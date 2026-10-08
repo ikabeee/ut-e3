@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Guía de contribución
+    url: https://github.com/ikabeee/ut-e3/blob/develop/CONTRIBUTING.md
+    about: Lee cómo trabajamos (git flow, convenciones y arquitectura) antes de abrir un issue.
