@@ -1,52 +1,5 @@
 // use prisma-8
 
-// Contrato de datos del showcase de videojuegos.
-// Después de editar este archivo ejecuta `npm run db:emit`
+// Contrato de datos del proyecto.
+// Agrega aquí tus modelos, ejecuta `npm run db:emit`
 // y sube a git contract.json y contract.d.ts.
-
-enum game_genre {
-  @@type("pg/text@1")
-  action     = "action"
-  adventure  = "adventure"
-  platformer = "platformer"
-  puzzle     = "puzzle"
-  rpg        = "rpg"
-  strategy   = "strategy"
-  sports     = "sports"
-  horror     = "horror"
-  educational = "educational"
-  other      = "other"
-}
-
-// Equipo de estudiantes que desarrolló uno o más videojuegos.
-model Team {
-  id        Int               @id @default(autoincrement())
-  slug      String            @unique
-  name      String
-  group     String?
-  members   String[]
-  games     Game[]
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
-}
-
-// Videojuego que se exhibe en el evento.
-model Game {
-  id          Int               @id @default(autoincrement())
-  slug        String            @unique
-  title       String
-  description String
-  genre       game_genre
-  engine      String?
-  coverUrl    String?
-  playUrl     String?
-  repoUrl     String?
-  standNumber Int?
-  published   Boolean           @default(false)
-  teamId      Int
-  team        Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  createdAt   TimestamptzString @default(now())
-  updatedAt   temporal.updatedAtString()
-
-  @@index([teamId])
-}

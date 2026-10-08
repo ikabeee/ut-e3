@@ -18,8 +18,7 @@ Requisitos: **Node.js ≥ 22.18** y **PostgreSQL ≥ 15**.
 npm install
 cp .env.example .env   # configura DATABASE_URL
 npm run db:emit        # genera los artefactos del contrato de Prisma
-npm run db:init        # crea las tablas en tu base local
-npm run db:seed        # (opcional) datos de ejemplo
+npm run db:init        # crea el esquema en tu base local
 npm run dev            # http://localhost:3000
 ```
 
@@ -34,7 +33,6 @@ npm run dev            # http://localhost:3000
 | `npm run db:emit`           | Regenera`contract.json` y `contract.d.ts` tras editar `contract.prisma`. |
 | `npm run db:init`           | Crea el esquema en una base de datos vacía.                                   |
 | `npm run db:update`         | Aplica cambios del contrato a tu base**local** (sin migraciones).        |
-| `npm run db:seed`           | Inserta datos de ejemplo.                                                      |
 | `npm run db:migration:plan` | Genera una migración formal en`migrations/app/`.                            |
 | `npm run db:migrate`        | Aplica las migraciones pendientes.                                             |
 
@@ -44,9 +42,7 @@ npm run dev            # http://localhost:3000
 src/
 ├── app/                  # Sólo rutas: cada archivo renderiza una page de una feature
 ├── features/             # Dominios del negocio: "gritan" de qué trata la app
-│   ├── games/            # Catálogo de videojuegos
-│   ├── teams/            # Equipos de desarrollo
-│   └── showcase/         # Información y presentación del evento
+│   └── example/          # Feature de ejemplo: cópiala para crear las tuyas
 └── shared/               # Código transversal sin reglas de negocio
     ├── components/
     ├── hooks/

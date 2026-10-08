@@ -42,27 +42,26 @@ npm run db:emit            # regenera contract.json / contract.d.ts
 npm run db:update          # aplica el contrato a la BD LOCAL (sin migraciones)
 npm run db:migration:plan  # genera una migración formal en migrations/app/
 npm run db:migrate         # aplica migraciones pendientes
-npm run db:seed            # datos de ejemplo
 ```
 
 Antes de dar por terminado un cambio, `npm run lint` y `npm run typecheck` deben pasar.
 
 ## Arquitectura: screaming architecture
 
-La estructura de carpetas "grita" el dominio (videojuegos, equipos, evento), no el framework.
-Cada dominio es una **feature** dentro de `src/features/`.
+La estructura de carpetas "grita" el dominio, no el framework.
+Cada dominio es una **feature** dentro de `src/features/`. El proyecto es un lienzo en blanco:
+sólo existe la feature `example`, que muestra la forma que debe tener cualquier feature nueva.
+El contrato de Prisma no tiene modelos todavía.
 
 ```
 src/
 ├── app/                      # SOLO rutas de Next.js: renderizan una page de una feature
 ├── features/
-│   ├── games/                # Catálogo de videojuegos
-│   ├── teams/                # Equipos de desarrollo
-│   └── showcase/             # Información y presentación del evento (home)
+│   └── example/              # Feature de referencia (scaffold): cópiala para crear las tuyas
 └── shared/                   # Código transversal SIN reglas de negocio
-    ├── components/           # Componentes genéricos (Container, PageSection, EmptyState...)
+    ├── components/           # Componentes genéricos
     ├── hooks/                # Hooks genéricos
-    └── lib/prisma/           # Contrato, cliente (db.ts) y seed de Prisma 8
+    └── lib/prisma/           # Contrato y cliente (db.ts) de Prisma 8
 ```
 
 ### Anatomía obligatoria de una feature
@@ -91,32 +90,30 @@ Una page de feature sólo orquesta: pide datos, maneja estados de carga/no encon
 compone componentes. Toda la UI vive en `components/`.
 
 ```tsx
-// src/features/games/pages/games-page.tsx
-async function PublishedGamesCatalog() {
-  const games = await listPublishedGames();        // lib/
-  return <GamesCatalog games={games} />;            // components/
-}
+// src/features/example/pages/example-page.tsx
+export async function ExamplePage() {
+  const message = await getExampleMessage();   // lib/
 
-export function GamesPage() {
   return (
-    <PageSection title="Videojuegos">
-      <Suspense fallback={<LoadingMessage message="Cargando videojuegos..." />}>
-        <PublishedGamesCatalog />
-      </Suspense>
-    </PageSection>
+    <main className="p-8">
+      <ExampleCard message={message} />         {/* components/ */}
+    </main>
   );
 }
 ```
 
+Si la page consulta la base de datos, envuelve la parte que espera los datos en `<Suspense>`
+(ver "Convenciones de Next.js 16.4").
+
 Los archivos de `src/app/` sólo enlazan la ruta con la page de la feature:
 
 ```tsx
-// src/app/games/page.tsx
-import { GamesPage } from "@/features/games/pages";
+// src/app/page.tsx
+import { ExamplePage } from "@/features/example/pages";
 
-export { gamesPageMetadata as metadata } from "@/features/games/pages";
+export { examplePageMetadata as metadata } from "@/features/example/pages";
 
-export default GamesPage;
+export default ExamplePage;
 ```
 
 ### Reglas de dependencias
@@ -127,7 +124,7 @@ export default GamesPage;
    ESLint (`no-restricted-imports`) bloquea cualquier import profundo. Dentro de la feature se usan imports relativos.
 2. Sólo `lib/*-queries.ts` importa `@/shared/lib/prisma/db`.
 3. `components/` y `hooks/` nunca importan `*-queries.ts` ni nada con `server-only`.
-4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx`, `not-found.tsx` globales y archivos de ruta que delegan en `pages/`.
+4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx`, `globals.css` y archivos de ruta que delegan en `pages/`.
 5. `shared/` nunca importa de `features/` (también lo valida ESLint).
 6. Una feature puede usar la API pública de otra, evitando dependencias circulares.
 
@@ -135,16 +132,17 @@ export default GamesPage;
 
 - **Todo nombre en inglés**: directorios, archivos, variables, funciones, tipos, props,
   ids de formularios, nombres de ramas y labels.
-- Directorios y archivos en `kebab-case`: `game-card.tsx`, `use-genre-filter.ts`, `game-queries.ts`.
-- Componentes y pages en `PascalCase` con export nombrado: `GameCard`, `GamesPage`.
-  Las pages terminan en `Page` y su metadata en `PageMetadata` (`gamesPageMetadata`).
-- Hooks con prefijo `use`: `useGenreFilter`.
-- Consultas con verbo: `listPublishedGames`, `getPublishedGameBySlug`.
+- Directorios y archivos en `kebab-case`: `example-card.tsx`, `use-toggle.ts`, `example-queries.ts`.
+- Componentes y pages en `PascalCase` con export nombrado: `ExampleCard`, `ExamplePage`.
+  Las pages terminan en `Page` y su metadata en `PageMetadata` (`examplePageMetadata`).
+- Hooks con prefijo `use`: `useToggle`.
+- Funciones de datos con verbo: `getExampleMessage`, `listGames`, `getGameBySlug`.
 - Sólo el contenido visible para el usuario (textos de la UI) y la documentación van en español.
 
 ### Agregar una feature nueva
 
-1. Crea `src/features/<feature>/` con `lib/`, `hooks/`, `components/` y `pages/`.
+1. Copia `src/features/example/` a `src/features/<feature>/` (nombre en inglés) y renombra sus archivos,
+   o crea las carpetas `lib/`, `hooks/`, `components/` y `pages/`.
 2. Si persiste datos, agrega los modelos a `contract.prisma`, ejecuta `npm run db:emit` y
    escribe las consultas en `lib/<feature>-queries.ts`.
 3. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`.
@@ -187,6 +185,7 @@ versión instalada está en `node_modules/@prisma/orm-postgres/skills/prisma-8/`
 - Consultas ORM en Postgres siempre con namespace: `db.orm.public.<Model>`.
 
 ```ts
+// Ejemplos asumiendo modelos Game y Team en el contrato.
 // Lista
 const games = await db.orm.public.Game.where({ published: true })
   .include("team")

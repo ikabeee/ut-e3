@@ -1,3 +1,5 @@
-import { HomePage } from "@/features/showcase/pages";
+import { ExamplePage } from "@/features/example/pages";
 
-export default HomePage;
+export { examplePageMetadata as metadata } from "@/features/example/pages";
+
+export default ExamplePage;

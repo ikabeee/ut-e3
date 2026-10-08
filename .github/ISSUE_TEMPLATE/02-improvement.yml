@@ -9,18 +9,12 @@ body:
         Usa esta plantilla para **mejorar algo que ya existe**.
         Si quieres proponer algo totalmente nuevo, usa la plantilla de **Nueva funcionalidad**.
 
-  - type: dropdown
+  - type: input
     id: feature-area
     attributes:
       label: Feature
-      options:
-        - games (catálogo de videojuegos)
-        - teams (equipos / desarrolladores)
-        - showcase (evento, agenda y stands)
-        - shared (componentes, estilos, layout)
-        - Base de datos / Prisma
-        - Documentación
-        - Infraestructura / DX
+      description: Nombre de la carpeta en src/features/ (o shared, documentación, infraestructura).
+      placeholder: example, shared, base de datos...
     validations:
       required: true
 

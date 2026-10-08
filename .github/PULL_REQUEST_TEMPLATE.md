@@ -15,9 +15,9 @@ Closes #
 
 ## Feature(s) afectada(s)
 
-- [ ] `games`
-- [ ] `teams`
-- [ ] `showcase`
+<!-- Lista las carpetas de src/features/ que cambiaste. -->
+
+- [ ] `src/features/<feature>`:
 - [ ] `shared`
 - [ ] Base de datos (`contract.prisma`)
 
