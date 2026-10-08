@@ -1,4 +1,4 @@
-name: 🚀 Nueva funcionalidad
+name: Nueva funcionalidad
 description: Propón algo nuevo para la plataforma del evento.
 title: "[Feature]: "
 labels: ["feature", "triage"]
@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        ¿Tienes una idea para la plataforma? ¡Cuéntanos! 💡
+        ¿Tienes una idea para la plataforma? ¡Cuéntanos!
         Piensa en **qué problema resuelve** antes de pensar en **cómo** se implementa.
 
   - type: textarea

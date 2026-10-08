@@ -1,4 +1,4 @@
-name: 🎮 Registro de videojuego
+name: Registro de videojuego
 description: Registra el videojuego de tu equipo para que aparezca en el evento.
 title: "[Videojuego]: "
 labels: ["videojuego", "contenido"]
@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        ¡Bienvenido al showcase de videojuegos del edificio! 🕹️
+        ¡Bienvenido al showcase de videojuegos del edificio!
         Llena este formulario para que el equipo organizador agregue tu juego a la plataforma.
 
   - type: input

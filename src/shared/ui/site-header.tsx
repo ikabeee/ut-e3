@@ -12,7 +12,7 @@ export function SiteHeader() {
       <Container>
         <nav className="flex h-16 items-center justify-between">
           <Link href="/" className="font-semibold tracking-tight">
-            🎮 UT Game Showcase
+            UT Game Showcase
           </Link>
           <ul className="flex gap-6 text-sm">
             {links.map((link) => (
