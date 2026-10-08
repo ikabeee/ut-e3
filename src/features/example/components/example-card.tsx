@@ -1,12 +1,17 @@
-import type { ExampleMessage } from "@features/example/lib/types";
+import { Card } from "@heroui/react";
 import { ExampleToggle } from "@features/example/components/example-toggle";
+import type { ExampleMessage } from "@features/example/lib/types";
 
 export function ExampleCard({ message }: { message: ExampleMessage }) {
   return (
-    <article className="flex flex-col gap-2">
-      <h1 className="text-2xl font-semibold">{message.title}</h1>
-      <p>{message.description}</p>
-      <ExampleToggle />
-    </article>
+    <Card className="max-w-md">
+      <Card.Header>
+        <Card.Title>{message.title}</Card.Title>
+        <Card.Description>{message.description}</Card.Description>
+      </Card.Header>
+      <Card.Footer>
+        <ExampleToggle />
+      </Card.Footer>
+    </Card>
   );
 }

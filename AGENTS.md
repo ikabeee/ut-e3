@@ -29,6 +29,7 @@ Todo el naming (directorios, archivos y código) va en **inglés**.
 | PostgreSQL | `>= 15` | |
 | Tailwind CSS | `4` | Configurado vía `@tailwindcss/turbopack`. |
 | TanStack Query | `5.x` (`@tanstack/react-query` + devtools) | Estado de servidor en el cliente. |
+| HeroUI | `3.x` (`@heroui/react`, `@heroui/styles`) | Librería de componentes (React Aria + Tailwind 4). |
 
 Las versiones de Prisma 8 están fijadas (sin `^`) porque son release candidates.
 
@@ -289,6 +290,27 @@ export function GamesPage() {
   `queryClient.query({ ...options, staleTime: "static" })` (no `ensureQueryData`).
 - Tras una mutación, invalida con `queryClient.invalidateQueries({ queryKey: ["<feature>"] })`.
 
+## HeroUI (componentes de UI)
+
+HeroUI v3 ya está configurado (referencia: https://heroui.com/en/docs/react/components).
+
+- Los estilos se cargan en `src/app/globals.css` con `@import "@heroui/styles";` después de
+  `@import "tailwindcss";`. **No necesita Provider.**
+- **Antes de crear un componente de UI propio, revisa si HeroUI ya lo tiene** (Button, Card, Input,
+  Modal, Select, Table, Tabs, etc.). Los componentes propios de la feature componen los de HeroUI.
+- Importa desde `@heroui/react`: `import { Button, Card } from "@heroui/react";`.
+- API de componentes compuestos: `Card.Header`, `Card.Title`, `Card.Content`, `Card.Footer`...
+- Están construidos sobre React Aria: usa `onPress` (no `onClick`), `isDisabled`, `isSelected`, etc.
+- Los componentes de HeroUI ya traen `"use client"`, así que pueden usarse dentro de Server
+  Components. Si **tu** componente pasa handlers (`onPress`) o usa hooks, ese componente sí lleva
+  `"use client"`.
+- Variantes por props (`<Button variant="primary" size="sm">`) y ajustes con `className` de Tailwind.
+- Colores con los tokens del tema en vez de colores fijos: `bg-background`, `text-foreground`,
+  `bg-surface`, `text-muted`, `bg-accent`, `text-danger`, etc.
+- **Modo oscuro**: el tema de HeroUI se activa con la clase `dark` (o `data-theme="dark"`) en `<html>`.
+  La variante `dark:` (redefinida por HeroUI) se activa con esa clase y, como respaldo, con la
+  preferencia del sistema; usa los tokens del tema para que ambos casos se vean igual.
+
 ## TypeScript 6
 
 - `strict` activado; no uses `any` (usa `unknown` y estrecha el tipo).
@@ -301,7 +323,7 @@ export function GamesPage() {
 - **Nada de emojis.** Prohibidos en código, UI, comentarios, logs, documentación, issues,
   PRs y mensajes de commit.
 - Sin `export default`, excepto en los archivos de ruta de `src/app/`.
-- Estilos con clases de Tailwind; soporta modo oscuro (`dark:`).
+- Estilos con componentes de HeroUI y clases de Tailwind con los tokens del tema; soporta modo oscuro (`dark:`).
 - Accesibilidad: HTML semántico, `alt` en imágenes, enlaces externos con `rel="noopener noreferrer"`.
 - Sin dependencias nuevas sin justificarlo en el PR.
 

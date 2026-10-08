@@ -9,6 +9,7 @@ por los estudiantes de la Ingeniería en Desarrollo y Gestión de Software
 - TypeScript 6
 - [Prisma 8](https://www.prisma.io) (PostgreSQL ≥ 15) como ORM
 - Tailwind CSS 4
+- [HeroUI v3](https://heroui.com/en/docs/react/components) como librería de componentes
 - [TanStack Query 5](https://tanstack.com/query/latest) con sus devtools (sólo en desarrollo)
 
 ## Empezar

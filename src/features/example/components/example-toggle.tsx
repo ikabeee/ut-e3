@@ -1,13 +1,14 @@
 "use client";
 
+import { Button } from "@heroui/react";
 import { useToggle } from "@features/example/hooks/use-toggle";
 
 export function ExampleToggle() {
   const { isOn, toggle } = useToggle();
 
   return (
-    <button type="button" aria-pressed={isOn} onClick={toggle} className="self-start underline">
+    <Button variant={isOn ? "primary" : "secondary"} aria-pressed={isOn} onPress={toggle}>
       {isOn ? "Encendido" : "Apagado"}
-    </button>
+    </Button>
   );
 }
