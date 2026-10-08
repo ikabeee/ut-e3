@@ -1,0 +1,111 @@
+name: 🎮 Registro de videojuego
+description: Registra el videojuego de tu equipo para que aparezca en el evento.
+title: "[Videojuego]: "
+labels: ["videojuego", "contenido"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¡Bienvenido al showcase de videojuegos del edificio! 🕹️
+        Llena este formulario para que el equipo organizador agregue tu juego a la plataforma.
+
+  - type: input
+    id: titulo
+    attributes:
+      label: Nombre del videojuego
+    validations:
+      required: true
+
+  - type: input
+    id: equipo
+    attributes:
+      label: Nombre del equipo
+    validations:
+      required: true
+
+  - type: textarea
+    id: integrantes
+    attributes:
+      label: Integrantes
+      description: Nombre, grupo y usuario de GitHub (opcional) de cada integrante.
+      placeholder: |
+        - Ana López — 5°A — @analopez
+        - Luis Pérez — 5°A
+    validations:
+      required: true
+
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: Descripción corta
+      description: Máximo 300 caracteres. Es lo que verán los visitantes en el catálogo.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: genero
+    attributes:
+      label: Género
+      multiple: true
+      options:
+        - Acción
+        - Aventura
+        - Plataformas
+        - Puzzle
+        - RPG
+        - Estrategia
+        - Deportes / Carreras
+        - Terror
+        - Educativo
+        - Otro
+    validations:
+      required: true
+
+  - type: dropdown
+    id: plataforma
+    attributes:
+      label: Plataforma
+      multiple: true
+      options:
+        - Web (navegador)
+        - Windows
+        - macOS
+        - Linux
+        - Android
+        - iOS
+        - Consola / hardware propio
+    validations:
+      required: true
+
+  - type: input
+    id: motor
+    attributes:
+      label: Motor o tecnología
+      placeholder: Unity, Godot, Unreal, Phaser, GameMaker...
+
+  - type: input
+    id: enlace
+    attributes:
+      label: Enlace para jugar o descargar
+      placeholder: https://itch.io/...
+
+  - type: input
+    id: repositorio
+    attributes:
+      label: Repositorio del código (opcional)
+
+  - type: textarea
+    id: multimedia
+    attributes:
+      label: Portada y capturas
+      description: Arrastra aquí la portada (16:9 recomendado) y hasta 4 capturas.
+
+  - type: checkboxes
+    id: confirmacion
+    attributes:
+      label: Confirmación
+      options:
+        - label: El contenido del juego es apropiado para un evento universitario abierto al público.
+          required: true
+        - label: Todos los integrantes están de acuerdo en publicar el juego en la plataforma.
+          required: true
