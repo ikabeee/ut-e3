@@ -15,7 +15,7 @@
     "db:emit": "prisma contract emit",
     "db:init": "prisma db init",
     "db:update": "prisma db update",
-    "db:seed": "node --env-file-if-exists=.env src/shared/infrastructure/prisma/seed.mts",
+    "db:seed": "node --env-file-if-exists=.env src/shared/lib/prisma/seed.mts",
     "db:migration:plan": "prisma migration plan",
     "db:migrate": "prisma db migrate",
     "db:verify": "prisma db verify"

@@ -1,10 +1,3 @@
-import { ShowcaseHero } from "@/modules/showcase";
-import { Container } from "@/shared/ui";
+import { HomePage } from "@/features/showcase/pages";
 
-export default function HomePage() {
-  return (
-    <Container>
-      <ShowcaseHero />
-    </Container>
-  );
-}
+export default HomePage;

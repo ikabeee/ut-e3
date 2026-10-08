@@ -1,0 +1,72 @@
+name: Mejora
+description: Propón una mejora a algo que ya existe (UX, rendimiento, accesibilidad, código).
+title: "[Mejora]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Usa esta plantilla para **mejorar algo que ya existe**.
+        Si quieres proponer algo totalmente nuevo, usa la plantilla de **Nueva funcionalidad**.
+
+  - type: dropdown
+    id: feature-area
+    attributes:
+      label: Feature
+      options:
+        - games (catálogo de videojuegos)
+        - teams (equipos / desarrolladores)
+        - showcase (evento, agenda y stands)
+        - shared (componentes, estilos, layout)
+        - Base de datos / Prisma
+        - Documentación
+        - Infraestructura / DX
+    validations:
+      required: true
+
+  - type: dropdown
+    id: improvement-type
+    attributes:
+      label: Tipo de mejora
+      multiple: true
+      options:
+        - Experiencia de usuario (UX/UI)
+        - Accesibilidad
+        - Rendimiento
+        - Refactor / calidad de código
+        - Seguridad
+        - Documentación
+        - Experiencia de desarrollo (DX)
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-situation
+    attributes:
+      label: Situación actual
+      description: ¿Cómo funciona hoy y por qué se puede mejorar?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Propuesta
+      description: Describe la mejora que propones. Puedes incluir bocetos, capturas o ejemplos.
+    validations:
+      required: true
+
+  - type: textarea
+    id: benefit
+    attributes:
+      label: Beneficio
+      description: ¿A quién beneficia (visitantes, equipos, organizadores, devs) y cómo?
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Antes de enviar
+      options:
+        - label: Busqué en los issues existentes y no encontré una propuesta igual.
+          required: true
+        - label: Me gustaría trabajar en esta mejora.
