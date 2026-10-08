@@ -1,5 +1,2 @@
-export { examplePageMetadata as metadata } from "@features/example/pages/example-page";
+export { examplePageMetadata as metadata, ExamplePage as default } from "@features/example/pages/example-page";
 
-export default function Home() {
-  return <></>;
-}

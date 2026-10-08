@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import type { ReactNode } from "react";
 import { getQueryClient } from "@shared/lib/query/get-query-client";
 
-export function QueryProvider({ children }: { children: ReactNode }) {
+export function QueryProvider({ children }: Readonly<{ children: ReactNode }>) {
   // Do not use useState here: without a Suspense boundary above, React could
   // discard the client during the initial render.
   const queryClient = getQueryClient();
