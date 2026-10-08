@@ -9,19 +9,12 @@ body:
         ¡Gracias por tomarte el tiempo de reportar un problema!
         Antes de continuar, busca en los [issues existentes](../issues?q=is%3Aissue) para evitar duplicados.
 
-  - type: dropdown
+  - type: input
     id: feature-area
     attributes:
       label: Feature afectada
-      description: ¿En qué parte de la aplicación ocurre el problema?
-      options:
-        - games (catálogo de videojuegos)
-        - teams (equipos / desarrolladores)
-        - showcase (evento, agenda y stands)
-        - shared (componentes, estilos, layout)
-        - Base de datos / Prisma
-        - Infraestructura / despliegue
-        - No estoy seguro
+      description: Nombre de la carpeta en src/features/ (o shared, base de datos, infraestructura).
+      placeholder: example, shared, base de datos...
     validations:
       required: true
 
@@ -40,7 +33,7 @@ body:
       label: Pasos para reproducirlo
       description: Enumera los pasos exactos para que alguien más pueda ver el error.
       placeholder: |
-        1. Ir a '/games'
+        1. Ir a '/...'
         2. Dar clic en '...'
         3. Hacer scroll hasta '...'
         4. Ver el error

@@ -80,7 +80,8 @@ npm run typecheck
 ## 5. Arquitectura
 
 El código está organizado con **screaming architecture**: las carpetas gritan *de qué trata* la aplicación
-(`games`, `teams`, `showcase`), no *con qué está hecha*.
+(cada dominio es una carpeta en `src/features/`), no *con qué está hecha*.
+Como punto de partida existe la feature `example`.
 
 - Cada feature en `src/features/<feature>/` tiene siempre `lib/`, `hooks/`, `components/` y `pages/`.
 - Las `pages/` son contenedores: obtienen datos y componen componentes. `src/app/` sólo las renderiza.

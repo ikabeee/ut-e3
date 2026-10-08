@@ -37,17 +37,12 @@ body:
     validations:
       required: true
 
-  - type: dropdown
+  - type: input
     id: feature-area
     attributes:
       label: Feature (screaming architecture)
-      description: ¿A qué feature pertenece? Si no encaja en ninguna, podría ser una feature nueva.
-      options:
-        - games
-        - teams
-        - showcase
-        - Feature nueva
-        - No estoy seguro
+      description: ¿A qué feature de src/features/ pertenece? Si no encaja en ninguna, propón el nombre (en inglés) de una feature nueva.
+      placeholder: example, shared, base de datos...
     validations:
       required: true
 
