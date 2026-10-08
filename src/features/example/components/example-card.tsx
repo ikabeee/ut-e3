@@ -1,5 +1,5 @@
-import type { ExampleMessage } from "../lib/types";
-import { ExampleToggle } from "./example-toggle";
+import type { ExampleMessage } from "@features/example/lib/types";
+import { ExampleToggle } from "@features/example/components/example-toggle";
 
 export function ExampleCard({ message }: { message: ExampleMessage }) {
   return (

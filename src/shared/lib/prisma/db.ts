@@ -1,7 +1,7 @@
 import "server-only";
 import postgres from "@prisma/orm-postgres/runtime";
-import type { Contract } from "./contract.d";
-import contractJson from "./contract.json" with { type: "json" };
+import type { Contract } from "@shared/lib/prisma/contract.d";
+import contractJson from "@shared/lib/prisma/contract.json" with { type: "json" };
 
 /**
  * Cliente de Prisma 8 compartido por toda la aplicación.

@@ -76,16 +76,15 @@ src/features/<feature>/
 ├── lib/           # Tipos, constantes, utilidades y acceso a datos (<feature>-queries.ts).
 ├── hooks/         # Hooks de React de la feature (use-<algo>.ts).
 ├── components/    # Componentes de presentación de la feature.
-├── pages/         # Contenedores de página que usa src/app/. Incluye pages/index.ts.
-└── index.ts       # API pública client-safe: tipos, componentes y hooks reutilizables.
+└── pages/         # Contenedores de página que usa src/app/.
 ```
 
 | Carpeta | Responsabilidad | Puede importar |
 | --- | --- | --- |
-| `lib/` | Tipos de dominio (`types.ts`), constantes, utilidades puras y consultas a la BD (`*-queries.ts` con `import "server-only"` y `await connection()`). Mapea las filas de Prisma a los tipos de dominio. | `@/shared/lib/*` |
+| `lib/` | Tipos de dominio (`types.ts`), constantes, utilidades puras y consultas a la BD (`*-queries.ts` con `import "server-only"` y `await connection()`). Mapea las filas de Prisma a los tipos de dominio. | `@shared/lib/*` |
 | `hooks/` | Estado y lógica de interacción en el cliente. Sin JSX. | `lib/` (sólo tipos y utilidades puras), React |
-| `components/` | UI. Reciben datos por props; **no consultan la BD**. Agrega `"use client"` sólo si usan hooks o eventos. | `lib/` (tipos/constantes), `hooks/`, `@/shared/components` |
-| `pages/` | **Contenedores**: obtienen los datos (vía `lib/`), definen `Suspense`/`notFound` y componen componentes. Sin estilos complejos ni lógica de negocio. Exportan también su `Metadata`. | `lib/`, `components/`, `@/shared/components` |
+| `components/` | UI. Reciben datos por props; **no consultan la BD**. Agrega `"use client"` sólo si usan hooks o eventos. | `lib/` (tipos/constantes), `hooks/`, `@shared/components/*` |
+| `pages/` | **Contenedores**: obtienen los datos (vía `lib/`), definen `Suspense`/`notFound` y componen componentes. Sin estilos complejos ni lógica de negocio. Exportan también su `Metadata`. | `lib/`, `components/`, `@shared/components/*` |
 
 ### Pages como contenedores
 
@@ -112,25 +111,49 @@ Los archivos de `src/app/` sólo enlazan la ruta con la page de la feature:
 
 ```tsx
 // src/app/page.tsx
-import { ExamplePage } from "@/features/example/pages";
+import { ExamplePage } from "@features/example/pages/example-page";
 
-export { examplePageMetadata as metadata } from "@/features/example/pages";
+export { examplePageMetadata as metadata } from "@features/example/pages/example-page";
 
 export default ExamplePage;
 ```
 
 ### Reglas de dependencias
 
-1. Fuera de una feature sólo se importa su API pública:
-   - `@/features/<feature>`: tipos, componentes y hooks (seguro en Client Components).
-   - `@/features/<feature>/pages`: contenedores de página (sólo desde `src/app/`).
-   ESLint (`no-restricted-imports`) bloquea cualquier import profundo. Dentro de la feature se usan imports relativos.
-2. Sólo `lib/*-queries.ts` importa `@/shared/lib/prisma/db`.
+1. `src/app/` sólo importa pages: `@features/<feature>/pages/<name>-page`.
+2. Sólo `lib/*-queries.ts` importa `@shared/lib/prisma/db`.
 3. `components/` y `hooks/` nunca importan `*-queries.ts` ni nada con `server-only`.
 4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx` (que monta `QueryProvider`), `globals.css`,
    archivos de ruta que delegan en `pages/` y Route Handlers (`route.ts`) que delegan en `lib/`.
 5. `shared/` nunca importa de `features/` (también lo valida ESLint).
-6. Una feature puede usar la API pública de otra, evitando dependencias circulares.
+6. Una feature puede importar componentes, hooks o tipos de otra, evitando dependencias circulares.
+
+ESLint (`no-restricted-imports`) valida las reglas 1, 3 y 5, además de las de imports de abajo.
+
+### Imports y path aliases
+
+No usamos archivos barril (`index.ts` que re-exportan). Cada import apunta al archivo concreto
+mediante los path aliases de `tsconfig.json`:
+
+| Alias | Apunta a |
+| --- | --- |
+| `@features/*` | `src/features/*` |
+| `@shared/*` | `src/shared/*` |
+
+```ts
+import { ExampleCard } from "@features/example/components/example-card";
+import type { ExampleMessage } from "@features/example/lib/types";
+import { getQueryClient } from "@shared/lib/query/get-query-client";
+```
+
+- Usa siempre un alias, también dentro de la misma feature. Lo único relativo permitido es `./`
+  para un archivo de la misma carpeta; `../` está prohibido.
+- No crees `index.ts` de re-exportación ni importes una carpeta (`@features/example`,
+  `@features/example/components`).
+- Por qué: los barriles mezclan código de servidor y cliente en un mismo módulo (riesgo de
+  arrastrar `server-only` o Prisma al bundle del navegador), favorecen dependencias circulares,
+  hacen más lentos el dev server y el tree-shaking, y esconden de dónde viene cada cosa.
+- ESLint rechaza `../`, el alias viejo `@/` y los imports de barriles o carpetas.
 
 ### Naming
 
@@ -150,8 +173,7 @@ export default ExamplePage;
 2. Si persiste datos, agrega los modelos a `contract.prisma`, ejecuta `npm run db:emit` y
    escribe las consultas en `lib/<feature>-queries.ts`.
 3. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`.
-4. Expón las pages en `pages/index.ts` y lo reutilizable en `index.ts`.
-5. Crea la ruta en `src/app/` que sólo renderiza la page.
+4. Crea la ruta en `src/app/` que sólo renderiza la page.
 
 ## Convenciones de Next.js 16.4
 
@@ -172,7 +194,7 @@ Lee la guía correspondiente en `node_modules/next/dist/docs/` antes de escribir
   (generados por `next typegen`).
 - Mutaciones con **Server Actions** (`"use server"`) en `lib/<feature>-actions.ts` de la feature.
 - Metadata con `export const metadata` o `generateMetadata`.
-- Alias de imports: `@/*` → `src/*`.
+- Imports con path aliases (ver "Imports y path aliases").
 
 ## Prisma 8 (ORM)
 
@@ -246,7 +268,7 @@ TanStack Query `5.x` ya está configurado (referencia: https://tanstack.com/quer
 ```tsx
 // src/features/<feature>/pages/<name>-page.tsx
 import { dehydrate, HydrationBoundary, noop } from "@tanstack/react-query";
-import { getQueryClient } from "@/shared/lib/query/get-query-client";
+import { getQueryClient } from "@shared/lib/query/get-query-client";
 
 export function GamesPage() {
   const queryClient = getQueryClient();
