@@ -2,4 +2,8 @@ import { ExamplePage } from "@/features/example/pages";
 
 export { examplePageMetadata as metadata } from "@/features/example/pages";
 
-export default ExamplePage;
+export default function Home() {
+    return(
+        <></>
+    )
+}
