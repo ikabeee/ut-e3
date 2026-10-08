@@ -28,5 +28,5 @@ await db.orm.public.Game.create({
   teamId: team.id,
 });
 
-console.log("✔ Datos de ejemplo creados.");
+console.log("Datos de ejemplo creados.");
 await db.close();

@@ -169,6 +169,8 @@ await db.orm.public.Team.create({ slug, name, members: [] });
 
 ## Estilo de código
 
+- **Nada de emojis.** Prohibidos en código, UI, comentarios, logs, documentación, issues,
+  PRs y mensajes de commit.
 - Componentes en `kebab-case.tsx`, exportados con nombre en `PascalCase` (sin `export default`
   excepto en archivos de rutas de `src/app/`).
 - Estilos con clases de Tailwind; soporta modo oscuro (`dark:`).

@@ -6,12 +6,12 @@ Closes #<!-- número del issue -->
 
 ## Tipo de cambio
 
-- [ ] 🐛 Bug fix (`fix/*` o `hotfix/*`)
-- [ ] ✨ Mejora
-- [ ] 🚀 Nueva funcionalidad (`feature/*`)
-- [ ] ♻️ Refactor
-- [ ] 📝 Documentación
-- [ ] 🔧 Configuración / infraestructura
+- [ ] Bug fix (`fix/*` o `hotfix/*`)
+- [ ] Mejora
+- [ ] Nueva funcionalidad (`feature/*`)
+- [ ] Refactor
+- [ ] Documentación
+- [ ] Configuración / infraestructura
 
 ## Módulo(s) afectado(s)
 
@@ -39,4 +39,5 @@ Closes #<!-- número del issue -->
 - [ ] `npm run lint` y `npm run typecheck` pasan sin errores.
 - [ ] El código respeta la screaming architecture (ver `AGENTS.md`): nada importa archivos internos de otro módulo.
 - [ ] Si cambié `contract.prisma`, ejecuté `npm run db:emit` y subí `contract.json` y `contract.d.ts`.
+- [ ] No agregué emojis (regla del proyecto).
 - [ ] Actualicé la documentación si era necesario.

@@ -1,4 +1,4 @@
-# 🎮 UT Game Showcase
+# UT Game Showcase
 
 Plataforma comunitaria para el evento donde se exhiben los videojuegos desarrollados
 por los estudiantes del edificio E3.

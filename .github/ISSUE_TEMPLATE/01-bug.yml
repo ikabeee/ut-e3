@@ -1,4 +1,4 @@
-name: 🐛 Reporte de bug
+name: Reporte de bug
 description: Algo no funciona como debería en la plataforma.
 title: "[Bug]: "
 labels: ["bug", "triage"]
@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        ¡Gracias por tomarte el tiempo de reportar un problema! 🙌
+        ¡Gracias por tomarte el tiempo de reportar un problema!
         Antes de continuar, busca en los [issues existentes](../issues?q=is%3Aissue) para evitar duplicados.
 
   - type: dropdown
@@ -92,10 +92,10 @@ body:
     attributes:
       label: Severidad
       options:
-        - 🔴 Crítica (bloquea el evento o la app no carga)
-        - 🟠 Alta (una funcionalidad principal no sirve)
-        - 🟡 Media (hay un rodeo posible)
-        - 🟢 Baja (detalle visual o menor)
+        - Crítica (bloquea el evento o la app no carga)
+        - Alta (una funcionalidad principal no sirve)
+        - Media (hay un rodeo posible)
+        - Baja (detalle visual o menor)
     validations:
       required: true
 

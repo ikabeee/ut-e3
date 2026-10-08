@@ -1,6 +1,6 @@
 # Guía de contribución
 
-¡Gracias por sumarte al **showcase de videojuegos del edificio**! 🎮
+¡Gracias por sumarte al **showcase de videojuegos del edificio**!
 Este es un proyecto comunitario: cualquier estudiante de la generación puede contribuir.
 
 ## 1. Antes de empezar
@@ -56,6 +56,8 @@ chore(deps): actualizar prisma
 
 El *scope* entre paréntesis es el módulo afectado.
 
+**Regla del proyecto: nada de emojis** en código, interfaz, documentación, commits, issues ni PRs.
+
 ## 4. Entorno local
 
 Requisitos: **Node.js ≥ 22.18** y **PostgreSQL ≥ 15**.
@@ -83,4 +85,4 @@ El código está organizado con **screaming architecture**: las carpetas gritan 
 ## 6. Código de conducta
 
 Sé respetuoso, da retroalimentación constructiva en las revisiones y ayuda a quienes están empezando.
-Todos estamos aprendiendo. 💜
+Todos estamos aprendiendo.
