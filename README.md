@@ -1,7 +1,7 @@
 # UT Game Showcase
 
 Plataforma comunitaria para el evento donde se exhiben los videojuegos desarrollados
-por los estudiantes del edificio E3.
+por los estudiantes de la Ingeniería en Desarrollo y Gestión de Software
 
 ## Stack
 
@@ -25,18 +25,18 @@ npm run dev            # http://localhost:3000
 
 ## Scripts
 
-| Script | Qué hace |
-| --- | --- |
-| `npm run dev` | Servidor de desarrollo. |
-| `npm run build` | Emite el contrato de Prisma y compila para producción. |
-| `npm run lint` | ESLint (incluye las reglas de fronteras entre features). |
-| `npm run typecheck` | Genera los tipos de rutas y ejecuta `tsc`. |
-| `npm run db:emit` | Regenera `contract.json` y `contract.d.ts` tras editar `contract.prisma`. |
-| `npm run db:init` | Crea el esquema en una base de datos vacía. |
-| `npm run db:update` | Aplica cambios del contrato a tu base **local** (sin migraciones). |
-| `npm run db:seed` | Inserta datos de ejemplo. |
-| `npm run db:migration:plan` | Genera una migración formal en `migrations/app/`. |
-| `npm run db:migrate` | Aplica las migraciones pendientes. |
+| Script                        | Qué hace                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| `npm run dev`               | Servidor de desarrollo.                                                        |
+| `npm run build`             | Emite el contrato de Prisma y compila para producción.                        |
+| `npm run lint`              | ESLint (incluye las reglas de fronteras entre features).                      |
+| `npm run typecheck`         | Genera los tipos de rutas y ejecuta`tsc`.                                    |
+| `npm run db:emit`           | Regenera`contract.json` y `contract.d.ts` tras editar `contract.prisma`. |
+| `npm run db:init`           | Crea el esquema en una base de datos vacía.                                   |
+| `npm run db:update`         | Aplica cambios del contrato a tu base**local** (sin migraciones).        |
+| `npm run db:seed`           | Inserta datos de ejemplo.                                                      |
+| `npm run db:migration:plan` | Genera una migración formal en`migrations/app/`.                            |
+| `npm run db:migrate`        | Aplica las migraciones pendientes.                                             |
 
 ## Estructura (screaming architecture)
 

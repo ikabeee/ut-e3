@@ -2,7 +2,7 @@
 
 <!-- ¿Qué cambia este PR y por qué? -->
 
-Closes #<!-- número del issue -->
+Closes #
 
 ## Tipo de cambio
 
@@ -25,9 +25,6 @@ Closes #<!-- número del issue -->
 
 <!-- Pasos para que quien revise pueda verificar el cambio. -->
 
-1.
-2.
-
 ## Capturas de pantalla
 
 <!-- Si hay cambios visuales, agrega un antes / después. -->
@@ -40,5 +37,4 @@ Closes #<!-- número del issue -->
 - [ ] El código respeta la screaming architecture (ver `AGENTS.md`): la feature tiene `lib/`, `hooks/`, `components/` y `pages/`, y nada importa archivos internos de otra feature.
 - [ ] Directorios, archivos y código tienen naming en inglés.
 - [ ] Si cambié `contract.prisma`, ejecuté `npm run db:emit` y subí `contract.json` y `contract.d.ts`.
-- [ ] No agregué emojis (regla del proyecto).
 - [ ] Actualicé la documentación si era necesario.
