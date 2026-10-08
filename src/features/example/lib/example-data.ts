@@ -1,4 +1,4 @@
-import type { ExampleMessage } from "./types";
+import type { ExampleMessage } from "@features/example/lib/types";
 
 // Replace this with real data access (for example `lib/example-queries.ts` using Prisma)
 // when the feature needs it.

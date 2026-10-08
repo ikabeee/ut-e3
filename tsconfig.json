@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@features/*": ["./src/features/*"],
+      "@shared/*": ["./src/shared/*"]
     },
     "types": [
       "node"

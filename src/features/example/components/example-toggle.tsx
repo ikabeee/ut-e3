@@ -1,6 +1,6 @@
 "use client";
 
-import { useToggle } from "../hooks/use-toggle";
+import { useToggle } from "@features/example/hooks/use-toggle";
 
 export function ExampleToggle() {
   const { isOn, toggle } = useToggle();

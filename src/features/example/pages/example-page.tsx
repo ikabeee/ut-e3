@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { ExampleCard } from "../components/example-card";
-import { getExampleMessage } from "../lib/example-data";
+import { ExampleCard } from "@features/example/components/example-card";
+import { getExampleMessage } from "@features/example/lib/example-data";
 
 export const examplePageMetadata: Metadata = {
   title: "Example",
