@@ -28,6 +28,7 @@ Todo el naming (directorios, archivos y código) va en **inglés**.
 | Prisma ORM | `8.x` (`prisma`, `@prisma/orm-postgres`) | Contract-first. **No es Prisma 7.** |
 | PostgreSQL | `>= 15` | |
 | Tailwind CSS | `4` | Configurado vía `@tailwindcss/turbopack`. |
+| TanStack Query | `5.x` (`@tanstack/react-query` + devtools) | Estado de servidor en el cliente. |
 
 Las versiones de Prisma 8 están fijadas (sin `^`) porque son release candidates.
 
@@ -59,9 +60,11 @@ src/
 ├── features/
 │   └── example/              # Feature de referencia (scaffold): cópiala para crear las tuyas
 └── shared/                   # Código transversal SIN reglas de negocio
-    ├── components/           # Componentes genéricos
+    ├── components/           # Componentes genéricos (QueryProvider)
     ├── hooks/                # Hooks genéricos
-    └── lib/prisma/           # Contrato y cliente (db.ts) de Prisma 8
+    └── lib/
+        ├── prisma/           # Contrato y cliente (db.ts) de Prisma 8
+        └── query/            # getQueryClient() de TanStack Query
 ```
 
 ### Anatomía obligatoria de una feature
@@ -124,7 +127,8 @@ export default ExamplePage;
    ESLint (`no-restricted-imports`) bloquea cualquier import profundo. Dentro de la feature se usan imports relativos.
 2. Sólo `lib/*-queries.ts` importa `@/shared/lib/prisma/db`.
 3. `components/` y `hooks/` nunca importan `*-queries.ts` ni nada con `server-only`.
-4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx`, `globals.css` y archivos de ruta que delegan en `pages/`.
+4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx` (que monta `QueryProvider`), `globals.css`,
+   archivos de ruta que delegan en `pages/` y Route Handlers (`route.ts`) que delegan en `lib/`.
 5. `shared/` nunca importa de `features/` (también lo valida ESLint).
 6. Una feature puede usar la API pública de otra, evitando dependencias circulares.
 
@@ -209,6 +213,59 @@ await db.orm.public.Team.create({ slug, name, members: [] });
   - Local: `npm run db:update`.
   - Compartida/producción: `npm run db:migration:plan`, revisa `migrations/app/…`, súbelo en el PR,
     y aplica con `npm run db:migrate`.
+
+## TanStack Query
+
+TanStack Query `5.x` ya está configurado (referencia: https://tanstack.com/query/latest).
+
+- `src/shared/lib/query/get-query-client.ts`: `getQueryClient()` crea un `QueryClient` nuevo por
+  request en el servidor y reutiliza uno solo en el navegador. Configura `staleTime: 60s` y
+  deshidrata también las queries `pending` para poder hacer streaming.
+- `src/shared/components/query-provider.tsx`: `QueryProvider` (`"use client"`) monta el
+  `QueryClientProvider` y las devtools. Ya envuelve toda la app en `src/app/layout.tsx`.
+- **Devtools**: botón flotante abajo a la derecha, sólo en `npm run dev`. El paquete las excluye
+  automáticamente del build de producción.
+
+### Cuándo usarlo
+
+- **Lecturas iniciales de una page**: Server Components + `lib/*-queries.ts` (Prisma) como siempre.
+- **TanStack Query**: datos que el cliente debe refrescar, paginar, filtrar o mutar sin recargar
+  la page (polling, búsquedas, optimistic updates, etc.).
+
+### Convenciones
+
+- Define las queries con `queryOptions` en `lib/<feature>-query-options.ts`, con la feature como
+  primer elemento de la key: `["games", "list"]`, `["games", "detail", slug]`.
+- La `queryFn` corre también en el navegador, así que **nunca** llama directo a Prisma: usa `fetch`
+  hacia un Route Handler (`src/app/api/<feature>/route.ts`) o una Server Action.
+- Los hooks que usan `useQuery`, `useSuspenseQuery` o `useMutation` viven en `hooks/`
+  (`use-<feature>-<algo>.ts`). Los componentes que los usan llevan `"use client"`.
+- Para prellenar el caché desde el servidor, la page de la feature hace el prefetch y envuelve los
+  componentes en `HydrationBoundary`:
+
+```tsx
+// src/features/<feature>/pages/<name>-page.tsx
+import { dehydrate, HydrationBoundary, noop } from "@tanstack/react-query";
+import { getQueryClient } from "@/shared/lib/query/get-query-client";
+
+export function GamesPage() {
+  const queryClient = getQueryClient();
+  // Sin await: la query pendiente se transmite al cliente por streaming.
+  // `prefetchQuery` está deprecado en 5.x; usa `query(...)` y descarta el error con `noop`.
+  queryClient.query(gamesQueryOptions()).catch(noop);
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <GamesList /> {/* usa useSuspenseQuery(gamesQueryOptions()) desde hooks/ */}
+    </HydrationBoundary>
+  );
+}
+```
+
+- Usa la API vigente de 5.x: `environmentManager.isServer()` (no `isServer`),
+  `queryClient.query(...)` (no `fetchQuery` / `prefetchQuery`) y
+  `queryClient.query({ ...options, staleTime: "static" })` (no `ensureQueryData`).
+- Tras una mutación, invalida con `queryClient.invalidateQueries({ queryKey: ["<feature>"] })`.
 
 ## TypeScript 6
 

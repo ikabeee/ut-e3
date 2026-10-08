@@ -9,6 +9,7 @@ por los estudiantes de la Ingeniería en Desarrollo y Gestión de Software
 - TypeScript 6
 - [Prisma 8](https://www.prisma.io) (PostgreSQL ≥ 15) como ORM
 - Tailwind CSS 4
+- [TanStack Query 5](https://tanstack.com/query/latest) con sus devtools (sólo en desarrollo)
 
 ## Empezar
 
@@ -46,7 +47,9 @@ src/
 └── shared/               # Código transversal sin reglas de negocio
     ├── components/
     ├── hooks/
-    └── lib/prisma/       # Contrato y cliente de Prisma 8
+    └── lib/
+        ├── prisma/       # Contrato y cliente de Prisma 8
+        └── query/        # QueryClient de TanStack Query
 ```
 
 Cada feature tiene siempre `lib/`, `hooks/`, `components/` y `pages/`. Las pages son
