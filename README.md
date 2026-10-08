@@ -29,7 +29,7 @@ npm run dev            # http://localhost:3000
 | --- | --- |
 | `npm run dev` | Servidor de desarrollo. |
 | `npm run build` | Emite el contrato de Prisma y compila para producción. |
-| `npm run lint` | ESLint (incluye las reglas de fronteras entre módulos). |
+| `npm run lint` | ESLint (incluye las reglas de fronteras entre features). |
 | `npm run typecheck` | Genera los tipos de rutas y ejecuta `tsc`. |
 | `npm run db:emit` | Regenera `contract.json` y `contract.d.ts` tras editar `contract.prisma`. |
 | `npm run db:init` | Crea el esquema en una base de datos vacía. |
@@ -42,18 +42,20 @@ npm run dev            # http://localhost:3000
 
 ```
 src/
-├── app/                  # Sólo rutas: páginas delgadas que componen módulos
-├── modules/              # Dominios del negocio — "gritan" de qué trata la app
+├── app/                  # Sólo rutas: cada archivo renderiza una page de una feature
+├── features/             # Dominios del negocio: "gritan" de qué trata la app
 │   ├── games/            # Catálogo de videojuegos
 │   ├── teams/            # Equipos de desarrollo
 │   └── showcase/         # Información y presentación del evento
 └── shared/               # Código transversal sin reglas de negocio
-    ├── infrastructure/prisma/   # Contrato y cliente de Prisma 8
-    └── ui/
+    ├── components/
+    ├── hooks/
+    └── lib/prisma/       # Contrato y cliente de Prisma 8
 ```
 
-Cada módulo sigue la misma forma (`domain/`, `application/`, `infrastructure/`, `ui/`,
-`index.ts` y `server.ts`). Los detalles están en [`AGENTS.md`](./AGENTS.md).
+Cada feature tiene siempre `lib/`, `hooks/`, `components/` y `pages/`. Las pages son
+contenedores que obtienen datos y componen componentes. Todo el naming va en inglés.
+Los detalles están en [`AGENTS.md`](./AGENTS.md).
 
 ## Contribuir
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { EVENT_INFO } from "@/modules/showcase";
-import { SiteHeader } from "@/shared/ui";
+import { EVENT_INFO } from "@/features/showcase";
+import { SiteHeader } from "@/shared/components";
 import "./globals.css";
 
 const geistSans = Geist({

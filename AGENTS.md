@@ -15,7 +15,7 @@ desarrollados por los estudiantes del edificio E3. Contribuyen estudiantes de to
 generación, así que el código debe ser **simple, predecible y fácil de leer**.
 
 Idioma: la interfaz, la documentación, los issues y los commits van en **español**.
-Los identificadores de código (variables, funciones, archivos) van en **inglés**.
+Todo el naming (directorios, archivos y código) va en **inglés**.
 
 ## Stack y versiones
 
@@ -35,7 +35,7 @@ Las versiones de Prisma 8 están fijadas (sin `^`) porque son release candidates
 
 ```bash
 npm run dev                # servidor de desarrollo
-npm run lint               # ESLint (incluye reglas de fronteras entre módulos)
+npm run lint               # ESLint (incluye reglas de fronteras entre features)
 npm run typecheck          # next typegen + tsc --noEmit
 npm run build              # emite el contrato de Prisma y compila
 npm run db:emit            # regenera contract.json / contract.d.ts
@@ -50,54 +50,106 @@ Antes de dar por terminado un cambio, `npm run lint` y `npm run typecheck` deben
 ## Arquitectura: screaming architecture
 
 La estructura de carpetas "grita" el dominio (videojuegos, equipos, evento), no el framework.
+Cada dominio es una **feature** dentro de `src/features/`.
 
 ```
 src/
-├── app/                         # SÓLO rutas de Next.js (page, layout, loading, not-found…)
-├── modules/
-│   ├── games/                   # Catálogo de videojuegos
-│   ├── teams/                   # Equipos de desarrollo
-│   └── showcase/                # Información y presentación del evento
-└── shared/                      # Código transversal SIN reglas de negocio
-    ├── infrastructure/prisma/   # Contrato, cliente (db.ts) y seed de Prisma 8
-    └── ui/                      # Componentes genéricos (Container, EmptyState…)
+├── app/                      # SOLO rutas de Next.js: renderizan una page de una feature
+├── features/
+│   ├── games/                # Catálogo de videojuegos
+│   ├── teams/                # Equipos de desarrollo
+│   └── showcase/             # Información y presentación del evento (home)
+└── shared/                   # Código transversal SIN reglas de negocio
+    ├── components/           # Componentes genéricos (Container, PageSection, EmptyState...)
+    ├── hooks/                # Hooks genéricos
+    └── lib/prisma/           # Contrato, cliente (db.ts) y seed de Prisma 8
 ```
 
-### Anatomía de un módulo
+### Anatomía obligatoria de una feature
+
+Toda feature tiene **siempre** estas cuatro carpetas (si una está vacía, deja un `.gitkeep`):
 
 ```
-src/modules/<modulo>/
-├── domain/            # Tipos/entidades y puertos (interfaces de repositorio). TS puro.
-├── application/       # Casos de uso: funciones `makeXxx(repository)` que devuelven la acción.
-├── infrastructure/    # Adaptadores: implementaciones Prisma de los repositorios.
-├── ui/                # Componentes React del dominio.
-├── index.ts           # API pública segura para cliente y servidor (tipos + UI).
-└── server.ts          # API pública de servidor: casos de uso ya conectados a infraestructura.
+src/features/<feature>/
+├── lib/           # Tipos, constantes, utilidades y acceso a datos (<feature>-queries.ts).
+├── hooks/         # Hooks de React de la feature (use-<algo>.ts).
+├── components/    # Componentes de presentación de la feature.
+├── pages/         # Contenedores de página que usa src/app/. Incluye pages/index.ts.
+└── index.ts       # API pública client-safe: tipos, componentes y hooks reutilizables.
 ```
 
-No todos los módulos necesitan todas las capas (`showcase` no tiene persistencia).
+| Carpeta | Responsabilidad | Puede importar |
+| --- | --- | --- |
+| `lib/` | Tipos de dominio (`types.ts`), constantes, utilidades puras y consultas a la BD (`*-queries.ts` con `import "server-only"` y `await connection()`). Mapea las filas de Prisma a los tipos de dominio. | `@/shared/lib/*` |
+| `hooks/` | Estado y lógica de interacción en el cliente. Sin JSX. | `lib/` (sólo tipos y utilidades puras), React |
+| `components/` | UI. Reciben datos por props; **no consultan la BD**. Agrega `"use client"` sólo si usan hooks o eventos. | `lib/` (tipos/constantes), `hooks/`, `@/shared/components` |
+| `pages/` | **Contenedores**: obtienen los datos (vía `lib/`), definen `Suspense`/`notFound` y componen componentes. Sin estilos complejos ni lógica de negocio. Exportan también su `Metadata`. | `lib/`, `components/`, `@/shared/components` |
+
+### Pages como contenedores
+
+Una page de feature sólo orquesta: pide datos, maneja estados de carga/no encontrado y
+compone componentes. Toda la UI vive en `components/`.
+
+```tsx
+// src/features/games/pages/games-page.tsx
+async function PublishedGamesCatalog() {
+  const games = await listPublishedGames();        // lib/
+  return <GamesCatalog games={games} />;            // components/
+}
+
+export function GamesPage() {
+  return (
+    <PageSection title="Videojuegos">
+      <Suspense fallback={<LoadingMessage message="Cargando videojuegos..." />}>
+        <PublishedGamesCatalog />
+      </Suspense>
+    </PageSection>
+  );
+}
+```
+
+Los archivos de `src/app/` sólo enlazan la ruta con la page de la feature:
+
+```tsx
+// src/app/games/page.tsx
+import { GamesPage } from "@/features/games/pages";
+
+export { gamesPageMetadata as metadata } from "@/features/games/pages";
+
+export default GamesPage;
+```
 
 ### Reglas de dependencias
 
-1. `domain/` no importa nada de `application/`, `infrastructure/`, `ui/`, Next.js, React ni Prisma.
-2. `application/` sólo depende de `domain/` (recibe el repositorio por parámetro).
-3. `infrastructure/` implementa los puertos de `domain/` y es el **único** lugar que importa
-   `@/shared/infrastructure/prisma/db`.
-4. `ui/` depende de `domain/` y de `@/shared/ui`. Nunca de `infrastructure/`.
-5. Fuera de un módulo, sólo se importa su API pública: `@/modules/<modulo>` o
-   `@/modules/<modulo>/server`. ESLint (`no-restricted-imports`) bloquea los imports profundos.
-   Dentro del módulo se usan imports relativos.
-6. Un módulo puede usar la API pública de otro módulo, pero evita dependencias circulares.
-7. `src/app/` no contiene lógica de negocio: compone componentes y llama casos de uso de `server.ts`.
-8. `shared/` nunca importa de `modules/`.
+1. Fuera de una feature sólo se importa su API pública:
+   - `@/features/<feature>`: tipos, componentes y hooks (seguro en Client Components).
+   - `@/features/<feature>/pages`: contenedores de página (sólo desde `src/app/`).
+   ESLint (`no-restricted-imports`) bloquea cualquier import profundo. Dentro de la feature se usan imports relativos.
+2. Sólo `lib/*-queries.ts` importa `@/shared/lib/prisma/db`.
+3. `components/` y `hooks/` nunca importan `*-queries.ts` ni nada con `server-only`.
+4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx`, `not-found.tsx` globales y archivos de ruta que delegan en `pages/`.
+5. `shared/` nunca importa de `features/` (también lo valida ESLint).
+6. Una feature puede usar la API pública de otra, evitando dependencias circulares.
 
-### Agregar un módulo nuevo
+### Naming
 
-1. Crea `src/modules/<modulo>/` con las capas que necesite.
-2. Si persiste datos, agrega los modelos a `contract.prisma`, ejecuta `npm run db:emit` y crea
-   el repositorio en `infrastructure/`.
-3. Expón tipos y UI en `index.ts`, y los casos de uso conectados en `server.ts` (con `import "server-only"`).
-4. Crea las rutas en `src/app/` consumiendo sólo esas APIs públicas.
+- **Todo nombre en inglés**: directorios, archivos, variables, funciones, tipos, props,
+  ids de formularios, nombres de ramas y labels.
+- Directorios y archivos en `kebab-case`: `game-card.tsx`, `use-genre-filter.ts`, `game-queries.ts`.
+- Componentes y pages en `PascalCase` con export nombrado: `GameCard`, `GamesPage`.
+  Las pages terminan en `Page` y su metadata en `PageMetadata` (`gamesPageMetadata`).
+- Hooks con prefijo `use`: `useGenreFilter`.
+- Consultas con verbo: `listPublishedGames`, `getPublishedGameBySlug`.
+- Sólo el contenido visible para el usuario (textos de la UI) y la documentación van en español.
+
+### Agregar una feature nueva
+
+1. Crea `src/features/<feature>/` con `lib/`, `hooks/`, `components/` y `pages/`.
+2. Si persiste datos, agrega los modelos a `contract.prisma`, ejecuta `npm run db:emit` y
+   escribe las consultas en `lib/<feature>-queries.ts`.
+3. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`.
+4. Expón las pages en `pages/index.ts` y lo reutilizable en `index.ts`.
+5. Crea la ruta en `src/app/` que sólo renderiza la page.
 
 ## Convenciones de Next.js 16.4
 
@@ -110,14 +162,13 @@ Lee la guía correspondiente en `node_modules/next/dist/docs/` antes de escribir
   - estar en una función/componente con `"use cache"` + `cacheLife(...)`.
   Consulta `01-app/01-getting-started/08-caching.md`.
 - **Prisma 8 y prerender.** El runtime de Prisma usa `crypto.randomUUID()` por consulta, así que
-  los repositorios llaman `await connection()` (de `next/server`) antes de consultar. Si quieres
+  las funciones de `lib/*-queries.ts` llaman `await connection()` (de `next/server`) antes de consultar. Si quieres
   cachear un resultado, envuelve la consulta en una función con `"use cache"` en lugar de usar
   `connection()`, e invalídala con `cacheTag` / `revalidateTag` / `updateTag` tras una mutación.
 - `params` y `searchParams` son **Promises**: `const { slug } = await params`.
   Tipa con los helpers globales `PageProps<"/ruta/[param]">` y `LayoutProps<"/ruta">`
   (generados por `next typegen`).
-- Mutaciones con **Server Actions** (`"use server"`), ubicadas en el módulo
-  (por ejemplo `src/modules/<modulo>/application/` + export desde `server.ts`).
+- Mutaciones con **Server Actions** (`"use server"`) en `lib/<feature>-actions.ts` de la feature.
 - Metadata con `export const metadata` o `generateMetadata`.
 - Alias de imports: `@/*` → `src/*`.
 
@@ -129,10 +180,10 @@ versión instalada está en `node_modules/@prisma/orm-postgres/skills/prisma-8/`
 `references/`). Léela antes de escribir consultas o migraciones; no respondas de memoria.
 
 - Configuración: `prisma.config.ts` (`definePrismaConfig` + `ormConfig`).
-- Contrato: `src/shared/infrastructure/prisma/contract.prisma` (primera línea `// use prisma-8`).
+- Contrato: `src/shared/lib/prisma/contract.prisma` (primera línea `// use prisma-8`).
 - Artefactos generados (se suben a git, **no se editan a mano**): `contract.json` y `contract.d.ts`.
   Después de cambiar el contrato ejecuta `npm run db:emit`.
-- Cliente: `src/shared/infrastructure/prisma/db.ts` exporta `db`.
+- Cliente: `src/shared/lib/prisma/db.ts` exporta `db`.
 - Consultas ORM en Postgres siempre con namespace: `db.orm.public.<Model>`.
 
 ```ts
@@ -151,8 +202,8 @@ await db.orm.public.Team.create({ slug, name, members: [] });
 
 - `.all()` se consume una sola vez (`await` basta; no escribas helpers `collect()`).
 - Para nombrar tipos de filas usa `ResultType` (`@prisma/orm-postgres/components/runtime`)
-  o `Models.public_<Model>` de `contract.d.ts`. Mapea las filas a los tipos de `domain/`
-  dentro del repositorio; el resto de la app no conoce los tipos de Prisma.
+  o `Models.public_<Model>` de `contract.d.ts`. Mapea las filas a los tipos de `lib/types.ts`
+  dentro de `*-queries.ts`; el resto de la app no conoce los tipos de Prisma.
 - Enums en PSL: `enum nombre { @@type("pg/text@1") valor = "valor" }`.
 - Fechas: usa `TimestamptzString` / `temporal.updatedAtString()` (Node 22 no trae `Temporal`).
 - Flujo de cambios en la BD:
@@ -163,7 +214,7 @@ await db.orm.public.Team.create({ slug, name, members: [] });
 ## TypeScript 6
 
 - `strict` activado; no uses `any` (usa `unknown` y estrecha el tipo).
-- Prefiere `type`/`interface` explícitos en `domain/` y deja que el resto se infiera.
+- Prefiere `type`/`interface` explícitos en `lib/types.ts` y deja que el resto se infiera.
 - Usa `import type` para imports que sólo son tipos.
 - No uses opciones deprecadas en TS 6 (`baseUrl`, `moduleResolution: node`/`node10`, `target: ES5`).
 
@@ -171,8 +222,7 @@ await db.orm.public.Team.create({ slug, name, members: [] });
 
 - **Nada de emojis.** Prohibidos en código, UI, comentarios, logs, documentación, issues,
   PRs y mensajes de commit.
-- Componentes en `kebab-case.tsx`, exportados con nombre en `PascalCase` (sin `export default`
-  excepto en archivos de rutas de `src/app/`).
+- Sin `export default`, excepto en los archivos de ruta de `src/app/`.
 - Estilos con clases de Tailwind; soporta modo oscuro (`dark:`).
 - Accesibilidad: HTML semántico, `alt` en imágenes, enlaces externos con `rel="noopener noreferrer"`.
 - Sin dependencias nuevas sin justificarlo en el PR.
@@ -180,9 +230,9 @@ await db.orm.public.Team.create({ slug, name, members: [] });
 ## Flujo de trabajo (git flow)
 
 - `main`: producción. `develop`: integración.
-- Trabajo nuevo en `feature/<issue>-<descripcion>` (o `fix/…`) desde `develop`, y PR hacia `develop`.
+- Trabajo nuevo en `feature/<issue>-<description>` (en inglés) (o `fix/…`) desde `develop`, y PR hacia `develop`.
 - `release/<version>` y `hotfix/<version>` se integran en `main` y `develop`.
-- Commits con Conventional Commits en español, con el módulo como scope:
+- Commits con Conventional Commits en español, con la feature como scope:
   `feat(games): agregar filtro por género`.
 - Nunca hagas push directo a `main` ni a `develop`, ni reescribas historia compartida.
 - Sigue `CONTRIBUTING.md` y las plantillas de `.github/`.
