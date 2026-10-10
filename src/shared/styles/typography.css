@@ -1,0 +1,108 @@
+/*
+ * Estilos base y utilidades tipográficas del diseño UTG.
+ * Se usan como clases de Tailwind: `type-mono`, `type-tiny`, `type-giant`, `page-wrap`...
+ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background: var(--background);
+  }
+
+  body {
+    margin: 0;
+    overflow-x: hidden;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-wide);
+    text-wrap: balance;
+  }
+
+  [hidden]:not([hidden="until-found" i]) {
+    display: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+/* Contenedor de página: el `.wrap` del diseño. */
+@utility page-wrap {
+  max-width: 1600px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Texto monoespaciado en mayúsculas (`.mono`). */
+@utility type-mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+/* Etiquetas pequeñas (`.tiny`). */
+@utility type-tiny {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+/* Títulos gigantes de sección (`.giant`). */
+@utility type-giant {
+  font-family: var(--font-wide);
+  font-weight: 700;
+  font-size: clamp(30px, 7vw, 104px);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+/* Títulos anchos en mayúsculas (h3 de tarjetas, nombres de juegos...). */
+@utility type-wide {
+  font-family: var(--font-wide);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Espaciado vertical entre secciones (`section.block`). */
+@utility section-block {
+  padding-top: clamp(80px, 11vw, 160px);
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
