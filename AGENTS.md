@@ -55,21 +55,23 @@ El workflow `.github/workflows/ci.yml` ejecuta lo mismo (más `npm run build`) e
 ## Arquitectura: screaming architecture
 
 La estructura de carpetas "grita" el dominio, no el framework.
-Cada dominio es una **feature** dentro de `src/features/`. El proyecto es un lienzo en blanco:
-sólo existe la feature `example`, que muestra la forma que debe tener cualquier feature nueva.
-El contrato de Prisma no tiene modelos todavía.
+Cada dominio es una **feature** dentro de `src/features/`. La feature `example` es el scaffold
+mínimo; `games` es la referencia completa (datos, TanStack Query, componentes y pages).
+Los datos todavía son mock (ver `docs/data-sources.md`); el contrato de Prisma no tiene modelos.
 
 ```
 src/
 ├── app/                      # SOLO rutas de Next.js: renderizan una page de una feature
 ├── features/
-│   └── example/              # Feature de referencia (scaffold): cópiala para crear las tuyas
+│   ├── example/              # Scaffold mínimo: cópialo para crear tus features
+│   └── games/                # Catálogo de juegos (/games) y API (/api/games)
 └── shared/                   # Código transversal SIN reglas de negocio
-    ├── components/           # Componentes genéricos (QueryProvider)
-    ├── hooks/                # Hooks genéricos
+    ├── components/           # QueryProvider, navegación, pie, botones del diseño...
+    ├── hooks/                # Hooks genéricos (movimiento reducido, estado en la URL...)
+    ├── styles/               # Tema UTG de HeroUI, tipografía y efectos
     └── lib/
         ├── prisma/           # Contrato y cliente (db.ts) de Prisma 8
-        └── query/            # getQueryClient() de TanStack Query
+        └── query/            # getQueryClient() y dehydrateForPrerender() de TanStack Query
 ```
 
 ### Anatomía obligatoria de una feature
@@ -129,7 +131,8 @@ export default ExamplePage;
 2. Sólo `lib/*-queries.ts` importa `@shared/lib/prisma/db`.
 3. `components/` y `hooks/` nunca importan `*-queries.ts` ni nada con `server-only`.
 4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx` (que monta `QueryProvider`), `globals.css`,
-   archivos de ruta que delegan en `pages/` y Route Handlers (`route.ts`) que delegan en `lib/`.
+   archivos de ruta que delegan en `pages/` y Route Handlers (`route.ts`), `sitemap.ts` y
+   `robots.ts` que delegan en `lib/` (ESLint les permite importar `lib/`, pero no componentes ni hooks).
 5. `shared/` nunca importa de `features/` (también lo valida ESLint).
 6. Una feature puede importar componentes, hooks o tipos de otra, evitando dependencias circulares.
 
@@ -267,32 +270,47 @@ TanStack Query `5.x` ya está configurado (referencia: https://tanstack.com/quer
   hacia un Route Handler (`src/app/api/<feature>/route.ts`) o una Server Action.
 - Los hooks que usan `useQuery`, `useSuspenseQuery` o `useMutation` viven en `hooks/`
   (`use-<feature>-<algo>.ts`). Los componentes que los usan llevan `"use client"`.
-- Para prellenar el caché desde el servidor, la page de la feature hace el prefetch y envuelve los
-  componentes en `HydrationBoundary`:
+- Para prellenar el caché desde el servidor **no uses `dehydrate()` de TanStack**: con Cache
+  Components lee `Date.now()` durante el prerender y el build falla. Usa
+  `dehydrateForPrerender` (`@shared/lib/query/dehydrate-for-prerender`), que toma la fecha de una
+  función cacheada con las mismas etiquetas que los datos (patrón de la guía de Next.js
+  `02-guides/client-side-data-fetching/tanstack-query.md`), y `QueryHydrationBoundary`
+  (`@shared/components/query-hydration-boundary`) dentro de `<Suspense>`:
+
+```ts
+// src/features/games/lib/games-prefetch.ts  (server-only)
+export async function getGamesHydrationState() {
+  const games = await listGames(); // "use cache" + cacheTag("games")
+  return dehydrateForPrerender([{ queryKey: gamesQueryKeys.list(), data: games }], [GAMES_CACHE_TAG]);
+}
+```
 
 ```tsx
-// src/features/<feature>/pages/<name>-page.tsx
-import { dehydrate, HydrationBoundary, noop } from "@tanstack/react-query";
-import { getQueryClient } from "@shared/lib/query/get-query-client";
-
+// src/features/games/pages/games-page.tsx
 export function GamesPage() {
-  const queryClient = getQueryClient();
-  // Sin await: la query pendiente se transmite al cliente por streaming.
-  // `prefetchQuery` está deprecado en 5.x; usa `query(...)` y descarta el error con `noop`.
-  queryClient.query(gamesQueryOptions()).catch(noop);
-
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <GamesList /> {/* usa useSuspenseQuery(gamesQueryOptions()) desde hooks/ */}
-    </HydrationBoundary>
+    <Suspense fallback={<GamesCatalogSkeleton />}>
+      <QueryHydrationBoundary state={getGamesHydrationState()}>
+        <GamesCatalog /> {/* useSuspenseQuery(gamesQueryOptions()) desde hooks/ */}
+      </QueryHydrationBoundary>
+    </Suspense>
   );
 }
 ```
 
+- En el servidor no existe `/api/...`: la hidratación usa la consulta de `lib/*-queries.ts`
+  y el navegador usa la `queryFn` con `fetch`. Ambos comparten la misma query key.
+- Para datos que vienen de la caché de Next.js usa `staleTime: "static"` en sus `queryOptions`:
+  la caché de Next (sus etiquetas) es la fuente de verdad y, con un `staleTime` numérico,
+  TanStack lee `Date.now()` al renderizar y Next ya no puede prerenderizar el componente.
+
 - Usa la API vigente de 5.x: `environmentManager.isServer()` (no `isServer`),
   `queryClient.query(...)` (no `fetchQuery` / `prefetchQuery`) y
   `queryClient.query({ ...options, staleTime: "static" })` (no `ensureQueryData`).
-- Tras una mutación, invalida con `queryClient.invalidateQueries({ queryKey: ["<feature>"] })`.
+- Tras una mutación, invalida las dos cachés: `updateTag("<etiqueta>")` en la Server Action y
+  `queryClient.invalidateQueries({ queryKey: ["<feature>"] })` en el cliente.
+- Estado de la URL (filtros que se comparten): `useSearchParamState` (`@shared/hooks/use-search-param-state`).
+  No usa `useSearchParams`, así la página se sigue prerenderizando completa.
 
 ## HeroUI (componentes de UI)
 
