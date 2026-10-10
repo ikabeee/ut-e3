@@ -186,6 +186,24 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
 3. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`.
 4. Crea la ruta en `src/app/` que sólo renderiza la page.
 
+## Documentación del proyecto
+
+- `docs/where-to-edit.md`: dónde cambiar cada contenido o estilo.
+- `docs/architecture.md`: capas, flujo de datos, rendimiento y SOLID.
+- `docs/data-sources.md`: datos mock y pasos para conectar Prisma.
+- `docs/design-system.md`: tema UTG sobre HeroUI.
+- `docs/versioning.md` y `CHANGELOG.md`: versionado semántico y releases con git flow.
+
+Si cambias algo visible, agrega una línea en `[Sin publicar]` de `CHANGELOG.md`. Si cambias
+dónde vive un contenido, actualiza `docs/where-to-edit.md`.
+
+## SEO
+
+- Cada page exporta su `Metadata` (título, descripción, `alternates.canonical`). Para Open Graph
+  usa `buildOpenGraph()` (`@shared/lib/metadata`): Next.js no fusiona el `openGraph` del layout.
+- Datos estructurados con `JsonLd` (`@shared/components/json-ld`) y un builder en `lib/`.
+- Las rutas nuevas que deban indexarse se agregan a `src/app/sitemap.ts`.
+
 ## Convenciones de Next.js 16.4
 
 Lee la guía correspondiente en `node_modules/next/dist/docs/` antes de escribir código. Puntos clave:

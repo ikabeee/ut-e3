@@ -37,4 +37,4 @@ Closes #
 - [ ] El código respeta la screaming architecture (ver `AGENTS.md`): la feature tiene `lib/`, `hooks/`, `components/` y `pages/`, y los imports usan los path aliases (`@features/...`, `@shared/...`) sin archivos barril.
 - [ ] Directorios, archivos y código tienen naming en inglés.
 - [ ] Si cambié `contract.prisma`, ejecuté `npm run db:emit` y subí `contract.json` y `contract.d.ts`.
-- [ ] Actualicé la documentación si era necesario.
+- [ ] Actualicé la documentación (y el `CHANGELOG.md` si el cambio se nota en el sitio).
