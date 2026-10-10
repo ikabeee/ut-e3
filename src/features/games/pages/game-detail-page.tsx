@@ -14,6 +14,7 @@ import { getGamePath } from "@features/games/lib/game-links";
 import { buildGameStructuredData } from "@features/games/lib/game-structured-data";
 import { getGameBySlug, listGames } from "@features/games/lib/games-queries";
 import { JsonLd } from "@shared/components/json-ld";
+import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
 
 type GameDetailPageProps = PageProps<"/games/[slug]">;
@@ -31,13 +32,17 @@ export async function generateGameDetailMetadata({ params }: GameDetailPageProps
     return { title: "Juego no encontrado" };
   }
 
-  const images = game.image ? [{ url: game.image.src, alt: game.name }] : undefined;
+  const openGraph = buildOpenGraph({
+    title: game.name,
+    description: game.description,
+    ...(game.image ? { images: [{ url: game.image.src, alt: game.name }] } : {}),
+  });
   return {
     title: game.name,
     description: `${game.description} ${game.team} · Stand ${game.stand} · ${game.genre}.`,
     alternates: { canonical: getGamePath(game.slug) },
-    openGraph: { title: game.name, description: game.description, type: "article", images },
-    twitter: { card: images ? "summary_large_image" : "summary", title: game.name, description: game.description },
+    openGraph,
+    twitter: { card: "summary_large_image", title: game.name, description: game.description },
   };
 }
 
