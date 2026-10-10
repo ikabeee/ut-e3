@@ -23,7 +23,8 @@
       "@shared/*": ["./src/shared/*"]
     },
     "types": [
-      "node"
+      "node",
+      "jest"
     ]
   },
   "include": [
