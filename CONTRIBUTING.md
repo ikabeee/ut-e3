@@ -73,9 +73,13 @@ npm run dev                 # http://localhost:3000
 Antes de abrir tu PR:
 
 ```bash
-npm run lint
+npm run lint        # incluye las reglas de SonarQube
 npm run typecheck
+npm test
 ```
+
+El CI de GitHub Actions corre estos mismos pasos (y `npm run build`) en cada Pull Request.
+Las pruebas viven junto al archivo que prueban: `game-filters.ts` -> `game-filters.test.ts`.
 
 ## 5. Arquitectura
 
