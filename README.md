@@ -11,6 +11,8 @@ por los estudiantes de la Ingeniería en Desarrollo y Gestión de Software
 - Tailwind CSS 4
 - [HeroUI v3](https://heroui.com/en/docs/react/components) como librería de componentes
 - [TanStack Query 5](https://tanstack.com/query/latest) con sus devtools (sólo en desarrollo)
+- ESLint 9 con las reglas de [SonarQube](https://github.com/SonarSource/SonarJS) y de TanStack Query
+- [Jest 30](https://jestjs.io) + [Testing Library](https://testing-library.com) para pruebas
 
 ## Empezar
 
@@ -32,6 +34,9 @@ npm run dev            # http://localhost:3000
 | `npm run build`             | Emite el contrato de Prisma y compila para producción.                        |
 | `npm run lint`              | ESLint (incluye las reglas de fronteras entre features).                      |
 | `npm run typecheck`         | Genera los tipos de rutas y ejecuta`tsc`.                                    |
+| `npm test`                  | Ejecuta las pruebas con Jest y Testing Library.                               |
+| `npm run test:watch`        | Pruebas en modo observador.                                                    |
+| `npm run test:coverage`     | Pruebas con reporte de cobertura (`coverage/`).                                |
 | `npm run db:emit`           | Regenera`contract.json` y `contract.d.ts` tras editar `contract.prisma`. |
 | `npm run db:init`           | Crea el esquema en una base de datos vacía.                                   |
 | `npm run db:update`         | Aplica cambios del contrato a tu base**local** (sin migraciones).        |

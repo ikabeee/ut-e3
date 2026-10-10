@@ -30,6 +30,8 @@ Todo el naming (directorios, archivos y código) va en **inglés**.
 | Tailwind CSS | `4` | Configurado vía `@tailwindcss/turbopack`. |
 | TanStack Query | `5.x` (`@tanstack/react-query` + devtools) | Estado de servidor en el cliente. |
 | HeroUI | `3.x` (`@heroui/react`, `@heroui/styles`) | Librería de componentes (React Aria + Tailwind 4). |
+| ESLint | `9.x` + `eslint-plugin-sonarjs` | Reglas de SonarQube. ESLint 10 aún no es compatible con `eslint-config-next`. |
+| Jest | `30.x` + Testing Library | Pruebas unitarias y de componentes (`next/jest`). |
 
 Las versiones de Prisma 8 están fijadas (sin `^`) porque son release candidates.
 
@@ -39,6 +41,7 @@ Las versiones de Prisma 8 están fijadas (sin `^`) porque son release candidates
 npm run dev                # servidor de desarrollo
 npm run lint               # ESLint (incluye reglas de fronteras entre features)
 npm run typecheck          # next typegen + tsc --noEmit
+npm test                   # pruebas con Jest (npm run test:coverage para cobertura)
 npm run build              # emite el contrato de Prisma y compila
 npm run db:emit            # regenera contract.json / contract.d.ts
 npm run db:update          # aplica el contrato a la BD LOCAL (sin migraciones)
@@ -46,7 +49,8 @@ npm run db:migration:plan  # genera una migración formal en migrations/app/
 npm run db:migrate         # aplica migraciones pendientes
 ```
 
-Antes de dar por terminado un cambio, `npm run lint` y `npm run typecheck` deben pasar.
+Antes de dar por terminado un cambio, `npm run lint`, `npm run typecheck` y `npm test` deben pasar.
+El workflow `.github/workflows/ci.yml` ejecuta lo mismo (más `npm run build`) en cada PR.
 
 ## Arquitectura: screaming architecture
 

@@ -1,6 +1,8 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import tanstackQuery from "@tanstack/eslint-plugin-query";
+import sonarjs from "eslint-plugin-sonarjs";
 
 // Import rules for the screaming architecture. Every import uses the path
 // aliases `@features/*` and `@shared/*` (see tsconfig.json); there are no barrel files.
@@ -41,6 +43,10 @@ const restrict = (...patterns) => ({
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // Lineamientos de SonarQube (los mismos que reporta SonarLint/SonarCloud).
+  sonarjs.configs.recommended,
+  // Buenas prácticas de TanStack Query (query keys, queryFn estables, etc.).
+  ...tanstackQuery.configs["flat/recommended"],
   { files: ["src/**/*.{ts,tsx,mts}"], rules: restrict() },
   { files: ["src/app/**/*.{ts,tsx}"], rules: restrict(nonPageImports) },
   {
@@ -55,6 +61,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "coverage/**",
     // Artefactos generados por Prisma 8:
     "src/shared/lib/prisma/contract.d.ts",
   ]),
