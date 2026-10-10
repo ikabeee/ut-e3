@@ -31,14 +31,14 @@ const nonPageImports = {
   message: "`src/app` sólo renderiza pages: importa desde `@features/<feature>/pages/<name>-page`.",
 };
 
-// Route Handlers (`route.ts`) y archivos de metadata (`sitemap.ts`, `robots.ts`) no renderizan
+// Route Handlers (`route.ts`) y archivos de metadata (`sitemap.ts`, `robots.ts`, `manifest.ts`) no renderizan
 // una page: delegan en `lib/` de la feature, pero nunca en componentes ni hooks.
 const routeFileImports = {
   group: ["@features/*/hooks/*", "@features/*/components/*"],
   message: "Los Route Handlers y archivos de metadata sólo delegan en `@features/<feature>/lib/*`.",
 };
 
-const routeFiles = ["src/app/**/route.ts", "src/app/sitemap.ts", "src/app/robots.ts"];
+const routeFiles = ["src/app/**/route.ts", "src/app/sitemap.ts", "src/app/robots.ts", "src/app/manifest.ts"];
 
 const featureImports = {
   group: ["@features/*", "@features/**"],

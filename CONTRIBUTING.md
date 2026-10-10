@@ -56,6 +56,10 @@ chore(deps): actualizar prisma
 
 El *scope* entre paréntesis es la feature afectada.
 
+Si tu cambio se nota en el sitio, agrega una línea en la sección `[Sin publicar]` de
+[`CHANGELOG.md`](./CHANGELOG.md). Las versiones y los releases se explican en
+[`docs/versioning.md`](./docs/versioning.md).
+
 **Regla del proyecto: nada de emojis** en código, interfaz, documentación, commits, issues ni PRs.
 
 ## 4. Entorno local
@@ -92,7 +96,12 @@ Como punto de partida existe la feature `example`.
 - **Todo el naming va en inglés**: directorios, archivos, código, ramas y labels. Sólo los textos de la
   interfaz y la documentación van en español.
 
-Las reglas completas están en [`AGENTS.md`](./AGENTS.md).
+Las reglas completas están en [`AGENTS.md`](./AGENTS.md). Para orientarte rápido:
+
+- [`docs/where-to-edit.md`](./docs/where-to-edit.md): dónde cambiar textos, juegos, colores o el croquis.
+- [`docs/architecture.md`](./docs/architecture.md): capas, flujo de datos y principios SOLID.
+- [`docs/design-system.md`](./docs/design-system.md): cómo usar HeroUI con el tema UTG.
+- [`docs/data-sources.md`](./docs/data-sources.md): datos mock y cómo conectar Prisma.
 
 ## 6. Código de conducta
 

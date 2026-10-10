@@ -11,6 +11,8 @@ export const siteConfig = {
   url: process.env["NEXT_PUBLIC_SITE_URL"] ?? "http://localhost:3000",
   locale: "es_MX",
   organization: "División de Ingeniería y Tecnologías · UT Cancún",
+  /** Imagen para compartir en redes cuando una página no define la suya. */
+  shareImage: "/media/reel.jpg",
 } as const;
 
 /** Rutas principales del sitio. */

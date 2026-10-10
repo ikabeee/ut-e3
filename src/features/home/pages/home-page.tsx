@@ -12,6 +12,7 @@ import { listGames } from "@features/games/lib/games-queries";
 import { CatalogShowcase } from "@features/home/components/catalog-showcase";
 import { ProgramAndFloorPlan } from "@features/home/components/program-and-floor-plan";
 import { JsonLd } from "@shared/components/json-ld";
+import { buildOpenGraph } from "@shared/lib/metadata";
 import { QueryHydrationBoundary } from "@shared/components/query-hydration-boundary";
 import { routes, siteConfig } from "@shared/lib/site-config";
 
@@ -19,7 +20,7 @@ export const homePageMetadata: Metadata = {
   title: { absolute: siteConfig.title },
   description: siteConfig.description,
   alternates: { canonical: routes.home },
-  openGraph: { images: [{ url: EVENT_REEL.poster, alt: siteConfig.title }] },
+  openGraph: buildOpenGraph({ images: [{ url: EVENT_REEL.poster, alt: siteConfig.title }] }),
 };
 
 /** Portada (`index.html`): reel, destacados, evento, catálogo, programa, croquis y ubicación. */

@@ -3,6 +3,7 @@ import { QueryProvider } from "@shared/components/query-provider";
 import { SiteFooter } from "@shared/components/site-footer";
 import { SiteHeader } from "@shared/components/site-header";
 import { fontVariables } from "@shared/lib/fonts";
+import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
 import "./globals.css";
 
@@ -14,11 +15,9 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   applicationName: siteConfig.name,
-  openGraph: {
-    type: "website",
-    locale: siteConfig.locale,
-    siteName: siteConfig.title,
-  },
+  openGraph: buildOpenGraph(),
+  twitter: { card: "summary_large_image" },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
