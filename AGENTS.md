@@ -314,6 +314,24 @@ HeroUI v3 ya está configurado (referencia: https://heroui.com/en/docs/react/com
 - **Modo oscuro**: el tema de HeroUI se activa con la clase `dark` (o `data-theme="dark"`) en `<html>`.
   La variante `dark:` (redefinida por HeroUI) se activa con esa clase y, como respaldo, con la
   preferencia del sistema; usa los tokens del tema para que ambos casos se vean igual.
+  El diseño UTG tiene **un solo tema oscuro**, así que `layout.tsx` fija `class="dark"`.
+
+### Tema UTG
+
+El diseño (carpeta UTG) se traduce a HeroUI en `src/shared/styles/`:
+
+| Archivo | Contenido |
+| --- | --- |
+| `theme.css` | Paleta `--utg-*` y su mapeo a las variables de HeroUI (`--accent`, `--surface`, `--border`, `--muted`...), radio 0, tipografías y colores extra de Tailwind (`bg-paper`, `text-copy`, `accent-deep`...). |
+| `typography.css` | Estilos base y utilidades del diseño: `page-wrap`, `type-mono`, `type-tiny`, `type-giant`, `type-wide`, `section-block`, `scrollbar-none`. |
+| `components.css` | Ajustes BEM de HeroUI (variantes de `Button`) y efectos: `arrow-glyph`, `link-wipe`, `fill-wipe`, capas de glitch y animaciones `animate-rise` / `animate-flash`. |
+
+Variantes de `Button` según el diseño: `primary` (bloque azul), `outline` (borde blanco),
+`tertiary` (negro sin borde), `ghost` (flechas) y `size="lg"` para la "pestaña" sin borde.
+Para enlaces con apariencia de botón usa `ActionLink` (`@shared/components/action-link`);
+para botones con la etiqueta animada, `ActionButton`; para flechas de carrusel, `ArrowButton`.
+Las tipografías (Syncopate, Archivo, JetBrains Mono y Martian Mono) se cargan con `next/font`
+en `src/shared/lib/fonts.ts`.
 
 ## TypeScript 6
 

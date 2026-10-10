@@ -1,2 +1,7 @@
 @import "tailwindcss";
 @import "@heroui/styles";
+
+/* Tema y estilos compartidos del diseño UTG (ver src/shared/styles/). */
+@import "../shared/styles/theme.css";
+@import "../shared/styles/typography.css";
+@import "../shared/styles/components.css";

@@ -1,0 +1,96 @@
+/*
+ * Tema UTG para HeroUI v3.
+ *
+ * El diseño del showcase usa un solo tema oscuro: campo negro, bloques en azul "acid",
+ * tipografía ancha en mayúsculas para títulos y monoespaciada para el cuerpo.
+ * Aquí se traducen esos valores a las variables semánticas de HeroUI, así los componentes
+ * (Button, Card, SearchField, ToggleButton...) toman el estilo del diseño sin colores fijos.
+ *
+ * Para cambiar un color del sitio, edita la paleta `--utg-*` de este archivo.
+ */
+
+@layer base {
+  :root,
+  .dark,
+  [data-theme="dark"] {
+    color-scheme: dark;
+
+    /* Paleta del diseño */
+    --utg-black: #000000;
+    --utg-panel: #1c1c1c;
+    --utg-mid: #3a3a3a;
+    --utg-grey: #717171;
+    --utg-white: #ffffff;
+    --utg-light: #f4f4f4;
+    --utg-acid: #178fdd;
+    --utg-blue-1: #68b5e6;
+    --utg-blue-2: #3ea1e1;
+    --utg-blue-4: #0582d4;
+    --utg-blue-5: #04598f;
+
+    /* Variables semánticas de HeroUI */
+    --radius: 0rem;
+    --field-radius: 0rem;
+    --border-width: 1px;
+    --field-border-width: 1px;
+
+    --background: var(--utg-black);
+    --foreground: var(--utg-white);
+    --surface: var(--utg-panel);
+    --surface-foreground: var(--utg-white);
+    --surface-secondary: var(--utg-panel);
+    --surface-secondary-foreground: var(--utg-white);
+    --surface-tertiary: var(--utg-mid);
+    --surface-tertiary-foreground: var(--utg-white);
+    --overlay: var(--utg-black);
+    --overlay-foreground: var(--utg-white);
+    --muted: var(--utg-grey);
+    --default: var(--utg-panel);
+    --default-foreground: var(--utg-white);
+    --accent: var(--utg-acid);
+    --accent-foreground: var(--utg-black);
+    --border: var(--utg-mid);
+    --separator: var(--utg-panel);
+    --focus: var(--utg-acid);
+    --link: var(--utg-white);
+
+    --field-background: var(--utg-panel);
+    --field-foreground: var(--utg-white);
+    --field-placeholder: var(--utg-grey);
+    --field-border: var(--utg-mid);
+
+    --surface-shadow: none;
+    --field-shadow: none;
+    --overlay-shadow: none;
+
+    /* Medidas del diseño */
+    --gutter: clamp(16px, 2.4vw, 32px);
+    --nav-height: 56px;
+  }
+}
+
+@theme inline {
+  /* Colores del diseño que no tienen equivalente semántico en HeroUI */
+  --color-paper: var(--utg-light);
+  --color-paper-foreground: var(--utg-black);
+  --color-paper-rule: #cfcfcf;
+  --color-accent-hi: var(--utg-blue-1);
+  --color-accent-strong: var(--utg-blue-4);
+  --color-accent-deep: var(--utg-blue-5);
+  /* Grises de texto secundario sobre negro */
+  --color-copy: #d8d8d8;
+  --color-copy-strong: #e4e4e4;
+  --color-copy-warm: #c9c8c1;
+  --color-copy-dim: #bdbdbd;
+
+  --font-sans: var(--font-archivo), Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "Courier New", monospace;
+  --font-wide: var(--font-syncopate), var(--font-archivo), "Arial Black", Helvetica, sans-serif;
+  --font-nav: var(--font-martian-mono), var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --spacing-gutter: var(--gutter);
+  --spacing-nav: var(--nav-height);
+
+  --ease-snap: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-wipe: cubic-bezier(0.7, 0, 0.2, 1);
+}
