@@ -10,3 +10,8 @@ export function getGamePath(slug: string) {
 export function getGenreCatalogPath(genre: string) {
   return `${routes.games}?${GENRE_SEARCH_PARAM}=${encodeURIComponent(genre)}`;
 }
+
+/** Stand del juego en el croquis interactivo: `/floor-plan#A1`. */
+export function getStandMapPath(stand: string) {
+  return `${routes.floorPlan}#${stand}`;
+}

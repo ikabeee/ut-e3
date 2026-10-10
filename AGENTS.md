@@ -63,8 +63,9 @@ Los datos todavía son mock (ver `docs/data-sources.md`); el contrato de Prisma 
 src/
 ├── app/                      # SOLO rutas de Next.js: renderizan una page de una feature
 ├── features/
+│   ├── event/                # Datos del evento: fecha, horario, sede y calendario
 │   ├── example/              # Scaffold mínimo: cópialo para crear tus features
-│   └── games/                # Catálogo de juegos (/games) y API (/api/games)
+│   └── games/                # Catálogo (/games), detalle (/games/[slug]) y API (/api/games)
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── components/           # QueryProvider, navegación, pie, botones del diseño...
     ├── hooks/                # Hooks genéricos (movimiento reducido, estado en la URL...)

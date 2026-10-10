@@ -31,7 +31,7 @@ describe("ScrambleText", () => {
 
   it("scrambles on hover and settles back on the label", () => {
     render(
-      <a href="/games">
+      <a href="#juegos">
         <ScrambleText text="Juegos" />
       </a>,
     );
@@ -53,7 +53,7 @@ describe("ScrambleText", () => {
   it("does not animate when the user prefers reduced motion", () => {
     mockReducedMotion(true);
     render(
-      <a href="/games">
+      <a href="#juegos">
         <ScrambleText text="Juegos" />
       </a>,
     );
