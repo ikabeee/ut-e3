@@ -34,8 +34,21 @@ const config = {
   testMatch: ["<rootDir>/src/**/*.test.{ts,tsx}"],
   collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.d.ts", "!src/shared/lib/prisma/**"],
   coverageReporters: ["text-summary", "lcov"],
-  // HeroUI se publica como ESM: hay que transformarlo para Jest.
-  transformIgnorePatterns: ["/node_modules/(?!(@heroui)/)"],
 };
 
-export default createJestConfig(config);
+// Paquetes que sólo se publican como ESM y Jest debe transformar.
+const esmPackages = ["@heroui", "tailwind-variants", "tailwind-merge"].join("|");
+
+// next/jest siempre agrega `/node_modules/` a `transformIgnorePatterns`, así que se reemplaza
+// ese patrón después de construir la configuración.
+export default async function jestConfig() {
+  const nextConfig = await createJestConfig(config)();
+
+  return {
+    ...nextConfig,
+    transformIgnorePatterns: [
+      `/node_modules/(?!(${esmPackages})/)`,
+      ...nextConfig.transformIgnorePatterns.filter((pattern) => !pattern.startsWith("/node_modules")),
+    ],
+  };
+}
