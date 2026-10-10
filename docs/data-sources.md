@@ -83,3 +83,19 @@ Prisma / mock  ->  GameRepository  ->  games-queries.ts ("use cache")
 
 > Las imágenes de `public/mock/games/` son las de referencia del diseño, no arte de los equipos.
 > Reemplázalas antes de publicar el sitio.
+
+## Croquis (`src/features/floor-plan`)
+
+El croquis no tiene datos propios en la base: combina contenido fijo del recinto con los juegos.
+
+```
+lib/plan-places.ts    Zonas (escenario, arena, servicios...) y stands informativos C1-C4
+lib/plan-layouts.ts   Geometría del SVG en horizontal (wide) y vertical (tall)
+lib/plan-items.ts     Une zonas, stands informativos y juegos (cada juego ocupa su `stand`)
+```
+
+- Para **asignar un stand** a un juego sólo cambia el campo `stand` del juego. El código debe
+  existir en `plan-layouts.ts` (pasillos A1-A9, B1-B9 y central C1-C4).
+- Para **agregar un stand**, aumenta `rows` o `columns` del bloque en ambas orientaciones.
+- Si algún día las zonas vienen de la base de datos, crea un repositorio como el de juegos y
+  conserva `buildPlanItems` como punto de unión.

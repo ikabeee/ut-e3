@@ -65,6 +65,7 @@ src/
 ├── features/
 │   ├── event/                # Datos del evento: fecha, horario, sede y calendario
 │   ├── example/              # Scaffold mínimo: cópialo para crear tus features
+│   ├── floor-plan/           # Croquis interactivo (/floor-plan): zonas, stands, zoom y directorio
 │   └── games/                # Catálogo (/games), detalle (/games/[slug]) y API (/api/games)
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── components/           # QueryProvider, navegación, pie, botones del diseño...
