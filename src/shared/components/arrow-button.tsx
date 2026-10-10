@@ -1,4 +1,4 @@
-import { Button, type ButtonProps } from "@heroui/react";
+import { Button, cn, type ButtonProps } from "@heroui/react";
 import { ArrowGlyph } from "@shared/components/arrow-glyph";
 
 type ArrowButtonProps = Omit<ButtonProps, "children" | "isIconOnly" | "aria-label"> & {
@@ -7,15 +7,25 @@ type ArrowButtonProps = Omit<ButtonProps, "children" | "isIconOnly" | "aria-labe
   label: string;
 };
 
-/** Flecha anterior/siguiente de los carruseles (`.arrow` del diseño). */
+/**
+ * Flecha anterior/siguiente de los carruseles (`.arrow` del diseño).
+ * Las flechas usan Arial: es la fuente por defecto de los botones en el diseño.
+ */
 export function ArrowButton({
   direction,
   label,
   variant = "ghost",
+  className,
   ...buttonProps
 }: Readonly<ArrowButtonProps>) {
   return (
-    <Button isIconOnly variant={variant} aria-label={label} {...buttonProps}>
+    <Button
+      isIconOnly
+      variant={variant}
+      aria-label={label}
+      className={cn("font-[family-name:Arial,Helvetica,sans-serif] font-normal", className)}
+      {...buttonProps}
+    >
       <ArrowGlyph direction={direction === "previous" ? "w" : "e"} />
     </Button>
   );

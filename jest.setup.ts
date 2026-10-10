@@ -20,3 +20,6 @@ class ResizeObserverMock {
 }
 
 Object.defineProperty(window, "ResizeObserver", { writable: true, value: ResizeObserverMock });
+
+// jsdom tampoco dibuja en canvas: sin contexto 2D, el arte generado simplemente no se pinta.
+HTMLCanvasElement.prototype.getContext = (() => null) as typeof HTMLCanvasElement.prototype.getContext;

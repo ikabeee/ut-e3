@@ -31,6 +31,15 @@ const nonPageImports = {
   message: "`src/app` sólo renderiza pages: importa desde `@features/<feature>/pages/<name>-page`.",
 };
 
+// Route Handlers (`route.ts`) y archivos de metadata (`sitemap.ts`, `robots.ts`) no renderizan
+// una page: delegan en `lib/` de la feature, pero nunca en componentes ni hooks.
+const routeFileImports = {
+  group: ["@features/*/hooks/*", "@features/*/components/*"],
+  message: "Los Route Handlers y archivos de metadata sólo delegan en `@features/<feature>/lib/*`.",
+};
+
+const routeFiles = ["src/app/**/route.ts", "src/app/sitemap.ts", "src/app/robots.ts"];
+
 const featureImports = {
   group: ["@features/*", "@features/**"],
   message: "`shared` no puede importar de `features`.",
@@ -48,7 +57,8 @@ const eslintConfig = defineConfig([
   // Buenas prácticas de TanStack Query (query keys, queryFn estables, etc.).
   ...tanstackQuery.configs["flat/recommended"],
   { files: ["src/**/*.{ts,tsx,mts}"], rules: restrict() },
-  { files: ["src/app/**/*.{ts,tsx}"], rules: restrict(nonPageImports) },
+  { files: ["src/app/**/*.{ts,tsx}"], ignores: routeFiles, rules: restrict(nonPageImports) },
+  { files: routeFiles, rules: restrict(routeFileImports) },
   {
     files: ["src/features/*/components/**/*.{ts,tsx}", "src/features/*/hooks/**/*.{ts,tsx}"],
     rules: restrict(serverOnlyImports),
