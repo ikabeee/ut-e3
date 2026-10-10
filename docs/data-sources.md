@@ -99,3 +99,19 @@ lib/plan-items.ts     Une zonas, stands informativos y juegos (cada juego ocupa 
 - Para **agregar un stand**, aumenta `rows` o `columns` del bloque en ambas orientaciones.
 - Si algún día las zonas vienen de la base de datos, crea un repositorio como el de juegos y
   conserva `buildPlanItems` como punto de unión.
+
+## Contenido del evento (`src/features/event`)
+
+Es contenido fijo del sitio, no datos de la base:
+
+```
+lib/event-info.ts      Fecha, horario, sede, dirección, Google Calendar y Google Maps
+lib/event-program.ts   Textos de la portada, torneos y sorteos, y el programa del día
+lib/event-media.ts     Reel del encabezado (public/media/reel.webm, .mp4 y póster .jpg)
+```
+
+- El programa enlaza cada actividad con una zona del croquis (`zoneId`), que debe existir en
+  `floor-plan/lib/plan-places.ts`.
+- La descripción de la portada usa el número real de juegos del catálogo.
+- El reel de `public/media/` es el del diseño: reemplázalo por el video oficial del evento
+  conservando los nombres de archivo.
