@@ -19,11 +19,15 @@ const archivo = Archivo({
   display: "swap",
 });
 
-/** Etiquetas, botones y datos. */
+/**
+ * Etiquetas, botones y datos. Sin fuente de respaldo ajustada: las flechas (← → ↗) no vienen
+ * en ningún subset de Google y, como en el diseño, deben salir de `ui-monospace`.
+ */
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jetbrains-mono",
   display: "swap",
+  adjustFontFallback: false,
 });
 
 /** Navegación principal. */
