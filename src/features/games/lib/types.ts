@@ -19,6 +19,9 @@ export interface GameImage {
   position: string;
 }
 
+/** Lo que se pinta en una portada o toma: una imagen o el arte generado. */
+export type GameVisual = { kind: "image"; image: GameImage } | { kind: "art"; art: GameKeyArt };
+
 /** Videojuego presentado por un equipo en su stand. */
 export interface Game {
   slug: string;
