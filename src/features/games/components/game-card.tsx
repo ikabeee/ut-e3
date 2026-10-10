@@ -41,8 +41,9 @@ export function GameCard({ game, coverSizes, variant = "catalog" }: Readonly<Gam
       </div>
       <h3
         className={cn(
-          "font-wide leading-[1.05] font-bold uppercase group-hover:text-accent",
+          // El tamaño va antes que `leading-*`: tailwind-merge descarta el interlineado si viene después.
           isCatalog ? "text-sm tracking-[-.02em]" : "text-[13px]",
+          "font-wide leading-[1.05] font-bold uppercase group-hover:text-accent",
         )}
       >
         {game.name}
