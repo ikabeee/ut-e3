@@ -31,3 +31,6 @@ jobs:
       - run: npm run typecheck
       - run: npm test -- --coverage
       - run: npm run build
+        env:
+          # Obligatoria en producción (src/shared/lib/env.ts); basta un valor de ejemplo.
+          NEXT_PUBLIC_SITE_URL: https://example.com
