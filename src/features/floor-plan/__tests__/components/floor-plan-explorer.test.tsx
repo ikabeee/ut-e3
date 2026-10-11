@@ -1,7 +1,7 @@
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FloorPlanExplorer } from "@features/floor-plan/components/floor-plan-explorer";
-import { STAND_OCCUPANT_FIXTURES } from "@features/floor-plan/lib/plan-fixtures";
+import { STAND_OCCUPANT_FIXTURES } from "@features/floor-plan/__tests__/plan-fixtures";
 import { buildPlanItems } from "@features/floor-plan/lib/plan-items";
 import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 
