@@ -6,6 +6,7 @@ import { GameSearchField } from "@features/games/components/game-search-field";
 import { GamesEmptyState } from "@features/games/components/games-empty-state";
 import { GenreRail } from "@features/games/components/genre-rail";
 import { useGameCatalog } from "@features/games/hooks/use-game-catalog";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { usePrefersReducedMotion } from "@shared/hooks/use-prefers-reduced-motion";
 
 const CARD_COVER_SIZES = "(max-width: 760px) 50vw, (max-width: 1000px) 33vw, (max-width: 1200px) 25vw, 20vw";
@@ -25,7 +26,7 @@ export function GamesCatalog() {
     <>
       <GenreRail genres={catalog.genres} selectedGenre={catalog.selectedGenre} onSelectGenre={handleSelectGenre} />
 
-      <section ref={browseRef} aria-label="Todos los juegos" className="mt-[clamp(40px,6vw,72px)]">
+      <section ref={browseRef} aria-label={GAMES_COPY.catalog.allGames} className="mt-[clamp(40px,6vw,72px)]">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
           <GameSearchField value={catalog.keyword} onChange={catalog.setKeyword} />
           <p className="type-tiny m-0 text-muted" aria-live="polite">

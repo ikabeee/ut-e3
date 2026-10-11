@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { GameCard } from "@features/games/components/game-card";
 import { GAME_SECTION_HEADING_CLASS } from "@features/games/components/game-detail-section";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { Game } from "@features/games/lib/types";
 import { routes } from "@shared/lib/site-config";
 
@@ -16,10 +17,10 @@ export function RelatedGames({ games }: Readonly<RelatedGamesProps>) {
     <section className="mt-[clamp(56px,8vw,96px)]" aria-labelledby="related-games-heading">
       <div className="mb-4 flex items-end justify-between gap-3">
         <h2 id="related-games-heading" className={GAME_SECTION_HEADING_CLASS}>
-          Más juegos
+          {GAMES_COPY.detail.relatedHeading}
         </h2>
         <Link href={routes.games} className="type-tiny touch-target relative text-accent no-underline">
-          Ver todos ↗
+          {GAMES_COPY.detail.seeAll}
         </Link>
       </div>
       <div className="grid grid-cols-5 gap-4 max-[980px]:grid-cols-3 max-[560px]:grid-cols-2">

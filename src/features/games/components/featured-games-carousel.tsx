@@ -5,6 +5,7 @@ import { cn } from "@heroui/react";
 import { GameMedia } from "@features/games/components/game-media";
 import { useFeaturedCarousel } from "@features/games/hooks/use-featured-carousel";
 import { useGames } from "@features/games/hooks/use-games";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { wrapIndex } from "@shared/lib/math";
 import { ArrowButton } from "@shared/components/arrow-button";
 import { useFitText } from "@shared/hooks/use-fit-text";
@@ -51,8 +52,8 @@ export function FeaturedGamesCarousel() {
   return (
     <header
       id="featured"
-      aria-roledescription="carrusel"
-      aria-label="Juegos del showcase"
+      aria-roledescription={GAMES_COPY.carousel.roleDescription}
+      aria-label={GAMES_COPY.carousel.label}
       className="grid h-[clamp(640px,calc(100svh-56px),1000px)] grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,7fr)_minmax(0,3fr)] bg-background max-[760px]:h-auto max-[760px]:grid-rows-[auto_auto]"
       {...carousel.pauseHandlers}
     >
@@ -154,8 +155,8 @@ export function FeaturedGamesCarousel() {
         </div>
         <div className="flex items-center justify-start gap-[10px]">
           <div className="flex [&>*+*]:border-l-0">
-            <ArrowButton direction="previous" label="Juego anterior" onPress={carousel.goPrevious} />
-            <ArrowButton direction="next" label="Juego siguiente" onPress={carousel.goNext} />
+            <ArrowButton direction="previous" label={GAMES_COPY.carousel.previous} onPress={carousel.goPrevious} />
+            <ArrowButton direction="next" label={GAMES_COPY.carousel.next} onPress={carousel.goNext} />
           </div>
         </div>
       </div>

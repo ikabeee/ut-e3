@@ -20,6 +20,13 @@ describe("games contract", () => {
     expect(() => parseGamesResponse([{ ...first, image: { src: "/a.jpg" } }])).toThrow("[0].image.position");
   });
 
+  it("keeps the paragraphs of a game and rejects anything that is not text", () => {
+    const [game] = overHttp([toGameDto({ ...MOCK_GAMES[0], about: ["Primero.", "Segundo."] })]) as Record<string, unknown>[];
+
+    expect(parseGamesResponse([game])[0].about).toEqual(["Primero.", "Segundo."]);
+    expect(() => parseGamesResponse([{ ...game, about: ["Primero.", 2] }])).toThrow("[0].about[1]");
+  });
+
   it("rejects colors outside the design palette", () => {
     const [game] = overHttp([toGameDto(MOCK_GAMES[0])]) as Record<string, unknown>[];
 

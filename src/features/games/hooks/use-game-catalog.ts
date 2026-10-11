@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { useGames } from "@features/games/hooks/use-games";
-import { describeResults, filterGames, toggleGenre } from "@features/games/lib/game-filters";
+import { filterGames, toggleGenre } from "@features/games/lib/game-filters";
 import { isKnownGenre, summarizeGenres } from "@features/games/lib/game-genres";
 import { GENRE_SEARCH_PARAM } from "@features/games/lib/game-links";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { useSearchParamState } from "@shared/hooks/use-search-param-state";
 
 /**
@@ -23,7 +24,7 @@ export function useGameCatalog() {
     selectedGenre: genre,
     keyword,
     visibleGames,
-    resultsLabel: describeResults(visibleGames.length, games.length, genre),
+    resultsLabel: GAMES_COPY.catalog.results(visibleGames.length, games.length, genre),
     selectGenre: (name: string) => setGenreParam(toggleGenre(genre, name)),
     setKeyword,
     resetFilters: () => {

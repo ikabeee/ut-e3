@@ -1,4 +1,4 @@
-import { describeResults, filterGames, toggleGenre } from "@features/games/lib/game-filters";
+import { filterGames, toggleGenre } from "@features/games/lib/game-filters";
 import { MOCK_GAMES } from "@features/games/lib/mock-games";
 
 describe("filterGames", () => {
@@ -44,15 +44,5 @@ describe("toggleGenre", () => {
 
   it("clears the genre when it is selected again", () => {
     expect(toggleGenre("Ritmo", "Ritmo")).toBeNull();
-  });
-});
-
-describe("describeResults", () => {
-  it("counts the visible games", () => {
-    expect(describeResults(4, 18, null)).toBe("4 de 18 juegos");
-  });
-
-  it("adds the selected genre", () => {
-    expect(describeResults(2, 18, "Puzle")).toBe("2 de 18 juegos · Puzle");
   });
 });

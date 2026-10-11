@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { EVENT_INFO } from "@features/event/lib/event-info";
+import { getEventContent } from "@features/event/lib/event-content";
 import { GameAbout } from "@features/games/components/game-about";
 import { GameDetailHeader } from "@features/games/components/game-detail-header";
 import { GameGallery } from "@features/games/components/game-gallery";
@@ -8,7 +8,7 @@ import { GamePlayLocation } from "@features/games/components/game-play-location"
 import { GameSidebar } from "@features/games/components/game-sidebar";
 import { GameTags } from "@features/games/components/game-tags";
 import { RelatedGames } from "@features/games/components/related-games";
-import { getRelatedGames } from "@features/games/lib/game-details";
+import { describeGame, getRelatedGames } from "@features/games/lib/game-details";
 import { getGalleryShots } from "@features/games/lib/game-gallery";
 import { getGamePath } from "@features/games/lib/game-links";
 import { buildGameStructuredData } from "@features/games/lib/game-structured-data";
@@ -52,6 +52,7 @@ export async function GameDetailPage({ params }: GameDetailPageProps) {
   if (!game) {
     notFound();
   }
+  const { info, highlights } = getEventContent();
 
   return (
     <main className="pt-[clamp(24px,4vw,48px)]">
@@ -68,15 +69,15 @@ export async function GameDetailPage({ params }: GameDetailPageProps) {
             />
             <p className="m-0 max-w-[62ch] text-[clamp(17px,1.5vw,20px)] leading-[1.4] text-copy-strong">{game.description}</p>
             <GameTags game={game} />
-            <GameAbout game={game} />
-            <GamePlayLocation game={game} eventDateLabel={EVENT_INFO.dateLabel} eventHoursLabel={EVENT_INFO.hoursLabel} />
+            <GameAbout paragraphs={describeGame(game, highlights)} />
+            <GamePlayLocation game={game} eventDateLabel={info.dateLabel} eventHoursLabel={info.hoursLabel} />
           </div>
 
           <GameSidebar
             game={game}
-            eventDateLabel={EVENT_INFO.dateLabel}
-            admissionLabel={EVENT_INFO.admission}
-            calendarUrl={EVENT_INFO.calendarUrl}
+            eventDateLabel={info.dateLabel}
+            admissionLabel={info.admission}
+            calendarUrl={info.calendarUrl}
           />
         </div>
 

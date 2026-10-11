@@ -2,8 +2,8 @@
 
 import { ToggleButton } from "@heroui/react";
 import { GameMedia } from "@features/games/components/game-media";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { GenreSummary } from "@features/games/lib/types";
-import { pluralize } from "@shared/lib/text";
 
 interface GenreTileProps {
   genre: GenreSummary;
@@ -43,7 +43,7 @@ export function GenreTile({ genre, isSelected, onSelect }: Readonly<GenreTilePro
         {genre.name}
       </b>
       <span className="type-tiny text-muted">
-        {genre.gameCount} {pluralize(genre.gameCount, "juego", "juegos")}
+        {GAMES_COPY.catalog.gameCount(genre.gameCount)}
       </span>
     </ToggleButton>
   );

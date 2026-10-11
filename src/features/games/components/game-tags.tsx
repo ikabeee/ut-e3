@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getGameFeatures } from "@features/games/lib/game-details";
 import { getGenreCatalogPath } from "@features/games/lib/game-links";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { Game } from "@features/games/lib/types";
 
 interface GameTagsProps {
@@ -14,7 +15,7 @@ export function GameTags({ game }: Readonly<GameTagsProps>) {
   return (
     <div className="grid grid-cols-2 gap-4 border-l-2 border-accent pl-4 max-[560px]:grid-cols-1">
       <div>
-        <span className="type-tiny text-muted">Género</span>
+        <span className="type-tiny text-muted">{GAMES_COPY.detail.genre}</span>
         <div className="mt-[6px] flex flex-wrap gap-[6px]">
           <Link href={getGenreCatalogPath(game.genre)} className={`${TAG_CLASS} touch-target relative hover:border-accent hover:text-accent`}>
             {game.genre}
@@ -22,7 +23,7 @@ export function GameTags({ game }: Readonly<GameTagsProps>) {
         </div>
       </div>
       <div>
-        <span className="type-tiny text-muted">Características</span>
+        <span className="type-tiny text-muted">{GAMES_COPY.detail.features}</span>
         <div className="mt-[6px] flex flex-wrap gap-[6px]">
           {getGameFeatures(game).map((feature) => (
             <span key={feature} className={TAG_CLASS}>
