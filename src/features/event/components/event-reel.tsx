@@ -3,9 +3,10 @@
 import { useRef, type ReactNode } from "react";
 import { ToggleButton } from "@heroui/react";
 import { useVideoPlayback } from "@features/event/hooks/use-video-playback";
-import { EVENT_REEL } from "@features/event/lib/event-media";
+import type { EventReelMedia } from "@features/event/lib/types";
 
 interface EventReelProps {
+  reel: EventReelMedia;
   reelLabel: string;
   /** Contenido del encabezado sobre el video. */
   children: ReactNode;
@@ -16,7 +17,7 @@ const SHADE_BACKGROUND =
   "linear-gradient(0deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.55) 38%,rgba(0,0,0,.15) 70%,rgba(0,0,0,.45) 100%),repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)";
 
 /** Encabezado con el reel de fondo, código de tiempo y botón de pausa (`.vh`). */
-export function EventReel({ reelLabel, children }: Readonly<EventReelProps>) {
+export function EventReel({ reel, reelLabel, children }: Readonly<EventReelProps>) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { isPaused, hasSource, timecode, togglePlayback } = useVideoPlayback(videoRef);
 
@@ -34,12 +35,12 @@ export function EventReel({ reelLabel, children }: Readonly<EventReelProps>) {
         loop
         playsInline
         preload="none"
-        poster={EVENT_REEL.poster}
+        poster={reel.poster}
         aria-hidden="true"
         className="absolute inset-0 -z-2 size-full object-cover contrast-[1.05] saturate-[.85]"
       >
         {hasSource &&
-          EVENT_REEL.sources.map((source) => <source key={source.src} src={source.src} type={source.type} />)}
+          reel.sources.map((source) => <source key={source.src} src={source.src} type={source.type} />)}
       </video>
       <div aria-hidden="true" className="absolute inset-0 -z-1" style={{ background: SHADE_BACKGROUND }} />
 

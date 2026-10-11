@@ -2,7 +2,7 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { EventReel } from "@features/event/components/event-reel";
-import { REEL_AUTOPLAY_MEDIA_QUERY } from "@features/event/lib/event-media";
+import { EVENT_REEL, REEL_AUTOPLAY_MEDIA_QUERY } from "@features/event/lib/event-media";
 
 interface BrowserConditions {
   isWideScreen?: boolean;
@@ -51,7 +51,7 @@ function showReel() {
 }
 
 const reel = (
-  <EventReel reelLabel="Reel 2026">
+  <EventReel reel={EVENT_REEL} reelLabel="Reel 2026">
     <h1>UTG</h1>
   </EventReel>
 );

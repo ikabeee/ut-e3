@@ -1,8 +1,13 @@
-import { EVENT_INFO, EVENT_VENUE } from "@features/event/lib/event-info";
+interface EventClosingBannerProps {
+  /** "Entrada libre": la primera palabra va en el primer renglón. */
+  admission: string;
+  dateLabel: string;
+  venueShortName: string;
+}
 
 /** Franja azul de cierre: "Entrada libre" y la fecha (`.closing`). */
-export function EventClosingBanner() {
-  const [firstWord, ...rest] = EVENT_INFO.admission.split(" ");
+export function EventClosingBanner({ admission, dateLabel, venueShortName }: Readonly<EventClosingBannerProps>) {
+  const [firstWord, ...rest] = admission.split(" ");
 
   return (
     <div className="mt-[clamp(100px,12vw,180px)] bg-accent text-background">
@@ -13,7 +18,7 @@ export function EventClosingBanner() {
           {rest.join(" ")}
         </h2>
         <span className="type-mono">
-          {EVENT_INFO.dateLabel} · {EVENT_VENUE.shortName}
+          {dateLabel} · {venueShortName}
         </span>
       </div>
     </div>

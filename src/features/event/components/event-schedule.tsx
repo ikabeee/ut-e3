@@ -1,11 +1,12 @@
 "use client";
 
-import { EVENT_INFO } from "@features/event/lib/event-info";
 import type { ScheduleEntry } from "@features/event/lib/types";
 import { ArrowGlyph } from "@shared/components/arrow-glyph";
 import { ScrambleText } from "@shared/components/scramble-text";
 
 interface EventScheduleProps {
+  /** Título de la sección: la fecha corta del evento ("27.11.26"). */
+  title: string;
   entries: readonly ScheduleEntry[];
   /** Nombre visible de cada zona del croquis. */
   zoneTitles: ReadonlyMap<string, string>;
@@ -14,11 +15,11 @@ interface EventScheduleProps {
 }
 
 /** Programa del día (`#schedule`): hora, actividad y enlace a su zona en el croquis. */
-export function EventSchedule({ entries, zoneTitles, onLocate }: Readonly<EventScheduleProps>) {
+export function EventSchedule({ title, entries, zoneTitles, onLocate }: Readonly<EventScheduleProps>) {
   return (
     <section id="schedule" className="section-block">
       <div className="page-wrap">
-        <h2 className="type-giant">{EVENT_INFO.shortDateLabel}</h2>
+        <h2 className="type-giant">{title}</h2>
         <ul className="m-0 mt-[clamp(36px,5vw,64px)] list-none border-t border-border p-0">
           {entries.map((entry) => (
             <li
