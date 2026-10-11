@@ -70,7 +70,7 @@ src/
 └── shared/               # Código transversal sin reglas de negocio (tema, botones, hooks)
 ```
 
-Cada feature tiene `lib/`, `hooks/`, `components/` y `pages/`. Las reglas completas están en
+Cada feature se organiza en `lib/`, `hooks/`, `components/` y `pages/` (crea cada carpeta cuando la necesites). Las reglas completas están en
 [`AGENTS.md`](./AGENTS.md).
 
 ## Documentación

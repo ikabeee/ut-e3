@@ -89,9 +89,10 @@ Las pruebas viven junto al archivo que prueban: `game-filters.ts` -> `game-filte
 
 El código está organizado con **screaming architecture**: las carpetas gritan *de qué trata* la aplicación
 (cada dominio es una carpeta en `src/features/`), no *con qué está hecha*.
-Como punto de partida existe la feature `example`.
+Como punto de partida existe la feature `example` (no se monta en ninguna ruta; cópiala y renómbrala).
 
-- Cada feature en `src/features/<feature>/` tiene siempre `lib/`, `hooks/`, `components/` y `pages/`.
+- Cada feature en `src/features/<feature>/` se organiza en `lib/`, `hooks/`, `components/` y `pages/`.
+  Crea cada carpeta cuando la necesites; el linter valida las que existen. No dejes carpetas vacías ni `.gitkeep`.
 - Las `pages/` son contenedores: obtienen datos y componen componentes. `src/app/` sólo las renderiza.
 - **Todo el naming va en inglés**: directorios, archivos, código, ramas y labels. Sólo los textos de la
   interfaz y la documentación van en español.
