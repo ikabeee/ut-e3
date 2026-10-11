@@ -83,6 +83,14 @@ export interface ScheduleEntry {
 }
 
 /**
+ * Renglón del programa listo para pintar, con el nombre visible de su zona en el croquis. Lo
+ * arma quien conoce las dos features (la portada), porque `event` no depende de `floor-plan`.
+ */
+export interface LocatedScheduleEntry extends ScheduleEntry {
+  zoneTitle: string;
+}
+
+/**
  * Horarios del programa que se citan en otros textos. Salen de `EVENT_SCHEDULE`
  * (`getScheduleHighlights`), así que nadie vuelve a escribir "12:00" a mano.
  */

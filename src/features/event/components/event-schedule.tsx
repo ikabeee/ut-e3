@@ -1,21 +1,20 @@
 "use client";
 
-import type { ScheduleEntry } from "@features/event/lib/types";
+import type { LocatedScheduleEntry } from "@features/event/lib/types";
 import { ArrowGlyph } from "@shared/components/arrow-glyph";
 import { ScrambleText } from "@shared/components/scramble-text";
 
 interface EventScheduleProps {
   /** Título de la sección: la fecha corta del evento ("27.11.26"). */
   title: string;
-  entries: readonly ScheduleEntry[];
-  /** Nombre visible de cada zona del croquis. */
-  zoneTitles: ReadonlyMap<string, string>;
+  /** Renglones con su zona ya validada (`resolveScheduleZones` en `home`). */
+  entries: readonly LocatedScheduleEntry[];
   /** Lleva al croquis y selecciona la zona donde ocurre la actividad. */
   onLocate: (zoneId: string) => void;
 }
 
 /** Programa del día (`#schedule`): hora, actividad y enlace a su zona en el croquis. */
-export function EventSchedule({ title, entries, zoneTitles, onLocate }: Readonly<EventScheduleProps>) {
+export function EventSchedule({ title, entries, onLocate }: Readonly<EventScheduleProps>) {
   return (
     <section id="schedule" className="section-block">
       <div className="page-wrap">
@@ -35,7 +34,7 @@ export function EventSchedule({ title, entries, zoneTitles, onLocate }: Readonly
                 onClick={() => onLocate(entry.zoneId)}
                 className="type-tiny link-wipe touch-target relative cursor-pointer border-0 p-0 pb-[3px] text-right text-muted max-[560px]:col-start-2 max-[560px]:text-left"
               >
-                <ScrambleText text={zoneTitles.get(entry.zoneId) ?? entry.zoneId} /> <ArrowGlyph direction="ne" />
+                <ScrambleText text={entry.zoneTitle} /> <ArrowGlyph direction="ne" />
               </button>
             </li>
           ))}

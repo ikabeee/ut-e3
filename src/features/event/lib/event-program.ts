@@ -14,7 +14,8 @@ const { division, universityShortName } = siteConfig.organization;
  * Contenido editable de la portada: presentación, programa del día y actividades.
  * Los horarios sólo se escriben en `EVENT_SCHEDULE`; las tarjetas de torneos y sorteos, el
  * detalle de cada juego y el croquis los toman de ahí (`getScheduleHighlights`).
- * Los `zoneId` del programa deben existir en `floor-plan/lib/plan-places.ts`.
+ * Los `zoneId` del programa deben existir en `floor-plan/lib/plan-places.ts` (`PLAN_ZONES`): la
+ * portada los valida con `resolveScheduleZones` y el build se detiene si alguno no existe.
  */
 export const EVENT_INTRO: EventIntro = {
   title: ["Juegos hechos", `en la ${universityShortName}`],

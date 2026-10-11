@@ -2,10 +2,12 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { getEventContent } from "@features/event/lib/event-content";
 import { buildPlanItems } from "@features/floor-plan/lib/plan-items";
+import { PLAN_ZONES } from "@features/floor-plan/lib/plan-places";
 import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 import { toStandOccupant } from "@features/games/lib/game-stand";
 import { MOCK_GAMES } from "@features/games/lib/mock-games";
 import { ProgramAndFloorPlan } from "@features/home/components/program-and-floor-plan";
+import { resolveScheduleZones } from "@features/home/lib/schedule-zones";
 
 function renderSection() {
   const event = getEventContent();
@@ -17,7 +19,7 @@ function renderSection() {
   return render(
     <ProgramAndFloorPlan
       scheduleTitle={event.info.shortDateLabel}
-      schedule={event.schedule}
+      schedule={resolveScheduleZones(event.schedule, PLAN_ZONES)}
       items={items}
       layouts={PLAN_LAYOUTS}
     />,
