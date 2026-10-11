@@ -1,6 +1,6 @@
 import { fetchGames, GAMES_API_PATH } from "@features/games/api/games-api-client";
 import { toGameDto } from "@features/games/api/games-contract";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
+import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
 
 function mockFetch(response: { ok: boolean; status?: number; body?: unknown }) {
   const fetchMock = jest.fn().mockResolvedValue({
@@ -20,9 +20,9 @@ describe("fetchGames", () => {
   });
 
   it("reads the games from the route handler", async () => {
-    const fetchMock = mockFetch({ ok: true, body: MOCK_GAMES.slice(0, 3).map(toGameDto) });
+    const fetchMock = mockFetch({ ok: true, body: GAME_FIXTURES.slice(0, 3).map(toGameDto) });
 
-    await expect(fetchGames()).resolves.toEqual(MOCK_GAMES.slice(0, 3));
+    await expect(fetchGames()).resolves.toEqual(GAME_FIXTURES.slice(0, 3));
     expect(fetchMock).toHaveBeenCalledWith(GAMES_API_PATH);
   });
 

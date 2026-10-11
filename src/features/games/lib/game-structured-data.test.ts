@@ -1,9 +1,9 @@
 import { buildGameStructuredData } from "@features/games/lib/game-structured-data";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
+import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
 
 describe("buildGameStructuredData", () => {
   it("describes the game as a schema.org VideoGame with absolute URLs", () => {
-    expect(buildGameStructuredData(MOCK_GAMES[0], "https://utg.example")).toMatchObject({
+    expect(buildGameStructuredData(GAME_FIXTURES[0], "https://utg.example")).toMatchObject({
       "@type": "VideoGame",
       name: "Ceniza Protocol",
       genre: "Acción",
@@ -14,6 +14,6 @@ describe("buildGameStructuredData", () => {
   });
 
   it("omits the image when the game has none", () => {
-    expect(buildGameStructuredData(MOCK_GAMES[5], "https://utg.example")).not.toHaveProperty("image");
+    expect(buildGameStructuredData(GAME_FIXTURES[2], "https://utg.example")).not.toHaveProperty("image");
   });
 });

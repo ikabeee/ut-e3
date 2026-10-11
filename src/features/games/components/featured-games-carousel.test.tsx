@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { FeaturedGamesCarousel } from "@features/games/components/featured-games-carousel";
 import { FEATURED_SLIDE_DURATION } from "@features/games/hooks/use-featured-carousel";
 import { gamesQueryKeys } from "@features/games/lib/games-query-options";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
+import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
 
 // jsdom no implementa PointerEvent: sin esto, `pointerType` no llega a los manejadores.
 class TestPointerEvent extends MouseEvent {
@@ -17,7 +17,7 @@ class TestPointerEvent extends MouseEvent {
 
 function renderCarousel() {
   const queryClient = new QueryClient();
-  queryClient.setQueryData(gamesQueryKeys.list(), [...MOCK_GAMES]);
+  queryClient.setQueryData(gamesQueryKeys.list(), [...GAME_FIXTURES]);
 
   return render(
     <QueryClientProvider client={queryClient}>

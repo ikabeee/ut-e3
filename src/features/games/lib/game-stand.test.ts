@@ -1,7 +1,7 @@
 import { getStandCells, PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 import { INFO_STANDS } from "@features/floor-plan/lib/plan-places";
 import { toStandOccupant } from "@features/games/lib/game-stand";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
+import { MOCK_GAMES } from "@features/games/lib/mock/mock-games";
 
 describe("toStandOccupant", () => {
   it("describes the stand with the name, genre and description of the game", () => {

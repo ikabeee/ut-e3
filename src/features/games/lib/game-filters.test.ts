@@ -1,33 +1,33 @@
 import { filterGames, toggleGenre } from "@features/games/lib/game-filters";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
+import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
 
 describe("filterGames", () => {
   it("returns every game without filters", () => {
-    expect(filterGames(MOCK_GAMES, { genre: null, keyword: "" })).toHaveLength(MOCK_GAMES.length);
+    expect(filterGames(GAME_FIXTURES, { genre: null, keyword: "" })).toHaveLength(GAME_FIXTURES.length);
   });
 
   it("keeps only the selected genre", () => {
-    const games = filterGames(MOCK_GAMES, { genre: "Puzle", keyword: "" });
+    const games = filterGames(GAME_FIXTURES, { genre: "Puzle", keyword: "" });
 
     expect(games.map((game) => game.name)).toEqual(["Hormigón", "Circuito 7"]);
   });
 
   it("searches ignoring accents and case", () => {
-    expect(filterGames(MOCK_GAMES, { genre: null, keyword: "XIBALBA" }).map((game) => game.slug)).toEqual([
+    expect(filterGames(GAME_FIXTURES, { genre: null, keyword: "XIBALBA" }).map((game) => game.slug)).toEqual([
       "xibalba-run",
     ]);
   });
 
   it.each([
-    ["team", "tianguis", "kaiju-mercado"],
+    ["team", "voltio", "circuito-7"],
     ["stand", "b9", "circuito-7"],
     ["description", "drones caseros", "turbina"],
   ])("searches by %s", (_field, keyword, slug) => {
-    expect(filterGames(MOCK_GAMES, { genre: null, keyword }).map((game) => game.slug)).toEqual([slug]);
+    expect(filterGames(GAME_FIXTURES, { genre: null, keyword }).map((game) => game.slug)).toEqual([slug]);
   });
 
   it("combines the genre and the keyword", () => {
-    expect(filterGames(MOCK_GAMES, { genre: "Ritmo", keyword: "ciudad" }).map((game) => game.slug)).toEqual([
+    expect(filterGames(GAME_FIXTURES, { genre: "Ritmo", keyword: "ciudad" }).map((game) => game.slug)).toEqual([
       "pulso-cero",
     ]);
   });

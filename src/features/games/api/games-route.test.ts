@@ -3,10 +3,10 @@
  */
 import { GET } from "@features/games/api/games-route";
 import { parseGamesResponse } from "@features/games/api/games-contract";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
+import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
 
 jest.mock("@features/games/lib/server/games-queries", () => ({
-  listGames: async () => MOCK_GAMES.slice(0, 2),
+  listGames: async () => GAME_FIXTURES.slice(0, 2),
 }));
 
 describe("GET /api/games", () => {
@@ -14,6 +14,6 @@ describe("GET /api/games", () => {
     const response = await GET();
 
     expect(response.headers.get("content-type")).toContain("application/json");
-    expect(parseGamesResponse(await response.json())).toEqual(MOCK_GAMES.slice(0, 2));
+    expect(parseGamesResponse(await response.json())).toEqual(GAME_FIXTURES.slice(0, 2));
   });
 });

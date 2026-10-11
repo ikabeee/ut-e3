@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { GameCoverflow } from "@features/games/components/game-coverflow";
 import { gamesQueryKeys } from "@features/games/lib/games-query-options";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
+import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
 
 const push = jest.fn();
 
@@ -13,7 +13,7 @@ jest.mock("next/navigation", () => ({
 
 function renderCoverflow() {
   const queryClient = new QueryClient();
-  queryClient.setQueryData(gamesQueryKeys.list(), [...MOCK_GAMES]);
+  queryClient.setQueryData(gamesQueryKeys.list(), [...GAME_FIXTURES]);
 
   return render(
     <QueryClientProvider client={queryClient}>
@@ -30,8 +30,8 @@ describe("GameCoverflow", () => {
   it("shows the middle game in front and links every case to its page", () => {
     renderCoverflow();
 
-    expect(currentCase()).toHaveAccessibleName("Marea Roja, Estrategia, stand A5");
-    expect(currentCase()).toHaveAttribute("href", "/games/marea-roja");
+    expect(currentCase()).toHaveAccessibleName("Pulso Cero, Ritmo, stand A7");
+    expect(currentCase()).toHaveAttribute("href", "/games/pulso-cero");
   });
 
   it("brings a side case to the front instead of opening it", async () => {
@@ -60,7 +60,7 @@ describe("GameCoverflow", () => {
 
     fireEvent.keyDown(currentCase() as HTMLElement, { key: "ArrowLeft" });
 
-    expect(currentCase()).toHaveAccessibleName("Templo 404, Metroidvania, stand B4");
+    expect(currentCase()).toHaveAccessibleName("Eco/Nulo, Ritmo, stand B3");
     expect(currentCase()).toHaveFocus();
   });
 });

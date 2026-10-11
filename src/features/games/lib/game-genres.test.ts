@@ -1,18 +1,19 @@
 import { isKnownGenre, summarizeGenres } from "@features/games/lib/game-genres";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
+import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
 
 describe("summarizeGenres", () => {
-  const genres = summarizeGenres(MOCK_GAMES);
+  const genres = summarizeGenres(GAME_FIXTURES);
 
   it("lists the genres with more games first and then alphabetically", () => {
-    expect(genres.slice(0, 5).map((genre) => genre.name)).toEqual([
+    expect(genres.map((genre) => genre.name)).toEqual([
       "Aventura",
       "Carreras",
       "Puzle",
       "Ritmo",
-      "Simulación",
+      "Acción",
+      "Pelea",
+      "Plataformas",
     ]);
-    expect(genres.at(-1)?.name).toBe("Sigilo");
   });
 
   it("counts the games of each genre", () => {
@@ -35,11 +36,11 @@ describe("summarizeGenres", () => {
 
 describe("isKnownGenre", () => {
   it("accepts genres that exist in the catalog", () => {
-    expect(isKnownGenre(MOCK_GAMES, "Sigilo")).toBe(true);
+    expect(isKnownGenre(GAME_FIXTURES, "Pelea")).toBe(true);
   });
 
   it("rejects unknown or empty genres", () => {
-    expect(isKnownGenre(MOCK_GAMES, "Deportes")).toBe(false);
-    expect(isKnownGenre(MOCK_GAMES, null)).toBe(false);
+    expect(isKnownGenre(GAME_FIXTURES, "Deportes")).toBe(false);
+    expect(isKnownGenre(GAME_FIXTURES, null)).toBe(false);
   });
 });
