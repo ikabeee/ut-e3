@@ -38,6 +38,10 @@ npm run dev            # http://localhost:3000
 
 Mientras los juegos sean mock no hace falta una base de datos para desarrollar ni para el build.
 
+El build de producción exige `NEXT_PUBLIC_SITE_URL` (URL absoluta `http(s)` sin `/` final,
+por ejemplo `https://ejemplo.com`): si falta o es inválida, `npm run build` falla con un
+mensaje que explica el problema. En desarrollo y pruebas se usa `http://localhost:3000`.
+
 ## Scripts
 
 | Script | Qué hace |
