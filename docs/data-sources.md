@@ -2,16 +2,22 @@
 
 Mientras no exista la base de datos, el sitio usa **datos mock** con el contenido del diseño
 (carpeta UTG). Están aislados detrás de interfaces para que conectar Prisma no toque
-componentes, hooks ni pages.
+componentes, hooks ni pages, y la fuente se elige con la variable `DATA_SOURCE` (`mock` por
+defecto, `prisma` cuando exista su repositorio), validada en `src/shared/lib/env.ts`.
+
+Los mocks son contenido del sitio, no datos de prueba: las pruebas usan sus propios fixtures
+(`lib/game-fixtures.ts`), así que agregar un juego al mock no rompe ninguna.
 
 ## Juegos (`src/features/games`)
 
 ```
-lib/types.ts                 Tipo de dominio `Game` (lo único que conoce el resto de la app)
-lib/game-repository.ts       Contrato `GameRepository` (listGames, findGameBySlug)
-lib/mock-games.ts            MOCK: los 18 juegos del diseño
-lib/mock-game-repository.ts  MOCK: implementación en memoria de GameRepository
-lib/server/games-queries.ts  Consultas cacheadas ("use cache" + cacheTag("games")); elige el repositorio
+lib/types.ts                       Tipo de dominio `Game` (lo único que conoce el resto de la app)
+lib/game-repository.ts             Contrato `GameRepository` (listGames, findGameBySlug)
+lib/game-fixtures.ts               Juegos de prueba (las pruebas no dependen del mock)
+lib/mock/mock-games.ts             MOCK temporal: los 18 juegos del diseño
+lib/mock/mock-game-repository.ts   MOCK temporal: implementación en memoria de GameRepository
+lib/server/game-repositories.ts    getGameRepository(): elige el repositorio según DATA_SOURCE
+lib/server/games-queries.ts        Consultas cacheadas ("use cache" + cacheTag("games"))
 lib/server/games-prefetch.ts Estado de TanStack Query prellenado en el servidor
 lib/games-query-options.ts   queryOptions y query keys de TanStack Query
 api/games-route.ts           GET /api/games (src/app/api/games/route.ts sólo lo re-exporta)
@@ -23,7 +29,7 @@ public/mock/games/*.jpg      MOCK: imágenes de referencia del diseño
 Flujo de datos:
 
 ```
-Prisma / mock  ->  GameRepository  ->  games-queries.ts ("use cache")
+Prisma / mock  ->  GameRepository  ->  getGameRepository() (DATA_SOURCE)  ->  games-queries.ts ("use cache")
                                           |-> pages (Server Components) -> QueryHydrationBoundary
                                           |-> api/games-route.ts (GameDto) -> fetchGames() en el navegador
                                                                    TanStack Query -> useGames()
@@ -88,13 +94,15 @@ Si agregas o cambias un campo de `Game` que el navegador necesita, actualiza tam
    };
    ```
 
-3. En `lib/server/games-queries.ts` cambia `mockGameRepository` por `prismaGameRepository`.
+3. Registra el repositorio en `lib/server/game-repositories.ts` (`prisma: prismaGameRepository`)
+   y define `DATA_SOURCE=prisma` en el entorno donde haya base de datos. Sin tocar código puedes
+   seguir usando los mocks en otro entorno (por ejemplo, el CI compila con `DATA_SOURCE=mock`).
    Las consultas ya tienen `"use cache"`, así que las pages se siguen prerenderizando.
 4. Cuando una Server Action modifique juegos, llama `updateTag(GAMES_CACHE_TAG)` y, en el
    cliente, `queryClient.invalidateQueries({ queryKey: gamesQueryKeys.all })`.
-5. Borra `lib/mock-games.ts`, `lib/mock-game-repository.ts` (y su prueba) y `public/mock/`.
-   Las pruebas de `game-filters` y `game-genres` usan `MOCK_GAMES`: muévelas a un fixture
-   (`lib/game-fixtures.ts`) antes de borrar el mock.
+5. Cuando la base de datos tenga los juegos, borra la carpeta `lib/mock/` (con su prueba),
+   quita `mock` de `game-repositories.ts` y borra `public/mock/`. Las pruebas de la lógica usan
+   `lib/game-fixtures.ts`, así que siguen funcionando sin el mock.
 
 > Las imágenes de `public/mock/games/` son las de referencia del diseño, no arte de los equipos.
 > Reemplázalas antes de publicar el sitio.

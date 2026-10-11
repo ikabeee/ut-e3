@@ -137,9 +137,9 @@ GameRepository (mock hoy, Prisma después)
 | --- | --- |
 | Responsabilidad única | Cada archivo hace una cosa: `game-filters.ts` filtra, `plan-viewport.ts` calcula el zoom, `use-gallery.ts` maneja la galería y `GameGallery` sólo la pinta. |
 | Abierto/cerrado | Las variantes de `Button` de HeroUI se extienden con CSS (`components.css`) sin tocar HeroUI; `GameCard` y `PlanItemCard` tienen variantes en lugar de copias. |
-| Sustitución de Liskov | Cualquier implementación de `GameRepository` (mock o Prisma) sirve igual a `games-queries.ts`. |
+| Sustitución de Liskov | Cualquier implementación de `GameRepository` (mock, Prisma o el repositorio falso de las pruebas) sirve igual a `games-queries.ts`. |
 | Segregación de interfaces | Los componentes reciben sólo lo que usan (`ArtLabels` en vez del juego completo; `EventSchedule` recibe nombres de zona, no el croquis; el croquis recibe `StandOccupant`, no `Game`). |
-| Inversión de dependencias | `games-queries.ts` depende de la interfaz `GameRepository`, no de la fuente de datos. |
+| Inversión de dependencias | `games-queries.ts` depende de la interfaz `GameRepository`, no de la fuente de datos. La elección vive fuera, en `getGameRepository()` (`lib/server/game-repositories.ts`), y se configura con `DATA_SOURCE`. |
 
 ## Agregar una feature
 
