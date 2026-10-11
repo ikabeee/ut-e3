@@ -175,6 +175,7 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
   Las pages terminan en `Page` y su metadata en `PageMetadata` (`examplePageMetadata`).
 - Hooks con prefijo `use`: `useToggle`.
 - Funciones de datos con verbo: `getExampleMessage`, `listGames`, `getGameBySlug`.
+- Los ids de HTML, las anclas (`#featured`, `#schedule`) y los ids de datos (`zoneId: "raffles"`) también van en inglés.
 - Sólo el contenido visible para el usuario (textos de la UI) y la documentación van en español.
 
 ### Agregar una feature nueva

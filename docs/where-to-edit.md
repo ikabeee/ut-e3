@@ -34,7 +34,7 @@ Después de cualquier cambio corre `npm run lint`, `npm run typecheck` y `npm te
 
 | Quiero cambiar... | Archivo |
 | --- | --- |
-| Nombre y descripción de zonas (escenario, arena, servicios...) | `src/features/floor-plan/lib/plan-places.ts` (`PLAN_ZONES`) |
+| Nombre y descripción de zonas (escenario, arena, premios, servicios...) | `src/features/floor-plan/lib/plan-places.ts` (`PLAN_ZONES`; ids en inglés: `stage`, `arena`, `raffles`...) |
 | Stands informativos C1-C4 | `src/features/floor-plan/lib/plan-places.ts` (`INFO_STANDS`) |
 | Posición o tamaño de zonas, pasillos y stands | `src/features/floor-plan/lib/plan-layouts.ts` (horizontal y vertical) |
 | Asignar un juego a un stand | Campo `stand` del juego |

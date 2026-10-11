@@ -27,7 +27,7 @@ describe("buildPlanItems", () => {
 
     expect(groups.map((group) => group.category)).toEqual(["team", "info", "act", "srv"]);
     expect(groups[0].items.slice(0, 5).map((item) => item.id)).toEqual(["A1", "A2", "A3", "A4", "B1"]);
-    expect(groups[2].items.map((item) => item.id)).toEqual(["stage", "arena", "sorteos", "entry"]);
+    expect(groups[2].items.map((item) => item.id)).toEqual(["stage", "arena", "raffles", "entry"]);
     expect(groups[3].items.map((item) => item.id)).toEqual(["food", "info", "wc", "rest"]);
   });
 

@@ -1,12 +1,12 @@
 import { EventActivityCard } from "@features/event/components/event-activity-card";
 import { EVENT_ACTIVITIES, EVENT_INTRO } from "@features/event/lib/event-program";
 
-/** "Juegos hechos en la UT Cancún": presentación y tarjetas de torneos y sorteos (`#evento`). */
+/** "Juegos hechos en la UT Cancún": presentación y tarjetas de torneos y sorteos (`#event`). */
 export function EventIntroSection() {
   const [firstLine, secondLine] = EVENT_INTRO.title;
 
   return (
-    <section id="evento" className="section-block">
+    <section id="event" className="section-block">
       <div className="page-wrap">
         <h2 className="type-giant">
           {firstLine}

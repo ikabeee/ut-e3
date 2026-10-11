@@ -13,10 +13,10 @@ interface EventScheduleProps {
   onLocate: (zoneId: string) => void;
 }
 
-/** Programa del día (`#programa`): hora, actividad y enlace a su zona en el croquis. */
+/** Programa del día (`#schedule`): hora, actividad y enlace a su zona en el croquis. */
 export function EventSchedule({ entries, zoneTitles, onLocate }: Readonly<EventScheduleProps>) {
   return (
-    <section id="programa" className="section-block">
+    <section id="schedule" className="section-block">
       <div className="page-wrap">
         <h2 className="type-giant">{EVENT_INFO.shortDateLabel}</h2>
         <ul className="m-0 mt-[clamp(36px,5vw,64px)] list-none border-t border-border p-0">

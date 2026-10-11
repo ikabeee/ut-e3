@@ -20,7 +20,7 @@ describe("mockGameRepository", () => {
   });
 
   it("returns null for an unknown slug", async () => {
-    await expect(mockGameRepository.findGameBySlug("no-existe")).resolves.toBeNull();
+    await expect(mockGameRepository.findGameBySlug("missing-game")).resolves.toBeNull();
   });
 
   it("uses unique slugs and stands", async () => {
