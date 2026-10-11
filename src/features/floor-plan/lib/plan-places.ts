@@ -17,7 +17,7 @@ export const PLAN_ZONES: Record<ZoneId, PlanZone> = {
     title: "Arena de torneos",
     description: "Estaciones para las rondas de los torneos. Inscríbete aquí antes de las 12:00.",
   },
-  sorteos: {
+  raffles: {
     category: "act",
     kind: "Actividades",
     title: "Premios",

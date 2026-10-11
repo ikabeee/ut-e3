@@ -31,7 +31,7 @@ export function ProgramAndFloorPlan() {
   return (
     <>
       <EventSchedule entries={EVENT_SCHEDULE} zoneTitles={ZONE_TITLES} onLocate={locateZone} />
-      <section ref={mapRef} id="mapa" className="section-block">
+      <section ref={mapRef} id="floor-plan" className="section-block">
         <div className="page-wrap">
           <h2 className="type-giant">Croquis</h2>
           <FloorPlanOverview selectedId={selectedId} onSelect={setSelectedId} />

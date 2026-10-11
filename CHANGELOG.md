@@ -27,6 +27,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 - Dependencias: Prisma 8 (`prisma` rc.22, `@prisma/orm-postgres` rc.17, `@prisma/cli-engine`
   0.7.0) y `dotenv` 18.0.7. TypeScript se mantiene en 6.x y ESLint en 9.x.
+- Anclas de la portada en inglés: `#featured`, `#event`, `#games`, `#schedule`, `#floor-plan` y
+  `#venue` (antes `#destacados`, `#evento`, `#juegos`, `#programa`, `#mapa` y `#ubicacion`). La zona
+  "Premios" del croquis ahora es `/floor-plan#raffles` (antes `#sorteos`).
 
 ## [0.1.0]
 
