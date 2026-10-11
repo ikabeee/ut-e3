@@ -13,7 +13,10 @@ lib/mock-games.ts            MOCK: los 18 juegos del diseño
 lib/mock-game-repository.ts  MOCK: implementación en memoria de GameRepository
 lib/server/games-queries.ts  Consultas cacheadas ("use cache" + cacheTag("games")); elige el repositorio
 lib/server/games-prefetch.ts Estado de TanStack Query prellenado en el servidor
-lib/games-query-options.ts   queryOptions + fetch a /api/games para el navegador
+lib/games-query-options.ts   queryOptions y query keys de TanStack Query
+api/games-route.ts           GET /api/games (src/app/api/games/route.ts sólo lo re-exporta)
+api/games-contract.ts        GameDto: lo que viaja por HTTP y su validación en el navegador
+api/games-api-client.ts      fetchGames(): fetch a /api/games + parseGamesResponse()
 public/mock/games/*.jpg      MOCK: imágenes de referencia del diseño
 ```
 
@@ -22,9 +25,13 @@ Flujo de datos:
 ```
 Prisma / mock  ->  GameRepository  ->  games-queries.ts ("use cache")
                                           |-> pages (Server Components) -> QueryHydrationBoundary
-                                          |-> /api/games (Route Handler) -> fetchGames() en el navegador
+                                          |-> api/games-route.ts (GameDto) -> fetchGames() en el navegador
                                                                    TanStack Query -> useGames()
 ```
+
+Si agregas o cambias un campo de `Game` que el navegador necesita, actualiza también `GameDto`,
+`toGameDto` y `parseGamesResponse` en `api/games-contract.ts`: TypeScript marca el error en
+`toGameDto` y la prueba `games-contract.test.ts` comprueba que el viaje por HTTP no pierde datos.
 
 ### Pasos para usar Prisma
 
