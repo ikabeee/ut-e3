@@ -22,6 +22,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   robots, manifest e icono UTG.
 - Documentación en `docs/` (dónde modificar, arquitectura, datos, sistema de diseño y versiones).
 - Calidad: reglas de SonarQube y TanStack Query en ESLint, Jest + Testing Library y CI.
+- Páginas de error en español (`error.tsx` y `global-error.tsx`) con el estilo del 404 y las
+  acciones "Reintentar" e "Ir al inicio".
 
 ### Cambiado
 
