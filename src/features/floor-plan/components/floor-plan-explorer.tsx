@@ -9,15 +9,21 @@ import { PlanTooltip } from "@features/floor-plan/components/plan-tooltip";
 import { PlanZoomControls } from "@features/floor-plan/components/plan-zoom-controls";
 import { useFloorPlanExplorer } from "@features/floor-plan/hooks/use-floor-plan-explorer";
 import { usePlanTooltip } from "@features/floor-plan/hooks/use-plan-tooltip";
+import type { StandOccupant } from "@features/floor-plan/lib/types";
 import { usePrefersReducedMotion } from "@shared/hooks/use-prefers-reduced-motion";
 
 /** En pantallas angostas el directorio queda debajo del croquis. */
 const STACKED_LAYOUT_MAX_WIDTH = 900;
 
+interface FloorPlanExplorerProps {
+  /** Quienes ocupan los stands de equipo (los juegos, convertidos por la page). */
+  occupants: readonly StandOccupant[];
+}
+
 /** Croquis interactivo completo (`croquis.html`): filtros, mapa con zoom, panel y directorio. */
-export function FloorPlanExplorer() {
+export function FloorPlanExplorer({ occupants }: Readonly<FloorPlanExplorerProps>) {
   const viewportRef = useRef<HTMLDivElement>(null);
-  const explorer = useFloorPlanExplorer(viewportRef);
+  const explorer = useFloorPlanExplorer(viewportRef, occupants);
   const tooltip = usePlanTooltip(viewportRef);
   const prefersReducedMotion = usePrefersReducedMotion();
   const tooltipItem = tooltip.tooltip ? explorer.itemsById.get(tooltip.tooltip.itemId) : undefined;

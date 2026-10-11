@@ -6,7 +6,10 @@ import { EventVideoHero } from "@features/event/components/event-video-hero";
 import { VenueSection } from "@features/event/components/venue-section";
 import { EVENT_REEL } from "@features/event/lib/event-media";
 import { buildEventStructuredData } from "@features/event/lib/event-structured-data";
+import { PLAN_ITEM_COVER_SIZES } from "@features/floor-plan/components/plan-item-card";
 import { FeaturedGamesCarousel } from "@features/games/components/featured-games-carousel";
+import { GameMedia } from "@features/games/components/game-media";
+import { toStandOccupant } from "@features/games/lib/game-stand";
 import { getGamesHydrationState } from "@features/games/lib/server/games-prefetch";
 import { listGames } from "@features/games/lib/server/games-queries";
 import { CatalogShowcase } from "@features/home/components/catalog-showcase";
@@ -26,6 +29,7 @@ export const homePageMetadata: Metadata = {
 /** Portada (`index.html`): reel, destacados, evento, catálogo, programa, croquis y ubicación. */
 export async function HomePage() {
   const games = await listGames();
+  const occupants = games.map((game) => toStandOccupant(game, <GameMedia game={game} sizes={PLAN_ITEM_COVER_SIZES} />));
 
   return (
     <>
@@ -37,7 +41,7 @@ export async function HomePage() {
           <main>
             <EventIntroSection />
             <CatalogShowcase />
-            <ProgramAndFloorPlan />
+            <ProgramAndFloorPlan occupants={occupants} />
             <VenueSection />
           </main>
         </QueryHydrationBoundary>

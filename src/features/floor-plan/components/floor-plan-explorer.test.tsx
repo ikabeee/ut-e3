@@ -1,19 +1,10 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FloorPlanExplorer } from "@features/floor-plan/components/floor-plan-explorer";
-import { gamesQueryKeys } from "@features/games/lib/games-query-options";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
+import { STAND_OCCUPANT_FIXTURES } from "@features/floor-plan/lib/plan-fixtures";
 
 function renderExplorer() {
-  const queryClient = new QueryClient();
-  queryClient.setQueryData(gamesQueryKeys.list(), [...MOCK_GAMES]);
-
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <FloorPlanExplorer />
-    </QueryClientProvider>,
-  );
+  return render(<FloorPlanExplorer occupants={STAND_OCCUPANT_FIXTURES} />);
 }
 
 function panelTitle() {

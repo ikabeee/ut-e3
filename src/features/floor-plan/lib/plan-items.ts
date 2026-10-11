@@ -1,21 +1,20 @@
 import { INFO_STANDS, PLAN_CATEGORIES, PLAN_ZONES } from "@features/floor-plan/lib/plan-places";
-import type { PlanCategory, PlanItem, ZoneId } from "@features/floor-plan/lib/types";
-import type { Game } from "@features/games/lib/types";
+import type { PlanCategory, PlanItem, StandOccupant, ZoneId } from "@features/floor-plan/lib/types";
 
 /**
- * Todo lo seleccionable del croquis, en el orden del directorio: stands de equipo (en el
- * orden del catálogo), stands informativos y zonas.
+ * Todo lo seleccionable del croquis, en el orden del directorio: stands de equipo (en el orden
+ * en que llegan los ocupantes), stands informativos y zonas.
  */
-export function buildPlanItems(games: readonly Game[]): PlanItem[] {
-  const teamStands = games.map(
-    (game): PlanItem => ({
-      id: game.stand,
+export function buildPlanItems(occupants: readonly StandOccupant[]): PlanItem[] {
+  const teamStands = occupants.map(
+    (occupant): PlanItem => ({
+      id: occupant.stand,
       category: "team",
-      code: game.stand,
-      title: game.name,
-      subtitle: game.genre,
-      description: game.description,
-      game,
+      code: occupant.stand,
+      title: occupant.title,
+      subtitle: occupant.subtitle,
+      description: occupant.description,
+      cover: occupant.cover,
     }),
   );
 
@@ -27,7 +26,7 @@ export function buildPlanItems(games: readonly Game[]): PlanItem[] {
       title: stand.title,
       subtitle: "Informativo",
       description: stand.description,
-      game: null,
+      cover: null,
     }),
   );
 
@@ -40,7 +39,7 @@ export function buildPlanItems(games: readonly Game[]): PlanItem[] {
       title: zone.title,
       subtitle: zone.kind,
       description: zone.description,
-      game: null,
+      cover: null,
     };
   });
 

@@ -1,14 +1,11 @@
 import { findItemRect, getStandCells, PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
+import { INFO_STANDS } from "@features/floor-plan/lib/plan-places";
 
 describe("plan layouts", () => {
-  it.each(["wide", "tall"] as const)("places a stand for every game in the %s layout", (orientation) => {
+  it.each(["wide", "tall"] as const)("places every info stand in the %s layout", (orientation) => {
     const codes = PLAN_LAYOUTS[orientation].standBlocks.flatMap((block) => getStandCells(block).map((cell) => cell.code));
 
-    for (const game of MOCK_GAMES) {
-      expect(codes).toContain(game.stand);
-    }
-    expect(codes).toEqual(expect.arrayContaining(["C1", "C2", "C3", "C4"]));
+    expect(codes).toEqual(expect.arrayContaining(Object.keys(INFO_STANDS)));
   });
 
   it("numbers the stands row by row", () => {

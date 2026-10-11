@@ -1,19 +1,13 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { gamesQueryKeys } from "@features/games/lib/games-query-options";
+import { toStandOccupant } from "@features/games/lib/game-stand";
 import { MOCK_GAMES } from "@features/games/lib/mock-games";
 import { ProgramAndFloorPlan } from "@features/home/components/program-and-floor-plan";
 
 function renderSection() {
-  const queryClient = new QueryClient();
-  queryClient.setQueryData(gamesQueryKeys.list(), [...MOCK_GAMES]);
+  const occupants = MOCK_GAMES.map((game) => toStandOccupant(game, null));
 
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <ProgramAndFloorPlan />
-    </QueryClientProvider>,
-  );
+  return render(<ProgramAndFloorPlan occupants={occupants} />);
 }
 
 function panelTitle() {
