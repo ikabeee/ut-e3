@@ -1,22 +1,10 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderWithGames } from "@features/games/__tests__/render-with-games";
 import { GamesCatalog } from "@features/games/components/games-catalog";
-import { gamesQueryKeys } from "@features/games/lib/games-query-options";
-import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
+import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 
 const TOTAL = GAME_FIXTURES.length;
-
-function renderCatalog() {
-  const queryClient = new QueryClient();
-  queryClient.setQueryData(gamesQueryKeys.list(), [...GAME_FIXTURES]);
-
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <GamesCatalog />
-    </QueryClientProvider>,
-  );
-}
 
 function getGameCards() {
   return within(screen.getByRole("region", { name: "Todos los juegos" })).queryAllByRole("link");
@@ -29,7 +17,7 @@ describe("GamesCatalog", () => {
   });
 
   it("shows every game and the total count", () => {
-    renderCatalog();
+    renderWithGames(<GamesCatalog />);
 
     expect(getGameCards()).toHaveLength(TOTAL);
     expect(screen.getByText(`${TOTAL} de ${TOTAL} juegos`)).toBeInTheDocument();
@@ -37,7 +25,7 @@ describe("GamesCatalog", () => {
 
   it("filters by genre, keeps it in the URL and clears it when pressed again", async () => {
     const user = userEvent.setup();
-    renderCatalog();
+    renderWithGames(<GamesCatalog />);
 
     await user.click(screen.getByRole("button", { name: /Puzle/ }));
 
@@ -53,14 +41,14 @@ describe("GamesCatalog", () => {
 
   it("reads the genre from the URL", () => {
     window.history.replaceState(null, "", "/games?genre=Ritmo");
-    renderCatalog();
+    renderWithGames(<GamesCatalog />);
 
     expect(screen.getByText(`2 de ${TOTAL} juegos · Ritmo`)).toBeInTheDocument();
   });
 
   it("shows the empty state and resets the filters", async () => {
     const user = userEvent.setup();
-    renderCatalog();
+    renderWithGames(<GamesCatalog />);
 
     await user.type(screen.getByRole("searchbox", { name: "Buscar juegos" }), "ajedrez");
 

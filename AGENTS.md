@@ -69,6 +69,7 @@ src/
 │   ├── games/                # Catálogo (/games), detalle (/games/[slug]), API y carruseles
 │   └── home/                 # Portada (/): compone event, games y floor-plan
 └── shared/                   # Código transversal SIN reglas de negocio
+    ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
     ├── components/           # QueryProvider, navegación, pie, botones del diseño...
     ├── hooks/                # Hooks genéricos (movimiento reducido, estado en la URL...)
     ├── styles/               # Tema UTG de HeroUI, tipografía y efectos
@@ -80,12 +81,13 @@ src/
 
 ### Anatomía de una feature
 
-Una feature se organiza en cuatro carpetas, más `api/` si expone datos por HTTP. Crea cada carpeta
-(`lib/`, `hooks/`, `components/`, `pages/`, `api/`) cuando la necesites; el linter valida las que
-existen. No dejes carpetas vacías ni `.gitkeep`.
+Una feature se organiza en cuatro carpetas, más `api/` si expone datos por HTTP y `__tests__/` para
+sus pruebas. Crea cada carpeta (`lib/`, `hooks/`, `components/`, `pages/`, `api/`) cuando la
+necesites; el linter valida las que existen. No dejes carpetas vacías ni `.gitkeep`.
 
 ```
 src/features/<feature>/
+├── __tests__/     # Pruebas, con las mismas subcarpetas que el código (ver "Pruebas").
 ├── api/           # Contrato HTTP: Route Handlers (<feature>-route.ts) y cliente (<feature>-api-client.ts).
 ├── lib/           # Tipos, constantes y utilidades puras (se pueden usar en el navegador).
 │   └── server/    # Sólo servidor: consultas a la BD (<feature>-queries.ts) y prefetch.
@@ -106,6 +108,23 @@ src/features/<feature>/
 "Código de servidor" es `lib/server/` de cualquier feature, `@shared/lib/server/` y `@shared/lib/prisma/`.
 La frontera depende de la carpeta, no del nombre del archivo: `import "server-only"` sólo se permite ahí.
 
+### Pruebas
+
+Las pruebas viven en la carpeta `__tests__/` de cada feature, que repite las subcarpetas del
+código: `lib/game-filters.ts` -> `__tests__/lib/game-filters.test.ts`. Lo mismo aplica a
+`src/shared/__tests__/` y a `src/app/__tests__/` (Next.js no enruta las carpetas que empiezan con `_`).
+
+- Jest corre todo archivo `*.test.ts(x)` dentro de `src/`. En `__tests__/`, lo que no termina en
+  `.test` es un helper de prueba y no cuenta en la cobertura.
+- Los componentes que leen el catálogo de juegos se prueban con `renderWithGames(<Componente />)`
+  (`@features/games/__tests__/render-with-games`): monta un `QueryClient` con los juegos de prueba
+  (`GAME_FIXTURES`, `@features/games/__tests__/game-fixtures`) ya en caché. Las pruebas no usan los
+  juegos mock del sitio, así que cambiar el catálogo no las rompe.
+- Las pruebas de `src/app/` importan las rutas con el alias `@app/*` (`@app/error`).
+- Una prueba sigue las reglas de dependencias de la carpeta que prueba (`__tests__/lib/` las de
+  `lib/`, etc.), pero además puede importar `@app/*` y los helpers de `__tests__/`. ESLint impide que
+  el código de la app importe cualquiera de los dos.
+
 ### Pages como contenedores
 
 Una page de feature sólo orquesta: pide datos, maneja estados de carga/no encontrado y
@@ -115,26 +134,31 @@ La feature `example` es el scaffold de referencia y contiene exactamente esto:
 
 ```
 src/features/example/
+├── __tests__/
+│   ├── api/
+│   │   ├── example-route.test.ts
+│   │   └── example-api-client.test.ts
+│   ├── hooks/
+│   │   └── use-toggle.test.ts
+│   ├── components/
+│   │   ├── example-card.test.tsx
+│   │   └── example-toggle.test.tsx
+│   └── pages/
+│       └── example-page.test.tsx # Prueba de humo de la composición
 ├── api/
 │   ├── example-route.ts          # GET: Route Handler ("server-only"); no se monta en src/app/api
-│   ├── example-route.test.ts
-│   ├── example-api-client.ts     # EXAMPLE_API_PATH, fetchExampleMessage() y validación de la respuesta
-│   └── example-api-client.test.ts
+│   └── example-api-client.ts     # EXAMPLE_API_PATH, fetchExampleMessage() y validación de la respuesta
 ├── lib/
 │   ├── types.ts                  # ExampleMessage
 │   └── server/
 │       └── example-queries.ts    # getExampleMessage(): "server-only" + "use cache" + cacheLife
 ├── hooks/
-│   ├── use-toggle.ts             # useToggle(): estado del cliente, sin JSX
-│   └── use-toggle.test.ts
+│   └── use-toggle.ts             # useToggle(): estado del cliente, sin JSX
 ├── components/
 │   ├── example-card.tsx          # ExampleCard: recibe `message` por props (Card de HeroUI)
-│   ├── example-card.test.tsx
-│   ├── example-toggle.tsx        # ExampleToggle: "use client", usa useToggle (Button + onPress)
-│   └── example-toggle.test.tsx
+│   └── example-toggle.tsx        # ExampleToggle: "use client", usa useToggle (Button + onPress)
 └── pages/
-    ├── example-page.tsx          # ExamplePage + examplePageMetadata
-    └── example-page.test.tsx     # Prueba de humo de la composición
+    └── example-page.tsx          # ExamplePage + examplePageMetadata
 ```
 
 ```ts
@@ -185,9 +209,9 @@ Si la consulta no se cachea (usa `await connection()`), envuelve la parte que es
 `<Suspense>` (ver "Convenciones de Next.js 16.4").
 
 **`example` no se monta en ninguna ruta**: no existe `src/app/example/` y no aparece en el sitio
-ni en el sitemap. Su prueba de humo (`example-page.test.tsx`) es lo que garantiza que sigue
-funcionando. Cuando copies la feature, enlázala con una ruta creando un archivo en `src/app/` que
-sólo exporte la page y su metadata:
+ni en el sitemap. Su prueba de humo (`__tests__/pages/example-page.test.tsx`) es lo que garantiza
+que sigue funcionando. Cuando copies la feature, enlázala con una ruta creando un archivo en
+`src/app/` que sólo exporte la page y su metadata:
 
 ```tsx
 // src/app/<ruta>/page.tsx  (por ejemplo, src/app/teams/page.tsx para la feature teams)
@@ -236,6 +260,7 @@ mediante los path aliases de `tsconfig.json`:
 | --- | --- |
 | `@features/*` | `src/features/*` |
 | `@shared/*` | `src/shared/*` |
+| `@app/*` | `src/app/*` (sólo en las pruebas de `src/app/__tests__/`) |
 
 ```ts
 import { ExampleCard } from "@features/example/components/example-card";

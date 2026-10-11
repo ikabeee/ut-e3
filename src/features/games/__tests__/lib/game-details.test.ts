@@ -5,7 +5,7 @@ import {
   getRelatedGames,
   getStandAisle,
 } from "@features/games/lib/game-details";
-import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
+import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 import type { Game } from "@features/games/lib/types";
 
 const SCHEDULE = { tournamentSignupDeadline: "11:30", tournamentFinalsAt: "18:00" };

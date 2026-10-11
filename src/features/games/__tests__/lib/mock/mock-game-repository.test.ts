@@ -1,7 +1,7 @@
 import { mockGameRepository } from "@features/games/lib/mock/mock-game-repository";
 import { MOCK_GAMES } from "@features/games/lib/mock/mock-games";
 
-// Revisa los datos que hoy muestra el sitio; las pruebas de la lógica usan `game-fixtures.ts`.
+// Revisa los datos que hoy muestra el sitio; las pruebas de la lógica usan `__tests__/game-fixtures.ts`.
 describe("mockGameRepository", () => {
   it("lists every game of the mock catalog", async () => {
     await expect(mockGameRepository.listGames()).resolves.toEqual(MOCK_GAMES);

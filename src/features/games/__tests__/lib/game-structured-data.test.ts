@@ -1,5 +1,5 @@
 import { buildGameStructuredData } from "@features/games/lib/game-structured-data";
-import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
+import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 
 describe("buildGameStructuredData", () => {
   it("describes the game as a schema.org VideoGame with absolute URLs", () => {

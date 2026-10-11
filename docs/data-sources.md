@@ -6,14 +6,14 @@ componentes, hooks ni pages, y la fuente se elige con la variable `DATA_SOURCE` 
 defecto, `prisma` cuando exista su repositorio), validada en `src/shared/lib/env.ts`.
 
 Los mocks son contenido del sitio, no datos de prueba: las pruebas usan sus propios fixtures
-(`lib/game-fixtures.ts`), así que agregar un juego al mock no rompe ninguna.
+(`__tests__/game-fixtures.ts`), así que agregar un juego al mock no rompe ninguna.
 
 ## Juegos (`src/features/games`)
 
 ```
 lib/types.ts                       Tipo de dominio `Game` (lo único que conoce el resto de la app)
 lib/game-repository.ts             Contrato `GameRepository` (listGames, findGameBySlug)
-lib/game-fixtures.ts               Juegos de prueba (las pruebas no dependen del mock)
+__tests__/game-fixtures.ts         Juegos de prueba (las pruebas no dependen del mock)
 lib/mock/mock-games.ts             MOCK temporal: los 18 juegos del diseño
 lib/mock/mock-game-repository.ts   MOCK temporal: implementación en memoria de GameRepository
 lib/server/game-repositories.ts    getGameRepository(): elige el repositorio según DATA_SOURCE
@@ -100,9 +100,10 @@ Si agregas o cambias un campo de `Game` que el navegador necesita, actualiza tam
    Las consultas ya tienen `"use cache"`, así que las pages se siguen prerenderizando.
 4. Cuando una Server Action modifique juegos, llama `updateTag(GAMES_CACHE_TAG)` y, en el
    cliente, `queryClient.invalidateQueries({ queryKey: gamesQueryKeys.all })`.
-5. Cuando la base de datos tenga los juegos, borra la carpeta `lib/mock/` (con su prueba),
-   quita `mock` de `game-repositories.ts` y borra `public/mock/`. Las pruebas de la lógica usan
-   `lib/game-fixtures.ts`, así que siguen funcionando sin el mock.
+5. Cuando la base de datos tenga los juegos, borra la carpeta `lib/mock/` (con su prueba,
+   `__tests__/lib/mock/mock-game-repository.test.ts`), quita `mock` de `game-repositories.ts` y
+   borra `public/mock/`. Las pruebas de la lógica y el helper `renderWithGames` usan los juegos de
+   prueba de `__tests__/game-fixtures.ts`, así que siguen funcionando sin el mock.
 
 > Las imágenes de `public/mock/games/` son las de referencia del diseño, no arte de los equipos.
 > Reemplázalas antes de publicar el sitio.
@@ -114,11 +115,11 @@ ocupantes de los stands de equipo. No conoce los juegos: su page los convierte c
 `toStandOccupant` (`games/lib/game-stand.ts`).
 
 ```
-lib/types.ts          `StandOccupant`: lo que el croquis necesita de quien ocupa un stand
-lib/plan-places.ts    Zonas (escenario, arena, servicios...) y stands informativos C1-C4
-lib/plan-layouts.ts   Geometría del SVG en horizontal (wide) y vertical (tall)
-lib/plan-items.ts     Une zonas, stands informativos y ocupantes (`buildPlanItems(occupants)`)
-lib/plan-fixtures.ts  Ocupantes de prueba (las pruebas del croquis no dependen de `games`)
+lib/types.ts                `StandOccupant`: lo que el croquis necesita de quien ocupa un stand
+lib/plan-places.ts          Zonas (escenario, arena, servicios...) y stands informativos C1-C4
+lib/plan-layouts.ts         Geometría del SVG en horizontal (wide) y vertical (tall)
+lib/plan-items.ts           Une zonas, stands informativos y ocupantes (`buildPlanItems(occupants)`)
+__tests__/plan-fixtures.ts  Ocupantes de prueba (las pruebas del croquis no dependen de `games`)
 ```
 
 - Para **asignar un stand** a un juego sólo cambia el campo `stand` del juego. El código debe

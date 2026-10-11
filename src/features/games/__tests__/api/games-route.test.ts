@@ -3,7 +3,7 @@
  */
 import { GET } from "@features/games/api/games-route";
 import { parseGamesResponse } from "@features/games/api/games-contract";
-import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
+import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 
 jest.mock("@features/games/lib/server/games-queries", () => ({
   listGames: async () => GAME_FIXTURES.slice(0, 2),

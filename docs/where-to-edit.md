@@ -51,7 +51,7 @@ ls -lh public/media/
 | Quiero cambiar... | Archivo |
 | --- | --- |
 | Juegos, equipos, géneros, stands, descripciones, jugadores y "Acerca del juego" propio (mientras sean mock) | `src/features/games/lib/mock/mock-games.ts` (`players`, `about`). Las pruebas no dependen de este archivo |
-| Juegos de las pruebas | `src/features/games/lib/game-fixtures.ts` |
+| Juegos de las pruebas | `src/features/games/__tests__/game-fixtures.ts` (los usa también `renderWithGames`) |
 | Fuente de los juegos (mock o base de datos) | `DATA_SOURCE` en `.env` y `src/features/games/lib/server/game-repositories.ts` |
 | Portada de un juego | Agrega la imagen en `public/` y ponla en `image.src` del juego; sin imagen se genera arte |
 | Colores del arte generado de un juego | `art.palette` del juego (`acid`, `black`, `white`, `panel`, `light`) |
@@ -84,8 +84,36 @@ ls -lh public/media/
 | Botones (rellenos, bordes, medidas) | `src/shared/styles/components.css` |
 | Utilidades de texto (`type-giant`, `type-mono`, `type-tiny`...) | `src/shared/styles/typography.css` |
 | Logo UTG | `src/shared/components/utg-logo.tsx` e icono `src/app/icon.svg` |
+| Ícono de la app instalada (PWA) | `src/app/icon.svg` y luego `npm run pwa:icons` (ver abajo) |
+| Nombre, colores y accesos directos de la app instalada | `src/app/manifest.ts` (colores en `themeColor` de `src/shared/lib/site-config.ts`) |
 | Navegación y pie de página | `src/shared/components/site-header.tsx`, `site-nav-links.tsx`, `site-footer.tsx` |
 | Páginas de error (404 y "Algo salió mal") | `src/shared/components/not-found-view.tsx` y `error-view.tsx` |
+
+### Cambiar el ícono de la app (PWA)
+
+El ícono del navegador y el de la app instalada salen de `src/app/icon.svg`. Android y
+Chromium leen los PNG del manifest y iOS usa `apple-touch-icon.png` (declarado en `icons.apple`
+de `src/app/layout.tsx`), así que después de editar el SVG regenera los PNG:
+
+```bash
+npm run pwa:icons
+```
+
+El script `scripts/generate-pwa-icons.mjs` usa `sharp` (ya viene con Next.js) y escribe en
+`public/icons/`:
+
+| Archivo | Tamaño | Uso |
+| --- | --- | --- |
+| `icon-192.png` | 192x192 | Ícono `any` del manifest y de los accesos directos. |
+| `icon-512.png` | 512x512 | Ícono `any` del manifest (pantalla de bienvenida en Android). |
+| `icon-maskable-512.png` | 512x512 | Ícono `maskable`: el logo ocupa el 80 % central sobre el color de fondo, porque Android lo recorta en círculo o en otras formas. |
+| `apple-touch-icon.png` | 180x180 | Ícono de iOS al agregar el sitio a la pantalla de inicio. |
+
+- El SVG debe ser cuadrado y con fondo propio (iOS rellena con negro lo transparente).
+- Si cambias el color de fondo, actualiza `themeColor` en `src/shared/lib/site-config.ts` y
+  `BACKGROUND_COLOR` en el script, y vuelve a correrlo.
+- Revisa el maskable en [maskable.app](https://maskable.app/) o en DevTools > Application > Manifest.
+- Sube los PNG regenerados en el mismo PR que el SVG.
 
 ## SEO
 

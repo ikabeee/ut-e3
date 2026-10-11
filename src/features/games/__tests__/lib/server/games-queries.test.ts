@@ -1,6 +1,6 @@
 import { cacheTag } from "next/cache";
 import type { GameRepository } from "@features/games/lib/game-repository";
-import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
+import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 import { GAMES_CACHE_TAG, getGameBySlug, listGames } from "@features/games/lib/server/games-queries";
 
 // Repositorio falso: las consultas se prueban sin mocks del sitio, sin red y sin base de datos.

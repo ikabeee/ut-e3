@@ -1,6 +1,6 @@
 import { fetchGames, GAMES_API_PATH } from "@features/games/api/games-api-client";
 import { toGameDto } from "@features/games/api/games-contract";
-import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
+import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 
 function mockFetch(response: { ok: boolean; status?: number; body?: unknown }) {
   const fetchMock = jest.fn().mockResolvedValue({

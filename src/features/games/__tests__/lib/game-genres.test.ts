@@ -1,5 +1,5 @@
 import { isKnownGenre, summarizeGenres } from "@features/games/lib/game-genres";
-import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
+import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 
 describe("summarizeGenres", () => {
   const genres = summarizeGenres(GAME_FIXTURES);

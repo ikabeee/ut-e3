@@ -1,5 +1,5 @@
 import { parseGamesResponse, toGameDto } from "@features/games/api/games-contract";
-import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
+import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 
 /** Simula el viaje por HTTP: el DTO se serializa y se vuelve a leer como JSON. */
 const overHttp = (value: unknown): unknown => JSON.parse(JSON.stringify(value));

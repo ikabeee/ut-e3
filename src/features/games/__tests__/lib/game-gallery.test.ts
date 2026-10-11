@@ -1,5 +1,5 @@
 import { getCoverVisual, getGalleryShots } from "@features/games/lib/game-gallery";
-import { GAME_FIXTURES, makeGameFixture } from "@features/games/lib/game-fixtures";
+import { GAME_FIXTURES, makeGameFixture } from "@features/games/__tests__/game-fixtures";
 
 describe("getGalleryShots", () => {
   it("starts with the cover image and adds three generated shots", () => {

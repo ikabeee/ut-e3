@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import ErrorPage from "./error";
+import ErrorPage from "@app/error";
 
 describe("ErrorPage", () => {
   it("logs the error and retries the segment when asked", () => {

@@ -1,5 +1,5 @@
 import { filterGames, toggleGenre } from "@features/games/lib/game-filters";
-import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
+import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 
 describe("filterGames", () => {
   it("returns every game without filters", () => {

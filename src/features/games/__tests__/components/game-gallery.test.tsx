@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { GameGallery } from "@features/games/components/game-gallery";
 import { getGalleryShots } from "@features/games/lib/game-gallery";
-import { GAME_FIXTURES } from "@features/games/lib/game-fixtures";
+import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 
 const game = GAME_FIXTURES[3];
 
