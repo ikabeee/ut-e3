@@ -1,4 +1,4 @@
-import { formatTimecode } from "@features/event/lib/event-media";
+import { canAutoplayReel, formatTimecode } from "@features/event/lib/event-media";
 import { describeShowcase, EVENT_SCHEDULE } from "@features/event/lib/event-program";
 import { buildEventStructuredData } from "@features/event/lib/event-structured-data";
 
@@ -6,6 +6,17 @@ describe("formatTimecode", () => {
   it("writes minutes, seconds and frames", () => {
     expect(formatTimecode(0)).toBe("00:00:00");
     expect(formatTimecode(75.5)).toBe("01:15:15");
+  });
+});
+
+describe("canAutoplayReel", () => {
+  const desktop = { isWideScreen: true, prefersSaveData: false, prefersReducedMotion: false };
+
+  it("autoplays only on a wide screen without save data or reduced motion", () => {
+    expect(canAutoplayReel(desktop)).toBe(true);
+    expect(canAutoplayReel({ ...desktop, isWideScreen: false })).toBe(false);
+    expect(canAutoplayReel({ ...desktop, prefersSaveData: true })).toBe(false);
+    expect(canAutoplayReel({ ...desktop, prefersReducedMotion: true })).toBe(false);
   });
 });
 
