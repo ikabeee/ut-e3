@@ -123,11 +123,17 @@ const nonPageImports = {
   message: "`src/app` sólo renderiza pages: importa desde `@features/<feature>/pages/<name>-page`.",
 };
 
-// Route Handlers (`route.ts`) y archivos de metadata (`sitemap.ts`, `robots.ts`, `manifest.ts`) no
-// renderizan una page: delegan en `lib/` de la feature, pero nunca en componentes ni hooks.
-const routeFileImports = {
-  group: ["@features/*/hooks/**", "@features/*/components/**", "@features/*/pages/**"],
-  message: "Los Route Handlers y archivos de metadata sólo delegan en `@features/<feature>/lib/*`.",
+// Los archivos de metadata (`sitemap.ts`, `robots.ts`, `manifest.ts`) no renderizan una page:
+// delegan en `lib/` de la feature, pero nunca en componentes, hooks ni pages.
+const metadataFileImports = {
+  group: ["@features/*/hooks/**", "@features/*/components/**", "@features/*/pages/**", "@features/*/api/**"],
+  message: "Los archivos de metadata sólo delegan en `@features/<feature>/lib/*`.",
+};
+
+// Un Route Handler de `src/app` sólo enlaza la ruta con el de la feature, como las pages.
+const routeHandlerImports = {
+  regex: "^@shared/|^@features/(?![^/]+/api/[^/]+-route$)",
+  message: 'Un `route.ts` sólo re-exporta el handler de la feature: `export { GET } from "@features/<feature>/api/<feature>-route";`.',
 };
 
 /** Features que `feature` no puede importar según `FEATURE_DEPENDENCIES`. */
@@ -189,7 +195,8 @@ const featureLayerConfigs = FEATURES.flatMap((feature) =>
   })),
 );
 
-const routeFiles = ["src/app/**/route.ts", "src/app/sitemap.ts", "src/app/robots.ts", "src/app/manifest.ts"];
+const routeHandlerFiles = ["src/app/**/route.ts"];
+const metadataFiles = ["src/app/sitemap.ts", "src/app/robots.ts", "src/app/manifest.ts"];
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -206,8 +213,13 @@ const eslintConfig = defineConfig([
     settings: { "import/ignore": ["node_modules"] },
     rules: { "import/no-cycle": ["error", { ignoreExternal: true }] },
   },
-  { files: [`src/app/**/*.${SOURCE}`], ignores: routeFiles, rules: restrict([nonPageImports, prismaClient]) },
-  { files: routeFiles, rules: restrict([routeFileImports, prismaClient]) },
+  {
+    files: [`src/app/**/*.${SOURCE}`],
+    ignores: [...routeHandlerFiles, ...metadataFiles],
+    rules: restrict([nonPageImports, prismaClient]),
+  },
+  { files: routeHandlerFiles, rules: restrict([routeHandlerImports]) },
+  { files: metadataFiles, rules: restrict([metadataFileImports, prismaClient]) },
   { files: [`src/shared/**/*.${SOURCE}`, "src/shared/**/*.mts"], rules: restrict([featureImports, prismaClient]) },
   {
     files: [`src/shared/components/**/*.${SOURCE}`, `src/shared/hooks/**/*.${SOURCE}`],

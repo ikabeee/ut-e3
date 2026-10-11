@@ -1,22 +1,10 @@
 import { queryOptions } from "@tanstack/react-query";
-import type { Game } from "@features/games/lib/types";
-
-/** Endpoint público de los juegos (src/app/api/games/route.ts). */
-export const GAMES_API_PATH = "/api/games";
+import { fetchGames } from "@features/games/api/games-api-client";
 
 export const gamesQueryKeys = {
   all: ["games"] as const,
   list: () => [...gamesQueryKeys.all, "list"] as const,
 };
-
-/** Lee los juegos desde el Route Handler. Se ejecuta en el navegador. */
-export async function fetchGames(): Promise<Game[]> {
-  const response = await fetch(GAMES_API_PATH);
-  if (!response.ok) {
-    throw new Error(`No se pudieron cargar los juegos (${response.status}).`);
-  }
-  return response.json() as Promise<Game[]>;
-}
 
 /**
  * Lista de juegos para `useSuspenseQuery`. Las pages la prellenan en el servidor con
