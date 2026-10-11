@@ -3,6 +3,7 @@
 import { useRef, type ReactNode } from "react";
 import { ToggleButton } from "@heroui/react";
 import { useVideoPlayback } from "@features/event/hooks/use-video-playback";
+import { EVENT_COPY } from "@features/event/lib/event-copy";
 import type { EventReelMedia } from "@features/event/lib/types";
 
 interface EventReelProps {
@@ -24,7 +25,7 @@ export function EventReel({ reel, reelLabel, children }: Readonly<EventReelProps
   return (
     <header
       id="top"
-      aria-label="UTG Showcase"
+      aria-label={EVENT_COPY.reel.label}
       className="relative isolate flex h-[clamp(560px,calc(100svh-56px),1000px)] items-end overflow-hidden border-b border-border bg-background"
     >
       {/* Sin `autoPlay` ni fuentes en el HTML: el póster se ve de inmediato y el video sólo se
@@ -56,7 +57,7 @@ export function EventReel({ reel, reelLabel, children }: Readonly<EventReelProps
       <ToggleButton
         isSelected={isPaused}
         onChange={togglePlayback}
-        aria-label={isPaused ? "Reproducir video" : "Pausar video"}
+        aria-label={isPaused ? EVENT_COPY.reel.play : EVENT_COPY.reel.pause}
         className="group absolute right-gutter bottom-[7px] grid size-11 min-w-0 place-items-center rounded-none border border-foreground bg-black/60 p-0 active:transform-none data-[selected=true]:bg-black/60 hover:bg-foreground data-[selected=true]:hover:bg-foreground"
       >
         {isPaused ? (

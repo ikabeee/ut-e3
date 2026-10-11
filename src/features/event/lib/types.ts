@@ -1,29 +1,28 @@
-/** Fecha, horario y enlaces del evento. */
+/** Fecha, horario y enlaces del evento. Las etiquetas salen de `startsAt` y `endsAt`. */
 export interface EventInfo {
   name: string;
   /** Fecha en el formato del diseño ("27.11.2026"). */
   dateLabel: string;
   /** Fecha corta del título del programa ("27.11.26"). */
   shortDateLabel: string;
+  /** Horario ("10:00—20:00"). */
   hoursLabel: string;
-  /** Inicio y fin en ISO 8601 (hora de Cancún, UTC-5) para datos estructurados. */
+  /** Inicio y fin en ISO 8601 con la hora de Cancún (UTC-5). */
   startsAt: string;
   endsAt: string;
   admission: string;
-  organizer: string;
   /** Evento prellenado en Google Calendar ("Quiero participar" / "Quiero asistir"). */
   calendarUrl: string;
 }
 
-/** Sede del evento y su dirección. */
+/** Sede del evento. La dirección completa se arma con sus partes (`formatVenueAddress`). */
 export interface EventVenue {
   name: string;
   shortName: string;
-  /** Referencia corta sobre el título "Ubicación". */
+  /** Referencia corta sobre el título "Ubicación" ("Carretera Cancún–Aeropuerto · Km 11.5"). */
   landmark: string;
-  address: string;
-  /** Texto que se copia con "Copiar dirección". */
-  copyableAddress: string;
+  /** Calle y número, sin código postal ni ciudad. */
+  streetAddress: string;
   locality: string;
   region: string;
   postalCode: string;
@@ -71,11 +70,27 @@ export interface EventActivity {
   facts: readonly ActivityFact[];
 }
 
+/** Renglones del programa cuyo horario citan otros textos (torneos y sorteos). */
+export type ScheduleMilestone = "tournamentSignupDeadline" | "tournamentRounds" | "tournamentFinals" | "raffle";
+
 /** Renglón del programa; `zoneId` es la zona del croquis donde ocurre. */
 export interface ScheduleEntry {
   time: string;
   title: string;
   zoneId: string;
+  /** Si otros textos citan este horario (tarjetas de actividades, detalle del juego, croquis). */
+  milestone?: ScheduleMilestone;
+}
+
+/**
+ * Horarios del programa que se citan en otros textos. Salen de `EVENT_SCHEDULE`
+ * (`getScheduleHighlights`), así que nadie vuelve a escribir "12:00" a mano.
+ */
+export interface ScheduleHighlights {
+  tournamentSignupDeadline: string;
+  tournamentRoundsAt: string;
+  tournamentFinalsAt: string;
+  raffleTimes: readonly string[];
 }
 
 /** Todo el contenido del evento, leído en un solo lugar (`getEventContent`). */
@@ -86,5 +101,7 @@ export interface EventContent {
   intro: EventIntro;
   activities: readonly EventActivity[];
   schedule: readonly ScheduleEntry[];
+  /** Horarios del programa que citan otros textos (torneos y sorteos). */
+  highlights: ScheduleHighlights;
   reel: EventReelMedia;
 }

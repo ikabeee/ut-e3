@@ -1,6 +1,7 @@
 "use client";
 
 import { useCopyToClipboard } from "@features/event/hooks/use-copy-to-clipboard";
+import { EVENT_COPY } from "@features/event/lib/event-copy";
 import { ActionButton } from "@shared/components/action-button";
 
 interface CopyAddressButtonProps {
@@ -11,11 +12,11 @@ interface CopyAddressButtonProps {
 export function CopyAddressButton({ address }: Readonly<CopyAddressButtonProps>) {
   const { copy, isCopied, hasFailed, isPending } = useCopyToClipboard();
 
-  let label = "Copiar dirección";
+  let label: string = EVENT_COPY.copyAddress.idle;
   if (isCopied) {
-    label = "Dirección copiada";
+    label = EVENT_COPY.copyAddress.copied;
   } else if (hasFailed) {
-    label = "No se pudo copiar";
+    label = EVENT_COPY.copyAddress.failed;
   }
 
   return (
