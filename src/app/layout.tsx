@@ -18,10 +18,17 @@ export const metadata: Metadata = {
   openGraph: buildOpenGraph(),
   twitter: { card: "summary_large_image" },
   formatDetection: { telephone: false },
+  // iOS no lee el manifest: toma de aquí el ícono y el modo app al agregarlo a la pantalla de inicio.
+  // Al definir `icons`, Next deja de agregar `icon.svg` por convención, así que se declara aquí.
+  icons: {
+    icon: { url: "/icon.svg", type: "image/svg+xml" },
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: { capable: true, title: siteConfig.name, statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: siteConfig.themeColor,
   colorScheme: "dark",
   viewportFit: "cover",
 };
