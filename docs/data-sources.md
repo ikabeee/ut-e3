@@ -28,6 +28,11 @@ Prisma / mock  ->  GameRepository  ->  games-queries.ts ("use cache")
 
 ### Pasos para usar Prisma
 
+> El modelo relacional propuesto (equipos, stands, géneros, check-ins y rifa) está en
+> [`data-model.md`](./data-model.md). El ejemplo de abajo es la versión plana mínima que
+> reproduce el tipo `Game` actual; la tabla "Relación con el tipo `Game` actual" de ese
+> documento explica cómo armarlo desde el modelo relacional.
+
 1. Agrega el modelo al contrato `src/shared/lib/prisma/contract.prisma` y ejecuta
    `npm run db:emit` (lee antes `node_modules/@prisma/orm-postgres/skills/prisma-8/`):
 
@@ -111,7 +116,8 @@ lib/event-media.ts     Reel del encabezado (public/media/reel.webm, .mp4 y póst
 ```
 
 - El programa enlaza cada actividad con una zona del croquis (`zoneId`), que debe existir en
-  `floor-plan/lib/plan-places.ts`.
+  `floor-plan/lib/plan-places.ts` (`stage`, `arena`, `raffles`, `food`, `info`, `wc`, `rest`
+  o `entry`). Los ids van en inglés aunque el nombre visible esté en español.
 - La descripción de la portada usa el número real de juegos del catálogo.
 - El reel de `public/media/` es el del diseño: reemplázalo por el video oficial del evento
   conservando los nombres de archivo.

@@ -13,7 +13,7 @@ export const PLAN_LAYOUTS: Record<PlanOrientation, PlanLayout> = {
     zones: {
       arena: { rect: [40, 40, 250, 120], label: "Arena" },
       stage: { rect: [330, 40, 340, 110], label: "Main Stage", fontSize: 28 },
-      sorteos: { rect: [710, 40, 250, 120], label: "Premios" },
+      raffles: { rect: [710, 40, 250, 120], label: "Premios" },
       food: { rect: [40, 480, 290, 80], label: "Comida" },
       info: { rect: [345, 480, 80, 80], label: "Info", fontSize: 14 },
       wc: { rect: [575, 480, 70, 80], label: "WC", fontSize: 14 },
@@ -37,7 +37,7 @@ export const PLAN_LAYOUTS: Record<PlanOrientation, PlanLayout> = {
     zones: {
       stage: { rect: [30, 30, 340, 80], label: "Main Stage", fontSize: 24 },
       arena: { rect: [30, 160, 165, 70], label: "Arena", fontSize: 16 },
-      sorteos: { rect: [205, 160, 165, 70], label: "Premios", fontSize: 16 },
+      raffles: { rect: [205, 160, 165, 70], label: "Premios", fontSize: 16 },
       food: { rect: [30, 768, 165, 50], label: "Comida", fontSize: 15 },
       rest: { rect: [205, 768, 165, 50], label: "Descanso", fontSize: 15 },
       info: { rect: [30, 826, 130, 46], label: "Info", fontSize: 14 },

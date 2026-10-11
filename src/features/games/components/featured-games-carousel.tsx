@@ -50,7 +50,7 @@ export function FeaturedGamesCarousel() {
 
   return (
     <header
-      id="destacados"
+      id="featured"
       aria-roledescription="carrusel"
       aria-label="Juegos del showcase"
       className="grid h-[clamp(640px,calc(100svh-56px),1000px)] grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,7fr)_minmax(0,3fr)] bg-background max-[760px]:h-auto max-[760px]:grid-rows-[auto_auto]"

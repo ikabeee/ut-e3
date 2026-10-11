@@ -8,6 +8,13 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Documentación del modelo de datos (`docs/data-model.md`): diagrama ER en Mermaid para juegos,
+  equipos, stands, check-ins de visitantes sin login, boletos de rifa y afluencia por stand.
+
+## [0.2.0] - 2026-10-10
+
+### Agregado
+
 - Portada (`/`): reel con pausa y código de tiempo, carrusel de destacados con avance
   automático, presentación del evento, torneos y sorteos, exhibidor 3D de juegos, programa
   enlazado al croquis, ubicación con "Copiar dirección" y cierre.
@@ -22,6 +29,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   robots, manifest e icono UTG.
 - Documentación en `docs/` (dónde modificar, arquitectura, datos, sistema de diseño y versiones).
 - Calidad: reglas de SonarQube y TanStack Query en ESLint, Jest + Testing Library y CI.
+- Páginas de error en español (`error.tsx` y `global-error.tsx`) con el estilo del 404 y las
+  acciones "Reintentar" e "Ir al inicio".
 
 ### Cambiado
 
@@ -31,6 +40,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   queda en pausa después de tocarlo.
 - Dependencias: Prisma 8 (`prisma` rc.22, `@prisma/orm-postgres` rc.17, `@prisma/cli-engine`
   0.7.0) y `dotenv` 18.0.7. TypeScript se mantiene en 6.x y ESLint en 9.x.
+- Anclas de la portada en inglés: `#featured`, `#event`, `#games`, `#schedule`, `#floor-plan` y
+  `#venue` (antes `#destacados`, `#evento`, `#juegos`, `#programa`, `#mapa` y `#ubicacion`). La zona
+  "Premios" del croquis ahora es `/floor-plan#raffles` (antes `#sorteos`).
 
 ## [0.1.0]
 

@@ -14,7 +14,29 @@ Después de cualquier cambio corre `npm run lint`, `npm run typecheck` y `npm te
 | Tarjetas de torneos y sorteos (horarios incluidos) | `src/features/event/lib/event-program.ts` (`EVENT_ACTIVITIES`) |
 | Programa del día | `src/features/event/lib/event-program.ts` (`EVENT_SCHEDULE`) |
 | Video del encabezado | Reemplaza `public/media/reel.webm`, `reel.mp4` y `reel.jpg` (mismos nombres) |
+| Ancho mínimo para que el reel se reproduzca solo | `REEL_AUTOPLAY_MIN_WIDTH` en `src/features/event/lib/event-media.ts` |
 | Esquema de la carretera | `src/features/event/components/venue-map.tsx` |
+
+### Publicar una versión ligera del reel
+
+El reel sólo se descarga solo en pantallas de al menos `REEL_AUTOPLAY_MIN_WIDTH` px (1024),
+sin ahorro de datos y sin movimiento reducido; en el resto se ve el póster hasta que alguien
+toca "Reproducir video" (ver `useVideoPlayback` en `src/features/event/hooks/`). Aun así,
+cada descarga cuenta en la red de la sede, así que el video debe ser ligero:
+
+- Resolución de 720p (1280x720), sin audio y de pocos segundos, porque se repite en bucle.
+- Cada archivo pesa **500 KB o menos**.
+- Conserva los mismos nombres en `public/media/`: `reel.webm` (VP9, se usa primero),
+  `reel.mp4` (H.264, respaldo para Safari) y `reel.jpg` (póster, primer cuadro del video).
+
+Por ejemplo, con [FFmpeg](https://ffmpeg.org/) (sube `-crf` si el archivo pasa de 500 KB):
+
+```bash
+ffmpeg -i original.mov -an -vf "scale=-2:720" -c:v libvpx-vp9 -b:v 0 -crf 42 -row-mt 1 public/media/reel.webm
+ffmpeg -i original.mov -an -vf "scale=-2:720" -c:v libx264 -crf 30 -preset slow -movflags +faststart public/media/reel.mp4
+ffmpeg -i original.mov -vf "scale=-2:720" -frames:v 1 -q:v 4 public/media/reel.jpg
+ls -lh public/media/
+```
 
 ## Juegos
 
@@ -34,7 +56,7 @@ Después de cualquier cambio corre `npm run lint`, `npm run typecheck` y `npm te
 
 | Quiero cambiar... | Archivo |
 | --- | --- |
-| Nombre y descripción de zonas (escenario, arena, servicios...) | `src/features/floor-plan/lib/plan-places.ts` (`PLAN_ZONES`) |
+| Nombre y descripción de zonas (escenario, arena, premios, servicios...) | `src/features/floor-plan/lib/plan-places.ts` (`PLAN_ZONES`; ids en inglés: `stage`, `arena`, `raffles`...) |
 | Stands informativos C1-C4 | `src/features/floor-plan/lib/plan-places.ts` (`INFO_STANDS`) |
 | Posición o tamaño de zonas, pasillos y stands | `src/features/floor-plan/lib/plan-layouts.ts` (horizontal y vertical) |
 | Asignar un juego a un stand | Campo `stand` del juego |
@@ -51,12 +73,14 @@ Después de cualquier cambio corre `npm run lint`, `npm run typecheck` y `npm te
 | Utilidades de texto (`type-giant`, `type-mono`, `type-tiny`...) | `src/shared/styles/typography.css` |
 | Logo UTG | `src/shared/components/utg-logo.tsx` e icono `src/app/icon.svg` |
 | Navegación y pie de página | `src/shared/components/site-header.tsx`, `site-nav-links.tsx`, `site-footer.tsx` |
+| Páginas de error (404 y "Algo salió mal") | `src/shared/components/not-found-view.tsx` y `error-view.tsx` |
 
 ## SEO
 
 | Quiero cambiar... | Archivo |
 | --- | --- |
 | Nombre, descripción y URL pública del sitio | `src/shared/lib/site-config.ts` y `NEXT_PUBLIC_SITE_URL` en `.env` |
+| Validación de variables de entorno | `src/shared/lib/env.ts` |
 | Imagen para compartir por defecto | `shareImage` en `src/shared/lib/site-config.ts` |
 | Título y descripción de cada página | `*PageMetadata` / `generate*Metadata` en `src/features/<feature>/pages/` |
 | Páginas del sitemap y reglas de robots | `src/app/sitemap.ts` y `src/app/robots.ts` |

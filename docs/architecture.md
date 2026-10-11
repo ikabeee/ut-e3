@@ -16,6 +16,9 @@ src/features/<feature>/
 src/shared/                 Piezas sin reglas de negocio: tema, botones, hooks genéricos.
 ```
 
+Crea cada carpeta (`lib/`, `hooks/`, `components/`, `pages/`) cuando la necesites; el linter
+valida las que existen. No se dejan carpetas vacías ni `.gitkeep`.
+
 | Feature | Responsabilidad | Usa |
 | --- | --- | --- |
 | `games` | Catálogo, detalle, carrusel de destacados, exhibidor 3D, API `/api/games`. | `event` (fecha y calendario en el detalle) |
@@ -72,7 +75,8 @@ GameRepository (mock hoy, Prisma después)
 
 ## Agregar una feature
 
-1. Copia `src/features/example/` a `src/features/<feature>/` (nombre en inglés).
+1. Copia `src/features/example/` a `src/features/<feature>/` (nombre en inglés) y renombra sus
+   archivos. `example` no se monta en ninguna ruta: es sólo la plantilla, protegida por su prueba de humo.
 2. Datos en `lib/` (tipos, consultas con `"use cache"`, funciones puras con pruebas).
 3. Estado de cliente en `hooks/`, UI en `components/` (HeroUI + tema UTG), contenedor en `pages/`.
 4. Ruta en `src/app/` que sólo exporta la page y su metadata.

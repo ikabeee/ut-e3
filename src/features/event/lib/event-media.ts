@@ -12,6 +12,28 @@ export const EVENT_REEL = {
   framesPerSecond: 30,
 } as const;
 
+/**
+ * Ancho mínimo de pantalla (px) para descargar y reproducir el reel automáticamente. Debajo de
+ * este ancho (teléfonos y tabletas en vertical) sólo se ve el póster y el video se carga al
+ * tocar "Reproducir video".
+ */
+export const REEL_AUTOPLAY_MIN_WIDTH = 1024;
+
+/** Media query de pantalla ancha que habilita la reproducción automática del reel. */
+export const REEL_AUTOPLAY_MEDIA_QUERY = `(min-width: ${REEL_AUTOPLAY_MIN_WIDTH}px)`;
+
+/** Condiciones del navegador que deciden si el reel se descarga y reproduce solo. */
+export interface ReelAutoplayConditions {
+  isWideScreen: boolean;
+  prefersSaveData: boolean;
+  prefersReducedMotion: boolean;
+}
+
+/** El reel sólo arranca solo en pantalla ancha, sin ahorro de datos y sin movimiento reducido. */
+export function canAutoplayReel({ isWideScreen, prefersSaveData, prefersReducedMotion }: ReelAutoplayConditions) {
+  return isWideScreen && !prefersSaveData && !prefersReducedMotion;
+}
+
 /** Código de tiempo del reel en minutos, segundos y cuadros: 75.5 s -> "01:15:15". */
 export function formatTimecode(seconds: number, framesPerSecond: number = EVENT_REEL.framesPerSecond) {
   const pad = (value: number) => String(Math.floor(value)).padStart(2, "0");

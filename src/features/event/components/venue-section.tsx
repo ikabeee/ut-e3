@@ -4,10 +4,10 @@ import { EVENT_VENUE } from "@features/event/lib/event-info";
 import { ActionLink } from "@shared/components/action-link";
 import { PaperCard } from "@shared/components/paper-card";
 
-/** "Ubicación": sede, dirección, acciones y esquema (`#ubicacion`). */
+/** "Ubicación": sede, dirección, acciones y esquema (`#venue`). */
 export function VenueSection() {
   return (
-    <section id="ubicacion" className="section-block">
+    <section id="venue" className="section-block">
       <div className="page-wrap">
         <p className="type-tiny mb-[18px]">{EVENT_VENUE.landmark}</p>
         <h2 className="type-giant">Ubicación</h2>

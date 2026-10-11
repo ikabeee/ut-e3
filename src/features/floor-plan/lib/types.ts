@@ -6,7 +6,7 @@ import type { Game } from "@features/games/lib/types";
  */
 export type PlanCategory = "team" | "info" | "act" | "srv";
 
-export type ZoneId = "stage" | "arena" | "sorteos" | "food" | "info" | "wc" | "rest" | "entry";
+export type ZoneId = "stage" | "arena" | "raffles" | "food" | "info" | "wc" | "rest" | "entry";
 
 /** Zona del recinto (escenario, arena, servicios, entrada...). */
 export interface PlanZone {

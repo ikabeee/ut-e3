@@ -38,6 +38,10 @@ npm run dev            # http://localhost:3000
 
 Mientras los juegos sean mock no hace falta una base de datos para desarrollar ni para el build.
 
+El build de producción exige `NEXT_PUBLIC_SITE_URL` (URL absoluta `http(s)` sin `/` final,
+por ejemplo `https://ejemplo.com`): si falta o es inválida, `npm run build` falla con un
+mensaje que explica el problema. En desarrollo y pruebas se usa `http://localhost:3000`.
+
 ## Scripts
 
 | Script | Qué hace |
@@ -70,7 +74,7 @@ src/
 └── shared/               # Código transversal sin reglas de negocio (tema, botones, hooks)
 ```
 
-Cada feature tiene `lib/`, `hooks/`, `components/` y `pages/`. Las reglas completas están en
+Cada feature se organiza en `lib/`, `hooks/`, `components/` y `pages/` (crea cada carpeta cuando la necesites). Las reglas completas están en
 [`AGENTS.md`](./AGENTS.md).
 
 ## Documentación
@@ -80,8 +84,10 @@ Cada feature tiene `lib/`, `hooks/`, `components/` y `pages/`. Las reglas comple
 | [`docs/where-to-edit.md`](./docs/where-to-edit.md) | Dónde cambiar textos, fechas, juegos, colores, el croquis o el reel. |
 | [`docs/architecture.md`](./docs/architecture.md) | Cómo está construido: capas, flujo de datos, patrones y principios SOLID. |
 | [`docs/data-sources.md`](./docs/data-sources.md) | Datos mock y pasos para conectar Prisma. |
+| [`docs/data-model.md`](./docs/data-model.md) | Modelo de datos (diagrama ER): juegos, equipos, stands, check-ins y rifa. |
 | [`docs/design-system.md`](./docs/design-system.md) | Tema UTG sobre HeroUI: colores, tipografía, botones y efectos. |
 | [`docs/versioning.md`](./docs/versioning.md) | Versiones, CHANGELOG y cómo publicar un release. |
+| [`docs/audit.md`](./docs/audit.md) | Auditoría técnica: capacidad, PWA, mantenibilidad y plan de acción. |
 | [`AGENTS.md`](./AGENTS.md) | Reglas del proyecto (también las leen los agentes de IA). |
 | [`CONTRIBUTING.md`](./CONTRIBUTING.md) | Flujo de trabajo, commits y Pull Requests. |
 

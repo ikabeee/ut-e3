@@ -77,9 +77,10 @@ src/
         └── query/            # getQueryClient() y dehydrateForPrerender() de TanStack Query
 ```
 
-### Anatomía obligatoria de una feature
+### Anatomía de una feature
 
-Toda feature tiene **siempre** estas cuatro carpetas (si una está vacía, deja un `.gitkeep`):
+Una feature se organiza en cuatro carpetas. Crea cada carpeta (`lib/`, `hooks/`, `components/`,
+`pages/`) cuando la necesites; el linter valida las que existen. No dejes carpetas vacías ni `.gitkeep`.
 
 ```
 src/features/<feature>/
@@ -91,7 +92,7 @@ src/features/<feature>/
 
 | Carpeta | Responsabilidad | Puede importar |
 | --- | --- | --- |
-| `lib/` | Tipos de dominio (`types.ts`), constantes, utilidades puras y consultas a la BD (`*-queries.ts` con `import "server-only"` y `await connection()`). Mapea las filas de Prisma a los tipos de dominio. | `@shared/lib/*` |
+| `lib/` | Tipos de dominio (`types.ts`), constantes, utilidades puras y consultas a la BD (`*-queries.ts` con `import "server-only"` y `"use cache"` + `cacheLife(...)` o `await connection()`). Mapea las filas de Prisma a los tipos de dominio. | `@shared/lib/*` |
 | `hooks/` | Estado y lógica de interacción en el cliente. Sin JSX. | `lib/` (sólo tipos y utilidades puras), React |
 | `components/` | UI. Reciben datos por props; **no consultan la BD**. Agrega `"use client"` sólo si usan hooks o eventos. | `lib/` (tipos/constantes), `hooks/`, `@shared/components/*` |
 | `pages/` | **Contenedores**: obtienen los datos (vía `lib/`), definen `Suspense`/`notFound` y componen componentes. Sin estilos complejos ni lógica de negocio. Exportan también su `Metadata`. | `lib/`, `components/`, `@shared/components/*` |
@@ -101,31 +102,85 @@ src/features/<feature>/
 Una page de feature sólo orquesta: pide datos, maneja estados de carga/no encontrado y
 compone componentes. Toda la UI vive en `components/`.
 
+La feature `example` es el scaffold de referencia y contiene exactamente esto:
+
+```
+src/features/example/
+├── lib/
+│   ├── types.ts                  # ExampleMessage
+│   └── example-queries.ts        # getExampleMessage(): "server-only" + "use cache" + cacheLife
+├── hooks/
+│   ├── use-toggle.ts             # useToggle(): estado del cliente, sin JSX
+│   └── use-toggle.test.ts
+├── components/
+│   ├── example-card.tsx          # ExampleCard: recibe `message` por props (Card de HeroUI)
+│   ├── example-card.test.tsx
+│   ├── example-toggle.tsx        # ExampleToggle: "use client", usa useToggle (Button + onPress)
+│   └── example-toggle.test.tsx
+└── pages/
+    ├── example-page.tsx          # ExamplePage + examplePageMetadata
+    └── example-page.test.tsx     # Prueba de humo de la composición
+```
+
+```ts
+// src/features/example/lib/example-queries.ts
+import "server-only";
+import { cacheLife } from "next/cache";
+import type { ExampleMessage } from "@features/example/lib/types";
+
+// Con Prisma, aquí iría la consulta (`db.orm.public.<Model>`) y el mapeo de la fila al tipo de
+// dominio. "use cache" + cacheLife permite prerenderizar la page sin `<Suspense>`.
+export async function getExampleMessage(): Promise<ExampleMessage> {
+  "use cache";
+  cacheLife("hours");
+
+  return {
+    title: "Feature de ejemplo",
+    description: "Copia src/features/example para crear tu propia feature.",
+  };
+}
+```
+
 ```tsx
 // src/features/example/pages/example-page.tsx
+import type { Metadata } from "next";
+import { ExampleCard } from "@features/example/components/example-card";
+import { ExampleToggle } from "@features/example/components/example-toggle";
+import { getExampleMessage } from "@features/example/lib/example-queries";
+
+// Al copiar la feature, agrega `alternates: { canonical: "/<ruta>" }` y la ruta a `src/app/sitemap.ts`.
+export const examplePageMetadata: Metadata = {
+  title: "Ejemplo",
+  description: "Feature de ejemplo para crear nuevas secciones del showcase.",
+};
+
 export async function ExamplePage() {
-  const message = await getExampleMessage();   // lib/
+  const message = await getExampleMessage(); // lib/
 
   return (
-    <main className="p-8">
-      <ExampleCard message={message} />         {/* components/ */}
+    <main className="page-wrap flex flex-col gap-6 py-8">
+      <ExampleCard message={message} />
+      <ExampleToggle />
     </main>
   );
 }
 ```
 
-Si la page consulta la base de datos, envuelve la parte que espera los datos en `<Suspense>`
-(ver "Convenciones de Next.js 16.4").
+Si la consulta no se cachea (usa `await connection()`), envuelve la parte que espera los datos en
+`<Suspense>` (ver "Convenciones de Next.js 16.4").
 
-Los archivos de `src/app/` sólo enlazan la ruta con la page de la feature:
+**`example` no se monta en ninguna ruta**: no existe `src/app/example/` y no aparece en el sitio
+ni en el sitemap. Su prueba de humo (`example-page.test.tsx`) es lo que garantiza que sigue
+funcionando. Cuando copies la feature, enlázala con una ruta creando un archivo en `src/app/` que
+sólo exporte la page y su metadata:
 
 ```tsx
-// src/app/page.tsx
-import { ExamplePage } from "@features/example/pages/example-page";
+// src/app/<ruta>/page.tsx  (por ejemplo, src/app/teams/page.tsx para la feature teams)
+import { TeamsPage } from "@features/teams/pages/teams-page";
 
-export { examplePageMetadata as metadata } from "@features/example/pages/example-page";
+export { teamsPageMetadata as metadata } from "@features/teams/pages/teams-page";
 
-export default ExamplePage;
+export default TeamsPage;
 ```
 
 ### Reglas de dependencias
@@ -175,24 +230,29 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
   Las pages terminan en `Page` y su metadata en `PageMetadata` (`examplePageMetadata`).
 - Hooks con prefijo `use`: `useToggle`.
 - Funciones de datos con verbo: `getExampleMessage`, `listGames`, `getGameBySlug`.
+- Los ids de HTML, las anclas (`#featured`, `#schedule`) y los ids de datos (`zoneId: "raffles"`) también van en inglés.
 - Sólo el contenido visible para el usuario (textos de la UI) y la documentación van en español.
 
 ### Agregar una feature nueva
 
-1. Copia `src/features/example/` a `src/features/<feature>/` (nombre en inglés) y renombra sus archivos,
-   o crea las carpetas `lib/`, `hooks/`, `components/` y `pages/`.
+1. Copia `src/features/example/` a `src/features/<feature>/` (nombre en inglés) y renombra sus
+   archivos, funciones y pruebas (`ExampleCard` -> `TeamCard`, `examplePageMetadata` ->
+   `teamsPageMetadata`...). Borra lo que no uses: crea cada carpeta sólo cuando la necesites.
 2. Si persiste datos, agrega los modelos a `contract.prisma`, ejecuta `npm run db:emit` y
    escribe las consultas en `lib/<feature>-queries.ts`.
 3. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`.
-4. Crea la ruta en `src/app/` que sólo renderiza la page.
+4. Crea la ruta en `src/app/<ruta>/page.tsx` que sólo renderiza la page (ver el ejemplo de arriba),
+   agrega `alternates.canonical` a su metadata y, si debe indexarse, la ruta a `src/app/sitemap.ts`.
 
 ## Documentación del proyecto
 
 - `docs/where-to-edit.md`: dónde cambiar cada contenido o estilo.
 - `docs/architecture.md`: capas, flujo de datos, rendimiento y SOLID.
 - `docs/data-sources.md`: datos mock y pasos para conectar Prisma.
+- `docs/data-model.md`: diagrama ER propuesto (juegos, equipos, stands, check-ins y rifa).
 - `docs/design-system.md`: tema UTG sobre HeroUI.
 - `docs/versioning.md` y `CHANGELOG.md`: versionado semántico y releases con git flow.
+- `docs/audit.md`: auditoría técnica (capacidad, PWA, mantenibilidad) y plan de acción por fases.
 
 Si cambias algo visible, agrega una línea en `[Sin publicar]` de `CHANGELOG.md`. Si cambias
 dónde vive un contenido, actualiza `docs/where-to-edit.md`.
