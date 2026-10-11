@@ -116,25 +116,27 @@
   }
 }
 
-/* Flechas de los botones: se desplazan hacia su dirección al pasar el mouse. */
+/* Flechas de los botones: se desplazan hacia su dirección al pasar el mouse (sólo con mouse). */
 @utility arrow-glyph {
   display: inline-block;
   transition: transform 0.32s cubic-bezier(0.3, 1.6, 0.5, 1);
 
-  :hover > &[data-direction="ne"] {
-    transform: translate(3px, -3px);
-  }
+  @media (hover: hover) {
+    :hover > &[data-direction="ne"] {
+      transform: translate(3px, -3px);
+    }
 
-  :hover > &[data-direction="s"] {
-    transform: translateY(3px);
-  }
+    :hover > &[data-direction="s"] {
+      transform: translateY(3px);
+    }
 
-  :hover > &[data-direction="e"] {
-    transform: translateX(4px);
-  }
+    :hover > &[data-direction="e"] {
+      transform: translateX(4px);
+    }
 
-  :hover > &[data-direction="w"] {
-    transform: translateX(-4px);
+    :hover > &[data-direction="w"] {
+      transform: translateX(-4px);
+    }
   }
 }
 
@@ -146,9 +148,11 @@
     background-size 0.3s var(--ease-wipe),
     color 0.2s;
 
-  &:hover {
-    background-size: 100% 1px;
-    color: var(--accent);
+  @media (hover: hover) {
+    &:hover {
+      background-size: 100% 1px;
+      color: var(--accent);
+    }
   }
 }
 
@@ -162,13 +166,29 @@
     color 0.18s 0.06s,
     transform 0.12s;
 
-  &:hover {
-    background-size: 100% 100%;
-    color: var(--wipe-ink, var(--utg-black));
+  @media (hover: hover) {
+    &:hover {
+      background-size: 100% 100%;
+      color: var(--wipe-ink, var(--utg-black));
+    }
   }
 
   &:active {
     transform: translateY(1px);
+  }
+}
+
+/*
+ * Área táctil mínima de 44x44 px sin cambiar el tamaño visual: un pseudo-elemento invisible
+ * crece hacia afuera lo que le falte al elemento. El elemento debe estar posicionado
+ * (`relative` o `absolute`) y ningún contenedor cercano debe recortar su desborde.
+ */
+@utility touch-target {
+  &::before {
+    content: "";
+    position: absolute;
+    inset-block: min(0px, calc((100% - 44px) / 2));
+    inset-inline: min(0px, calc((100% - 44px) / 2));
   }
 }
 
