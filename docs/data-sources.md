@@ -98,12 +98,16 @@ Si agregas o cambias un campo de `Game` que el navegador necesita, actualiza tam
 
 ## Croquis (`src/features/floor-plan`)
 
-El croquis no tiene datos propios en la base: combina contenido fijo del recinto con los juegos.
+El croquis no tiene datos propios en la base: combina contenido fijo del recinto con los
+ocupantes de los stands de equipo. No conoce los juegos: su page los convierte con
+`toStandOccupant` (`games/lib/game-stand.ts`).
 
 ```
+lib/types.ts          `StandOccupant`: lo que el croquis necesita de quien ocupa un stand
 lib/plan-places.ts    Zonas (escenario, arena, servicios...) y stands informativos C1-C4
 lib/plan-layouts.ts   Geometría del SVG en horizontal (wide) y vertical (tall)
-lib/plan-items.ts     Une zonas, stands informativos y juegos (cada juego ocupa su `stand`)
+lib/plan-items.ts     Une zonas, stands informativos y ocupantes (`buildPlanItems(occupants)`)
+lib/plan-fixtures.ts  Ocupantes de prueba (las pruebas del croquis no dependen de `games`)
 ```
 
 - Para **asignar un stand** a un juego sólo cambia el campo `stand` del juego. El código debe
