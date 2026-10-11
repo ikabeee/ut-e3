@@ -1,4 +1,4 @@
-import { listGames } from "@features/games/lib/games-queries";
+import { listGames } from "@features/games/lib/server/games-queries";
 
 /** Lista de juegos para TanStack Query en el navegador (`fetchGames`). */
 export async function GET() {

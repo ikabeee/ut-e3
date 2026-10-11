@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ExampleCard } from "@features/example/components/example-card";
 import { ExampleToggle } from "@features/example/components/example-toggle";
-import { getExampleMessage } from "@features/example/lib/example-queries";
+import { getExampleMessage } from "@features/example/lib/server/example-queries";
 
 // Al copiar la feature, agrega `alternates: { canonical: "/<ruta>" }` y la ruta a `src/app/sitemap.ts`.
 export const examplePageMetadata: Metadata = {
