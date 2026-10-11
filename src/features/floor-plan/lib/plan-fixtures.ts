@@ -1,4 +1,4 @@
-import type { StandOccupant } from "@features/floor-plan/lib/types";
+import type { PlanZoneTimes, StandOccupant } from "@features/floor-plan/lib/types";
 
 /**
  * Ocupantes de prueba para las pruebas del croquis. El croquis no conoce los juegos, así que sus
@@ -11,3 +11,9 @@ export const STAND_OCCUPANT_FIXTURES: readonly StandOccupant[] = [
   { stand: "B1", title: "Xibalbá", subtitle: "Plataformas", description: "Descenso al inframundo maya.", cover: null },
   { stand: "B7", title: "Lucha Pixel", subtitle: "Pelea", description: "Lucha libre en pixel art.", cover: null },
 ];
+
+/** Horarios de prueba que citan las zonas (en el sitio vienen del programa de `event`). */
+export const PLAN_ZONE_TIMES_FIXTURE: PlanZoneTimes = {
+  tournamentSignupDeadline: "11:30",
+  raffleTimes: ["14:00", "18:00"],
+};

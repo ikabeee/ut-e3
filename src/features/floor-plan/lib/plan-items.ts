@@ -1,11 +1,13 @@
+import { FLOOR_PLAN_COPY, PLAN_ZONE_SCHEDULE_NOTES } from "@features/floor-plan/lib/floor-plan-copy";
 import { INFO_STANDS, PLAN_CATEGORIES, PLAN_ZONES } from "@features/floor-plan/lib/plan-places";
-import type { PlanCategory, PlanItem, StandOccupant, ZoneId } from "@features/floor-plan/lib/types";
+import type { PlanCategory, PlanItem, PlanZoneTimes, StandOccupant, ZoneId } from "@features/floor-plan/lib/types";
 
 /**
  * Todo lo seleccionable del croquis, en el orden del directorio: stands de equipo (en el orden
- * en que llegan los ocupantes), stands informativos y zonas.
+ * en que llegan los ocupantes), stands informativos y zonas. `times` son los horarios del
+ * programa que citan algunas zonas.
  */
-export function buildPlanItems(occupants: readonly StandOccupant[]): PlanItem[] {
+export function buildPlanItems(occupants: readonly StandOccupant[], times: PlanZoneTimes): PlanItem[] {
   const teamStands = occupants.map(
     (occupant): PlanItem => ({
       id: occupant.stand,
@@ -24,7 +26,7 @@ export function buildPlanItems(occupants: readonly StandOccupant[]): PlanItem[] 
       category: "info",
       code,
       title: stand.title,
-      subtitle: "Informativo",
+      subtitle: FLOOR_PLAN_COPY.infoStandSubtitle,
       description: stand.description,
       cover: null,
     }),
@@ -32,13 +34,14 @@ export function buildPlanItems(occupants: readonly StandOccupant[]): PlanItem[] 
 
   const zones = (Object.keys(PLAN_ZONES) as ZoneId[]).map((id): PlanItem => {
     const zone = PLAN_ZONES[id];
+    const scheduleNote = PLAN_ZONE_SCHEDULE_NOTES[id]?.(times);
     return {
       id,
       category: zone.category,
       code: "",
       title: zone.title,
       subtitle: zone.kind,
-      description: zone.description,
+      description: scheduleNote ? `${zone.description} ${scheduleNote}` : zone.description,
       cover: null,
     };
   });
@@ -49,7 +52,7 @@ export function buildPlanItems(occupants: readonly StandOccupant[]): PlanItem[] 
 /** Antetítulo del panel: "Stand A1 · Acción", "Stand C2 · Informativo" o el tipo de zona. */
 export function getItemKicker(item: PlanItem) {
   if (item.category === "team" || item.category === "info") {
-    return `Stand ${item.code} · ${item.subtitle}`;
+    return FLOOR_PLAN_COPY.standKicker(item.code, item.subtitle);
   }
   return item.subtitle;
 }

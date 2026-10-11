@@ -17,6 +17,15 @@ export interface PlanZone {
   description: string;
 }
 
+/**
+ * Horarios del programa que mencionan las zonas del croquis. El croquis no conoce el programa:
+ * la page los pasa desde `event` (`getEventContent().highlights` tiene esta forma).
+ */
+export interface PlanZoneTimes {
+  tournamentSignupDeadline: string;
+  raffleTimes: readonly string[];
+}
+
 /** Stand que no es de un equipo (división, patrocinadores...). */
 export interface InfoStand {
   title: string;

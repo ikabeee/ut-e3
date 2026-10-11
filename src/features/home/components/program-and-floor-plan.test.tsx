@@ -1,7 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { EVENT_INFO } from "@features/event/lib/event-info";
-import { EVENT_SCHEDULE } from "@features/event/lib/event-program";
+import { getEventContent } from "@features/event/lib/event-content";
 import { buildPlanItems } from "@features/floor-plan/lib/plan-items";
 import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 import { toStandOccupant } from "@features/games/lib/game-stand";
@@ -9,12 +8,16 @@ import { MOCK_GAMES } from "@features/games/lib/mock-games";
 import { ProgramAndFloorPlan } from "@features/home/components/program-and-floor-plan";
 
 function renderSection() {
-  const items = buildPlanItems(MOCK_GAMES.map((game) => toStandOccupant(game, null)));
+  const event = getEventContent();
+  const items = buildPlanItems(
+    MOCK_GAMES.map((game) => toStandOccupant(game, null)),
+    event.highlights,
+  );
 
   return render(
     <ProgramAndFloorPlan
-      scheduleTitle={EVENT_INFO.shortDateLabel}
-      schedule={EVENT_SCHEDULE}
+      scheduleTitle={event.info.shortDateLabel}
+      schedule={event.schedule}
       items={items}
       layouts={PLAN_LAYOUTS}
     />,

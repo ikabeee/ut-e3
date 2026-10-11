@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { FloorPlanDrawing } from "@features/floor-plan/components/floor-plan-drawing";
 import { PlanItemCard } from "@features/floor-plan/components/plan-item-card";
 import { PlanLegend } from "@features/floor-plan/components/plan-legend";
+import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
 import { indexItems } from "@features/floor-plan/lib/plan-items";
 import type { PlanItem, PlanLayout, PlanOrientation } from "@features/floor-plan/lib/types";
 
@@ -40,7 +41,7 @@ export function FloorPlanOverview({ items, layouts, selectedId, onSelect }: Read
               viewBox={`0 0 ${layout.width} ${layout.height}`}
               preserveAspectRatio="xMidYMid meet"
               role="group"
-              aria-label="Croquis del evento con zonas y stands"
+              aria-label={FLOOR_PLAN_COPY.overview.mapLabel}
               className={`h-auto w-full max-w-full ${className}`}
             >
               <FloorPlanDrawing

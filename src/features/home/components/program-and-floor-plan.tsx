@@ -5,6 +5,7 @@ import { EventSchedule } from "@features/event/components/event-schedule";
 import type { ScheduleEntry } from "@features/event/lib/types";
 import { FloorPlanOverview } from "@features/floor-plan/components/floor-plan-overview";
 import type { PlanItem, PlanLayout, PlanOrientation } from "@features/floor-plan/lib/types";
+import { HOME_COPY } from "@features/home/lib/home-copy";
 import { usePrefersReducedMotion } from "@shared/hooks/use-prefers-reduced-motion";
 
 /** Stand seleccionado al cargar la portada. */
@@ -40,7 +41,7 @@ export function ProgramAndFloorPlan({ scheduleTitle, schedule, items, layouts }:
       <EventSchedule title={scheduleTitle} entries={schedule} zoneTitles={zoneTitles} onLocate={locateZone} />
       <section ref={mapRef} id="floor-plan" className="section-block">
         <div className="page-wrap">
-          <h2 className="type-giant">Croquis</h2>
+          <h2 className="type-giant">{HOME_COPY.floorPlanHeading}</h2>
           <FloorPlanOverview items={items} layouts={layouts} selectedId={selectedId} onSelect={setSelectedId} />
         </div>
       </section>

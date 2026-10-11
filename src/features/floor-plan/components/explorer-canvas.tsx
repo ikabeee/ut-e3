@@ -4,6 +4,7 @@ import { useRef, type PointerEvent } from "react";
 import { cn } from "@heroui/react";
 import { FloorPlanDrawing, type FloorPlanSelectionProps } from "@features/floor-plan/components/floor-plan-drawing";
 import { usePlanGestures } from "@features/floor-plan/hooks/use-plan-gestures";
+import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
 import type { PlanViewport } from "@features/floor-plan/hooks/use-plan-viewport";
 import { toViewBoxAttribute } from "@features/floor-plan/lib/plan-viewport";
 import type { PlanLayout, PlanOrientation } from "@features/floor-plan/lib/types";
@@ -47,7 +48,7 @@ export function ExplorerCanvas({
       viewBox={toViewBoxAttribute(viewport.viewBox)}
       preserveAspectRatio="xMidYMid meet"
       role="application"
-      aria-label="Croquis interactivo. Arrastra para mover, usa la rueda o pellizca para acercar."
+      aria-label={FLOOR_PLAN_COPY.explorer.mapLabel}
       tabIndex={0}
       className={cn(
         "h-auto w-full cursor-grab focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent",
