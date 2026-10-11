@@ -113,6 +113,8 @@ lib/plan-fixtures.ts  Ocupantes de prueba (las pruebas del croquis no dependen d
 - Para **asignar un stand** a un juego sólo cambia el campo `stand` del juego. El código debe
   existir en `plan-layouts.ts` (pasillos A1-A9, B1-B9 y central C1-C4).
 - Para **agregar un stand**, aumenta `rows` o `columns` del bloque en ambas orientaciones.
+- Los componentes del croquis reciben `items` (`buildPlanItems`) y `layouts` (`PLAN_LAYOUTS`) por
+  props desde la page; no importan las zonas ni la geometría.
 - Si algún día las zonas vienen de la base de datos, crea un repositorio como el de juegos y
   conserva `buildPlanItems` como punto de unión.
 
@@ -124,7 +126,13 @@ Es contenido fijo del sitio, no datos de la base:
 lib/event-info.ts      Fecha, horario, sede, dirección, Google Calendar y Google Maps
 lib/event-program.ts   Textos de la portada, torneos y sorteos, y el programa del día
 lib/event-media.ts     Reel del encabezado (public/media/reel.webm, .mp4 y póster .jpg)
+lib/event-content.ts   getEventContent(): único punto de lectura de todo lo anterior
 ```
+
+Los componentes de `event` no importan esas constantes: la portada (`home/pages/home-page.tsx`)
+llama una vez a `getEventContent()` y pasa a cada sección sólo lo que usa. Si el contenido pasa
+a la base de datos, `getEventContent()` se convierte en una consulta cacheada en
+`lib/server/event-queries.ts` y ningún componente cambia.
 
 - El programa enlaza cada actividad con una zona del croquis (`zoneId`), que debe existir en
   `floor-plan/lib/plan-places.ts` (`stage`, `arena`, `raffles`, `food`, `info`, `wc`, `rest`
