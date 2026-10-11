@@ -423,7 +423,7 @@ El diseño (carpeta UTG) se traduce a HeroUI en `src/shared/styles/`:
 | --- | --- |
 | `theme.css` | Paleta `--utg-*` y su mapeo a las variables de HeroUI (`--accent`, `--surface`, `--border`, `--muted`...), radio 0, tipografías y colores extra de Tailwind (`bg-paper`, `text-copy`, `accent-deep`...). |
 | `typography.css` | Estilos base y utilidades del diseño: `page-wrap`, `type-mono`, `type-tiny`, `type-giant`, `type-wide`, `section-block`, `scrollbar-none`. |
-| `components.css` | Ajustes BEM de HeroUI (variantes de `Button`) y efectos: `arrow-glyph`, `link-wipe`, `fill-wipe`, capas de glitch y animaciones `animate-rise` / `animate-flash`. |
+| `components.css` | Ajustes BEM de HeroUI (variantes de `Button`), `touch-target` (área táctil de 44x44 px) y efectos: `arrow-glyph`, `link-wipe`, `fill-wipe`, capas de glitch y animaciones `animate-rise` / `animate-flash`. |
 
 Variantes de `Button` según el diseño: `primary` (bloque azul), `outline` (borde blanco),
 `tertiary` (negro sin borde), `ghost` (flechas) y `size="lg"` para la "pestaña" sin borde.
@@ -431,6 +431,25 @@ Para enlaces con apariencia de botón usa `ActionLink` (`@shared/components/acti
 para botones con la etiqueta animada, `ActionButton`; para flechas de carrusel, `ArrowButton`.
 Las tipografías (Syncopate, Archivo, JetBrains Mono y Martian Mono) se cargan con `next/font`
 en `src/shared/lib/fonts.ts`.
+
+## Móvil primero
+
+La mayoría de los visitantes usa el sitio en su teléfono dentro de la sede. Todo cambio visible
+cumple estos criterios (revísalos a 360 y 390 px, en horizontal y en escritorio a 1440 px):
+
+- **Sin scroll horizontal** a 360 y 390 px (`document.documentElement.scrollWidth <= innerWidth`).
+  `body` oculta el desborde, así que revisa también que nada quede cortado en el borde.
+- **Áreas táctiles de al menos 44x44 px.** Si el diseño no permite agrandar el elemento, usa la
+  utilidad `touch-target` (pseudo-elemento invisible; el elemento debe ser `relative` o `absolute`
+  y su contenedor no debe recortarlo). Para crecer sólo en pantallas táctiles usa `pointer-coarse:`.
+- **Campos de texto de al menos 16 px**: con menos, Safari en iOS hace zoom al enfocar.
+- **Nada sólo con `hover`.** Lo que aparece o se activa al pasar el mouse necesita una alternativa
+  táctil (tocar, foco o un botón). Los efectos de `hover` propios van dentro de
+  `@media (hover: hover)` (la variante `hover:` de Tailwind ya lo hace).
+- **Alturas con `svh`/`dvh`**, no con `vh`: en móvil `100vh` queda debajo de la barra del navegador.
+  Respeta `safe-area-inset-*` en lo que toca los bordes (la barra fija y el pie ya lo hacen).
+- **Nada pesado precargado en móvil**: videos e imágenes grandes sin `preload` ni `priority`
+  salvo el contenido principal de la primera pantalla.
 
 ## TypeScript 6
 

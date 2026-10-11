@@ -36,7 +36,7 @@ export function SiteNavLinks() {
             <Link
               href={link.href}
               aria-current={isActive ? "page" : undefined}
-              className={cn("link-wipe whitespace-nowrap no-underline", isActive && "text-accent")}
+              className={cn("link-wipe touch-target relative whitespace-nowrap no-underline", isActive && "text-accent")}
             >
               <ScrambleText text={link.label} />
             </Link>

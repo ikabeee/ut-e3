@@ -60,7 +60,18 @@ Definidos en `src/shared/styles/components.css`:
 - **Interferencia** en el icono del CTA principal: `glitch-layer-*`.
 - Animaciones `animate-rise` (títulos) y `animate-flash` (stands).
 
-Todo respeta `prefers-reduced-motion`.
+Todo respeta `prefers-reduced-motion`. Los efectos de `hover` sólo se activan con mouse
+(`@media (hover: hover)`), para que en pantallas táctiles no se queden "pegados" tras un toque.
+
+## Áreas táctiles
+
+Todo elemento interactivo mide al menos 44x44 px en pantallas táctiles (ver "Móvil primero" en
+`AGENTS.md`):
+
+- `touch-target` (`components.css`): pseudo-elemento invisible que amplía el área sin cambiar el
+  tamaño visual. El elemento debe ser `relative` o `absolute`. `ArrowButton` ya lo incluye.
+- `pointer-coarse:min-h-11`: agranda el elemento sólo con dedo (filtros y directorio del croquis).
+- Campos de texto: `text-base` (16 px) y, si el diseño pide 14 px, `pointer-fine:text-sm`.
 
 ## Notas de implementación
 

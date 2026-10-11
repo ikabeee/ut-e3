@@ -18,7 +18,7 @@ export function RelatedGames({ games }: Readonly<RelatedGamesProps>) {
         <h2 id="related-games-heading" className={GAME_SECTION_HEADING_CLASS}>
           Más juegos
         </h2>
-        <Link href={routes.games} className="type-tiny text-accent no-underline">
+        <Link href={routes.games} className="type-tiny touch-target relative text-accent no-underline">
           Ver todos ↗
         </Link>
       </div>

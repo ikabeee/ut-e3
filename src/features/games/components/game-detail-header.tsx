@@ -11,7 +11,7 @@ interface GameDetailHeaderProps {
 export function GameDetailHeader({ game }: Readonly<GameDetailHeaderProps>) {
   return (
     <>
-      <Link href={routes.games} className="type-tiny mb-[18px] inline-block text-muted no-underline hover:text-accent">
+      <Link href={routes.games} className="type-tiny touch-target relative mb-[18px] inline-block text-muted no-underline hover:text-accent">
         ← Todos los juegos
       </Link>
       <header className="flex flex-col gap-[10px]">
@@ -26,7 +26,7 @@ export function GameDetailHeader({ game }: Readonly<GameDetailHeaderProps>) {
         <Link
           href={getGamePath(game.slug)}
           aria-current="page"
-          className="-mb-px border-b-2 border-accent py-3 text-accent no-underline"
+          className="touch-target relative -mb-px border-b-2 border-accent py-3 text-accent no-underline"
         >
           Información general
         </Link>

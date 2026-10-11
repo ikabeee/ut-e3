@@ -32,7 +32,7 @@ export function EventSchedule({ entries, zoneTitles, onLocate }: Readonly<EventS
               <button
                 type="button"
                 onClick={() => onLocate(entry.zoneId)}
-                className="type-tiny link-wipe cursor-pointer border-0 p-0 pb-[3px] text-right text-muted max-[560px]:col-start-2 max-[560px]:text-left"
+                className="type-tiny link-wipe touch-target relative cursor-pointer border-0 p-0 pb-[3px] text-right text-muted max-[560px]:col-start-2 max-[560px]:text-left"
               >
                 <ScrambleText text={zoneTitles.get(entry.zoneId) ?? entry.zoneId} /> <ArrowGlyph direction="ne" />
               </button>
