@@ -10,7 +10,7 @@ const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const createJestConfig = nextJest({ dir: rootDir });
 
 /**
- * Traduce los path aliases de tsconfig.json (`@features/*`, `@shared/*`) a
+ * Traduce los path aliases de tsconfig.json (`@features/*`, `@shared/*`, `@app/*`) a
  * `moduleNameMapper`, para que los aliases se declaren en un único lugar.
  */
 function aliasesFromTsconfig() {
@@ -31,8 +31,14 @@ const config = {
   testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   moduleNameMapper: aliasesFromTsconfig(),
+  // Las pruebas viven en `__tests__/`; ahí, lo que no termina en `.test` es un helper de prueba.
   testMatch: ["<rootDir>/src/**/*.test.{ts,tsx}"],
-  collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.d.ts", "!src/shared/lib/prisma/**"],
+  collectCoverageFrom: [
+    "src/**/*.{ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/**/__tests__/**",
+    "!src/shared/lib/prisma/**",
+  ],
   coverageReporters: ["text-summary", "lcov"],
 };
 

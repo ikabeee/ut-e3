@@ -69,6 +69,7 @@ src/
 │   ├── games/                # Catálogo (/games), detalle (/games/[slug]), API y carruseles
 │   └── home/                 # Portada (/): compone event, games y floor-plan
 └── shared/                   # Código transversal SIN reglas de negocio
+    ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
     ├── components/           # QueryProvider, navegación, pie, botones del diseño...
     ├── hooks/                # Hooks genéricos (movimiento reducido, estado en la URL...)
     ├── styles/               # Tema UTG de HeroUI, tipografía y efectos
@@ -79,11 +80,13 @@ src/
 
 ### Anatomía de una feature
 
-Una feature se organiza en cuatro carpetas. Crea cada carpeta (`lib/`, `hooks/`, `components/`,
-`pages/`) cuando la necesites; el linter valida las que existen. No dejes carpetas vacías ni `.gitkeep`.
+Una feature se organiza en cuatro carpetas, más `__tests__/` para sus pruebas. Crea cada carpeta
+(`lib/`, `hooks/`, `components/`, `pages/`) cuando la necesites; el linter valida las que existen.
+No dejes carpetas vacías ni `.gitkeep`.
 
 ```
 src/features/<feature>/
+├── __tests__/     # Pruebas, con las mismas subcarpetas que el código (ver "Pruebas").
 ├── lib/           # Tipos, constantes, utilidades y acceso a datos (<feature>-queries.ts).
 ├── hooks/         # Hooks de React de la feature (use-<algo>.ts).
 ├── components/    # Componentes de presentación de la feature.
@@ -97,6 +100,19 @@ src/features/<feature>/
 | `components/` | UI. Reciben datos por props; **no consultan la BD**. Agrega `"use client"` sólo si usan hooks o eventos. | `lib/` (tipos/constantes), `hooks/`, `@shared/components/*` |
 | `pages/` | **Contenedores**: obtienen los datos (vía `lib/`), definen `Suspense`/`notFound` y componen componentes. Sin estilos complejos ni lógica de negocio. Exportan también su `Metadata`. | `lib/`, `components/`, `@shared/components/*` |
 
+### Pruebas
+
+Las pruebas viven en la carpeta `__tests__/` de cada feature, que repite las subcarpetas del
+código: `lib/game-filters.ts` -> `__tests__/lib/game-filters.test.ts`. Lo mismo aplica a
+`src/shared/__tests__/` y a `src/app/__tests__/` (Next.js no enruta las carpetas que empiezan con `_`).
+
+- Jest corre todo archivo `*.test.ts(x)` dentro de `src/`. En `__tests__/`, lo que no termina en
+  `.test` es un helper de prueba y no cuenta en la cobertura.
+- Los componentes que leen el catálogo de juegos se prueban con `renderWithGames(<Componente />)`
+  (`@features/games/__tests__/render-with-games`): monta un `QueryClient` con `MOCK_GAMES` ya en caché.
+- Las pruebas de `src/app/` importan las rutas con el alias `@app/*` (`@app/error`).
+- ESLint impide que el código de la app importe `@app/*` o algo de `__tests__/`.
+
 ### Pages como contenedores
 
 Una page de feature sólo orquesta: pide datos, maneja estados de carga/no encontrado y
@@ -106,20 +122,24 @@ La feature `example` es el scaffold de referencia y contiene exactamente esto:
 
 ```
 src/features/example/
+├── __tests__/
+│   ├── hooks/
+│   │   └── use-toggle.test.ts
+│   ├── components/
+│   │   ├── example-card.test.tsx
+│   │   └── example-toggle.test.tsx
+│   └── pages/
+│       └── example-page.test.tsx # Prueba de humo de la composición
 ├── lib/
 │   ├── types.ts                  # ExampleMessage
 │   └── example-queries.ts        # getExampleMessage(): "server-only" + "use cache" + cacheLife
 ├── hooks/
-│   ├── use-toggle.ts             # useToggle(): estado del cliente, sin JSX
-│   └── use-toggle.test.ts
+│   └── use-toggle.ts             # useToggle(): estado del cliente, sin JSX
 ├── components/
 │   ├── example-card.tsx          # ExampleCard: recibe `message` por props (Card de HeroUI)
-│   ├── example-card.test.tsx
-│   ├── example-toggle.tsx        # ExampleToggle: "use client", usa useToggle (Button + onPress)
-│   └── example-toggle.test.tsx
+│   └── example-toggle.tsx        # ExampleToggle: "use client", usa useToggle (Button + onPress)
 └── pages/
-    ├── example-page.tsx          # ExamplePage + examplePageMetadata
-    └── example-page.test.tsx     # Prueba de humo de la composición
+    └── example-page.tsx          # ExamplePage + examplePageMetadata
 ```
 
 ```ts
@@ -170,9 +190,9 @@ Si la consulta no se cachea (usa `await connection()`), envuelve la parte que es
 `<Suspense>` (ver "Convenciones de Next.js 16.4").
 
 **`example` no se monta en ninguna ruta**: no existe `src/app/example/` y no aparece en el sitio
-ni en el sitemap. Su prueba de humo (`example-page.test.tsx`) es lo que garantiza que sigue
-funcionando. Cuando copies la feature, enlázala con una ruta creando un archivo en `src/app/` que
-sólo exporte la page y su metadata:
+ni en el sitemap. Su prueba de humo (`__tests__/pages/example-page.test.tsx`) es lo que garantiza
+que sigue funcionando. Cuando copies la feature, enlázala con una ruta creando un archivo en
+`src/app/` que sólo exporte la page y su metadata:
 
 ```tsx
 // src/app/<ruta>/page.tsx  (por ejemplo, src/app/teams/page.tsx para la feature teams)
@@ -205,6 +225,7 @@ mediante los path aliases de `tsconfig.json`:
 | --- | --- |
 | `@features/*` | `src/features/*` |
 | `@shared/*` | `src/shared/*` |
+| `@app/*` | `src/app/*` (sólo en las pruebas de `src/app/__tests__/`) |
 
 ```ts
 import { ExampleCard } from "@features/example/components/example-card";

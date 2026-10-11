@@ -11,6 +11,12 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 - Documentación del modelo de datos (`docs/data-model.md`): diagrama ER en Mermaid para juegos,
   equipos, stands, check-ins de visitantes sin login, boletos de rifa y afluencia por stand.
 
+### Cambiado
+
+- Pruebas: viven en la carpeta `__tests__/` de cada feature (y de `src/shared/` y `src/app/`) en lugar
+  de junto a cada archivo. El helper `renderWithGames` reemplaza el `QueryClient` repetido en las
+  pruebas de componentes que leen el catálogo.
+
 ## [0.2.0] - 2026-10-10
 
 ### Agregado

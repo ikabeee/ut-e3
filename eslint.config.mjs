@@ -6,6 +6,7 @@ import sonarjs from "eslint-plugin-sonarjs";
 
 // Import rules for the screaming architecture. Every import uses the path
 // aliases `@features/*` and `@shared/*` (see tsconfig.json); there are no barrel files.
+// `@app/*` only exists so the tests in `src/app/__tests__/` can import the route files.
 const relativeParentImports = {
   group: ["../*", "../**"],
   message: "Usa los path aliases (`@features/...`, `@shared/...`) en lugar de rutas relativas `../`.",
@@ -45,9 +46,19 @@ const featureImports = {
   message: "`shared` no puede importar de `features`.",
 };
 
-const restrict = (...patterns) => ({
+const testOnlyImports = {
+  group: ["@app/*", "@app/**", "@features/*/__tests__/**", "@shared/__tests__/**"],
+  message: "Sólo las pruebas (`__tests__/`) importan `@app/*` y los helpers de prueba.",
+};
+
+const importRules = (patterns) => ({
   "no-restricted-imports": ["error", { patterns: [relativeParentImports, legacyAlias, barrelImports, ...patterns] }],
 });
+
+const restrict = (...patterns) => importRules([testOnlyImports, ...patterns]);
+
+// Las pruebas siguen las mismas reglas, pero pueden importar `@app/*` y los helpers de `__tests__/`.
+const restrictTests = (...patterns) => importRules(patterns);
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -64,6 +75,9 @@ const eslintConfig = defineConfig([
     rules: restrict(serverOnlyImports),
   },
   { files: ["src/shared/**/*.{ts,tsx,mts}"], rules: restrict(featureImports) },
+  // Van al final para reemplazar las reglas de arriba en las pruebas.
+  { files: ["src/**/__tests__/**/*.{ts,tsx}"], rules: restrictTests() },
+  { files: ["src/shared/__tests__/**/*.{ts,tsx}"], rules: restrictTests(featureImports) },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
