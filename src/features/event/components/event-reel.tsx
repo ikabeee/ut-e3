@@ -18,7 +18,7 @@ const SHADE_BACKGROUND =
 /** Encabezado con el reel de fondo, código de tiempo y botón de pausa (`.vh`). */
 export function EventReel({ reelLabel, children }: Readonly<EventReelProps>) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { isPaused, timecode, togglePlayback, shouldAutoplay } = useVideoPlayback(videoRef);
+  const { isPaused, hasSource, timecode, togglePlayback } = useVideoPlayback(videoRef);
 
   return (
     <header
@@ -26,20 +26,20 @@ export function EventReel({ reelLabel, children }: Readonly<EventReelProps>) {
       aria-label="UTG Showcase"
       className="relative isolate flex h-[clamp(560px,calc(100svh-56px),1000px)] items-end overflow-hidden border-b border-border bg-background"
     >
+      {/* Sin `autoPlay` ni fuentes en el HTML: el póster se ve de inmediato y el video sólo se
+          descarga cuando `useVideoPlayback` lo decide en el cliente. */}
       <video
         ref={videoRef}
-        autoPlay={shouldAutoplay}
         muted
         loop
         playsInline
-        preload="auto"
+        preload="none"
         poster={EVENT_REEL.poster}
         aria-hidden="true"
         className="absolute inset-0 -z-2 size-full object-cover contrast-[1.05] saturate-[.85]"
       >
-        {EVENT_REEL.sources.map((source) => (
-          <source key={source.src} src={source.src} type={source.type} />
-        ))}
+        {hasSource &&
+          EVENT_REEL.sources.map((source) => <source key={source.src} src={source.src} type={source.type} />)}
       </video>
       <div aria-hidden="true" className="absolute inset-0 -z-1" style={{ background: SHADE_BACKGROUND }} />
 
@@ -56,7 +56,7 @@ export function EventReel({ reelLabel, children }: Readonly<EventReelProps>) {
         isSelected={isPaused}
         onChange={togglePlayback}
         aria-label={isPaused ? "Reproducir video" : "Pausar video"}
-        className="group absolute right-gutter bottom-3 grid h-[34px] w-10 min-w-0 place-items-center rounded-none border border-foreground bg-black/60 p-0 active:transform-none data-[selected=true]:bg-black/60 hover:bg-foreground data-[selected=true]:hover:bg-foreground"
+        className="group absolute right-gutter bottom-[7px] grid size-11 min-w-0 place-items-center rounded-none border border-foreground bg-black/60 p-0 active:transform-none data-[selected=true]:bg-black/60 hover:bg-foreground data-[selected=true]:hover:bg-foreground"
       >
         {isPaused ? (
           <span className="block size-0 border-y-[7px] border-l-[11px] border-y-transparent border-l-foreground group-hover:border-l-background" />

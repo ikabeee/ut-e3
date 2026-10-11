@@ -25,6 +25,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- Portada (`/`): el reel ya no se descarga en móvil, con ahorro de datos ni con movimiento
+  reducido; se ve el póster y "Reproducir video" lo carga. En escritorio arranca al estar a la
+  vista. El botón de pausa ahora mide 44x44 px.
 - Dependencias: Prisma 8 (`prisma` rc.22, `@prisma/orm-postgres` rc.17, `@prisma/cli-engine`
   0.7.0) y `dotenv` 18.0.7. TypeScript se mantiene en 6.x y ESLint en 9.x.
 
