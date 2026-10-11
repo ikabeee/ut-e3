@@ -12,7 +12,8 @@ src/features/<feature>/
   pages/                    Contenedores: piden datos, definen Suspense/notFound y metadata.
   components/               UI. Reciben datos por props; los interactivos llevan "use client".
   hooks/                    Estado e interacción del cliente (sin JSX).
-  lib/                      Tipos, datos, consultas y funciones puras (probadas con Jest).
+  lib/                      Tipos, datos y funciones puras (probadas con Jest).
+  lib/server/               Sólo servidor ("server-only"): consultas cacheadas y prefetch.
 src/shared/                 Piezas sin reglas de negocio: tema, botones, hooks genéricos.
 ```
 
@@ -25,15 +26,41 @@ valida las que existen. No se dejan carpetas vacías ni `.gitkeep`.
 | `floor-plan` | Croquis: zonas, stands, layouts, zoom, filtros y directorio. | `games` (cada juego ocupa su stand) |
 | `event` | Contenido del evento: reel, actividades, programa, ubicación y cierre. | Nada |
 | `home` | Compone la portada y conecta el programa con el croquis. | `event`, `games`, `floor-plan` |
+| `example` | Scaffold para copiar; no se monta en ninguna ruta. | Nada |
 
-ESLint impide importar `../`, archivos barril, código de servidor desde componentes o hooks y
-features desde `shared`.
+## Grafo de dependencias entre features
+
+Fuera de `pages/`, una feature sólo importa las que declara `FEATURE_DEPENDENCIES` en
+`eslint.config.mjs`. Es un grafo dirigido y **sin ciclos**: si alguien agrega una arista que
+cierra uno, ESLint se detiene con el ciclo en el mensaje.
+
+```
+home ──> event
+  │ └──> floor-plan ──> games ──> event
+  └────────────────────> games
+```
+
+Las `pages/` son la excepción: pueden componer cualquier feature, porque nada las importa salvo
+`src/app/` y por eso nunca forman parte de un ciclo. Cuando dos features necesitan hablar y la
+arista cerraría un ciclo, se conectan en una page (o en `home`, que compone la portada).
+
+## Reglas que valida ESLint
+
+| Regla | Qué impide |
+| --- | --- |
+| Capas | `lib/` no importa `hooks/`, `components/` ni `pages/`; `hooks/` no importa `components/` ni `pages/`; `pages/` no importa `hooks/`. |
+| Servidor por ubicación | `import "server-only"` sólo en `lib/server/`, `@shared/lib/server/` y `@shared/lib/prisma/`; nada que llegue al navegador importa esas carpetas. |
+| Base de datos | Sólo `lib/server/` importa `@shared/lib/prisma/db`. |
+| Grafo de features | Imports entre features que no están en `FEATURE_DEPENDENCIES` (salvo desde `pages/`). |
+| Ciclos | Ciclos entre archivos, también dentro de una feature (`import/no-cycle`). |
+| Rutas | `src/app/` sólo importa pages; `route.ts`, `sitemap.ts` y `robots.ts` sólo delegan en `lib/`. |
+| Imports | `../`, el alias `@/`, archivos barril y `shared` importando `features`. |
 
 ## Flujo de datos
 
 ```
 GameRepository (mock hoy, Prisma después)
-  -> lib/games-queries.ts      "use cache" + cacheTag("games")
+  -> lib/server/games-queries.ts  "use cache" + cacheTag("games")
        -> pages                getGamesHydrationState() -> QueryHydrationBoundary
        -> /api/games           Route Handler para el navegador
   -> TanStack Query (cliente)  useGames() / useSuspenseQuery(gamesQueryOptions())

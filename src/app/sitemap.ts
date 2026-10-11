@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getGamePath } from "@features/games/lib/game-links";
-import { listGames } from "@features/games/lib/games-queries";
+import { listGames } from "@features/games/lib/server/games-queries";
 import { routes, siteConfig } from "@shared/lib/site-config";
 
 const absoluteUrl = (path: string) => new URL(path, siteConfig.url).toString();
