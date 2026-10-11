@@ -1,15 +1,17 @@
 "use client";
 
+import { useMemo } from "react";
 import { FloorPlanDrawing } from "@features/floor-plan/components/floor-plan-drawing";
 import { PlanItemCard } from "@features/floor-plan/components/plan-item-card";
 import { PlanLegend } from "@features/floor-plan/components/plan-legend";
-import { usePlanItems } from "@features/floor-plan/hooks/use-plan-items";
-import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
-import type { PlanOrientation, StandOccupant } from "@features/floor-plan/lib/types";
+import { indexItems } from "@features/floor-plan/lib/plan-items";
+import type { PlanItem, PlanLayout, PlanOrientation } from "@features/floor-plan/lib/types";
 
 interface FloorPlanOverviewProps {
-  /** Quienes ocupan los stands de equipo. */
-  occupants: readonly StandOccupant[];
+  /** Stands y zonas del croquis (`buildPlanItems`). */
+  items: readonly PlanItem[];
+  /** Geometría de cada orientación (`PLAN_LAYOUTS`). */
+  layouts: Readonly<Record<PlanOrientation, PlanLayout>>;
   selectedId: string;
   onSelect: (id: string) => void;
 }
@@ -23,15 +25,15 @@ const ORIENTATIONS: { orientation: PlanOrientation; className: string }[] = [
  * Croquis resumido de la portada (`.map-wrap`): el plano sin zoom, el panel del elemento
  * seleccionado y la leyenda. La selección la controla quien lo usa (el programa la cambia).
  */
-export function FloorPlanOverview({ occupants, selectedId, onSelect }: Readonly<FloorPlanOverviewProps>) {
-  const { itemsById } = usePlanItems(occupants);
+export function FloorPlanOverview({ items, layouts, selectedId, onSelect }: Readonly<FloorPlanOverviewProps>) {
+  const itemsById = useMemo(() => indexItems(items), [items]);
   const selectedItem = itemsById.get(selectedId);
 
   return (
     <div className="mt-[clamp(36px,5vw,64px)] grid grid-cols-[1fr_340px] items-start gap-gutter max-[1000px]:grid-cols-1">
       <div className="@container min-w-0 overflow-hidden border border-border bg-background">
         {ORIENTATIONS.map(({ orientation, className }) => {
-          const layout = PLAN_LAYOUTS[orientation];
+          const layout = layouts[orientation];
           return (
             <svg
               key={orientation}
