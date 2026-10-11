@@ -28,7 +28,7 @@ export function PlanDirectory({ items, selectedId, visibleCategories, onSelect }
                 aria-current={isCurrent ? "true" : undefined}
                 onClick={() => onSelect(item.id)}
                 className={cn(
-                  "grid cursor-pointer grid-cols-[38px_1fr_auto] items-center gap-[10px] border border-surface bg-transparent px-[10px] py-[9px] text-left text-foreground hover:border-accent",
+                  "grid cursor-pointer grid-cols-[38px_1fr_auto] items-center gap-[10px] border border-surface bg-transparent px-[10px] py-[9px] text-left text-foreground hover:border-accent pointer-coarse:min-h-11",
                   isCurrent && "border-accent bg-accent text-background",
                 )}
               >
