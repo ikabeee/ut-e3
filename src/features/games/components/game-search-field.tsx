@@ -7,7 +7,10 @@ interface GameSearchFieldProps {
   onChange: (value: string) => void;
 }
 
-/** Buscador del catálogo (`.kw` del diseño). */
+/**
+ * Buscador del catálogo (`.kw` del diseño). El texto mide 16 px en pantallas táctiles: con menos,
+ * Safari en iOS hace zoom al enfocar el campo. Con mouse conserva los 14 px del diseño.
+ */
 export function GameSearchField({ value, onChange }: Readonly<GameSearchFieldProps>) {
   return (
     <SearchField
@@ -21,7 +24,7 @@ export function GameSearchField({ value, onChange }: Readonly<GameSearchFieldPro
         <SearchField.Input
           placeholder="Busca un juego"
           autoComplete="off"
-          className="h-[46px] min-w-0 px-0.5 font-mono text-sm text-foreground placeholder:text-muted"
+          className="h-[46px] min-w-0 px-0.5 font-mono text-base text-foreground pointer-fine:text-sm placeholder:text-muted"
         />
       </SearchField.Group>
     </SearchField>

@@ -5,6 +5,16 @@ import { FEATURED_SLIDE_DURATION } from "@features/games/hooks/use-featured-caro
 import { gamesQueryKeys } from "@features/games/lib/games-query-options";
 import { MOCK_GAMES } from "@features/games/lib/mock-games";
 
+// jsdom no implementa PointerEvent: sin esto, `pointerType` no llega a los manejadores.
+class TestPointerEvent extends MouseEvent {
+  readonly pointerType: string;
+
+  constructor(type: string, init: PointerEventInit = {}) {
+    super(type, init);
+    this.pointerType = init.pointerType ?? "";
+  }
+}
+
 function renderCarousel() {
   const queryClient = new QueryClient();
   queryClient.setQueryData(gamesQueryKeys.list(), [...MOCK_GAMES]);
@@ -27,6 +37,10 @@ function advance(milliseconds: number) {
 }
 
 describe("FeaturedGamesCarousel", () => {
+  beforeAll(() => {
+    globalThis.PointerEvent ??= TestPointerEvent as typeof PointerEvent;
+  });
+
   beforeEach(() => {
     jest.useFakeTimers();
     Element.prototype.scrollTo = jest.fn();
@@ -61,14 +75,33 @@ describe("FeaturedGamesCarousel", () => {
     expect(slideTitle()).toHaveTextContent("Ruta 9");
   });
 
-  it("advances on its own and pauses while the pointer is over it", () => {
+  it("advances on its own and pauses while the mouse is over it", () => {
     renderCarousel();
 
     advance(FEATURED_SLIDE_DURATION + 100);
     expect(slideTitle()).toHaveTextContent("Los Últimos Faros");
 
-    fireEvent.mouseEnter(screen.getByRole("banner"));
+    fireEvent.pointerOver(screen.getByRole("banner"), { pointerType: "mouse" });
     advance(FEATURED_SLIDE_DURATION * 2);
+    expect(slideTitle()).toHaveTextContent("Los Últimos Faros");
+
+    fireEvent.pointerOut(screen.getByRole("banner"), { pointerType: "mouse" });
+    advance(FEATURED_SLIDE_DURATION + 100);
+    expect(slideTitle()).toHaveTextContent("Hormigón");
+  });
+
+  it("pauses only while a finger touches it and keeps advancing after a tap", () => {
+    renderCarousel();
+    const carousel = screen.getByRole("banner");
+
+    fireEvent.pointerDown(carousel, { pointerType: "touch" });
+    advance(FEATURED_SLIDE_DURATION * 2);
+    expect(slideTitle()).toHaveTextContent("Ceniza Protocol");
+
+    // Al tocar, el navegador también emula mouseenter (sin mouseleave): no debe pausar.
+    fireEvent.pointerUp(carousel, { pointerType: "touch" });
+    fireEvent.mouseEnter(carousel);
+    advance(FEATURED_SLIDE_DURATION + 100);
     expect(slideTitle()).toHaveTextContent("Los Últimos Faros");
   });
 });

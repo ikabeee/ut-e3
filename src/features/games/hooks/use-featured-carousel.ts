@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, type PointerEvent } from "react";
 import { useAutoplayProgress } from "@shared/hooks/use-autoplay-progress";
 import { usePrefersReducedMotion } from "@shared/hooks/use-prefers-reduced-motion";
 import { useSwipe } from "@shared/hooks/use-swipe";
@@ -16,12 +16,13 @@ interface SlideState {
 }
 
 /**
- * Carrusel de destacados: avance automático con barra de progreso, pausa al pasar el mouse
- * o con el foco dentro, flechas, miniaturas y deslizamiento. Es circular.
+ * Carrusel de destacados: avance automático con barra de progreso, pausa al pasar el mouse,
+ * mientras un dedo toca el carrusel o con el foco dentro, flechas, miniaturas y deslizamiento.
+ * Es circular.
  */
 export function useFeaturedCarousel(count: number) {
   const [{ current, previous }, setSlides] = useState<SlideState>({ current: 0, previous: null });
-  const [isHovering, setIsHovering] = useState(false);
+  const [isPointerResting, setIsPointerResting] = useState(false);
   const [hasFocusWithin, setHasFocusWithin] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
 
@@ -42,7 +43,7 @@ export function useFeaturedCarousel(count: number) {
 
   const progressBarRef = useAutoplayProgress({
     duration: FEATURED_SLIDE_DURATION,
-    isPaused: isHovering || hasFocusWithin || prefersReducedMotion,
+    isPaused: isPointerResting || hasFocusWithin || prefersReducedMotion,
     stepKey: current,
     onComplete: goNext,
   });
@@ -58,8 +59,24 @@ export function useFeaturedCarousel(count: number) {
     progressBarRef,
     swipeHandlers,
     pauseHandlers: {
-      onMouseEnter: () => setIsHovering(true),
-      onMouseLeave: () => setIsHovering(false),
+      // En pantallas táctiles no existe hover: `mouseenter` se emula al tocar y nunca llega
+      // `mouseleave`, así que el carrusel quedaba pausado para siempre. Con el mouse se pausa
+      // mientras el puntero está encima; con el dedo, sólo mientras toca el carrusel.
+      onPointerEnter: (event: PointerEvent) => {
+        if (event.pointerType === "mouse") setIsPointerResting(true);
+      },
+      onPointerLeave: (event: PointerEvent) => {
+        if (event.pointerType === "mouse") setIsPointerResting(false);
+      },
+      onPointerDown: (event: PointerEvent) => {
+        if (event.pointerType !== "mouse") setIsPointerResting(true);
+      },
+      onPointerUp: (event: PointerEvent) => {
+        if (event.pointerType !== "mouse") setIsPointerResting(false);
+      },
+      onPointerCancel: (event: PointerEvent) => {
+        if (event.pointerType !== "mouse") setIsPointerResting(false);
+      },
       onFocus: () => setHasFocusWithin(true),
       onBlur: () => setHasFocusWithin(false),
     },

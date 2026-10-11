@@ -16,7 +16,7 @@ export function GameTags({ game }: Readonly<GameTagsProps>) {
       <div>
         <span className="type-tiny text-muted">Género</span>
         <div className="mt-[6px] flex flex-wrap gap-[6px]">
-          <Link href={getGenreCatalogPath(game.genre)} className={`${TAG_CLASS} hover:border-accent hover:text-accent`}>
+          <Link href={getGenreCatalogPath(game.genre)} className={`${TAG_CLASS} touch-target relative hover:border-accent hover:text-accent`}>
             {game.genre}
           </Link>
         </div>
