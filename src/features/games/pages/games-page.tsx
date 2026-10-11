@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { GamesCatalog } from "@features/games/components/games-catalog";
 import { GamesCatalogSkeleton } from "@features/games/components/games-catalog-skeleton";
-import { getGamesHydrationState } from "@features/games/lib/games-prefetch";
+import { getGamesHydrationState } from "@features/games/lib/server/games-prefetch";
 import { QueryHydrationBoundary } from "@shared/components/query-hydration-boundary";
 import { routes } from "@shared/lib/site-config";
 

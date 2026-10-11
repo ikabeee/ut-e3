@@ -13,8 +13,8 @@ conexión, cómo probarlo y qué hacer el día del evento. El código vive en la
 | --- | --- | --- |
 | Service worker | `src/features/offline/lib/service-worker.ts` | Guarda páginas y archivos y responde sin red. |
 | Funciones puras del worker | `src/features/offline/lib/service-worker-strategies.ts` | Elige la estrategia de cada petición y encuentra los archivos con hash de un HTML o CSS. |
-| `/sw.js` | `src/app/sw.js/route.ts` → `lib/service-worker-queries.ts` → `lib/service-worker-script.ts` | Arma el archivo del worker con la versión y la lista de páginas. Se prerenderiza en el build. |
-| Páginas a precargar | `src/features/offline/lib/precache-routes.ts` | `/`, `/games`, `/floor-plan`, `/offline` y `/games/<slug>` de cada juego. |
+| `/sw.js` | `src/app/sw.js/route.ts` → `lib/server/service-worker-queries.ts` → `lib/service-worker-script.ts` | Arma el archivo del worker con la versión y la lista de páginas. Se prerenderiza en el build. |
+| Páginas y archivos a precargar | `src/features/offline/lib/precache-routes.ts` | `/`, `/games`, `/floor-plan`, `/offline` y `/games/<slug>` de cada juego, más el manifest y los íconos (`PRECACHE_ASSET_URLS`). |
 | Constantes | `src/features/offline/lib/service-worker-config.ts` | Tiempo límite de red (3 s), máximo de imágenes (60), prefijo de cachés. |
 | Registro y actualización | `src/features/offline/hooks/use-service-worker.ts` y `components/service-worker-registration.tsx` | Registra `/sw.js` (sólo en producción) y muestra "Hay una versión nueva". |
 | Aviso de conexión | `src/features/offline/components/offline-banner.tsx` y `hooks/use-is-offline.ts` | "Sin conexión. Lo que ya visitaste sigue disponible." |
@@ -41,7 +41,7 @@ El worker escrito a mano resuelve los dos problemas que Serwist resolvía:
 - **Escribirlo y probarlo en TypeScript sin bundler.** `runServiceWorker` y sus funciones puras
   se copian dentro de `/sw.js` con `Function.prototype.toString()`. Por eso esas funciones **no
   pueden usar imports ni variables del módulo**: todo les llega por parámetros. Las pruebas de
-  `lib/service-worker.test.ts` las ejecutan con una Cache API simulada.
+  `__tests__/lib/service-worker.test.ts` las ejecutan con una Cache API simulada.
 
 ## Estrategias
 
@@ -51,6 +51,7 @@ El worker escrito a mano resuelve los dos problemas que Serwist resolvía:
 | HTML de `/`, `/games`, `/floor-plan`, `/offline` y `/games/<slug>` | Se precargan al instalar. Network first con tiempo límite de 3 s y respaldo en caché. La clave no lleva `?query` (`/games?genre=Puzle` usa `/games`). | `ut-e3-pages-<versión>` |
 | Navegación a una ruta no guardada, sin conexión | Responde la página `/offline`. Con conexión, la red responde (un 404 sigue siendo 404). | |
 | Peticiones RSC de Next (`?_rsc=` o cabecera `RSC: 1`) | Red con tiempo límite de 3 s. Si falla, responde 503 y Next cambia a una navegación completa, que el worker responde con el HTML guardado. Así la navegación interna no se queda colgada. | No se guardan |
+| Manifest e íconos (`/manifest.webmanifest`, `/icon.svg`, `/icons/*.png`) | Se precargan al instalar (≈30 KB) para que la app instalada muestre su ícono sin conexión. Si alguno falla, la instalación sigue. Si cambian los íconos de `src/app/manifest.ts`, actualiza `PRECACHE_ASSET_URLS`. | `ut-e3-static-<versión>` |
 | Imágenes (`/_next/image`, `/mock/*` y el póster) | Stale-while-revalidate, máximo 60 entradas (se borran las más antiguas). Sólo las que ya se vieron. | `ut-e3-images-<versión>` |
 | `/api/*` | Network first con respaldo en caché. | `ut-e3-api-<versión>` |
 | Video `/media/reel.webm` y `.mp4`, peticiones con `Range` | Nunca pasan por el worker. Sin conexión se ve el póster. | |
@@ -64,9 +65,9 @@ fallan aunque el sistema diga que hay red, como un wifi sin internet) con `navig
 
 ### Tamaño
 
-Medido con el catálogo mock de 18 juegos: 22 páginas y 40 archivos de `/_next/static/`.
-Transferencia ≈ 970 KB comprimidos (parte ya está en la caché HTTP de la primera visita) y
-≈ 3.2 MB guardados sin comprimir en el teléfono. Cada juego agrega ≈ 10 KB comprimidos.
+Medido con el catálogo mock de 18 juegos: 22 páginas, 40 archivos de `/_next/static/` y 6 del
+manifest e íconos. Transferencia ≈ 1 MB comprimido (parte ya está en la caché HTTP de la primera
+visita) y ≈ 3.2 MB guardados sin comprimir en el teléfono. Cada juego agrega ≈ 10 KB comprimidos.
 
 ## Versiones y actualizaciones
 

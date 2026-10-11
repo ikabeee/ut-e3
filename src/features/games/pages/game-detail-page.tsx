@@ -12,7 +12,7 @@ import { getRelatedGames } from "@features/games/lib/game-details";
 import { getGalleryShots } from "@features/games/lib/game-gallery";
 import { getGamePath } from "@features/games/lib/game-links";
 import { buildGameStructuredData } from "@features/games/lib/game-structured-data";
-import { getGameBySlug, listGames } from "@features/games/lib/games-queries";
+import { getGameBySlug, listGames } from "@features/games/lib/server/games-queries";
 import { JsonLd } from "@shared/components/json-ld";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";

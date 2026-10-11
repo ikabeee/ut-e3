@@ -1,8 +1,8 @@
 import "server-only";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { listGames } from "@features/games/lib/games-queries";
-import { buildPrecacheRoutes } from "@features/offline/lib/precache-routes";
+import { listGames } from "@features/games/lib/server/games-queries";
+import { buildPrecacheRoutes, PRECACHE_ASSET_URLS } from "@features/offline/lib/precache-routes";
 import {
   CACHE_PREFIX,
   MAX_IMAGE_ENTRIES,
@@ -34,6 +34,7 @@ export async function getServiceWorkerScript() {
     version: getServiceWorkerVersion(),
     cachePrefix: CACHE_PREFIX,
     precacheUrls: buildPrecacheRoutes(games.map((game) => game.slug)),
+    precacheAssetUrls: [...PRECACHE_ASSET_URLS],
     offlineUrl: OFFLINE_PATH,
     networkTimeoutMs: NETWORK_TIMEOUT_MS,
     maxImageEntries: MAX_IMAGE_ENTRIES,

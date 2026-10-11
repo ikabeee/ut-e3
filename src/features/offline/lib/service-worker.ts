@@ -122,6 +122,19 @@ export function runServiceWorker(scope: ServiceWorkerScope, config: ServiceWorke
       throw new Error("No se pudo precargar la página sin conexión");
     }
     await precacheStaticAssets(assetUrls);
+    await precacheAppAssets();
+  }
+
+  /** Manifest e íconos de la app instalada. Si alguno falla, la instalación sigue. */
+  async function precacheAppAssets() {
+    const cache = await scope.caches.open(cacheNames.static);
+    await Promise.allSettled(
+      config.precacheAssetUrls.map(async (path) => {
+        const url = new URL(path, origin).href;
+        const response = await scope.fetch(url, { cache: "no-cache" });
+        if (isCacheable(response)) await cache.put(url, response);
+      }),
+    );
   }
 
   async function deleteOldCaches() {
@@ -188,7 +201,8 @@ export function runServiceWorker(scope: ServiceWorkerScope, config: ServiceWorke
 
   async function staleWhileRevalidate(request: Request) {
     const cache = await scope.caches.open(cacheNames.images);
-    const cached = await cache.match(request);
+    // También busca en las demás cachés: los íconos de la app se precargan en la de estáticos.
+    const cached = (await cache.match(request)) ?? (await scope.caches.match(request));
     const network = scope.fetch(request).then(async (response) => {
       if (isCacheable(response)) {
         await cache.put(request, response.clone());

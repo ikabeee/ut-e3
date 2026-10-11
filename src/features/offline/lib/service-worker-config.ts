@@ -23,6 +23,8 @@ export interface ServiceWorkerConfig {
   cachePrefix: string;
   /** Páginas (HTML) que se guardan al instalar. */
   precacheUrls: string[];
+  /** Archivos sin hash (manifest e íconos) que se guardan al instalar, si se pueden descargar. */
+  precacheAssetUrls: string[];
   offlineUrl: string;
   networkTimeoutMs: number;
   maxImageEntries: number;

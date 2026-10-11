@@ -20,7 +20,8 @@
     "db:update": "prisma db update",
     "db:migration:plan": "prisma migration plan",
     "db:migrate": "prisma db migrate",
-    "db:verify": "prisma db verify"
+    "db:verify": "prisma db verify",
+    "pwa:icons": "node scripts/generate-pwa-icons.mjs"
   },
   "dependencies": {
     "@heroui/react": "^3.2.6",

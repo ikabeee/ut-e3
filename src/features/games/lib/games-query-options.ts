@@ -20,7 +20,7 @@ export async function fetchGames(): Promise<Game[]> {
 
 /**
  * Lista de juegos para `useSuspenseQuery`. Las pages la prellenan en el servidor con
- * `getGamesHydrationState` (lib/games-prefetch.ts).
+ * `getGamesHydrationState` (lib/server/games-prefetch.ts).
  *
  * `staleTime: "static"`: la fuente de verdad es la caché de Next.js (etiqueta `games`).
  * Cuando esa caché se invalida, la siguiente navegación hidrata datos más nuevos y TanStack

@@ -6,6 +6,7 @@ describe("buildServiceWorkerScript", () => {
       version: "build-42",
       cachePrefix: "ut-e3",
       precacheUrls: ["/", "/offline"],
+      precacheAssetUrls: ["/icons/icon-192.png"],
       offlineUrl: "/offline",
       networkTimeoutMs: 3000,
       maxImageEntries: 60,

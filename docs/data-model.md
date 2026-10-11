@@ -380,7 +380,7 @@ Server Actions (`lib/<feature>-actions.ts`) y en el endpoint de sincronización:
 
 ## Relación con el tipo `Game` actual
 
-El resto de la app no cambia: `lib/games-queries.ts` arma el tipo `Game`
+El resto de la app no cambia: `lib/server/games-queries.ts` arma el tipo `Game`
 (`src/features/games/lib/types.ts`) con estas columnas.
 
 | Campo de `Game` | Origen |

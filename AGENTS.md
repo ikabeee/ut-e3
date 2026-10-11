@@ -70,33 +70,57 @@ src/
 │   ├── home/                 # Portada (/): compone event, games y floor-plan
 │   └── offline/              # Sin conexión: service worker (/sw.js), avisos y página /offline
 └── shared/                   # Código transversal SIN reglas de negocio
+    ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
     ├── components/           # QueryProvider, navegación, pie, botones del diseño...
     ├── hooks/                # Hooks genéricos (movimiento reducido, estado en la URL...)
     ├── styles/               # Tema UTG de HeroUI, tipografía y efectos
     └── lib/
         ├── prisma/           # Contrato y cliente (db.ts) de Prisma 8
-        └── query/            # getQueryClient() y dehydrateForPrerender() de TanStack Query
+        ├── query/            # getQueryClient() de TanStack Query
+        └── server/           # Código sólo de servidor: dehydrateForPrerender()
 ```
 
 ### Anatomía de una feature
 
-Una feature se organiza en cuatro carpetas. Crea cada carpeta (`lib/`, `hooks/`, `components/`,
-`pages/`) cuando la necesites; el linter valida las que existen. No dejes carpetas vacías ni `.gitkeep`.
+Una feature se organiza en cuatro carpetas, más `__tests__/` para sus pruebas. Crea cada carpeta
+(`lib/`, `hooks/`, `components/`, `pages/`) cuando la necesites; el linter valida las que existen.
+No dejes carpetas vacías ni `.gitkeep`.
 
 ```
 src/features/<feature>/
-├── lib/           # Tipos, constantes, utilidades y acceso a datos (<feature>-queries.ts).
+├── __tests__/     # Pruebas, con las mismas subcarpetas que el código (ver "Pruebas").
+├── lib/           # Tipos, constantes y utilidades puras (se pueden usar en el navegador).
+│   └── server/    # Sólo servidor: consultas a la BD (<feature>-queries.ts) y prefetch.
 ├── hooks/         # Hooks de React de la feature (use-<algo>.ts).
 ├── components/    # Componentes de presentación de la feature.
 └── pages/         # Contenedores de página que usa src/app/.
 ```
 
-| Carpeta | Responsabilidad | Puede importar |
+| Carpeta | Responsabilidad | No puede importar |
 | --- | --- | --- |
-| `lib/` | Tipos de dominio (`types.ts`), constantes, utilidades puras y consultas a la BD (`*-queries.ts` con `import "server-only"` y `"use cache"` + `cacheLife(...)` o `await connection()`). Mapea las filas de Prisma a los tipos de dominio. | `@shared/lib/*` |
-| `hooks/` | Estado y lógica de interacción en el cliente. Sin JSX. | `lib/` (sólo tipos y utilidades puras), React |
-| `components/` | UI. Reciben datos por props; **no consultan la BD**. Agrega `"use client"` sólo si usan hooks o eventos. | `lib/` (tipos/constantes), `hooks/`, `@shared/components/*` |
-| `pages/` | **Contenedores**: obtienen los datos (vía `lib/`), definen `Suspense`/`notFound` y componen componentes. Sin estilos complejos ni lógica de negocio. Exportan también su `Metadata`. | `lib/`, `components/`, `@shared/components/*` |
+| `lib/` | Tipos de dominio (`types.ts`), constantes y utilidades puras. Llegan al navegador cuando un componente las usa. | `hooks/`, `components/`, `pages/`, código de servidor |
+| `lib/server/` | Todo lo que lleva `import "server-only"`: consultas a la BD (`*-queries.ts` con `"use cache"` + `cacheLife(...)` o `await connection()`), que mapean las filas de Prisma a los tipos de dominio, y prefetch. Es lo único que importa `@shared/lib/prisma/db`. | `hooks/`, `components/`, `pages/` |
+| `hooks/` | Estado y lógica de interacción en el cliente. Sin JSX. | `components/`, `pages/`, código de servidor |
+| `components/` | UI. Reciben datos por props; **no consultan la BD**. Agrega `"use client"` sólo si usan hooks o eventos. | `pages/`, código de servidor |
+| `pages/` | **Contenedores**: obtienen los datos (vía `lib/server/`), definen `Suspense`/`notFound` y componen componentes. Sin estilos complejos ni lógica de negocio. Exportan también su `Metadata`. Son el único lugar donde se combinan features libremente. | `hooks/`, `@shared/lib/prisma/db` |
+
+"Código de servidor" es `lib/server/` de cualquier feature, `@shared/lib/server/` y `@shared/lib/prisma/`.
+La frontera depende de la carpeta, no del nombre del archivo: `import "server-only"` sólo se permite ahí.
+
+### Pruebas
+
+Las pruebas viven en la carpeta `__tests__/` de cada feature, que repite las subcarpetas del
+código: `lib/game-filters.ts` -> `__tests__/lib/game-filters.test.ts`. Lo mismo aplica a
+`src/shared/__tests__/` y a `src/app/__tests__/` (Next.js no enruta las carpetas que empiezan con `_`).
+
+- Jest corre todo archivo `*.test.ts(x)` dentro de `src/`. En `__tests__/`, lo que no termina en
+  `.test` es un helper de prueba y no cuenta en la cobertura.
+- Los componentes que leen el catálogo de juegos se prueban con `renderWithGames(<Componente />)`
+  (`@features/games/__tests__/render-with-games`): monta un `QueryClient` con `MOCK_GAMES` ya en caché.
+- Las pruebas de `src/app/` importan las rutas con el alias `@app/*` (`@app/error`).
+- Una prueba sigue las reglas de dependencias de la carpeta que prueba (`__tests__/lib/` las de
+  `lib/`, etc.), pero además puede importar `@app/*` y los helpers de `__tests__/`. ESLint impide que
+  el código de la app importe cualquiera de los dos.
 
 ### Pages como contenedores
 
@@ -107,24 +131,29 @@ La feature `example` es el scaffold de referencia y contiene exactamente esto:
 
 ```
 src/features/example/
+├── __tests__/
+│   ├── hooks/
+│   │   └── use-toggle.test.ts
+│   ├── components/
+│   │   ├── example-card.test.tsx
+│   │   └── example-toggle.test.tsx
+│   └── pages/
+│       └── example-page.test.tsx # Prueba de humo de la composición
 ├── lib/
 │   ├── types.ts                  # ExampleMessage
-│   └── example-queries.ts        # getExampleMessage(): "server-only" + "use cache" + cacheLife
+│   └── server/
+│       └── example-queries.ts    # getExampleMessage(): "server-only" + "use cache" + cacheLife
 ├── hooks/
-│   ├── use-toggle.ts             # useToggle(): estado del cliente, sin JSX
-│   └── use-toggle.test.ts
+│   └── use-toggle.ts             # useToggle(): estado del cliente, sin JSX
 ├── components/
 │   ├── example-card.tsx          # ExampleCard: recibe `message` por props (Card de HeroUI)
-│   ├── example-card.test.tsx
-│   ├── example-toggle.tsx        # ExampleToggle: "use client", usa useToggle (Button + onPress)
-│   └── example-toggle.test.tsx
+│   └── example-toggle.tsx        # ExampleToggle: "use client", usa useToggle (Button + onPress)
 └── pages/
-    ├── example-page.tsx          # ExamplePage + examplePageMetadata
-    └── example-page.test.tsx     # Prueba de humo de la composición
+    └── example-page.tsx          # ExamplePage + examplePageMetadata
 ```
 
 ```ts
-// src/features/example/lib/example-queries.ts
+// src/features/example/lib/server/example-queries.ts
 import "server-only";
 import { cacheLife } from "next/cache";
 import type { ExampleMessage } from "@features/example/lib/types";
@@ -147,7 +176,7 @@ export async function getExampleMessage(): Promise<ExampleMessage> {
 import type { Metadata } from "next";
 import { ExampleCard } from "@features/example/components/example-card";
 import { ExampleToggle } from "@features/example/components/example-toggle";
-import { getExampleMessage } from "@features/example/lib/example-queries";
+import { getExampleMessage } from "@features/example/lib/server/example-queries";
 
 // Al copiar la feature, agrega `alternates: { canonical: "/<ruta>" }` y la ruta a `src/app/sitemap.ts`.
 export const examplePageMetadata: Metadata = {
@@ -156,7 +185,7 @@ export const examplePageMetadata: Metadata = {
 };
 
 export async function ExamplePage() {
-  const message = await getExampleMessage(); // lib/
+  const message = await getExampleMessage(); // lib/server/
 
   return (
     <main className="page-wrap flex flex-col gap-6 py-8">
@@ -171,9 +200,9 @@ Si la consulta no se cachea (usa `await connection()`), envuelve la parte que es
 `<Suspense>` (ver "Convenciones de Next.js 16.4").
 
 **`example` no se monta en ninguna ruta**: no existe `src/app/example/` y no aparece en el sitio
-ni en el sitemap. Su prueba de humo (`example-page.test.tsx`) es lo que garantiza que sigue
-funcionando. Cuando copies la feature, enlázala con una ruta creando un archivo en `src/app/` que
-sólo exporte la page y su metadata:
+ni en el sitemap. Su prueba de humo (`__tests__/pages/example-page.test.tsx`) es lo que garantiza
+que sigue funcionando. Cuando copies la feature, enlázala con una ruta creando un archivo en
+`src/app/` que sólo exporte la page y su metadata:
 
 ```tsx
 // src/app/<ruta>/page.tsx  (por ejemplo, src/app/teams/page.tsx para la feature teams)
@@ -187,16 +216,24 @@ export default TeamsPage;
 ### Reglas de dependencias
 
 1. `src/app/` sólo importa pages: `@features/<feature>/pages/<name>-page`.
-2. Sólo `lib/*-queries.ts` importa `@shared/lib/prisma/db`.
-3. `components/` y `hooks/` nunca importan `*-queries.ts` ni nada con `server-only`.
-4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx` (que monta `QueryProvider` y, como única
+2. Sólo `lib/server/` de una feature importa `@shared/lib/prisma/db`.
+3. Sólo `lib/server/`, `@shared/lib/server/`, `@shared/lib/prisma/` (y los Route Handlers) importan
+   `server-only`, y nada que pueda llegar al navegador (`lib/`, `hooks/`, `components/`) importa esas carpetas.
+4. Dentro de una feature, las capas siguen la tabla de arriba: `lib/` no importa `hooks/`,
+   `components/` ni `pages/`; `hooks/` no importa `components/` ni `pages/`; `pages/` no importa `hooks/`.
+5. `src/app/` no contiene UI ni lógica: sólo `layout.tsx` (que monta `QueryProvider` y, como única
    excepción, `OfflineNotices` de la feature `offline`), `globals.css`,
    archivos de ruta que delegan en `pages/` y Route Handlers (`route.ts`), `sitemap.ts` y
-   `robots.ts` que delegan en `lib/` (ESLint les permite importar `lib/`, pero no componentes ni hooks).
-5. `shared/` nunca importa de `features/` (también lo valida ESLint).
-6. Una feature puede importar componentes, hooks o tipos de otra, evitando dependencias circulares.
+   `robots.ts` que delegan en `lib/` (no en componentes, hooks ni pages).
+6. `shared/` nunca importa de `features/`.
+7. Fuera de `pages/`, una feature sólo importa las features que declara `FEATURE_DEPENDENCIES` en
+   `eslint.config.mjs`. Ese grafo no puede tener ciclos (ESLint se detiene si lo tiene) y está
+   dibujado en `docs/architecture.md`. Las `pages/` pueden componer cualquier feature, porque sólo
+   `src/app/` las importa y así nunca cierran un ciclo.
+8. No hay ciclos entre archivos, tampoco dentro de una misma feature (`import/no-cycle`).
 
-ESLint (`no-restricted-imports`) valida las reglas 1, 3 y 5, además de las de imports de abajo.
+ESLint valida todas estas reglas (`no-restricted-imports` e `import/no-cycle`), además de las de
+imports de abajo. Si una regla te bloquea, el mensaje dice qué capa o feature puedes usar.
 
 ### Imports y path aliases
 
@@ -207,6 +244,7 @@ mediante los path aliases de `tsconfig.json`:
 | --- | --- |
 | `@features/*` | `src/features/*` |
 | `@shared/*` | `src/shared/*` |
+| `@app/*` | `src/app/*` (sólo en las pruebas de `src/app/__tests__/`) |
 
 ```ts
 import { ExampleCard } from "@features/example/components/example-card";
@@ -241,9 +279,10 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
    archivos, funciones y pruebas (`ExampleCard` -> `TeamCard`, `examplePageMetadata` ->
    `teamsPageMetadata`...). Borra lo que no uses: crea cada carpeta sólo cuando la necesites.
 2. Si persiste datos, agrega los modelos a `contract.prisma`, ejecuta `npm run db:emit` y
-   escribe las consultas en `lib/<feature>-queries.ts`.
-3. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`.
-4. Crea la ruta en `src/app/<ruta>/page.tsx` que sólo renderiza la page (ver el ejemplo de arriba),
+   escribe las consultas en `lib/server/<feature>-queries.ts`.
+3. Si importa otra feature fuera de `pages/`, agrégala a `FEATURE_DEPENDENCIES` en `eslint.config.mjs`.
+4. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`.
+5. Crea la ruta en `src/app/<ruta>/page.tsx` que sólo renderiza la page (ver el ejemplo de arriba),
    agrega `alternates.canonical` a su metadata y, si debe indexarse, la ruta a `src/app/sitemap.ts`.
 
 ## Documentación del proyecto
@@ -278,13 +317,14 @@ Lee la guía correspondiente en `node_modules/next/dist/docs/` antes de escribir
   - estar en una función/componente con `"use cache"` + `cacheLife(...)`.
   Consulta `01-app/01-getting-started/08-caching.md`.
 - **Prisma 8 y prerender.** El runtime de Prisma usa `crypto.randomUUID()` por consulta, así que
-  las funciones de `lib/*-queries.ts` llaman `await connection()` (de `next/server`) antes de consultar. Si quieres
+  las funciones de `lib/server/*-queries.ts` llaman `await connection()` (de `next/server`) antes de consultar. Si quieres
   cachear un resultado, envuelve la consulta en una función con `"use cache"` en lugar de usar
   `connection()`, e invalídala con `cacheTag` / `revalidateTag` / `updateTag` tras una mutación.
 - `params` y `searchParams` son **Promises**: `const { slug } = await params`.
   Tipa con los helpers globales `PageProps<"/ruta/[param]">` y `LayoutProps<"/ruta">`
   (generados por `next typegen`).
-- Mutaciones con **Server Actions** (`"use server"`) en `lib/<feature>-actions.ts` de la feature.
+- Mutaciones con **Server Actions** (`"use server"`) en `lib/<feature>-actions.ts` de la feature. Los
+  componentes cliente pueden importarlas; dentro llaman a `lib/server/` (no a `db` directamente).
 - Metadata con `export const metadata` o `generateMetadata`.
 - Imports con path aliases (ver "Imports y path aliases").
 
@@ -320,7 +360,7 @@ await db.orm.public.Team.create({ slug, name, members: [] });
 - `.all()` se consume una sola vez (`await` basta; no escribas helpers `collect()`).
 - Para nombrar tipos de filas usa `ResultType` (`@prisma/orm-postgres/components/runtime`)
   o `Models.public_<Model>` de `contract.d.ts`. Mapea las filas a los tipos de `lib/types.ts`
-  dentro de `*-queries.ts`; el resto de la app no conoce los tipos de Prisma.
+  dentro de `lib/server/*-queries.ts`; el resto de la app no conoce los tipos de Prisma.
 - Enums en PSL: `enum nombre { @@type("pg/text@1") valor = "valor" }`.
 - Fechas: usa `TimestamptzString` / `temporal.updatedAtString()` (Node 22 no trae `Temporal`).
 - Flujo de cambios en la BD:
@@ -342,7 +382,7 @@ TanStack Query `5.x` ya está configurado (referencia: https://tanstack.com/quer
 
 ### Cuándo usarlo
 
-- **Lecturas iniciales de una page**: Server Components + `lib/*-queries.ts` (Prisma) como siempre.
+- **Lecturas iniciales de una page**: Server Components + `lib/server/*-queries.ts` (Prisma) como siempre.
 - **TanStack Query**: datos que el cliente debe refrescar, paginar, filtrar o mutar sin recargar
   la page (polling, búsquedas, optimistic updates, etc.).
 
@@ -356,13 +396,13 @@ TanStack Query `5.x` ya está configurado (referencia: https://tanstack.com/quer
   (`use-<feature>-<algo>.ts`). Los componentes que los usan llevan `"use client"`.
 - Para prellenar el caché desde el servidor **no uses `dehydrate()` de TanStack**: con Cache
   Components lee `Date.now()` durante el prerender y el build falla. Usa
-  `dehydrateForPrerender` (`@shared/lib/query/dehydrate-for-prerender`), que toma la fecha de una
+  `dehydrateForPrerender` (`@shared/lib/server/dehydrate-for-prerender`), que toma la fecha de una
   función cacheada con las mismas etiquetas que los datos (patrón de la guía de Next.js
   `02-guides/client-side-data-fetching/tanstack-query.md`), y `QueryHydrationBoundary`
   (`@shared/components/query-hydration-boundary`) dentro de `<Suspense>`:
 
 ```ts
-// src/features/games/lib/games-prefetch.ts  (server-only)
+// src/features/games/lib/server/games-prefetch.ts  (server-only)
 export async function getGamesHydrationState() {
   const games = await listGames(); // "use cache" + cacheTag("games")
   return dehydrateForPrerender([{ queryKey: gamesQueryKeys.list(), data: games }], [GAMES_CACHE_TAG]);
@@ -382,7 +422,7 @@ export function GamesPage() {
 }
 ```
 
-- En el servidor no existe `/api/...`: la hidratación usa la consulta de `lib/*-queries.ts`
+- En el servidor no existe `/api/...`: la hidratación usa la consulta de `lib/server/*-queries.ts`
   y el navegador usa la `queryFn` con `fetch`. Ambos comparten la misma query key.
 - Para datos que vienen de la caché de Next.js usa `staleTime: "static"` en sus `queryOptions`:
   la caché de Next (sus etiquetas) es la fuente de verdad y, con un `staleTime` numérico,

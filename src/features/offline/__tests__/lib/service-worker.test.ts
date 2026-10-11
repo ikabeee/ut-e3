@@ -86,6 +86,7 @@ const config: ServiceWorkerConfig = {
   version: "v2",
   cachePrefix: "ut-e3",
   precacheUrls: ["/", "/offline"],
+  precacheAssetUrls: ["/icons/icon-192.png", "/manifest.webmanifest"],
   offlineUrl: "/offline",
   networkTimeoutMs: 20,
   maxImageEntries: 2,
@@ -151,6 +152,7 @@ describe("runServiceWorker: install", () => {
       [`${ORIGIN}/_next/static/chunks/app.css`]: "@font-face{src:url(../media/font.woff2)}",
       [`${ORIGIN}/_next/static/chunks/main.js`]: "console.log(1)",
       [`${ORIGIN}/_next/static/media/font.woff2`]: "font",
+      [`${ORIGIN}/icons/icon-192.png`]: "png",
     };
     const { storage, lifecycle } = setup(async (url) => new FakeResponse(files[url] ?? null, { status: files[url] ? 200 : 404 }));
 
@@ -161,6 +163,7 @@ describe("runServiceWorker: install", () => {
       `${ORIGIN}/_next/static/chunks/app.css`,
       `${ORIGIN}/_next/static/chunks/main.js`,
       `${ORIGIN}/_next/static/media/font.woff2`,
+      `${ORIGIN}/icons/icon-192.png`,
     ]);
   });
 
@@ -236,6 +239,14 @@ describe("runServiceWorker: fetch", () => {
 
     expect(await (await request("/_next/static/chunks/main.js"))?.text()).toBe("js");
     expect(scope.fetch).not.toHaveBeenCalled();
+  });
+
+  it("serves a precached app icon without network", async () => {
+    const { storage, request } = setup(offline);
+    const files = await storage.open("ut-e3-static-v2");
+    await files.put(`${ORIGIN}/icons/icon-192.png`, new FakeResponse("png"));
+
+    expect(await (await request("/icons/icon-192.png"))?.text()).toBe("png");
   });
 
   it("keeps at most maxImageEntries images", async () => {

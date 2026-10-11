@@ -34,7 +34,7 @@ Closes #
 - [ ] La rama sigue git flow (`feature/*`, `fix/*`, `release/*` o `hotfix/*`) y el PR apunta a la rama correcta (`develop`, o `main` sólo para `release/*` y `hotfix/*`).
 - [ ] Los commits siguen [Conventional Commits](https://www.conventionalcommits.org/es/).
 - [ ] `npm run lint`, `npm run typecheck` y `npm test` pasan sin errores.
-- [ ] El código respeta la screaming architecture (ver `AGENTS.md`): la feature tiene `lib/`, `hooks/`, `components/` y `pages/`, y los imports usan los path aliases (`@features/...`, `@shared/...`) sin archivos barril.
+- [ ] El código respeta la screaming architecture (ver `AGENTS.md`): cada archivo está en la capa que le corresponde (`lib/`, `lib/server/`, `hooks/`, `components/`, `pages/`), las dependencias entre features siguen `FEATURE_DEPENDENCIES` y los imports usan los path aliases (`@features/...`, `@shared/...`) sin archivos barril.
 - [ ] Directorios, archivos y código tienen naming en inglés.
 - [ ] Lo revisé en móvil (360/390 px) y en escritorio (1440 px): sin scroll horizontal, áreas táctiles de 44x44 px y campos de texto de 16 px (ver "Móvil primero" en `AGENTS.md`).
 - [ ] Si cambié `contract.prisma`, ejecuté `npm run db:emit` y subí `contract.json` y `contract.d.ts`.
