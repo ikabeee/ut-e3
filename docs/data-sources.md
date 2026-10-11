@@ -28,6 +28,11 @@ Prisma / mock  ->  GameRepository  ->  games-queries.ts ("use cache")
 
 ### Pasos para usar Prisma
 
+> El modelo relacional propuesto (equipos, stands, géneros, check-ins y rifa) está en
+> [`data-model.md`](./data-model.md). El ejemplo de abajo es la versión plana mínima que
+> reproduce el tipo `Game` actual; la tabla "Relación con el tipo `Game` actual" de ese
+> documento explica cómo armarlo desde el modelo relacional.
+
 1. Agrega el modelo al contrato `src/shared/lib/prisma/contract.prisma` y ejecuta
    `npm run db:emit` (lee antes `node_modules/@prisma/orm-postgres/skills/prisma-8/`):
 

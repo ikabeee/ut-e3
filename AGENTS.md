@@ -249,6 +249,7 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
 - `docs/where-to-edit.md`: dónde cambiar cada contenido o estilo.
 - `docs/architecture.md`: capas, flujo de datos, rendimiento y SOLID.
 - `docs/data-sources.md`: datos mock y pasos para conectar Prisma.
+- `docs/data-model.md`: diagrama ER propuesto (juegos, equipos, stands, check-ins y rifa).
 - `docs/design-system.md`: tema UTG sobre HeroUI.
 - `docs/versioning.md` y `CHANGELOG.md`: versionado semántico y releases con git flow.
 - `docs/audit.md`: auditoría técnica (capacidad, PWA, mantenibilidad) y plan de acción por fases.
