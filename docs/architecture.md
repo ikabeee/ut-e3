@@ -78,7 +78,7 @@ home/pages/home-page.tsx     pasa el programa ya resuelto a ProgramAndFloorPlan 
 
 `EventSchedule` recibe el nombre de cada zona ya validado (`zoneTitle`). Si un `zoneId` no
 existe, `resolveScheduleZones` lanza un error y el build de la portada se detiene; además,
-`schedule-zones.test.ts` cruza `EVENT_SCHEDULE` con `PLAN_ZONES` en `npm test`.
+`__tests__/lib/schedule-zones.test.ts` cruza `EVENT_SCHEDULE` con `PLAN_ZONES` en `npm test`.
 
 ## Reglas que valida ESLint
 
