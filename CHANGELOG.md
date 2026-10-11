@@ -30,6 +30,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 - Dependencias: Prisma 8 (`prisma` rc.22, `@prisma/orm-postgres` rc.17, `@prisma/cli-engine`
   0.7.0) y `dotenv` 18.0.7. TypeScript se mantiene en 6.x y ESLint en 9.x.
 
+### Corregido
+
+- Croquis (`/floor-plan`): un hash mal codificado en la URL (por ejemplo `#%E0%A4%A`) ya no
+  tumba la página; se ignora y se muestra la selección por defecto.
+
 ## [0.1.0]
 
 ### Agregado
