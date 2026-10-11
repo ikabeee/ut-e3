@@ -57,6 +57,7 @@ Después de cualquier cambio corre `npm run lint`, `npm run typecheck` y `npm te
 | Quiero cambiar... | Archivo |
 | --- | --- |
 | Nombre, descripción y URL pública del sitio | `src/shared/lib/site-config.ts` y `NEXT_PUBLIC_SITE_URL` en `.env` |
+| Validación de variables de entorno | `src/shared/lib/env.ts` |
 | Imagen para compartir por defecto | `shareImage` en `src/shared/lib/site-config.ts` |
 | Título y descripción de cada página | `*PageMetadata` / `generate*Metadata` en `src/features/<feature>/pages/` |
 | Páginas del sitemap y reglas de robots | `src/app/sitemap.ts` y `src/app/robots.ts` |
