@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import manifest from "./manifest";
+import manifest from "@app/manifest";
 
 /** Lee ancho y alto de la cabecera IHDR de un PNG de `public/`. */
 function readPngSize(src: string) {

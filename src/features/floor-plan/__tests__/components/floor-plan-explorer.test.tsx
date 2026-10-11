@@ -1,20 +1,7 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, render, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FloorPlanExplorer } from "@features/floor-plan/components/floor-plan-explorer";
-import { gamesQueryKeys } from "@features/games/lib/games-query-options";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
-
-function renderExplorer() {
-  const queryClient = new QueryClient();
-  queryClient.setQueryData(gamesQueryKeys.list(), [...MOCK_GAMES]);
-
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <FloorPlanExplorer />
-    </QueryClientProvider>,
-  );
-}
+import { renderWithGames } from "@features/games/__tests__/render-with-games";
 
 function panelTitle() {
   return screen.getAllByRole("heading", { level: 2 })[0];
@@ -27,14 +14,14 @@ describe("FloorPlanExplorer", () => {
   });
 
   it("selects the main stage by default", () => {
-    renderExplorer();
+    renderWithGames(<FloorPlanExplorer />);
 
     expect(panelTitle()).toHaveTextContent("Main Stage");
   });
 
   it("opens the stand from the URL hash", async () => {
     window.history.replaceState(null, "", "/floor-plan#B7");
-    renderExplorer();
+    renderWithGames(<FloorPlanExplorer />);
     await act(async () => undefined);
 
     expect(panelTitle()).toHaveTextContent("Lucha Pixel");
@@ -43,7 +30,7 @@ describe("FloorPlanExplorer", () => {
 
   it("selects an item from the directory and keeps it in the URL", async () => {
     const user = userEvent.setup();
-    renderExplorer();
+    renderWithGames(<FloorPlanExplorer />);
 
     await user.click(screen.getByRole("button", { name: /C3\s*Oferta educativa/ }));
 
@@ -53,7 +40,7 @@ describe("FloorPlanExplorer", () => {
 
   it("selects a stand on the map", async () => {
     const user = userEvent.setup();
-    renderExplorer();
+    renderWithGames(<FloorPlanExplorer />);
 
     const [wideMap] = screen.getAllByRole("application");
     await user.click(within(wideMap).getByRole("button", { name: "Stand A4, Ruta 9" }));
@@ -63,7 +50,7 @@ describe("FloorPlanExplorer", () => {
 
   it("filters categories and restores them all from the last visible one", async () => {
     const user = userEvent.setup();
-    renderExplorer();
+    renderWithGames(<FloorPlanExplorer />);
     const filters = within(screen.getByRole("group", { name: "Mostrar en el mapa" }));
 
     await user.click(filters.getByRole("button", { name: "Servicios" }));
@@ -87,7 +74,7 @@ describe("FloorPlanExplorer", () => {
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
     });
-    renderExplorer();
+    renderWithGames(<FloorPlanExplorer />);
 
     await user.click(screen.getByRole("button", { name: "Acercar" }));
 

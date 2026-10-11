@@ -82,9 +82,10 @@ Prisma / mock  ->  GameRepository  ->  games-queries.ts ("use cache")
    Las consultas ya tienen `"use cache"`, así que las pages se siguen prerenderizando.
 4. Cuando una Server Action modifique juegos, llama `updateTag(GAMES_CACHE_TAG)` y, en el
    cliente, `queryClient.invalidateQueries({ queryKey: gamesQueryKeys.all })`.
-5. Borra `lib/mock-games.ts`, `lib/mock-game-repository.ts` (y su prueba) y `public/mock/`.
-   Las pruebas de `game-filters` y `game-genres` usan `MOCK_GAMES`: muévelas a un fixture
-   (`lib/game-fixtures.ts`) antes de borrar el mock.
+5. Borra `lib/mock-games.ts`, `lib/mock-game-repository.ts` (y su prueba,
+   `__tests__/lib/mock-game-repository.test.ts`) y `public/mock/`. Varias pruebas y el helper
+   `renderWithGames` usan `MOCK_GAMES`: antes de borrar el mock, mueve esos datos a un fixture de
+   prueba (`__tests__/game-fixtures.ts`).
 
 > Las imágenes de `public/mock/games/` son las de referencia del diseño, no arte de los equipos.
 > Reemplázalas antes de publicar el sitio.

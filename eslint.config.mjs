@@ -7,7 +7,8 @@ import sonarjs from "eslint-plugin-sonarjs";
 
 // Reglas de la screaming architecture (ver AGENTS.md, "Reglas de dependencias", y
 // docs/architecture.md). Todo import usa los path aliases `@features/*` y `@shared/*`
-// (tsconfig.json); no hay archivos barril.
+// (tsconfig.json); no hay archivos barril. `@app/*` sólo existe para que las pruebas de
+// `src/app/__tests__/` importen los archivos de ruta.
 
 // ---------------------------------------------------------------------------------------
 // Grafo de features
@@ -118,6 +119,11 @@ const featureImports = {
   message: "`shared` no puede importar de `features`.",
 };
 
+const testOnlyImports = {
+  group: ["@app/*", "@app/**", "@features/*/__tests__/**", "@shared/__tests__/**"],
+  message: "Sólo las pruebas (`__tests__/`) importan `@app/*` y los helpers de prueba.",
+};
+
 const nonPageImports = {
   group: ["@features/*/lib/**", "@features/*/hooks/**", "@features/*/components/**", "@features/*/api/**"],
   message: "`src/app` sólo renderiza pages: importa desde `@features/<feature>/pages/<name>-page`.",
@@ -162,6 +168,12 @@ const restrict = (patterns, { allowServerOnly = false } = {}) => ({
 const SOURCE = "{ts,tsx}";
 
 /**
+ * `globs` dentro de `dir` y en su `__tests__/`, que repite las subcarpetas del código: una prueba
+ * sigue las reglas de la carpeta que prueba (`__tests__/lib/` las de `lib/`).
+ */
+const withTests = (dir, ...globs) => globs.flatMap((glob) => [`${dir}/${glob}`, `${dir}/__tests__/${glob}`]);
+
+/**
  * Lo que cada carpeta de una feature no puede importar. En ESLint gana el último bloque que
  * coincide con un archivo, por eso `lib/server/` va después de `lib/` y `api/*-route.ts`
  * después de `api/`.
@@ -184,7 +196,7 @@ const FEATURE_LAYERS = [
 
 const featureLayerConfigs = FEATURES.flatMap((feature) =>
   FEATURE_LAYERS.map(({ glob, patterns, allowServerOnly, composesFeatures }) => ({
-    files: [`src/features/${feature}/${glob}`],
+    files: withTests(`src/features/${feature}`, glob),
     rules: restrict([...patterns, ...(composesFeatures ? [] : forbiddenFeatures(feature))], { allowServerOnly }),
   })),
 );
@@ -210,12 +222,25 @@ const eslintConfig = defineConfig([
   { files: routeFiles, rules: restrict([routeFileImports, prismaClient]) },
   { files: [`src/shared/**/*.${SOURCE}`, "src/shared/**/*.mts"], rules: restrict([featureImports, prismaClient]) },
   {
-    files: [`src/shared/components/**/*.${SOURCE}`, `src/shared/hooks/**/*.${SOURCE}`],
+    files: withTests("src/shared", `components/**/*.${SOURCE}`, `hooks/**/*.${SOURCE}`),
     rules: restrict([featureImports, serverCode]),
   },
-  { files: [`src/shared/lib/server/**/*.${SOURCE}`], rules: restrict([featureImports, prismaClient], { allowServerOnly: true }) },
-  { files: [`src/shared/lib/prisma/**/*.${SOURCE}`], rules: restrict([featureImports], { allowServerOnly: true }) },
+  {
+    files: withTests("src/shared", `lib/server/**/*.${SOURCE}`),
+    rules: restrict([featureImports, prismaClient], { allowServerOnly: true }),
+  },
+  {
+    files: withTests("src/shared", `lib/prisma/**/*.${SOURCE}`),
+    rules: restrict([featureImports], { allowServerOnly: true }),
+  },
   ...featureLayerConfigs,
+  // Las pruebas pueden importar `@app/*` y los helpers de `__tests__/`; el resto del código no. Es una
+  // regla aparte de `no-restricted-imports` para que las pruebas la apaguen sin perder las de su capa.
+  {
+    files: [`src/**/*.${SOURCE}`, "src/**/*.mts"],
+    rules: { "@typescript-eslint/no-restricted-imports": ["error", { patterns: [testOnlyImports] }] },
+  },
+  { files: [`src/**/__tests__/**/*.${SOURCE}`], rules: { "@typescript-eslint/no-restricted-imports": "off" } },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
