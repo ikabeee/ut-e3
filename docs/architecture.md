@@ -9,6 +9,7 @@ El sitio implementa el diseño de la carpeta UTG (`index.html`, `juegos.html`, `
 ```
 src/app/                    Rutas. Cada archivo sólo exporta la page de una feature.
 src/features/<feature>/
+  __tests__/                Pruebas, con las mismas subcarpetas que el código (lib/, components/...).
   api/                      Contrato HTTP: Route Handlers, cliente del navegador y DTO validado.
   pages/                    Contenedores: piden datos, definen Suspense/notFound y metadata.
   components/               UI. Reciben datos por props; los interactivos llevan "use client".
@@ -60,7 +61,7 @@ home/pages/home-page.tsx      lo mismo para el croquis de la portada
 ```
 
 La portada llega como `ReactNode` (slot): `PlanItemCard` la pinta sin importar `GameMedia`. Así
-`floor-plan` se prueba con sus propios ocupantes (`lib/plan-fixtures.ts`) y conectar Prisma a
+`floor-plan` se prueba con sus propios ocupantes (`__tests__/plan-fixtures.ts`) y conectar Prisma a
 `games` no toca el croquis. Si mañana ocupan stands equipos o patrocinadores, basta otro
 `toStandOccupant` en su feature.
 

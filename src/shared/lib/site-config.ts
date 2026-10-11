@@ -26,6 +26,8 @@ export const siteConfig = {
   organizationLabel: `${organization.division} · ${organization.universityShortName}`,
   /** Imagen para compartir en redes cuando una página no define la suya. */
   shareImage: "/media/reel.jpg",
+  /** Color de la barra del navegador y del fondo de la app instalada (`--utg-black`). */
+  themeColor: "#000000",
 } as const;
 
 /** Rutas principales del sitio. */

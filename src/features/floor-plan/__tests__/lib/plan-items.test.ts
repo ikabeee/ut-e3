@@ -6,7 +6,7 @@ import {
   splitStandName,
   toggleCategory,
 } from "@features/floor-plan/lib/plan-items";
-import { PLAN_ZONE_TIMES_FIXTURE, STAND_OCCUPANT_FIXTURES } from "@features/floor-plan/lib/plan-fixtures";
+import { PLAN_ZONE_TIMES_FIXTURE, STAND_OCCUPANT_FIXTURES } from "@features/floor-plan/__tests__/plan-fixtures";
 import { PLAN_CATEGORIES } from "@features/floor-plan/lib/plan-places";
 
 describe("buildPlanItems", () => {
