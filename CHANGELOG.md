@@ -25,6 +25,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- Móvil: buscador del catálogo a 16 px, áreas táctiles de 44x44 px (flechas, zoom, filtros y
+  directorio del croquis, navegación y enlaces del detalle), `safe-area-inset-*` en la barra fija,
+  el pie y los márgenes, efectos de `hover` sólo con mouse y el carrusel de destacados ya no se
+  queda en pausa después de tocarlo.
 - Dependencias: Prisma 8 (`prisma` rc.22, `@prisma/orm-postgres` rc.17, `@prisma/cli-engine`
   0.7.0) y `dotenv` 18.0.7. TypeScript se mantiene en 6.x y ESLint en 9.x.
 
