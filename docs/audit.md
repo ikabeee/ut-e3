@@ -252,6 +252,13 @@ cliente sólo para interacción del usuario o polling.
 - Se pueden mantener la interfaz `GameRepository` y el mock: sirven para que cualquiera trabaje
   sin base de datos, como `USE_MOCKS` en `goncy/store`.
 
+> **Decisión del 11 de octubre:** Prisma se queda. Ya empezó el trabajo del diagrama
+> entidad-relación para conectar la base de datos, así que la fase 1 ya no retira Prisma. En su
+> lugar, la conexión se hace con `prisma-game-repository.ts` detrás de `GameRepository` (ver
+> #21). El análisis de abajo se conserva como contexto y para cuidar lo que agregue la base de
+> datos: costo, puntos de falla y conexiones con 2000 usuarios. Las consultas deben seguir
+> cacheadas con `"use cache"` para que las páginas sigan siendo estáticas.
+
 **C2. Alto. Prisma 8 RC está instalado pero no se usa.**
 
 - `contract.prisma` no tiene modelos y nada importa `@shared/lib/prisma/db`, pero
@@ -380,6 +387,48 @@ define en `vercel.json` de `la-velada-web-oficial`. Guía:
   GitHub Flow (`main` + ramas cortas + preview) reduce los merges de `release/*`. Si es
   requisito, consérvenlo.
 
+### F. Requisitos transversales
+
+**F1. Móvil primero.** La mayoría de visitantes abrirá el sitio en su teléfono, dentro de la sede
+y con mala señal. Todo PR que cambie la interfaz se revisa con estos criterios:
+
+- Sin scroll horizontal a 360 px y 390 px de ancho, en vertical y en horizontal.
+- Áreas táctiles de al menos 44 × 44 px y separadas entre sí. Ninguna acción depende sólo de
+  `hover`.
+- Campos de texto con `font-size` de 16 px o más. Con menos, Safari en iOS hace zoom al enfocar
+  (hoy el buscador del catálogo usa 14 px).
+- Respetar `safe-area-inset-*` y usar `svh`/`dvh` en lugar de `vh`.
+- Nada pesado precargado en móvil (ver B2).
+- Probado en DevTools con un perfil de Android de gama media (CPU 4x más lenta y red "Fast 4G")
+  y, cuando se pueda, en un teléfono real.
+
+**F2. Naming en inglés.** Todo nombre va en inglés: archivos, carpetas, código, ids de HTML,
+anclas de URL, claves, ramas y etiquetas. Sólo el texto visible para el usuario (y la
+documentación) va en español. Quedan nombres en español que hay que renombrar:
+
+- Ids de sección: `destacados`, `evento`, `juegos`, `programa`, `mapa` y `ubicacion`.
+- La zona `sorteos` del croquis (`ZoneId`, `plan-places.ts` y `plan-layouts.ts`).
+
+## Relación con los issues abiertos
+
+Antes de esta auditoría ya existían los issues #16 a #27 (seguimiento en #27), enfocados en la
+arquitectura. Coinciden con varios hallazgos de aquí:
+
+| Hallazgo | Issue existente |
+| --- | --- |
+| C4 (estilos y colores fijos) | #25 |
+| C6 y C10 (`example` rota, carpetas vacías) | #22 |
+| C9 (contenido escrito en funciones) | #19 |
+| C2 y D4 (Prisma, variables de entorno) | #21 |
+| C8 (tipos abiertos) | #24 (para `zoneId`) |
+
+**Hay una tensión que debe decidir el equipo.** #16 propone formalizar la capa API: carpeta
+`api/` por feature, DTOs y validación de la respuesta de `/api/games`. C1 propone lo contrario:
+quitar `/api/games` y TanStack Query mientras no haya un caso de uso en el navegador. Las dos
+cosas no pueden hacerse a la vez. Con Prisma, los datos siguen leyéndose en el servidor, así que
+C1 sigue aplicando: si mañana hace falta una API (por ejemplo, para una app de torneos en vivo),
+se diseña con #16 como guía.
+
 ## Diseño propuesto de la PWA
 
 ### Piezas
@@ -450,15 +499,25 @@ actuales, el service worker tendría que entender también `/api/games` y la cac
 | Agregar `error.tsx` y `global-error.tsx` en español | `feature/<n>-error-pages` | D2 |
 | No precargar el reel en móvil ni con ahorro de datos | `fix/<n>-reel-preload` | B2 |
 | Hacer fallar el build sin `NEXT_PUBLIC_SITE_URL` en producción | `fix/<n>-require-site-url` | D4 |
-| Arreglar o eliminar la feature `example` | `fix/<n>-example-scaffold` | C6 |
+| Arreglar la feature `example` y quitar la regla de carpetas vacías | `fix/<n>-example-scaffold` | C6, C10 (#22) |
+| Renombrar ids y anclas en español | `fix/<n>-english-naming` | F2 |
+| Revisión móvil: buscador a 16 px, áreas táctiles y desbordes | `fix/<n>-mobile-pass` | F1 |
+
+### Entre fases: formato
+
+| Issue sugerido | Rama | Hallazgo |
+| --- | --- | --- |
 | Agregar Prettier, `format:check` en CI y `.nvmrc` | `feature/<n>-formatting` | C5 |
+
+Este PR reformatea archivos de todo el repositorio. Se lanza cuando no haya PRs abiertos, para
+no provocar conflictos en todos los demás.
 
 ### Fase 1: simplificar (2 semanas)
 
 | Issue sugerido | Hallazgo |
 | --- | --- |
-| Pasar los juegos como props y retirar TanStack Query y `/api/games` | C1 |
-| Decidir si hace falta base de datos; si no, retirar Prisma y mover los juegos a `games.ts` | C2 |
+| Pasar los juegos como props y retirar TanStack Query y `/api/games` (decidir antes frente a #16) | C1 |
+| Conectar Prisma detrás de `GameRepository` (lo lleva el trabajo del diagrama ER) | C2 (#21) |
 | Tipar los géneros y alinear el formulario de registro | C8 |
 | Sacar textos y horarios de `game-details.ts` a los datos | C9 |
 | Actualizar `AGENTS.md`, `docs/architecture.md` y `docs/data-sources.md` con el flujo nuevo | C1, C2 |
