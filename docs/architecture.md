@@ -9,6 +9,7 @@ El sitio implementa el diseño de la carpeta UTG (`index.html`, `juegos.html`, `
 ```
 src/app/                    Rutas. Cada archivo sólo exporta la page de una feature.
 src/features/<feature>/
+  __tests__/                Pruebas, con las mismas subcarpetas que el código (lib/, components/...).
   api/                      Contrato HTTP: Route Handlers, cliente del navegador y DTO validado.
   pages/                    Contenedores: piden datos, definen Suspense/notFound y metadata.
   components/               UI. Reciben datos por props; los interactivos llevan "use client".
