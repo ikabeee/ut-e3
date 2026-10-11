@@ -10,6 +10,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 - Documentación del modelo de datos (`docs/data-model.md`): diagrama ER en Mermaid para juegos,
   equipos, stands, check-ins de visitantes sin login, boletos de rifa y afluencia por stand.
+- El sitio se puede instalar como app: manifest con íconos PNG de 192 y 512 px, ícono
+  `maskable`, `apple-touch-icon` para iOS y accesos directos a "Juegos" y "Croquis"
+  (`npm run pwa:icons` regenera los íconos desde `src/app/icon.svg`).
 
 ### Cambiado
 

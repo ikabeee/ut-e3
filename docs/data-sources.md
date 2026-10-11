@@ -11,8 +11,8 @@ lib/types.ts                 Tipo de dominio `Game` (lo único que conoce el res
 lib/game-repository.ts       Contrato `GameRepository` (listGames, findGameBySlug)
 lib/mock-games.ts            MOCK: los 18 juegos del diseño
 lib/mock-game-repository.ts  MOCK: implementación en memoria de GameRepository
-lib/games-queries.ts         Consultas cacheadas ("use cache" + cacheTag("games")); elige el repositorio
-lib/games-prefetch.ts        Estado de TanStack Query prellenado en el servidor
+lib/server/games-queries.ts  Consultas cacheadas ("use cache" + cacheTag("games")); elige el repositorio
+lib/server/games-prefetch.ts Estado de TanStack Query prellenado en el servidor
 lib/games-query-options.ts   queryOptions + fetch a /api/games para el navegador
 public/mock/games/*.jpg      MOCK: imágenes de referencia del diseño
 ```
@@ -56,7 +56,7 @@ Prisma / mock  ->  GameRepository  ->  games-queries.ts ("use cache")
    }
    ```
 
-2. Crea `src/features/games/lib/prisma-game-repository.ts` que implemente `GameRepository`
+2. Crea `src/features/games/lib/server/prisma-game-repository.ts` que implemente `GameRepository`
    y mapee las filas al tipo `Game` (el resto de la app no conoce los tipos de Prisma):
 
    ```ts
@@ -78,7 +78,7 @@ Prisma / mock  ->  GameRepository  ->  games-queries.ts ("use cache")
    };
    ```
 
-3. En `lib/games-queries.ts` cambia `mockGameRepository` por `prismaGameRepository`.
+3. En `lib/server/games-queries.ts` cambia `mockGameRepository` por `prismaGameRepository`.
    Las consultas ya tienen `"use cache"`, así que las pages se siguen prerenderizando.
 4. Cuando una Server Action modifique juegos, llama `updateTag(GAMES_CACHE_TAG)` y, en el
    cliente, `queryClient.invalidateQueries({ queryKey: gamesQueryKeys.all })`.

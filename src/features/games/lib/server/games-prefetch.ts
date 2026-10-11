@@ -1,7 +1,7 @@
 import "server-only";
-import { GAMES_CACHE_TAG, listGames } from "@features/games/lib/games-queries";
+import { GAMES_CACHE_TAG, listGames } from "@features/games/lib/server/games-queries";
 import { gamesQueryKeys } from "@features/games/lib/games-query-options";
-import { dehydrateForPrerender } from "@shared/lib/query/dehydrate-for-prerender";
+import { dehydrateForPrerender } from "@shared/lib/server/dehydrate-for-prerender";
 
 /**
  * Estado de TanStack Query con la lista de juegos, prellenado en el servidor.
