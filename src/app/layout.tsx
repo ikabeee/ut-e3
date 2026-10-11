@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { OfflineNotices } from "@features/offline/components/offline-notices";
 import { QueryProvider } from "@shared/components/query-provider";
 import { SiteFooter } from "@shared/components/site-footer";
 import { SiteHeader } from "@shared/components/site-header";
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
           <SiteFooter />
         </QueryProvider>
+        <OfflineNotices />
       </body>
     </html>
   );

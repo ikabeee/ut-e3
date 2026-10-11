@@ -38,6 +38,13 @@ const routeFileImports = {
   message: "Los Route Handlers y archivos de metadata sólo delegan en `@features/<feature>/lib/*`.",
 };
 
+// Excepción mínima: el layout raíz monta los avisos de conexión y el registro del service worker
+// (feature offline) en todas las páginas. Ninguna page los puede montar por el resto del sitio.
+const layoutImports = {
+  group: [...nonPageImports.group, "!@features/offline/components/offline-notices"],
+  message: nonPageImports.message,
+};
+
 const routeFiles = ["src/app/**/route.ts", "src/app/sitemap.ts", "src/app/robots.ts", "src/app/manifest.ts"];
 
 const featureImports = {
@@ -57,7 +64,8 @@ const eslintConfig = defineConfig([
   // Buenas prácticas de TanStack Query (query keys, queryFn estables, etc.).
   ...tanstackQuery.configs["flat/recommended"],
   { files: ["src/**/*.{ts,tsx,mts}"], rules: restrict() },
-  { files: ["src/app/**/*.{ts,tsx}"], ignores: routeFiles, rules: restrict(nonPageImports) },
+  { files: ["src/app/**/*.{ts,tsx}"], ignores: [...routeFiles, "src/app/layout.tsx"], rules: restrict(nonPageImports) },
+  { files: ["src/app/layout.tsx"], rules: restrict(layoutImports) },
   { files: routeFiles, rules: restrict(routeFileImports) },
   {
     files: ["src/features/*/components/**/*.{ts,tsx}", "src/features/*/hooks/**/*.{ts,tsx}"],

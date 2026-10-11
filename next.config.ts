@@ -8,15 +8,28 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  experimental: {
+    // Reintenta navegaciones y Server Actions al volver la conexión y habilita `useOffline()`.
+    useOffline: true,
+  },
   images: {
     // AVIF primero (más ligero) y WebP como respaldo.
     formats: ["image/avif", "image/webp"],
   },
   async headers() {
-    return ["/media/:path*", "/mock/:path*"].map((source) => ({
+    const media = ["/media/:path*", "/mock/:path*"].map((source) => ({
       source,
       headers: [{ key: "Cache-Control", value: MEDIA_CACHE_CONTROL }],
     }));
+    // El service worker nunca se guarda en caché HTTP: así el navegador detecta cada versión nueva.
+    const serviceWorker = {
+      source: "/sw.js",
+      headers: [
+        { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+        { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+      ],
+    };
+    return [...media, serviceWorker];
   },
   turbopack: {
     rules: {
