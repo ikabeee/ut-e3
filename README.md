@@ -82,6 +82,7 @@ Cada feature tiene `lib/`, `hooks/`, `components/` y `pages/`. Las reglas comple
 | [`docs/data-sources.md`](./docs/data-sources.md) | Datos mock y pasos para conectar Prisma. |
 | [`docs/design-system.md`](./docs/design-system.md) | Tema UTG sobre HeroUI: colores, tipografía, botones y efectos. |
 | [`docs/versioning.md`](./docs/versioning.md) | Versiones, CHANGELOG y cómo publicar un release. |
+| [`docs/audit.md`](./docs/audit.md) | Auditoría técnica: capacidad, PWA, mantenibilidad y plan de acción. |
 | [`AGENTS.md`](./AGENTS.md) | Reglas del proyecto (también las leen los agentes de IA). |
 | [`CONTRIBUTING.md`](./CONTRIBUTING.md) | Flujo de trabajo, commits y Pull Requests. |
 

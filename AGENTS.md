@@ -193,6 +193,7 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
 - `docs/data-sources.md`: datos mock y pasos para conectar Prisma.
 - `docs/design-system.md`: tema UTG sobre HeroUI.
 - `docs/versioning.md` y `CHANGELOG.md`: versionado semántico y releases con git flow.
+- `docs/audit.md`: auditoría técnica (capacidad, PWA, mantenibilidad) y plan de acción por fases.
 
 Si cambias algo visible, agrega una línea en `[Sin publicar]` de `CHANGELOG.md`. Si cambias
 dónde vive un contenido, actualiza `docs/where-to-edit.md`.

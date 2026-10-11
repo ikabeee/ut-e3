@@ -6,6 +6,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [0.2.0] - 2026-10-10
+
 ### Agregado
 
 - Portada (`/`): reel con pausa y código de tiempo, carrusel de destacados con avance
