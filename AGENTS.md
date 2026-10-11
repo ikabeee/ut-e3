@@ -67,7 +67,8 @@ src/
 │   ├── example/              # Scaffold mínimo: cópialo para crear tus features
 │   ├── floor-plan/           # Croquis interactivo (/floor-plan): zonas, stands, zoom y directorio
 │   ├── games/                # Catálogo (/games), detalle (/games/[slug]), API y carruseles
-│   └── home/                 # Portada (/): compone event, games y floor-plan
+│   ├── home/                 # Portada (/): compone event, games y floor-plan
+│   └── offline/              # Sin conexión: service worker (/sw.js), avisos y página /offline
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── components/           # QueryProvider, navegación, pie, botones del diseño...
     ├── hooks/                # Hooks genéricos (movimiento reducido, estado en la URL...)
@@ -188,7 +189,8 @@ export default TeamsPage;
 1. `src/app/` sólo importa pages: `@features/<feature>/pages/<name>-page`.
 2. Sólo `lib/*-queries.ts` importa `@shared/lib/prisma/db`.
 3. `components/` y `hooks/` nunca importan `*-queries.ts` ni nada con `server-only`.
-4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx` (que monta `QueryProvider`), `globals.css`,
+4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx` (que monta `QueryProvider` y, como única
+   excepción, `OfflineNotices` de la feature `offline`), `globals.css`,
    archivos de ruta que delegan en `pages/` y Route Handlers (`route.ts`), `sitemap.ts` y
    `robots.ts` que delegan en `lib/` (ESLint les permite importar `lib/`, pero no componentes ni hooks).
 5. `shared/` nunca importa de `features/` (también lo valida ESLint).
@@ -252,6 +254,7 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
 - `docs/data-model.md`: diagrama ER propuesto (juegos, equipos, stands, check-ins y rifa).
 - `docs/design-system.md`: tema UTG sobre HeroUI.
 - `docs/versioning.md` y `CHANGELOG.md`: versionado semántico y releases con git flow.
+- `docs/pwa.md`: sitio sin conexión (service worker, estrategias de caché, actualizaciones y pruebas).
 - `docs/audit.md`: auditoría técnica (capacidad, PWA, mantenibilidad) y plan de acción por fases.
 
 Si cambias algo visible, agrega una línea en `[Sin publicar]` de `CHANGELOG.md`. Si cambias

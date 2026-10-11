@@ -74,6 +74,8 @@ ls -lh public/media/
 | Logo UTG | `src/shared/components/utg-logo.tsx` e icono `src/app/icon.svg` |
 | Navegación y pie de página | `src/shared/components/site-header.tsx`, `site-nav-links.tsx`, `site-footer.tsx` |
 | Páginas de error (404 y "Algo salió mal") | `src/shared/components/not-found-view.tsx` y `error-view.tsx` |
+| Página `/offline` y avisos "Sin conexión" / "Hay una versión nueva" | `src/features/offline/pages/offline-page.tsx` y `src/features/offline/components/` |
+| Páginas que se guardan para usar sin conexión | `buildPrecacheRoutes` en `src/features/offline/lib/precache-routes.ts` (ver [`docs/pwa.md`](./pwa.md)) |
 
 ## SEO
 

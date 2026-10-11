@@ -8,6 +8,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Sitio sin conexión (PWA): service worker que guarda la portada, el catálogo, cada juego y el
+  croquis en la primera visita; aviso "Sin conexión", página `/offline` y aviso "Hay una versión
+  nueva" para actualizar. Ver `docs/pwa.md`.
 - Documentación del modelo de datos (`docs/data-model.md`): diagrama ER en Mermaid para juegos,
   equipos, stands, check-ins de visitantes sin login, boletos de rifa y afluencia por stand.
 
