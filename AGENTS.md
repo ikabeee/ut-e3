@@ -493,6 +493,20 @@ cumple estos criterios (revísalos a 360 y 390 px, en horizontal y en escritorio
 - Usa `import type` para imports que sólo son tipos.
 - No uses opciones deprecadas en TS 6 (`baseUrl`, `moduleResolution: node`/`node10`, `target: ES5`).
 
+## Textos de la interfaz (copys)
+
+- Los textos de la interfaz de una feature (títulos, botones, `aria-label`, mensajes) viven en
+  `lib/<feature>-copy.ts` (`GAMES_COPY`, `EVENT_COPY`, `FLOOR_PLAN_COPY`...). Los componentes no
+  escriben literales: importan el copy de su feature o reciben el texto por props.
+- **Un dato se escribe una sola vez.** Horarios (`EVENT_SCHEDULE`), fecha (`EVENT_INFO.startsAt`),
+  sede (`EVENT_VENUE`) y organización (`siteConfig.organization`) tienen un solo dueño. Un texto que
+  los cita es una función que recibe el dato (`GAMES_COPY.detail.tournamentNote(schedule)`) o lo
+  compone con su dueño; nunca vuelve a escribir "12:00" o el nombre de la división.
+- Los datos cruzan features por parámetros desde las pages (por ejemplo, los horarios del
+  programa llegan al croquis como `PlanZoneTimes`), no por imports que agreguen aristas al grafo.
+- El contenido que podría venir de la base de datos (programa, juegos, zonas) no es copy: sigue
+  en sus archivos de datos y llega a los componentes por props.
+
 ## Estilo de código
 
 - **Nada de emojis.** Prohibidos en código, UI, comentarios, logs, documentación, issues,

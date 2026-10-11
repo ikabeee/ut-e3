@@ -51,9 +51,11 @@ Si agregas o cambias un campo de `Game` que el navegador necesita, actualiza tam
      genre         String
      team          String
      members       Int
+     players       Int     @default(1)
      stand         String  @unique
      hasTournament Boolean
      description   String
+     about         String?
      imageSrc      String?
      imagePosition String?
      artSeed       Int
@@ -71,7 +73,8 @@ Si agregas o cambias un campo de `Game` que el navegador necesita, actualiza tam
    import type { GameRepository } from "@features/games/lib/game-repository";
    import { db } from "@shared/lib/prisma/db";
 
-   // toGame(row) arma el tipo Game: `image` con imageSrc/imagePosition y `art` con artSeed/palette.
+   // toGame(row) arma el tipo Game: `image` con imageSrc/imagePosition, `art` con artSeed/palette
+   // y `about` partiendo el texto en párrafos (`null` si no tiene).
 
    export const prismaGameRepository: GameRepository = {
      async listGames() {
