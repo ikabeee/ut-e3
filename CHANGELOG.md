@@ -6,6 +6,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- Documentación del modelo de datos (`docs/data-model.md`): diagrama ER en Mermaid para juegos,
+  equipos, stands, check-ins de visitantes sin login, boletos de rifa y afluencia por stand.
+
 ## [0.2.0] - 2026-10-10
 
 ### Agregado

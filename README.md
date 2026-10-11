@@ -80,6 +80,7 @@ Cada feature tiene `lib/`, `hooks/`, `components/` y `pages/`. Las reglas comple
 | [`docs/where-to-edit.md`](./docs/where-to-edit.md) | Dónde cambiar textos, fechas, juegos, colores, el croquis o el reel. |
 | [`docs/architecture.md`](./docs/architecture.md) | Cómo está construido: capas, flujo de datos, patrones y principios SOLID. |
 | [`docs/data-sources.md`](./docs/data-sources.md) | Datos mock y pasos para conectar Prisma. |
+| [`docs/data-model.md`](./docs/data-model.md) | Modelo de datos (diagrama ER): juegos, equipos, stands, check-ins y rifa. |
 | [`docs/design-system.md`](./docs/design-system.md) | Tema UTG sobre HeroUI: colores, tipografía, botones y efectos. |
 | [`docs/versioning.md`](./docs/versioning.md) | Versiones, CHANGELOG y cómo publicar un release. |
 | [`AGENTS.md`](./AGENTS.md) | Reglas del proyecto (también las leen los agentes de IA). |
