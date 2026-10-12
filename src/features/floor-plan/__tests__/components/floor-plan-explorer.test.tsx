@@ -6,7 +6,12 @@ import { buildPlanItems } from "@features/floor-plan/lib/plan-items";
 import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 
 function renderExplorer() {
-  return render(<FloorPlanExplorer items={buildPlanItems(STAND_OCCUPANT_FIXTURES, PLAN_ZONE_TIMES_FIXTURE)} layouts={PLAN_LAYOUTS} />);
+  return render(
+    <FloorPlanExplorer
+      items={buildPlanItems(STAND_OCCUPANT_FIXTURES, PLAN_ZONE_TIMES_FIXTURE)}
+      layouts={PLAN_LAYOUTS}
+    />,
+  );
 }
 
 function panelTitle() {

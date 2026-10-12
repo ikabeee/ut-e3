@@ -67,7 +67,9 @@ export async function GameDetailPage({ params }: GameDetailPageProps) {
               shots={getGalleryShots(game, games.length)}
               labels={{ stand: game.stand, genre: game.genre, members: game.members }}
             />
-            <p className="m-0 max-w-[62ch] text-[clamp(17px,1.5vw,20px)] leading-[1.4] text-copy-strong">{game.description}</p>
+            <p className="m-0 max-w-[62ch] text-[clamp(17px,1.5vw,20px)] leading-[1.4] text-copy-strong">
+              {game.description}
+            </p>
             <GameTags game={game} />
             <GameAbout paragraphs={describeGame(game, highlights)} />
             <GamePlayLocation game={game} eventDateLabel={info.dateLabel} eventHoursLabel={info.hoursLabel} />

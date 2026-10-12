@@ -15,7 +15,7 @@ export function VenueSection({ venue }: Readonly<VenueSectionProps>) {
   return (
     <section id="venue" className="section-block">
       <div className="page-wrap">
-        <p className="type-tiny mb-[18px]">{venue.landmark}</p>
+        <p className="mb-[18px] type-tiny">{venue.landmark}</p>
         <h2 className="type-giant">{EVENT_COPY.venue.heading}</h2>
         <div className="mt-[clamp(36px,5vw,64px)] grid grid-cols-[.85fr_1.15fr] gap-gutter max-[860px]:grid-cols-1">
           <article className="flex min-w-0 flex-col">

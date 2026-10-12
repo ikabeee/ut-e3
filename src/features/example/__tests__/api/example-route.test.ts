@@ -11,6 +11,9 @@ describe("GET (example)", () => {
   it("responds with the message as JSON", async () => {
     const response = await GET();
 
-    await expect(response.json()).resolves.toEqual({ title: "Feature de ejemplo", description: "Descripción de prueba" });
+    await expect(response.json()).resolves.toEqual({
+      title: "Feature de ejemplo",
+      description: "Descripción de prueba",
+    });
   });
 });

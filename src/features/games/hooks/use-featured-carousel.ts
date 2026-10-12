@@ -35,7 +35,8 @@ export function useFeaturedCarousel(count: number) {
     [count],
   );
   const goBy = useCallback(
-    (step: number) => setSlides((state) => ({ current: wrapIndex(state.current + step, count), previous: state.current })),
+    (step: number) =>
+      setSlides((state) => ({ current: wrapIndex(state.current + step, count), previous: state.current })),
     [count],
   );
   const goNext = useCallback(() => goBy(1), [goBy]);

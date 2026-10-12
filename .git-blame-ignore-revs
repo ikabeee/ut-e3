@@ -1,0 +1,6 @@
+# Commits que sólo cambian el formato. `git blame` los salta para mostrar el último cambio real.
+# Configúralo una vez en tu clon: git config blame.ignoreRevsFile .git-blame-ignore-revs
+# GitHub lee este archivo automáticamente en la vista "Blame".
+
+# style: aplicar formato con Prettier (#60)
+4f1e355a3fb528e2bb62f19623dbb395304dec52

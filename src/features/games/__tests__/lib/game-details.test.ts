@@ -65,7 +65,13 @@ describe("getRelatedGames", () => {
   it("puts games of the same genre first and then the closest ones in the catalog", () => {
     const related = getRelatedGames(GAME_FIXTURES, findGame("ruta-9"));
 
-    expect(related.map((game) => game.slug)).toEqual(["turbina", "eco-nulo", "pulso-cero", "xibalba-run", "lucha-pixel"]);
+    expect(related.map((game) => game.slug)).toEqual([
+      "turbina",
+      "eco-nulo",
+      "pulso-cero",
+      "xibalba-run",
+      "lucha-pixel",
+    ]);
   });
 
   it("wraps around the end of the catalog", () => {

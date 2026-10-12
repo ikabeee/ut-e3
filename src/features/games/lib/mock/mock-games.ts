@@ -34,8 +34,7 @@ export const MOCK_GAMES: readonly Game[] = [
     players: 1,
     stand: "A2",
     hasTournament: false,
-    description:
-      "Mantén encendido el último faro del Caribe mientras la marea cambia la isla cada noche.",
+    description: "Mantén encendido el último faro del Caribe mientras la marea cambia la isla cada noche.",
     about: null,
     image: { src: "/mock/games/los-ultimos-faros.jpg", position: "50% 30%" },
     art: { seed: 1, palette: ["white", "panel"] },

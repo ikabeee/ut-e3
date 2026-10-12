@@ -3,7 +3,9 @@ import { INFO_STANDS } from "@features/floor-plan/lib/plan-places";
 
 describe("plan layouts", () => {
   it.each(["wide", "tall"] as const)("places every info stand in the %s layout", (orientation) => {
-    const codes = PLAN_LAYOUTS[orientation].standBlocks.flatMap((block) => getStandCells(block).map((cell) => cell.code));
+    const codes = PLAN_LAYOUTS[orientation].standBlocks.flatMap((block) =>
+      getStandCells(block).map((cell) => cell.code),
+    );
 
     expect(codes).toEqual(expect.arrayContaining(Object.keys(INFO_STANDS)));
   });

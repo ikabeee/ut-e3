@@ -38,15 +38,18 @@ export function FeaturedSlides({ games, current, previous }: Readonly<FeaturedSl
                 game={slide}
                 sizes="100vw"
                 preload={index === 0}
-                className={cn("transition-transform duration-[7s] ease-linear", isCurrent ? "scale-100" : "scale-[1.05]")}
+                className={cn(
+                  "transition-transform duration-[7s] ease-linear",
+                  isCurrent ? "scale-100" : "scale-[1.05]",
+                )}
               />
             ) : null}
           </div>
         );
       })}
       {/* Degradados sobre la imagen: a la izquierda y abajo en escritorio, sólo abajo en móvil. */}
-      <div aria-hidden="true" className="shade-featured absolute inset-0 max-[760px]:hidden" />
-      <div aria-hidden="true" className="shade-featured-mobile absolute inset-0 hidden max-[760px]:block" />
+      <div aria-hidden="true" className="absolute inset-0 shade-featured max-[760px]:hidden" />
+      <div aria-hidden="true" className="absolute inset-0 hidden shade-featured-mobile max-[760px]:block" />
     </div>
   );
 }

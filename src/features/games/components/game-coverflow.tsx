@@ -75,7 +75,7 @@ export function GameCoverflow() {
               <CoverflowCover game={game} isCurrent={placement.isCurrent} />
               <div
                 aria-hidden="true"
-                className="coverflow-reflection pointer-events-none absolute top-[calc(100%+4px)] left-0 size-full [transform:scaleY(-1)] opacity-90"
+                className="pointer-events-none absolute top-[calc(100%+4px)] left-0 size-full [transform:scaleY(-1)] coverflow-reflection opacity-90"
               >
                 <CoverflowCover game={game} isCurrent={placement.isCurrent} isReflection />
               </div>

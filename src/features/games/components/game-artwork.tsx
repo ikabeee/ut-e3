@@ -20,7 +20,14 @@ export interface GameArtworkProps {
  * Imagen o arte generado que ocupa todo su contenedor. El contenedor debe tener
  * `position: relative` y un tamaño definido (por ejemplo con `aspect-*`).
  */
-export function GameArtwork({ visual, labels, sizes, preload = false, alt = "", className }: Readonly<GameArtworkProps>) {
+export function GameArtwork({
+  visual,
+  labels,
+  sizes,
+  preload = false,
+  alt = "",
+  className,
+}: Readonly<GameArtworkProps>) {
   if (visual.kind === "image") {
     return (
       <Image

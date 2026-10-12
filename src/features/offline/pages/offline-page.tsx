@@ -15,7 +15,7 @@ export const offlinePageMetadata: Metadata = {
 export function OfflinePage() {
   return (
     <main className="page-wrap flex flex-col items-start gap-6 pt-[clamp(48px,8vw,120px)]">
-      <p className="type-tiny m-0 text-accent">{OFFLINE_COPY.page.kicker}</p>
+      <p className="m-0 type-tiny text-accent">{OFFLINE_COPY.page.kicker}</p>
       <h1 className="type-giant">{OFFLINE_COPY.page.title}</h1>
       <p className="m-0 max-w-[46ch] text-copy">{OFFLINE_COPY.page.description}</p>
       <nav aria-label={OFFLINE_COPY.page.navigationLabel} className="flex flex-wrap gap-3">

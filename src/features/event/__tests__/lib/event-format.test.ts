@@ -25,7 +25,13 @@ describe("event date labels", () => {
 describe("buildGoogleCalendarUrl", () => {
   it("prefills the event with its dates in UTC", () => {
     const url = new URL(
-      buildGoogleCalendarUrl({ title: "UTG", startsAt: STARTS_AT, endsAt: ENDS_AT, details: "Showcase.", location: "UT Cancún" }),
+      buildGoogleCalendarUrl({
+        title: "UTG",
+        startsAt: STARTS_AT,
+        endsAt: ENDS_AT,
+        details: "Showcase.",
+        location: "UT Cancún",
+      }),
     );
 
     expect(url.origin + url.pathname).toBe("https://calendar.google.com/calendar/render");
@@ -40,7 +46,13 @@ describe("buildGoogleCalendarUrl", () => {
 });
 
 describe("venue address", () => {
-  const venue = { name: "UT Cancún", streetAddress: "Km 11.5", postalCode: "77565", locality: "Cancún", region: "Quintana Roo" };
+  const venue = {
+    name: "UT Cancún",
+    streetAddress: "Km 11.5",
+    postalCode: "77565",
+    locality: "Cancún",
+    region: "Quintana Roo",
+  };
 
   it("builds the visible address and the one to copy from the same parts", () => {
     expect(formatVenueAddress(venue)).toBe("Km 11.5, C.P. 77565, Cancún, Quintana Roo.");

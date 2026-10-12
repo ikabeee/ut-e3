@@ -36,11 +36,10 @@ export function EventReel({ reel, reelLabel, children }: Readonly<EventReelProps
         aria-hidden="true"
         className="absolute inset-0 -z-2 size-full object-cover contrast-[1.05] saturate-[.85]"
       >
-        {hasSource &&
-          reel.sources.map((source) => <source key={source.src} src={source.src} type={source.type} />)}
+        {hasSource && reel.sources.map((source) => <source key={source.src} src={source.src} type={source.type} />)}
       </video>
       {/* Degradado inferior para leer el texto y líneas de escaneo encima del video. */}
-      <div aria-hidden="true" className="shade-reel absolute inset-0 -z-1" />
+      <div aria-hidden="true" className="absolute inset-0 -z-1 shade-reel" />
 
       {children}
 

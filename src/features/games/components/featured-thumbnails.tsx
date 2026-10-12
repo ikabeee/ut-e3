@@ -42,10 +42,11 @@ export function FeaturedThumbnails({ games, current, onSelect, progressBarRef }:
               sizes="200px"
               className={cn(
                 "transition-[filter,transform] duration-300",
-                !isCurrent && "brightness-50 grayscale group-hover:scale-[1.04] group-hover:brightness-[.85] group-hover:grayscale-[.3]",
+                !isCurrent &&
+                  "brightness-50 grayscale group-hover:scale-[1.04] group-hover:brightness-[.85] group-hover:grayscale-[.3]",
               )}
             />
-            <span aria-hidden="true" className="shade-thumb absolute inset-0" />
+            <span aria-hidden="true" className="absolute inset-0 shade-thumb" />
             <span
               className={cn(
                 "absolute right-[10px] bottom-[10px] left-[10px] z-[1] font-wide text-[clamp(10px,.95vw,13px)] leading-[1.1] font-bold tracking-[-.02em] uppercase",

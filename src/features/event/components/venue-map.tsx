@@ -20,12 +20,7 @@ export function VenueMap({ venueShortName, landmark }: Readonly<VenueMapProps>) 
   const copy = EVENT_COPY.venueMap;
 
   return (
-    <svg
-      viewBox="0 0 600 400"
-      role="img"
-      aria-label={copy.label(venueShortName)}
-      className="block h-auto w-full"
-    >
+    <svg viewBox="0 0 600 400" role="img" aria-label={copy.label(venueShortName)} className="block h-auto w-full">
       <defs>
         <pattern id="venue-map-dots" x={12} y={12} width={DOT_STEP} height={DOT_STEP} patternUnits="userSpaceOnUse">
           <rect width={1.2} height={1.2} fill="var(--border)" />

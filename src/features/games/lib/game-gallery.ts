@@ -19,16 +19,14 @@ export function getCoverVisual(game: Game): GameVisual {
  * del mismo color (igual que el diseño). `totalGames` es el tamaño del catálogo.
  */
 export function getGalleryShots(game: Game, totalGames: number): GalleryShot[] {
-  const extras = EXTRA_SHOTS.map(
-    ({ offset, background }, index): GalleryShot => ({
-      id: `shot-${index + 1}`,
-      kind: "art",
-      art: {
-        seed: ((game.art.seed + offset) % totalGames) + game.art.seed,
-        palette: [game.art.palette[0], background],
-      },
-    }),
-  );
+  const extras = EXTRA_SHOTS.map(({ offset, background }, index): GalleryShot => ({
+    id: `shot-${index + 1}`,
+    kind: "art",
+    art: {
+      seed: ((game.art.seed + offset) % totalGames) + game.art.seed,
+      palette: [game.art.palette[0], background],
+    },
+  }));
 
   return [{ id: "cover", ...getCoverVisual(game) }, ...extras];
 }

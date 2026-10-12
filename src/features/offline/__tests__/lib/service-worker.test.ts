@@ -28,7 +28,8 @@ class FakeResponse {
   }
 }
 
-const keyOf = (request: RequestInfo | URL) => (typeof request === "string" ? request : String((request as Request).url ?? request));
+const keyOf = (request: RequestInfo | URL) =>
+  typeof request === "string" ? request : String((request as Request).url ?? request);
 
 class FakeCache {
   readonly entries = new Map<string, FakeResponse>();
@@ -79,7 +80,10 @@ const ORIGIN = "https://showcase.example";
 
 function fakeHeaders(init: Record<string, string> = {}) {
   const values = new Map(Object.entries(init).map(([key, value]) => [key.toLowerCase(), value]));
-  return { has: (name: string) => values.has(name.toLowerCase()), get: (name: string) => values.get(name.toLowerCase()) ?? null };
+  return {
+    has: (name: string) => values.has(name.toLowerCase()),
+    get: (name: string) => values.get(name.toLowerCase()) ?? null,
+  };
 }
 
 const config: ServiceWorkerConfig = {
@@ -115,7 +119,10 @@ function setup(network: NetworkHandler) {
     return done;
   }
 
-  async function request(path: string, init: { mode?: string; method?: string; headers?: Record<string, string> } = {}) {
+  async function request(
+    path: string,
+    init: { mode?: string; method?: string; headers?: Record<string, string> } = {},
+  ) {
     let response: Promise<FakeResponse> | undefined;
     listeners.get("fetch")?.({
       request: {
@@ -154,7 +161,9 @@ describe("runServiceWorker: install", () => {
       [`${ORIGIN}/_next/static/media/font.woff2`]: "font",
       [`${ORIGIN}/icons/icon-192.png`]: "png",
     };
-    const { storage, lifecycle } = setup(async (url) => new FakeResponse(files[url] ?? null, { status: files[url] ? 200 : 404 }));
+    const { storage, lifecycle } = setup(
+      async (url) => new FakeResponse(files[url] ?? null, { status: files[url] ? 200 : 404 }),
+    );
 
     await lifecycle("install");
 
@@ -168,7 +177,9 @@ describe("runServiceWorker: install", () => {
   });
 
   it("fails when the offline page cannot be stored, so the browser retries on the next visit", async () => {
-    const { lifecycle } = setup(async (url) => new FakeResponse("<html>", { status: url.endsWith("/offline") ? 500 : 200 }));
+    const { lifecycle } = setup(
+      async (url) => new FakeResponse("<html>", { status: url.endsWith("/offline") ? 500 : 200 }),
+    );
 
     await expect(lifecycle("install")).rejects.toThrow("página sin conexión");
   });

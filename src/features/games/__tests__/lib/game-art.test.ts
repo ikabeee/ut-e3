@@ -28,7 +28,10 @@ describe("drawGameArt", () => {
     const ctx = new Proxy(
       {},
       {
-        get: (_target, property: string) => (...args: unknown[]) => calls.push(`${property}(${args.length})`),
+        get:
+          (_target, property: string) =>
+          (...args: unknown[]) =>
+            calls.push(`${property}(${args.length})`),
         set: () => true,
       },
     ) as unknown as CanvasRenderingContext2D;

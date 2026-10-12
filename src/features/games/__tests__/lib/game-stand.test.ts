@@ -17,7 +17,9 @@ describe("toStandOccupant", () => {
   });
 
   it.each(["wide", "tall"] as const)("finds a free stand for every game in the %s layout", (orientation) => {
-    const codes = PLAN_LAYOUTS[orientation].standBlocks.flatMap((block) => getStandCells(block).map((cell) => cell.code));
+    const codes = PLAN_LAYOUTS[orientation].standBlocks.flatMap((block) =>
+      getStandCells(block).map((cell) => cell.code),
+    );
 
     for (const game of MOCK_GAMES) {
       expect(codes).toContain(game.stand);

@@ -30,12 +30,7 @@ export function UtgLogo({ variant, className, label }: Readonly<UtgLogoProps>) {
         <>
           <path d={LOGO_PATH} transform="translate(.75 .75)" fill="var(--utg-black)" />
           {EXTRUSION_OFFSETS.map((offset) => (
-            <path
-              key={offset}
-              d={LOGO_PATH}
-              transform={`translate(${offset} ${offset})`}
-              fill="var(--utg-blue-5)"
-            />
+            <path key={offset} d={LOGO_PATH} transform={`translate(${offset} ${offset})`} fill="var(--utg-blue-5)" />
           ))}
         </>
       ) : (

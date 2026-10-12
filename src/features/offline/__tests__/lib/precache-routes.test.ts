@@ -13,6 +13,12 @@ describe("buildPrecacheRoutes", () => {
   });
 
   it("does not repeat a route", () => {
-    expect(buildPrecacheRoutes(["ruta-9", "ruta-9"])).toEqual(["/", "/games", "/floor-plan", "/offline", "/games/ruta-9"]);
+    expect(buildPrecacheRoutes(["ruta-9", "ruta-9"])).toEqual([
+      "/",
+      "/games",
+      "/floor-plan",
+      "/offline",
+      "/games/ruta-9",
+    ]);
   });
 });

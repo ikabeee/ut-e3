@@ -40,7 +40,11 @@ export interface ServiceWorkerHelpers {
   extractStaticAssetUrls(text: string, baseUrl: string, origin: string): string[];
 }
 
-export function runServiceWorker(scope: ServiceWorkerScope, config: ServiceWorkerConfig, helpers: ServiceWorkerHelpers) {
+export function runServiceWorker(
+  scope: ServiceWorkerScope,
+  config: ServiceWorkerConfig,
+  helpers: ServiceWorkerHelpers,
+) {
   const origin = scope.location.origin;
   const cacheNames = {
     static: `${config.cachePrefix}-static-${config.version}`,

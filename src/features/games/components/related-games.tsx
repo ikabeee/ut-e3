@@ -18,7 +18,7 @@ export function RelatedGames({ games }: Readonly<RelatedGamesProps>) {
         <h2 id="related-games-heading" className="type-section">
           {GAMES_COPY.detail.relatedHeading}
         </h2>
-        <Link href={GAMES_PATH} className="type-tiny touch-target relative text-accent no-underline">
+        <Link href={GAMES_PATH} className="touch-target relative type-tiny text-accent no-underline">
           {GAMES_COPY.detail.seeAll}
         </Link>
       </div>

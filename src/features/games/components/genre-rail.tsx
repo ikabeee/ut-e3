@@ -29,8 +29,18 @@ export function GenreRail({ genres, selectedGenre, onSelectGenre }: Readonly<Gen
           {GAMES_COPY.catalog.genresHeading}
         </h1>
         <div className="flex [&>*+*]:border-l-0">
-          <ArrowButton direction="previous" label={GAMES_COPY.catalog.previousGenres} className="h-10" onPress={() => scrollByItems(-1)} />
-          <ArrowButton direction="next" label={GAMES_COPY.catalog.nextGenres} className="h-10" onPress={() => scrollByItems(1)} />
+          <ArrowButton
+            direction="previous"
+            label={GAMES_COPY.catalog.previousGenres}
+            className="h-10"
+            onPress={() => scrollByItems(-1)}
+          />
+          <ArrowButton
+            direction="next"
+            label={GAMES_COPY.catalog.nextGenres}
+            className="h-10"
+            onPress={() => scrollByItems(1)}
+          />
         </div>
       </div>
       <div

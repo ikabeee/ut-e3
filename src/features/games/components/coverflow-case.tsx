@@ -23,7 +23,7 @@ export function CoverflowCover({ game, isCurrent, isReflection = false }: Readon
     >
       <div className="relative flex-1 overflow-hidden bg-surface">
         <GameMedia game={game} sizes={COVER_SIZES} />
-        <span aria-hidden="true" className="shade-cover absolute inset-x-0 bottom-0 h-[42%]" />
+        <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[42%] shade-cover" />
         <span className="absolute right-[10px] bottom-[10px] left-[10px] z-[1] font-wide text-[calc(var(--cw)*.085)] leading-none font-bold tracking-[-.03em] text-foreground uppercase">
           {game.name}
         </span>
@@ -41,10 +41,7 @@ export function CoverflowEdges() {
         aria-hidden="true"
         className={cn(edgeClass, "left-[calc(var(--cd)*-1)] origin-right [transform:rotateY(-90deg)]")}
       />
-      <span
-        aria-hidden="true"
-        className={cn(edgeClass, "left-full origin-left [transform:rotateY(90deg)]")}
-      />
+      <span aria-hidden="true" className={cn(edgeClass, "left-full origin-left [transform:rotateY(90deg)]")} />
     </>
   );
 }

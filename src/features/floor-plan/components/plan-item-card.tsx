@@ -19,7 +19,9 @@ export function PlanItemCard({ item, variant }: Readonly<PlanItemCardProps>) {
 
   return (
     <div className="flex min-w-0 flex-col" aria-live="polite">
-      {item.cover ? <div className="relative aspect-video max-w-full overflow-hidden bg-surface">{item.cover}</div> : null}
+      {item.cover ? (
+        <div className="relative aspect-video max-w-full overflow-hidden bg-surface">{item.cover}</div>
+      ) : null}
       <PaperCard className={isOverview ? "gap-[10px] px-[22px] pt-[22px] pb-7" : "gap-2 p-[18px] pb-5"}>
         <span className="type-tiny">{getItemKicker(item)}</span>
         <Heading

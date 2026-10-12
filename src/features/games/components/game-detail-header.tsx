@@ -11,18 +11,19 @@ interface GameDetailHeaderProps {
 export function GameDetailHeader({ game }: Readonly<GameDetailHeaderProps>) {
   return (
     <>
-      <Link href={GAMES_PATH} className="type-tiny touch-target relative mb-[18px] inline-block text-muted no-underline hover:text-accent">
+      <Link
+        href={GAMES_PATH}
+        className="touch-target relative mb-[18px] inline-block type-tiny text-muted no-underline hover:text-accent"
+      >
         {GAMES_COPY.detail.backToCatalog}
       </Link>
       <header className="flex flex-col gap-[10px]">
         <h1 className="font-wide text-[clamp(28px,4.4vw,60px)] leading-[.95] font-bold tracking-[-.035em] uppercase">
           {game.name}
         </h1>
-        <p className="type-tiny m-0 text-muted">
-          {GAMES_COPY.detail.teamAndStand(game)}
-        </p>
+        <p className="m-0 type-tiny text-muted">{GAMES_COPY.detail.teamAndStand(game)}</p>
       </header>
-      <nav aria-label={GAMES_COPY.detail.sectionsLabel} className="type-tiny my-6 flex gap-6 border-b border-border">
+      <nav aria-label={GAMES_COPY.detail.sectionsLabel} className="my-6 flex gap-6 border-b border-border type-tiny">
         <Link
           href={getGamePath(game.slug)}
           aria-current="page"

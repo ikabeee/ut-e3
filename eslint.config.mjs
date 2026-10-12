@@ -74,7 +74,8 @@ const legacyAlias = {
 };
 
 const barrelImports = {
-  regex: "^@(features|shared)(/[^/]+)*/index$|^@features/[^/]+(/(lib|hooks|components|pages|api)|/lib/server)?$|^@shared/lib/server$",
+  regex:
+    "^@(features|shared)(/[^/]+)*/index$|^@features/[^/]+(/(lib|hooks|components|pages|api)|/lib/server)?$|^@shared/lib/server$",
   message: "No hay archivos barril: importa el archivo concreto, por ejemplo `@features/games/components/game-card`.",
 };
 
@@ -158,7 +159,8 @@ const metadataFileImports = {
 // Un Route Handler de `src/app` sólo enlaza la ruta con el de la feature, como las pages.
 const routeHandlerImports = {
   regex: "^@shared/|^@features/(?![^/]+/api/[^/]+-route$)",
-  message: 'Un `route.ts` sólo re-exporta el handler de la feature: `export { GET } from "@features/<feature>/api/<feature>-route";`.',
+  message:
+    'Un `route.ts` sólo re-exporta el handler de la feature: `export { GET } from "@features/<feature>/api/<feature>-route";`.',
 };
 
 /** Features que `feature` no puede importar según `FEATURE_DEPENDENCIES`. */
@@ -173,7 +175,8 @@ function forbiddenFeatures(feature) {
 // `server-only` marca un archivo como de servidor: sólo puede vivir en las ubicaciones de servidor.
 const serverOnlyPackage = {
   name: "server-only",
-  message: 'El código de servidor vive en `lib/server/` (o `api/*-route.ts`): mueve este archivo ahí en lugar de importar "server-only".',
+  message:
+    'El código de servidor vive en `lib/server/` (o `api/*-route.ts`): mueve este archivo ahí en lugar de importar "server-only".',
 };
 
 const restrict = (patterns, { allowServerOnly = false } = {}) => ({
@@ -205,7 +208,11 @@ const withTests = (dir, ...globs) => globs.flatMap((glob) => [`${dir}/${glob}`, 
  */
 const FEATURE_LAYERS = [
   { glob: `lib/**/*.${SOURCE}`, patterns: [hooksLayer, componentsLayer, pagesLayer, apiRoutes, serverCode] },
-  { glob: `lib/server/**/*.${SOURCE}`, patterns: [hooksLayer, componentsLayer, pagesLayer, apiLayer], allowServerOnly: true },
+  {
+    glob: `lib/server/**/*.${SOURCE}`,
+    patterns: [hooksLayer, componentsLayer, pagesLayer, apiLayer],
+    allowServerOnly: true,
+  },
   // Server Actions ("use server"): los componentes cliente las importan y ellas llaman a `lib/server/`.
   { glob: "lib/*-actions.ts", patterns: [hooksLayer, componentsLayer, pagesLayer, apiLayer, prismaClient] },
   { glob: `hooks/**/*.${SOURCE}`, patterns: [componentsLayer, pagesLayer, apiRoutes, serverCode] },

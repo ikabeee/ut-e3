@@ -29,7 +29,7 @@ export function GamesCatalog() {
       <section ref={browseRef} aria-label={GAMES_COPY.catalog.allGames} className="mt-[clamp(40px,6vw,72px)]">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
           <GameSearchField value={catalog.keyword} onChange={catalog.setKeyword} />
-          <p className="type-tiny m-0 text-muted" aria-live="polite">
+          <p className="m-0 type-tiny text-muted" aria-live="polite">
             {catalog.resultsLabel}
           </p>
         </div>

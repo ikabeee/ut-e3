@@ -6,7 +6,7 @@ export function CatalogShowcase() {
   return (
     <section id="games" className="section-block">
       <div className="page-wrap">
-        <h2 className="type-giant text-center text-[clamp(24px,4.6vw,68px)]!">{HOME_COPY.catalogHeading}</h2>
+        <h2 className="text-center type-giant text-[clamp(24px,4.6vw,68px)]!">{HOME_COPY.catalogHeading}</h2>
       </div>
       <GameCoverflow />
     </section>
