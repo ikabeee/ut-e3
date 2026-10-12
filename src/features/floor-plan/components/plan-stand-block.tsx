@@ -6,7 +6,7 @@ import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
 import { getItemInteraction, type PlanSelection } from "@features/floor-plan/lib/plan-interaction";
 import { getStandCells } from "@features/floor-plan/lib/plan-layouts";
 import { splitStandName } from "@features/floor-plan/lib/plan-items";
-import type { FloorPlanVariant, StandBlock } from "@features/floor-plan/lib/types";
+import type { FloorPlanVariant, PlanRect, StandBlock } from "@features/floor-plan/lib/types";
 
 interface PlanStandBlockProps {
   block: StandBlock;
@@ -14,16 +14,24 @@ interface PlanStandBlockProps {
   nameSize: number;
   variant: FloorPlanVariant;
   selection: PlanSelection;
+  /** Áreas táctiles por código de stand (`getTouchRects`). */
+  touchRects: ReadonlyMap<string, PlanRect>;
 }
 
 /**
  * Pasillo de stands: su nombre y una celda por stand con el código arriba y el nombre del
  * ocupante abajo, partido en dos renglones. Los stands de equipo van en azul; el resto punteado.
  */
-export function PlanStandBlock({ block, nameSize, variant, selection }: Readonly<PlanStandBlockProps>) {
+export function PlanStandBlock({ block, nameSize, variant, selection, touchRects }: Readonly<PlanStandBlockProps>) {
   return (
     <g>
-      <text x={block.labelAt[0]} y={block.labelAt[1]} fontSize={11} fill="var(--muted)" className="font-mono">
+      <text
+        x={block.labelAt[0]}
+        y={block.labelAt[1]}
+        fontSize={11}
+        fill="var(--muted)"
+        className="pointer-events-none font-mono"
+      >
         {block.name}
       </text>
       {getStandCells(block).map(({ code, rect }) => {
@@ -50,6 +58,7 @@ export function PlanStandBlock({ block, nameSize, variant, selection }: Readonly
             fillOpacity={isTeam ? 0.2 : 1}
             stroke={isTeam ? "var(--accent)" : "var(--foreground)"}
             strokeDasharray={isTeam ? undefined : "3 3"}
+            touchRect={touchRects.get(code)}
             {...getItemInteraction(code, selection)}
           >
             <text
