@@ -75,6 +75,7 @@ ls -lh public/media/
 | Posición o tamaño de zonas, pasillos y stands | `src/features/floor-plan/lib/plan-layouts.ts` (horizontal y vertical) |
 | Cómo se dibuja cada parte del croquis | `src/features/floor-plan/components/`: `plan-zones.tsx` (zonas), `plan-stand-block.tsx` (pasillos y stands), `plan-entry.tsx` (entrada), `plan-public-area.tsx` (área de público), `plan-floor.tsx` (retícula y muro) y `plan-defs.tsx` (patrones). `floor-plan-drawing.tsx` sólo los junta |
 | Cuándo un stand o zona se ve seleccionado u oculto por los filtros | `getItemInteraction` en `src/features/floor-plan/lib/plan-interaction.ts` |
+| Área táctil de stands y zonas en el teléfono | `TOUCH_MARGIN` en `src/features/floor-plan/lib/plan-touch-areas.ts` (si mueves zonas en `plan-layouts.ts`, `npm test` avisa si alguna queda por debajo de 44 px) |
 | Asignar un juego a un stand | Campo `stand` del juego |
 | Stand seleccionado al abrir la portada | `INITIAL_SELECTION` en `src/features/home/components/program-and-floor-plan.tsx` |
 | Zoom máximo y márgenes al arrastrar | `src/features/floor-plan/lib/plan-viewport.ts` |

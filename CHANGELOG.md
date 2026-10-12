@@ -29,6 +29,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   los filtros del croquis y la pausa del reel usan variantes con nombre de `components.css` en lugar
   de cadenas largas de utilidades. Los colores del exhibidor y los degradados sobre imágenes salen
   de tokens del tema, y los títulos del detalle usan `type-section`. Sin cambios visuales.
+- Móvil: los stands y zonas del croquis (en la portada y en `/floor-plan`) se pueden tocar con un
+  área de 44 px o más desde pantallas de 360 px. Info, WC, Comida y Descanso medían 37 a 41 px.
+  El área extra es invisible, sólo existe con dedo y no invade las zonas vecinas.
 - Pruebas: viven en la carpeta `__tests__/` de cada feature (y de `src/shared/` y `src/app/`) en lugar
   de junto a cada archivo. El helper `renderWithGames` reemplaza el `QueryClient` repetido en las
   pruebas de componentes que leen el catálogo.

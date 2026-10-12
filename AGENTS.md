@@ -513,6 +513,8 @@ cumple estos criterios (revísalos a 360 y 390 px, en horizontal y en escritorio
 - **Áreas táctiles de al menos 44x44 px.** Si el diseño no permite agrandar el elemento, usa la
   utilidad `touch-target` (pseudo-elemento invisible; el elemento debe ser `relative` o `absolute`
   y su contenedor no debe recortarlo). Para crecer sólo en pantallas táctiles usa `pointer-coarse:`.
+  Dentro de un SVG (`touch-target` no funciona ahí) usa un `<rect>` transparente junto al
+  elemento, como `getTouchRects` del croquis (ver "Áreas táctiles" en `docs/design-system.md`).
 - **Campos de texto de al menos 16 px**: con menos, Safari en iOS hace zoom al enfocar.
 - **Nada sólo con `hover`.** Lo que aparece o se activa al pasar el mouse necesita una alternativa
   táctil (tocar, foco o un botón). Los efectos de `hover` propios van dentro de
