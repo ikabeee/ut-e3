@@ -113,6 +113,14 @@ Todo elemento interactivo mide al menos 44x44 px en pantallas táctiles (ver "M�
 - `touch-target` (`components.css`): pseudo-elemento invisible que amplía el área sin cambiar el
   tamaño visual. El elemento debe ser `relative` o `absolute`. `ArrowButton` ya lo incluye.
 - `pointer-coarse:min-h-11`: agranda el elemento sólo con dedo (filtros y directorio del croquis).
+- Croquis (SVG): `touch-target` no funciona dentro de un SVG y el dibujo se achica con el ancho
+  del teléfono. Cada stand y zona lleva junto a su grupo un rectángulo transparente que calcula
+  `getTouchRects` (`floor-plan/lib/plan-touch-areas.ts`): crece hasta `TOUCH_MARGIN` unidades
+  por lado sin pasar de la mitad del espacio hasta su vecino, así que nunca invade otra zona. Sólo
+  existe con dedo (`hidden pointer-coarse:block`), de modo que con mouse el hover, el clic y el
+  anillo de foco siguen el dibujo. Los textos decorativos del croquis (pasillos, "ENTRADA",
+  "PÚBLICO") llevan `pointer-events-none` para no tapar esas áreas. La prueba
+  `__tests__/lib/plan-touch-areas.test.ts` verifica 44 px a 360 px y que no haya solapes.
 - Campos de texto: `text-base` (16 px) y, si el diseño pide 14 px, `pointer-fine:text-sm`.
 
 ## Notas de implementación

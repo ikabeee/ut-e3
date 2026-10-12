@@ -4,12 +4,14 @@ import { cn } from "@heroui/react";
 import { FitSvgText } from "@features/floor-plan/components/fit-svg-text";
 import { PlanItemShape } from "@features/floor-plan/components/plan-item-shape";
 import { getItemInteraction, type PlanSelection } from "@features/floor-plan/lib/plan-interaction";
-import type { FloorPlanVariant, PlanLayout, ZoneId, ZoneShape } from "@features/floor-plan/lib/types";
+import type { FloorPlanVariant, PlanLayout, PlanRect, ZoneId, ZoneShape } from "@features/floor-plan/lib/types";
 
 interface PlanZonesProps {
   zones: PlanLayout["zones"];
   variant: FloorPlanVariant;
   selection: PlanSelection;
+  /** Áreas táctiles por id (`getTouchRects`). */
+  touchRects: ReadonlyMap<string, PlanRect>;
 }
 
 /** Tamaño de la etiqueta cuando la zona no lo define. */
@@ -19,7 +21,7 @@ const DEFAULT_ZONE_FONT_SIZE = 18;
  * Zonas del recinto (escenario, arena, servicios...): las actividades en azul y los servicios en
  * gris. Una zona sin datos en `itemsById` no se pinta.
  */
-export function PlanZones({ zones, variant, selection }: Readonly<PlanZonesProps>) {
+export function PlanZones({ zones, variant, selection, touchRects }: Readonly<PlanZonesProps>) {
   return (Object.entries(zones) as [Exclude<ZoneId, "entry">, ZoneShape][]).map(([id, zone]) => {
     const item = selection.itemsById.get(id);
     if (!item) {
@@ -38,6 +40,7 @@ export function PlanZones({ zones, variant, selection }: Readonly<PlanZonesProps
         fill={color}
         fillOpacity={isActivity ? 0.14 : 0.22}
         stroke={color}
+        touchRect={touchRects.get(id)}
         {...getItemInteraction(id, selection)}
       >
         <FitSvgText
