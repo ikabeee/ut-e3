@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
-import { routes, siteConfig } from "@shared/lib/site-config";
+import { SECTION_LINKS } from "@features/site/lib/navigation";
+import { siteConfig } from "@shared/lib/site-config";
 
 const shortcutIcon = { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" };
 
@@ -30,9 +31,7 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
-    shortcuts: [
-      { name: "Juegos", url: routes.games, icons: [shortcutIcon] },
-      { name: "Croquis", url: routes.floorPlan, icons: [shortcutIcon] },
-    ],
+    // Las mismas secciones que la navegación del sitio (`SECTION_LINKS`).
+    shortcuts: SECTION_LINKS.map((link) => ({ name: link.label, url: link.href, icons: [shortcutIcon] })),
   };
 }

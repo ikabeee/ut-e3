@@ -17,17 +17,18 @@ import { toStandOccupant } from "@features/games/lib/game-stand";
 import { getGamesHydrationState } from "@features/games/lib/server/games-prefetch";
 import { listGames } from "@features/games/lib/server/games-queries";
 import { CatalogShowcase } from "@features/home/components/catalog-showcase";
+import { HOME_PATH } from "@features/home/lib/home-links";
 import { ProgramAndFloorPlan } from "@features/home/components/program-and-floor-plan";
 import { resolveScheduleZones } from "@features/home/lib/schedule-zones";
 import { JsonLd } from "@shared/components/json-ld";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { QueryHydrationBoundary } from "@shared/components/query-hydration-boundary";
-import { routes, siteConfig } from "@shared/lib/site-config";
+import { siteConfig } from "@shared/lib/site-config";
 
 export const homePageMetadata: Metadata = {
   title: { absolute: siteConfig.title },
   description: siteConfig.description,
-  alternates: { canonical: routes.home },
+  alternates: { canonical: HOME_PATH },
   openGraph: buildOpenGraph({ images: [{ url: getEventContent().reel.poster, alt: siteConfig.title }] }),
 };
 

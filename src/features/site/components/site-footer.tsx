@@ -1,5 +1,6 @@
 import { siteConfig } from "@shared/lib/site-config";
 
+/** Pie del sitio: nombre del showcase y organización. */
 export function SiteFooter() {
   return (
     <footer>

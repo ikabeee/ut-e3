@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { ErrorView } from "@shared/components/error-view";
+import { ErrorView } from "@features/site/components/error-view";
 
 describe("ErrorView", () => {
   it("shows the error message in Spanish", () => {

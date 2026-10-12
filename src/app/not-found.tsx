@@ -1,9 +1,1 @@
-import type { Metadata } from "next";
-import { NotFoundView } from "@shared/components/not-found-view";
-
-export const metadata: Metadata = {
-  title: "Página no encontrada",
-  robots: { index: false },
-};
-
-export default NotFoundView;
+export { notFoundPageMetadata as metadata, NotFoundPage as default } from "@features/site/pages/not-found-page";

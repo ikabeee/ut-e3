@@ -28,6 +28,7 @@ const FEATURE_DEPENDENCIES = {
   "floor-plan": [],
   games: ["event", "floor-plan"],
   home: ["event", "floor-plan", "games"],
+  site: ["floor-plan", "games", "home"],
 };
 
 const FEATURES = readdirSync(new URL("./src/features", import.meta.url), { withFileTypes: true })
@@ -125,8 +126,22 @@ const testOnlyImports = {
 };
 
 const nonPageImports = {
-  group: ["@features/*/lib/**", "@features/*/hooks/**", "@features/*/components/**", "@features/*/api/**"],
-  message: "`src/app` sólo renderiza pages: importa desde `@features/<feature>/pages/<name>-page`.",
+  group: [
+    "@features/*/lib/**",
+    "@features/*/hooks/**",
+    "@features/*/components/**",
+    "@features/*/api/**",
+    "@shared/components/**",
+  ],
+  message:
+    "`src/app` sólo renderiza pages: importa desde `@features/<feature>/pages/<name>-page` (la navegación, el pie, el 404 y el error viven en la feature `site`).",
+};
+
+// El layout raíz es la única excepción: monta el marco del sitio (cabecera y pie de `site`) y el
+// `QueryProvider` de `shared`. Nada más de `components/` ni de `shared/components`.
+const rootLayoutImports = {
+  regex: "^@features/(?!site/components/)[^/]+/(lib|hooks|components|api)/|^@shared/components/(?!query-provider$)",
+  message: "El layout sólo monta `@features/site/components/*`, `QueryProvider` y estilos globales; el resto va en una page.",
 };
 
 // Los archivos de metadata (`sitemap.ts`, `robots.ts`, `manifest.ts`) no renderizan una page:
@@ -230,6 +245,7 @@ const eslintConfig = defineConfig([
     ignores: [...routeHandlerFiles, ...metadataFiles],
     rules: restrict([nonPageImports, prismaClient]),
   },
+  { files: ["src/app/layout.tsx"], rules: restrict([rootLayoutImports, prismaClient]) },
   { files: routeHandlerFiles, rules: restrict([routeHandlerImports]) },
   { files: metadataFiles, rules: restrict([metadataFileImports, prismaClient]) },
   { files: [`src/shared/**/*.${SOURCE}`, "src/shared/**/*.mts"], rules: restrict([featureImports, prismaClient]) },

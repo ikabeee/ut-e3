@@ -67,10 +67,11 @@ src/
 │   ├── example/              # Scaffold mínimo: cópialo para crear tus features
 │   ├── floor-plan/           # Croquis interactivo (/floor-plan): zonas, stands, zoom y directorio
 │   ├── games/                # Catálogo (/games), detalle (/games/[slug]), API y carruseles
-│   └── home/                 # Portada (/): compone event, games y floor-plan
+│   ├── home/                 # Portada (/): compone event, games y floor-plan
+│   └── site/                 # Marco del sitio: navegación, pie, 404 y página de error
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
-    ├── components/           # QueryProvider, navegación, pie, botones del diseño...
+    ├── components/           # Primitivos del diseño: botones, QueryProvider, JsonLd, logo...
     ├── hooks/                # Hooks genéricos (movimiento reducido, estado en la URL...)
     ├── styles/               # Tema UTG de HeroUI, tipografía y efectos
     └── lib/
@@ -231,7 +232,9 @@ export { GET } from "@features/teams/api/teams-route";
 
 ### Reglas de dependencias
 
-1. `src/app/` sólo importa pages: `@features/<feature>/pages/<name>-page`.
+1. `src/app/` sólo importa pages: `@features/<feature>/pages/<name>-page`. Tampoco importa
+   `@shared/components/*`. La única excepción es `layout.tsx`, que monta la cabecera y el pie
+   (`@features/site/components/*`) y el `QueryProvider`.
 2. Sólo `lib/server/` de una feature importa `@shared/lib/prisma/db`.
 3. Sólo `lib/server/`, `@shared/lib/server/`, `@shared/lib/prisma/` y los Route Handlers
    (`api/*-route.ts`) importan `server-only`, y nada que pueda llegar al navegador (`lib/`, `hooks/`,
@@ -241,7 +244,10 @@ export { GET } from "@features/teams/api/teams-route";
 5. `src/app/` no contiene UI ni lógica: sólo `layout.tsx` (que monta `QueryProvider`), `globals.css`,
    archivos de ruta que delegan en `pages/`, Route Handlers (`route.ts`) que re-exportan
    `@features/<feature>/api/<feature>-route`, y `sitemap.ts` y `robots.ts` que delegan en `lib/`.
-6. `shared/` nunca importa de `features/`.
+6. `shared/` nunca importa de `features/`, y no conoce rutas, secciones ni textos del evento. Criterio:
+   **si sabe el nombre de una página, una ruta o un texto del evento, no es `shared/`**. La
+   navegación, el pie, el 404 y el error viven en la feature `site`; cada feature declara su ruta
+   en `lib/<feature>-links.ts` (`GAMES_PATH`, `FLOOR_PLAN_PATH`, `HOME_PATH`).
 7. Fuera de `pages/`, una feature sólo importa las features que declara `FEATURE_DEPENDENCIES` en
    `eslint.config.mjs`. Ese grafo no puede tener ciclos (ESLint se detiene si lo tiene) y está
    dibujado en `docs/architecture.md`. Las `pages/` pueden componer cualquier feature, porque sólo
@@ -297,6 +303,8 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
 2. Si persiste datos, agrega los modelos a `contract.prisma`, ejecuta `npm run db:emit` y
    escribe las consultas en `lib/server/<feature>-queries.ts`.
 3. Si importa otra feature fuera de `pages/`, agrégala a `FEATURE_DEPENDENCIES` en `eslint.config.mjs`.
+   Declara su ruta en `lib/<feature>-links.ts` y, si debe aparecer en la navegación, agrégala a
+   `SECTION_LINKS` (`src/features/site/lib/navigation.ts`).
 4. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`. Si el navegador
    necesita pedir datos por HTTP, agrega `api/` como en `example` (Route Handler, cliente y pruebas).
 5. Crea la ruta en `src/app/<ruta>/page.tsx` que sólo renderiza la page (ver el ejemplo de arriba),
