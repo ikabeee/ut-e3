@@ -1,15 +1,16 @@
 import "server-only";
 import type { GameRepository } from "@features/games/lib/game-repository";
 import { mockGameRepository } from "@features/games/lib/mock/mock-game-repository";
+import { prismaGameRepository } from "@features/games/lib/server/prisma-game-repository";
 import { env, type DataSource } from "@shared/lib/env";
 
 /**
- * Implementaciones de `GameRepository` por fuente de datos. Cuando exista
- * `lib/server/prisma-game-repository.ts`, agrégalo aquí (`prisma: prismaGameRepository`) y
- * actívalo con `DATA_SOURCE=prisma`, sin tocar `games-queries.ts`.
+ * Implementaciones de `GameRepository` por fuente de datos: los juegos del diseño (`mock`) o
+ * PostgreSQL (`prisma`). Se eligen con `DATA_SOURCE` sin tocar `games-queries.ts`.
  */
 const GAME_REPOSITORIES: Partial<Record<DataSource, GameRepository>> = {
   mock: mockGameRepository,
+  prisma: prismaGameRepository,
 };
 
 /**

@@ -474,28 +474,26 @@ Antes del evento:
 4. Comprobar los permisos con `SET ROLE` del rol de la app (cambiar tablas debe fallar).
 5. Confirmar que hay 18 juegos con stand y revisar los `CHECK` con `\d+`.
 
-## Relación con el tipo `Game` actual
+## Relación con el tipo `Game`
 
 El repositorio de Prisma de la feature `games` (`lib/server/prisma-game-repository.ts`, que
-implementa `GameRepository`) arma el tipo `Game` (`src/features/games/lib/types.ts`) con estas
-columnas:
+implementa `GameRepository`) lee estas columnas y `toGame()` (`lib/game-mapping.ts`) arma el tipo
+`Game` (`src/features/games/lib/types.ts`):
 
 | Campo de `Game` | Origen |
 | --- | --- |
-| `slug`, `name`, `description`, `players` | `game` |
+| `slug`, `name`, `description`, `players`, `itchioUrl` | `game` |
 | `about` | `game.about` partido en párrafos (línea en blanco); `null` usa el texto genérico de `games-copy.ts` |
 | `genre` | `genre.name` del género principal (`game.genre_id`) |
 | `team` | `team.name` |
 | `members` | `count(*)` de `team_member` |
-| `stand` | `team.stand_code` (vacío hasta que se asigne) |
-| `image` | `game_image` con `is_cover = true` (`image_url` y `crop_position`) |
+| `stand` | `team.stand_code` (`null` hasta que se asigne: el sitio muestra "Por asignar") |
+| `platforms` | `platform.name` de `game_platform`, en orden alfabético |
+| `image` | `game_image` con `is_cover = true` (`image_url`, `alt_text` y `crop_position`) |
+| `gallery` | la portada y después las demás fotos por `sort_order` |
 
-Cuando se conecte la base hay que:
-
-- quitar `hasTournament` y `art` del tipo `Game` y de la UI, junto con el arte generado
-  (`src/features/games/lib/game-art.ts`), porque ya no existen en el modelo;
-- hacer `image` obligatorio, porque sólo se listan juegos con portada;
-- decidir cómo se muestra un juego sin stand asignado.
+Los juegos sin portada no se leen para el sitio; el panel de administración sí los ve
+(`lib/server/games-admin-queries.ts`).
 
 ## Privacidad
 

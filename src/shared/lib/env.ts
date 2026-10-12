@@ -10,15 +10,19 @@
  * Este módulo también llega al bundle del navegador (lo importa `site-config.ts`). Ahí sólo
  * existen las variables `NEXT_PUBLIC_*`, que Next.js inserta en el build únicamente si se
  * escriben como `process.env.NEXT_PUBLIC_<NOMBRE>` (no con corchetes ni desestructurando).
- * Las demás (como `DATA_SOURCE`) sólo tienen valor en el servidor; en el navegador toman su
- * valor por defecto y no se usan.
+ * Las demás (como `DATA_SOURCE` o las credenciales del panel) sólo tienen valor en el servidor:
+ * Next.js no las incluye en el bundle del navegador, donde toman su valor por defecto y no se usan.
  */
+import { parseImageHosts } from "@shared/lib/image-hosts";
 
 /** Valores crudos tal como llegan de `process.env`. */
 export interface EnvSource {
   NODE_ENV?: string;
   NEXT_PUBLIC_SITE_URL?: string;
   DATA_SOURCE?: string;
+  IMAGE_REMOTE_HOSTS?: string;
+  ADMIN_USER?: string;
+  ADMIN_PASSWORD?: string;
 }
 
 /** De dónde leen sus datos las features: los mocks del diseño o la base de datos. */
@@ -32,6 +36,15 @@ export interface Env {
   siteUrl: string;
   /** Fuente de datos del servidor (`DATA_SOURCE`); `mock` si no se define. */
   dataSource: DataSource;
+  /** Dominios de las fotos de juegos por URL https (`IMAGE_REMOTE_HOSTS`, separados por comas). */
+  imageRemoteHosts: string[];
+  /** Credenciales HTTP Basic del panel (`ADMIN_USER` y `ADMIN_PASSWORD`); `null` si falta alguna. */
+  admin: AdminCredentials | null;
+}
+
+export interface AdminCredentials {
+  user: string;
+  password: string;
 }
 
 /** URL pública que se usa en desarrollo y pruebas cuando falta `NEXT_PUBLIC_SITE_URL`. */
@@ -79,11 +92,21 @@ export function parseDataSource(value: string | undefined): DataSource {
   return known;
 }
 
+/**
+ * Credenciales del panel de administración. Sin las dos variables, todas las acciones de
+ * administración se rechazan (nadie puede modificar los datos).
+ */
+export function parseAdminCredentials(user: string | undefined, password: string | undefined): AdminCredentials | null {
+  return user && password ? { user, password } : null;
+}
+
 /** Valida todas las variables a partir de sus valores crudos. */
 export function parseEnv(source: EnvSource): Env {
   return {
     siteUrl: parseSiteUrl(source.NEXT_PUBLIC_SITE_URL, source.NODE_ENV),
     dataSource: parseDataSource(source.DATA_SOURCE),
+    imageRemoteHosts: parseImageHosts(source.IMAGE_REMOTE_HOSTS),
+    admin: parseAdminCredentials(source.ADMIN_USER, source.ADMIN_PASSWORD),
   };
 }
 
@@ -92,6 +115,9 @@ function readProcessEnv(): EnvSource {
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
     DATA_SOURCE: process.env.DATA_SOURCE,
+    IMAGE_REMOTE_HOSTS: process.env.IMAGE_REMOTE_HOSTS,
+    ADMIN_USER: process.env.ADMIN_USER,
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
   };
 }
 

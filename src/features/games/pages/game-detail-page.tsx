@@ -8,7 +8,7 @@ import { GamePlayLocation } from "@features/games/components/game-play-location"
 import { GameSidebar } from "@features/games/components/game-sidebar";
 import { GameTags } from "@features/games/components/game-tags";
 import { RelatedGames } from "@features/games/components/related-games";
-import { describeGame, getRelatedGames } from "@features/games/lib/game-details";
+import { describeGame, formatStand, getRelatedGames } from "@features/games/lib/game-details";
 import { getGalleryShots } from "@features/games/lib/game-gallery";
 import { getGamePath } from "@features/games/lib/game-links";
 import { buildGameStructuredData } from "@features/games/lib/game-structured-data";
@@ -35,11 +35,11 @@ export async function generateGameDetailMetadata({ params }: GameDetailPageProps
   const openGraph = buildOpenGraph({
     title: game.name,
     description: game.description,
-    ...(game.image ? { images: [{ url: game.image.src, alt: game.name }] } : {}),
+    images: [{ url: game.image.src, alt: game.image.alt }],
   });
   return {
     title: game.name,
-    description: `${game.description} ${game.team} · Stand ${game.stand} · ${game.genre}.`,
+    description: `${game.description} ${game.team} · Stand ${formatStand(game.stand)} · ${game.genre}.`,
     alternates: { canonical: getGamePath(game.slug) },
     openGraph,
     twitter: { card: "summary_large_image", title: game.name, description: game.description },
@@ -52,7 +52,7 @@ export async function GameDetailPage({ params }: GameDetailPageProps) {
   if (!game) {
     notFound();
   }
-  const { info, highlights } = getEventContent();
+  const { info } = getEventContent();
 
   return (
     <main className="pt-[clamp(24px,4vw,48px)]">
@@ -62,16 +62,12 @@ export async function GameDetailPage({ params }: GameDetailPageProps) {
 
         <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-[clamp(24px,4vw,56px)] max-[980px]:grid-cols-1">
           <div className="flex min-w-0 flex-col gap-7">
-            <GameGallery
-              gameName={game.name}
-              shots={getGalleryShots(game, games.length)}
-              labels={{ stand: game.stand, genre: game.genre, members: game.members }}
-            />
+            <GameGallery shots={getGalleryShots(game)} />
             <p className="m-0 max-w-[62ch] text-[clamp(17px,1.5vw,20px)] leading-[1.4] text-copy-strong">
               {game.description}
             </p>
             <GameTags game={game} />
-            <GameAbout paragraphs={describeGame(game, highlights)} />
+            <GameAbout paragraphs={describeGame(game)} />
             <GamePlayLocation game={game} eventDateLabel={info.dateLabel} eventHoursLabel={info.hoursLabel} />
           </div>
 

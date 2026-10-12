@@ -1,5 +1,5 @@
 import { GameDetailSection } from "@features/games/components/game-detail-section";
-import { getStandAisle } from "@features/games/lib/game-details";
+import { formatStand, getStandAisle } from "@features/games/lib/game-details";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { Game } from "@features/games/lib/types";
 
@@ -13,7 +13,7 @@ interface GamePlayLocationProps {
 export function GamePlayLocation({ game, eventDateLabel, eventHoursLabel }: Readonly<GamePlayLocationProps>) {
   const { playLocation } = GAMES_COPY.detail;
   const cells = [
-    { label: playLocation.stand, value: game.stand },
+    { label: playLocation.stand, value: formatStand(game.stand) },
     { label: playLocation.aisle, value: getStandAisle(game.stand) },
     { label: playLocation.date, value: eventDateLabel },
     { label: playLocation.hours, value: eventHoursLabel },

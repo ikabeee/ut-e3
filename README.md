@@ -86,6 +86,7 @@ src/
 │   ├── home/             # Portada (compone las demás features)
 │   ├── offline/          # Sin conexión: service worker, avisos y página /offline
 │   ├── site/             # Navegación, pie, 404 y página de error
+│   ├── teams/            # Equipos e integrantes (CRUD del panel)
 │   └── example/          # Scaffold mínimo para crear features nuevas
 └── shared/               # Código transversal sin reglas de negocio (tema, botones, hooks)
 ```
@@ -99,7 +100,7 @@ Cada feature se organiza en `lib/` (y `lib/server/` para el código de servidor)
 | --- | --- |
 | [`docs/where-to-edit.md`](./docs/where-to-edit.md) | Dónde cambiar textos, fechas, juegos, colores, el croquis o el reel. |
 | [`docs/architecture.md`](./docs/architecture.md) | Cómo está construido: capas, flujo de datos, patrones y principios SOLID. |
-| [`docs/data-sources.md`](./docs/data-sources.md) | Datos mock y pasos para conectar Prisma. |
+| [`docs/data-sources.md`](./docs/data-sources.md) | Base de datos local con Docker, fuentes de datos y acciones de administración. |
 | [`docs/data-model.md`](./docs/data-model.md) | Modelo de datos (diagrama ER): juegos, equipos, stands, check-ins y rifa. |
 | [`docs/design-system.md`](./docs/design-system.md) | Tema UTG sobre HeroUI: colores, tipografía, botones y efectos. |
 | [`docs/versioning.md`](./docs/versioning.md) | Versiones, CHANGELOG y cómo publicar un release. |

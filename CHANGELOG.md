@@ -18,6 +18,14 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 - Docker: `Dockerfile` multi-stage (Next.js `standalone`) y `docker-compose.yml` con
   PostgreSQL 16, migraciones y seeds (`npm run docker:up`).
 - CI con PostgreSQL: aplica las migraciones, carga los seeds y verifica el esquema.
+- El sitio puede leer los juegos de la base de datos (`DATA_SOURCE=prisma`, repositorio de
+  Prisma): catálogo, detalle, portada, croquis, API y sitemap. Sólo se muestran los juegos con
+  portada; los equipos sin stand aparecen "Por asignar" y no se dibujan en el croquis. El
+  detalle muestra las plataformas, el enlace a itch.io y la galería de fotos del juego.
+- CRUDs del catálogo para el panel de administración (equipos, integrantes, juegos, fotos,
+  géneros y plataformas) con Server Actions protegidas por `ADMIN_USER` / `ADMIN_PASSWORD`,
+  validación con mensajes en español y llaves de escáner por equipo.
+- `IMAGE_REMOTE_HOSTS`: dominios permitidos para las fotos de los juegos por URL.
 - El sitio se puede instalar como app: manifest con íconos PNG de 192 y 512 px, ícono
   `maskable`, `apple-touch-icon` para iOS y accesos directos a "Juegos" y "Croquis"
   (`npm run pwa:icons` regenera los íconos desde `src/app/icon.svg`).
@@ -40,6 +48,13 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 - Pruebas: viven en la carpeta `__tests__/` de cada feature (y de `src/shared/` y `src/app/`) en lugar
   de junto a cada archivo. El helper `renderWithGames` reemplaza el `QueryClient` repetido en las
   pruebas de componentes que leen el catálogo.
+
+### Eliminado
+
+- El arte generado de los juegos sin imagen y el campo de torneo por juego (`hasTournament`),
+  que ya no existen en el modelo de datos. Los 14 juegos del mock sin imagen usan una portada de
+  relleno. La galería del detalle muestra las fotos reales del juego (sin flechas si sólo tiene
+  la portada).
 
 ## [0.2.0] - 2026-10-10
 

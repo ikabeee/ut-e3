@@ -50,19 +50,22 @@ ls -lh public/media/
 
 | Quiero cambiar... | Archivo |
 | --- | --- |
-| Juegos, equipos, géneros, stands, descripciones, jugadores y "Acerca del juego" propio (mientras sean mock) | `src/features/games/lib/mock/mock-games.ts` (`players`, `about`). Las pruebas no dependen de este archivo |
+| Juegos, equipos, integrantes, géneros, plataformas, stands, descripciones, jugadores y "Acerca del juego" | La base de datos (`DATA_SOURCE=prisma`), con las acciones de `games-actions.ts` y `teams-actions.ts` (panel de administración) |
+| Datos de ejemplo de la base | `src/shared/lib/prisma/seed-data.json` (y `npm run db:seed`) |
+| Juegos sin base de datos (`DATA_SOURCE=mock`) | `src/features/games/lib/mock/mock-games.ts`. Las pruebas no dependen de este archivo |
 | Juegos de las pruebas | `src/features/games/__tests__/game-fixtures.ts` (los usa también `renderWithGames`) |
 | Fuente de los juegos (mock o base de datos) | `DATA_SOURCE` en `.env` y `src/features/games/lib/server/game-repositories.ts` |
-| Portada de un juego | Agrega la imagen en `public/` y ponla en `image.src` del juego; sin imagen se genera arte |
-| Colores del arte generado de un juego | `art.palette` del juego (`acid`, `black`, `white`, `panel`, `light`) |
-| Textos de la interfaz de juegos (botones, títulos, "Acerca del juego" genérico, aviso de torneo, características y ficha) | `src/features/games/lib/games-copy.ts` (`GAMES_COPY`) |
+| Portada y galería de un juego | Tabla `game_image` (`is_cover` marca la portada); un juego sin portada no se muestra |
+| Dominios permitidos para fotos por URL | `IMAGE_REMOTE_HOSTS` en `.env` |
+| Mensajes de error del panel (duplicados, formatos) | `*_CONSTRAINT_MESSAGES` en `games-actions.ts` y `teams-actions.ts` |
+| Textos de la interfaz de juegos (botones, títulos, "Acerca del juego" genérico, "Por asignar", características y ficha) | `src/features/games/lib/games-copy.ts` (`GAMES_COPY`) |
 | Criterio de "Más juegos" | `getRelatedGames` en `src/features/games/lib/game-details.ts` |
 | Campos en los que busca el buscador | `filterGames` en `src/features/games/lib/game-filters.ts` |
 | Velocidad del carrusel de destacados | `FEATURED_SLIDE_DURATION` en `src/features/games/hooks/use-featured-carousel.ts` |
 | Diapositivas, título o miniaturas del carrusel de destacados | `featured-slides.tsx`, `featured-caption.tsx` y `featured-thumbnails.tsx` en `src/features/games/components/` |
 | Teclas del exhibidor 3D (flechas y Espacio) | `src/features/games/hooks/use-coverflow-keyboard.ts` |
 | Medidas del exhibidor 3D | `RACK_VARIABLES` en `src/features/games/components/game-coverflow.tsx` |
-| Conectar la base de datos | [`docs/data-sources.md`](./data-sources.md) |
+| Base de datos local, seeds y acciones del panel | [`docs/data-sources.md`](./data-sources.md) |
 
 ## Croquis
 

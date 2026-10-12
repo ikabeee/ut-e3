@@ -1,4 +1,3 @@
-import type { ScheduleHighlights } from "@features/event/lib/types";
 import type { Game } from "@features/games/lib/types";
 import { siteConfig } from "@shared/lib/site-config";
 import { padTwoDigits, pluralize } from "@shared/lib/text";
@@ -10,6 +9,8 @@ const { division, universityShortName } = siteConfig.organization;
  * cantidades) son funciones: el dato se pasa o se lee de su único dueño, nunca se escribe aquí.
  */
 export const GAMES_COPY = {
+  /** Lo que se muestra en lugar del stand mientras el equipo no tiene uno asignado. */
+  unassignedStand: "Por asignar",
   carousel: {
     roleDescription: "carrusel",
     label: "Juegos del showcase",
@@ -18,8 +19,9 @@ export const GAMES_COPY = {
   },
   coverflow: {
     label: "Juegos en el exhibidor",
-    /** Nombre accesible de cada caja: "Ruta 9, Carreras, stand A4". */
-    caseLabel: (game: Pick<Game, "name" | "genre" | "stand">) => `${game.name}, ${game.genre}, stand ${game.stand}`,
+    /** Nombre accesible de cada caja: "Ruta 9, Carreras, stand A4" (o "stand por asignar"). */
+    caseLabel: (game: Pick<Game, "name" | "genre" | "stand">) =>
+      `${game.name}, ${game.genre}, stand ${game.stand ?? "por asignar"}`,
     /** Posición para lectores de pantalla: "09 de 18". */
     position: (current: number, count: number) => `${padTwoDigits(current + 1)} de ${padTwoDigits(count)}`,
   },
@@ -41,7 +43,7 @@ export const GAMES_COPY = {
   },
   detail: {
     backToCatalog: "← Todos los juegos",
-    teamAndStand: (game: Pick<Game, "team" | "stand">) => `${game.team} · Stand ${game.stand}`,
+    teamAndStand: (game: Pick<Game, "team" | "stand">) => `${game.team} · Stand ${game.stand ?? "por asignar"}`,
     sectionsLabel: "Secciones del juego",
     overviewTab: "Información general",
     gallery: "Galería",
@@ -55,12 +57,6 @@ export const GAMES_COPY = {
     /** Párrafo de "Acerca del juego" cuando el juego no trae el suyo (`Game.about`). */
     about: (game: Pick<Game, "name" | "team" | "members">) =>
       `${game.name} es el proyecto de ${game.team}, ${game.members} estudiantes de la ${division} de la ${universityShortName}. En el evento vas a poder jugar una demo de unos 10 minutos y platicar con el equipo sobre cómo lo hicieron.`,
-    /** Aviso de torneo con los horarios del programa del evento. */
-    tournamentNote: ({
-      tournamentSignupDeadline,
-      tournamentFinalsAt,
-    }: Pick<ScheduleHighlights, "tournamentSignupDeadline" | "tournamentFinalsAt">) =>
-      `Este juego tiene torneo. Inscríbete en la Arena antes de las ${tournamentSignupDeadline}; las finales se juegan en el main stage a las ${tournamentFinalsAt}.`,
     playLocationHeading: "Dónde jugarlo",
     playLocation: { stand: "Stand", aisle: "Pasillo", date: "Fecha", hours: "Horario" },
     relatedHeading: "Más juegos",
@@ -68,21 +64,18 @@ export const GAMES_COPY = {
   },
   sidebar: {
     viewOnMap: "Ver en el croquis",
+    playOnItchio: "Jugar en itch.io",
     attend: "Quiero asistir",
   },
   features: {
     demo: "Demo jugable",
     players: (players: number) => (players === 1 ? "Un jugador" : `${players} jugadores`),
-    competitive: "Competitivo",
   },
   facts: {
     team: "Equipo",
     members: "Integrantes",
     genre: "Género",
     stand: "Stand",
-    tournament: "Torneo",
     event: "Evento",
-    yes: "Sí",
-    no: "No",
   },
 } as const;

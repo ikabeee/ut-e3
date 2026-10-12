@@ -1,5 +1,6 @@
 import {
   describeGame,
+  formatStand,
   getGameFacts,
   getGameFeatures,
   getRelatedGames,
@@ -7,8 +8,6 @@ import {
 } from "@features/games/lib/game-details";
 import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 import type { Game } from "@features/games/lib/types";
-
-const SCHEDULE = { tournamentSignupDeadline: "11:30", tournamentFinalsAt: "18:00" };
 
 function findGame(slug: string): Game {
   const game = GAME_FIXTURES.find((candidate) => candidate.slug === slug);
@@ -23,22 +22,28 @@ describe("game details", () => {
     expect(getStandAisle("B7")).toBe("B");
   });
 
-  it("adds the competitive feature only to games with a tournament", () => {
-    expect(getGameFeatures(findGame("ruta-9"))).toEqual(["Demo jugable", "Un jugador", "Competitivo"]);
-    expect(getGameFeatures(findGame("hormigon"))).toEqual(["Demo jugable", "Un jugador"]);
+  it("shows 'Por asignar' while the team has no stand", () => {
+    expect(formatStand("A4")).toBe("A4");
+    expect(formatStand(null)).toBe("Por asignar");
+    expect(getStandAisle(null)).toBe("Por asignar");
   });
 
-  it("lists the players of the demo", () => {
-    expect(getGameFeatures({ ...findGame("hormigon"), players: 4 })).toEqual(["Demo jugable", "4 jugadores"]);
+  it("lists the demo, the players and the platforms", () => {
+    expect(getGameFeatures(findGame("ceniza-protocol"))).toEqual([
+      "Demo jugable",
+      "Un jugador",
+      "Windows",
+      "Web (navegador)",
+    ]);
+    expect(getGameFeatures({ ...findGame("hormigon"), players: 4 })).toEqual([
+      "Demo jugable",
+      "4 jugadores",
+      "Windows",
+    ]);
   });
 
-  it("describes the tournament with the times of the schedule only when the game has one", () => {
-    const [, tournament] = describeGame(findGame("lucha-pixel"), SCHEDULE);
-
-    expect(tournament).toBe(
-      "Este juego tiene torneo. Inscríbete en la Arena antes de las 11:30; las finales se juegan en el main stage a las 18:00.",
-    );
-    expect(describeGame(findGame("cenote"), SCHEDULE)).toEqual([
+  it("uses the generic text when the game has no paragraphs", () => {
+    expect(describeGame(findGame("cenote"))).toEqual([
       "Cenote es el proyecto de Equipo Raíz, 3 estudiantes de la División de Ingeniería y Tecnologías de la UT Cancún. En el evento vas a poder jugar una demo de unos 10 minutos y platicar con el equipo sobre cómo lo hicieron.",
     ]);
   });
@@ -46,7 +51,7 @@ describe("game details", () => {
   it("uses the paragraphs of the game when it has them", () => {
     const game = { ...findGame("cenote"), about: ["Explora un cenote.", "Hecho en Godot."] };
 
-    expect(describeGame(game, SCHEDULE)).toEqual(["Explora un cenote.", "Hecho en Godot."]);
+    expect(describeGame(game)).toEqual(["Explora un cenote.", "Hecho en Godot."]);
   });
 
   it("builds the fact sheet without the word Equipo", () => {
@@ -55,7 +60,6 @@ describe("game details", () => {
       { label: "Integrantes", value: "4" },
       { label: "Género", value: "Carreras" },
       { label: "Stand", value: "A9" },
-      { label: "Torneo", value: "Sí" },
       { label: "Evento", value: "27.11.2026" },
     ]);
   });

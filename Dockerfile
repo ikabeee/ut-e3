@@ -35,10 +35,13 @@ FROM deps AS builder
 COPY . .
 ARG DATABASE_URL
 ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
-ARG DATA_SOURCE=mock
+ARG DATA_SOURCE=prisma
+# Dominios de las fotos de los juegos: next/image los fija en el build.
+ARG IMAGE_REMOTE_HOSTS=""
 ENV DATABASE_URL=${DATABASE_URL} \
     NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL} \
-    DATA_SOURCE=${DATA_SOURCE}
+    DATA_SOURCE=${DATA_SOURCE} \
+    IMAGE_REMOTE_HOSTS=${IMAGE_REMOTE_HOSTS}
 RUN npm run build
 
 # 4. Imagen final: sólo el servidor standalone, `public/` y los estáticos.

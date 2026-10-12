@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { parseImageHosts } from "./src/shared/lib/image-hosts";
 
 // Archivos de public/ que cambian poco (reel e imágenes): caché de un día y revalidación en
 // segundo plano. No llevan hash en el nombre, por eso no se marcan como inmutables.
@@ -17,6 +18,11 @@ const nextConfig: NextConfig = {
   images: {
     // AVIF primero (más ligero) y WebP como respaldo.
     formats: ["image/avif", "image/webp"],
+    // Dominios permitidos para las fotos de los juegos por URL (IMAGE_REMOTE_HOSTS en .env).
+    remotePatterns: parseImageHosts(process.env.IMAGE_REMOTE_HOSTS).map((hostname) => ({
+      protocol: "https" as const,
+      hostname,
+    })),
   },
   async headers() {
     const media = ["/media/:path*", "/mock/:path*"].map((source) => ({
