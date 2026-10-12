@@ -11,12 +11,6 @@ import { ArrowButton } from "@shared/components/arrow-button";
 import { useFitText } from "@shared/hooks/use-fit-text";
 import { usePrefersReducedMotion } from "@shared/hooks/use-prefers-reduced-motion";
 
-// Degradados sobre la imagen: a la izquierda y abajo en escritorio, sólo abajo en móvil.
-const DESKTOP_SHADE =
-  "linear-gradient(90deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.45) 40%,rgba(0,0,0,0) 70%),linear-gradient(0deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,0) 50%)";
-const MOBILE_SHADE = "linear-gradient(0deg,#000 0%,rgba(0,0,0,.75) 40%,rgba(0,0,0,0) 75%)";
-const THUMB_SHADE = "linear-gradient(0deg,rgba(0,0,0,.75),rgba(0,0,0,0) 60%)";
-
 /** Espacio que se deja a la izquierda de la miniatura activa al desplazarse. */
 const THUMB_SCROLL_OFFSET = 8;
 
@@ -86,8 +80,9 @@ export function FeaturedGamesCarousel() {
               </div>
             );
           })}
-          <div aria-hidden="true" className="absolute inset-0 max-[760px]:hidden" style={{ background: DESKTOP_SHADE }} />
-          <div aria-hidden="true" className="absolute inset-0 hidden max-[760px]:block" style={{ background: MOBILE_SHADE }} />
+          {/* Degradados sobre la imagen: a la izquierda y abajo en escritorio, sólo abajo en móvil. */}
+          <div aria-hidden="true" className="shade-featured absolute inset-0 max-[760px]:hidden" />
+          <div aria-hidden="true" className="shade-featured-mobile absolute inset-0 hidden max-[760px]:block" />
         </div>
 
         <div className="absolute right-gutter bottom-[clamp(20px,3vw,40px)] left-gutter flex max-w-[min(760px,100%)] flex-col gap-[18px]">
@@ -134,7 +129,7 @@ export function FeaturedGamesCarousel() {
                     !isCurrent && "brightness-50 grayscale group-hover:scale-[1.04] group-hover:brightness-[.85] group-hover:grayscale-[.3]",
                   )}
                 />
-                <span aria-hidden="true" className="absolute inset-0" style={{ background: THUMB_SHADE }} />
+                <span aria-hidden="true" className="shade-thumb absolute inset-0" />
                 <span
                   className={cn(
                     "absolute right-[10px] bottom-[10px] left-[10px] z-[1] font-wide text-[clamp(10px,.95vw,13px)] leading-[1.1] font-bold tracking-[-.02em] uppercase",

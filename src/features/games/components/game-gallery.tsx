@@ -17,9 +17,8 @@ interface GameGalleryProps {
 const VIEWER_SIZES = "(max-width: 980px) 100vw, 1180px";
 const THUMBNAIL_SIZES = "170px";
 
-// Flechas sobre la imagen (`.g-nav` del diseño): sin barrido, cambian de color al instante.
-const NAV_BUTTON_CLASS =
-  "absolute top-1/2 z-[2] size-[46px] -translate-y-1/2 text-lg transition-none [--btn-base:rgba(0,0,0,.75)] [--btn-edge:var(--border)] max-[560px]:size-[38px]";
+// Flechas sobre la imagen (`.g-nav` del diseño): variante `overlay`, centradas en vertical.
+const NAV_BUTTON_CLASS = "absolute top-1/2 z-[2] size-[46px] -translate-y-1/2 max-[560px]:size-[38px]";
 
 /** Galería del detalle con miniaturas (`.gallery` y `.shots` del diseño). */
 export function GameGallery({ gameName, shots, labels }: Readonly<GameGalleryProps>) {
@@ -48,8 +47,8 @@ export function GameGallery({ gameName, shots, labels }: Readonly<GameGalleryPro
             </div>
           ))}
         </div>
-        <ArrowButton direction="previous" label={GAMES_COPY.detail.previousImage} className={cn(NAV_BUTTON_CLASS, "left-3")} onPress={showPrevious} />
-        <ArrowButton direction="next" label={GAMES_COPY.detail.nextImage} className={cn(NAV_BUTTON_CLASS, "right-3")} onPress={showNext} />
+        <ArrowButton direction="previous" label={GAMES_COPY.detail.previousImage} tone="overlay" className={cn(NAV_BUTTON_CLASS, "left-3")} onPress={showPrevious} />
+        <ArrowButton direction="next" label={GAMES_COPY.detail.nextImage} tone="overlay" className={cn(NAV_BUTTON_CLASS, "right-3")} onPress={showNext} />
       </section>
 
       <div

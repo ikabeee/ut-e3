@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { GameCard } from "@features/games/components/game-card";
 import { GAMES_PATH } from "@features/games/lib/game-links";
-import { GAME_SECTION_HEADING_CLASS } from "@features/games/components/game-detail-section";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { Game } from "@features/games/lib/types";
 
@@ -16,7 +15,7 @@ export function RelatedGames({ games }: Readonly<RelatedGamesProps>) {
   return (
     <section className="mt-[clamp(56px,8vw,96px)]" aria-labelledby="related-games-heading">
       <div className="mb-4 flex items-end justify-between gap-3">
-        <h2 id="related-games-heading" className={GAME_SECTION_HEADING_CLASS}>
+        <h2 id="related-games-heading" className="type-section">
           {GAMES_COPY.detail.relatedHeading}
         </h2>
         <Link href={GAMES_PATH} className="type-tiny touch-target relative text-accent no-underline">
