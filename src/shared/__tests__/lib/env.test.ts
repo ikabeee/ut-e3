@@ -1,4 +1,4 @@
-import { DEVELOPMENT_SITE_URL, parseEnv, parseSiteUrl } from "@shared/lib/env";
+import { DEVELOPMENT_SITE_URL, parseDataSource, parseEnv, parseSiteUrl } from "@shared/lib/env";
 
 describe("parseSiteUrl", () => {
   it("accepts an absolute http(s) URL", () => {
@@ -35,10 +35,26 @@ describe("parseSiteUrl", () => {
   });
 });
 
+describe("parseDataSource", () => {
+  it("uses the mocks when the variable is missing", () => {
+    expect(parseDataSource(undefined)).toBe("mock");
+    expect(parseDataSource("  ")).toBe("mock");
+  });
+
+  it("accepts the known data sources", () => {
+    expect(parseDataSource("prisma")).toBe("prisma");
+    expect(parseDataSource(" mock ")).toBe("mock");
+  });
+
+  it("rejects an unknown data source", () => {
+    expect(() => parseDataSource("mysql")).toThrow('DATA_SOURCE debe ser "mock" o "prisma"');
+  });
+});
+
 describe("parseEnv", () => {
   it("maps the raw variables to the validated env", () => {
-    expect(parseEnv({ NODE_ENV: "production", NEXT_PUBLIC_SITE_URL: "https://utg.example.com" })).toEqual({
-      siteUrl: "https://utg.example.com",
-    });
+    expect(
+      parseEnv({ NODE_ENV: "production", NEXT_PUBLIC_SITE_URL: "https://utg.example.com", DATA_SOURCE: "prisma" }),
+    ).toEqual({ siteUrl: "https://utg.example.com", dataSource: "prisma" });
   });
 });

@@ -1,12 +1,12 @@
 import { parseGamesResponse, toGameDto } from "@features/games/api/games-contract";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
+import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 
 /** Simula el viaje por HTTP: el DTO se serializa y se vuelve a leer como JSON. */
 const overHttp = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
 
 describe("games contract", () => {
   it("reads back every game sent by the route handler", () => {
-    expect(parseGamesResponse(overHttp(MOCK_GAMES.map(toGameDto)))).toEqual(MOCK_GAMES);
+    expect(parseGamesResponse(overHttp(GAME_FIXTURES.map(toGameDto)))).toEqual(GAME_FIXTURES);
   });
 
   it("rejects a response that is not a list", () => {
@@ -14,21 +14,21 @@ describe("games contract", () => {
   });
 
   it("names the first invalid field", () => {
-    const [first, second] = overHttp(MOCK_GAMES.slice(0, 2).map(toGameDto)) as Record<string, unknown>[];
+    const [first, second] = overHttp(GAME_FIXTURES.slice(0, 2).map(toGameDto)) as Record<string, unknown>[];
 
     expect(() => parseGamesResponse([first, { ...second, members: "4" }])).toThrow("[1].members");
     expect(() => parseGamesResponse([{ ...first, image: { src: "/a.jpg" } }])).toThrow("[0].image.position");
   });
 
   it("keeps the paragraphs of a game and rejects anything that is not text", () => {
-    const [game] = overHttp([toGameDto({ ...MOCK_GAMES[0], about: ["Primero.", "Segundo."] })]) as Record<string, unknown>[];
+    const [game] = overHttp([toGameDto({ ...GAME_FIXTURES[0], about: ["Primero.", "Segundo."] })]) as Record<string, unknown>[];
 
     expect(parseGamesResponse([game])[0].about).toEqual(["Primero.", "Segundo."]);
     expect(() => parseGamesResponse([{ ...game, about: ["Primero.", 2] }])).toThrow("[0].about[1]");
   });
 
   it("rejects colors outside the design palette", () => {
-    const [game] = overHttp([toGameDto(MOCK_GAMES[0])]) as Record<string, unknown>[];
+    const [game] = overHttp([toGameDto(GAME_FIXTURES[0])]) as Record<string, unknown>[];
 
     expect(() => parseGamesResponse([{ ...game, art: { seed: 1, palette: ["acid", "pink"] } }])).toThrow(
       "[0].art.palette[1]",

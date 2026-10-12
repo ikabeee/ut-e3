@@ -50,7 +50,9 @@ ls -lh public/media/
 
 | Quiero cambiar... | Archivo |
 | --- | --- |
-| Juegos, equipos, géneros, stands, descripciones, jugadores y "Acerca del juego" propio (mientras sean mock) | `src/features/games/lib/mock-games.ts` (`players`, `about`) |
+| Juegos, equipos, géneros, stands, descripciones, jugadores y "Acerca del juego" propio (mientras sean mock) | `src/features/games/lib/mock/mock-games.ts` (`players`, `about`). Las pruebas no dependen de este archivo |
+| Juegos de las pruebas | `src/features/games/__tests__/game-fixtures.ts` (los usa también `renderWithGames`) |
+| Fuente de los juegos (mock o base de datos) | `DATA_SOURCE` en `.env` y `src/features/games/lib/server/game-repositories.ts` |
 | Portada de un juego | Agrega la imagen en `public/` y ponla en `image.src` del juego; sin imagen se genera arte |
 | Colores del arte generado de un juego | `art.palette` del juego (`acid`, `black`, `white`, `panel`, `light`) |
 | Textos de la interfaz de juegos (botones, títulos, "Acerca del juego" genérico, aviso de torneo, características y ficha) | `src/features/games/lib/games-copy.ts` (`GAMES_COPY`) |

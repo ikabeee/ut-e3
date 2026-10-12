@@ -5,13 +5,13 @@ import {
   getRelatedGames,
   getStandAisle,
 } from "@features/games/lib/game-details";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
+import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 import type { Game } from "@features/games/lib/types";
 
 const SCHEDULE = { tournamentSignupDeadline: "11:30", tournamentFinalsAt: "18:00" };
 
 function findGame(slug: string): Game {
-  const game = MOCK_GAMES.find((candidate) => candidate.slug === slug);
+  const game = GAME_FIXTURES.find((candidate) => candidate.slug === slug);
   if (!game) {
     throw new Error(`Missing mock game ${slug}`);
   }
@@ -63,26 +63,26 @@ describe("game details", () => {
 
 describe("getRelatedGames", () => {
   it("puts games of the same genre first and then the closest ones in the catalog", () => {
-    const related = getRelatedGames(MOCK_GAMES, findGame("ruta-9"));
+    const related = getRelatedGames(GAME_FIXTURES, findGame("ruta-9"));
 
-    expect(related.map((game) => game.slug)).toEqual(["turbina", "subsuelo", "kaiju-mercado", "eco-nulo", "templo-404"]);
+    expect(related.map((game) => game.slug)).toEqual(["turbina", "eco-nulo", "pulso-cero", "xibalba-run", "lucha-pixel"]);
   });
 
   it("wraps around the end of the catalog", () => {
-    const related = getRelatedGames(MOCK_GAMES, findGame("circuito-7"));
+    const related = getRelatedGames(GAME_FIXTURES, findGame("circuito-7"));
 
     expect(related.map((game) => game.slug)).toEqual([
       "hormigon",
       "ceniza-protocol",
       "los-ultimos-faros",
       "ruta-9",
-      "subsuelo",
+      "eco-nulo",
     ]);
   });
 
   it("never includes the current game", () => {
     const current = findGame("eco-nulo");
 
-    expect(getRelatedGames(MOCK_GAMES, current, 17)).not.toContainEqual(current);
+    expect(getRelatedGames(GAME_FIXTURES, current, 17)).not.toContainEqual(current);
   });
 });

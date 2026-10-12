@@ -34,3 +34,5 @@ jobs:
         env:
           # Obligatoria en producción (src/shared/lib/env.ts); basta un valor de ejemplo.
           NEXT_PUBLIC_SITE_URL: https://example.com
+          # El CI compila con los juegos mock: no necesita base de datos.
+          DATA_SOURCE: mock

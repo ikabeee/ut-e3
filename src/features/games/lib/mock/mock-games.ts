@@ -1,11 +1,14 @@
 import type { Game } from "@features/games/lib/types";
 
 /**
- * DATOS MOCK: los 18 juegos del diseño.
+ * DATOS MOCK (temporales): los 18 juegos del diseño, que muestra el sitio mientras no exista la
+ * base de datos (`DATA_SOURCE=mock`).
  *
- * Sólo los usa `mock-game-repository.ts`. Cuando los juegos vivan en la base de datos,
- * borra este archivo, `mock-game-repository.ts` y `public/mock/` (ver docs/data-sources.md).
- * Las imágenes son las de referencia del diseño y deben reemplazarse por el arte de cada equipo.
+ * Sólo los usa `mock-game-repository.ts` (y las pruebas que revisan estos datos). Las pruebas de
+ * la lógica usan `game-fixtures.ts`, así que agregar un juego aquí no rompe ninguna. Cuando los
+ * juegos vivan en la base de datos, borra la carpeta `lib/mock/` y `public/mock/`
+ * (ver docs/data-sources.md). Las imágenes son las de referencia del diseño y deben
+ * reemplazarse por el arte de cada equipo.
  */
 export const MOCK_GAMES: readonly Game[] = [
   {

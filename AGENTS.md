@@ -117,7 +117,9 @@ código: `lib/game-filters.ts` -> `__tests__/lib/game-filters.test.ts`. Lo mismo
 - Jest corre todo archivo `*.test.ts(x)` dentro de `src/`. En `__tests__/`, lo que no termina en
   `.test` es un helper de prueba y no cuenta en la cobertura.
 - Los componentes que leen el catálogo de juegos se prueban con `renderWithGames(<Componente />)`
-  (`@features/games/__tests__/render-with-games`): monta un `QueryClient` con `MOCK_GAMES` ya en caché.
+  (`@features/games/__tests__/render-with-games`): monta un `QueryClient` con los juegos de prueba
+  (`GAME_FIXTURES`, `@features/games/__tests__/game-fixtures`) ya en caché. Las pruebas no usan los
+  juegos mock del sitio, así que cambiar el catálogo no las rompe.
 - Las pruebas de `src/app/` importan las rutas con el alias `@app/*` (`@app/error`).
 - Una prueba sigue las reglas de dependencias de la carpeta que prueba (`__tests__/lib/` las de
   `lib/`, etc.), pero además puede importar `@app/*` y los helpers de `__tests__/`. ESLint impide que

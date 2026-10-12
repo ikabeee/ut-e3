@@ -17,8 +17,8 @@ describe("GameCoverflow", () => {
   it("shows the middle game in front and links every case to its page", () => {
     renderWithGames(<GameCoverflow />);
 
-    expect(currentCase()).toHaveAccessibleName("Marea Roja, Estrategia, stand A5");
-    expect(currentCase()).toHaveAttribute("href", "/games/marea-roja");
+    expect(currentCase()).toHaveAccessibleName("Pulso Cero, Ritmo, stand A7");
+    expect(currentCase()).toHaveAttribute("href", "/games/pulso-cero");
   });
 
   it("brings a side case to the front instead of opening it", async () => {
@@ -47,7 +47,7 @@ describe("GameCoverflow", () => {
 
     fireEvent.keyDown(currentCase() as HTMLElement, { key: "ArrowLeft" });
 
-    expect(currentCase()).toHaveAccessibleName("Templo 404, Metroidvania, stand B4");
+    expect(currentCase()).toHaveAccessibleName("Eco/Nulo, Ritmo, stand B3");
     expect(currentCase()).toHaveFocus();
   });
 });
