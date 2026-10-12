@@ -74,6 +74,14 @@ npm run db:init             # crea las tablas en tu base local
 npm run dev                 # http://localhost:3000
 ```
 
+Configura también `git blame` para que salte los commits que sólo cambian el formato (están en
+[`.git-blame-ignore-revs`](./.git-blame-ignore-revs)); así ves quién hizo el último cambio real de
+cada línea:
+
+```bash
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
 Antes de abrir tu PR:
 
 ```bash
