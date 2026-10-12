@@ -93,8 +93,9 @@ El código está organizado con **screaming architecture**: las carpetas gritan 
 Como punto de partida existe la feature `example` (no se monta en ninguna ruta; cópiala y renómbrala).
 
 - Cada feature en `src/features/<feature>/` se organiza en `lib/` (con `lib/server/` para el código de
-  servidor), `hooks/`, `components/` y `pages/`, más `__tests__/` para sus pruebas. Crea cada carpeta
-  cuando la necesites; el linter valida las que existen. No dejes carpetas vacías ni `.gitkeep`.
+  servidor), `hooks/`, `components/` y `pages/`, más `api/` si expone datos por HTTP y `__tests__/` para
+  sus pruebas. Crea cada carpeta cuando la necesites; el linter valida las que existen. No dejes
+  carpetas vacías ni `.gitkeep`.
 - `npm run lint` valida qué capa puede importar a cuál y qué features pueden depender de otras
   (`FEATURE_DEPENDENCIES` en `eslint.config.mjs`). Si te bloquea, el mensaje dice qué hacer.
 - Las `pages/` son contenedores: obtienen datos y componen componentes. `src/app/` sólo las renderiza.

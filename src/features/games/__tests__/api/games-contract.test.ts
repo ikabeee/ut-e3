@@ -1,0 +1,30 @@
+import { parseGamesResponse, toGameDto } from "@features/games/api/games-contract";
+import { MOCK_GAMES } from "@features/games/lib/mock-games";
+
+/** Simula el viaje por HTTP: el DTO se serializa y se vuelve a leer como JSON. */
+const overHttp = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
+
+describe("games contract", () => {
+  it("reads back every game sent by the route handler", () => {
+    expect(parseGamesResponse(overHttp(MOCK_GAMES.map(toGameDto)))).toEqual(MOCK_GAMES);
+  });
+
+  it("rejects a response that is not a list", () => {
+    expect(() => parseGamesResponse({ games: [] })).toThrow("se esperaba una lista");
+  });
+
+  it("names the first invalid field", () => {
+    const [first, second] = overHttp(MOCK_GAMES.slice(0, 2).map(toGameDto)) as Record<string, unknown>[];
+
+    expect(() => parseGamesResponse([first, { ...second, members: "4" }])).toThrow("[1].members");
+    expect(() => parseGamesResponse([{ ...first, image: { src: "/a.jpg" } }])).toThrow("[0].image.position");
+  });
+
+  it("rejects colors outside the design palette", () => {
+    const [game] = overHttp([toGameDto(MOCK_GAMES[0])]) as Record<string, unknown>[];
+
+    expect(() => parseGamesResponse([{ ...game, art: { seed: 1, palette: ["acid", "pink"] } }])).toThrow(
+      "[0].art.palette[1]",
+    );
+  });
+});

@@ -10,6 +10,7 @@ El sitio implementa el diseño de la carpeta UTG (`index.html`, `juegos.html`, `
 src/app/                    Rutas. Cada archivo sólo exporta la page de una feature.
 src/features/<feature>/
   __tests__/                Pruebas, con las mismas subcarpetas que el código (lib/, components/...).
+  api/                      Contrato HTTP: Route Handlers, cliente del navegador y DTO validado.
   pages/                    Contenedores: piden datos, definen Suspense/notFound y metadata.
   components/               UI. Reciben datos por props; los interactivos llevan "use client".
   hooks/                    Estado e interacción del cliente (sin JSX).
@@ -54,7 +55,8 @@ arista cerraría un ciclo, se conectan en una page (o en `home`, que compone la 
 | Base de datos | Sólo `lib/server/` importa `@shared/lib/prisma/db`. |
 | Grafo de features | Imports entre features que no están en `FEATURE_DEPENDENCIES` (salvo desde `pages/`). |
 | Ciclos | Ciclos entre archivos, también dentro de una feature (`import/no-cycle`). |
-| Rutas | `src/app/` sólo importa pages; `route.ts`, `sitemap.ts` y `robots.ts` sólo delegan en `lib/`. |
+| Rutas | `src/app/` sólo importa pages; un `route.ts` sólo re-exporta `@features/<feature>/api/<feature>-route`; `sitemap.ts` y `robots.ts` sólo delegan en `lib/`. |
+| API | Los Route Handlers (`api/*-route.ts`) sólo los importa `src/app`; componentes, hooks y `lib/` usan el cliente (`api/*-api-client.ts`). |
 | Imports | `../`, el alias `@/`, archivos barril y `shared` importando `features`. |
 
 ## Flujo de datos
@@ -62,9 +64,10 @@ arista cerraría un ciclo, se conectan en una page (o en `home`, que compone la 
 ```
 GameRepository (mock hoy, Prisma después)
   -> lib/server/games-queries.ts  "use cache" + cacheTag("games")
-       -> pages                getGamesHydrationState() -> QueryHydrationBoundary
-       -> /api/games           Route Handler para el navegador
-  -> TanStack Query (cliente)  useGames() / useSuspenseQuery(gamesQueryOptions())
+       -> pages                   getGamesHydrationState() -> QueryHydrationBoundary
+       -> api/games-route.ts      GET /api/games: juegos -> GameDto (api/games-contract.ts)
+  -> TanStack Query (cliente)     useGames() / useSuspenseQuery(gamesQueryOptions())
+       -> api/games-api-client.ts fetchGames(): fetch + parseGamesResponse() -> Game[]
 ```
 
 - **Servidor**: las consultas se cachean con `"use cache"`, así todas las páginas se

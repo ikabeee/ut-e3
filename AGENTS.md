@@ -81,13 +81,14 @@ src/
 
 ### Anatomía de una feature
 
-Una feature se organiza en cuatro carpetas, más `__tests__/` para sus pruebas. Crea cada carpeta
-(`lib/`, `hooks/`, `components/`, `pages/`) cuando la necesites; el linter valida las que existen.
-No dejes carpetas vacías ni `.gitkeep`.
+Una feature se organiza en cuatro carpetas, más `api/` si expone datos por HTTP y `__tests__/` para
+sus pruebas. Crea cada carpeta (`lib/`, `hooks/`, `components/`, `pages/`, `api/`) cuando la
+necesites; el linter valida las que existen. No dejes carpetas vacías ni `.gitkeep`.
 
 ```
 src/features/<feature>/
 ├── __tests__/     # Pruebas, con las mismas subcarpetas que el código (ver "Pruebas").
+├── api/           # Contrato HTTP: Route Handlers (<feature>-route.ts) y cliente (<feature>-api-client.ts).
 ├── lib/           # Tipos, constantes y utilidades puras (se pueden usar en el navegador).
 │   └── server/    # Sólo servidor: consultas a la BD (<feature>-queries.ts) y prefetch.
 ├── hooks/         # Hooks de React de la feature (use-<algo>.ts).
@@ -101,7 +102,8 @@ src/features/<feature>/
 | `lib/server/` | Todo lo que lleva `import "server-only"`: consultas a la BD (`*-queries.ts` con `"use cache"` + `cacheLife(...)` o `await connection()`), que mapean las filas de Prisma a los tipos de dominio, y prefetch. Es lo único que importa `@shared/lib/prisma/db`. | `hooks/`, `components/`, `pages/` |
 | `hooks/` | Estado y lógica de interacción en el cliente. Sin JSX. | `components/`, `pages/`, código de servidor |
 | `components/` | UI. Reciben datos por props; **no consultan la BD**. Agrega `"use client"` sólo si usan hooks o eventos. | `pages/`, código de servidor |
-| `pages/` | **Contenedores**: obtienen los datos (vía `lib/server/`), definen `Suspense`/`notFound` y componen componentes. Sin estilos complejos ni lógica de negocio. Exportan también su `Metadata`. Son el único lugar donde se combinan features libremente. | `hooks/`, `@shared/lib/prisma/db` |
+| `pages/` | **Contenedores**: obtienen los datos (vía `lib/server/`), definen `Suspense`/`notFound` y componen componentes. Sin estilos complejos ni lógica de negocio. Exportan también su `Metadata`. Son el único lugar donde se combinan features libremente. | `hooks/`, `api/`, `@shared/lib/prisma/db` |
+| `api/` | Cómo la feature **expone** y **consume** sus datos por HTTP: `<feature>-route.ts` (Route Handlers con `import "server-only"` que usan `lib/server/`), `<feature>-api-client.ts` (ruta del endpoint y `fetch` del navegador) y, si lo que viaja difiere del tipo de dominio, `<feature>-contract.ts` (DTO y validación de la respuesta). | `hooks/`, `components/`, `pages/`; el cliente tampoco importa código de servidor |
 
 "Código de servidor" es `lib/server/` de cualquier feature, `@shared/lib/server/` y `@shared/lib/prisma/`.
 La frontera depende de la carpeta, no del nombre del archivo: `import "server-only"` sólo se permite ahí.
@@ -131,6 +133,9 @@ La feature `example` es el scaffold de referencia y contiene exactamente esto:
 ```
 src/features/example/
 ├── __tests__/
+│   ├── api/
+│   │   ├── example-route.test.ts
+│   │   └── example-api-client.test.ts
 │   ├── hooks/
 │   │   └── use-toggle.test.ts
 │   ├── components/
@@ -138,6 +143,9 @@ src/features/example/
 │   │   └── example-toggle.test.tsx
 │   └── pages/
 │       └── example-page.test.tsx # Prueba de humo de la composición
+├── api/
+│   ├── example-route.ts          # GET: Route Handler ("server-only"); no se monta en src/app/api
+│   └── example-api-client.ts     # EXAMPLE_API_PATH, fetchExampleMessage() y validación de la respuesta
 ├── lib/
 │   ├── types.ts                  # ExampleMessage
 │   └── server/
@@ -212,17 +220,25 @@ export { teamsPageMetadata as metadata } from "@features/teams/pages/teams-page"
 export default TeamsPage;
 ```
 
+Si la feature tiene `api/`, el Route Handler de `src/app/` también es una sola línea:
+
+```ts
+// src/app/api/<ruta>/route.ts  (por ejemplo, src/app/api/teams/route.ts)
+export { GET } from "@features/teams/api/teams-route";
+```
+
 ### Reglas de dependencias
 
 1. `src/app/` sólo importa pages: `@features/<feature>/pages/<name>-page`.
 2. Sólo `lib/server/` de una feature importa `@shared/lib/prisma/db`.
-3. Sólo `lib/server/`, `@shared/lib/server/`, `@shared/lib/prisma/` (y los Route Handlers) importan
-   `server-only`, y nada que pueda llegar al navegador (`lib/`, `hooks/`, `components/`) importa esas carpetas.
+3. Sólo `lib/server/`, `@shared/lib/server/`, `@shared/lib/prisma/` y los Route Handlers
+   (`api/*-route.ts`) importan `server-only`, y nada que pueda llegar al navegador (`lib/`, `hooks/`,
+   `components/`, `api/*-api-client.ts`) importa esas carpetas ni los Route Handlers.
 4. Dentro de una feature, las capas siguen la tabla de arriba: `lib/` no importa `hooks/`,
    `components/` ni `pages/`; `hooks/` no importa `components/` ni `pages/`; `pages/` no importa `hooks/`.
 5. `src/app/` no contiene UI ni lógica: sólo `layout.tsx` (que monta `QueryProvider`), `globals.css`,
-   archivos de ruta que delegan en `pages/` y Route Handlers (`route.ts`), `sitemap.ts` y
-   `robots.ts` que delegan en `lib/` (no en componentes, hooks ni pages).
+   archivos de ruta que delegan en `pages/`, Route Handlers (`route.ts`) que re-exportan
+   `@features/<feature>/api/<feature>-route`, y `sitemap.ts` y `robots.ts` que delegan en `lib/`.
 6. `shared/` nunca importa de `features/`.
 7. Fuera de `pages/`, una feature sólo importa las features que declara `FEATURE_DEPENDENCIES` en
    `eslint.config.mjs`. Ese grafo no puede tener ciclos (ESLint se detiene si lo tiene) y está
@@ -279,7 +295,8 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
 2. Si persiste datos, agrega los modelos a `contract.prisma`, ejecuta `npm run db:emit` y
    escribe las consultas en `lib/server/<feature>-queries.ts`.
 3. Si importa otra feature fuera de `pages/`, agrégala a `FEATURE_DEPENDENCIES` en `eslint.config.mjs`.
-4. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`.
+4. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`. Si el navegador
+   necesita pedir datos por HTTP, agrega `api/` como en `example` (Route Handler, cliente y pruebas).
 5. Crea la ruta en `src/app/<ruta>/page.tsx` que sólo renderiza la page (ver el ejemplo de arriba),
    agrega `alternates.canonical` a su metadata y, si debe indexarse, la ruta a `src/app/sitemap.ts`.
 
@@ -387,8 +404,9 @@ TanStack Query `5.x` ya está configurado (referencia: https://tanstack.com/quer
 
 - Define las queries con `queryOptions` en `lib/<feature>-query-options.ts`, con la feature como
   primer elemento de la key: `["games", "list"]`, `["games", "detail", slug]`.
-- La `queryFn` corre también en el navegador, así que **nunca** llama directo a Prisma: usa `fetch`
-  hacia un Route Handler (`src/app/api/<feature>/route.ts`) o una Server Action.
+- La `queryFn` corre también en el navegador, así que **nunca** llama directo a Prisma: usa el cliente
+  de la feature (`api/<feature>-api-client.ts`, que valida la respuesta) hacia su Route Handler
+  (`api/<feature>-route.ts`, re-exportado en `src/app/api/<feature>/route.ts`) o una Server Action.
 - Los hooks que usan `useQuery`, `useSuspenseQuery` o `useMutation` viven en `hooks/`
   (`use-<feature>-<algo>.ts`). Los componentes que los usan llevan `"use client"`.
 - Para prellenar el caché desde el servidor **no uses `dehydrate()` de TanStack**: con Cache
