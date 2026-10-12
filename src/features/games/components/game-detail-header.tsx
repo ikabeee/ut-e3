@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { getGamePath } from "@features/games/lib/game-links";
+import { GAMES_PATH, getGamePath } from "@features/games/lib/game-links";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { Game } from "@features/games/lib/types";
-import { routes } from "@shared/lib/site-config";
 
 interface GameDetailHeaderProps {
   game: Game;
@@ -12,7 +11,7 @@ interface GameDetailHeaderProps {
 export function GameDetailHeader({ game }: Readonly<GameDetailHeaderProps>) {
   return (
     <>
-      <Link href={routes.games} className="type-tiny touch-target relative mb-[18px] inline-block text-muted no-underline hover:text-accent">
+      <Link href={GAMES_PATH} className="type-tiny touch-target relative mb-[18px] inline-block text-muted no-underline hover:text-accent">
         {GAMES_COPY.detail.backToCatalog}
       </Link>
       <header className="flex flex-col gap-[10px]">

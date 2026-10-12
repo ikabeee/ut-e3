@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { GameCard } from "@features/games/components/game-card";
+import { GAMES_PATH } from "@features/games/lib/game-links";
 import { GAME_SECTION_HEADING_CLASS } from "@features/games/components/game-detail-section";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { Game } from "@features/games/lib/types";
-import { routes } from "@shared/lib/site-config";
 
 interface RelatedGamesProps {
   games: readonly Game[];
@@ -19,7 +19,7 @@ export function RelatedGames({ games }: Readonly<RelatedGamesProps>) {
         <h2 id="related-games-heading" className={GAME_SECTION_HEADING_CLASS}>
           {GAMES_COPY.detail.relatedHeading}
         </h2>
-        <Link href={routes.games} className="type-tiny touch-target relative text-accent no-underline">
+        <Link href={GAMES_PATH} className="type-tiny touch-target relative text-accent no-underline">
           {GAMES_COPY.detail.seeAll}
         </Link>
       </div>
