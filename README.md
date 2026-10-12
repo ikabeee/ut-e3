@@ -70,6 +70,7 @@ src/
 │   ├── floor-plan/       # Croquis interactivo
 │   ├── games/            # Catálogo, detalle, carruseles y API
 │   ├── home/             # Portada (compone las demás features)
+│   ├── offline/          # Sin conexión: service worker, avisos y página /offline
 │   ├── site/             # Navegación, pie, 404 y página de error
 │   └── example/          # Scaffold mínimo para crear features nuevas
 └── shared/               # Código transversal sin reglas de negocio (tema, botones, hooks)
@@ -88,6 +89,7 @@ Cada feature se organiza en `lib/` (y `lib/server/` para el código de servidor)
 | [`docs/data-model.md`](./docs/data-model.md) | Modelo de datos (diagrama ER): juegos, equipos, stands, check-ins y rifa. |
 | [`docs/design-system.md`](./docs/design-system.md) | Tema UTG sobre HeroUI: colores, tipografía, botones y efectos. |
 | [`docs/versioning.md`](./docs/versioning.md) | Versiones, CHANGELOG y cómo publicar un release. |
+| [`docs/pwa.md`](./docs/pwa.md) | Sitio sin conexión: service worker, cómo probarlo y lista para el día del evento. |
 | [`docs/audit.md`](./docs/audit.md) | Auditoría técnica: capacidad, PWA, mantenibilidad y plan de acción. |
 | [`AGENTS.md`](./AGENTS.md) | Reglas del proyecto (también las leen los agentes de IA). |
 | [`CONTRIBUTING.md`](./CONTRIBUTING.md) | Flujo de trabajo, commits y Pull Requests. |

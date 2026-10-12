@@ -28,6 +28,7 @@ const FEATURE_DEPENDENCIES = {
   "floor-plan": [],
   games: ["event", "floor-plan"],
   home: ["event", "floor-plan", "games"],
+  offline: ["floor-plan", "games", "home"],
   site: ["floor-plan", "games", "home"],
 };
 
@@ -137,11 +138,14 @@ const nonPageImports = {
     "`src/app` sólo renderiza pages: importa desde `@features/<feature>/pages/<name>-page` (la navegación, el pie, el 404 y el error viven en la feature `site`).",
 };
 
-// El layout raíz es la única excepción: monta el marco del sitio (cabecera y pie de `site`) y el
+// El layout raíz es la única excepción: monta el marco del sitio (cabecera y pie de `site`), los
+// avisos de conexión y el registro del service worker (`OfflineNotices` de `offline`) y el
 // `QueryProvider` de `shared`. Nada más de `components/` ni de `shared/components`.
 const rootLayoutImports = {
-  regex: "^@features/(?!site/components/)[^/]+/(lib|hooks|components|api)/|^@shared/components/(?!query-provider$)",
-  message: "El layout sólo monta `@features/site/components/*`, `QueryProvider` y estilos globales; el resto va en una page.",
+  regex:
+    "^@features/(?!site/components/|offline/components/offline-notices$)[^/]+/(lib|hooks|components|api)/|^@shared/components/(?!query-provider$)",
+  message:
+    "El layout sólo monta `@features/site/components/*`, `OfflineNotices`, `QueryProvider` y estilos globales; el resto va en una page.",
 };
 
 // Los archivos de metadata (`sitemap.ts`, `robots.ts`, `manifest.ts`) no renderizan una page:

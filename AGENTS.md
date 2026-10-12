@@ -68,6 +68,7 @@ src/
 │   ├── floor-plan/           # Croquis interactivo (/floor-plan): zonas, stands, zoom y directorio
 │   ├── games/                # Catálogo (/games), detalle (/games/[slug]), API y carruseles
 │   ├── home/                 # Portada (/): compone event, games y floor-plan
+│   ├── offline/              # Sin conexión: service worker (/sw.js), avisos y página /offline
 │   └── site/                 # Marco del sitio: navegación, pie, 404 y página de error
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
@@ -234,7 +235,8 @@ export { GET } from "@features/teams/api/teams-route";
 
 1. `src/app/` sólo importa pages: `@features/<feature>/pages/<name>-page`. Tampoco importa
    `@shared/components/*`. La única excepción es `layout.tsx`, que monta la cabecera y el pie
-   (`@features/site/components/*`) y el `QueryProvider`.
+   (`@features/site/components/*`), los avisos de conexión (`OfflineNotices` de la feature
+   `offline`) y el `QueryProvider`.
 2. Sólo `lib/server/` de una feature importa `@shared/lib/prisma/db`.
 3. Sólo `lib/server/`, `@shared/lib/server/`, `@shared/lib/prisma/` y los Route Handlers
    (`api/*-route.ts`) importan `server-only`, y nada que pueda llegar al navegador (`lib/`, `hooks/`,
@@ -318,6 +320,7 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
 - `docs/data-model.md`: diagrama ER propuesto (juegos, equipos, stands, check-ins y rifa).
 - `docs/design-system.md`: tema UTG sobre HeroUI.
 - `docs/versioning.md` y `CHANGELOG.md`: versionado semántico y releases con git flow.
+- `docs/pwa.md`: sitio sin conexión (service worker, estrategias de caché, actualizaciones y pruebas).
 - `docs/audit.md`: auditoría técnica (capacidad, PWA, mantenibilidad) y plan de acción por fases.
 
 Si cambias algo visible, agrega una línea en `[Sin publicar]` de `CHANGELOG.md`. Si cambias

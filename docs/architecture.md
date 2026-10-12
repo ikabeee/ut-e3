@@ -29,6 +29,7 @@ valida las que existen. No se dejan carpetas vacías ni `.gitkeep`.
 | `floor-plan` | Croquis: zonas, stands, layouts, zoom, filtros y directorio. | Nada. Su page compone los juegos como `StandOccupant` |
 | `event` | Contenido del evento: reel, actividades, programa, ubicación y cierre. | Nada |
 | `home` | Compone la portada y conecta el programa con el croquis. | `event`, `games`, `floor-plan` |
+| `offline` | Service worker (`/sw.js`), aviso de conexión, aviso de versión nueva y página `/offline` (ver `docs/pwa.md`). | `games`, `floor-plan` y `home` (sus rutas, para precargarlas y enlazarlas desde `/offline`) |
 | `site` | Marco del sitio: cabecera, navegación, pie, 404 y página de error. | `games`, `floor-plan` y `home` (sólo sus rutas, para la navegación) |
 | `example` | Scaffold para copiar; no se monta en ninguna ruta. | Nada |
 
@@ -39,16 +40,16 @@ Fuera de `pages/`, una feature sólo importa las que declara `FEATURE_DEPENDENCI
 cierra uno, ESLint se detiene con el ciclo en el mensaje.
 
 ```
-site ─┬─> home ─┬─> event
-      │         ├─> games ─┬─> event
-      │         │          └─> floor-plan
-      │         └─> floor-plan
-      ├─> games
-      └─> floor-plan
+site ─────┬─> home ─┬─> event
+offline ──┤         ├─> games ─┬─> event
+          │         │          └─> floor-plan
+          │         └─> floor-plan
+          ├─> games
+          └─> floor-plan
 ```
 
-`event` y `floor-plan` no dependen de nadie. `site` está arriba de todo: compone las rutas que
-cada feature declara en su `lib/*-links.ts`, y nadie depende de él. Las `pages/` son la excepción: pueden componer
+`event` y `floor-plan` no dependen de nadie. `site` y `offline` están arriba de todo: componen las
+rutas que cada feature declara en su `lib/*-links.ts`, y nadie depende de ellos. Las `pages/` son la excepción: pueden componer
 cualquier feature, porque nada las importa salvo `src/app/` y por eso nunca forman parte de un
 ciclo. Cuando dos features necesitan hablar y la arista cerraría un ciclo, se conectan en una page
 (o en `home`, que compone la portada).
@@ -110,7 +111,7 @@ existe, `resolveScheduleZones` lanza un error y el build de la portada se detien
 | Base de datos | Sólo `lib/server/` importa `@shared/lib/prisma/db`. |
 | Grafo de features | Imports entre features que no están en `FEATURE_DEPENDENCIES` (salvo desde `pages/`). |
 | Ciclos | Ciclos entre archivos, también dentro de una feature (`import/no-cycle`). |
-| Rutas | `src/app/` sólo importa pages; un `route.ts` sólo re-exporta `@features/<feature>/api/<feature>-route`; `sitemap.ts` y `robots.ts` sólo delegan en `lib/`. |
+| Rutas | `src/app/` sólo importa pages (salvo `layout.tsx`, que monta la cabecera y el pie de `site`, `OfflineNotices` y `QueryProvider`); un `route.ts` sólo re-exporta `@features/<feature>/api/<feature>-route`; `sitemap.ts` y `robots.ts` sólo delegan en `lib/`. |
 | API | Los Route Handlers (`api/*-route.ts`) sólo los importa `src/app`; componentes, hooks y `lib/` usan el cliente (`api/*-api-client.ts`). |
 | Imports | `../`, el alias `@/`, archivos barril y `shared` importando `features`. |
 

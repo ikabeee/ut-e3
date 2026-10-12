@@ -89,6 +89,8 @@ ls -lh public/media/
 | Secciones de la navegación (y accesos directos de la app instalada) | `SECTION_LINKS` en `src/features/site/lib/navigation.ts`; la ruta de cada sección está en el `lib/*-links.ts` de su feature |
 | Navegación y pie de página | `src/features/site/components/site-header.tsx`, `site-nav-links.tsx`, `site-footer.tsx` |
 | Páginas de error (404 y "Algo salió mal") | `src/features/site/components/not-found-view.tsx` y `error-view.tsx`; textos en `src/features/site/lib/site-copy.ts` |
+| Página `/offline` y avisos "Sin conexión" / "Hay una versión nueva" | `src/features/offline/pages/offline-page.tsx` y `src/features/offline/components/`; textos en `src/features/offline/lib/offline-copy.ts` |
+| Páginas que se guardan para usar sin conexión | `buildPrecacheRoutes` en `src/features/offline/lib/precache-routes.ts` (ver [`docs/pwa.md`](./pwa.md)) |
 
 ### Cambiar el ícono de la app (PWA)
 
