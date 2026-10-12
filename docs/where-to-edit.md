@@ -86,8 +86,9 @@ ls -lh public/media/
 | Logo UTG | `src/shared/components/utg-logo.tsx` e icono `src/app/icon.svg` |
 | Ícono de la app instalada (PWA) | `src/app/icon.svg` y luego `npm run pwa:icons` (ver abajo) |
 | Nombre, colores y accesos directos de la app instalada | `src/app/manifest.ts` (colores en `themeColor` de `src/shared/lib/site-config.ts`) |
-| Navegación y pie de página | `src/shared/components/site-header.tsx`, `site-nav-links.tsx`, `site-footer.tsx` |
-| Páginas de error (404 y "Algo salió mal") | `src/shared/components/not-found-view.tsx` y `error-view.tsx` |
+| Secciones de la navegación (y accesos directos de la app instalada) | `SECTION_LINKS` en `src/features/site/lib/navigation.ts`; la ruta de cada sección está en el `lib/*-links.ts` de su feature |
+| Navegación y pie de página | `src/features/site/components/site-header.tsx`, `site-nav-links.tsx`, `site-footer.tsx` |
+| Páginas de error (404 y "Algo salió mal") | `src/features/site/components/not-found-view.tsx` y `error-view.tsx`; textos en `src/features/site/lib/site-copy.ts` |
 
 ### Cambiar el ícono de la app (PWA)
 

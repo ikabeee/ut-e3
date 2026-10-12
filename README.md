@@ -70,6 +70,7 @@ src/
 │   ├── floor-plan/       # Croquis interactivo
 │   ├── games/            # Catálogo, detalle, carruseles y API
 │   ├── home/             # Portada (compone las demás features)
+│   ├── site/             # Navegación, pie, 404 y página de error
 │   └── example/          # Scaffold mínimo para crear features nuevas
 └── shared/               # Código transversal sin reglas de negocio (tema, botones, hooks)
 ```

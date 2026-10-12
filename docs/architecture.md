@@ -16,7 +16,8 @@ src/features/<feature>/
   hooks/                    Estado e interacción del cliente (sin JSX).
   lib/                      Tipos, datos y funciones puras (probadas con Jest).
   lib/server/               Sólo servidor ("server-only"): consultas cacheadas y prefetch.
-src/shared/                 Piezas sin reglas de negocio: tema, botones, hooks genéricos.
+src/shared/                 Piezas sin reglas de negocio: tema, botones, hooks genéricos. No conoce
+                            rutas, secciones ni textos del evento (eso vive en features).
 ```
 
 Crea cada carpeta (`lib/`, `hooks/`, `components/`, `pages/`) cuando la necesites; el linter
@@ -28,6 +29,7 @@ valida las que existen. No se dejan carpetas vacías ni `.gitkeep`.
 | `floor-plan` | Croquis: zonas, stands, layouts, zoom, filtros y directorio. | Nada. Su page compone los juegos como `StandOccupant` |
 | `event` | Contenido del evento: reel, actividades, programa, ubicación y cierre. | Nada |
 | `home` | Compone la portada y conecta el programa con el croquis. | `event`, `games`, `floor-plan` |
+| `site` | Marco del sitio: cabecera, navegación, pie, 404 y página de error. | `games`, `floor-plan` y `home` (sólo sus rutas, para la navegación) |
 | `example` | Scaffold para copiar; no se monta en ninguna ruta. | Nada |
 
 ## Grafo de dependencias entre features
@@ -37,16 +39,35 @@ Fuera de `pages/`, una feature sólo importa las que declara `FEATURE_DEPENDENCI
 cierra uno, ESLint se detiene con el ciclo en el mensaje.
 
 ```
-home ─┬─> event
-      ├─> games ─┬─> event
-      │          └─> floor-plan
+site ─┬─> home ─┬─> event
+      │         ├─> games ─┬─> event
+      │         │          └─> floor-plan
+      │         └─> floor-plan
+      ├─> games
       └─> floor-plan
 ```
 
-`event` y `floor-plan` no dependen de nadie. Las `pages/` son la excepción: pueden componer
+`event` y `floor-plan` no dependen de nadie. `site` está arriba de todo: compone las rutas que
+cada feature declara en su `lib/*-links.ts`, y nadie depende de él. Las `pages/` son la excepción: pueden componer
 cualquier feature, porque nada las importa salvo `src/app/` y por eso nunca forman parte de un
 ciclo. Cuando dos features necesitan hablar y la arista cerraría un ciclo, se conectan en una page
 (o en `home`, que compone la portada).
+
+### Qué va en `shared/` y qué en una feature
+
+**Si sabe el nombre de una página, una ruta o un texto del evento, no es `shared/`.** `shared/`
+tiene primitivos estables (botones, `JsonLd`, `QueryProvider`, el logo, hooks de URL y de
+movimiento reducido) que casi nunca cambian. La cabecera, la navegación, el pie, el 404 y la
+página de error son del sitio: viven en la feature `site`. Agregar una sección nueva no toca
+`shared/`: se declara su ruta en la feature y se suma a `SECTION_LINKS` de `site`.
+
+Dos excepciones razonadas:
+
+- `UtgLogo` sigue en `shared/components`: es un recurso gráfico sin rutas ni textos del dominio y
+  también lo usa el encabezado de `event`. Si viviera en `site`, `event -> site -> games -> event`
+  cerraría un ciclo.
+- `siteConfig.organization` sigue en `shared/lib/site-config.ts`: varias features componen textos
+  con la organización y ninguna puede depender de `site` sin cerrar un ciclo.
 
 ### Croquis y juegos: capa anticorrupción
 
