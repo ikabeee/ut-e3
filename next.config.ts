@@ -5,6 +5,8 @@ import type { NextConfig } from "next";
 const MEDIA_CACHE_CONTROL = "public, max-age=86400, stale-while-revalidate=604800";
 
 const nextConfig: NextConfig = {
+  // Servidor mínimo para la imagen de Docker (ver Dockerfile).
+  output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,

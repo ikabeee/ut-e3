@@ -1,328 +1,385 @@
 # Modelo de datos (diagrama ER)
 
-Propuesta del modelo relacional en PostgreSQL para los tres requerimientos de la plataforma:
+Modelo relacional en PostgreSQL para los tres requerimientos de la plataforma:
 
-1. **Administrar y mostrar los videojuegos** (equipos, integrantes, géneros, plataformas y capturas).
-2. **Check-ins sin login**: el visitante escanea el QR del stand, se identifica sólo con su
-   gamertag, marca cada juego que probó y al final recibe por correo su número de rifa.
+1. **Administrar y mostrar los videojuegos** (equipos, integrantes, géneros, plataformas y fotos).
+2. **Check-ins sin login**: el visitante se registra sólo con su gamertag y recibe un QR
+   personal. En cada stand, el equipo escanea ese QR para registrar que probó su juego. Cuando
+   probó todos los juegos, deja su teléfono y obtiene un boleto para el sorteo.
 3. **Afluencia en tiempo real** de cada stand, aunque el internet del recinto falle.
 
 Es la base para escribir `src/shared/lib/prisma/contract.prisma`. Todavía no hay modelos en el
 contrato; los datos del sitio siguen siendo mock (ver [`data-sources.md`](./data-sources.md)).
 
+Los diagramas siguen la guía de ERD de Mermaid de
+[`mermaid-diagrams`](https://github.com/davila7/claude-code-templates/blob/main/cli-tool/components/skills/creative-design/mermaid-diagrams/references/erd-diagrams.md)
+y el modelo se revisó con el perfil
+[`database-administrator`](https://github.com/VoltAgent/awesome-claude-code-subagents/blob/main/categories/03-infrastructure/database-administrator.md)
+(integridad, índices, respaldos, conexiones, seguridad y monitoreo), ajustado a un evento de
+un día.
+
+**Estado: aprobado por el equipo (2026-10-12).** Los cambios posteriores se discuten en un PR.
+
+## Decisiones
+
+- **Un solo evento**: no hay tabla de eventos. La fecha, la sede y el horario siguen en
+  `src/features/event/lib/event-info.ts`.
+- **Reglas del sorteo en el servidor**: cuándo se sortea y cuántos ganadores hay viven en el
+  código del servidor, no en la base.
+- **El QR es del visitante**: el equipo del stand lo escanea. El stand no tiene QR propio.
+- **Sin tabla de stands**: el código del stand (`A1`...`B9`) es un campo del equipo y puede
+  quedar vacío porque los equipos se registran antes de saber su stand.
+- **Todos los juegos están publicados** y todos se hacen en Unity: no hay `published` ni
+  `engine`. Se publican en itch.io (`itchio_url`).
+- **Sin arte generado**: si un equipo no ha subido fotos, su juego no se muestra en el sitio.
+  La portada es la foto con `is_cover`; sus dimensiones se validan en el servidor
+  ([#62](https://github.com/ikabeee/ut-e3/issues/62)).
+
 ## Reglas de negocio
 
-| # | Regla | Cómo se cumple |
-| --- | --- | --- |
-| 1 | Un equipo tiene varios integrantes. | Uno a muchos: `team_member.team_id`. |
-| 2 | Un equipo tiene un solo juego. | `game.team_id` es `UNIQUE` y `NOT NULL`. |
-| 2 | Un equipo tiene un solo stand. | `team.stand_id` es `UNIQUE` y `NOT NULL`. Un stand puede quedar libre. |
-| 3 y 4 | Un visitante visita varios stands y un stand recibe muchos visitantes. | Relación muchos a muchos resuelta con la tabla intermedia `CHECK_IN`. |
-| - | Un visitante marca cada juego una sola vez. | `UNIQUE (visitor_id, stand_id)` en `check_in`. |
-| - | El gamertag no se repite dentro de un evento. | `UNIQUE (event_id, gamertag_key)` en `visitor`. |
-| - | Un boleto de rifa por visitante y por correo. | `UNIQUE (visitor_id)` y `UNIQUE (event_id, email)` en `raffle_ticket`. |
+| Regla | Cómo se cumple |
+| --- | --- |
+| Un equipo tiene varios integrantes. | Uno a muchos: `team_member.team_id`. |
+| Un equipo tiene un solo juego. | `game.team_id` es `UNIQUE` y `NOT NULL`. |
+| Un equipo tiene un solo stand y un stand es de un solo equipo. | `team.stand_code` es `UNIQUE` (vacío mientras no se asigna). |
+| Un juego tiene como máximo una portada y sin portada no se muestra. | `UNIQUE (game_id) WHERE is_cover` en `game_image`; las consultas del sitio filtran por portada. |
+| Un juego corre en varias plataformas y una plataforma tiene muchos juegos. | Muchos a muchos con la tabla intermedia `GAME_PLATFORM`. |
+| Un visitante prueba varios juegos y un juego recibe a muchos visitantes. | Muchos a muchos con la tabla intermedia `CHECK_IN`. |
+| Cada juego cuenta una sola vez por visitante. | `UNIQUE (visitor_id, game_id)` en `check_in`. |
+| El gamertag es único. | `UNIQUE (gamertag)` en `visitor`. |
+| Un boleto por visitante, sólo si probó todos los juegos con stand asignado. | `raffle_ticket.visitor_id` es `UNIQUE`; el `INSERT` del boleto revisa los check-ins. |
+| Un boleto por teléfono. | `UNIQUE (phone)` en `raffle_ticket`. |
 
-`EVENT` no viene en las reglas originales: agrupa stands, visitantes y boletos por edición, así
-el sistema sirve el próximo año sin borrar datos y los números de rifa empiezan en 1 en cada
-evento. Un equipo pertenece al evento de su stand.
+## Modelo conceptual
 
-## Vista general
-
-Sólo entidades y relaciones. El detalle de columnas está en las dos secciones siguientes.
+Entidades y relaciones del negocio. Las relaciones muchos a muchos se dibujan directas
+(`}o--o{`); en los diagramas detallados se resuelven con su tabla intermedia.
 
 ```mermaid
 erDiagram
-    EVENT ||--o{ STAND : "distribuye"
-    EVENT ||--o{ VISITOR : "registra"
-    EVENT ||--o{ RAFFLE_TICKET : "emite"
-    STAND ||--o| TEAM : "aloja"
     TEAM ||--|{ TEAM_MEMBER : "integra"
     TEAM ||--|| GAME : "desarrolla"
-    GENRE ||--o{ GAME : "es el principal de"
-    GAME ||--o{ GAME_GENRE : "géneros extra"
-    GENRE ||--o{ GAME_GENRE : "clasifica"
-    GAME ||--o{ GAME_SCREENSHOT : "muestra"
-    VISITOR ||--o{ CHECK_IN : "hace"
-    STAND ||--o{ CHECK_IN : "recibe"
+    GAME }o--|| GENRE : "pertenece a"
+    GAME }o--o{ GENRE : "también es"
+    GAME }o--|{ PLATFORM : "disponible en"
+    GAME ||--o{ GAME_IMAGE : "muestra"
+    VISITOR }o--o{ GAME : "prueba (check-in)"
     VISITOR ||--o| RAFFLE_TICKET : "obtiene"
 ```
 
-Cómo leer la cardinalidad: `||` exactamente uno, `o|` cero o uno, `|{` uno o muchos y
-`o{` cero o muchos. Por ejemplo, `STAND ||--o| TEAM` dice que cada equipo tiene exactamente
-un stand y que un stand tiene cero o un equipo (los stands sin asignar quedan libres).
+Cómo leer la cardinalidad: el símbolo junto a una entidad dice cuántas de ella corresponden a
+una de la otra. `||` exactamente uno, `|o` cero o uno, `}|` uno o muchos y `}o` cero o muchos
+(del lado derecho se escriben `||`, `o|`, `|{` y `o{`). Por ejemplo, `GAME }o--|| GENRE` dice
+que cada juego tiene exactamente un género principal y que un género puede ser el principal de
+cero o muchos juegos.
 
 El diagrama muestra las reglas del negocio. La base de datos garantiza el lado "como máximo"
-(un juego por equipo, un stand por equipo); el lado "al menos uno" de `TEAM ||--|| GAME` y
-`TEAM ||--|{ TEAM_MEMBER` lo valida la aplicación al publicar (ver "Reglas que valida la
-aplicación").
+(un juego por equipo, un boleto por visitante); el lado "al menos uno" de `TEAM ||--|| GAME`,
+`TEAM ||--|{ TEAM_MEMBER` y `GAME }o--|{ PLATFORM` lo valida el servidor (ver "Reglas que
+valida el servidor").
 
-## Convenciones
+## Convenciones del diagrama
 
-- Tablas y columnas en inglés y `snake_case`; en el diagrama las entidades van en mayúsculas.
-- Todas las llaves primarias son `uuid` (`@default(uuid())` en Prisma 8), salvo `visitor.id` y
-  `check_in.id`, que **genera el celular** (`crypto.randomUUID()`) para poder trabajar sin
-  internet (ver "Internet intermitente").
-- Todas las columnas son `NOT NULL`, salvo las marcadas como `nullable` en su comentario.
-- Las fechas son `timestamptz` (en UTC); `created_at` y `updated_at` llevan `DEFAULT now()`.
-- `UK` marca columnas únicas. Cuando la unicidad es compuesta, el comentario lo dice
-  (por ejemplo, `code` es único junto con `event_id`).
-- Los enums (`art_color`, `platform`, `email_status`) son `text` con un `CHECK` de valores
-  permitidos: así los genera Prisma 8 (`enum` con `@@type("pg/text@1")`).
-- Las relaciones muchos a muchos usan tablas intermedias explícitas (`GAME_GENRE` y
-  `CHECK_IN`); Prisma 8 no acepta muchos a muchos implícitos.
-- Las reglas simples viven en la base como `CHECK` (`@@check` en Prisma 8); ver "Restricciones".
+- Entidades en mayúsculas y en singular (`GAME`, no `GAMES`); tablas y columnas en inglés y
+  `snake_case`.
+- Formato de columna: `tipo nombre llaves "restricciones"`. Las llaves son `PK`, `FK` y `UK`;
+  el comentario dice siempre `NOT NULL` o `NULLABLE` y, cuando aplica, `DEFAULT`, `CHECK`,
+  `ENUM` o `AUTO_INCREMENT`.
+- Cuando una restricción `UNIQUE` es compuesta, el comentario lo dice (por ejemplo,
+  `visitor_id` es único junto con `game_id`).
+- Muchos a muchos con tabla intermedia explícita: la relación directa `}o--o{` más las dos
+  relaciones uno a muchos con la tabla intermedia, cuya PK es la pareja de llaves foráneas.
+  Prisma 8 tampoco acepta muchos a muchos implícitos.
+- Llaves primarias `uuid` (`@default(uuid())` en Prisma 8), salvo `raffle_ticket.ticket_number`
+  (autoincremental) y `check_in.id`, que **genera el escáner del stand** para poder trabajar
+  sin internet.
+- Toda entidad lleva `created_at`; las que se editan llevan también `updated_at`
+  (`timestamptz` en UTC, `DEFAULT NOW()`).
+- Los textos se guardan como `text` con un `CHECK` de longitud (`máx. N` en el diagrama). En
+  PostgreSQL equivale a `varchar(n)` y Prisma 8 los recibe como `string` normal.
+- Los enums (como `student_group`) son `text` con un `CHECK` de valores permitidos:
+  así los genera Prisma 8 (`enum` con `@@type("pg/text@1")`). Las demás reglas simples también
+  son `CHECK` (`@@check`).
 
-## Catálogo: evento, stands, equipos y juegos
+## Catálogo: equipos y juegos
 
 ```mermaid
 erDiagram
-    EVENT {
-        uuid id PK
-        varchar(64) slug UK "ej. showcase-2026"
-        varchar(120) name
-        timestamptz starts_at
-        timestamptz ends_at
-        smallint required_checks "juegos mínimos para pedir boleto"
-        int last_ticket_number "DEFAULT 0; contador de boletos"
-        timestamptz created_at
-    }
-    STAND {
-        uuid id PK
-        uuid event_id FK
-        varchar(8) code UK "A1, B7...; único con event_id"
-        varchar(64) qr_token UK "secreto impreso en el QR"
-        timestamptz created_at
-    }
+    TEAM ||--|{ TEAM_MEMBER : "integra"
+    TEAM ||--|| GAME : "desarrolla"
+    GAME }o--|| GENRE : "pertenece a"
+    GAME }o--o{ GENRE : "también es"
+    GAME ||--o{ GAME_GENRE : "tiene"
+    GENRE ||--o{ GAME_GENRE : "aparece en"
+    GAME }o--|{ PLATFORM : "disponible en"
+    GAME ||--|{ GAME_PLATFORM : "tiene"
+    PLATFORM ||--o{ GAME_PLATFORM : "aparece en"
+    GAME ||--o{ GAME_IMAGE : "muestra"
+
     TEAM {
         uuid id PK
-        uuid stand_id FK, UK "un stand por equipo"
-        varchar(80) name
-        timestamptz created_at
-        timestamptz updated_at
+        text name UK "NOT NULL; máx. 80"
+        text stand_code UK "NULLABLE; CHECK A1-A9, B1-B9; máx. 2"
+        text scanner_key_hash UK "NOT NULL; CHECK hex SHA-256"
+        timestamptz created_at "NOT NULL DEFAULT NOW()"
+        timestamptz updated_at "NOT NULL DEFAULT NOW()"
     }
     TEAM_MEMBER {
         uuid id PK
-        uuid team_id FK
-        varchar(120) full_name
-        varchar(16) group_name "ej. 5A"
-        varchar(39) github_username "nullable"
-        boolean is_leader "DEFAULT false"
-        smallint sort_order
+        uuid team_id FK "NOT NULL"
+        text full_name "NOT NULL; máx. 120"
+        student_group group_name "NOT NULL; ENUM IDYGS101, IDYGS102, IDYGS103"
+        boolean is_leader "NOT NULL DEFAULT FALSE; máximo uno por equipo"
+        smallint sort_order "NOT NULL DEFAULT 0"
+        timestamptz created_at "NOT NULL DEFAULT NOW()"
+        timestamptz updated_at "NOT NULL DEFAULT NOW()"
     }
     GAME {
         uuid id PK
-        uuid team_id FK, UK "un juego por equipo"
-        uuid genre_id FK "género principal"
-        varchar(80) slug UK "ruta /games/[slug]"
-        varchar(80) name
-        varchar(300) description
-        text about "nullable; párrafos de Acerca del juego"
-        smallint players "DEFAULT 1; jugadores por partida en la demo"
-        platform[] platforms "lista de enum; al menos una"
-        varchar(60) engine "nullable; Unity, Godot..."
-        text play_url "nullable"
-        text repository_url "nullable"
-        boolean has_tournament "DEFAULT false"
-        text cover_url "nullable; sin portada se genera arte"
-        varchar(20) cover_position "nullable; ej. 60% 35%"
-        int art_seed
-        art_color art_shape_color "enum"
-        art_color art_background_color "enum"
-        smallint sort_order "orden del catálogo"
-        boolean published "DEFAULT false"
-        timestamptz created_at
-        timestamptz updated_at
+        uuid team_id FK, UK "NOT NULL; un juego por equipo"
+        uuid genre_id FK "NOT NULL; género principal"
+        text slug UK "NOT NULL; ruta /games/[slug]; máx. 80"
+        text name "NOT NULL; máx. 80"
+        text description "NOT NULL; máx. 300"
+        text about "NULLABLE; párrafos de Acerca del juego; máx. 3000"
+        smallint players "NOT NULL DEFAULT 1; jugadores por partida en la demo; 1 a 16"
+        text itchio_url "NULLABLE; CHECK https://*.itch.io/"
+        smallint sort_order "NOT NULL DEFAULT 0"
+        timestamptz created_at "NOT NULL DEFAULT NOW()"
+        timestamptz updated_at "NOT NULL DEFAULT NOW()"
     }
     GENRE {
         uuid id PK
-        varchar(40) slug UK
-        varchar(40) name UK
+        text slug UK "NOT NULL; máx. 40"
+        text name UK "NOT NULL; máx. 40"
+        timestamptz created_at "NOT NULL DEFAULT NOW()"
     }
     GAME_GENRE {
-        uuid game_id PK, FK
-        uuid genre_id PK, FK "géneros además del principal"
+        uuid game_id PK, FK "NOT NULL"
+        uuid genre_id PK, FK "NOT NULL; distinto al principal"
     }
-    GAME_SCREENSHOT {
+    PLATFORM {
         uuid id PK
-        uuid game_id FK
-        text image_url
-        varchar(160) alt_text
-        smallint sort_order UK "0 a 3; único con game_id"
+        text slug UK "NOT NULL; máx. 40"
+        text name UK "NOT NULL; máx. 40"
+        timestamptz created_at "NOT NULL DEFAULT NOW()"
     }
-
-    EVENT ||--o{ STAND : "distribuye"
-    STAND ||--o| TEAM : "aloja"
-    TEAM ||--|{ TEAM_MEMBER : "integra"
-    TEAM ||--|| GAME : "desarrolla"
-    GENRE ||--o{ GAME : "es el principal de"
-    GAME ||--o{ GAME_GENRE : "géneros extra"
-    GENRE ||--o{ GAME_GENRE : "clasifica"
-    GAME ||--o{ GAME_SCREENSHOT : "muestra"
+    GAME_PLATFORM {
+        uuid game_id PK, FK "NOT NULL"
+        uuid platform_id PK, FK "NOT NULL"
+    }
+    GAME_IMAGE {
+        uuid id PK
+        uuid game_id FK "NOT NULL"
+        text image_url "NOT NULL; CHECK https:// o /ruta"
+        text alt_text "NOT NULL; máx. 160"
+        boolean is_cover "NOT NULL DEFAULT FALSE; una portada por juego"
+        text crop_position "NULLABLE; ej. 60% 35%; máx. 20"
+        smallint sort_order UK "NOT NULL; CHECK 0-4; orden de la galería"
+        timestamptz created_at "NOT NULL DEFAULT NOW()"
+        timestamptz updated_at "NOT NULL DEFAULT NOW()"
+    }
 ```
 
 Notas:
 
-- **Stands**: sólo se guardan los stands de equipo (pasillos A y B). Sus códigos deben existir
-  en `src/features/floor-plan/lib/plan-layouts.ts`. Los stands informativos C1-C4 y las zonas
-  siguen siendo contenido fijo del croquis.
-- **Equipos**: no guardan `event_id`; su evento es el del stand. Así no puede haber un equipo
-  de 2026 en un stand de 2027.
+- **Stand**: `stand_code` debe existir en `src/features/floor-plan/lib/plan-layouts.ts`
+  (pasillos A1-A9 y B1-B9, 18 stands). Los stands informativos C1-C4 y las zonas siguen siendo
+  contenido fijo del croquis. Quitar el `stand_code` de un equipo que no se presentó saca su
+  juego de los requisitos del boleto sin borrar nada.
+- **Escáner del stand**: cada equipo recibe una llave secreta para abrir el escáner en el
+  celular de su stand; la base sólo guarda su hash (`scanner_key_hash`). Así el servidor sabe
+  qué juego registra cada check-in y nadie más puede registrarlos. Si se pierde, se genera
+  otra (no se puede volver a mostrar la anterior).
+- **Integrantes**: `group_name` usa el enum `student_group` (`IDYGS101`, `IDYGS102`,
+  `IDYGS103`). Un índice único parcial permite como máximo un líder por equipo.
 - **Géneros**: el registro de videojuego (`.github/ISSUE_TEMPLATE/04-game-submission.yml`)
   permite varios. `game.genre_id` es el principal (el que agrupa el catálogo) y, como es
   `NOT NULL`, todo juego tiene exactamente uno; `GAME_GENRE` guarda los demás.
-- **Plataformas**: lista fija del registro, guardada como arreglo del enum `platform`
-  (`web`, `windows`, `macos`, `linux`, `android`, `ios`, `console`). No necesita tabla propia.
-- **Arte generado**: enum `art_color` (`acid`, `black`, `white`, `panel`, `light`), igual que
-  `ArtColor` en `src/features/games/lib/types.ts`.
-- **Integrantes**: se calcula `count(*)` de `team_member`; no se guarda el número.
+- **Plataformas**: tabla propia para que los organizadores las administren (Web, Windows,
+  macOS, Linux, Android, iOS...) y relación muchos a muchos con `GAME_PLATFORM`.
+- **Fotos**: todas las fotos del juego viven en `GAME_IMAGE` (máximo 5: portada y 4 capturas,
+  como pide el registro).
+  - `is_cover` marca la portada. Un índice único parcial impide dos portadas en el mismo juego.
+  - Un juego sin portada no se muestra en el sitio.
+  - `sort_order` ordena la galería. Para reordenarla, intercambia los valores dentro de una
+    transacción pasando por un valor temporal, porque `UNIQUE (game_id, sort_order)` no admite
+    repetidos.
+  - Las dimensiones, el peso y el formato se validan en el servidor al subir la foto; las
+    reglas se definen en [#62](https://github.com/ikabeee/ut-e3/issues/62).
 
-## Participación de visitantes: check-ins y rifa
+## Participación de visitantes: check-ins y sorteo
 
 ```mermaid
 erDiagram
+    VISITOR }o--o{ GAME : "prueba"
+    VISITOR ||--o{ CHECK_IN : "registra"
+    GAME ||--o{ CHECK_IN : "recibe"
+    VISITOR ||--o| RAFFLE_TICKET : "obtiene"
+
     VISITOR {
-        uuid id PK "lo genera el celular"
-        uuid event_id FK
-        varchar(24) gamertag "como lo escribió"
-        varchar(24) gamertag_key UK "lower(gamertag); único con event_id"
-        char(64) device_token_hash "SHA-256 del token del navegador"
-        timestamptz created_at
+        uuid id PK
+        text gamertag UK "NOT NULL; CHECK a-z 0-9 _ . - (3 a 24); máx. 24"
+        text qr_token_hash UK "NOT NULL; CHECK hex SHA-256"
+        timestamptz created_at "NOT NULL DEFAULT NOW()"
+        timestamptz updated_at "NOT NULL DEFAULT NOW(); cambia al reemitir el QR"
     }
     CHECK_IN {
-        uuid id PK "lo genera el celular; llave de idempotencia"
-        uuid visitor_id FK, UK "único con stand_id"
-        uuid stand_id FK
-        timestamptz scanned_at "LEAST(hora del celular, now())"
-        timestamptz received_at "DEFAULT now(); hora del servidor"
+        uuid id PK "NOT NULL; lo genera el escáner"
+        uuid visitor_id FK, UK "NOT NULL; único con game_id"
+        uuid game_id FK "NOT NULL"
+        timestamptz scanned_at "NOT NULL; ajustada al horario del evento"
+        timestamptz created_at "NOT NULL DEFAULT NOW(); llegó al servidor"
     }
     RAFFLE_TICKET {
-        uuid id PK
-        uuid event_id FK
-        uuid visitor_id FK, UK "un boleto por visitante"
-        int ticket_number UK "único con event_id"
-        varchar(254) email UK "en minúsculas; único con event_id"
-        email_status email_status "enum: pending, sent, failed"
-        timestamptz email_sent_at "nullable"
-        timestamptz issued_at
+        int ticket_number PK "AUTO_INCREMENT; puede tener huecos"
+        uuid visitor_id FK, UK "NOT NULL; un boleto por visitante"
+        text phone UK "NOT NULL; CHECK formato +52...; máx. 16"
+        timestamptz won_at "NULLABLE"
+        timestamptz notified_at "NULLABLE; CHECK sólo si won_at"
+        timestamptz created_at "NOT NULL DEFAULT NOW()"
     }
-    STAND {
+    GAME {
         uuid id PK
-        uuid event_id FK
-        varchar(64) qr_token UK
+        text name "NOT NULL; máx. 80"
     }
-    EVENT {
-        uuid id PK
-        smallint required_checks
-        int last_ticket_number
-    }
-
-    EVENT ||--o{ VISITOR : "registra"
-    EVENT ||--o{ RAFFLE_TICKET : "emite"
-    VISITOR ||--o{ CHECK_IN : "hace"
-    STAND ||--o{ CHECK_IN : "recibe"
-    VISITOR ||--o| RAFFLE_TICKET : "obtiene"
 ```
 
-### Flujo sin login
+### Flujo
 
-1. El QR del stand abre `/check-in/<qr_token>`. `qr_token` es aleatorio (no el código `A1`)
-   para que nadie marque stands escribiendo la URL. No se cambia durante el evento: los
-   check-ins que esperan en la cola del celular lo llevan.
-2. La primera vez el visitante escribe **sólo su gamertag**. El navegador genera `visitor.id`
-   y un token secreto que guarda en `localStorage`; el servidor sólo guarda su hash
-   (`device_token_hash`) y lo verifica en cada envío. El visitante no ve ni escribe nada más,
-   pero nadie puede marcar juegos ni pedir el boleto con un gamertag ajeno.
-3. Cada escaneo guarda en el celular `{ id, qr_token, scanned_at }` y lo envía a un solo
-   endpoint de sincronización junto con el visitante. El servidor, en una transacción:
-   - inserta el visitante si no existe (`ON CONFLICT (id) DO NOTHING`) y verifica el token;
-   - convierte cada `qr_token` en su `stand_id` (un `qr_token` válido es lo que permite crear
-     al visitante, así no se registran gamertags sin haber pasado por un stand);
-   - inserta los check-ins con `INSERT ... ON CONFLICT DO NOTHING` **sin columna**, que ignora
-     tanto un reintento (mismo `id`) como un segundo escaneo del mismo stand (otro `id`, mismo
-     `visitor_id` y `stand_id`). Con `ON CONFLICT (id)` el segundo caso lanzaría un error y
-     abortaría todo el lote. Va con SQL crudo (`db.raw.sql`), porque el `upsert` del ORM
-     sólo cubre una restricción.
-4. **Gamertag ocupado**: si el visitante está en línea, se le avisa al escribirlo. Si se
-   registró sin conexión y al sincronizar el gamertag ya existe, el servidor le agrega un
-   sufijo (`neo-2`), lo devuelve y la app lo muestra. Nunca se descartan sus check-ins.
-5. **Boleto**: antes de pedirlo, la app envía los check-ins pendientes. Si el visitante tiene
-   al menos `event.required_checks`, escribe su correo y el número se asigna en una
-   transacción:
+1. **Registro**: el visitante entra al sitio, escribe **sólo su gamertag** y recibe su QR
+   personal. El QR contiene una URL con un token aleatorio de al menos 128 bits
+   (`crypto.randomBytes(16)`), `/v/<token>`; la base sólo guarda su hash (`qr_token_hash`).
+   El gamertag se guarda en minúsculas para que `Neo` y `neo` sean el mismo.
+2. **Check-in**: en cada stand, el equipo escanea el QR del visitante. El escáner envía los
+   escaneos en lotes con su llave en un encabezado HTTP (no en la URL). El servidor obtiene el
+   juego a partir de la llave y guarda todo el lote en una sola sentencia:
 
    ```sql
-   BEGIN;
-   UPDATE event SET last_ticket_number = last_ticket_number + 1
-   WHERE id = $1
-   RETURNING last_ticket_number;            -- bloquea la fila: no hay números repetidos
-   INSERT INTO raffle_ticket (event_id, visitor_id, ticket_number, email, email_status)
-   VALUES ($1, $2, $3, lower($4), 'pending');
-   COMMIT;
+   INSERT INTO check_in (id, visitor_id, game_id, scanned_at)
+   SELECT s.id, v.id, $game_id, LEAST(GREATEST(s.scanned_at, $event_start), now())
+   FROM unnest($ids::uuid[], $token_hashes::text[], $scanned_at::timestamptz[])
+        AS s(id, token_hash, scanned_at)
+   JOIN visitor v ON v.qr_token_hash = s.token_hash
+   ON CONFLICT DO NOTHING
+   RETURNING id;
    ```
 
-   - Usa `UPDATE ... RETURNING` y no `SELECT ... FOR UPDATE`: el `UPDATE` toma un bloqueo que
-     no choca con los `INSERT` que apuntan a `event` (visitantes y boletos), así no hay
-     esperas ni deadlocks. En Prisma 8 va dentro de `db.transaction(...)`.
-   - Si el `INSERT` falla (por ejemplo, el visitante ya tenía boleto porque se reintentó la
-     petición), la transacción se revierte, el contador no avanza y se devuelve el boleto
-     que ya existía.
-   - El número **también se muestra en pantalla**. El correo se envía después del `COMMIT`;
-     `email_status` y `email_sent_at` permiten reintentar los que fallen, y si el correo tenía
-     un error el visitante lo corrige y se reenvía con el mismo número.
-6. **Límite de peticiones** por visitante (token), no por IP: todo el recinto puede salir a
-   internet con la misma IP.
+   - El `JOIN` descarta los QR desconocidos (mal leídos o ya reemplazados) sin abortar el
+     lote; `ON CONFLICT DO NOTHING` **sin columna** ignora tanto un reenvío (mismo `id`) como
+     un segundo escaneo del mismo visitante en el mismo stand.
+   - Comparando los `id` devueltos con los enviados, el escáner sabe cuáles fueron nuevos,
+     cuáles repetidos y cuáles desconocidos.
+   - Va con SQL crudo (`db.raw.sql`): el `upsert` del ORM sólo cubre una restricción.
+3. **Boleto**: cuando el visitante probó todos los juegos con stand asignado (hoy 18), su
+   página le muestra un formulario para dejar su teléfono. El boleto se crea en una sola
+   sentencia que se puede reintentar:
 
-`UNIQUE (event_id, email)` impide que una persona junte varios boletos creando varios
-gamertags con el mismo correo.
+   ```sql
+   INSERT INTO raffle_ticket (visitor_id, phone)
+   SELECT $visitor_id, $phone
+   WHERE (SELECT count(*) FROM check_in c
+          JOIN game g ON g.id = c.game_id
+          JOIN team t ON t.id = g.team_id
+          WHERE c.visitor_id = $visitor_id AND t.stand_code IS NOT NULL)
+       = (SELECT count(*) FROM game g
+          JOIN team t ON t.id = g.team_id
+          WHERE t.stand_code IS NOT NULL)
+   ON CONFLICT (visitor_id) DO NOTHING
+   RETURNING ticket_number;
+   ```
+
+   - Si no devuelve nada, el servidor busca el boleto existente (un doble toque o un
+     reintento) y, si no hay, es que todavía le faltan juegos.
+   - Un teléfono que ya tiene boleto lanza el error de `UNIQUE (phone)`; la app lo traduce a
+     un mensaje claro.
+   - `ticket_number` se muestra en pantalla. Puede tener huecos (un intento fallido consume un
+     número), así que no indica cuántos boletos hay.
+4. **Sorteo**: se elige entre los boletos que existen, nunca un número al azar entre 1 y el
+   máximo:
+
+   ```sql
+   SELECT ticket_number FROM raffle_ticket
+   WHERE won_at IS NULL
+   ORDER BY random()
+   LIMIT $winners;
+   ```
+
+   El servidor marca `won_at`, manda el mensaje y guarda `notified_at`. En el main stage, el
+   staff escanea el QR del ganador para comprobar que el boleto es suyo: el número por sí solo
+   no prueba nada.
+
+### Identificar al visitante sin login
+
+La página web nunca ve la dirección MAC del celular, así que su cambio por seguridad de la red
+no afecta. Lo que sí se puede perder son los datos del navegador (borrar datos del sitio,
+pestaña de incógnito). Por eso el QR se protege en tres capas:
+
+1. **Cookie**: el servidor guarda el token en una cookie `httpOnly` y `Secure` de larga
+   duración. No se copia a `localStorage`: borrar los datos del sitio la quita igual y
+   cualquier script de la página podría leerla.
+2. **Captura de pantalla**: al registrarse, la app le pide guardar una captura de su QR. El
+   equipo puede escanear la captura aunque el navegador haya perdido sus datos, y al abrir el
+   QR desde la galería del celular se recupera la sesión.
+3. **Módulo de Información**: si pierde todo, el staff busca su gamertag y le genera un QR nuevo
+   (cambia `qr_token_hash` y el anterior deja de servir). Sus check-ins no se pierden porque
+   están ligados al visitante, no al token.
+
+La página `/v/<token>` envía `Referrer-Policy: no-referrer` para que el token no se filtre a
+otros sitios.
 
 ### Afluencia por stand
 
-La afluencia no necesita otra tabla: se calcula con los check-ins recientes del evento.
+La afluencia no necesita otra tabla: se calcula con los check-ins recientes de cada juego.
 
 ```sql
-SELECT s.code, count(c.id) AS recent_check_ins
-FROM stand s
+SELECT t.stand_code, count(c.id) AS recent_check_ins
+FROM game g
+JOIN team t ON t.id = g.team_id
 LEFT JOIN check_in c
-  ON c.stand_id = s.id
+  ON c.game_id = g.id
  AND c.scanned_at > now() - interval '15 minutes'
-WHERE s.event_id = $1
-GROUP BY s.code;
+WHERE t.stand_code IS NOT NULL
+GROUP BY t.stand_code;
 ```
 
-- Usa el índice `(stand_id, scanned_at)` y sólo lee los últimos 15 minutos.
-- Va en una función de `lib/*-queries.ts` con `"use cache"` y un `cacheLife` de unos 30
+- Usa el índice `(game_id, scanned_at)` y sólo lee los últimos 15 minutos.
+- Va en una función de `lib/server/*-queries.ts` con `"use cache"` y un `cacheLife` de unos 30
   segundos, así todos los visitantes comparten una sola consulta. El croquis la pide a un
   Route Handler y la refresca con `refetchInterval` de TanStack Query.
-- Qué mide: como el visitante marca el juego al terminar la demo y cada juego cuenta una sola
-  vez por visitante, es "personas que probaron el juego por primera vez en los últimos 15
-  minutos". Si se necesita la ocupación exacta (personas en el stand en este momento), se
-  agrega una tabla de reportes que llene el equipo del stand.
+- Qué mide: cada juego cuenta una sola vez por visitante, así que es "personas que probaron el
+  juego por primera vez en los últimos 15 minutos", no la ocupación exacta del stand.
+
+## Valores calculados
+
+No se guardan en ninguna columna; se calculan al consultar:
+
+| Valor | Cálculo |
+| --- | --- |
+| Integrantes de un equipo | `count(*)` de `team_member` |
+| Juegos probados por un visitante | `count(*)` de sus `check_in` en juegos con stand |
+| Juegos requeridos para el boleto | `count(*)` de `game` cuyo equipo tiene `stand_code` |
+| Afluencia de un stand | check-ins de su juego en los últimos 15 minutos |
 
 ## Internet intermitente
 
-El modelo está pensado para que los check-ins no se pierdan cuando se va el internet:
+Con el QR en el celular del visitante, lo que debe funcionar sin internet es el **escáner del
+stand**:
 
-- **Identificadores generados en el celular**: `visitor.id` y `check_in.id` son UUID creados
-  con `crypto.randomUUID()`. El celular guarda los check-ins en una cola local (IndexedDB) y
-  los reenvía al volver la conexión; `ON CONFLICT DO NOTHING` hace que reenviar sea seguro.
-- **Página disponible sin conexión**: el primer escaneo necesita internet para cargar la
-  página; después, un service worker la guarda para que los siguientes escaneos funcionen
-  offline.
-- **Dos horas por check-in**: `scanned_at` es la hora en que se escaneó y `received_at` la hora
-  en que llegó al servidor. El `INSERT` calcula `scanned_at = LEAST($hora_del_celular, now())`
-  en SQL (no en Node, cuyo reloj puede ir adelantado respecto a la base), así un celular
-  adelantado no altera la afluencia y los check-ins que llegan tarde cuentan en su hora real.
-  Para celulares atrasados, el lote puede incluir la hora del celular al enviarlo y el
-  servidor corrige la diferencia.
-- **Envíos tardíos**: se aceptan sincronizaciones hasta 24 horas después de `ends_at`; lo que
-  se valida es que `scanned_at` caiga dentro del evento.
-- **Infraestructura (pendiente de decidir)**: debe haber **un solo servidor que escriba**.
-  Lo más simple es la base en la nube y los celulares con su cola offline. Si se monta un
-  servidor local en la red del recinto, durante el evento ese es el único que escribe y
-  después se copia a la nube. Dos servidores escribiendo a la vez chocarían en gamertags,
-  check-ins y números de boleto (los UUID sólo evitan choques de llaves primarias).
-
-Volumen esperado: unos cientos o pocos miles de visitantes y ~18 stands, es decir, decenas de
-miles de check-ins por evento. No hace falta particionar ni réplicas de lectura.
+- **Registro**: necesita internet una sola vez (para reservar el gamertag). Después, el QR es
+  una imagen y funciona sin conexión.
+- **Escáner**: es una página instalable (PWA) que el equipo abre antes del evento. Cada
+  escaneo se guarda en una cola local (IndexedDB) con su `check_in.id` (UUID con
+  `crypto.randomUUID()`) y se envía en lotes al volver la conexión.
+- **Reenvíos seguros**: la sentencia del check-in es idempotente, así que el escáner conserva
+  todos sus escaneos del día y tiene un botón "reenviar todo" por si hubiera que restaurar la
+  base.
+- **Relojes**: `scanned_at` se ajusta en SQL a `LEAST(GREATEST(hora del escáner, inicio del
+  evento), now())`. Un reloj adelantado no altera la afluencia, uno atrasado no hace que se
+  pierda el escaneo, y los que llegan tarde cuentan en su hora real.
+- **Un solo servidor que escriba**: la base en la nube (recomendado) o un servidor local en el
+  recinto que después se copia a la nube, pero no los dos a la vez: chocarían en gamertags,
+  check-ins y números de boleto.
 
 ## Restricciones
 
@@ -332,90 +389,127 @@ Además de las llaves primarias y las restricciones `UNIQUE` (que ya crean su í
 
 | Tabla | Índice | Para qué |
 | --- | --- | --- |
-| `stand` | `UNIQUE (event_id, code)` | Buscar un stand por su código en el croquis. |
-| `stand` | `UNIQUE (qr_token)` | Resolver el QR escaneado. |
-| `team` | `UNIQUE (stand_id)` | Un stand por equipo; también sirve a la llave foránea. |
+| `team` | `UNIQUE (stand_code)` | Un equipo por stand; buscar el equipo de un stand. |
+| `team` | `UNIQUE (scanner_key_hash)` | Identificar el escáner que envía un lote. |
 | `team_member` | `(team_id)` | Integrantes de un equipo. |
+| `team_member` | `UNIQUE (team_id) WHERE is_leader` | Como máximo un líder por equipo. |
 | `game` | `UNIQUE (team_id)` y `(genre_id)` | Juego de un equipo; juegos de un género. |
 | `game_genre` | `(genre_id)` | Juegos con un género extra (la PK empieza por `game_id`). |
-| `game_screenshot` | `UNIQUE (game_id, sort_order)` | Galería ordenada. |
-| `visitor` | `UNIQUE (event_id, gamertag_key)` | Buscar al visitante por gamertag. |
-| `check_in` | `UNIQUE (visitor_id, stand_id)` | Un check por juego; también lista los del visitante. |
-| `check_in` | `(stand_id, scanned_at)` | Afluencia reciente por stand. |
-| `raffle_ticket` | `UNIQUE (visitor_id)` | Un boleto por visitante. |
-| `raffle_ticket` | `UNIQUE (event_id, ticket_number)` | Buscar al ganador en el sorteo. |
-| `raffle_ticket` | `UNIQUE (event_id, email)` | Un boleto por correo. |
+| `game_platform` | `(platform_id)` | Juegos de una plataforma (la PK empieza por `game_id`). |
+| `game_image` | `UNIQUE (game_id, sort_order)` | Galería ordenada. |
+| `game_image` | `UNIQUE (game_id) WHERE is_cover` | Una sola portada por juego. |
+| `visitor` | `UNIQUE (gamertag)` y `UNIQUE (qr_token_hash)` | Buscar al visitante por gamertag o por su QR. |
+| `check_in` | `UNIQUE (visitor_id, game_id)` | Un check por juego; también cuenta los del visitante. |
+| `check_in` | `(game_id, scanned_at)` | Afluencia reciente por juego. |
+| `raffle_ticket` | `UNIQUE (visitor_id)` y `UNIQUE (phone)` | Un boleto por visitante y por teléfono. |
+
+Las tablas del catálogo tienen menos de 100 filas, así que sus índices de llaves foráneas casi
+no se usan; se dejan para seguir una sola regla: toda llave foránea lleva índice.
 
 ### CHECK
 
 | Tabla | Restricción |
 | --- | --- |
-| `event` | `ends_at > starts_at` y `required_checks >= 1` |
-| `game` | `cardinality(platforms) >= 1` |
-| `game_screenshot` | `sort_order BETWEEN 0 AND 3` (máximo 4 capturas) |
-| `visitor` | `gamertag_key = lower(gamertag)` y `gamertag_key ~ '^[a-z0-9_.-]{3,24}$'` |
-| `check_in` | `scanned_at <= received_at` |
-| `raffle_ticket` | `email = lower(email)` |
+| `team` | `stand_code ~ '^[AB][1-9]$'` y `scanner_key_hash ~ '^[0-9a-f]{64}$'` |
+| `game` | `itchio_url ~ '^https://[a-z0-9-]+[.]itch[.]io/'` y `players BETWEEN 1 AND 16` |
+| `game`, `genre`, `platform` | `slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'` |
+| Columnas de texto | `char_length(<columna>) <= N` (el `máx. N` del diagrama) |
+| `game_image` | `image_url ~ '^(https://\|/[^/])'` (URL https o ruta del sitio) y `sort_order BETWEEN 0 AND 4` |
+| `visitor` | `gamertag ~ '^[a-z0-9_.-]{3,24}$'` y `qr_token_hash ~ '^[0-9a-f]{64}$'` |
+| `check_in` | `scanned_at <= created_at` |
+| `raffle_ticket` | `phone ~ '^[+][1-9][0-9]{7,14}$'` y `notified_at IS NULL OR won_at IS NOT NULL` |
 
-El gamertag sólo acepta letras sin acento, números, `_`, `.` y `-` (de 3 a 24). Así no hay dos
-gamertags que se vean iguales con letras de otros alfabetos.
+- El gamertag sólo acepta letras sin acento en minúsculas, números, `_`, `.` y `-` (de 3 a
+  24). Así no hay dos gamertags que se vean iguales con letras de otros alfabetos.
+- `scanned_at <= created_at` se cumple porque las dos salen de `now()` en la misma sentencia:
+  inserta check-ins sólo con la sentencia de arriba, también en los datos de prueba.
 
 ### Borrado (`onDelete`)
 
 Decláralo explícito en cada relación del contrato:
 
-- `Cascade`: `team` borra sus `team_member` y su `game`; `game` borra sus `game_genre` y
-  `game_screenshot`.
-- `Restrict` (no deja borrar si hay registros que dependen): todo lo demás. Por ejemplo, un
-  stand con check-ins o un género con juegos no se pueden borrar.
+- `Cascade`: `team` borra sus `team_member` y su `game`; `game` borra sus `game_genre`,
+  `game_platform` y `game_image`; `visitor` borra su `raffle_ticket` (y con él su teléfono).
+- `Restrict` (no deja borrar si hay registros que dependen): todo lo demás. Un juego con
+  check-ins no se puede borrar (y por eso tampoco su equipo), ni un género o una plataforma
+  con juegos.
 
-## Reglas que valida la aplicación
+## Reglas que valida el servidor
 
-PostgreSQL no puede expresar estas reglas con restricciones simples; se validan en las
-Server Actions (`lib/<feature>-actions.ts`) y en el endpoint de sincronización:
+Se validan en las Server Actions (`lib/<feature>-actions.ts`) y en el endpoint del escáner:
 
-- Todo equipo publicado tiene su juego y al menos un integrante.
+- Todo equipo tiene su juego y al menos un integrante; todo juego, al menos una plataforma.
 - Los géneros extra de un juego no repiten su género principal.
-- El visitante y el stand de un check-in, y el visitante y su boleto, son del mismo evento.
-- Un check-in es válido si `scanned_at` cae entre `event.starts_at` y `event.ends_at`.
-- El boleto se emite si el visitante tiene al menos `event.required_checks` check-ins.
+- El juego de un check-in sale de la llave del escáner, nunca de lo que envía el cliente.
+- Las fotos cumplen las reglas de dimensiones, peso y formato
+  ([#62](https://github.com/ikabeee/ut-e3/issues/62)).
+- El catálogo, el detalle y el croquis sólo muestran juegos con portada.
+- Los ids del lote son UUID válidos antes de llegar a la base.
+- Cuándo se sortea, cuántos ganadores hay y el envío del mensaje son reglas del servidor.
+
+## Operación el día del evento
+
+Recomendaciones del perfil de DBA, a la medida de un evento de un día con unos 2,000
+visitantes:
+
+| Tema | Recomendación |
+| --- | --- |
+| Respaldos | PostgreSQL administrado con recuperación a un punto en el tiempo (PITR) y 7 días de retención (Neon, Supabase Pro o RDS; los planes gratuitos no la tienen). Pérdida máxima realista: 5 minutos; tiempo de recuperación: 15 a 45 minutos (restaurar en otra instancia y cambiar `DATABASE_URL`). `pg_dump` antes de abrir y al terminar. |
+| Conexiones | El pooler del proveedor (PgBouncer en modo transacción, unas 20 conexiones) para la app y la URL directa para `db:migrate`. Pool de 1 a 3 conexiones por instancia de la app. Base en la misma región que la app y sin pausa automática ese día. |
+| Roles | La app usa un rol con `SELECT`, `INSERT` y `UPDATE` (en `check_in` sólo `INSERT` y `SELECT`; `DELETE` sólo en `raffle_ticket` y el catálogo), sin permisos para cambiar tablas. Las migraciones usan otro rol. `statement_timeout = 5s` e `idle_in_transaction_session_timeout = 10s` en el rol de la app. |
+| Conexión segura | `sslmode=verify-full` (o `require` como mínimo). |
+| Monitoreo | Panel del proveedor y `pg_stat_statements`: conexiones (alerta arriba del 70%), CPU, las 5 consultas más costosas (el check-in y la afluencia deben quedar en menos de 10 ms), check-ins por minuto (alerta si un escáner lleva 10 minutos sin enviar en horario del evento) y un `/health` con `SELECT 1`. |
+| Mantenimiento | El autovacuum por defecto basta. `VACUUM (ANALYZE)` después de cargar el catálogo y después del pico de registros. |
+| Capacidad | `check_in`: máximo 36,000 filas (2,000 visitantes por 18 juegos), unos 8 MB con índices. Toda la base mide menos de 20 MB y cabe en memoria. Escrituras: 2 a 5 por segundo, con picos de 15. |
+| No hace falta | Réplicas, alta disponibilidad multi-región, particiones, RLS ni auditoría. |
+
+Antes del evento:
+
+1. Restaurar un respaldo con PITR en otra instancia y medir cuánto tarda.
+2. Prueba de carga: 300 escaneos por minuto con ráfagas de 3 veces, y 18 escáneres enviando
+   500 escaneos en cola cada uno. Meta: 95% de las respuestas en menos de 300 ms y cero
+   errores 5xx.
+3. Simulacro sin internet: modo avión, 20 escaneos, reconectar, reenviar dos veces y un lote
+   con un QR desconocido.
+4. Comprobar los permisos con `SET ROLE` del rol de la app (cambiar tablas debe fallar).
+5. Confirmar que hay 18 juegos con stand y revisar los `CHECK` con `\d+`.
 
 ## Relación con el tipo `Game` actual
 
-El resto de la app no cambia: `lib/server/games-queries.ts` arma el tipo `Game`
-(`src/features/games/lib/types.ts`) con estas columnas.
+El repositorio de Prisma de la feature `games` (`lib/server/prisma-game-repository.ts`, que
+implementa `GameRepository`) arma el tipo `Game` (`src/features/games/lib/types.ts`) con estas
+columnas:
 
 | Campo de `Game` | Origen |
 | --- | --- |
-| `slug`, `name`, `description`, `hasTournament`, `players` | `game` |
+| `slug`, `name`, `description`, `players` | `game` |
 | `about` | `game.about` partido en párrafos (línea en blanco); `null` usa el texto genérico de `games-copy.ts` |
 | `genre` | `genre.name` del género principal (`game.genre_id`) |
 | `team` | `team.name` |
 | `members` | `count(*)` de `team_member` |
-| `stand` | `stand.code` del equipo |
-| `image` | `game.cover_url` y `game.cover_position` (`null` si no hay portada) |
-| `art` | `game.art_seed`, `game.art_shape_color` y `game.art_background_color` |
+| `stand` | `team.stand_code` (vacío hasta que se asigne) |
+| `image` | `game_image` con `is_cover = true` (`image_url` y `crop_position`) |
 
-## Privacidad y seguridad
+Cuando se conecte la base hay que:
 
-- El gamertag es un seudónimo; el único dato personal es el correo, que sólo se pide al final
-  y sólo vive en `raffle_ticket`.
-- El formulario del correo debe mostrar el aviso de privacidad y decir para qué se usa.
-- Después del último sorteo se borran las filas de `raffle_ticket` (ninguna tabla depende de
-  ella). `visitor` y `check_in` no tienen datos personales y se conservan para estadísticas.
-- La aplicación se conecta con un usuario de PostgreSQL sin permisos para cambiar tablas; las
-  migraciones usan otro usuario.
+- quitar `hasTournament` y `art` del tipo `Game` y de la UI, junto con el arte generado
+  (`src/features/games/lib/game-art.ts`), porque ya no existen en el modelo;
+- hacer `image` obligatorio, porque sólo se listan juegos con portada;
+- decidir cómo se muestra un juego sin stand asignado.
 
-## Fuera de este modelo (por decidir)
+## Privacidad
 
-- **Recuperar el token**: si el visitante cambia de navegador o borra sus datos, pierde el
-  token. La propuesta es que el staff del módulo de Información asocie su gamertag a un token
-  nuevo mientras no tenga boleto. Dejar que cualquiera lo haga solo (sin staff) quita
-  fricción, pero permitiría quedarse con el gamertag de otra persona antes de que pida su
-  boleto.
-- **Organizadores**: quién entra a administrar juegos y cómo se autentica. Se agrega su tabla
-  cuando se elija la estrategia de autenticación.
-- **Sorteos y premios**: hoy los ganadores se anuncian en el main stage. Si se quiere registrar
-  quién ganó qué, se agregan `RAFFLE_DRAW` y `PRIZE` relacionadas con `RAFFLE_TICKET`.
-- **Torneos**: `has_tournament` sólo marca si el juego tiene torneo; inscripciones y resultados
-  quedarían en tablas propias.
+- El gamertag es un seudónimo; el único dato personal del visitante es el teléfono, que sólo
+  se pide al final y sólo vive en `raffle_ticket`.
+- El formulario del teléfono debe mostrar el aviso de privacidad y decir para qué se usa.
+- Después del sorteo se borran las filas de `raffle_ticket`. Los teléfonos siguen en los
+  respaldos hasta que vence su retención (7 días). `visitor` y `check_in` no tienen datos
+  personales y se conservan para estadísticas.
+
+## Por decidir
+
+- **Proveedor de PostgreSQL** con PITR y **proveedor del mensaje** al ganador (SMS o WhatsApp).
+- **Llave del escáner**: cómo se entrega a cada equipo (un enlace privado o un código impreso).
+- **Organizadores**: quién entra a administrar juegos y cómo se autentica.
+- **Fotos**: dimensiones, peso, formato y almacenamiento
+  ([#62](https://github.com/ikabeee/ut-e3/issues/62)).

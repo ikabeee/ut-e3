@@ -49,7 +49,12 @@ npm run db:emit            # regenera contract.json / contract.d.ts
 npm run db:update          # aplica el contrato a la BD LOCAL (sin migraciones)
 npm run db:migration:plan  # genera una migración formal en migrations/app/
 npm run db:migrate         # aplica migraciones pendientes
+npm run db:seed            # datos de ejemplo (idempotente)
+npm run docker:up          # PostgreSQL + migraciones + seeds + sitio en Docker
 ```
+
+Para trabajar con la base, levántala con `docker compose up -d --wait db` y corre
+`npm run db:migrate` y `npm run db:seed` (ver `docs/data-sources.md`).
 
 Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm run lint`,
 `npm run typecheck` y `npm test` pasen. El workflow `.github/workflows/ci.yml` ejecuta lo mismo (con
@@ -60,7 +65,8 @@ Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm
 La estructura de carpetas "grita" el dominio, no el framework.
 Cada dominio es una **feature** dentro de `src/features/`. La feature `example` es el scaffold
 mínimo; `games` es la referencia completa (datos, TanStack Query, componentes y pages).
-Los datos todavía son mock (ver `docs/data-sources.md`); el contrato de Prisma no tiene modelos.
+El contrato de Prisma implementa el modelo de `docs/data-model.md`; el sitio todavía lee los juegos
+mock (`DATA_SOURCE=mock`, ver `docs/data-sources.md`).
 
 ```
 src/
@@ -366,7 +372,12 @@ versión instalada está en `node_modules/@prisma/orm-postgres/skills/prisma-8/`
 `references/`). Léela antes de escribir consultas o migraciones; no respondas de memoria.
 
 - Configuración: `prisma.config.ts` (`definePrismaConfig` + `ormConfig`).
-- Contrato: `src/shared/lib/prisma/contract.prisma` (primera línea `// use prisma-8`).
+- Contrato: `src/shared/lib/prisma/contract.prisma` (primera línea `// use prisma-8`). Implementa
+  el modelo de `docs/data-model.md`.
+- Seeds: `src/shared/lib/prisma/seed.ts` (corre con Node, fuera de Next.js) y sus datos en
+  `seed-data.json`.
+- Los textos son `String` con `@@check` de longitud, no `VarChar(n)`: en esta versión el ORM
+  tipa `VarChar(n)` con un tipo "branded" que obliga a castear cada valor.
 - Artefactos generados (se suben a git, **no se editan a mano**): `contract.json` y `contract.d.ts`.
   Después de cambiar el contrato ejecuta `npm run db:emit`.
 - Cliente: `src/shared/lib/prisma/db.ts` exporta `db`.

@@ -1,0 +1,2008 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.check_in",
+    "label": "Create table \"check_in\"",
+    "summary": "Creates table \"check_in\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "check_in"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"check_in\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"check_in\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"check_in\"",
+        "sql": "CREATE TABLE \"public\".\"check_in\" (\n  \"created_at\" timestamptz NOT NULL,\n  \"game_id\" uuid NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"scanned_at\" timestamptz NOT NULL,\n  \"visitor_id\" uuid NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"check_in_scanned_before_received_bf05099b\" CHECK (scanned_at <= created_at)\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"check_in\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"check_in\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.game",
+    "label": "Create table \"game\"",
+    "summary": "Creates table \"game\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "game"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"game\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"game\"",
+        "sql": "CREATE TABLE \"public\".\"game\" (\n  \"about\" text,\n  \"created_at\" timestamptz NOT NULL,\n  \"description\" text NOT NULL,\n  \"genre_id\" uuid NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"itchio_url\" text,\n  \"name\" text NOT NULL,\n  \"players\" int2 DEFAULT 1 NOT NULL,\n  \"slug\" text NOT NULL,\n  \"sort_order\" int2 DEFAULT 0 NOT NULL,\n  \"team_id\" uuid NOT NULL,\n  \"updated_at\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"game_about_length_4f46127c\" CHECK (char_length(about) <= 3000),\n  CONSTRAINT \"game_description_length_9ce16a9b\" CHECK (char_length(description) <= 300),\n  CONSTRAINT \"game_itchio_url_format_4c9d4c0f\" CHECK (itchio_url ~ '^https://[a-z0-9-]+[.]itch[.]io/'),\n  CONSTRAINT \"game_name_length_46b790f5\" CHECK (char_length(name) <= 80),\n  CONSTRAINT \"game_players_range_42c40983\" CHECK (players BETWEEN 1 AND 16),\n  CONSTRAINT \"game_slug_format_0d449c04\" CHECK (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' AND char_length(slug) <= 80)\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"game\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.game_genre",
+    "label": "Create table \"game_genre\"",
+    "summary": "Creates table \"game_genre\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "game_genre"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"game_genre\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_genre\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"game_genre\"",
+        "sql": "CREATE TABLE \"public\".\"game_genre\" (\n  \"game_id\" uuid NOT NULL,\n  \"genre_id\" uuid NOT NULL,\n  PRIMARY KEY (\"game_id\", \"genre_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"game_genre\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_genre\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.game_image",
+    "label": "Create table \"game_image\"",
+    "summary": "Creates table \"game_image\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "game_image"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"game_image\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_image\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"game_image\"",
+        "sql": "CREATE TABLE \"public\".\"game_image\" (\n  \"alt_text\" text NOT NULL,\n  \"created_at\" timestamptz NOT NULL,\n  \"crop_position\" text,\n  \"game_id\" uuid NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"image_url\" text NOT NULL,\n  \"is_cover\" bool DEFAULT false NOT NULL,\n  \"sort_order\" int2 NOT NULL,\n  \"updated_at\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"game_image_alt_text_length_5b8f0bb2\" CHECK (char_length(alt_text) <= 160),\n  CONSTRAINT \"game_image_crop_position_length_435ff29f\" CHECK (char_length(crop_position) <= 20),\n  CONSTRAINT \"game_image_sort_order_range_31993b07\" CHECK (sort_order BETWEEN 0 AND 4),\n  CONSTRAINT \"game_image_url_format_1de61377\" CHECK (image_url ~ '^(https://|/[^/])')\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"game_image\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_image\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.game_platform",
+    "label": "Create table \"game_platform\"",
+    "summary": "Creates table \"game_platform\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "game_platform"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"game_platform\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_platform\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"game_platform\"",
+        "sql": "CREATE TABLE \"public\".\"game_platform\" (\n  \"game_id\" uuid NOT NULL,\n  \"platform_id\" uuid NOT NULL,\n  PRIMARY KEY (\"game_id\", \"platform_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"game_platform\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_platform\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.genre",
+    "label": "Create table \"genre\"",
+    "summary": "Creates table \"genre\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "genre"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"genre\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"genre\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"genre\"",
+        "sql": "CREATE TABLE \"public\".\"genre\" (\n  \"created_at\" timestamptz NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"name\" text NOT NULL,\n  \"slug\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"genre_name_length_e3707e7a\" CHECK (char_length(name) <= 40),\n  CONSTRAINT \"genre_slug_format_a2990fec\" CHECK (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' AND char_length(slug) <= 40)\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"genre\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"genre\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.platform",
+    "label": "Create table \"platform\"",
+    "summary": "Creates table \"platform\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "platform"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"platform\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"platform\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"platform\"",
+        "sql": "CREATE TABLE \"public\".\"platform\" (\n  \"created_at\" timestamptz NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"name\" text NOT NULL,\n  \"slug\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"platform_name_length_e3707e7a\" CHECK (char_length(name) <= 40),\n  CONSTRAINT \"platform_slug_format_a2990fec\" CHECK (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' AND char_length(slug) <= 40)\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"platform\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"platform\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.raffle_ticket",
+    "label": "Create table \"raffle_ticket\"",
+    "summary": "Creates table \"raffle_ticket\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "raffle_ticket"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"raffle_ticket\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"raffle_ticket\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"raffle_ticket\"",
+        "sql": "CREATE TABLE \"public\".\"raffle_ticket\" (\n  \"created_at\" timestamptz NOT NULL,\n  \"notified_at\" timestamptz,\n  \"phone\" text NOT NULL,\n  \"ticket_number\" SERIAL NOT NULL,\n  \"visitor_id\" uuid NOT NULL,\n  \"won_at\" timestamptz,\n  PRIMARY KEY (\"ticket_number\"),\n  CONSTRAINT \"raffle_ticket_notified_winner_ff4de8c9\" CHECK (notified_at IS NULL OR won_at IS NOT NULL),\n  CONSTRAINT \"raffle_ticket_phone_format_904f0b6b\" CHECK (phone ~ '^[+][1-9][0-9]{7,14}$')\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"raffle_ticket\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"raffle_ticket\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.team",
+    "label": "Create table \"team\"",
+    "summary": "Creates table \"team\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "team"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"team\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"team\"",
+        "sql": "CREATE TABLE \"public\".\"team\" (\n  \"created_at\" timestamptz NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"name\" text NOT NULL,\n  \"scanner_key_hash\" text NOT NULL,\n  \"stand_code\" text,\n  \"updated_at\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"team_name_length_46b790f5\" CHECK (char_length(name) <= 80),\n  CONSTRAINT \"team_scanner_key_hash_hex_8e430906\" CHECK (scanner_key_hash ~ '^[0-9a-f]{64}$'),\n  CONSTRAINT \"team_stand_code_format_e4e36fe5\" CHECK (stand_code ~ '^[AB][1-9]$')\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"team\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.team_member",
+    "label": "Create table \"team_member\"",
+    "summary": "Creates table \"team_member\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "team_member"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"team_member\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team_member\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"team_member\"",
+        "sql": "CREATE TABLE \"public\".\"team_member\" (\n  \"created_at\" timestamptz NOT NULL,\n  \"full_name\" text NOT NULL,\n  \"group_name\" text NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"is_leader\" bool DEFAULT false NOT NULL,\n  \"sort_order\" int2 DEFAULT 0 NOT NULL,\n  \"team_id\" uuid NOT NULL,\n  \"updated_at\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"team_member_full_name_length_700f57e9\" CHECK (char_length(full_name) <= 120),\n  CONSTRAINT \"team_member_group_name_check_b42f413d\" CHECK (\"group_name\" IN ('IDYGS101', 'IDYGS102', 'IDYGS103'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"team_member\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team_member\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.visitor",
+    "label": "Create table \"visitor\"",
+    "summary": "Creates table \"visitor\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "visitor"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"visitor\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"visitor\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"visitor\"",
+        "sql": "CREATE TABLE \"public\".\"visitor\" (\n  \"created_at\" timestamptz NOT NULL,\n  \"gamertag\" text NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"qr_token_hash\" text NOT NULL,\n  \"updated_at\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"visitor_gamertag_format_aeff463d\" CHECK (gamertag ~ '^[a-z0-9_.-]{3,24}$'),\n  CONSTRAINT \"visitor_qr_token_hash_hex_b5a3443a\" CHECK (qr_token_hash ~ '^[0-9a-f]{64}$')\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"visitor\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"visitor\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.check_in.check_in_visitor_id_game_id_key",
+    "label": "Add unique constraint on \"check_in\" (visitor_id, game_id)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "check_in_visitor_id_game_id_key",
+        "table": "check_in"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"check_in_visitor_id_game_id_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "check_in_visitor_id_game_id_key",
+          "public",
+          "\"public\".\"check_in\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"check_in_visitor_id_game_id_key\"",
+        "sql": "ALTER TABLE \"public\".\"check_in\" ADD CONSTRAINT \"check_in_visitor_id_game_id_key\" UNIQUE (\"visitor_id\", \"game_id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"check_in_visitor_id_game_id_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "check_in_visitor_id_game_id_key",
+          "public",
+          "\"public\".\"check_in\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.game.game_team_id_key",
+    "label": "Add unique constraint on \"game\" (team_id)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "game_team_id_key",
+        "table": "game"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"game_team_id_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_team_id_key",
+          "public",
+          "\"public\".\"game\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"game_team_id_key\"",
+        "sql": "ALTER TABLE \"public\".\"game\" ADD CONSTRAINT \"game_team_id_key\" UNIQUE (\"team_id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"game_team_id_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_team_id_key",
+          "public",
+          "\"public\".\"game\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.game.game_slug_key",
+    "label": "Add unique constraint on \"game\" (slug)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "game_slug_key",
+        "table": "game"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"game_slug_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_slug_key",
+          "public",
+          "\"public\".\"game\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"game_slug_key\"",
+        "sql": "ALTER TABLE \"public\".\"game\" ADD CONSTRAINT \"game_slug_key\" UNIQUE (\"slug\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"game_slug_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_slug_key",
+          "public",
+          "\"public\".\"game\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.game_image.game_image_game_id_sort_order_key",
+    "label": "Add unique constraint on \"game_image\" (game_id, sort_order)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "game_image_game_id_sort_order_key",
+        "table": "game_image"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"game_image_game_id_sort_order_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_image_game_id_sort_order_key",
+          "public",
+          "\"public\".\"game_image\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"game_image_game_id_sort_order_key\"",
+        "sql": "ALTER TABLE \"public\".\"game_image\" ADD CONSTRAINT \"game_image_game_id_sort_order_key\" UNIQUE (\"game_id\", \"sort_order\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"game_image_game_id_sort_order_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_image_game_id_sort_order_key",
+          "public",
+          "\"public\".\"game_image\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.genre.genre_slug_key",
+    "label": "Add unique constraint on \"genre\" (slug)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "genre_slug_key",
+        "table": "genre"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"genre_slug_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "genre_slug_key",
+          "public",
+          "\"public\".\"genre\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"genre_slug_key\"",
+        "sql": "ALTER TABLE \"public\".\"genre\" ADD CONSTRAINT \"genre_slug_key\" UNIQUE (\"slug\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"genre_slug_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "genre_slug_key",
+          "public",
+          "\"public\".\"genre\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.genre.genre_name_key",
+    "label": "Add unique constraint on \"genre\" (name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "genre_name_key",
+        "table": "genre"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"genre_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "genre_name_key",
+          "public",
+          "\"public\".\"genre\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"genre_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"genre\" ADD CONSTRAINT \"genre_name_key\" UNIQUE (\"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"genre_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "genre_name_key",
+          "public",
+          "\"public\".\"genre\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.platform.platform_slug_key",
+    "label": "Add unique constraint on \"platform\" (slug)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "platform_slug_key",
+        "table": "platform"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"platform_slug_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "platform_slug_key",
+          "public",
+          "\"public\".\"platform\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"platform_slug_key\"",
+        "sql": "ALTER TABLE \"public\".\"platform\" ADD CONSTRAINT \"platform_slug_key\" UNIQUE (\"slug\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"platform_slug_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "platform_slug_key",
+          "public",
+          "\"public\".\"platform\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.platform.platform_name_key",
+    "label": "Add unique constraint on \"platform\" (name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "platform_name_key",
+        "table": "platform"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"platform_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "platform_name_key",
+          "public",
+          "\"public\".\"platform\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"platform_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"platform\" ADD CONSTRAINT \"platform_name_key\" UNIQUE (\"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"platform_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "platform_name_key",
+          "public",
+          "\"public\".\"platform\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.raffle_ticket.raffle_ticket_visitor_id_key",
+    "label": "Add unique constraint on \"raffle_ticket\" (visitor_id)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "raffle_ticket_visitor_id_key",
+        "table": "raffle_ticket"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"raffle_ticket_visitor_id_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "raffle_ticket_visitor_id_key",
+          "public",
+          "\"public\".\"raffle_ticket\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"raffle_ticket_visitor_id_key\"",
+        "sql": "ALTER TABLE \"public\".\"raffle_ticket\" ADD CONSTRAINT \"raffle_ticket_visitor_id_key\" UNIQUE (\"visitor_id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"raffle_ticket_visitor_id_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "raffle_ticket_visitor_id_key",
+          "public",
+          "\"public\".\"raffle_ticket\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.raffle_ticket.raffle_ticket_phone_key",
+    "label": "Add unique constraint on \"raffle_ticket\" (phone)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "raffle_ticket_phone_key",
+        "table": "raffle_ticket"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"raffle_ticket_phone_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "raffle_ticket_phone_key",
+          "public",
+          "\"public\".\"raffle_ticket\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"raffle_ticket_phone_key\"",
+        "sql": "ALTER TABLE \"public\".\"raffle_ticket\" ADD CONSTRAINT \"raffle_ticket_phone_key\" UNIQUE (\"phone\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"raffle_ticket_phone_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "raffle_ticket_phone_key",
+          "public",
+          "\"public\".\"raffle_ticket\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.team.team_name_key",
+    "label": "Add unique constraint on \"team\" (name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "team_name_key",
+        "table": "team"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"team_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "team_name_key",
+          "public",
+          "\"public\".\"team\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"team_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"team\" ADD CONSTRAINT \"team_name_key\" UNIQUE (\"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"team_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "team_name_key",
+          "public",
+          "\"public\".\"team\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.team.team_stand_code_key",
+    "label": "Add unique constraint on \"team\" (stand_code)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "team_stand_code_key",
+        "table": "team"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"team_stand_code_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "team_stand_code_key",
+          "public",
+          "\"public\".\"team\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"team_stand_code_key\"",
+        "sql": "ALTER TABLE \"public\".\"team\" ADD CONSTRAINT \"team_stand_code_key\" UNIQUE (\"stand_code\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"team_stand_code_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "team_stand_code_key",
+          "public",
+          "\"public\".\"team\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.team.team_scanner_key_hash_key",
+    "label": "Add unique constraint on \"team\" (scanner_key_hash)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "team_scanner_key_hash_key",
+        "table": "team"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"team_scanner_key_hash_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "team_scanner_key_hash_key",
+          "public",
+          "\"public\".\"team\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"team_scanner_key_hash_key\"",
+        "sql": "ALTER TABLE \"public\".\"team\" ADD CONSTRAINT \"team_scanner_key_hash_key\" UNIQUE (\"scanner_key_hash\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"team_scanner_key_hash_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "team_scanner_key_hash_key",
+          "public",
+          "\"public\".\"team\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.visitor.visitor_gamertag_key",
+    "label": "Add unique constraint on \"visitor\" (gamertag)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "visitor_gamertag_key",
+        "table": "visitor"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"visitor_gamertag_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "visitor_gamertag_key",
+          "public",
+          "\"public\".\"visitor\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"visitor_gamertag_key\"",
+        "sql": "ALTER TABLE \"public\".\"visitor\" ADD CONSTRAINT \"visitor_gamertag_key\" UNIQUE (\"gamertag\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"visitor_gamertag_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "visitor_gamertag_key",
+          "public",
+          "\"public\".\"visitor\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.visitor.visitor_qr_token_hash_key",
+    "label": "Add unique constraint on \"visitor\" (qr_token_hash)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "visitor_qr_token_hash_key",
+        "table": "visitor"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"visitor_qr_token_hash_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "visitor_qr_token_hash_key",
+          "public",
+          "\"public\".\"visitor\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"visitor_qr_token_hash_key\"",
+        "sql": "ALTER TABLE \"public\".\"visitor\" ADD CONSTRAINT \"visitor_qr_token_hash_key\" UNIQUE (\"qr_token_hash\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"visitor_qr_token_hash_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "visitor_qr_token_hash_key",
+          "public",
+          "\"public\".\"visitor\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.check_in.check_in_game_id_idx_aa9dd7a6",
+    "label": "Create index \"check_in_game_id_idx_aa9dd7a6\" on \"check_in\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "check_in_game_id_idx_aa9dd7a6",
+        "table": "check_in"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"check_in_game_id_idx_aa9dd7a6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"check_in_game_id_idx_aa9dd7a6\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"check_in_game_id_idx_aa9dd7a6\"",
+        "sql": "CREATE INDEX \"check_in_game_id_idx_aa9dd7a6\" ON \"public\".\"check_in\" (\"game_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"check_in_game_id_idx_aa9dd7a6\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"check_in_game_id_idx_aa9dd7a6\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.check_in.check_in_game_id_scanned_at_idx_7ed6ca48",
+    "label": "Create index \"check_in_game_id_scanned_at_idx_7ed6ca48\" on \"check_in\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "check_in_game_id_scanned_at_idx_7ed6ca48",
+        "table": "check_in"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"check_in_game_id_scanned_at_idx_7ed6ca48\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"check_in_game_id_scanned_at_idx_7ed6ca48\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"check_in_game_id_scanned_at_idx_7ed6ca48\"",
+        "sql": "CREATE INDEX \"check_in_game_id_scanned_at_idx_7ed6ca48\" ON \"public\".\"check_in\" (\"game_id\", \"scanned_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"check_in_game_id_scanned_at_idx_7ed6ca48\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"check_in_game_id_scanned_at_idx_7ed6ca48\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.check_in.check_in_visitor_id_idx_f711bdfd",
+    "label": "Create index \"check_in_visitor_id_idx_f711bdfd\" on \"check_in\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "check_in_visitor_id_idx_f711bdfd",
+        "table": "check_in"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"check_in_visitor_id_idx_f711bdfd\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"check_in_visitor_id_idx_f711bdfd\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"check_in_visitor_id_idx_f711bdfd\"",
+        "sql": "CREATE INDEX \"check_in_visitor_id_idx_f711bdfd\" ON \"public\".\"check_in\" (\"visitor_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"check_in_visitor_id_idx_f711bdfd\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"check_in_visitor_id_idx_f711bdfd\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.game.game_genre_id_idx_44287509",
+    "label": "Create index \"game_genre_id_idx_44287509\" on \"game\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "game_genre_id_idx_44287509",
+        "table": "game"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"game_genre_id_idx_44287509\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_genre_id_idx_44287509\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"game_genre_id_idx_44287509\"",
+        "sql": "CREATE INDEX \"game_genre_id_idx_44287509\" ON \"public\".\"game\" (\"genre_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"game_genre_id_idx_44287509\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_genre_id_idx_44287509\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.game_genre.game_genre_game_id_idx_aa9dd7a6",
+    "label": "Create index \"game_genre_game_id_idx_aa9dd7a6\" on \"game_genre\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "game_genre_game_id_idx_aa9dd7a6",
+        "table": "game_genre"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"game_genre_game_id_idx_aa9dd7a6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_genre_game_id_idx_aa9dd7a6\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"game_genre_game_id_idx_aa9dd7a6\"",
+        "sql": "CREATE INDEX \"game_genre_game_id_idx_aa9dd7a6\" ON \"public\".\"game_genre\" (\"game_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"game_genre_game_id_idx_aa9dd7a6\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_genre_game_id_idx_aa9dd7a6\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.game_genre.game_genre_genre_id_idx_44287509",
+    "label": "Create index \"game_genre_genre_id_idx_44287509\" on \"game_genre\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "game_genre_genre_id_idx_44287509",
+        "table": "game_genre"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"game_genre_genre_id_idx_44287509\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_genre_genre_id_idx_44287509\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"game_genre_genre_id_idx_44287509\"",
+        "sql": "CREATE INDEX \"game_genre_genre_id_idx_44287509\" ON \"public\".\"game_genre\" (\"genre_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"game_genre_genre_id_idx_44287509\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_genre_genre_id_idx_44287509\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.game_image.game_image_game_id_idx_aa9dd7a6",
+    "label": "Create index \"game_image_game_id_idx_aa9dd7a6\" on \"game_image\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "game_image_game_id_idx_aa9dd7a6",
+        "table": "game_image"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"game_image_game_id_idx_aa9dd7a6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_image_game_id_idx_aa9dd7a6\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"game_image_game_id_idx_aa9dd7a6\"",
+        "sql": "CREATE INDEX \"game_image_game_id_idx_aa9dd7a6\" ON \"public\".\"game_image\" (\"game_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"game_image_game_id_idx_aa9dd7a6\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_image_game_id_idx_aa9dd7a6\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.game_image.game_image_one_cover_b9e9659e",
+    "label": "Create index \"game_image_one_cover_b9e9659e\" on \"game_image\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "game_image_one_cover_b9e9659e",
+        "table": "game_image"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"game_image_one_cover_b9e9659e\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_image_one_cover_b9e9659e\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"game_image_one_cover_b9e9659e\"",
+        "sql": "CREATE UNIQUE INDEX \"game_image_one_cover_b9e9659e\" ON \"public\".\"game_image\" (\"game_id\") WHERE (is_cover)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"game_image_one_cover_b9e9659e\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_image_one_cover_b9e9659e\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.game_platform.game_platform_game_id_idx_aa9dd7a6",
+    "label": "Create index \"game_platform_game_id_idx_aa9dd7a6\" on \"game_platform\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "game_platform_game_id_idx_aa9dd7a6",
+        "table": "game_platform"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"game_platform_game_id_idx_aa9dd7a6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_platform_game_id_idx_aa9dd7a6\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"game_platform_game_id_idx_aa9dd7a6\"",
+        "sql": "CREATE INDEX \"game_platform_game_id_idx_aa9dd7a6\" ON \"public\".\"game_platform\" (\"game_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"game_platform_game_id_idx_aa9dd7a6\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_platform_game_id_idx_aa9dd7a6\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.game_platform.game_platform_platform_id_idx_d54ba338",
+    "label": "Create index \"game_platform_platform_id_idx_d54ba338\" on \"game_platform\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "game_platform_platform_id_idx_d54ba338",
+        "table": "game_platform"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"game_platform_platform_id_idx_d54ba338\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_platform_platform_id_idx_d54ba338\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"game_platform_platform_id_idx_d54ba338\"",
+        "sql": "CREATE INDEX \"game_platform_platform_id_idx_d54ba338\" ON \"public\".\"game_platform\" (\"platform_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"game_platform_platform_id_idx_d54ba338\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"game_platform_platform_id_idx_d54ba338\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.team_member.team_member_one_leader_da663291",
+    "label": "Create index \"team_member_one_leader_da663291\" on \"team_member\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "team_member_one_leader_da663291",
+        "table": "team_member"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"team_member_one_leader_da663291\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team_member_one_leader_da663291\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"team_member_one_leader_da663291\"",
+        "sql": "CREATE UNIQUE INDEX \"team_member_one_leader_da663291\" ON \"public\".\"team_member\" (\"team_id\") WHERE (is_leader)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"team_member_one_leader_da663291\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team_member_one_leader_da663291\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.team_member.team_member_team_id_idx_d177da93",
+    "label": "Create index \"team_member_team_id_idx_d177da93\" on \"team_member\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "team_member_team_id_idx_d177da93",
+        "table": "team_member"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"team_member_team_id_idx_d177da93\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team_member_team_id_idx_d177da93\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"team_member_team_id_idx_d177da93\"",
+        "sql": "CREATE INDEX \"team_member_team_id_idx_d177da93\" ON \"public\".\"team_member\" (\"team_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"team_member_team_id_idx_d177da93\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team_member_team_id_idx_d177da93\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.check_in.check_in_visitor_id_fkey",
+    "label": "Add foreign key \"check_in_visitor_id_fkey\" on \"check_in\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "check_in_visitor_id_fkey",
+        "table": "check_in"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"check_in_visitor_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "check_in_visitor_id_fkey",
+          "public",
+          "\"public\".\"check_in\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"check_in_visitor_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"check_in\"\nADD CONSTRAINT \"check_in_visitor_id_fkey\"\nFOREIGN KEY (\"visitor_id\")\nREFERENCES \"public\".\"visitor\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"check_in_visitor_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "check_in_visitor_id_fkey",
+          "public",
+          "\"public\".\"check_in\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.check_in.check_in_game_id_fkey",
+    "label": "Add foreign key \"check_in_game_id_fkey\" on \"check_in\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "check_in_game_id_fkey",
+        "table": "check_in"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"check_in_game_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "check_in_game_id_fkey",
+          "public",
+          "\"public\".\"check_in\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"check_in_game_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"check_in\"\nADD CONSTRAINT \"check_in_game_id_fkey\"\nFOREIGN KEY (\"game_id\")\nREFERENCES \"public\".\"game\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"check_in_game_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "check_in_game_id_fkey",
+          "public",
+          "\"public\".\"check_in\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.game.game_team_id_fkey",
+    "label": "Add foreign key \"game_team_id_fkey\" on \"game\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "game_team_id_fkey",
+        "table": "game"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"game_team_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_team_id_fkey",
+          "public",
+          "\"public\".\"game\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"game_team_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"game\"\nADD CONSTRAINT \"game_team_id_fkey\"\nFOREIGN KEY (\"team_id\")\nREFERENCES \"public\".\"team\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"game_team_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_team_id_fkey",
+          "public",
+          "\"public\".\"game\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.game.game_genre_id_fkey",
+    "label": "Add foreign key \"game_genre_id_fkey\" on \"game\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "game_genre_id_fkey",
+        "table": "game"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"game_genre_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_genre_id_fkey",
+          "public",
+          "\"public\".\"game\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"game_genre_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"game\"\nADD CONSTRAINT \"game_genre_id_fkey\"\nFOREIGN KEY (\"genre_id\")\nREFERENCES \"public\".\"genre\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"game_genre_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_genre_id_fkey",
+          "public",
+          "\"public\".\"game\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.game_genre.game_genre_game_id_fkey",
+    "label": "Add foreign key \"game_genre_game_id_fkey\" on \"game_genre\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "game_genre_game_id_fkey",
+        "table": "game_genre"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"game_genre_game_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_genre_game_id_fkey",
+          "public",
+          "\"public\".\"game_genre\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"game_genre_game_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"game_genre\"\nADD CONSTRAINT \"game_genre_game_id_fkey\"\nFOREIGN KEY (\"game_id\")\nREFERENCES \"public\".\"game\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"game_genre_game_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_genre_game_id_fkey",
+          "public",
+          "\"public\".\"game_genre\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.game_genre.game_genre_genre_id_fkey",
+    "label": "Add foreign key \"game_genre_genre_id_fkey\" on \"game_genre\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "game_genre_genre_id_fkey",
+        "table": "game_genre"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"game_genre_genre_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_genre_genre_id_fkey",
+          "public",
+          "\"public\".\"game_genre\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"game_genre_genre_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"game_genre\"\nADD CONSTRAINT \"game_genre_genre_id_fkey\"\nFOREIGN KEY (\"genre_id\")\nREFERENCES \"public\".\"genre\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"game_genre_genre_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_genre_genre_id_fkey",
+          "public",
+          "\"public\".\"game_genre\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.game_image.game_image_game_id_fkey",
+    "label": "Add foreign key \"game_image_game_id_fkey\" on \"game_image\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "game_image_game_id_fkey",
+        "table": "game_image"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"game_image_game_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_image_game_id_fkey",
+          "public",
+          "\"public\".\"game_image\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"game_image_game_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"game_image\"\nADD CONSTRAINT \"game_image_game_id_fkey\"\nFOREIGN KEY (\"game_id\")\nREFERENCES \"public\".\"game\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"game_image_game_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_image_game_id_fkey",
+          "public",
+          "\"public\".\"game_image\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.game_platform.game_platform_game_id_fkey",
+    "label": "Add foreign key \"game_platform_game_id_fkey\" on \"game_platform\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "game_platform_game_id_fkey",
+        "table": "game_platform"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"game_platform_game_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_platform_game_id_fkey",
+          "public",
+          "\"public\".\"game_platform\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"game_platform_game_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"game_platform\"\nADD CONSTRAINT \"game_platform_game_id_fkey\"\nFOREIGN KEY (\"game_id\")\nREFERENCES \"public\".\"game\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"game_platform_game_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_platform_game_id_fkey",
+          "public",
+          "\"public\".\"game_platform\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.game_platform.game_platform_platform_id_fkey",
+    "label": "Add foreign key \"game_platform_platform_id_fkey\" on \"game_platform\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "game_platform_platform_id_fkey",
+        "table": "game_platform"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"game_platform_platform_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_platform_platform_id_fkey",
+          "public",
+          "\"public\".\"game_platform\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"game_platform_platform_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"game_platform\"\nADD CONSTRAINT \"game_platform_platform_id_fkey\"\nFOREIGN KEY (\"platform_id\")\nREFERENCES \"public\".\"platform\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"game_platform_platform_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "game_platform_platform_id_fkey",
+          "public",
+          "\"public\".\"game_platform\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.raffle_ticket.raffle_ticket_visitor_id_fkey",
+    "label": "Add foreign key \"raffle_ticket_visitor_id_fkey\" on \"raffle_ticket\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "raffle_ticket_visitor_id_fkey",
+        "table": "raffle_ticket"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"raffle_ticket_visitor_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "raffle_ticket_visitor_id_fkey",
+          "public",
+          "\"public\".\"raffle_ticket\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"raffle_ticket_visitor_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"raffle_ticket\"\nADD CONSTRAINT \"raffle_ticket_visitor_id_fkey\"\nFOREIGN KEY (\"visitor_id\")\nREFERENCES \"public\".\"visitor\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"raffle_ticket_visitor_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "raffle_ticket_visitor_id_fkey",
+          "public",
+          "\"public\".\"raffle_ticket\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.team_member.team_member_team_id_fkey",
+    "label": "Add foreign key \"team_member_team_id_fkey\" on \"team_member\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "team_member_team_id_fkey",
+        "table": "team_member"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"team_member_team_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "team_member_team_id_fkey",
+          "public",
+          "\"public\".\"team_member\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"team_member_team_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"team_member\"\nADD CONSTRAINT \"team_member_team_id_fkey\"\nFOREIGN KEY (\"team_id\")\nREFERENCES \"public\".\"team\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"team_member_team_id_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "team_member_team_id_fkey",
+          "public",
+          "\"public\".\"team_member\""
+        ]
+      }
+    ]
+  }
+]

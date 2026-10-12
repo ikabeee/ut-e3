@@ -290,6 +290,7 @@ const eslintConfig = defineConfig([
     "coverage/**",
     // Artefactos generados por Prisma 8:
     "src/shared/lib/prisma/contract.d.ts",
+    "migrations/**",
   ]),
 ]);
 

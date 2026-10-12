@@ -13,6 +13,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   nueva" para actualizar. Ver `docs/pwa.md`.
 - Documentación del modelo de datos (`docs/data-model.md`): diagrama ER en Mermaid para juegos,
   equipos, stands, check-ins de visitantes sin login, boletos de rifa y afluencia por stand.
+- Base de datos: contrato de Prisma 8 con el modelo aprobado (11 tablas, `CHECK`, índices
+  parciales y `onDelete`), primera migración y seeds idempotentes con los 18 juegos de ejemplo.
+- Docker: `Dockerfile` multi-stage (Next.js `standalone`) y `docker-compose.yml` con
+  PostgreSQL 16, migraciones y seeds (`npm run docker:up`).
+- CI con PostgreSQL: aplica las migraciones, carga los seeds y verifica el esquema.
 - El sitio se puede instalar como app: manifest con íconos PNG de 192 y 512 px, ícono
   `maskable`, `apple-touch-icon` para iOS y accesos directos a "Juegos" y "Croquis"
   (`npm run pwa:icons` regenera los íconos desde `src/app/icon.svg`).
