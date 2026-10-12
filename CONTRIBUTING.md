@@ -85,14 +85,35 @@ git config blame.ignoreRevsFile .git-blame-ignore-revs
 Antes de abrir tu PR:
 
 ```bash
+npm run format      # aplica el formato con Prettier
 npm run lint        # incluye las reglas de SonarQube
 npm run typecheck
 npm test
 ```
 
-El CI de GitHub Actions corre estos mismos pasos (y `npm run build`) en cada Pull Request.
+El CI de GitHub Actions corre estos mismos pasos (y `npm run build`) en cada Pull Request. En lugar de
+`npm run format`, el CI corre `npm run format:check`, que falla si algún archivo no tiene el formato.
 Las pruebas viven en la carpeta `__tests__/` de su feature (o de `src/shared/` y `src/app/`), con las
 mismas subcarpetas que el código: `games/lib/game-filters.ts` -> `games/__tests__/lib/game-filters.test.ts`.
+
+### Formato del código
+
+[Prettier](https://prettier.io/) formatea el código (`prettier.config.mjs`): ancho de 120 columnas,
+comillas dobles, punto y coma y comas finales. No discutas espacios en las revisiones: lo decide Prettier.
+
+- **Activa "format on save" en tu editor.** En VS Code instala la extensión "Prettier - Code formatter"
+  (`esbenp.prettier-vscode`) y en tu configuración de usuario pon `"editor.formatOnSave": true` y
+  `"editor.defaultFormatter": "esbenp.prettier-vscode"`. WebStorm lo trae integrado: activa
+  "Run on save" en Settings > Languages & Frameworks > JavaScript > Prettier.
+- Si no lo tienes, corre `npm run format` antes de abrir tu PR.
+- `prettier-plugin-tailwindcss` ordena las clases de Tailwind dentro de cada cadena (también dentro de
+  `cn(...)`). Sólo reordena dentro de una misma cadena: el orden de los argumentos de `cn()` sí importa
+  para tailwind-merge, que descarta la clase que choca con una posterior (por ejemplo, `text-sm` después
+  de `leading-*` borra el interlineado). Pon el tamaño del texto en un argumento anterior al interlineado.
+- No se formatean los archivos generados (`contract.json`, `contract.d.ts`, `package-lock.json`), las
+  salidas de compilación, `public/` ni el Markdown, porque Prettier alinea las tablas con espacios y
+  editar una celda reescribiría la tabla completa (ver `.prettierignore`).
+- `.nvmrc` fija Node 22: con [nvm](https://github.com/nvm-sh/nvm), `nvm use` selecciona esa versión.
 
 ## 5. Arquitectura
 

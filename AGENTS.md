@@ -32,6 +32,7 @@ Todo el naming (directorios, archivos y código) va en **inglés**.
 | HeroUI | `3.x` (`@heroui/react`, `@heroui/styles`) | Librería de componentes (React Aria + Tailwind 4). |
 | ESLint | `9.x` + `eslint-plugin-sonarjs` | Reglas de SonarQube. ESLint 10 aún no es compatible con `eslint-config-next`. |
 | Jest | `30.x` + Testing Library | Pruebas unitarias y de componentes (`next/jest`). |
+| Prettier | `3.x` + `prettier-plugin-tailwindcss` | Formato del código y orden de las clases de Tailwind. |
 
 Las versiones de Prisma 8 están fijadas (sin `^`) porque son release candidates.
 
@@ -40,6 +41,7 @@ Las versiones de Prisma 8 están fijadas (sin `^`) porque son release candidates
 ```bash
 npm run dev                # servidor de desarrollo
 npm run lint               # ESLint (incluye reglas de fronteras entre features)
+npm run format             # aplica el formato con Prettier (npm run format:check sólo revisa)
 npm run typecheck          # next typegen + tsc --noEmit
 npm test                   # pruebas con Jest (npm run test:coverage para cobertura)
 npm run build              # emite el contrato de Prisma y compila
@@ -49,8 +51,9 @@ npm run db:migration:plan  # genera una migración formal en migrations/app/
 npm run db:migrate         # aplica migraciones pendientes
 ```
 
-Antes de dar por terminado un cambio, `npm run lint`, `npm run typecheck` y `npm test` deben pasar.
-El workflow `.github/workflows/ci.yml` ejecuta lo mismo (más `npm run build`) en cada PR.
+Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm run lint`,
+`npm run typecheck` y `npm test` pasen. El workflow `.github/workflows/ci.yml` ejecuta lo mismo (con
+`npm run format:check` en lugar de `format`, más `npm run build`) en cada PR.
 
 ## Arquitectura: screaming architecture
 
@@ -553,6 +556,14 @@ cumple estos criterios (revísalos a 360 y 390 px, en horizontal y en escritorio
 - Estilos con componentes de HeroUI y clases de Tailwind con los tokens del tema; soporta modo oscuro (`dark:`).
 - Accesibilidad: HTML semántico, `alt` en imágenes, enlaces externos con `rel="noopener noreferrer"`.
 - Sin dependencias nuevas sin justificarlo en el PR.
+- **Formato con Prettier** (`prettier.config.mjs`: 120 columnas, comillas dobles, punto y coma y comas
+  finales). Activa "format on save" en el editor o corre `npm run format` antes del PR; el CI rechaza
+  el código sin formato (`npm run format:check`). No formatees a mano ni discutas espacios.
+- `prettier-plugin-tailwindcss` ordena las clases dentro de cada cadena, también en `cn(...)`, pero no
+  mueve clases entre argumentos. Con tailwind-merge el orden de los argumentos importa: el tamaño del
+  texto (`text-*`) va en un argumento anterior al interlineado (`leading-*`), como en `game-card.tsx`.
+- No se formatean los artefactos generados, `public/` ni el Markdown (ver `.prettierignore`). Si un
+  commit sólo cambia el formato, agrega su hash a `.git-blame-ignore-revs`.
 
 ## Flujo de trabajo (git flow)
 
