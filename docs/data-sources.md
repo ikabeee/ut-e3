@@ -140,7 +140,9 @@ a la base de datos, `getEventContent()` se convierte en una consulta cacheada en
 
 - El programa enlaza cada actividad con una zona del croquis (`zoneId`), que debe existir en
   `floor-plan/lib/plan-places.ts` (`stage`, `arena`, `raffles`, `food`, `info`, `wc`, `rest`
-  o `entry`). Los ids van en inglés aunque el nombre visible esté en español.
+  o `entry`). Los ids van en inglés aunque el nombre visible esté en español. La portada valida
+  el enlace con `resolveScheduleZones` (`home/lib/schedule-zones.ts`): un `zoneId` mal escrito
+  hace fallar `npm test` y el build, no el sitio publicado.
 - La descripción de la portada usa el número real de juegos del catálogo.
 - El reel de `public/media/` es el del diseño: reemplázalo por el video oficial del evento
   conservando los nombres de archivo.

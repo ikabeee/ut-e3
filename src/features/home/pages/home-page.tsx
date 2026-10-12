@@ -10,6 +10,7 @@ import { buildEventStructuredData } from "@features/event/lib/event-structured-d
 import { PLAN_ITEM_COVER_SIZES } from "@features/floor-plan/components/plan-item-card";
 import { buildPlanItems } from "@features/floor-plan/lib/plan-items";
 import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
+import { PLAN_ZONES } from "@features/floor-plan/lib/plan-places";
 import { FeaturedGamesCarousel } from "@features/games/components/featured-games-carousel";
 import { GameMedia } from "@features/games/components/game-media";
 import { toStandOccupant } from "@features/games/lib/game-stand";
@@ -17,6 +18,7 @@ import { getGamesHydrationState } from "@features/games/lib/server/games-prefetc
 import { listGames } from "@features/games/lib/server/games-queries";
 import { CatalogShowcase } from "@features/home/components/catalog-showcase";
 import { ProgramAndFloorPlan } from "@features/home/components/program-and-floor-plan";
+import { resolveScheduleZones } from "@features/home/lib/schedule-zones";
 import { JsonLd } from "@shared/components/json-ld";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { QueryHydrationBoundary } from "@shared/components/query-hydration-boundary";
@@ -53,7 +55,7 @@ export async function HomePage() {
             <CatalogShowcase />
             <ProgramAndFloorPlan
               scheduleTitle={event.info.shortDateLabel}
-              schedule={event.schedule}
+              schedule={resolveScheduleZones(event.schedule, PLAN_ZONES)}
               items={buildPlanItems(occupants, event.highlights)}
               layouts={PLAN_LAYOUTS}
             />

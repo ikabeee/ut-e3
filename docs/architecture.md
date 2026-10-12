@@ -65,6 +65,21 @@ La portada llega como `ReactNode` (slot): `PlanItemCard` la pinta sin importar `
 `games` no toca el croquis. Si mañana ocupan stands equipos o patrocinadores, basta otro
 `toStandOccupant` en su feature.
 
+### Programa y croquis: el enlace se resuelve en la portada
+
+Cada renglón del programa (`event`) apunta a una zona del croquis (`floor-plan`) con `zoneId`.
+`event` no puede importar el tipo `ZoneId` (cerraría el ciclo `event -> floor-plan` /
+`games -> event`), así que la relación se resuelve en quien compone las dos features:
+
+```
+home/lib/schedule-zones.ts   resolveScheduleZones(EVENT_SCHEDULE, PLAN_ZONES) -> LocatedScheduleEntry[]
+home/pages/home-page.tsx     pasa el programa ya resuelto a ProgramAndFloorPlan -> EventSchedule
+```
+
+`EventSchedule` recibe el nombre de cada zona ya validado (`zoneTitle`). Si un `zoneId` no
+existe, `resolveScheduleZones` lanza un error y el build de la portada se detiene; además,
+`__tests__/lib/schedule-zones.test.ts` cruza `EVENT_SCHEDULE` con `PLAN_ZONES` en `npm test`.
+
 ## Reglas que valida ESLint
 
 | Regla | Qué impide |
