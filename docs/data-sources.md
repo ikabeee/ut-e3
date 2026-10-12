@@ -15,7 +15,8 @@ npm run dev
 ```
 
 - **Todo en Docker**: `npm run docker:up` levanta la base, corre migraciones y seeds (servicio
-  `migrate`) y construye y sirve el sitio en `http://localhost:3000`. `npm run docker:down` lo
+  `migrate`, que se reconstruye cada vez para tomar las migraciones nuevas) y construye y sirve el
+  sitio en `http://localhost:3000`. `npm run docker:down` lo
   detiene. `DATA_SOURCE` (de `.env`) se usa en el build y al servir; con `prisma`, el build
   necesita la base con datos porque prerenderiza el catálogo, por eso el script levanta `db` y
   `migrate` antes de construir `app`.
