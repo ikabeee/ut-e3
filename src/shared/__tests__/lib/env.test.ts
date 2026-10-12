@@ -1,4 +1,4 @@
-import { DEVELOPMENT_SITE_URL, parseDataSource, parseEnv, parseSiteUrl } from "@shared/lib/env";
+import { DEVELOPMENT_SITE_URL, parseAdminCredentials, parseDataSource, parseEnv, parseSiteUrl } from "@shared/lib/env";
 
 describe("parseSiteUrl", () => {
   it("accepts an absolute http(s) URL", () => {
@@ -51,10 +51,30 @@ describe("parseDataSource", () => {
   });
 });
 
+describe("parseAdminCredentials", () => {
+  it("needs both the user and the password", () => {
+    expect(parseAdminCredentials("staff", "secreto")).toEqual({ user: "staff", password: "secreto" });
+    expect(parseAdminCredentials("staff", "")).toBeNull();
+    expect(parseAdminCredentials(undefined, "secreto")).toBeNull();
+  });
+});
+
 describe("parseEnv", () => {
   it("maps the raw variables to the validated env", () => {
     expect(
-      parseEnv({ NODE_ENV: "production", NEXT_PUBLIC_SITE_URL: "https://utg.example.com", DATA_SOURCE: "prisma" }),
-    ).toEqual({ siteUrl: "https://utg.example.com", dataSource: "prisma" });
+      parseEnv({
+        NODE_ENV: "production",
+        NEXT_PUBLIC_SITE_URL: "https://utg.example.com",
+        DATA_SOURCE: "prisma",
+        IMAGE_REMOTE_HOSTS: "img.itch.zone",
+        ADMIN_USER: "staff",
+        ADMIN_PASSWORD: "secreto",
+      }),
+    ).toEqual({
+      siteUrl: "https://utg.example.com",
+      dataSource: "prisma",
+      imageRemoteHosts: ["img.itch.zone"],
+      admin: { user: "staff", password: "secreto" },
+    });
   });
 });

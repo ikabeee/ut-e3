@@ -13,7 +13,10 @@ interface GameSidebarProps {
   calendarUrl: string;
 }
 
-/** Columna lateral fija: portada, acceso, acciones y ficha (`.jg-side`). */
+/**
+ * Columna lateral fija: portada, acceso, acciones y ficha (`.jg-side`). "Ver en el croquis" sólo
+ * aparece cuando el equipo ya tiene stand y "Jugar en itch.io" cuando el juego está publicado.
+ */
 export function GameSidebar({ game, eventDateLabel, admissionLabel, calendarUrl }: Readonly<GameSidebarProps>) {
   return (
     <aside className="sticky top-[calc(env(safe-area-inset-top,0px)+76px)] flex flex-col gap-3 max-[980px]:static max-[980px]:-order-1">
@@ -24,9 +27,16 @@ export function GameSidebar({ game, eventDateLabel, admissionLabel, calendarUrl 
         {GAMES_COPY.features.demo}
       </Chip>
       <p className="m-0 font-wide text-lg font-bold uppercase">{admissionLabel}</p>
-      <ActionLink href={getStandMapPath(game.stand)} variant="primary" arrow="ne" fullWidth>
-        {GAMES_COPY.sidebar.viewOnMap}
-      </ActionLink>
+      {game.stand ? (
+        <ActionLink href={getStandMapPath(game.stand)} variant="primary" arrow="ne" fullWidth>
+          {GAMES_COPY.sidebar.viewOnMap}
+        </ActionLink>
+      ) : null}
+      {game.itchioUrl ? (
+        <ActionLink href={game.itchioUrl} arrow="ne" isExternal fullWidth>
+          {GAMES_COPY.sidebar.playOnItchio}
+        </ActionLink>
+      ) : null}
       <ActionLink href={calendarUrl} arrow="ne" isExternal fullWidth>
         {GAMES_COPY.sidebar.attend}
       </ActionLink>

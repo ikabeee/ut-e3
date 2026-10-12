@@ -65,8 +65,8 @@ Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm
 La estructura de carpetas "grita" el dominio, no el framework.
 Cada dominio es una **feature** dentro de `src/features/`. La feature `example` es el scaffold
 mínimo; `games` es la referencia completa (datos, TanStack Query, componentes y pages).
-El contrato de Prisma implementa el modelo de `docs/data-model.md`; el sitio todavía lee los juegos
-mock (`DATA_SOURCE=mock`, ver `docs/data-sources.md`).
+El contrato de Prisma implementa el modelo de `docs/data-model.md`. El sitio lee los juegos de
+PostgreSQL con `DATA_SOURCE=prisma` o los del diseño con `DATA_SOURCE=mock` (ver `docs/data-sources.md`).
 
 ```
 src/
@@ -78,7 +78,8 @@ src/
 │   ├── games/                # Catálogo (/games), detalle (/games/[slug]), API y carruseles
 │   ├── home/                 # Portada (/): compone event, games y floor-plan
 │   ├── offline/              # Sin conexión: service worker (/sw.js), avisos y página /offline
-│   └── site/                 # Marco del sitio: navegación, pie, 404 y página de error
+│   ├── site/                 # Marco del sitio: navegación, pie, 404 y página de error
+│   └── teams/                # Equipos e integrantes: CRUD y Server Actions del panel
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
     ├── components/           # Primitivos del diseño: botones, QueryProvider, JsonLd, logo...
@@ -325,7 +326,7 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
 
 - `docs/where-to-edit.md`: dónde cambiar cada contenido o estilo.
 - `docs/architecture.md`: capas, flujo de datos, rendimiento y SOLID.
-- `docs/data-sources.md`: datos mock y pasos para conectar Prisma.
+- `docs/data-sources.md`: base de datos local, fuentes de datos (mock o Prisma) y acciones de administración.
 - `docs/data-model.md`: diagrama ER propuesto (juegos, equipos, stands, check-ins y rifa).
 - `docs/design-system.md`: tema UTG sobre HeroUI.
 - `docs/versioning.md` y `CHANGELOG.md`: versionado semántico y releases con git flow.
@@ -361,6 +362,11 @@ Lee la guía correspondiente en `node_modules/next/dist/docs/` antes de escribir
   (generados por `next typegen`).
 - Mutaciones con **Server Actions** (`"use server"`) en `lib/<feature>-actions.ts` de la feature. Los
   componentes cliente pueden importarlas; dentro llaman a `lib/server/` (no a `db` directamente).
+  Las Server Actions son endpoints públicos: las de administración envuelven su trabajo en
+  `runAdminAction()` (`@shared/lib/server/admin-action`), que comprueba permisos (`ADMIN_USER` /
+  `ADMIN_PASSWORD`), traduce los errores esperados (validación, registro no encontrado,
+  restricciones de la base) y llama `updateTag`. Devuelven un `ActionResult`
+  (`@shared/lib/action-result`) en lugar de lanzar errores esperados.
 - Metadata con `export const metadata` o `generateMetadata`.
 - Imports con path aliases (ver "Imports y path aliases").
 

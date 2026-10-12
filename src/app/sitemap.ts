@@ -19,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: absoluteUrl(getGamePath(game.slug)),
       changeFrequency: "monthly" as const,
       priority: 0.8,
-      images: game.image ? [absoluteUrl(game.image.src)] : undefined,
+      images: [absoluteUrl(game.image.src)],
     })),
   ];
 }

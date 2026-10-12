@@ -1,31 +1,25 @@
-import type { ScheduleHighlights } from "@features/event/lib/types";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { Game } from "@features/games/lib/types";
 
-/** Pasillo del stand: la letra del código ("B7" -> "B"). */
-export function getStandAisle(stand: string) {
-  return stand.charAt(0);
+/** Código del stand o "Por asignar" mientras el equipo no tiene stand. */
+export function formatStand(stand: string | null) {
+  return stand ?? GAMES_COPY.unassignedStand;
 }
 
-/** Etiquetas de "Características" del detalle. */
+/** Pasillo del stand: la letra del código ("B7" -> "B"); "Por asignar" si no tiene stand. */
+export function getStandAisle(stand: string | null) {
+  return stand ? stand.charAt(0) : GAMES_COPY.unassignedStand;
+}
+
+/** Etiquetas de "Características" del detalle: la demo, los jugadores y las plataformas. */
 export function getGameFeatures(game: Game) {
   const { features } = GAMES_COPY;
-  return [features.demo, features.players(game.players), ...(game.hasTournament ? [features.competitive] : [])];
+  return [features.demo, features.players(game.players), ...game.platforms];
 }
 
-/** Horarios del programa del evento que cita el detalle de un juego. */
-export type GameScheduleTimes = Pick<ScheduleHighlights, "tournamentSignupDeadline" | "tournamentFinalsAt">;
-
-/**
- * Párrafos de "Acerca del juego": los del juego o, si no trae, el texto genérico; más el aviso
- * de torneo con los horarios del programa (`schedule`, que pasa la page desde `event`).
- */
-export function describeGame(game: Game, schedule: GameScheduleTimes) {
-  const paragraphs = game.about ? [...game.about] : [GAMES_COPY.detail.about(game)];
-  if (game.hasTournament) {
-    paragraphs.push(GAMES_COPY.detail.tournamentNote(schedule));
-  }
-  return paragraphs;
+/** Párrafos de "Acerca del juego": los del juego o, si no trae, el texto genérico. */
+export function describeGame(game: Game) {
+  return game.about ? [...game.about] : [GAMES_COPY.detail.about(game)];
 }
 
 export interface GameFact {
@@ -40,8 +34,7 @@ export function getGameFacts(game: Game, eventDateLabel: string): GameFact[] {
     { label: facts.team, value: game.team.replace(/^Equipo /, "") },
     { label: facts.members, value: String(game.members) },
     { label: facts.genre, value: game.genre },
-    { label: facts.stand, value: game.stand },
-    { label: facts.tournament, value: game.hasTournament ? facts.yes : facts.no },
+    { label: facts.stand, value: formatStand(game.stand) },
     { label: facts.event, value: eventDateLabel },
   ];
 }

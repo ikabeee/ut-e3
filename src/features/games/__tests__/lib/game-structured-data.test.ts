@@ -12,8 +12,4 @@ describe("buildGameStructuredData", () => {
       author: { "@type": "Organization", name: "Equipo Grava" },
     });
   });
-
-  it("omits the image when the game has none", () => {
-    expect(buildGameStructuredData(GAME_FIXTURES[2], "https://utg.example")).not.toHaveProperty("image");
-  });
 });

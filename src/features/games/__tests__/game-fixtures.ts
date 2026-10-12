@@ -4,15 +4,17 @@ type GameFixtureInput = Pick<Game, "slug" | "name" | "genre" | "team" | "stand">
 
 /** Completa un juego de prueba con valores neutros para lo que la prueba no necesita. */
 export function makeGameFixture(game: GameFixtureInput): Game {
+  const image = game.image ?? { src: `/mock/games/${game.slug}.jpg`, alt: `Portada de ${game.name}`, position: null };
   return {
     members: 4,
     players: 1,
-    hasTournament: false,
     description: `${game.name}, juego de prueba.`,
     about: null,
-    image: null,
-    art: { seed: 0, palette: ["acid", "black"] },
+    platforms: ["Windows"],
+    itchioUrl: null,
+    gallery: [image],
     ...game,
+    image,
   };
 }
 
@@ -21,8 +23,8 @@ export function makeGameFixture(game: GameFixtureInput): Game {
  * del sitio (`lib/mock/` hoy, la base de datos después): agregar o cambiar un juego del catálogo no
  * rompe las pruebas, y borrar el mock no las deja sin datos.
  *
- * Cubren los casos que prueban: géneros con uno y dos juegos, juegos con y sin imagen, con y sin
- * torneo, y textos con acentos para el buscador.
+ * Cubren los casos que prueban: géneros con uno y dos juegos, juegos con encuadre propio, con varias
+ * plataformas y con capturas, y textos con acentos para el buscador.
  */
 export const GAME_FIXTURES: readonly Game[] = [
   makeGameFixture({
@@ -32,9 +34,9 @@ export const GAME_FIXTURES: readonly Game[] = [
     team: "Equipo Grava",
     members: 5,
     stand: "A1",
-    hasTournament: true,
     description: "Shooter de extracción en una ciudad sepultada por ceniza volcánica.",
-    image: { src: "/mock/games/ceniza-protocol.jpg", position: "70% 30%" },
+    platforms: ["Windows", "Web (navegador)"],
+    image: { src: "/mock/games/ceniza-protocol.jpg", alt: "Portada de Ceniza Protocol", position: "70% 30%" },
   }),
   makeGameFixture({
     slug: "los-ultimos-faros",
@@ -42,8 +44,7 @@ export const GAME_FIXTURES: readonly Game[] = [
     genre: "Aventura",
     team: "Equipo Marea",
     stand: "A2",
-    image: { src: "/mock/games/los-ultimos-faros.jpg", position: "50% 30%" },
-    art: { seed: 1, palette: ["white", "panel"] },
+    image: { src: "/mock/games/los-ultimos-faros.jpg", alt: "Portada de Los Últimos Faros", position: "50% 30%" },
   }),
   makeGameFixture({
     slug: "hormigon",
@@ -52,7 +53,6 @@ export const GAME_FIXTURES: readonly Game[] = [
     team: "Equipo Ocho",
     members: 3,
     stand: "A3",
-    art: { seed: 2, palette: ["black", "light"] },
   }),
   makeGameFixture({
     slug: "ruta-9",
@@ -60,9 +60,12 @@ export const GAME_FIXTURES: readonly Game[] = [
     genre: "Carreras",
     team: "Equipo Ruido",
     stand: "A4",
-    hasTournament: true,
-    image: { src: "/mock/games/ruta-9.jpg", position: "60% 35%" },
-    art: { seed: 3, palette: ["acid", "panel"] },
+    itchioUrl: "https://ruido.itch.io/ruta-9",
+    image: { src: "/mock/games/ruta-9.jpg", alt: "Portada de Ruta 9", position: "60% 35%" },
+    gallery: [
+      { src: "/mock/games/ruta-9.jpg", alt: "Portada de Ruta 9", position: "60% 35%" },
+      { src: "/mock/games/ruta-9-pits.jpg", alt: "Ruta 9: entrada a pits", position: null },
+    ],
   }),
   makeGameFixture({
     slug: "eco-nulo",
@@ -71,7 +74,6 @@ export const GAME_FIXTURES: readonly Game[] = [
     team: "Equipo Señal",
     members: 3,
     stand: "B3",
-    hasTournament: true,
     description: "Cada golpe en el ritmo borra una frecuencia del mapa.",
   }),
   makeGameFixture({
@@ -89,7 +91,6 @@ export const GAME_FIXTURES: readonly Game[] = [
     team: "Equipo Ceiba",
     members: 5,
     stand: "A8",
-    hasTournament: true,
   }),
   makeGameFixture({
     slug: "turbina",
@@ -97,7 +98,6 @@ export const GAME_FIXTURES: readonly Game[] = [
     genre: "Carreras",
     team: "Equipo Pistón",
     stand: "A9",
-    hasTournament: true,
     description: "Carreras de drones caseros por los techos de Cancún.",
   }),
   makeGameFixture({
@@ -107,7 +107,6 @@ export const GAME_FIXTURES: readonly Game[] = [
     team: "Equipo Máscara",
     members: 5,
     stand: "B7",
-    hasTournament: true,
   }),
   makeGameFixture({ slug: "cenote", name: "Cenote", genre: "Aventura", team: "Equipo Raíz", members: 3, stand: "B8" }),
   makeGameFixture({
@@ -116,6 +115,5 @@ export const GAME_FIXTURES: readonly Game[] = [
     genre: "Puzle",
     team: "Equipo Voltio",
     stand: "B9",
-    art: { seed: 17, palette: ["acid", "panel"] },
   }),
 ];

@@ -13,7 +13,7 @@ import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 import { PLAN_ZONES } from "@features/floor-plan/lib/plan-places";
 import { FeaturedGamesCarousel } from "@features/games/components/featured-games-carousel";
 import { GameMedia } from "@features/games/components/game-media";
-import { toStandOccupant } from "@features/games/lib/game-stand";
+import { toStandOccupants } from "@features/games/lib/game-stand";
 import { getGamesHydrationState } from "@features/games/lib/server/games-prefetch";
 import { listGames } from "@features/games/lib/server/games-queries";
 import { CatalogShowcase } from "@features/home/components/catalog-showcase";
@@ -36,7 +36,7 @@ export const homePageMetadata: Metadata = {
 export async function HomePage() {
   const games = await listGames();
   const event = getEventContent();
-  const occupants = games.map((game) => toStandOccupant(game, <GameMedia game={game} sizes={PLAN_ITEM_COVER_SIZES} />));
+  const occupants = toStandOccupants(games, (game) => <GameMedia game={game} sizes={PLAN_ITEM_COVER_SIZES} />);
 
   return (
     <>

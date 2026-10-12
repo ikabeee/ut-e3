@@ -1,4 +1,4 @@
-import type { ArtColor, Game } from "@features/games/lib/types";
+import type { Game, GameImage } from "@features/games/lib/types";
 
 /**
  * Contrato HTTP de `/api/games`: lo que viaja entre el Route Handler y el navegador.
@@ -7,6 +7,12 @@ import type { ArtColor, Game } from "@features/games/lib/types";
  * decidir aquí qué se publica (`toGameDto`) y cómo se lee (`parseGamesResponse`), en lugar de
  * romper el navegador en silencio.
  */
+export interface GameImageDto {
+  src: string;
+  alt: string;
+  position: string | null;
+}
+
 export interface GameDto {
   slug: string;
   name: string;
@@ -14,15 +20,18 @@ export interface GameDto {
   team: string;
   members: number;
   players: number;
-  stand: string;
-  hasTournament: boolean;
+  stand: string | null;
   description: string;
   about: string[] | null;
-  image: { src: string; position: string } | null;
-  art: { seed: number; palette: [ArtColor, ArtColor] };
+  platforms: string[];
+  itchioUrl: string | null;
+  image: GameImageDto;
+  gallery: GameImageDto[];
 }
 
-const ART_COLORS: readonly ArtColor[] = ["acid", "black", "white", "panel", "light"];
+function toImageDto(image: GameImage): GameImageDto {
+  return { src: image.src, alt: image.alt, position: image.position };
+}
 
 /** Juego de dominio -> DTO que responde el Route Handler. */
 export function toGameDto(game: Game): GameDto {
@@ -34,11 +43,12 @@ export function toGameDto(game: Game): GameDto {
     members: game.members,
     players: game.players,
     stand: game.stand,
-    hasTournament: game.hasTournament,
     description: game.description,
     about: game.about ? [...game.about] : null,
-    image: game.image ? { src: game.image.src, position: game.image.position } : null,
-    art: { seed: game.art.seed, palette: [game.art.palette[0], game.art.palette[1]] },
+    platforms: [...game.platforms],
+    itchioUrl: game.itchioUrl,
+    image: toImageDto(game.image),
+    gallery: game.gallery.map(toImageDto),
   };
 }
 
@@ -60,48 +70,41 @@ function readString(source: JsonObject, key: string, path: string): string {
   return typeof value === "string" ? value : fail(`${path}.${key}`);
 }
 
+function readOptionalString(source: JsonObject, key: string, path: string): string | null {
+  const value = source[key];
+  return value === null ? null : readString(source, key, path);
+}
+
 function readNumber(source: JsonObject, key: string, path: string): number {
   const value = source[key];
   return typeof value === "number" && Number.isFinite(value) ? value : fail(`${path}.${key}`);
 }
 
-function readBoolean(source: JsonObject, key: string, path: string): boolean {
-  const value = source[key];
-  return typeof value === "boolean" ? value : fail(`${path}.${key}`);
-}
-
-function readArtColor(value: unknown, path: string): ArtColor {
-  return ART_COLORS.find((color) => color === value) ?? fail(path);
-}
-
-function parseAbout(value: unknown, path: string): Game["about"] {
-  if (value === null) {
-    return null;
-  }
+function parseStrings(value: unknown, path: string): string[] {
   if (!Array.isArray(value)) {
     fail(path);
   }
-  return value.map((paragraph, index) => (typeof paragraph === "string" ? paragraph : fail(`${path}[${index}]`)));
+  return value.map((item, index) => (typeof item === "string" ? item : fail(`${path}[${index}]`)));
 }
 
-function parseImage(value: unknown, path: string): Game["image"] {
-  if (value === null) {
-    return null;
-  }
+function parseAbout(value: unknown, path: string): Game["about"] {
+  return value === null ? null : parseStrings(value, path);
+}
+
+function parseImage(value: unknown, path: string): GameImage {
   const image = asObject(value, path);
-  return { src: readString(image, "src", path), position: readString(image, "position", path) };
+  return {
+    src: readString(image, "src", path),
+    alt: readString(image, "alt", path),
+    position: readOptionalString(image, "position", path),
+  };
 }
 
-function parseArt(value: unknown, path: string): Game["art"] {
-  const art = asObject(value, path);
-  const palette = art.palette;
-  if (!Array.isArray(palette) || palette.length !== 2) {
-    fail(`${path}.palette`);
+function parseGallery(value: unknown, path: string): GameImage[] {
+  if (!Array.isArray(value)) {
+    fail(path);
   }
-  return {
-    seed: readNumber(art, "seed", path),
-    palette: [readArtColor(palette[0], `${path}.palette[0]`), readArtColor(palette[1], `${path}.palette[1]`)],
-  };
+  return value.map((image, index) => parseImage(image, `${path}[${index}]`));
 }
 
 function parseGame(value: unknown, path: string): Game {
@@ -113,19 +116,20 @@ function parseGame(value: unknown, path: string): Game {
     team: readString(game, "team", path),
     members: readNumber(game, "members", path),
     players: readNumber(game, "players", path),
-    stand: readString(game, "stand", path),
-    hasTournament: readBoolean(game, "hasTournament", path),
+    stand: readOptionalString(game, "stand", path),
     description: readString(game, "description", path),
     about: parseAbout(game.about, `${path}.about`),
+    platforms: parseStrings(game.platforms, `${path}.platforms`),
+    itchioUrl: readOptionalString(game, "itchioUrl", path),
     image: parseImage(game.image, `${path}.image`),
-    art: parseArt(game.art, `${path}.art`),
+    gallery: parseGallery(game.gallery, `${path}.gallery`),
   };
 }
 
 /**
  * Valida el JSON de `/api/games` y lo convierte en juegos de dominio. Lanza un error que nombra
- * el primer campo inválido (por ejemplo `[3].art.palette[1]`); TanStack Query lo muestra como
- * error de la query.
+ * el primer campo inválido (por ejemplo `[3].image.alt`); TanStack Query lo muestra como error
+ * de la query.
  */
 export function parseGamesResponse(value: unknown): Game[] {
   if (!Array.isArray(value)) {

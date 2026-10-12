@@ -33,7 +33,7 @@ export function GameCard({ game, coverSizes, variant = "catalog" }: Readonly<Gam
             isCatalog && "ease-[cubic-bezier(.2,.7,.2,1)]",
           )}
         />
-        {isCatalog ? (
+        {isCatalog && game.stand ? (
           <span className="absolute top-0 left-0 bg-background px-2 py-1 font-mono text-[11px] font-bold text-accent">
             {game.stand}
           </span>

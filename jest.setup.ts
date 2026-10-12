@@ -24,9 +24,6 @@ if (typeof window !== "undefined") {
 
   Object.defineProperty(window, "ResizeObserver", { writable: true, value: ResizeObserverMock });
 
-  // jsdom tampoco dibuja en canvas: sin contexto 2D, el arte generado simplemente no se pinta.
-  HTMLCanvasElement.prototype.getContext = (() => null) as typeof HTMLCanvasElement.prototype.getContext;
-
-  // Ni la API de tipografías: se resuelve de inmediato, como si ya estuvieran cargadas.
+  // jsdom tampoco tiene la API de tipografías: se resuelve de inmediato, como si ya estuvieran cargadas.
   Object.defineProperty(document, "fonts", { configurable: true, value: { ready: Promise.resolve() } });
 }

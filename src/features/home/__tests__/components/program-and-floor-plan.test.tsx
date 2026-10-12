@@ -4,7 +4,7 @@ import { getEventContent } from "@features/event/lib/event-content";
 import { buildPlanItems } from "@features/floor-plan/lib/plan-items";
 import { PLAN_ZONES } from "@features/floor-plan/lib/plan-places";
 import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
-import { toStandOccupant } from "@features/games/lib/game-stand";
+import { toStandOccupants } from "@features/games/lib/game-stand";
 import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
 import { ProgramAndFloorPlan } from "@features/home/components/program-and-floor-plan";
 import { resolveScheduleZones } from "@features/home/lib/schedule-zones";
@@ -12,7 +12,7 @@ import { resolveScheduleZones } from "@features/home/lib/schedule-zones";
 function renderSection() {
   const event = getEventContent();
   const items = buildPlanItems(
-    GAME_FIXTURES.map((game) => toStandOccupant(game, null)),
+    toStandOccupants(GAME_FIXTURES, () => null),
     event.highlights,
   );
 

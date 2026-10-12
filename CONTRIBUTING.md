@@ -136,7 +136,7 @@ Las reglas completas están en [`AGENTS.md`](./AGENTS.md). Para orientarte rápi
 - [`docs/where-to-edit.md`](./docs/where-to-edit.md): dónde cambiar textos, juegos, colores o el croquis.
 - [`docs/architecture.md`](./docs/architecture.md): capas, flujo de datos y principios SOLID.
 - [`docs/design-system.md`](./docs/design-system.md): cómo usar HeroUI con el tema UTG.
-- [`docs/data-sources.md`](./docs/data-sources.md): datos mock y cómo conectar Prisma.
+- [`docs/data-sources.md`](./docs/data-sources.md): base de datos local, seeds y de dónde lee el sitio.
 - [`docs/data-model.md`](./docs/data-model.md): diagrama ER de la base de datos.
 
 ## 6. Código de conducta

@@ -12,7 +12,7 @@ export const EMPTY_GAME_FILTERS: GameFilters = { genre: null, keyword: "" };
 
 /** Texto en el que busca el buscador: nombre, equipo, género, stand y descripción. */
 function searchableText(game: Game) {
-  return normalizeText(`${game.name} ${game.team} ${game.genre} ${game.stand} ${game.description}`);
+  return normalizeText(`${game.name} ${game.team} ${game.genre} ${game.stand ?? ""} ${game.description}`);
 }
 
 /** Aplica el género y el texto de búsqueda (sin distinguir acentos ni mayúsculas). */

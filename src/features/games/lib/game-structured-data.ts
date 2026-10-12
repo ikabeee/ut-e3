@@ -11,7 +11,7 @@ export function buildGameStructuredData(game: Game, siteUrl: string) {
     description: game.description,
     genre: game.genre,
     url: new URL(getGamePath(game.slug), siteUrl).toString(),
-    ...(game.image ? { image: new URL(game.image.src, siteUrl).toString() } : {}),
+    image: new URL(game.image.src, siteUrl).toString(),
     author: { "@type": "Organization", name: game.team },
     publisher: { "@type": "CollegeOrUniversity", name: siteConfig.organization.university },
   };

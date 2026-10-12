@@ -6,7 +6,7 @@ import { FLOOR_PLAN_PATH } from "@features/floor-plan/lib/floor-plan-links";
 import { buildPlanItems } from "@features/floor-plan/lib/plan-items";
 import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 import { GameMedia } from "@features/games/components/game-media";
-import { toStandOccupant } from "@features/games/lib/game-stand";
+import { toStandOccupants } from "@features/games/lib/game-stand";
 import { listGames } from "@features/games/lib/server/games-queries";
 
 export const floorPlanPageMetadata: Metadata = {
@@ -17,12 +17,12 @@ export const floorPlanPageMetadata: Metadata = {
 };
 
 /**
- * Compone el croquis con los juegos (cada uno ocupa su stand, `toStandOccupant`) y con los
+ * Compone el croquis con los juegos (cada uno ocupa su stand, `toStandOccupants`) y con los
  * horarios del programa del evento que citan algunas zonas.
  */
 export async function FloorPlanPage() {
   const games = await listGames();
-  const occupants = games.map((game) => toStandOccupant(game, <GameMedia game={game} sizes={PLAN_ITEM_COVER_SIZES} />));
+  const occupants = toStandOccupants(games, (game) => <GameMedia game={game} sizes={PLAN_ITEM_COVER_SIZES} />);
 
   return (
     <main className="pt-[clamp(28px,4vw,48px)]">

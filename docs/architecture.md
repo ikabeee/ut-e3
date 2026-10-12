@@ -31,6 +31,7 @@ valida las que existen. No se dejan carpetas vacías ni `.gitkeep`.
 | `home` | Compone la portada y conecta el programa con el croquis. | `event`, `games`, `floor-plan` |
 | `offline` | Service worker (`/sw.js`), aviso de conexión, aviso de versión nueva y página `/offline` (ver `docs/pwa.md`). | `games`, `floor-plan` y `home` (sus rutas, para precargarlas y enlazarlas desde `/offline`) |
 | `site` | Marco del sitio: cabecera, navegación, pie, 404 y página de error. | `games`, `floor-plan` y `home` (sólo sus rutas, para la navegación) |
+| `teams` | Equipos e integrantes: CRUD, llaves de escáner y Server Actions del panel. | `games` (invalida la caché de los juegos, que muestran el equipo y su stand) |
 | `example` | Scaffold para copiar; no se monta en ninguna ruta. | Nada |
 
 ## Grafo de dependencias entre features
@@ -46,6 +47,7 @@ offline ──┤         ├─> games ─┬─> event
           │         └─> floor-plan
           ├─> games
           └─> floor-plan
+teams ─────> games
 ```
 
 `event` y `floor-plan` no dependen de nadie. `site` y `offline` están arriba de todo: componen las
@@ -77,15 +79,15 @@ El croquis no conoce `Game`. Declara lo que necesita de quien ocupa un stand (`S
 ocupa stands se traduce a ese tipo en su propia feature:
 
 ```
-games/lib/game-stand.ts       toStandOccupant(game, cover) -> StandOccupant
-floor-plan/pages/...          listGames() -> toStandOccupant(game, <GameMedia />) -> FloorPlanExplorer
+games/lib/game-stand.ts       toStandOccupants(games, cover) -> StandOccupant[] (sólo juegos con stand)
+floor-plan/pages/...          listGames() -> toStandOccupants(games, (game) => <GameMedia />) -> FloorPlanExplorer
 home/pages/home-page.tsx      lo mismo para el croquis de la portada
 ```
 
 La portada llega como `ReactNode` (slot): `PlanItemCard` la pinta sin importar `GameMedia`. Así
 `floor-plan` se prueba con sus propios ocupantes (`__tests__/plan-fixtures.ts`) y conectar Prisma a
 `games` no toca el croquis. Si mañana ocupan stands equipos o patrocinadores, basta otro
-`toStandOccupant` en su feature.
+`toStandOccupants` en su feature.
 
 ### Programa y croquis: el enlace se resuelve en la portada
 
@@ -118,12 +120,17 @@ existe, `resolveScheduleZones` lanza un error y el build de la portada se detien
 ## Flujo de datos
 
 ```
-GameRepository (mock hoy, Prisma después)
+GameRepository (mock o Prisma, según DATA_SOURCE)
   -> lib/server/games-queries.ts  "use cache" + cacheTag("games")
        -> pages                   getGamesHydrationState() -> QueryHydrationBoundary
        -> api/games-route.ts      GET /api/games: juegos -> GameDto (api/games-contract.ts)
   -> TanStack Query (cliente)     useGames() / useSuspenseQuery(gamesQueryOptions())
        -> api/games-api-client.ts fetchGames(): fetch + parseGamesResponse() -> Game[]
+
+Panel de administración
+  -> lib/*-actions.ts             runAdminAction(): permisos, validación y errores de la base
+  -> lib/server/*-queries.ts      CRUD con Prisma
+  -> updateTag("games")           el sitio vuelve a leer la base
 ```
 
 - **Servidor**: las consultas se cachean con `"use cache"`, así todas las páginas se
@@ -131,8 +138,9 @@ GameRepository (mock hoy, Prisma después)
 - **Cliente**: TanStack Query guarda los juegos. Las pages los prellenan con
   `dehydrateForPrerender` (la versión de `dehydrate()` compatible con Cache Components) y los
   componentes los leen con `useGames()` sin esperar a la red.
-- **Mutaciones**: "Copiar dirección" usa `useMutation`. Cuando existan mutaciones de datos,
-  invalida `updateTag("games")` en la Server Action y `gamesQueryKeys.all` en el cliente.
+- **Mutaciones**: "Copiar dirección" usa `useMutation`. Las Server Actions del catálogo
+  (`games-actions.ts`, `teams-actions.ts`) invalidan `updateTag("games")`; el panel debe
+  invalidar también `gamesQueryKeys.all` en el cliente.
 - **Contenido fijo** (evento, zonas y geometría del croquis): las pages lo leen
   (`getEventContent()`, `buildPlanItems()`, `PLAN_LAYOUTS`) y lo pasan por props. Los componentes
   no importan constantes de contenido, así que se prueban con otro contenido y no cambian si
@@ -161,7 +169,7 @@ GameRepository (mock hoy, Prisma después)
 | Responsabilidad única | Cada archivo hace una cosa: `game-filters.ts` filtra, `plan-viewport.ts` calcula el zoom, `use-gallery.ts` maneja la galería y `GameGallery` sólo la pinta. Los componentes grandes son composiciones: `FloorPlanDrawing` junta `PlanDefs`, `PlanFloor`, `PlanZones`, `PlanPublicArea`, `PlanEntry` y `PlanStandBlock` (la selección y los filtros los resuelve `getItemInteraction` en `lib/`); `FeaturedGamesCarousel` junta `FeaturedSlides`, `FeaturedCaption` y `FeaturedThumbnails`; el teclado del exhibidor vive en `useCoverflowKeyboard` y el desplazamiento de las miniaturas en `useActiveThumbScroll`. |
 | Abierto/cerrado | Las variantes de `Button` y `ToggleButton` de HeroUI se extienden con clases con nombre en `components.css` (`button--plate`, `toggle-button--filter`...) sin tocar HeroUI ni redefinirlas en `className`; `GameCard` y `PlanItemCard` tienen variantes en lugar de copias. |
 | Sustitución de Liskov | Cualquier implementación de `GameRepository` (mock, Prisma o el repositorio falso de las pruebas) sirve igual a `games-queries.ts`. |
-| Segregación de interfaces | Los componentes reciben sólo lo que usan (`ArtLabels` en vez del juego completo; `EventSchedule` recibe nombres de zona, no el croquis; el croquis recibe `StandOccupant`, no `Game`). |
+| Segregación de interfaces | Los componentes reciben sólo lo que usan (`GameImageView` recibe una foto, no el juego; `EventSchedule` recibe nombres de zona, no el croquis; el croquis recibe `StandOccupant`, no `Game`). |
 | Inversión de dependencias | `games-queries.ts` depende de la interfaz `GameRepository`, no de la fuente de datos. La elección vive fuera, en `getGameRepository()` (`lib/server/game-repositories.ts`), y se configura con `DATA_SOURCE`. |
 
 ## Agregar una feature
