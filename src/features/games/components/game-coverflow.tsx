@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, type KeyboardEvent, type MouseEvent } from "react";
+import type { MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@heroui/react";
 import { CoverflowCover, CoverflowEdges } from "@features/games/components/coverflow-case";
 import { useCoverflow } from "@features/games/hooks/use-coverflow";
+import { useCoverflowKeyboard } from "@features/games/hooks/use-coverflow-keyboard";
 import { useGames } from "@features/games/hooks/use-games";
 import { getCoverflowPlacement } from "@features/games/lib/coverflow-layout";
 import { getGamePath } from "@features/games/lib/game-links";
@@ -25,18 +26,13 @@ export function GameCoverflow() {
   const games = useGames();
   const router = useRouter();
   const coverflow = useCoverflow(games.length);
-  const caseRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const focusCurrentAfterMove = useRef(false);
-  const { current } = coverflow;
-  const currentGame = games[current];
-
-  // Al moverse con el teclado, el foco sigue a la caja del frente.
-  useEffect(() => {
-    if (focusCurrentAfterMove.current) {
-      focusCurrentAfterMove.current = false;
-      caseRefs.current[current]?.focus();
-    }
-  }, [current]);
+  const currentGame = games[coverflow.current];
+  const keyboard = useCoverflowKeyboard({
+    current: coverflow.current,
+    goNext: coverflow.goNext,
+    goPrevious: coverflow.goPrevious,
+    onOpenCurrent: () => router.push(getGamePath(currentGame.slug)),
+  });
 
   const handleCaseClick = (event: MouseEvent<HTMLAnchorElement>, index: number) => {
     // Una caja de lado primero gira al frente; la del frente abre el juego.
@@ -46,26 +42,12 @@ export function GameCoverflow() {
     }
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === " " && event.target instanceof HTMLAnchorElement) {
-      event.preventDefault();
-      router.push(getGamePath(currentGame.slug));
-    } else if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-      focusCurrentAfterMove.current = true;
-      if (event.key === "ArrowRight") {
-        coverflow.goNext();
-      } else {
-        coverflow.goPrevious();
-      }
-    }
-  };
-
   return (
     <div className="@container">
       <div
         aria-roledescription={GAMES_COPY.carousel.roleDescription}
         aria-label={GAMES_COPY.coverflow.label}
-        onKeyDown={handleKeyDown}
+        onKeyDown={keyboard.onKeyDown}
         className={cn(
           RACK_VARIABLES,
           "coverflow-rack relative mt-[clamp(8px,2vw,24px)] h-[calc(var(--top)+var(--ch)*1.13+56px+var(--rack-pad))] touch-pan-y overflow-hidden [perspective-origin:50%_calc(var(--top)+var(--ch)/2)] [perspective:calc(var(--cw)*var(--persp-f))]",
@@ -77,9 +59,7 @@ export function GameCoverflow() {
           return (
             <Link
               key={game.slug}
-              ref={(element) => {
-                caseRefs.current[index] = element;
-              }}
+              ref={keyboard.caseRef(index)}
               href={getGamePath(game.slug)}
               tabIndex={placement.isCurrent ? 0 : -1}
               aria-label={GAMES_COPY.coverflow.caseLabel(game)}
