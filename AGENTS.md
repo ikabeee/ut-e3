@@ -68,10 +68,11 @@ src/
 │   ├── floor-plan/           # Croquis interactivo (/floor-plan): zonas, stands, zoom y directorio
 │   ├── games/                # Catálogo (/games), detalle (/games/[slug]), API y carruseles
 │   ├── home/                 # Portada (/): compone event, games y floor-plan
-│   └── offline/              # Sin conexión: service worker (/sw.js), avisos y página /offline
+│   ├── offline/              # Sin conexión: service worker (/sw.js), avisos y página /offline
+│   └── site/                 # Marco del sitio: navegación, pie, 404 y página de error
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
-    ├── components/           # QueryProvider, navegación, pie, botones del diseño...
+    ├── components/           # Primitivos del diseño: botones, QueryProvider, JsonLd, logo...
     ├── hooks/                # Hooks genéricos (movimiento reducido, estado en la URL...)
     ├── styles/               # Tema UTG de HeroUI, tipografía y efectos
     └── lib/
@@ -82,13 +83,14 @@ src/
 
 ### Anatomía de una feature
 
-Una feature se organiza en cuatro carpetas, más `__tests__/` para sus pruebas. Crea cada carpeta
-(`lib/`, `hooks/`, `components/`, `pages/`) cuando la necesites; el linter valida las que existen.
-No dejes carpetas vacías ni `.gitkeep`.
+Una feature se organiza en cuatro carpetas, más `api/` si expone datos por HTTP y `__tests__/` para
+sus pruebas. Crea cada carpeta (`lib/`, `hooks/`, `components/`, `pages/`, `api/`) cuando la
+necesites; el linter valida las que existen. No dejes carpetas vacías ni `.gitkeep`.
 
 ```
 src/features/<feature>/
 ├── __tests__/     # Pruebas, con las mismas subcarpetas que el código (ver "Pruebas").
+├── api/           # Contrato HTTP: Route Handlers (<feature>-route.ts) y cliente (<feature>-api-client.ts).
 ├── lib/           # Tipos, constantes y utilidades puras (se pueden usar en el navegador).
 │   └── server/    # Sólo servidor: consultas a la BD (<feature>-queries.ts) y prefetch.
 ├── hooks/         # Hooks de React de la feature (use-<algo>.ts).
@@ -101,8 +103,9 @@ src/features/<feature>/
 | `lib/` | Tipos de dominio (`types.ts`), constantes y utilidades puras. Llegan al navegador cuando un componente las usa. | `hooks/`, `components/`, `pages/`, código de servidor |
 | `lib/server/` | Todo lo que lleva `import "server-only"`: consultas a la BD (`*-queries.ts` con `"use cache"` + `cacheLife(...)` o `await connection()`), que mapean las filas de Prisma a los tipos de dominio, y prefetch. Es lo único que importa `@shared/lib/prisma/db`. | `hooks/`, `components/`, `pages/` |
 | `hooks/` | Estado y lógica de interacción en el cliente. Sin JSX. | `components/`, `pages/`, código de servidor |
-| `components/` | UI. Reciben datos por props; **no consultan la BD**. Agrega `"use client"` sólo si usan hooks o eventos. | `pages/`, código de servidor |
-| `pages/` | **Contenedores**: obtienen los datos (vía `lib/server/`), definen `Suspense`/`notFound` y componen componentes. Sin estilos complejos ni lógica de negocio. Exportan también su `Metadata`. Son el único lugar donde se combinan features libremente. | `hooks/`, `@shared/lib/prisma/db` |
+| `components/` | UI. Reciben datos por props, también el contenido fijo (fechas, textos del evento, zonas): lo lee la page y lo pasa. **No consultan la BD**. Agrega `"use client"` sólo si usan hooks o eventos. | `pages/`, código de servidor |
+| `pages/` | **Contenedores**: obtienen los datos (vía `lib/server/`), definen `Suspense`/`notFound` y componen componentes. Sin estilos complejos ni lógica de negocio. Exportan también su `Metadata`. Son el único lugar donde se combinan features libremente. | `hooks/`, `api/`, `@shared/lib/prisma/db` |
+| `api/` | Cómo la feature **expone** y **consume** sus datos por HTTP: `<feature>-route.ts` (Route Handlers con `import "server-only"` que usan `lib/server/`), `<feature>-api-client.ts` (ruta del endpoint y `fetch` del navegador) y, si lo que viaja difiere del tipo de dominio, `<feature>-contract.ts` (DTO y validación de la respuesta). | `hooks/`, `components/`, `pages/`; el cliente tampoco importa código de servidor |
 
 "Código de servidor" es `lib/server/` de cualquier feature, `@shared/lib/server/` y `@shared/lib/prisma/`.
 La frontera depende de la carpeta, no del nombre del archivo: `import "server-only"` sólo se permite ahí.
@@ -116,7 +119,9 @@ código: `lib/game-filters.ts` -> `__tests__/lib/game-filters.test.ts`. Lo mismo
 - Jest corre todo archivo `*.test.ts(x)` dentro de `src/`. En `__tests__/`, lo que no termina en
   `.test` es un helper de prueba y no cuenta en la cobertura.
 - Los componentes que leen el catálogo de juegos se prueban con `renderWithGames(<Componente />)`
-  (`@features/games/__tests__/render-with-games`): monta un `QueryClient` con `MOCK_GAMES` ya en caché.
+  (`@features/games/__tests__/render-with-games`): monta un `QueryClient` con los juegos de prueba
+  (`GAME_FIXTURES`, `@features/games/__tests__/game-fixtures`) ya en caché. Las pruebas no usan los
+  juegos mock del sitio, así que cambiar el catálogo no las rompe.
 - Las pruebas de `src/app/` importan las rutas con el alias `@app/*` (`@app/error`).
 - Una prueba sigue las reglas de dependencias de la carpeta que prueba (`__tests__/lib/` las de
   `lib/`, etc.), pero además puede importar `@app/*` y los helpers de `__tests__/`. ESLint impide que
@@ -132,6 +137,9 @@ La feature `example` es el scaffold de referencia y contiene exactamente esto:
 ```
 src/features/example/
 ├── __tests__/
+│   ├── api/
+│   │   ├── example-route.test.ts
+│   │   └── example-api-client.test.ts
 │   ├── hooks/
 │   │   └── use-toggle.test.ts
 │   ├── components/
@@ -139,6 +147,9 @@ src/features/example/
 │   │   └── example-toggle.test.tsx
 │   └── pages/
 │       └── example-page.test.tsx # Prueba de humo de la composición
+├── api/
+│   ├── example-route.ts          # GET: Route Handler ("server-only"); no se monta en src/app/api
+│   └── example-api-client.ts     # EXAMPLE_API_PATH, fetchExampleMessage() y validación de la respuesta
 ├── lib/
 │   ├── types.ts                  # ExampleMessage
 │   └── server/
@@ -213,19 +224,32 @@ export { teamsPageMetadata as metadata } from "@features/teams/pages/teams-page"
 export default TeamsPage;
 ```
 
+Si la feature tiene `api/`, el Route Handler de `src/app/` también es una sola línea:
+
+```ts
+// src/app/api/<ruta>/route.ts  (por ejemplo, src/app/api/teams/route.ts)
+export { GET } from "@features/teams/api/teams-route";
+```
+
 ### Reglas de dependencias
 
-1. `src/app/` sólo importa pages: `@features/<feature>/pages/<name>-page`.
+1. `src/app/` sólo importa pages: `@features/<feature>/pages/<name>-page`. Tampoco importa
+   `@shared/components/*`. La única excepción es `layout.tsx`, que monta la cabecera y el pie
+   (`@features/site/components/*`), los avisos de conexión (`OfflineNotices` de la feature
+   `offline`) y el `QueryProvider`.
 2. Sólo `lib/server/` de una feature importa `@shared/lib/prisma/db`.
-3. Sólo `lib/server/`, `@shared/lib/server/`, `@shared/lib/prisma/` (y los Route Handlers) importan
-   `server-only`, y nada que pueda llegar al navegador (`lib/`, `hooks/`, `components/`) importa esas carpetas.
+3. Sólo `lib/server/`, `@shared/lib/server/`, `@shared/lib/prisma/` y los Route Handlers
+   (`api/*-route.ts`) importan `server-only`, y nada que pueda llegar al navegador (`lib/`, `hooks/`,
+   `components/`, `api/*-api-client.ts`) importa esas carpetas ni los Route Handlers.
 4. Dentro de una feature, las capas siguen la tabla de arriba: `lib/` no importa `hooks/`,
    `components/` ni `pages/`; `hooks/` no importa `components/` ni `pages/`; `pages/` no importa `hooks/`.
-5. `src/app/` no contiene UI ni lógica: sólo `layout.tsx` (que monta `QueryProvider` y, como única
-   excepción, `OfflineNotices` de la feature `offline`), `globals.css`,
-   archivos de ruta que delegan en `pages/` y Route Handlers (`route.ts`), `sitemap.ts` y
-   `robots.ts` que delegan en `lib/` (no en componentes, hooks ni pages).
-6. `shared/` nunca importa de `features/`.
+5. `src/app/` no contiene UI ni lógica: sólo `layout.tsx` (que monta `QueryProvider`), `globals.css`,
+   archivos de ruta que delegan en `pages/`, Route Handlers (`route.ts`) que re-exportan
+   `@features/<feature>/api/<feature>-route`, y `sitemap.ts` y `robots.ts` que delegan en `lib/`.
+6. `shared/` nunca importa de `features/`, y no conoce rutas, secciones ni textos del evento. Criterio:
+   **si sabe el nombre de una página, una ruta o un texto del evento, no es `shared/`**. La
+   navegación, el pie, el 404 y el error viven en la feature `site`; cada feature declara su ruta
+   en `lib/<feature>-links.ts` (`GAMES_PATH`, `FLOOR_PLAN_PATH`, `HOME_PATH`).
 7. Fuera de `pages/`, una feature sólo importa las features que declara `FEATURE_DEPENDENCIES` en
    `eslint.config.mjs`. Ese grafo no puede tener ciclos (ESLint se detiene si lo tiene) y está
    dibujado en `docs/architecture.md`. Las `pages/` pueden componer cualquier feature, porque sólo
@@ -281,7 +305,10 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
 2. Si persiste datos, agrega los modelos a `contract.prisma`, ejecuta `npm run db:emit` y
    escribe las consultas en `lib/server/<feature>-queries.ts`.
 3. Si importa otra feature fuera de `pages/`, agrégala a `FEATURE_DEPENDENCIES` en `eslint.config.mjs`.
-4. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`.
+   Declara su ruta en `lib/<feature>-links.ts` y, si debe aparecer en la navegación, agrégala a
+   `SECTION_LINKS` (`src/features/site/lib/navigation.ts`).
+4. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`. Si el navegador
+   necesita pedir datos por HTTP, agrega `api/` como en `example` (Route Handler, cliente y pruebas).
 5. Crea la ruta en `src/app/<ruta>/page.tsx` que sólo renderiza la page (ver el ejemplo de arriba),
    agrega `alternates.canonical` a su metadata y, si debe indexarse, la ruta a `src/app/sitemap.ts`.
 
@@ -390,8 +417,9 @@ TanStack Query `5.x` ya está configurado (referencia: https://tanstack.com/quer
 
 - Define las queries con `queryOptions` en `lib/<feature>-query-options.ts`, con la feature como
   primer elemento de la key: `["games", "list"]`, `["games", "detail", slug]`.
-- La `queryFn` corre también en el navegador, así que **nunca** llama directo a Prisma: usa `fetch`
-  hacia un Route Handler (`src/app/api/<feature>/route.ts`) o una Server Action.
+- La `queryFn` corre también en el navegador, así que **nunca** llama directo a Prisma: usa el cliente
+  de la feature (`api/<feature>-api-client.ts`, que valida la respuesta) hacia su Route Handler
+  (`api/<feature>-route.ts`, re-exportado en `src/app/api/<feature>/route.ts`) o una Server Action.
 - Los hooks que usan `useQuery`, `useSuspenseQuery` o `useMutation` viven en `hooks/`
   (`use-<feature>-<algo>.ts`). Los componentes que los usan llevan `"use client"`.
 - Para prellenar el caché desde el servidor **no uses `dehydrate()` de TanStack**: con Cache
@@ -500,6 +528,20 @@ cumple estos criterios (revísalos a 360 y 390 px, en horizontal y en escritorio
 - Prefiere `type`/`interface` explícitos en `lib/types.ts` y deja que el resto se infiera.
 - Usa `import type` para imports que sólo son tipos.
 - No uses opciones deprecadas en TS 6 (`baseUrl`, `moduleResolution: node`/`node10`, `target: ES5`).
+
+## Textos de la interfaz (copys)
+
+- Los textos de la interfaz de una feature (títulos, botones, `aria-label`, mensajes) viven en
+  `lib/<feature>-copy.ts` (`GAMES_COPY`, `EVENT_COPY`, `FLOOR_PLAN_COPY`...). Los componentes no
+  escriben literales: importan el copy de su feature o reciben el texto por props.
+- **Un dato se escribe una sola vez.** Horarios (`EVENT_SCHEDULE`), fecha (`EVENT_INFO.startsAt`),
+  sede (`EVENT_VENUE`) y organización (`siteConfig.organization`) tienen un solo dueño. Un texto que
+  los cita es una función que recibe el dato (`GAMES_COPY.detail.tournamentNote(schedule)`) o lo
+  compone con su dueño; nunca vuelve a escribir "12:00" o el nombre de la división.
+- Los datos cruzan features por parámetros desde las pages (por ejemplo, los horarios del
+  programa llegan al croquis como `PlanZoneTimes`), no por imports que agreguen aristas al grafo.
+- El contenido que podría venir de la base de datos (programa, juegos, zonas) no es copy: sigue
+  en sus archivos de datos y llega a los componentes por props.
 
 ## Estilo de código
 

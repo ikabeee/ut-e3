@@ -1,5 +1,4 @@
 import {
-  describeCoverflowPosition,
   getCoverflowPlacement,
   getInitialCoverflowIndex,
 } from "@features/games/lib/coverflow-layout";
@@ -26,9 +25,5 @@ describe("coverflow layout", () => {
     expect(left.style.transform).toContain("rotateY(calc(var(--angle) * 1))");
     expect(right.style.transform).toContain("calc(1 * (var(--cw) * var(--gap-f) + 0 * var(--cw) * var(--step-f)))");
     expect(right.style.transform).toContain("rotateY(calc(var(--angle) * -1))");
-  });
-
-  it("describes the position for screen readers", () => {
-    expect(describeCoverflowPosition(8, 18)).toBe("09 de 18");
   });
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { GenreTile } from "@features/games/components/genre-tile";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { GenreSummary } from "@features/games/lib/types";
 import { ArrowButton } from "@shared/components/arrow-button";
 import { useHorizontalScroll } from "@shared/hooks/use-horizontal-scroll";
@@ -25,11 +26,11 @@ export function GenreRail({ genres, selectedGenre, onSelectGenre }: Readonly<Gen
           id="genres-heading"
           className="font-wide text-[clamp(24px,3.4vw,46px)] leading-[.95] font-bold tracking-[-.03em] uppercase"
         >
-          Géneros
+          {GAMES_COPY.catalog.genresHeading}
         </h1>
         <div className="flex [&>*+*]:border-l-0">
-          <ArrowButton direction="previous" label="Géneros anteriores" className="h-10" onPress={() => scrollByItems(-1)} />
-          <ArrowButton direction="next" label="Más géneros" className="h-10" onPress={() => scrollByItems(1)} />
+          <ArrowButton direction="previous" label={GAMES_COPY.catalog.previousGenres} className="h-10" onPress={() => scrollByItems(-1)} />
+          <ArrowButton direction="next" label={GAMES_COPY.catalog.nextGenres} className="h-10" onPress={() => scrollByItems(1)} />
         </div>
       </div>
       <div

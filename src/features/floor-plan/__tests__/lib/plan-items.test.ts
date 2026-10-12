@@ -6,29 +6,47 @@ import {
   splitStandName,
   toggleCategory,
 } from "@features/floor-plan/lib/plan-items";
+import { PLAN_ZONE_TIMES_FIXTURE, STAND_OCCUPANT_FIXTURES } from "@features/floor-plan/__tests__/plan-fixtures";
 import { PLAN_CATEGORIES } from "@features/floor-plan/lib/plan-places";
-import { MOCK_GAMES } from "@features/games/lib/mock-games";
 
 describe("buildPlanItems", () => {
-  const items = buildPlanItems(MOCK_GAMES);
+  const items = buildPlanItems(STAND_OCCUPANT_FIXTURES, PLAN_ZONE_TIMES_FIXTURE);
   const itemsById = indexItems(items);
 
   it("creates one item per team stand, info stand and zone", () => {
-    expect(items).toHaveLength(MOCK_GAMES.length + 4 + 8);
+    expect(items).toHaveLength(STAND_OCCUPANT_FIXTURES.length + 4 + 8);
   });
 
-  it("links each team stand to its game", () => {
+  it("fills each team stand with its occupant", () => {
     expect(itemsById.get("B7")).toMatchObject({ category: "team", title: "Lucha Pixel", subtitle: "Pelea" });
-    expect(itemsById.get("B7")?.game?.slug).toBe("lucha-pixel");
+  });
+
+  it("keeps the cover of the occupant and leaves the rest without one", () => {
+    const cover = "portada";
+    const [first] = buildPlanItems([{ ...STAND_OCCUPANT_FIXTURES[0], cover }], PLAN_ZONE_TIMES_FIXTURE);
+
+    expect(first.cover).toBe(cover);
+    expect(itemsById.get("C1")?.cover).toBeNull();
+    expect(itemsById.get("stage")?.cover).toBeNull();
   });
 
   it("groups the directory in the design order", () => {
     const groups = groupItemsByCategory(items);
 
     expect(groups.map((group) => group.category)).toEqual(["team", "info", "act", "srv"]);
-    expect(groups[0].items.slice(0, 5).map((item) => item.id)).toEqual(["A1", "A2", "A3", "A4", "B1"]);
+    expect(groups[0].items.map((item) => item.id)).toEqual(STAND_OCCUPANT_FIXTURES.map((occupant) => occupant.stand));
     expect(groups[2].items.map((item) => item.id)).toEqual(["stage", "arena", "raffles", "entry"]);
     expect(groups[3].items.map((item) => item.id)).toEqual(["food", "info", "wc", "rest"]);
+  });
+
+  it("adds the times of the schedule to the zones that mention them", () => {
+    expect(itemsById.get("arena")?.description).toBe(
+      "Estaciones para las rondas de los torneos. Inscríbete aquí antes de las 11:30.",
+    );
+    expect(itemsById.get("raffles")?.description).toBe(
+      "Exhibición de los premios. Los sorteos se hacen en el main stage a las 14:00 y 18:00.",
+    );
+    expect(itemsById.get("food")?.description).toBe("Puestos de comida y bebidas con mesas para descansar.");
   });
 
   it.each([

@@ -30,10 +30,14 @@ export interface Game {
   /** Nombre del equipo, por ejemplo "Equipo Grava". */
   team: string;
   members: number;
+  /** Jugadores por partida en la demo (1 = un jugador). */
+  players: number;
   /** Código del stand en el croquis, por ejemplo "A1". */
   stand: string;
   hasTournament: boolean;
   description: string;
+  /** Párrafos de "Acerca del juego"; con `null` se usa el texto genérico de `games-copy.ts`. */
+  about: readonly string[] | null;
   image: GameImage | null;
   art: GameKeyArt;
 }

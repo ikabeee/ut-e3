@@ -9,15 +9,24 @@ import { PlanTooltip } from "@features/floor-plan/components/plan-tooltip";
 import { PlanZoomControls } from "@features/floor-plan/components/plan-zoom-controls";
 import { useFloorPlanExplorer } from "@features/floor-plan/hooks/use-floor-plan-explorer";
 import { usePlanTooltip } from "@features/floor-plan/hooks/use-plan-tooltip";
+import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
+import type { PlanItem, PlanLayout, PlanOrientation } from "@features/floor-plan/lib/types";
 import { usePrefersReducedMotion } from "@shared/hooks/use-prefers-reduced-motion";
 
 /** En pantallas angostas el directorio queda debajo del croquis. */
 const STACKED_LAYOUT_MAX_WIDTH = 900;
 
+interface FloorPlanExplorerProps {
+  /** Stands y zonas del croquis (`buildPlanItems`), con los juegos como ocupantes. */
+  items: readonly PlanItem[];
+  /** Geometría de cada orientación (`PLAN_LAYOUTS`). */
+  layouts: Readonly<Record<PlanOrientation, PlanLayout>>;
+}
+
 /** Croquis interactivo completo (`croquis.html`): filtros, mapa con zoom, panel y directorio. */
-export function FloorPlanExplorer() {
+export function FloorPlanExplorer({ items, layouts }: Readonly<FloorPlanExplorerProps>) {
   const viewportRef = useRef<HTMLDivElement>(null);
-  const explorer = useFloorPlanExplorer(viewportRef);
+  const explorer = useFloorPlanExplorer(viewportRef, items, layouts);
   const tooltip = usePlanTooltip(viewportRef);
   const prefersReducedMotion = usePrefersReducedMotion();
   const tooltipItem = tooltip.tooltip ? explorer.itemsById.get(tooltip.tooltip.itemId) : undefined;
@@ -42,10 +51,9 @@ export function FloorPlanExplorer() {
     <>
       <header className="mb-5 flex flex-wrap items-end justify-between gap-5">
         <div>
-          <h1 className="type-giant">Croquis</h1>
+          <h1 className="type-giant">{FLOOR_PLAN_COPY.explorer.heading}</h1>
           <p className="mt-[14px] mb-0 max-w-[52ch] text-[clamp(15px,1.2vw,18px)] leading-[1.4] text-copy">
-            Ubica los stands de cada equipo, el main stage, la arena de torneos y los servicios del evento. Toca
-            cualquier punto del mapa para ver su información.
+            {FLOOR_PLAN_COPY.explorer.description}
           </p>
         </div>
         <PlanCategoryFilters visibleCategories={explorer.visibleCategories} onToggle={explorer.toggleCategory} />
@@ -57,12 +65,14 @@ export function FloorPlanExplorer() {
           className="@container relative min-w-0 touch-none overflow-hidden border border-border bg-background select-none [grid-area:viewport]"
         >
           <ExplorerCanvas
+            layout={layouts.wide}
             orientation="wide"
             viewport={explorer.viewports.wide}
             className="hidden @min-[560px]:block"
             {...selectionProps}
           />
           <ExplorerCanvas
+            layout={layouts.tall}
             orientation="tall"
             viewport={explorer.viewports.tall}
             className="block @min-[560px]:hidden"

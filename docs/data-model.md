@@ -116,6 +116,8 @@ erDiagram
         varchar(80) slug UK "ruta /games/[slug]"
         varchar(80) name
         varchar(300) description
+        text about "nullable; párrafos de Acerca del juego"
+        smallint players "DEFAULT 1; jugadores por partida en la demo"
         platform[] platforms "lista de enum; al menos una"
         varchar(60) engine "nullable; Unity, Godot..."
         text play_url "nullable"
@@ -385,7 +387,8 @@ El resto de la app no cambia: `lib/server/games-queries.ts` arma el tipo `Game`
 
 | Campo de `Game` | Origen |
 | --- | --- |
-| `slug`, `name`, `description`, `hasTournament` | `game` |
+| `slug`, `name`, `description`, `hasTournament`, `players` | `game` |
+| `about` | `game.about` partido en párrafos (línea en blanco); `null` usa el texto genérico de `games-copy.ts` |
 | `genre` | `genre.name` del género principal (`game.genre_id`) |
 | `team` | `team.name` |
 | `members` | `count(*)` de `team_member` |

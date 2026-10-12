@@ -1,4 +1,4 @@
-import type { Game } from "@features/games/lib/types";
+import type { ReactNode } from "react";
 
 /**
  * Categorías del croquis (también son los filtros y la leyenda):
@@ -17,10 +17,34 @@ export interface PlanZone {
   description: string;
 }
 
+/**
+ * Horarios del programa que mencionan las zonas del croquis. El croquis no conoce el programa:
+ * la page los pasa desde `event` (`getEventContent().highlights` tiene esta forma).
+ */
+export interface PlanZoneTimes {
+  tournamentSignupDeadline: string;
+  raffleTimes: readonly string[];
+}
+
 /** Stand que no es de un equipo (división, patrocinadores...). */
 export interface InfoStand {
   title: string;
   description: string;
+}
+
+/**
+ * Lo que el croquis necesita saber de quien ocupa un stand de equipo. El croquis no conoce los
+ * juegos: cada dominio que ocupa stands (hoy `games`) se convierte a este tipo en su feature.
+ */
+export interface StandOccupant {
+  /** Código del stand, por ejemplo "A1". */
+  stand: string;
+  title: string;
+  /** Antetítulo del panel, por ejemplo el género del juego. */
+  subtitle: string;
+  description: string;
+  /** Portada del panel (imagen o arte). La pinta quien conoce al ocupante; `null` si no tiene. */
+  cover: ReactNode;
 }
 
 /** Cualquier punto seleccionable del croquis, listo para el panel y el directorio. */
@@ -34,8 +58,8 @@ export interface PlanItem {
   /** Género del juego, "Informativo" o el tipo de zona. */
   subtitle: string;
   description: string;
-  /** Juego del stand (sólo en stands de equipo). */
-  game: Game | null;
+  /** Portada del ocupante (sólo en stands de equipo). */
+  cover: ReactNode;
 }
 
 export type PlanOrientation = "wide" | "tall";

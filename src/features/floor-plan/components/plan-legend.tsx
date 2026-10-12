@@ -1,5 +1,6 @@
 import { CategorySwatch } from "@features/floor-plan/components/category-swatch";
-import { PLAN_CATEGORIES, PLAN_CATEGORY_LABELS } from "@features/floor-plan/lib/plan-places";
+import { PLAN_CATEGORY_LABELS } from "@features/floor-plan/lib/floor-plan-copy";
+import { PLAN_CATEGORIES } from "@features/floor-plan/lib/plan-places";
 
 /** Leyenda del croquis del inicio (`.legend`). */
 export function PlanLegend() {

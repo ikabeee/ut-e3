@@ -15,3 +15,10 @@ export function padTwoDigits(value: number) {
 export function pluralize(count: number, singular: string, plural: string) {
   return count === 1 ? singular : plural;
 }
+
+const LIST_FORMAT = new Intl.ListFormat("es", { style: "long", type: "conjunction" });
+
+/** Enumera en español: `["13:00", "16:00", "19:00"]` -> "13:00, 16:00 y 19:00". */
+export function formatList(items: readonly string[]) {
+  return LIST_FORMAT.format(items);
+}

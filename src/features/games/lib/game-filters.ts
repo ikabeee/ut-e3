@@ -29,9 +29,3 @@ export function filterGames(games: readonly Game[], { genre, keyword }: GameFilt
 export function toggleGenre(current: string | null, genre: string) {
   return current === genre ? null : genre;
 }
-
-/** Contador del catálogo: "4 de 18 juegos" o "2 de 18 juegos · Puzle". */
-export function describeResults(visible: number, total: number, genre: string | null) {
-  const count = `${visible} de ${total} juegos`;
-  return genre === null ? count : `${count} · ${genre}`;
-}

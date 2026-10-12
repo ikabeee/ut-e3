@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@heroui/react";
+import { PLAN_CATEGORY_LABELS } from "@features/floor-plan/lib/floor-plan-copy";
 import { groupItemsByCategory } from "@features/floor-plan/lib/plan-items";
-import { PLAN_CATEGORY_LABELS } from "@features/floor-plan/lib/plan-places";
 import type { PlanCategory, PlanItem } from "@features/floor-plan/lib/types";
 
 interface PlanDirectoryProps {

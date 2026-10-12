@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Toolbar } from "@heroui/react";
+import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
 
 interface PlanZoomControlsProps {
   zoomPercent: number;
@@ -15,8 +16,8 @@ const CONTROL_CLASS =
 /** Controles de zoom del croquis (`.zctl`): alejar, nivel, acercar y ajustar. */
 export function PlanZoomControls({ zoomPercent, onZoomOut, onZoomIn, onFit }: Readonly<PlanZoomControlsProps>) {
   return (
-    <Toolbar aria-label="Controles del mapa" className="flex items-stretch gap-0 border border-border bg-background p-0">
-      <Button variant="tertiary" isIconOnly aria-label="Alejar" className={CONTROL_CLASS} onPress={onZoomOut}>
+    <Toolbar aria-label={FLOOR_PLAN_COPY.zoom.toolbarLabel} className="flex items-stretch gap-0 border border-border bg-background p-0">
+      <Button variant="tertiary" isIconOnly aria-label={FLOOR_PLAN_COPY.zoom.zoomOut} className={CONTROL_CLASS} onPress={onZoomOut}>
         −
       </Button>
       <span
@@ -25,13 +26,13 @@ export function PlanZoomControls({ zoomPercent, onZoomOut, onZoomIn, onFit }: Re
       >
         {zoomPercent}%
       </span>
-      <Button variant="tertiary" isIconOnly aria-label="Acercar" className={CONTROL_CLASS} onPress={onZoomIn}>
+      <Button variant="tertiary" isIconOnly aria-label={FLOOR_PLAN_COPY.zoom.zoomIn} className={CONTROL_CLASS} onPress={onZoomIn}>
         +
       </Button>
       <Button
         variant="tertiary"
         isIconOnly
-        aria-label="Ajustar a la pantalla"
+        aria-label={FLOOR_PLAN_COPY.zoom.fit}
         className={CONTROL_CLASS}
         onPress={onFit}
       >

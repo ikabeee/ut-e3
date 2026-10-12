@@ -2,7 +2,8 @@
 
 import { ToggleButton } from "@heroui/react";
 import { CategorySwatch } from "@features/floor-plan/components/category-swatch";
-import { PLAN_CATEGORIES, PLAN_FILTER_LABELS } from "@features/floor-plan/lib/plan-places";
+import { FLOOR_PLAN_COPY, PLAN_FILTER_LABELS } from "@features/floor-plan/lib/floor-plan-copy";
+import { PLAN_CATEGORIES } from "@features/floor-plan/lib/plan-places";
 import type { PlanCategory } from "@features/floor-plan/lib/types";
 
 interface PlanCategoryFiltersProps {
@@ -13,7 +14,7 @@ interface PlanCategoryFiltersProps {
 /** Filtros por categoría, que también funcionan como leyenda (`.filters`). */
 export function PlanCategoryFilters({ visibleCategories, onToggle }: Readonly<PlanCategoryFiltersProps>) {
   return (
-    <div role="group" aria-label="Mostrar en el mapa" className="flex flex-wrap gap-[6px]">
+    <div role="group" aria-label={FLOOR_PLAN_COPY.explorer.filtersLabel} className="flex flex-wrap gap-[6px]">
       {PLAN_CATEGORIES.map((category) => (
         <ToggleButton
           key={category}

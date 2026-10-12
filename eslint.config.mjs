@@ -25,10 +25,11 @@ import sonarjs from "eslint-plugin-sonarjs";
 const FEATURE_DEPENDENCIES = {
   event: [],
   example: [],
-  "floor-plan": ["games"],
-  games: ["event"],
+  "floor-plan": [],
+  games: ["event", "floor-plan"],
   home: ["event", "floor-plan", "games"],
-  offline: ["games"],
+  offline: ["floor-plan", "games", "home"],
+  site: ["floor-plan", "games", "home"],
 };
 
 const FEATURES = readdirSync(new URL("./src/features", import.meta.url), { withFileTypes: true })
@@ -126,22 +127,38 @@ const testOnlyImports = {
 };
 
 const nonPageImports = {
-  group: ["@features/*/lib/**", "@features/*/hooks/**", "@features/*/components/**", "@features/*/api/**"],
-  message: "`src/app` sólo renderiza pages: importa desde `@features/<feature>/pages/<name>-page`.",
+  group: [
+    "@features/*/lib/**",
+    "@features/*/hooks/**",
+    "@features/*/components/**",
+    "@features/*/api/**",
+    "@shared/components/**",
+  ],
+  message:
+    "`src/app` sólo renderiza pages: importa desde `@features/<feature>/pages/<name>-page` (la navegación, el pie, el 404 y el error viven en la feature `site`).",
 };
 
-// Excepción mínima: el layout raíz monta los avisos de conexión y el registro del service worker
-// (feature offline) en todas las páginas. Ninguna page los puede montar para el sitio completo.
-const layoutImports = {
-  group: [...nonPageImports.group, "!@features/offline/components/offline-notices"],
-  message: nonPageImports.message,
+// El layout raíz es la única excepción: monta el marco del sitio (cabecera y pie de `site`), los
+// avisos de conexión y el registro del service worker (`OfflineNotices` de `offline`) y el
+// `QueryProvider` de `shared`. Nada más de `components/` ni de `shared/components`.
+const rootLayoutImports = {
+  regex:
+    "^@features/(?!site/components/|offline/components/offline-notices$)[^/]+/(lib|hooks|components|api)/|^@shared/components/(?!query-provider$)",
+  message:
+    "El layout sólo monta `@features/site/components/*`, `OfflineNotices`, `QueryProvider` y estilos globales; el resto va en una page.",
 };
 
-// Route Handlers (`route.ts`) y archivos de metadata (`sitemap.ts`, `robots.ts`, `manifest.ts`) no
-// renderizan una page: delegan en `lib/` de la feature, pero nunca en componentes ni hooks.
-const routeFileImports = {
-  group: ["@features/*/hooks/**", "@features/*/components/**", "@features/*/pages/**"],
-  message: "Los Route Handlers y archivos de metadata sólo delegan en `@features/<feature>/lib/*`.",
+// Los archivos de metadata (`sitemap.ts`, `robots.ts`, `manifest.ts`) no renderizan una page:
+// delegan en `lib/` de la feature, pero nunca en componentes, hooks ni pages.
+const metadataFileImports = {
+  group: ["@features/*/hooks/**", "@features/*/components/**", "@features/*/pages/**", "@features/*/api/**"],
+  message: "Los archivos de metadata sólo delegan en `@features/<feature>/lib/*`.",
+};
+
+// Un Route Handler de `src/app` sólo enlaza la ruta con el de la feature, como las pages.
+const routeHandlerImports = {
+  regex: "^@shared/|^@features/(?![^/]+/api/[^/]+-route$)",
+  message: 'Un `route.ts` sólo re-exporta el handler de la feature: `export { GET } from "@features/<feature>/api/<feature>-route";`.',
 };
 
 /** Features que `feature` no puede importar según `FEATURE_DEPENDENCIES`. */
@@ -209,7 +226,8 @@ const featureLayerConfigs = FEATURES.flatMap((feature) =>
   })),
 );
 
-const routeFiles = ["src/app/**/route.ts", "src/app/sitemap.ts", "src/app/robots.ts", "src/app/manifest.ts"];
+const routeHandlerFiles = ["src/app/**/route.ts"];
+const metadataFiles = ["src/app/sitemap.ts", "src/app/robots.ts", "src/app/manifest.ts"];
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -226,9 +244,14 @@ const eslintConfig = defineConfig([
     settings: { "import/ignore": ["node_modules"] },
     rules: { "import/no-cycle": ["error", { ignoreExternal: true }] },
   },
-  { files: [`src/app/**/*.${SOURCE}`], ignores: routeFiles, rules: restrict([nonPageImports, prismaClient]) },
-  { files: ["src/app/layout.tsx"], rules: restrict([layoutImports, prismaClient]) },
-  { files: routeFiles, rules: restrict([routeFileImports, prismaClient]) },
+  {
+    files: [`src/app/**/*.${SOURCE}`],
+    ignores: [...routeHandlerFiles, ...metadataFiles],
+    rules: restrict([nonPageImports, prismaClient]),
+  },
+  { files: ["src/app/layout.tsx"], rules: restrict([rootLayoutImports, prismaClient]) },
+  { files: routeHandlerFiles, rules: restrict([routeHandlerImports]) },
+  { files: metadataFiles, rules: restrict([metadataFileImports, prismaClient]) },
   { files: [`src/shared/**/*.${SOURCE}`, "src/shared/**/*.mts"], rules: restrict([featureImports, prismaClient]) },
   {
     files: withTests("src/shared", `components/**/*.${SOURCE}`, `hooks/**/*.${SOURCE}`),

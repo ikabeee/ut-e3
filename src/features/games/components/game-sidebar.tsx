@@ -2,6 +2,7 @@ import { Chip } from "@heroui/react";
 import { GameMedia } from "@features/games/components/game-media";
 import { getGameFacts } from "@features/games/lib/game-details";
 import { getStandMapPath } from "@features/games/lib/game-links";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { Game } from "@features/games/lib/types";
 import { ActionLink } from "@shared/components/action-link";
 
@@ -20,14 +21,14 @@ export function GameSidebar({ game, eventDateLabel, admissionLabel, calendarUrl 
         <GameMedia game={game} sizes="320px" />
       </div>
       <Chip className="type-tiny h-6 self-start rounded-none border border-border px-[9px] py-0 font-normal">
-        Demo jugable
+        {GAMES_COPY.features.demo}
       </Chip>
       <p className="m-0 font-wide text-lg font-bold uppercase">{admissionLabel}</p>
       <ActionLink href={getStandMapPath(game.stand)} variant="primary" arrow="ne" fullWidth>
-        Ver en el croquis
+        {GAMES_COPY.sidebar.viewOnMap}
       </ActionLink>
       <ActionLink href={calendarUrl} arrow="ne" isExternal fullWidth>
-        Quiero asistir
+        {GAMES_COPY.sidebar.attend}
       </ActionLink>
       <dl className="mt-[6px] mb-0 flex flex-col max-[980px]:hidden">
         {getGameFacts(game, eventDateLabel).map((fact) => (

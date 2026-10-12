@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { OfflineNotices } from "@features/offline/components/offline-notices";
+import { SiteFooter } from "@features/site/components/site-footer";
+import { SiteHeader } from "@features/site/components/site-header";
 import { QueryProvider } from "@shared/components/query-provider";
-import { SiteFooter } from "@shared/components/site-footer";
-import { SiteHeader } from "@shared/components/site-header";
 import { fontVariables } from "@shared/lib/fonts";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";

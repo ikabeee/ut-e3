@@ -1,16 +1,16 @@
 import { GameDetailSection } from "@features/games/components/game-detail-section";
-import { describeGame } from "@features/games/lib/game-details";
-import type { Game } from "@features/games/lib/types";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 
 interface GameAboutProps {
-  game: Game;
+  /** Párrafos de "Acerca del juego" (`describeGame`). */
+  paragraphs: readonly string[];
 }
 
-export function GameAbout({ game }: Readonly<GameAboutProps>) {
+export function GameAbout({ paragraphs }: Readonly<GameAboutProps>) {
   return (
-    <GameDetailSection title="Acerca del juego">
+    <GameDetailSection title={GAMES_COPY.detail.aboutHeading}>
       <div>
-        {describeGame(game).map((paragraph) => (
+        {paragraphs.map((paragraph) => (
           <p key={paragraph} className="m-0 max-w-[66ch] leading-normal text-copy-warm">
             {paragraph}
           </p>

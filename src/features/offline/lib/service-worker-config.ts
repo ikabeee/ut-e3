@@ -1,7 +1,7 @@
 /** Ruta de la página de respaldo que el service worker muestra sin conexión. */
 export const OFFLINE_PATH = "/offline";
 
-/** URL del service worker. La sirve el Route Handler `src/app/sw.js/route.ts`. */
+/** URL del service worker. La sirve el Route Handler `api/offline-route.ts` (re-exportado en `src/app/sw.js/route.ts`). */
 export const SERVICE_WORKER_PATH = "/sw.js";
 
 /** Mensaje que la página envía al worker en espera para activarlo ("Hay una versión nueva"). */

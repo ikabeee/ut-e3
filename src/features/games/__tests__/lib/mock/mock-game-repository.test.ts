@@ -1,15 +1,17 @@
-import { mockGameRepository } from "@features/games/lib/mock-game-repository";
+import { mockGameRepository } from "@features/games/lib/mock/mock-game-repository";
+import { MOCK_GAMES } from "@features/games/lib/mock/mock-games";
 
+// Revisa los datos que hoy muestra el sitio; las pruebas de la lógica usan `__tests__/game-fixtures.ts`.
 describe("mockGameRepository", () => {
-  it("lists the 18 games of the showcase", async () => {
-    await expect(mockGameRepository.listGames()).resolves.toHaveLength(18);
+  it("lists every game of the mock catalog", async () => {
+    await expect(mockGameRepository.listGames()).resolves.toEqual(MOCK_GAMES);
   });
 
   it("returns a copy so callers cannot mutate the mock data", async () => {
     const games = await mockGameRepository.listGames();
     games.pop();
 
-    await expect(mockGameRepository.listGames()).resolves.toHaveLength(18);
+    await expect(mockGameRepository.listGames()).resolves.toHaveLength(MOCK_GAMES.length);
   });
 
   it("finds a game by slug", async () => {

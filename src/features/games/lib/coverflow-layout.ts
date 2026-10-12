@@ -37,9 +37,3 @@ export function getCoverflowPlacement(index: number, current: number): Coverflow
 export function getInitialCoverflowIndex(count: number) {
   return Math.floor((count - 1) / 2);
 }
-
-/** Texto del contador para lectores de pantalla: "09 de 18". */
-export function describeCoverflowPosition(current: number, count: number) {
-  const pad = (value: number) => String(value).padStart(2, "0");
-  return `${pad(current + 1)} de ${pad(count)}`;
-}

@@ -4,12 +4,13 @@ import { useRef, type PointerEvent } from "react";
 import { cn } from "@heroui/react";
 import { FloorPlanDrawing, type FloorPlanSelectionProps } from "@features/floor-plan/components/floor-plan-drawing";
 import { usePlanGestures } from "@features/floor-plan/hooks/use-plan-gestures";
+import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
 import type { PlanViewport } from "@features/floor-plan/hooks/use-plan-viewport";
-import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 import { toViewBoxAttribute } from "@features/floor-plan/lib/plan-viewport";
-import type { PlanOrientation } from "@features/floor-plan/lib/types";
+import type { PlanLayout, PlanOrientation } from "@features/floor-plan/lib/types";
 
 interface ExplorerCanvasProps extends FloorPlanSelectionProps {
+  layout: PlanLayout;
   orientation: PlanOrientation;
   viewport: PlanViewport;
   /** Muestra u oculta esta orientación con container queries. */
@@ -20,6 +21,7 @@ interface ExplorerCanvasProps extends FloorPlanSelectionProps {
 
 /** Un croquis interactivo (una orientación) con arrastre, zoom y teclado. */
 export function ExplorerCanvas({
+  layout,
   orientation,
   viewport,
   className,
@@ -46,7 +48,7 @@ export function ExplorerCanvas({
       viewBox={toViewBoxAttribute(viewport.viewBox)}
       preserveAspectRatio="xMidYMid meet"
       role="application"
-      aria-label="Croquis interactivo. Arrastra para mover, usa la rueda o pellizca para acercar."
+      aria-label={FLOOR_PLAN_COPY.explorer.mapLabel}
       tabIndex={0}
       className={cn(
         "h-auto w-full cursor-grab focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent",
@@ -61,7 +63,7 @@ export function ExplorerCanvas({
       onKeyDown={handlers.onKeyDown}
     >
       <FloorPlanDrawing
-        layout={PLAN_LAYOUTS[orientation]}
+        layout={layout}
         orientation={orientation}
         variant="explorer"
         onSelectItem={(id) => {

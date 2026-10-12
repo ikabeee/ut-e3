@@ -1,8 +1,10 @@
 import { cn } from "@heroui/react";
 import { getItemKicker } from "@features/floor-plan/lib/plan-items";
 import type { PlanItem } from "@features/floor-plan/lib/types";
-import { GameMedia } from "@features/games/components/game-media";
 import { PaperCard } from "@shared/components/paper-card";
+
+/** Atributo `sizes` para la portada que llega en `StandOccupant.cover`: la tarjeta mide 340 px. */
+export const PLAN_ITEM_COVER_SIZES = "340px";
 
 interface PlanItemCardProps {
   item: PlanItem;
@@ -10,18 +12,14 @@ interface PlanItemCardProps {
   variant: "overview" | "explorer";
 }
 
-/** Panel con la información del stand o zona seleccionada; los stands de equipo llevan portada. */
+/** Panel con la información del stand o zona seleccionada; los stands de equipo llevan su portada. */
 export function PlanItemCard({ item, variant }: Readonly<PlanItemCardProps>) {
   const isOverview = variant === "overview";
   const Heading = isOverview ? "h3" : "h2";
 
   return (
     <div className="flex min-w-0 flex-col" aria-live="polite">
-      {item.game ? (
-        <div className="relative aspect-video max-w-full overflow-hidden bg-surface">
-          <GameMedia game={item.game} sizes="340px" />
-        </div>
-      ) : null}
+      {item.cover ? <div className="relative aspect-video max-w-full overflow-hidden bg-surface">{item.cover}</div> : null}
       <PaperCard className={isOverview ? "gap-[10px] px-[22px] pt-[22px] pb-7" : "gap-2 p-[18px] pb-5"}>
         <span className="type-tiny">{getItemKicker(item)}</span>
         <Heading

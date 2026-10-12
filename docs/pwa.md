@@ -13,16 +13,18 @@ conexión, cómo probarlo y qué hacer el día del evento. El código vive en la
 | --- | --- | --- |
 | Service worker | `src/features/offline/lib/service-worker.ts` | Guarda páginas y archivos y responde sin red. |
 | Funciones puras del worker | `src/features/offline/lib/service-worker-strategies.ts` | Elige la estrategia de cada petición y encuentra los archivos con hash de un HTML o CSS. |
-| `/sw.js` | `src/app/sw.js/route.ts` → `lib/server/service-worker-queries.ts` → `lib/service-worker-script.ts` | Arma el archivo del worker con la versión y la lista de páginas. Se prerenderiza en el build. |
+| `/sw.js` | `src/app/sw.js/route.ts` (re-exporta `api/offline-route.ts`) → `lib/server/service-worker-queries.ts` → `lib/service-worker-script.ts` | Arma el archivo del worker con la versión y la lista de páginas. Se prerenderiza en el build. |
 | Páginas y archivos a precargar | `src/features/offline/lib/precache-routes.ts` | `/`, `/games`, `/floor-plan`, `/offline` y `/games/<slug>` de cada juego, más el manifest y los íconos (`PRECACHE_ASSET_URLS`). |
 | Constantes | `src/features/offline/lib/service-worker-config.ts` | Tiempo límite de red (3 s), máximo de imágenes (60), prefijo de cachés. |
 | Registro y actualización | `src/features/offline/hooks/use-service-worker.ts` y `components/service-worker-registration.tsx` | Registra `/sw.js` (sólo en producción) y muestra "Hay una versión nueva". |
 | Aviso de conexión | `src/features/offline/components/offline-banner.tsx` y `hooks/use-is-offline.ts` | "Sin conexión. Lo que ya visitaste sigue disponible." |
 | Página `/offline` | `src/features/offline/pages/offline-page.tsx` | Respaldo para rutas que no están guardadas. No se indexa ni va en el sitemap. |
+| Textos | `src/features/offline/lib/offline-copy.ts` | Avisos de conexión y de versión nueva, y textos de `/offline`. |
 | Configuración | `next.config.ts` | `experimental.useOffline: true` y cabeceras de `/sw.js`. |
 
-`src/app/layout.tsx` monta `OfflineNotices` (aviso de conexión + registro del worker). Es la única
-excepción a "`src/app` sólo importa pages", declarada en `eslint.config.mjs`.
+`src/app/layout.tsx` monta `OfflineNotices` (aviso de conexión + registro del worker). Junto con
+la cabecera y el pie de `site`, es la excepción a "`src/app` sólo importa pages", declarada en
+`eslint.config.mjs` (`rootLayoutImports`).
 
 ## Por qué un service worker escrito a mano
 

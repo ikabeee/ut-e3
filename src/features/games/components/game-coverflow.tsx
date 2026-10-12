@@ -7,8 +7,9 @@ import { cn } from "@heroui/react";
 import { CoverflowCover, CoverflowEdges } from "@features/games/components/coverflow-case";
 import { useCoverflow } from "@features/games/hooks/use-coverflow";
 import { useGames } from "@features/games/hooks/use-games";
-import { describeCoverflowPosition, getCoverflowPlacement } from "@features/games/lib/coverflow-layout";
+import { getCoverflowPlacement } from "@features/games/lib/coverflow-layout";
 import { getGamePath } from "@features/games/lib/game-links";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { ArrowButton } from "@shared/components/arrow-button";
 
 // Medidas del exhibidor (ver `coverflow-layout.ts`). Por debajo de 640 px de ancho cambian
@@ -67,8 +68,8 @@ export function GameCoverflow() {
   return (
     <div className="@container">
       <div
-        aria-roledescription="carrusel"
-        aria-label="Juegos en el exhibidor"
+        aria-roledescription={GAMES_COPY.carousel.roleDescription}
+        aria-label={GAMES_COPY.coverflow.label}
         onKeyDown={handleKeyDown}
         className={cn(
           RACK_VARIABLES,
@@ -88,7 +89,7 @@ export function GameCoverflow() {
               }}
               href={getGamePath(game.slug)}
               tabIndex={placement.isCurrent ? 0 : -1}
-              aria-label={`${game.name}, ${game.genre}, stand ${game.stand}`}
+              aria-label={GAMES_COPY.coverflow.caseLabel(game)}
               aria-current={placement.isCurrent}
               onClick={(event) => handleCaseClick(event, index)}
               className={cn(
@@ -113,18 +114,18 @@ export function GameCoverflow() {
         <div className="absolute top-[calc(var(--top)+var(--ch)*1.13)] left-1/2 z-[300] flex -translate-x-1/2 gap-3">
           <ArrowButton
             direction="previous"
-            label="Juego anterior"
+            label={GAMES_COPY.carousel.previous}
             className={PLATE_ARROW_CLASS}
             isDisabled={coverflow.isFirst}
             onPress={coverflow.goPrevious}
           />
           <div className="sr-only" aria-live="polite">
             <h3>{currentGame.name}</h3>
-            <span>{describeCoverflowPosition(coverflow.current, games.length)}</span>
+            <span>{GAMES_COPY.coverflow.position(coverflow.current, games.length)}</span>
           </div>
           <ArrowButton
             direction="next"
-            label="Juego siguiente"
+            label={GAMES_COPY.carousel.next}
             className={PLATE_ARROW_CLASS}
             isDisabled={coverflow.isLast}
             onPress={coverflow.goNext}
