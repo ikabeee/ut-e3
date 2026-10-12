@@ -35,10 +35,11 @@ describe("manifest", () => {
     }
   });
 
-  it("offers shortcuts to the games catalog and the floor plan", () => {
+  it("offers shortcuts to the games catalog, the floor plan and the visitor QR", () => {
     expect(result.shortcuts?.map(({ name, url }) => ({ name, url }))).toEqual([
       { name: "Juegos", url: "/games" },
       { name: "Croquis", url: "/floor-plan" },
+      { name: "Mi QR", url: "/passport" },
     ]);
   });
 

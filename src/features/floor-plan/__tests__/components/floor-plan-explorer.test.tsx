@@ -5,12 +5,9 @@ import { PLAN_ZONE_TIMES_FIXTURE, STAND_OCCUPANT_FIXTURES } from "@features/floo
 import { buildPlanItems } from "@features/floor-plan/lib/plan-items";
 import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 
-function renderExplorer() {
+function renderExplorer(occupants = STAND_OCCUPANT_FIXTURES) {
   return render(
-    <FloorPlanExplorer
-      items={buildPlanItems(STAND_OCCUPANT_FIXTURES, PLAN_ZONE_TIMES_FIXTURE)}
-      layouts={PLAN_LAYOUTS}
-    />,
+    <FloorPlanExplorer items={buildPlanItems(occupants, PLAN_ZONE_TIMES_FIXTURE)} layouts={PLAN_LAYOUTS} />,
   );
 }
 
@@ -37,6 +34,18 @@ describe("FloorPlanExplorer", () => {
 
     expect(panelTitle()).toHaveTextContent("Lucha Pixel");
     expect(screen.getByText("Stand B7 · Pelea")).toBeInTheDocument();
+  });
+
+  it("shows the live status that the page composes for a stand", async () => {
+    window.history.replaceState(null, "", "/floor-plan#B7");
+    renderExplorer(
+      STAND_OCCUPANT_FIXTURES.map((occupant) =>
+        occupant.stand === "B7" ? { ...occupant, status: <p>Sin fila · 2 en 15 min</p> } : occupant,
+      ),
+    );
+    await act(async () => undefined);
+
+    expect(screen.getByText("Sin fila · 2 en 15 min")).toBeInTheDocument();
   });
 
   it("selects an item from the directory and keeps it in the URL", async () => {

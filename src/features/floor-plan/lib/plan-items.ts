@@ -16,6 +16,7 @@ export function buildPlanItems(occupants: readonly StandOccupant[], times: PlanZ
     subtitle: occupant.subtitle,
     description: occupant.description,
     cover: occupant.cover,
+    status: occupant.status,
   }));
 
   const infoStands = Object.entries(INFO_STANDS).map(([code, stand]): PlanItem => ({

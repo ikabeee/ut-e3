@@ -87,6 +87,7 @@ src/
 │   ├── offline/          # Sin conexión: service worker, avisos y página /offline
 │   ├── site/             # Navegación, pie, 404 y página de error
 │   ├── teams/            # Equipos e integrantes (CRUD del panel)
+│   ├── visitors/         # Pasaporte con QR, check-ins, sorteo y afluencia
 │   └── example/          # Scaffold mínimo para crear features nuevas
 └── shared/               # Código transversal sin reglas de negocio (tema, botones, hooks)
 ```

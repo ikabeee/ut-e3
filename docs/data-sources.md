@@ -131,6 +131,72 @@ if (result.ok) {
 }
 ```
 
+## Visitantes, check-ins y sorteo (`src/features/visitors`)
+
+Las reglas y las sentencias están explicadas en [`data-model.md`](./data-model.md) ("Participación
+de visitantes"). Esta feature siempre usa PostgreSQL: no tiene versión mock.
+
+```
+lib/visitor-rules.ts              Reglas puras: gamertag, teléfono, token del QR, lote del escáner, ajuste de hora
+lib/visitors-links.ts             Rutas: /passport y /v/<token>
+lib/visitors-copy.ts              Textos del pasaporte, el sorteo y la afluencia
+lib/server/visitor-session.ts     Cookie httpOnly con el token del QR
+lib/server/visitors-queries.ts    Registro, pasaporte (QR + avance + boleto) y reemisión del QR
+lib/server/check-ins-queries.ts   Llave del escáner -> juego; guarda lotes de escaneos (idempotente)
+lib/server/raffle-queries.ts      Boleto, sorteo con crypto.randomInt y aviso a ganadores
+lib/server/traffic-queries.ts     Afluencia por stand ("use cache" de 30 s)
+lib/visitors-actions.ts           Server Actions: registro y boleto (públicas); sorteo y QR nuevo (admin)
+api/check-ins-route.ts            GET y POST /api/check-ins (escáner del stand)
+api/stand-traffic-route.ts        GET /api/stand-traffic
+api/visitor-qr-route.ts           GET /v/<token>
+api/visitors-api-client.ts        fetchStandTraffic(): fetch + validación de la respuesta
+```
+
+- **Pasaporte (`/passport`)**: sin cookie muestra el registro (sólo gamertag); con cookie, el QR,
+  el avance, la lista de juegos con stand y el sorteo. Los juegos que cuentan para el boleto son
+  los de equipos con stand asignado.
+- **QR**: codifica `NEXT_PUBLIC_SITE_URL/v/<token>`. Abrirlo (por ejemplo, desde la captura de
+  pantalla) guarda la cookie y lleva al pasaporte; un QR reemplazado lleva a
+  `/passport?qr=unknown`. La cookie es `Secure` cuando el sitio se sirve por https. El QR se dibuja
+  en el servidor como SVG (`@shared/components/qr-code`, con `qrcode-generator`).
+- **Afluencia**: `/api/stand-traffic` devuelve los check-ins de los últimos 15 minutos por stand;
+  el croquis la muestra en cada stand de equipo y la refresca cada 30 segundos. Los umbrales
+  ("Sin fila", "Afluencia media", "Mucha afluencia") están en `lib/stand-traffic.ts`.
+- **Sin conexión**: cuando `/passport` se abre con una carga completa y hay red, el service worker
+  guarda esa página (con el QR) como cualquier otra; no la guarda al llegar por la redirección de
+  `/v/<token>` ni por navegación interna. Por eso el respaldo principal sigue siendo la captura
+  de pantalla del QR. `/passport` no se precarga porque es personal.
+
+### Endpoint del escáner
+
+El escáner de cada stand (la PWA está pendiente) manda la llave de su equipo en el encabezado
+`x-scanner-key` (la generan `createTeamAction` o `rotateTeamScannerKeyAction`):
+
+```http
+GET /api/check-ins                    -> 200 { "game": { "name", "standCode" } } o 401
+POST /api/check-ins
+Content-Type: application/json
+
+{ "checkIns": [{ "id": "<uuid del escáner>", "token": "<URL o token del QR>", "scannedAt": "<ISO 8601>" }] }
+
+-> 200 { "game": {...}, "results": [{ "id", "status": "created" | "duplicate" | "unknown" }] }
+-> 400 si el lote está vacío, pasa de 200 escaneos o un id/fecha no es válido
+```
+
+- Reenviar el mismo lote es seguro: lo ya guardado responde `duplicate`.
+- `unknown` es un QR mal leído o reemplazado; no aborta el lote.
+- `scannedAt` se ajusta entre el inicio del evento (`EVENT_INFO.startsAt`) y la hora en que
+  llega al servidor.
+
+Para probarlo en local, asigna una llave conocida a un equipo:
+
+```bash
+KEY=$(openssl rand -hex 16); HASH=$(printf %s "$KEY" | sha256sum | cut -d' ' -f1)
+docker compose exec db psql -U utg -d ut_game_showcase \
+  -c "UPDATE team SET scanner_key_hash = '$HASH' WHERE stand_code = 'A1'"
+curl -H "x-scanner-key: $KEY" http://localhost:3000/api/check-ins
+```
+
 ## Croquis (`src/features/floor-plan`)
 
 El croquis no tiene datos propios en la base: combina contenido fijo del recinto con los

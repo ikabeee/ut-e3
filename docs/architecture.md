@@ -30,8 +30,9 @@ valida las que existen. No se dejan carpetas vacías ni `.gitkeep`.
 | `event` | Contenido del evento: reel, actividades, programa, ubicación y cierre. | Nada |
 | `home` | Compone la portada y conecta el programa con el croquis. | `event`, `games`, `floor-plan` |
 | `offline` | Service worker (`/sw.js`), aviso de conexión, aviso de versión nueva y página `/offline` (ver `docs/pwa.md`). | `games`, `floor-plan` y `home` (sus rutas, para precargarlas y enlazarlas desde `/offline`) |
-| `site` | Marco del sitio: cabecera, navegación, pie, 404 y página de error. | `games`, `floor-plan` y `home` (sólo sus rutas, para la navegación) |
+| `site` | Marco del sitio: cabecera, navegación, pie, 404 y página de error. | `games`, `floor-plan`, `home` y `visitors` (sólo sus rutas, para la navegación) |
 | `teams` | Equipos e integrantes: CRUD, llaves de escáner y Server Actions del panel. | `games` (invalida la caché de los juegos, que muestran el equipo y su stand) |
+| `visitors` | Pasaporte (`/passport`): registro con gamertag, QR, check-ins del escáner (`/api/check-ins`), boleto, sorteo y afluencia de los stands (`/api/stand-traffic`). | `event` (inicio del evento para ajustar la hora de los escaneos) y `floor-plan` (la ruta de cada stand) |
 | `example` | Scaffold para copiar; no se monta en ninguna ruta. | Nada |
 
 ## Grafo de dependencias entre features
@@ -46,7 +47,9 @@ offline ──┤         ├─> games ─┬─> event
           │         │          └─> floor-plan
           │         └─> floor-plan
           ├─> games
-          └─> floor-plan
+          ├─> floor-plan
+          └─> visitors (sólo site) ─┬─> event
+                                    └─> floor-plan
 teams ─────> games
 ```
 
@@ -71,6 +74,13 @@ Dos excepciones razonadas:
   cerraría un ciclo.
 - `siteConfig.organization` sigue en `shared/lib/site-config.ts`: varias features componen textos
   con la organización y ninguna puede depender de `site` sin cerrar un ciclo.
+
+### Croquis y afluencia: otro slot
+
+La afluencia en vivo de cada stand (`StandTrafficBadge`, feature `visitors`) llega al croquis igual
+que la portada: como `status` del `StandOccupant`, un `ReactNode` que componen las pages
+(`floor-plan-page.tsx` y `home-page.tsx`). Así `floor-plan` no depende de `visitors` (que ya usa
+`floor-plan` para enlazar cada stand) y no se cierra un ciclo.
 
 ### Croquis y juegos: capa anticorrupción
 
@@ -131,6 +141,12 @@ Panel de administración
   -> lib/*-actions.ts             runAdminAction(): permisos, validación y errores de la base
   -> lib/server/*-queries.ts      CRUD con Prisma
   -> updateTag("games")           el sitio vuelve a leer la base
+
+Visitantes (sin login)
+  -> /passport                    cookie httpOnly con el token del QR; registro y boleto con
+                                  Server Actions públicas (runServerAction)
+  -> POST /api/check-ins          escáner del stand: lote idempotente, el juego sale de su llave
+  -> GET /api/stand-traffic       afluencia ("use cache" de 30 s) -> useStandTraffic() en el croquis
 ```
 
 - **Servidor**: las consultas se cachean con `"use cache"`, así todas las páginas se
@@ -145,6 +161,9 @@ Panel de administración
   (`getEventContent()`, `buildPlanItems()`, `PLAN_LAYOUTS`) y lo pasan por props. Los componentes
   no importan constantes de contenido, así que se prueban con otro contenido y no cambian si
   mañana viene de la base de datos.
+- **Datos en vivo**: la afluencia de los stands no se prellena (el croquis sigue estático); el
+  navegador la pide a `/api/stand-traffic` y la refresca cada 30 segundos con `refetchInterval`.
+  El pasaporte es personal: su contenido va en `<Suspense>` y se renderiza en cada petición.
 - **Estado de la URL**: el género del catálogo (`?genre=`) y el stand del croquis (`#A1`) viven
   en la URL con `useSearchParamState` y `useUrlHash`, que no fuerzan el render en el cliente.
 - **Estado de la interfaz**: carruseles, zoom, filtros y galería usan hooks locales.

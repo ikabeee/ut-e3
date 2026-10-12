@@ -1,3 +1,5 @@
+import type { RawInput } from "@shared/lib/validation";
+
 /** Errores por campo de un formulario: `{ name: "Escribe el nombre." }`. */
 export type FieldErrors = Record<string, string>;
 
@@ -15,3 +17,6 @@ export function actionOk<T>(data: T): ActionResult<T> {
 export function actionError(error: string, fieldErrors?: FieldErrors): ActionResult<never> {
   return fieldErrors ? { ok: false, error, fieldErrors } : { ok: false, error };
 }
+
+/** Server Action que recibe los datos de un formulario (`useServerActionForm`). */
+export type FormAction<T = void> = (input: RawInput) => Promise<ActionResult<T>>;

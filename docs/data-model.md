@@ -270,7 +270,10 @@ erDiagram
      un segundo escaneo del mismo visitante en el mismo stand.
    - Comparando los `id` devueltos con los enviados, el escáner sabe cuáles fueron nuevos,
      cuáles repetidos y cuáles desconocidos.
-   - Va con SQL crudo (`db.raw.sql`): el `upsert` del ORM sólo cubre una restricción.
+   - Implementación (`visitors/lib/server/check-ins-queries.ts`): el ORM resuelve primero los
+     hashes del lote a visitantes (el `JOIN`) y guarda las filas con
+     `createAll(filas, { onConflict: "skip" })`, que genera `ON CONFLICT DO NOTHING` sin columna.
+     La hora se ajusta en el servidor con `clampScannedAt` antes de insertar.
 3. **Boleto**: cuando el visitante probó todos los juegos con stand asignado (hoy 18), su
    página le muestra un formulario para dejar su teléfono. El boleto se crea en una sola
    sentencia que se puede reintentar:
@@ -289,6 +292,8 @@ erDiagram
    RETURNING ticket_number;
    ```
 
+   - Implementación (`visitors/lib/server/raffle-queries.ts`): comprueba el avance y crea el
+     boleto con `createAll([...], { onConflict: "skip", conflictOn: ["visitorId"] })`.
    - Si no devuelve nada, el servidor busca el boleto existente (un doble toque o un
      reintento) y, si no hay, es que todavía le faltan juegos.
    - Un teléfono que ya tiene boleto lanza el error de `UNIQUE (phone)`; la app lo traduce a
@@ -304,6 +309,10 @@ erDiagram
    ORDER BY random()
    LIMIT $winners;
    ```
+
+   La implementación baraja en el servidor con `crypto.randomInt` (mismo resultado: se elige
+   entre las filas que existen) y marca `won_at` sólo donde sigue en `NULL`, así dos sorteos
+   simultáneos no premian dos veces el mismo boleto.
 
    El servidor marca `won_at`, manda el mensaje y guarda `notified_at`. En el main stage, el
    staff escanea el QR del ganador para comprobar que el boleto es suyo: el número por sí solo
@@ -374,8 +383,8 @@ stand**:
 - **Reenvíos seguros**: la sentencia del check-in es idempotente, así que el escáner conserva
   todos sus escaneos del día y tiene un botón "reenviar todo" por si hubiera que restaurar la
   base.
-- **Relojes**: `scanned_at` se ajusta en SQL a `LEAST(GREATEST(hora del escáner, inicio del
-  evento), now())`. Un reloj adelantado no altera la afluencia, uno atrasado no hace que se
+- **Relojes**: `scanned_at` se ajusta a `LEAST(GREATEST(hora del escáner, inicio del
+  evento), now())` (en el servidor, con `clampScannedAt`). Un reloj adelantado no altera la afluencia, uno atrasado no hace que se
   pierda el escaneo, y los que llegan tarde cuentan en su hora real.
 - **Un solo servidor que escriba**: la base en la nube (recomendado) o un servidor local en el
   recinto que después se copia a la nube, pero no los dos a la vez: chocarían en gamertags,

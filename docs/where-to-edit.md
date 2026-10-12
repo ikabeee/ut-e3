@@ -83,6 +83,20 @@ ls -lh public/media/
 | Stand seleccionado al abrir la portada | `INITIAL_SELECTION` en `src/features/home/components/program-and-floor-plan.tsx` |
 | Zoom máximo y márgenes al arrastrar | `src/features/floor-plan/lib/plan-viewport.ts` |
 
+## Pasaporte y sorteo
+
+| Quiero cambiar... | Archivo |
+| --- | --- |
+| Textos del pasaporte, el registro, el sorteo y la afluencia | `src/features/visitors/lib/visitors-copy.ts` (`VISITORS_COPY`) |
+| Reglas del gamertag y del teléfono (lada por defecto) | `src/features/visitors/lib/visitor-rules.ts` |
+| Duración de la cookie del visitante | `VISITOR_COOKIE_MAX_AGE_SECONDS` en `visitor-rules.ts` |
+| Mensajes de error (gamertag o teléfono repetidos) | `VISITOR_CONSTRAINT_MESSAGES` en `src/features/visitors/lib/visitors-actions.ts` |
+| Qué juegos cuentan para el boleto | `listRequiredGames` en `src/features/visitors/lib/server/visitors-queries.ts` |
+| Ventana y umbrales de la afluencia | `TRAFFIC_WINDOW_MINUTES` en `visitor-rules.ts` y `TRAFFIC_THRESHOLDS` en `stand-traffic.ts` |
+| Cada cuánto se refresca la afluencia | `STAND_TRAFFIC_REFRESH_MS` en `visitors-query-options.ts` y `cacheLife` en `lib/server/traffic-queries.ts` |
+| Máximo de ganadores por sorteo | `MAX_RAFFLE_WINNERS` en `visitor-rules.ts` |
+| Nombre del enlace en la navegación ("Mi QR") | `navigation.passport` en `src/features/site/lib/site-copy.ts` |
+
 ## Apariencia
 
 | Quiero cambiar... | Archivo |

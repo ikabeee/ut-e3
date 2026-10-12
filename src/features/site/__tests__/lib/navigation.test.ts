@@ -5,6 +5,7 @@ describe("site navigation", () => {
     expect(SECTION_LINKS.map((link) => [link.label, link.href])).toEqual([
       ["Juegos", "/games"],
       ["Croquis", "/floor-plan"],
+      ["Mi QR", "/passport"],
     ]);
     expect(NAV_LINKS[0]).toEqual({ href: "/", label: "Inicio" });
   });
