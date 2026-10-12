@@ -79,6 +79,16 @@
   text-transform: uppercase;
 }
 
+/* Títulos de las secciones del detalle de un juego (`.jg-h2`). */
+@utility type-section {
+  font-family: var(--font-wide);
+  font-weight: 700;
+  font-size: clamp(18px, 1.8vw, 24px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
 /* Títulos gigantes de sección (`.giant`). */
 @utility type-giant {
   font-family: var(--font-wide);
