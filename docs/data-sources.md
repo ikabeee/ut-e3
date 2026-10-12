@@ -1,6 +1,47 @@
-# Fuentes de datos y cómo reemplazar los mocks
+# Fuentes de datos y base de datos local
 
-Mientras no exista la base de datos, el sitio usa **datos mock** con el contenido del diseño
+## Base de datos local (Docker)
+
+El modelo está en [`data-model.md`](./data-model.md) y su contrato de Prisma 8 en
+`src/shared/lib/prisma/contract.prisma`. `docker-compose.yml` levanta PostgreSQL 16 con los
+valores de `.env.example`.
+
+```bash
+cp .env.example .env              # una sola vez
+docker compose up -d --wait db    # PostgreSQL en localhost:5432
+npm run db:migrate                # aplica las migraciones de migrations/app/
+npm run db:seed                   # géneros, plataformas y los 18 equipos con su juego
+npm run dev
+```
+
+- **Todo en Docker**: `npm run docker:up` levanta la base, corre migraciones y seeds (servicio
+  `migrate`) y construye y sirve el sitio en `http://localhost:3000`. `npm run docker:down` lo
+  detiene. `DATA_SOURCE` (de `.env`) se usa en el build y al servir; con `prisma`, el build
+  necesita la base con datos porque prerenderiza el catálogo, por eso el script levanta `db` y
+  `migrate` antes de construir `app`.
+- **Seeds** (`src/shared/lib/prisma/seed.ts` y `seed-data.json`): se pueden correr varias
+  veces, no duplican ni modifican lo que ya existe. Son los mismos 18 juegos del mock; las
+  portadas están en `public/mock/games/` (las que dicen "PORTADA DE EJEMPLO" son de relleno).
+- **Llaves de escáner**: el seed genera una llave aleatoria por equipo nuevo y la imprime una
+  sola vez; la base sólo guarda su hash. Si las pierdes en tu base local, bórrala y vuelve a
+  sembrar.
+- **Empezar de cero**: `docker compose down -v` borra el volumen con los datos.
+- **Puertos ocupados**: cambia `POSTGRES_PORT` o `APP_PORT` en `.env` (y el puerto de
+  `DATABASE_URL`).
+
+### Cambiar el modelo
+
+1. Edita `contract.prisma` y ejecuta `npm run db:emit` (lee antes
+   `node_modules/@prisma/orm-postgres/skills/prisma-8/`).
+2. En tu base local puedes probar con `npm run db:update` (no escribe migraciones).
+3. Antes del PR genera la migración formal con `npm run db:migration:plan -- --name <cambio>`,
+   revisa `migrations/app/<fecha>_<cambio>/` y súbela junto con el contrato.
+4. `npm run db:migrate` la aplica. El CI levanta PostgreSQL, aplica las migraciones, carga los
+   seeds y corre `npm run db:verify`.
+
+## Datos mock
+
+Mientras el sitio no lea la base de datos, usa **datos mock** con el contenido del diseño
 (carpeta UTG). Están aislados detrás de interfaces para que conectar Prisma no toque
 componentes, hooks ni pages, y la fuente se elige con la variable `DATA_SOURCE` (`mock` por
 defecto, `prisma` cuando exista su repositorio), validada en `src/shared/lib/env.ts`.
@@ -41,36 +82,11 @@ Si agregas o cambias un campo de `Game` que el navegador necesita, actualiza tam
 
 ### Pasos para usar Prisma
 
-> El modelo relacional propuesto (equipos, stands, géneros, check-ins y rifa) está en
-> [`data-model.md`](./data-model.md). El ejemplo de abajo es la versión plana mínima que
-> reproduce el tipo `Game` actual; la tabla "Relación con el tipo `Game` actual" de ese
-> documento explica cómo armarlo desde el modelo relacional.
+> El contrato (`src/shared/lib/prisma/contract.prisma`) ya implementa el modelo relacional de
+> [`data-model.md`](./data-model.md) (equipos, géneros, plataformas, fotos, check-ins y rifa); la
+> tabla "Relación con el tipo `Game` actual" de ese documento explica cómo armar `Game` con él.
 
-1. Agrega el modelo al contrato `src/shared/lib/prisma/contract.prisma` y ejecuta
-   `npm run db:emit` (lee antes `node_modules/@prisma/orm-postgres/skills/prisma-8/`):
-
-   ```prisma
-   model Game {
-     id            Int     @id @default(autoincrement())
-     slug          String  @unique
-     name          String
-     genre         String
-     team          String
-     members       Int
-     players       Int     @default(1)
-     stand         String  @unique
-     hasTournament Boolean
-     description   String
-     about         String?
-     imageSrc      String?
-     imagePosition String?
-     artSeed       Int
-     artShape      String
-     artBackground String
-     position      Int
-   }
-   ```
-
+1. Levanta la base local, aplica las migraciones y carga los seeds (ver "Base de datos local").
 2. Crea `src/features/games/lib/server/prisma-game-repository.ts` que implemente `GameRepository`
    y mapee las filas al tipo `Game` (el resto de la app no conoce los tipos de Prisma):
 
@@ -79,12 +95,12 @@ Si agregas o cambias un campo de `Game` que el navegador necesita, actualiza tam
    import type { GameRepository } from "@features/games/lib/game-repository";
    import { db } from "@shared/lib/prisma/db";
 
-   // toGame(row) arma el tipo Game: `image` con imageSrc/imagePosition, `art` con artSeed/palette
-   // y `about` partiendo el texto en párrafos (`null` si no tiene).
+   // toGame(row) arma el tipo Game con el equipo, el género, las plataformas y las fotos
+   // (tabla "Relación con el tipo `Game` actual" de docs/data-model.md).
 
    export const prismaGameRepository: GameRepository = {
      async listGames() {
-       const rows = await db.orm.public.Game.orderBy((game) => game.position.asc()).all();
+       const rows = await db.orm.public.Game.orderBy((game) => game.sortOrder.asc()).all();
        return rows.map(toGame);
      },
      async findGameBySlug(slug) {

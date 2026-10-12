@@ -13,7 +13,8 @@ src/shared/lib/prisma/contract.json
 src/shared/lib/prisma/contract.d.ts
 src/shared/lib/prisma/ops.json
 src/shared/lib/prisma/migration.json
-migrations/snapshots
+# Migraciones: las genera `npm run db:migration:plan` (se revisan, no se reformatean)
+migrations
 
 # Markdown: Prettier rellena las tablas con espacios para alinearlas, así que editar una celda larga
 # reescribe la tabla completa. Las tablas de docs/ quedan en formato compacto (| --- |).

@@ -1,0 +1,62 @@
+# PostgreSQL, migraciones + seeds y la plataforma. Guía completa en docs/data-sources.md.
+#
+# Sólo la base (para `npm run dev`):   docker compose up -d --wait db
+# Todo el stack:                       npm run docker:up   (http://localhost:3000)
+#
+# `npm run docker:up` levanta primero `db`, corre `migrate` y al final construye `app`: con
+# `DATA_SOURCE=prisma`, el build prerenderiza el catálogo y necesita la base con datos.
+# Las variables se pueden cambiar en `.env` (ver .env.example).
+
+name: ut-game-showcase
+
+x-database-url: &database-url postgresql://${POSTGRES_USER:-utg}:${POSTGRES_PASSWORD:-utg}@db:5432/${POSTGRES_DB:-ut_game_showcase}
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-utg}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-utg}
+      POSTGRES_DB: ${POSTGRES_DB:-ut_game_showcase}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build:
+      context: .
+      target: migrate
+    environment:
+      DATABASE_URL: *database-url
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      target: runner
+      # El build se conecta a la base por el puerto publicado en el host.
+      network: host
+      args:
+        DATABASE_URL: postgresql://${POSTGRES_USER:-utg}:${POSTGRES_PASSWORD:-utg}@localhost:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-ut_game_showcase}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        DATA_SOURCE: ${DATA_SOURCE:-mock}
+    environment:
+      DATABASE_URL: *database-url
+      # La misma fuente del build: las páginas cacheadas se revalidan con ella.
+      DATA_SOURCE: ${DATA_SOURCE:-mock}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  db-data:

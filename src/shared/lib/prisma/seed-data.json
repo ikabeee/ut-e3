@@ -1,0 +1,790 @@
+{
+  "genres": [
+    {
+      "slug": "accion",
+      "name": "Acción"
+    },
+    {
+      "slug": "aventura",
+      "name": "Aventura"
+    },
+    {
+      "slug": "puzle",
+      "name": "Puzle"
+    },
+    {
+      "slug": "carreras",
+      "name": "Carreras"
+    },
+    {
+      "slug": "roguelike",
+      "name": "Roguelike"
+    },
+    {
+      "slug": "simulacion",
+      "name": "Simulación"
+    },
+    {
+      "slug": "ritmo",
+      "name": "Ritmo"
+    },
+    {
+      "slug": "metroidvania",
+      "name": "Metroidvania"
+    },
+    {
+      "slug": "estrategia",
+      "name": "Estrategia"
+    },
+    {
+      "slug": "arcade",
+      "name": "Arcade"
+    },
+    {
+      "slug": "plataformas",
+      "name": "Plataformas"
+    },
+    {
+      "slug": "sigilo",
+      "name": "Sigilo"
+    },
+    {
+      "slug": "pelea",
+      "name": "Pelea"
+    }
+  ],
+  "platforms": [
+    {
+      "slug": "windows",
+      "name": "Windows"
+    },
+    {
+      "slug": "web",
+      "name": "Web (navegador)"
+    },
+    {
+      "slug": "macos",
+      "name": "macOS"
+    },
+    {
+      "slug": "linux",
+      "name": "Linux"
+    },
+    {
+      "slug": "android",
+      "name": "Android"
+    },
+    {
+      "slug": "ios",
+      "name": "iOS"
+    },
+    {
+      "slug": "console",
+      "name": "Consola / hardware propio"
+    }
+  ],
+  "teams": [
+    {
+      "name": "Equipo Grava",
+      "standCode": "A1",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS101",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 5",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "ceniza-protocol",
+        "name": "Ceniza Protocol",
+        "description": "Shooter de extracción en una ciudad sepultada por ceniza volcánica.",
+        "genre": "accion",
+        "platforms": ["windows", "web"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/ceniza-protocol.jpg",
+          "altText": "Portada de Ceniza Protocol",
+          "cropPosition": "70% 30%"
+        }
+      }
+    },
+    {
+      "name": "Equipo Marea",
+      "standCode": "A2",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS102",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "los-ultimos-faros",
+        "name": "Los Últimos Faros",
+        "description": "Mantén encendido el último faro del Caribe mientras la marea cambia la isla cada noche.",
+        "genre": "aventura",
+        "platforms": ["windows", "android"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/los-ultimos-faros.jpg",
+          "altText": "Portada de Los Últimos Faros",
+          "cropPosition": "50% 30%"
+        }
+      }
+    },
+    {
+      "name": "Equipo Ocho",
+      "standCode": "A3",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS103",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "hormigon",
+        "name": "Hormigón",
+        "description": "Vierte, fragua y apila concreto para construir torres imposibles.",
+        "genre": "puzle",
+        "platforms": ["windows"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/hormigon.jpg",
+          "altText": "Portada de Hormigón",
+          "cropPosition": "60% 40%"
+        }
+      }
+    },
+    {
+      "name": "Equipo Ruido",
+      "standCode": "A4",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS101",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "ruta-9",
+        "name": "Ruta 9",
+        "description": "Carreras arcade nocturnas sobre periféricos que nunca terminan.",
+        "genre": "carreras",
+        "platforms": ["windows", "web"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/ruta-9.jpg",
+          "altText": "Portada de Ruta 9",
+          "cropPosition": "60% 35%"
+        }
+      }
+    },
+    {
+      "name": "Equipo Fosa",
+      "standCode": "B1",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS102",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 5",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "subsuelo",
+        "name": "Subsuelo",
+        "description": "Desciende por cenotes y galerías que cambian en cada partida.",
+        "genre": "roguelike",
+        "platforms": ["windows"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/subsuelo.jpg",
+          "altText": "Portada de Subsuelo",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Tianguis",
+      "standCode": "B2",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS103",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "kaiju-mercado",
+        "name": "Kaiju Mercado",
+        "description": "Administra un tianguis donde los clientes miden treinta metros.",
+        "genre": "simulacion",
+        "platforms": ["windows", "android"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/kaiju-mercado.jpg",
+          "altText": "Portada de Kaiju Mercado",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Señal",
+      "standCode": "B3",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS101",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "eco-nulo",
+        "name": "Eco/Nulo",
+        "description": "Cada golpe en el ritmo borra una frecuencia del mapa.",
+        "genre": "ritmo",
+        "platforms": ["windows", "web"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/eco-nulo.jpg",
+          "altText": "Portada de Eco/Nulo",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Basalto",
+      "standCode": "B4",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS102",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 5",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "templo-404",
+        "name": "Templo 404",
+        "description": "Explora un templo que se corrompe como un archivo dañado.",
+        "genre": "metroidvania",
+        "platforms": ["windows"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/templo-404.jpg",
+          "altText": "Portada de Templo 404",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Coral",
+      "standCode": "A5",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS103",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "marea-roja",
+        "name": "Marea Roja",
+        "description": "Defiende el arrecife de una marea tóxica colocando torres de coral.",
+        "genre": "estrategia",
+        "platforms": ["windows"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/marea-roja.jpg",
+          "altText": "Portada de Marea Roja",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Comal",
+      "standCode": "A6",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS101",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "neon-taqueria",
+        "name": "Neón Taquería",
+        "description": "Atiende pedidos imposibles en una taquería que nunca cierra.",
+        "genre": "arcade",
+        "platforms": ["windows", "web", "android"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/neon-taqueria.jpg",
+          "altText": "Portada de Neón Taquería",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Bajo",
+      "standCode": "A7",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS102",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "pulso-cero",
+        "name": "Pulso Cero",
+        "description": "Sincroniza tus saltos con el bajo para cruzar una ciudad apagada.",
+        "genre": "ritmo",
+        "platforms": ["windows"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/pulso-cero.jpg",
+          "altText": "Portada de Pulso Cero",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Ceiba",
+      "standCode": "A8",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS103",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 5",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "xibalba-run",
+        "name": "Xibalbá Run",
+        "description": "Corre por el inframundo maya antes de que se cierre la última puerta.",
+        "genre": "plataformas",
+        "platforms": ["windows"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/xibalba-run.jpg",
+          "altText": "Portada de Xibalbá Run",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Pistón",
+      "standCode": "A9",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS101",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "turbina",
+        "name": "Turbina",
+        "description": "Carreras de drones caseros por los techos de Cancún.",
+        "genre": "carreras",
+        "platforms": ["windows", "web"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/turbina.jpg",
+          "altText": "Portada de Turbina",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Jade",
+      "standCode": "B5",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS102",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "sombra-jade",
+        "name": "Sombra Jade",
+        "description": "Infíltrate en un museo para recuperar una máscara robada.",
+        "genre": "sigilo",
+        "platforms": ["windows", "android"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/sombra-jade.jpg",
+          "altText": "Portada de Sombra Jade",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Nopal",
+      "standCode": "B6",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS103",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "granja-orbital",
+        "name": "Granja Orbital",
+        "description": "Cultiva nopales en gravedad cero y abastece una estación espacial.",
+        "genre": "simulacion",
+        "platforms": ["windows"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/granja-orbital.jpg",
+          "altText": "Portada de Granja Orbital",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Máscara",
+      "standCode": "B7",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS101",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 5",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "lucha-pixel",
+        "name": "Lucha Pixel",
+        "description": "Lucha libre en 2D con llaves que se arman como combos.",
+        "genre": "pelea",
+        "platforms": ["windows", "web"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/lucha-pixel.jpg",
+          "altText": "Portada de Lucha Pixel",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Raíz",
+      "standCode": "B8",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS102",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "cenote",
+        "name": "Cenote",
+        "description": "Explora cenotes inundados y descubre lo que guardan sus paredes.",
+        "genre": "aventura",
+        "platforms": ["windows"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/cenote.jpg",
+          "altText": "Portada de Cenote",
+          "cropPosition": null
+        }
+      }
+    },
+    {
+      "name": "Equipo Voltio",
+      "standCode": "B9",
+      "members": [
+        {
+          "fullName": "Integrante 1",
+          "groupName": "IDYGS103",
+          "isLeader": true
+        },
+        {
+          "fullName": "Integrante 2",
+          "groupName": "IDYGS101",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 3",
+          "groupName": "IDYGS102",
+          "isLeader": false
+        },
+        {
+          "fullName": "Integrante 4",
+          "groupName": "IDYGS103",
+          "isLeader": false
+        }
+      ],
+      "game": {
+        "slug": "circuito-7",
+        "name": "Circuito 7",
+        "description": "Conecta circuitos antes de que se acabe la batería del robot.",
+        "genre": "puzle",
+        "platforms": ["windows", "android"],
+        "itchioUrl": null,
+        "cover": {
+          "imageUrl": "/mock/games/circuito-7.jpg",
+          "altText": "Portada de Circuito 7",
+          "cropPosition": null
+        }
+      }
+    }
+  ]
+}

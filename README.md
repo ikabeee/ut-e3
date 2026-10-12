@@ -22,21 +22,31 @@ Proyecto comunitario: contribuyen estudiantes de toda la generación.
 - [HeroUI v3](https://heroui.com/en/docs/react/components) moldeado al diseño UTG (tema propio)
 - [TanStack Query 5](https://tanstack.com/query/latest) para el estado de servidor en el cliente
 - Tailwind CSS 4
-- [Prisma 8](https://www.prisma.io) (PostgreSQL ≥ 15) como ORM (los datos aún son mock)
+- [Prisma 8](https://www.prisma.io) (PostgreSQL ≥ 15) como ORM, con Docker Compose para la base local
 - ESLint 9 con las reglas de [SonarQube](https://github.com/SonarSource/SonarJS) y de TanStack Query
 - [Jest 30](https://jestjs.io) + [Testing Library](https://testing-library.com) para pruebas
 
 ## Empezar
 
-Requisitos: **Node.js ≥ 22.18**. PostgreSQL ≥ 15 sólo cuando se conecte la base de datos.
+Requisitos: **Node.js ≥ 22.18**. Para la base de datos, **Docker** (PostgreSQL 16).
 
 ```bash
 npm install
-cp .env.example .env   # DATABASE_URL y NEXT_PUBLIC_SITE_URL
+cp .env.example .env   # DATABASE_URL, NEXT_PUBLIC_SITE_URL y DATA_SOURCE
 npm run dev            # http://localhost:3000
 ```
 
-Mientras los juegos sean mock no hace falta una base de datos para desarrollar ni para el build.
+Con `DATA_SOURCE=mock` (el valor por defecto) el sitio usa los juegos del diseño y no necesita
+base de datos. Para trabajar con PostgreSQL:
+
+```bash
+docker compose up -d --wait db    # PostgreSQL en localhost:5432
+npm run db:migrate                # crea las tablas
+npm run db:seed                   # datos de ejemplo: 18 equipos con su juego
+```
+
+Para levantar todo en Docker (base, migraciones, seeds y el sitio) usa `npm run docker:up`. Los
+detalles están en [`docs/data-sources.md`](./docs/data-sources.md).
 
 El build de producción exige `NEXT_PUBLIC_SITE_URL` (URL absoluta `http(s)` sin `/` final,
 por ejemplo `https://ejemplo.com`): si falta o es inválida, `npm run build` falla con un
@@ -59,6 +69,10 @@ mensaje que explica el problema. En desarrollo y pruebas se usa `http://localhos
 | `npm run db:update` | Aplica cambios del contrato a tu base **local** (sin migraciones). |
 | `npm run db:migration:plan` | Genera una migración formal en `migrations/app/`. |
 | `npm run db:migrate` | Aplica las migraciones pendientes. |
+| `npm run db:seed` | Carga los datos de ejemplo (se puede correr varias veces). |
+| `npm run db:verify` | Comprueba que la base coincide con el contrato. |
+| `npm run docker:up` | Levanta PostgreSQL, aplica migraciones y seeds, y sirve el sitio en Docker. |
+| `npm run docker:down` | Detiene los contenedores (los datos se conservan en el volumen). |
 
 ## Estructura (screaming architecture)
 
