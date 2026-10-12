@@ -1,6 +1,6 @@
 /** @jest-environment node */
 import { headers } from "next/headers";
-import { isAdminRequest, matchesBasicCredentials } from "@shared/lib/server/admin-auth";
+import { isAdminAuthorization, isAdminRequest, matchesBasicCredentials } from "@shared/lib/server/admin-auth";
 
 jest.mock("next/headers", () => ({ headers: jest.fn() }));
 
@@ -36,5 +36,15 @@ describe("isAdminRequest", () => {
   it("checks the Authorization header against the configured credentials", async () => {
     await expect(isAdminRequest({ user: "admin", password: "s3cret" })).resolves.toBe(true);
     await expect(isAdminRequest({ user: "admin", password: "other" })).resolves.toBe(false);
+  });
+});
+
+describe("isAdminAuthorization", () => {
+  it("checks the header against the configured credentials and denies everything without them", () => {
+    const credentials = { user: "admin", password: "s3cret" };
+
+    expect(isAdminAuthorization(basic("admin:s3cret"), credentials)).toBe(true);
+    expect(isAdminAuthorization(basic("admin:other"), credentials)).toBe(false);
+    expect(isAdminAuthorization(basic("admin:s3cret"), null)).toBe(false);
   });
 });

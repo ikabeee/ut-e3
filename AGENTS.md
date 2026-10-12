@@ -72,6 +72,7 @@ PostgreSQL con `DATA_SOURCE=prisma` o los del diseño con `DATA_SOURCE=mock` (ve
 src/
 ├── app/                      # SOLO rutas de Next.js: renderizan una page de una feature
 ├── features/
+│   ├── admin/                # Panel de administración (/admin): equipos, juegos, catálogo y sorteo
 │   ├── event/                # Evento: fecha, sede, programa, actividades, reel y ubicación
 │   ├── example/              # Scaffold mínimo: cópialo para crear tus features
 │   ├── floor-plan/           # Croquis interactivo (/floor-plan): zonas, stands, zoom y directorio

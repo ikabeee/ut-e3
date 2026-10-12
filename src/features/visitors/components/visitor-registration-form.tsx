@@ -43,6 +43,7 @@ export function VisitorRegistrationForm({ hasUnknownQr }: Readonly<VisitorRegist
           {/* 16 px: con menos, iOS hace zoom al escribir. */}
           <Input
             placeholder={copy.gamertagPlaceholder}
+            onInput={form.clearFieldError}
             autoCapitalize="none"
             spellCheck={false}
             className="text-base"

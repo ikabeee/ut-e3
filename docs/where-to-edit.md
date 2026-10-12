@@ -50,7 +50,7 @@ ls -lh public/media/
 
 | Quiero cambiar... | Archivo |
 | --- | --- |
-| Juegos, equipos, integrantes, géneros, plataformas, stands, descripciones, jugadores y "Acerca del juego" | La base de datos (`DATA_SOURCE=prisma`), con las acciones de `games-actions.ts` y `teams-actions.ts` (panel de administración) |
+| Juegos, equipos, integrantes, géneros, plataformas, stands, descripciones, jugadores y "Acerca del juego" | La base de datos (`DATA_SOURCE=prisma`), con las acciones de `games-actions.ts` y `teams-actions.ts` (panel de administración en `/admin`) |
 | Datos de ejemplo de la base | `src/shared/lib/prisma/seed-data.json` (y `npm run db:seed`) |
 | Juegos sin base de datos (`DATA_SOURCE=mock`) | `src/features/games/lib/mock/mock-games.ts`. Las pruebas no dependen de este archivo |
 | Juegos de las pruebas | `src/features/games/__tests__/game-fixtures.ts` (los usa también `renderWithGames`) |
@@ -96,6 +96,17 @@ ls -lh public/media/
 | Cada cuánto se refresca la afluencia | `STAND_TRAFFIC_REFRESH_MS` en `visitors-query-options.ts` y `cacheLife` en `lib/server/traffic-queries.ts` |
 | Máximo de ganadores por sorteo | `MAX_RAFFLE_WINNERS` en `visitor-rules.ts` |
 | Nombre del enlace en la navegación ("Mi QR") | `navigation.passport` en `src/features/site/lib/site-copy.ts` |
+
+## Panel de administración
+
+| Quiero cambiar... | Archivo |
+| --- | --- |
+| Usuario y contraseña del panel | `ADMIN_USER` y `ADMIN_PASSWORD` en `.env` |
+| Textos del panel (títulos, botones, ayudas de los campos) | `src/features/admin/lib/admin-copy.ts` (`ADMIN_COPY`) |
+| Secciones y rutas del panel | `src/features/admin/lib/admin-links.ts` (y su página en `src/features/admin/pages/`) |
+| Rutas protegidas con usuario y contraseña | `config.matcher` en `src/proxy.ts` |
+| Campos de cada formulario | `team-fields.tsx`, `team-member-fields.tsx`, `game-fields.tsx` y `game-image-fields.tsx` en `src/features/admin/components/` |
+| Zona horaria de las horas del sorteo | `EVENT_TIME_ZONE` en `src/features/admin/lib/admin-records.ts` |
 
 ## Apariencia
 

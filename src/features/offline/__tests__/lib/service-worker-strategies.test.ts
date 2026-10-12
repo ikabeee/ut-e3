@@ -38,6 +38,7 @@ describe("getRequestStrategy", () => {
     ["/media/reel.jpg", { destination: "image" as const }, "image"],
     ["/api/games", {}, "api"],
     ["/manifest.webmanifest", {}, "network"],
+    ["/administration-guide", { mode: "navigate" as const }, "page"],
   ])("%s -> %s", (path, overrides, expected) => {
     expect(getRequestStrategy(request(path, overrides), ORIGIN)).toBe(expected);
   });
@@ -49,6 +50,9 @@ describe("getRequestStrategy", () => {
     ["other origins", request("https://fonts.example/font.woff2")],
     ["non GET requests", request("/games", { method: "POST", mode: "navigate" })],
     ["the service worker itself", request("/sw.js")],
+    ["the admin panel", request("/admin", { mode: "navigate" })],
+    ["admin sections", request("/admin/raffle", { mode: "navigate" })],
+    ["admin RSC requests", request("/admin/teams", { headers: headers({ RSC: "1" }) })],
   ])("never handles %s", (_name, req) => {
     expect(getRequestStrategy(req, ORIGIN)).toBe("bypass");
   });

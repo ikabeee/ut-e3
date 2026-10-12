@@ -137,7 +137,9 @@ GameRepository (mock o Prisma, según DATA_SOURCE)
   -> TanStack Query (cliente)     useGames() / useSuspenseQuery(gamesQueryOptions())
        -> api/games-api-client.ts fetchGames(): fetch + parseGamesResponse() -> Game[]
 
-Panel de administración
+Panel de administración (/admin, features/admin)
+  -> src/proxy.ts                 pide usuario y contraseña (HTTP Basic) en /admin
+  -> pages + lib/server/admin-queries.ts  vuelven a comprobar las credenciales y leen la base
   -> lib/*-actions.ts             runAdminAction(): permisos, validación y errores de la base
   -> lib/server/*-queries.ts      CRUD con Prisma
   -> updateTag("games")           el sitio vuelve a leer la base
@@ -155,8 +157,10 @@ Visitantes (sin login)
   `dehydrateForPrerender` (la versión de `dehydrate()` compatible con Cache Components) y los
   componentes los leen con `useGames()` sin esperar a la red.
 - **Mutaciones**: "Copiar dirección" usa `useMutation`. Las Server Actions del catálogo
-  (`games-actions.ts`, `teams-actions.ts`) invalidan `updateTag("games")`; el panel debe
-  invalidar también `gamesQueryKeys.all` en el cliente.
+  (`games-actions.ts`, `teams-actions.ts`) invalidan `updateTag("games")` y vuelven a renderizar
+  la página del panel (`refresh()`). El panel no usa TanStack Query: al navegar al catálogo, la
+  hidratación trae la fecha nueva de la caché de Next (`dehydrateForPrerender`) y reemplaza los
+  juegos guardados en el cliente.
 - **Contenido fijo** (evento, zonas y geometría del croquis): las pages lo leen
   (`getEventContent()`, `buildPlanItems()`, `PLAN_LAYOUTS`) y lo pasan por props. Los componentes
   no importan constantes de contenido, así que se prueban con otro contenido y no cambian si

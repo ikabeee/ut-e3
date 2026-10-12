@@ -35,6 +35,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 - Afluencia en vivo de cada stand en el croquis (se refresca cada 30 segundos).
 - Server Actions de administración para el sorteo (sortear, listar y avisar a ganadores) y para
   generar un QR nuevo a un visitante.
+- Panel de administración (`/admin`), protegido con usuario y contraseña (`ADMIN_USER` /
+  `ADMIN_PASSWORD`): equipos con su stand, integrantes y llave del escáner; juegos con sus
+  géneros, plataformas y fotos (incluida la portada que los hace visibles); géneros y
+  plataformas; sorteo de ganadores, aviso a cada ganador y QR nuevo para quien perdió el suyo.
+  El service worker y `robots.txt` lo dejan fuera.
 - El sitio se puede instalar como app: manifest con íconos PNG de 192 y 512 px, ícono
   `maskable`, `apple-touch-icon` para iOS y accesos directos a "Juegos" y "Croquis"
   (`npm run pwa:icons` regenera los íconos desde `src/app/icon.svg`).

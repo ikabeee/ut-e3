@@ -23,6 +23,7 @@ import sonarjs from "eslint-plugin-sonarjs";
  * de docs/architecture.md.
  */
 const FEATURE_DEPENDENCIES = {
+  admin: ["games", "teams", "visitors"],
   event: [],
   example: [],
   "floor-plan": [],
