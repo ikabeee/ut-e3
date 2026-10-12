@@ -20,7 +20,7 @@ export function PlanCategoryFilters({ visibleCategories, onToggle }: Readonly<Pl
           key={category}
           isSelected={visibleCategories.has(category)}
           onChange={() => onToggle(category)}
-          className="group type-tiny h-auto gap-2 rounded-none border border-border bg-background px-3 py-2 text-foreground opacity-40 pointer-coarse:min-h-11 transition-[border-color,opacity] duration-200 hover:border-accent hover:bg-background active:transform-none data-[selected=true]:bg-background data-[selected=true]:text-foreground data-[selected=true]:opacity-100"
+          className="toggle-button--filter group type-tiny pointer-coarse:min-h-11"
         >
           <CategorySwatch category={category} className="grayscale group-data-[selected=true]:grayscale-0" />
           {PLAN_FILTER_LABELS[category]}

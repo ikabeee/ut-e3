@@ -10,8 +10,8 @@ interface PlanZoomControlsProps {
   onFit: () => void;
 }
 
-const CONTROL_CLASS =
-  "h-11 w-[46px] rounded-none border-0 border-l border-border bg-background p-0 font-mono text-xl text-foreground transition-[background-color,color] duration-200 first:border-l-0 hover:bg-accent hover:text-background active:transform-none [--btn-edge:var(--border)] [--btn-fill:var(--accent)]";
+// Celdas de la barra: variante `button--segment` de components.css.
+const CONTROL_CLASS = "button--segment";
 
 /** Controles de zoom del croquis (`.zctl`): alejar, nivel, acercar y ajustar. */
 export function PlanZoomControls({ zoomPercent, onZoomOut, onZoomIn, onFit }: Readonly<PlanZoomControlsProps>) {
