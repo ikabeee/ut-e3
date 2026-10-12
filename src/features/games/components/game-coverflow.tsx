@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, type KeyboardEvent, type MouseEvent } from "react";
+import type { MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@heroui/react";
 import { CoverflowCover, CoverflowEdges } from "@features/games/components/coverflow-case";
 import { useCoverflow } from "@features/games/hooks/use-coverflow";
+import { useCoverflowKeyboard } from "@features/games/hooks/use-coverflow-keyboard";
 import { useGames } from "@features/games/hooks/use-games";
 import { getCoverflowPlacement } from "@features/games/lib/coverflow-layout";
 import { getGamePath } from "@features/games/lib/game-links";
@@ -20,28 +21,18 @@ const RACK_VARIABLES = [
   "[--ch:calc(var(--cw)*1.36)] [--cd:max(6px,calc(var(--cw)*.07))]",
 ].join(" ");
 
-const RACK_BACKGROUND = "radial-gradient(70% 60% at 50% 38%,#1e1e20 0%,#0c0c0d 55%,#000 100%)";
-const REFLECTION_MASK = "linear-gradient(to top,rgba(0,0,0,.38),transparent 46%)";
-const PLATE_ARROW_CLASS =
-  "size-14 border-background text-xl [--btn-base:var(--utg-black)] [--btn-edge:var(--utg-black)] [--btn-fill:var(--utg-white)] [--btn-ink-hover:var(--utg-black)] hover:border-white disabled:opacity-35";
-
 /** Exhibidor 3D de la portada (`.fan`): cajas de juegos con reflejo, cantos y perspectiva. */
 export function GameCoverflow() {
   const games = useGames();
   const router = useRouter();
   const coverflow = useCoverflow(games.length);
-  const caseRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const focusCurrentAfterMove = useRef(false);
-  const { current } = coverflow;
-  const currentGame = games[current];
-
-  // Al moverse con el teclado, el foco sigue a la caja del frente.
-  useEffect(() => {
-    if (focusCurrentAfterMove.current) {
-      focusCurrentAfterMove.current = false;
-      caseRefs.current[current]?.focus();
-    }
-  }, [current]);
+  const currentGame = games[coverflow.current];
+  const keyboard = useCoverflowKeyboard({
+    current: coverflow.current,
+    goNext: coverflow.goNext,
+    goPrevious: coverflow.goPrevious,
+    onOpenCurrent: () => router.push(getGamePath(currentGame.slug)),
+  });
 
   const handleCaseClick = (event: MouseEvent<HTMLAnchorElement>, index: number) => {
     // Una caja de lado primero gira al frente; la del frente abre el juego.
@@ -51,32 +42,16 @@ export function GameCoverflow() {
     }
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === " " && event.target instanceof HTMLAnchorElement) {
-      event.preventDefault();
-      router.push(getGamePath(currentGame.slug));
-    } else if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-      focusCurrentAfterMove.current = true;
-      if (event.key === "ArrowRight") {
-        coverflow.goNext();
-      } else {
-        coverflow.goPrevious();
-      }
-    }
-  };
-
   return (
     <div className="@container">
       <div
         aria-roledescription={GAMES_COPY.carousel.roleDescription}
         aria-label={GAMES_COPY.coverflow.label}
-        onKeyDown={handleKeyDown}
+        onKeyDown={keyboard.onKeyDown}
         className={cn(
           RACK_VARIABLES,
-          "relative mt-[clamp(8px,2vw,24px)] h-[calc(var(--top)+var(--ch)*1.13+56px+var(--rack-pad))] touch-pan-y overflow-hidden [perspective-origin:50%_calc(var(--top)+var(--ch)/2)] [perspective:calc(var(--cw)*var(--persp-f))]",
-          "after:pointer-events-none after:absolute after:inset-x-0 after:top-[calc(var(--top)+var(--ch)+2px)] after:h-px after:bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent)] after:content-['']",
+          "coverflow-rack relative mt-[clamp(8px,2vw,24px)] h-[calc(var(--top)+var(--ch)*1.13+56px+var(--rack-pad))] touch-pan-y overflow-hidden [perspective-origin:50%_calc(var(--top)+var(--ch)/2)] [perspective:calc(var(--cw)*var(--persp-f))]",
         )}
-        style={{ background: RACK_BACKGROUND }}
         {...coverflow.swipeHandlers}
       >
         {games.map((game, index) => {
@@ -84,9 +59,7 @@ export function GameCoverflow() {
           return (
             <Link
               key={game.slug}
-              ref={(element) => {
-                caseRefs.current[index] = element;
-              }}
+              ref={keyboard.caseRef(index)}
               href={getGamePath(game.slug)}
               tabIndex={placement.isCurrent ? 0 : -1}
               aria-label={GAMES_COPY.coverflow.caseLabel(game)}
@@ -102,8 +75,7 @@ export function GameCoverflow() {
               <CoverflowCover game={game} isCurrent={placement.isCurrent} />
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute top-[calc(100%+4px)] left-0 size-full [transform:scaleY(-1)] opacity-90"
-                style={{ maskImage: REFLECTION_MASK, WebkitMaskImage: REFLECTION_MASK }}
+                className="coverflow-reflection pointer-events-none absolute top-[calc(100%+4px)] left-0 size-full [transform:scaleY(-1)] opacity-90"
               >
                 <CoverflowCover game={game} isCurrent={placement.isCurrent} isReflection />
               </div>
@@ -115,7 +87,8 @@ export function GameCoverflow() {
           <ArrowButton
             direction="previous"
             label={GAMES_COPY.carousel.previous}
-            className={PLATE_ARROW_CLASS}
+            tone="plate"
+            className="size-14"
             isDisabled={coverflow.isFirst}
             onPress={coverflow.goPrevious}
           />
@@ -126,7 +99,8 @@ export function GameCoverflow() {
           <ArrowButton
             direction="next"
             label={GAMES_COPY.carousel.next}
-            className={PLATE_ARROW_CLASS}
+            tone="plate"
+            className="size-14"
             isDisabled={coverflow.isLast}
             onPress={coverflow.goNext}
           />

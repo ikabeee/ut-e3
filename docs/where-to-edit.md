@@ -59,6 +59,8 @@ ls -lh public/media/
 | Criterio de "Más juegos" | `getRelatedGames` en `src/features/games/lib/game-details.ts` |
 | Campos en los que busca el buscador | `filterGames` en `src/features/games/lib/game-filters.ts` |
 | Velocidad del carrusel de destacados | `FEATURED_SLIDE_DURATION` en `src/features/games/hooks/use-featured-carousel.ts` |
+| Diapositivas, título o miniaturas del carrusel de destacados | `featured-slides.tsx`, `featured-caption.tsx` y `featured-thumbnails.tsx` en `src/features/games/components/` |
+| Teclas del exhibidor 3D (flechas y Espacio) | `src/features/games/hooks/use-coverflow-keyboard.ts` |
 | Medidas del exhibidor 3D | `RACK_VARIABLES` en `src/features/games/components/game-coverflow.tsx` |
 | Conectar la base de datos | [`docs/data-sources.md`](./data-sources.md) |
 
@@ -71,6 +73,8 @@ ls -lh public/media/
 | Textos de la interfaz del croquis (filtros, leyenda, zoom, encabezado) | `src/features/floor-plan/lib/floor-plan-copy.ts` |
 | Stands informativos C1-C4 | `src/features/floor-plan/lib/plan-places.ts` (`INFO_STANDS`) |
 | Posición o tamaño de zonas, pasillos y stands | `src/features/floor-plan/lib/plan-layouts.ts` (horizontal y vertical) |
+| Cómo se dibuja cada parte del croquis | `src/features/floor-plan/components/`: `plan-zones.tsx` (zonas), `plan-stand-block.tsx` (pasillos y stands), `plan-entry.tsx` (entrada), `plan-public-area.tsx` (área de público), `plan-floor.tsx` (retícula y muro) y `plan-defs.tsx` (patrones). `floor-plan-drawing.tsx` sólo los junta |
+| Cuándo un stand o zona se ve seleccionado u oculto por los filtros | `getItemInteraction` en `src/features/floor-plan/lib/plan-interaction.ts` |
 | Asignar un juego a un stand | Campo `stand` del juego |
 | Stand seleccionado al abrir la portada | `INITIAL_SELECTION` en `src/features/home/components/program-and-floor-plan.tsx` |
 | Zoom máximo y márgenes al arrastrar | `src/features/floor-plan/lib/plan-viewport.ts` |
@@ -82,7 +86,9 @@ ls -lh public/media/
 | Colores (azul acid, negros, grises) | `src/shared/styles/theme.css` (paleta `--utg-*`) |
 | Tipografías | `src/shared/lib/fonts.ts` y `--font-*` en `src/shared/styles/theme.css` |
 | Botones (rellenos, bordes, medidas) | `src/shared/styles/components.css` |
-| Utilidades de texto (`type-giant`, `type-mono`, `type-tiny`...) | `src/shared/styles/typography.css` |
+| Variantes de botones y toggles (flechas del exhibidor y de la galería, zoom, géneros, filtros, pausa del reel) | `button--*` y `toggle-button--*` en `src/shared/styles/components.css` (lista en [`docs/design-system.md`](./design-system.md#variantes)) |
+| Degradados sobre imágenes y fondo del exhibidor 3D | `shade-*` y `coverflow-*` en `src/shared/styles/components.css`; sus colores en `src/shared/styles/theme.css` |
+| Utilidades de texto (`type-giant`, `type-section`, `type-mono`, `type-tiny`...) | `src/shared/styles/typography.css` |
 | Logo UTG | `src/shared/components/utg-logo.tsx` e icono `src/app/icon.svg` |
 | Ícono de la app instalada (PWA) | `src/app/icon.svg` y luego `npm run pwa:icons` (ver abajo) |
 | Nombre, colores y accesos directos de la app instalada | `src/app/manifest.ts` (colores en `themeColor` de `src/shared/lib/site-config.ts`) |

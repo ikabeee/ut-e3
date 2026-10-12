@@ -6,15 +6,6 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
-### Cambiado
-
-- La fecha, los horarios de torneos y sorteos, la sede y la organización se escriben una sola vez y
-  los textos los componen: las tarjetas de la portada, el aviso de torneo del detalle, la Arena y
-  Premios del croquis, el enlace de Google Calendar y los datos estructurados ya no pueden quedar
-  desactualizados. La dirección que se copia se arma con la misma dirección que se muestra.
-- "Características" del detalle muestra los jugadores de cada juego (`players`) y "Acerca del juego"
-  usa el texto del juego cuando lo tiene (`about`).
-
 ### Agregado
 
 - Sitio sin conexión (PWA): service worker que guarda la portada, el catálogo, cada juego y el
@@ -28,6 +19,16 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- La fecha, los horarios de torneos y sorteos, la sede y la organización se escriben una sola vez y
+  los textos los componen: las tarjetas de la portada, el aviso de torneo del detalle, la Arena y
+  Premios del croquis, el enlace de Google Calendar y los datos estructurados ya no pueden quedar
+  desactualizados. La dirección que se copia se arma con la misma dirección que se muestra.
+- "Características" del detalle muestra los jugadores de cada juego (`players`) y "Acerca del juego"
+  usa el texto del juego cuando lo tiene (`about`).
+- Sistema de diseño: las flechas del exhibidor 3D y de la galería, el zoom del croquis, los géneros,
+  los filtros del croquis y la pausa del reel usan variantes con nombre de `components.css` en lugar
+  de cadenas largas de utilidades. Los colores del exhibidor y los degradados sobre imágenes salen
+  de tokens del tema, y los títulos del detalle usan `type-section`. Sin cambios visuales.
 - Pruebas: viven en la carpeta `__tests__/` de cada feature (y de `src/shared/` y `src/app/`) en lugar
   de junto a cada archivo. El helper `renderWithGames` reemplaza el `QueryClient` repetido en las
   pruebas de componentes que leen el catálogo.

@@ -17,7 +17,7 @@ const COVER_SLOTS = [
   { id: "back-right", className: "left-1/2 scale-90 brightness-[.55] group-hover:translate-x-[6%]" },
   {
     id: "front",
-    className: "left-[26%] z-[2] shadow-[0_10px_30px_rgba(0,0,0,.7)] group-hover:translate-y-[-4px]",
+    className: "left-[26%] z-[2] shadow-cover group-hover:translate-y-[-4px]",
   },
 ] as const;
 
@@ -27,7 +27,7 @@ export function GenreTile({ genre, isSelected, onSelect }: Readonly<GenreTilePro
     <ToggleButton
       isSelected={isSelected}
       onChange={() => onSelect(genre.name)}
-      className="group h-auto w-auto snap-start flex-col items-center gap-4 rounded-none border border-surface bg-surface px-[18px] pt-[22px] pb-[18px] font-sans text-base font-normal whitespace-normal text-foreground transition-[border-color,background-color] duration-200 hover:border-border active:transform-none data-[selected=true]:border-accent data-[selected=true]:bg-surface data-[selected=true]:text-foreground"
+      className="toggle-button--tile group snap-start items-center"
     >
       <div className="relative aspect-[16/10] w-full">
         {COVER_SLOTS.map((slot, index) => (

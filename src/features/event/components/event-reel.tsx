@@ -13,10 +13,6 @@ interface EventReelProps {
   children: ReactNode;
 }
 
-// Degradado inferior para leer el texto y líneas de escaneo encima del video.
-const SHADE_BACKGROUND =
-  "linear-gradient(0deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.55) 38%,rgba(0,0,0,.15) 70%,rgba(0,0,0,.45) 100%),repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)";
-
 /** Encabezado con el reel de fondo, código de tiempo y botón de pausa (`.vh`). */
 export function EventReel({ reel, reelLabel, children }: Readonly<EventReelProps>) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -43,7 +39,8 @@ export function EventReel({ reel, reelLabel, children }: Readonly<EventReelProps
         {hasSource &&
           reel.sources.map((source) => <source key={source.src} src={source.src} type={source.type} />)}
       </video>
-      <div aria-hidden="true" className="absolute inset-0 -z-1" style={{ background: SHADE_BACKGROUND }} />
+      {/* Degradado inferior para leer el texto y líneas de escaneo encima del video. */}
+      <div aria-hidden="true" className="shade-reel absolute inset-0 -z-1" />
 
       {children}
 
@@ -58,7 +55,7 @@ export function EventReel({ reel, reelLabel, children }: Readonly<EventReelProps
         isSelected={isPaused}
         onChange={togglePlayback}
         aria-label={isPaused ? EVENT_COPY.reel.play : EVENT_COPY.reel.pause}
-        className="group absolute right-gutter bottom-[7px] grid size-11 min-w-0 place-items-center rounded-none border border-foreground bg-black/60 p-0 active:transform-none data-[selected=true]:bg-black/60 hover:bg-foreground data-[selected=true]:hover:bg-foreground"
+        className="toggle-button--overlay group absolute right-gutter bottom-[7px] grid size-11 place-items-center"
       >
         {isPaused ? (
           <span className="block size-0 border-y-[7px] border-l-[11px] border-y-transparent border-l-foreground group-hover:border-l-background" />

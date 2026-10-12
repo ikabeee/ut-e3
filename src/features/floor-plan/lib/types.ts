@@ -64,6 +64,9 @@ export interface PlanItem {
 
 export type PlanOrientation = "wide" | "tall";
 
+/** `overview`: croquis resumido del inicio. `explorer`: croquis interactivo de /floor-plan. */
+export type FloorPlanVariant = "overview" | "explorer";
+
 /** Rectángulo `[x, y, ancho, alto]` en coordenadas del SVG. */
 export type PlanRect = readonly [number, number, number, number];
 

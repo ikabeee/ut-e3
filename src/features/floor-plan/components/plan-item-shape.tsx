@@ -2,14 +2,8 @@
 
 import type { CSSProperties, KeyboardEvent, ReactNode } from "react";
 import { cn } from "@heroui/react";
+import type { PlanItemInteraction } from "@features/floor-plan/lib/plan-interaction";
 import type { PlanRect } from "@features/floor-plan/lib/types";
-
-export interface PlanItemInteraction {
-  isSelected: boolean;
-  /** Atenuado por los filtros del croquis (no se puede seleccionar). */
-  isHidden?: boolean;
-  onSelect: () => void;
-}
 
 interface PlanItemShapeProps extends PlanItemInteraction {
   id: string;

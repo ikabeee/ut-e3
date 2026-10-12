@@ -20,12 +20,20 @@ Definidos en `src/shared/styles/theme.css`. Usa siempre las clases del tema, no 
 | `--light` | `#F4F4F4` | `bg-paper` (con `text-paper-foreground`) |
 | `--blue-1` / `--blue-4` / `--blue-5` | `#68B5E6` / `#0582D4` / `#04598F` | `accent-hi`, `accent-strong`, `accent-deep` |
 | Grises de texto secundario | `#D8D8D8`, `#E4E4E4`, `#C9C8C1`, `#BDBDBD` | `text-copy`, `text-copy-strong`, `text-copy-warm`, `text-copy-dim` |
+| Cajas del exhibidor 3D (`--utg-case-border`, `--utg-case-face`, `--utg-case-edge`) | `#D6D6D6` / `#0B0B0D` / `#BDBDBD` | `border-case-border`, `bg-case-face`; el canto en `coverflow-edge` |
+| Fondo del rack (`--utg-rack-top`, `--utg-rack-bottom`) | `#1E1E20` / `#0C0C0D` | `coverflow-rack` |
+| Sombra de una portada sobre otras | negro al 70 % | `shadow-cover` |
+
+Las transparencias se arman con `color-mix()` sobre un token (por ejemplo,
+`color-mix(in srgb, var(--utg-black) 75%, transparent)`), nunca con `rgba()` fijo. Si un color
+tiene que leerse desde TypeScript (por ejemplo, para la Web Animations API), se lee del tema con
+`getComputedStyle` en lugar de repetir el valor: así lo hace `usePlanFlash`.
 
 ## Tipografía
 
 | Uso | Familia | Clase |
 | --- | --- | --- |
-| Títulos | Syncopate | `font-wide`, `type-wide`, `type-giant` |
+| Títulos | Syncopate | `font-wide`, `type-wide`, `type-giant`; `type-section` para los títulos de sección del detalle |
 | Texto corrido | Archivo | `font-sans` (por defecto) |
 | Etiquetas, botones y datos | JetBrains Mono | `font-mono`, `type-mono`, `type-tiny` |
 | Navegación | Martian Mono | `font-nav` |
@@ -42,11 +50,45 @@ márgenes), `section-block` (espacio entre secciones) y `scrollbar-none`.
 | Enlace con forma de botón | `ActionLink` (`@shared/components/action-link`) |
 | Flechas de carrusel | `ArrowButton` (`@shared/components/arrow-button`) |
 | Tarjeta clara | `PaperCard` (Card de HeroUI con el fondo `paper`) |
-| Selección on/off (géneros, filtros, pausa) | `ToggleButton` de HeroUI |
+| Selección on/off (géneros, filtros, pausa) | `ToggleButton` de HeroUI con su variante (ver abajo) |
 | Buscador | `SearchField` de HeroUI |
 | Barra de controles | `Toolbar` de HeroUI |
 | Insignia | `Chip` de HeroUI |
 | Estado vacío / carga | `EmptyState` y `Skeleton` de HeroUI |
+
+## Variantes
+
+Una variante es una clase con nombre en `src/shared/styles/components.css` (BEM de HeroUI) que se
+suma a la variante de HeroUI. Cambiar el aspecto de un control se hace ahí, en un solo lugar.
+
+| Componente | Clase | Dónde se usa |
+| --- | --- | --- |
+| `Button` / `ArrowButton tone="plate"` | `button--plate` | Flechas del exhibidor 3D: placa negra que se rellena de blanco. |
+| `Button` / `ArrowButton tone="overlay"` | `button--overlay` | Flechas sobre una imagen (galería del detalle): negro translúcido, sin barrido. |
+| `Button` | `button--segment` | Celdas de una barra de controles (zoom del croquis): el fondo cambia de golpe a azul. |
+| `ToggleButton` | `toggle-button--tile` | Tarjeta seleccionable (géneros del catálogo). |
+| `ToggleButton` | `toggle-button--filter` | Filtro que se atenúa al apagarse (categorías del croquis). |
+| `ToggleButton` | `toggle-button--overlay` | Botón de ícono sobre un video (pausa del reel). |
+
+Todos los `ToggleButton` son cuadrados y no se escalan al presionar (regla de `.toggle-button`).
+
+**Regla práctica: si una cadena de utilidades supera dos renglones o se repite, es una variante.**
+En `className` quedan sólo los ajustes de layout del contexto (posición, tamaño, márgenes), por
+ejemplo `<ArrowButton tone="overlay" className="absolute top-1/2 left-3" />`. No sobrescribas las
+variables del botón (`--btn-base`, `--btn-edge`, `--btn-fill`) desde TSX ni exportes cadenas de
+clases para que otro componente las reutilice: crea la variante o una utilidad.
+
+### Degradados y exhibidor
+
+Utilidades de `components.css` para leer texto sobre imágenes y para el exhibidor 3D:
+
+| Utilidad | Uso |
+| --- | --- |
+| `shade-reel` | Degradado y líneas de escaneo sobre el reel de la portada. |
+| `shade-featured`, `shade-featured-mobile` | Carrusel de destacados: izquierda y abajo en escritorio, sólo abajo en móvil. |
+| `shade-thumb` | Miniaturas con el nombre abajo. |
+| `shade-cover` | Portada de una caja del exhibidor. |
+| `coverflow-rack`, `coverflow-edge`, `coverflow-glow`, `coverflow-reflection` | Fondo y piso del rack, cantos, brillo de la caja al frente y reflejo. |
 
 ## Efectos
 
