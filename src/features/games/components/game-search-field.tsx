@@ -25,7 +25,7 @@ export function GameSearchField({ value, onChange }: Readonly<GameSearchFieldPro
         <SearchField.Input
           placeholder={GAMES_COPY.catalog.searchPlaceholder}
           autoComplete="off"
-          className="h-[46px] min-w-0 px-0.5 font-mono text-base text-foreground pointer-fine:text-sm placeholder:text-muted"
+          className="h-[46px] min-w-0 px-0.5 font-mono text-base text-foreground placeholder:text-muted pointer-fine:text-sm"
         />
       </SearchField.Group>
     </SearchField>

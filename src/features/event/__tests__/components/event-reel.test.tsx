@@ -24,7 +24,11 @@ class IntersectionObserverMock {
   disconnect() {}
 }
 
-function simulateBrowser({ isWideScreen = false, prefersSaveData = false, prefersReducedMotion = false }: BrowserConditions) {
+function simulateBrowser({
+  isWideScreen = false,
+  prefersSaveData = false,
+  prefersReducedMotion = false,
+}: BrowserConditions) {
   const matches: Record<string, boolean> = {
     [REEL_AUTOPLAY_MEDIA_QUERY]: isWideScreen,
     [REDUCED_MOTION_QUERY]: prefersReducedMotion,
@@ -68,7 +72,11 @@ let play: jest.SpyInstance;
 
 beforeEach(() => {
   intersectionCallbacks = [];
-  Object.defineProperty(window, "IntersectionObserver", { configurable: true, writable: true, value: IntersectionObserverMock });
+  Object.defineProperty(window, "IntersectionObserver", {
+    configurable: true,
+    writable: true,
+    value: IntersectionObserverMock,
+  });
   play = jest.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
   jest.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
 });

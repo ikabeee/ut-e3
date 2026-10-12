@@ -15,10 +15,10 @@ interface PlanDirectoryProps {
 /** Directorio de stands y zonas agrupado por categoría (`.dir`). */
 export function PlanDirectory({ items, selectedId, visibleCategories, onSelect }: Readonly<PlanDirectoryProps>) {
   return (
-    <div className="flex max-h-[420px] flex-col gap-[14px] overflow-auto pr-1 [scrollbar-color:var(--border)_transparent] max-[900px]:max-h-none">
+    <div className="flex max-h-[420px] [scrollbar-color:var(--border)_transparent] flex-col gap-[14px] overflow-auto pr-1 max-[900px]:max-h-none">
       {groupItemsByCategory(items).map(({ category, items: groupItems }) => (
         <div key={category} className="flex flex-col gap-1" hidden={!visibleCategories.has(category)}>
-          <p className="type-tiny m-0 mb-1 text-muted">{PLAN_CATEGORY_LABELS[category]}</p>
+          <p className="m-0 mb-1 type-tiny text-muted">{PLAN_CATEGORY_LABELS[category]}</p>
           {groupItems.map((item) => {
             const isCurrent = item.id === selectedId;
             return (

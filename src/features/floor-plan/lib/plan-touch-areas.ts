@@ -30,7 +30,12 @@ function overlapsWithin([startA, endA]: Interval, [startB, endB]: Interval, marg
  * Agranda un intervalo hasta `margin` por lado, sin salir de `limits` ni pasar de la mitad del
  * espacio que lo separa de cada bloqueo.
  */
-function growInterval([start, end]: Interval, blockers: readonly Interval[], limits: Interval, margin: number): Interval {
+function growInterval(
+  [start, end]: Interval,
+  blockers: readonly Interval[],
+  limits: Interval,
+  margin: number,
+): Interval {
   let low = Math.max(limits[0], start - margin);
   let high = Math.min(limits[1], end + margin);
   for (const [blockerStart, blockerEnd] of blockers) {
@@ -60,13 +65,17 @@ export function expandWithinNeighbors(
 
   const [left, right] = growInterval(
     ownX,
-    others.filter((other) => overlapsWithin(ownY, [other.top, other.bottom], margin)).map((other) => [other.left, other.right]),
+    others
+      .filter((other) => overlapsWithin(ownY, [other.top, other.bottom], margin))
+      .map((other) => [other.left, other.right]),
     [limits.left, limits.right],
     margin,
   );
   const [top, bottom] = growInterval(
     ownY,
-    others.filter((other) => overlapsWithin(ownX, [other.left, other.right], margin)).map((other) => [other.top, other.bottom]),
+    others
+      .filter((other) => overlapsWithin(ownX, [other.left, other.right], margin))
+      .map((other) => [other.top, other.bottom]),
     [limits.top, limits.bottom],
     margin,
   );
@@ -84,7 +93,9 @@ export function getTouchRects(layout: PlanLayout): ReadonlyMap<string, PlanRect>
   const targets: [string, PlanRect][] = [
     ...Object.entries(layout.zones).map(([id, zone]): [string, PlanRect] => [id, zone.rect]),
     ["entry", layout.entry],
-    ...layout.standBlocks.flatMap((block) => getStandCells(block).map(({ code, rect }): [string, PlanRect] => [code, rect])),
+    ...layout.standBlocks.flatMap((block) =>
+      getStandCells(block).map(({ code, rect }): [string, PlanRect] => [code, rect]),
+    ),
   ];
   const obstacles = [...targets.map(([, rect]) => rect), layout.publicArea];
   const bounds: PlanRect = [0, 0, layout.width, layout.height];

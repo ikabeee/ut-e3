@@ -42,9 +42,7 @@ export function GenreTile({ genre, isSelected, onSelect }: Readonly<GenreTilePro
       <b className="font-wide text-sm tracking-[-.01em] uppercase group-data-[selected=true]:text-accent">
         {genre.name}
       </b>
-      <span className="type-tiny text-muted">
-        {GAMES_COPY.catalog.gameCount(genre.gameCount)}
-      </span>
+      <span className="type-tiny text-muted">{GAMES_COPY.catalog.gameCount(genre.gameCount)}</span>
     </ToggleButton>
   );
 }

@@ -1,11 +1,6 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
-import {
-  defaultShouldDehydrateQuery,
-  QueryClient,
-  type DehydratedState,
-  type QueryKey,
-} from "@tanstack/react-query";
+import { defaultShouldDehydrateQuery, QueryClient, type DehydratedState, type QueryKey } from "@tanstack/react-query";
 
 export interface PrerenderedQuery {
   queryKey: QueryKey;

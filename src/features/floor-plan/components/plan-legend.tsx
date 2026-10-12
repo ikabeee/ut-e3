@@ -5,7 +5,7 @@ import { PLAN_CATEGORIES } from "@features/floor-plan/lib/plan-places";
 /** Leyenda del croquis del inicio (`.legend`). */
 export function PlanLegend() {
   return (
-    <ul className="type-tiny m-0 grid list-none grid-cols-2 gap-x-[14px] gap-y-2 p-0 pt-[14px] text-muted">
+    <ul className="m-0 grid list-none grid-cols-2 gap-x-[14px] gap-y-2 p-0 pt-[14px] type-tiny text-muted">
       {PLAN_CATEGORIES.map((category) => (
         <li key={category} className="flex items-center gap-2">
           <CategorySwatch category={category} />

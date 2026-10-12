@@ -8,29 +8,25 @@ import type { PlanCategory, PlanItem, PlanZoneTimes, StandOccupant, ZoneId } fro
  * programa que citan algunas zonas.
  */
 export function buildPlanItems(occupants: readonly StandOccupant[], times: PlanZoneTimes): PlanItem[] {
-  const teamStands = occupants.map(
-    (occupant): PlanItem => ({
-      id: occupant.stand,
-      category: "team",
-      code: occupant.stand,
-      title: occupant.title,
-      subtitle: occupant.subtitle,
-      description: occupant.description,
-      cover: occupant.cover,
-    }),
-  );
+  const teamStands = occupants.map((occupant): PlanItem => ({
+    id: occupant.stand,
+    category: "team",
+    code: occupant.stand,
+    title: occupant.title,
+    subtitle: occupant.subtitle,
+    description: occupant.description,
+    cover: occupant.cover,
+  }));
 
-  const infoStands = Object.entries(INFO_STANDS).map(
-    ([code, stand]): PlanItem => ({
-      id: code,
-      category: "info",
-      code,
-      title: stand.title,
-      subtitle: FLOOR_PLAN_COPY.infoStandSubtitle,
-      description: stand.description,
-      cover: null,
-    }),
-  );
+  const infoStands = Object.entries(INFO_STANDS).map(([code, stand]): PlanItem => ({
+    id: code,
+    category: "info",
+    code,
+    title: stand.title,
+    subtitle: FLOOR_PLAN_COPY.infoStandSubtitle,
+    description: stand.description,
+    cover: null,
+  }));
 
   const zones = (Object.keys(PLAN_ZONES) as ZoneId[]).map((id): PlanItem => {
     const zone = PLAN_ZONES[id];

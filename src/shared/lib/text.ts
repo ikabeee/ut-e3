@@ -1,9 +1,6 @@
 /** Quita acentos y pasa a minúsculas para comparar textos ("Xibalbá" -> "xibalba"). */
 export function normalizeText(text: string) {
-  return text
-    .normalize("NFD")
-    .replaceAll(/[̀-ͯ]/g, "")
-    .toLowerCase();
+  return text.normalize("NFD").replaceAll(/[̀-ͯ]/g, "").toLowerCase();
 }
 
 /** Número con dos dígitos: 7 -> "07". */

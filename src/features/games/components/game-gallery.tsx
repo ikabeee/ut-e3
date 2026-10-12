@@ -26,7 +26,11 @@ export function GameGallery({ gameName, shots, labels }: Readonly<GameGalleryPro
 
   return (
     <>
-      <section aria-label={GAMES_COPY.detail.gallery} className="relative aspect-video max-w-full overflow-hidden bg-surface" {...swipeHandlers}>
+      <section
+        aria-label={GAMES_COPY.detail.gallery}
+        className="relative aspect-video max-w-full overflow-hidden bg-surface"
+        {...swipeHandlers}
+      >
         <div className="absolute inset-0">
           {shots.map((shot, index) => (
             <div
@@ -47,14 +51,26 @@ export function GameGallery({ gameName, shots, labels }: Readonly<GameGalleryPro
             </div>
           ))}
         </div>
-        <ArrowButton direction="previous" label={GAMES_COPY.detail.previousImage} tone="overlay" className={cn(NAV_BUTTON_CLASS, "left-3")} onPress={showPrevious} />
-        <ArrowButton direction="next" label={GAMES_COPY.detail.nextImage} tone="overlay" className={cn(NAV_BUTTON_CLASS, "right-3")} onPress={showNext} />
+        <ArrowButton
+          direction="previous"
+          label={GAMES_COPY.detail.previousImage}
+          tone="overlay"
+          className={cn(NAV_BUTTON_CLASS, "left-3")}
+          onPress={showPrevious}
+        />
+        <ArrowButton
+          direction="next"
+          label={GAMES_COPY.detail.nextImage}
+          tone="overlay"
+          className={cn(NAV_BUTTON_CLASS, "right-3")}
+          onPress={showNext}
+        />
       </section>
 
       <div
         role="tablist"
         aria-label={GAMES_COPY.detail.images}
-        className="scrollbar-none -mt-4 grid auto-cols-[clamp(110px,16%,170px)] grid-flow-col gap-[10px] overflow-x-auto"
+        className="-mt-4 scrollbar-none grid auto-cols-[clamp(110px,16%,170px)] grid-flow-col gap-[10px] overflow-x-auto"
       >
         {shots.map((shot, index) => (
           <button

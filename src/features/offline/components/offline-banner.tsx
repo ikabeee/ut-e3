@@ -13,7 +13,7 @@ export function OfflineBanner() {
   return (
     <div role="status" className="w-full max-w-xl">
       {isOffline ? (
-        <p className="type-mono pointer-events-auto m-0 border border-accent bg-background px-4 py-3 text-sm text-foreground">
+        <p className="pointer-events-auto m-0 border border-accent bg-background px-4 py-3 type-mono text-sm text-foreground">
           {OFFLINE_COPY.banner}
         </p>
       ) : null}

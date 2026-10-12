@@ -21,7 +21,10 @@ describe("games contract", () => {
   });
 
   it("keeps the paragraphs of a game and rejects anything that is not text", () => {
-    const [game] = overHttp([toGameDto({ ...GAME_FIXTURES[0], about: ["Primero.", "Segundo."] })]) as Record<string, unknown>[];
+    const [game] = overHttp([toGameDto({ ...GAME_FIXTURES[0], about: ["Primero.", "Segundo."] })]) as Record<
+      string,
+      unknown
+    >[];
 
     expect(parseGamesResponse([game])[0].about).toEqual(["Primero.", "Segundo."]);
     expect(() => parseGamesResponse([{ ...game, about: ["Primero.", 2] }])).toThrow("[0].about[1]");

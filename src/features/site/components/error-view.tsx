@@ -21,10 +21,10 @@ export function ErrorView({ onRetry, digest }: Readonly<ErrorViewProps>) {
     <main className="page-wrap flex flex-col items-start gap-6 pt-[clamp(48px,8vw,120px)]">
       {/* Los error boundaries no admiten `metadata`: React lleva este título al <head>. */}
       <title>{copy.documentTitle(siteConfig.name)}</title>
-      <p className="type-tiny m-0 text-accent">{copy.kicker}</p>
+      <p className="m-0 type-tiny text-accent">{copy.kicker}</p>
       <h1 className="type-giant">{copy.title}</h1>
       <p className="m-0 max-w-[46ch] text-copy">{copy.description}</p>
-      {digest ? <p className="type-mono m-0 text-muted">{copy.digest(digest)}</p> : null}
+      {digest ? <p className="m-0 type-mono text-muted">{copy.digest(digest)}</p> : null}
       <div className="flex flex-wrap gap-3">
         <ActionButton variant="primary" arrow="e" onPress={onRetry}>
           {copy.retry}

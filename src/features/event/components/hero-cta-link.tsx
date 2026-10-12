@@ -19,7 +19,7 @@ export function HeroCtaLink({ href, children }: Readonly<HeroCtaLinkProps>) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group fill-wipe inline-flex items-stretch p-0 font-mono text-sm font-bold text-background uppercase no-underline [--wipe-base:var(--utg-white)] [--wipe-fill:var(--accent)] [--wipe-ink:var(--utg-black)] max-[760px]:flex-[1_1_100%] max-[760px]:justify-between max-[640px]:self-stretch"
+      className="group inline-flex fill-wipe items-stretch p-0 font-mono text-sm font-bold text-background uppercase no-underline [--wipe-base:var(--utg-white)] [--wipe-fill:var(--accent)] [--wipe-ink:var(--utg-black)] max-[760px]:flex-[1_1_100%] max-[760px]:justify-between max-[640px]:self-stretch"
     >
       <ScrambleText text={children} className="flex items-center px-5 py-4" />
       <span
@@ -27,8 +27,12 @@ export function HeroCtaLink({ href, children }: Readonly<HeroCtaLinkProps>) {
         className="relative grid w-[52px] place-items-center bg-accent text-background transition-colors duration-200 group-hover:bg-background group-hover:text-accent"
       >
         <span className={`${GLYPH_CLASS} glitch-layer-base group-hover:[animation-duration:.5s]`}>{GLYPH}</span>
-        <span className={`${SLICE_CLASS} glitch-layer-a text-accent-deep group-hover:[animation-duration:.5s]`}>{GLYPH}</span>
-        <span className={`${SLICE_CLASS} glitch-layer-b text-accent-hi group-hover:[animation-duration:.5s]`}>{GLYPH}</span>
+        <span className={`${SLICE_CLASS} glitch-layer-a text-accent-deep group-hover:[animation-duration:.5s]`}>
+          {GLYPH}
+        </span>
+        <span className={`${SLICE_CLASS} glitch-layer-b text-accent-hi group-hover:[animation-duration:.5s]`}>
+          {GLYPH}
+        </span>
       </span>
     </a>
   );

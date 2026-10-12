@@ -20,7 +20,7 @@ export function GameSidebar({ game, eventDateLabel, admissionLabel, calendarUrl 
       <div className="relative aspect-[3/4] max-w-full overflow-hidden border border-border bg-surface max-[980px]:hidden">
         <GameMedia game={game} sizes="320px" />
       </div>
-      <Chip className="type-tiny h-6 self-start rounded-none border border-border px-[9px] py-0 font-normal">
+      <Chip className="h-6 self-start rounded-none border border-border px-[9px] py-0 type-tiny font-normal">
         {GAMES_COPY.features.demo}
       </Chip>
       <p className="m-0 font-wide text-lg font-bold uppercase">{admissionLabel}</p>

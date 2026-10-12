@@ -19,8 +19,8 @@ export function EventIntroSection({ intro, activities }: Readonly<EventIntroSect
           {secondLine}
         </h2>
         <div className="mt-9 grid grid-cols-2 items-end gap-gutter max-[820px]:grid-cols-1">
-          <p className="type-mono m-0 max-w-[46ch]">{intro.lead}</p>
-          <p className="type-mono m-0 max-w-[46ch] text-muted">{intro.details}</p>
+          <p className="m-0 max-w-[46ch] type-mono">{intro.lead}</p>
+          <p className="m-0 max-w-[46ch] type-mono text-muted">{intro.details}</p>
         </div>
         <div className="mt-[clamp(48px,6vw,80px)] grid grid-cols-2 gap-gutter max-[820px]:grid-cols-1">
           {activities.map((activity) => (

@@ -1,8 +1,4 @@
-import {
-  defaultShouldDehydrateQuery,
-  environmentManager,
-  QueryClient,
-} from "@tanstack/react-query";
+import { defaultShouldDehydrateQuery, environmentManager, QueryClient } from "@tanstack/react-query";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -14,8 +10,7 @@ function makeQueryClient() {
       },
       dehydrate: {
         // Also dehydrate pending queries so a prefetch can stream to the client.
-        shouldDehydrateQuery: (query) =>
-          defaultShouldDehydrateQuery(query) || query.state.status === "pending",
+        shouldDehydrateQuery: (query) => defaultShouldDehydrateQuery(query) || query.state.status === "pending",
         // Let Next.js handle server errors instead of redacting them here.
         shouldRedactErrors: () => false,
       },

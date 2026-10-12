@@ -38,6 +38,4 @@ const martianMono = Martian_Mono({
   display: "swap",
 });
 
-export const fontVariables = [syncopate, archivo, jetbrainsMono, martianMono]
-  .map((font) => font.variable)
-  .join(" ");
+export const fontVariables = [syncopate, archivo, jetbrainsMono, martianMono].map((font) => font.variable).join(" ");

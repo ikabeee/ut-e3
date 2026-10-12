@@ -274,7 +274,7 @@
       color-mix(in srgb, var(--utg-black) 45%, transparent) 100%
     ),
     /* Líneas de escaneo */
-    repeating-linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 18%, transparent) 0 1px, transparent 1px 3px);
+      repeating-linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 18%, transparent) 0 1px, transparent 1px 3px);
 }
 
 /* Destacados en escritorio: oscurece a la izquierda (texto) y abajo (miniaturas). */
@@ -311,7 +311,12 @@
 
 /* Exhibidor 3D: fondo del rack y línea del piso donde se apoyan las cajas. */
 @utility coverflow-rack {
-  background: radial-gradient(70% 60% at 50% 38%, var(--utg-rack-top) 0%, var(--utg-rack-bottom) 55%, var(--utg-black) 100%);
+  background: radial-gradient(
+    70% 60% at 50% 38%,
+    var(--utg-rack-top) 0%,
+    var(--utg-rack-bottom) 55%,
+    var(--utg-black) 100%
+  );
 
   &::after {
     content: "";
@@ -385,8 +390,7 @@
 /* Botón con relleno de izquierda a derecha para elementos que no son Button de HeroUI. */
 @utility fill-wipe {
   background: var(--wipe-base, var(--utg-black))
-    linear-gradient(var(--wipe-fill, var(--accent)), var(--wipe-fill, var(--accent))) no-repeat left
-    center / 0% 100%;
+    linear-gradient(var(--wipe-fill, var(--accent)), var(--wipe-fill, var(--accent))) no-repeat left center / 0% 100%;
   transition:
     background-size 0.38s var(--ease-wipe),
     color 0.18s 0.06s,

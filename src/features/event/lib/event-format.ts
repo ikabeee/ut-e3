@@ -31,7 +31,10 @@ export function formatHoursLabel(startsAt: string, endsAt: string) {
 
 /** Fecha en UTC con el formato de Google Calendar: "20261127T150000Z". */
 function toCalendarDate(isoDateTime: string) {
-  return new Date(isoDateTime).toISOString().replaceAll(/[-:]/g, "").replace(/\.\d{3}/, "");
+  return new Date(isoDateTime)
+    .toISOString()
+    .replaceAll(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
 }
 
 interface CalendarEvent {

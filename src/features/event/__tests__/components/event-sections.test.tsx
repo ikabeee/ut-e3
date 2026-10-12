@@ -19,7 +19,13 @@ const venue: EventVenue = {
 };
 
 const activities: EventActivity[] = [
-  { id: "talks", place: "Auditorio", title: "Charlas", description: "Charlas de los equipos.", facts: [{ label: "Inicio", value: "11:00" }] },
+  {
+    id: "talks",
+    place: "Auditorio",
+    title: "Charlas",
+    description: "Charlas de los equipos.",
+    facts: [{ label: "Inicio", value: "11:00" }],
+  },
 ];
 
 describe("event sections", () => {
@@ -55,6 +61,9 @@ describe("event sections", () => {
     expect(screen.getByText("Zona hotelera · Km 9")).toBeInTheDocument();
     expect(screen.getByText("Blvd. Kukulcán Km 9, C.P. 77500, Cancún, Quintana Roo.")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: /la CC está sobre la carretera/ })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Abrir en Google Maps/ })).toHaveAttribute("href", "https://maps.example/cc");
+    expect(screen.getByRole("link", { name: /Abrir en Google Maps/ })).toHaveAttribute(
+      "href",
+      "https://maps.example/cc",
+    );
   });
 });

@@ -20,8 +20,7 @@ export function filterGames(games: readonly Game[], { genre, keyword }: GameFilt
   const query = normalizeText(keyword.trim());
 
   return games.filter(
-    (game) =>
-      (genre === null || game.genre === genre) && (query === "" || searchableText(game).includes(query)),
+    (game) => (genre === null || game.genre === genre) && (query === "" || searchableText(game).includes(query)),
   );
 }
 

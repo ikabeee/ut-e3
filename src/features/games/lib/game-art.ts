@@ -129,7 +129,13 @@ const drawTriangles: ShapeDrawer = ({ ctx }, _seed, { size, cx, cy }) => {
 const SIGNAL_SHAPES: readonly ShapeDrawer[] = [drawConcentricSquares, drawBars, drawDotGrid, drawTriangles];
 
 /** Columnas de datos tipo escáner; sólo caben en lienzos anchos. */
-function drawScanData(canvas: ArtCanvasContext, art: GameKeyArt, labels: ArtLabels, { size, random }: ArtLayout, ink: string) {
+function drawScanData(
+  canvas: ArtCanvasContext,
+  art: GameKeyArt,
+  labels: ArtLabels,
+  { size, random }: ArtLayout,
+  ink: string,
+) {
   const { ctx, width, height, monoFontFamily } = canvas;
   if (width < 420) {
     return;

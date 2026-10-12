@@ -1,7 +1,4 @@
-import {
-  getCoverflowPlacement,
-  getInitialCoverflowIndex,
-} from "@features/games/lib/coverflow-layout";
+import { getCoverflowPlacement, getInitialCoverflowIndex } from "@features/games/lib/coverflow-layout";
 
 describe("coverflow layout", () => {
   it("starts in the middle of the catalog", () => {

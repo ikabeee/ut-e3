@@ -51,7 +51,10 @@ export function PlanZones({ zones, variant, selection, touchRects }: Readonly<Pl
           fontWeight={800}
           fill={isActivity ? "var(--accent)" : "var(--foreground)"}
           // En el croquis del inicio la etiqueta usa el ancho extendido de la tipografía.
-          className={cn("pointer-events-none font-wide uppercase", variant === "overview" && "[font-variation-settings:'wdth'_125]")}
+          className={cn(
+            "pointer-events-none font-wide uppercase",
+            variant === "overview" && "[font-variation-settings:'wdth'_125]",
+          )}
         >
           {zone.label}
         </FitSvgText>

@@ -36,9 +36,7 @@ export function useFloorPlanExplorer(
     [layouts],
   );
   const [hash, setHash] = useUrlHash();
-  const [visibleCategories, setVisibleCategories] = useState<ReadonlySet<PlanCategory>>(
-    () => new Set(PLAN_CATEGORIES),
-  );
+  const [visibleCategories, setVisibleCategories] = useState<ReadonlySet<PlanCategory>>(() => new Set(PLAN_CATEGORIES));
 
   const width = useElementWidth(viewportRef);
   const orientation: PlanOrientation = width !== null && width < EXPLORER_TALL_BREAKPOINT ? "tall" : "wide";

@@ -48,7 +48,12 @@ describe("expandWithinNeighbors", () => {
   });
 
   it("stays inside the drawing", () => {
-    expect(expandWithinNeighbors([2, 2, 40, 30], [], [0, 0, 100, 100])).toEqual([0, 0, 42 + TOUCH_MARGIN, 32 + TOUCH_MARGIN]);
+    expect(expandWithinNeighbors([2, 2, 40, 30], [], [0, 0, 100, 100])).toEqual([
+      0,
+      0,
+      42 + TOUCH_MARGIN,
+      32 + TOUCH_MARGIN,
+    ]);
   });
 });
 
