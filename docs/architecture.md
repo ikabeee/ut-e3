@@ -96,6 +96,10 @@ GameRepository (mock hoy, Prisma después)
   componentes los leen con `useGames()` sin esperar a la red.
 - **Mutaciones**: "Copiar dirección" usa `useMutation`. Cuando existan mutaciones de datos,
   invalida `updateTag("games")` en la Server Action y `gamesQueryKeys.all` en el cliente.
+- **Contenido fijo** (evento, zonas y geometría del croquis): las pages lo leen
+  (`getEventContent()`, `buildPlanItems()`, `PLAN_LAYOUTS`) y lo pasan por props. Los componentes
+  no importan constantes de contenido, así que se prueban con otro contenido y no cambian si
+  mañana viene de la base de datos.
 - **Estado de la URL**: el género del catálogo (`?genre=`) y el stand del croquis (`#A1`) viven
   en la URL con `useSearchParamState` y `useUrlHash`, que no fuerzan el render en el cliente.
 - **Estado de la interfaz**: carruseles, zoom, filtros y galería usan hooks locales.

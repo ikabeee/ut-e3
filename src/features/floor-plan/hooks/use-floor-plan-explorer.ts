@@ -1,12 +1,11 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { usePlanFlash } from "@features/floor-plan/hooks/use-plan-flash";
-import { usePlanItems } from "@features/floor-plan/hooks/use-plan-items";
 import { usePlanViewport } from "@features/floor-plan/hooks/use-plan-viewport";
-import { findItemRect, getBaseViewBox, PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
-import { toggleCategory } from "@features/floor-plan/lib/plan-items";
+import { findItemRect, getBaseViewBox } from "@features/floor-plan/lib/plan-layouts";
+import { indexItems, toggleCategory } from "@features/floor-plan/lib/plan-items";
 import { PLAN_CATEGORIES } from "@features/floor-plan/lib/plan-places";
 import { focusViewBox } from "@features/floor-plan/lib/plan-viewport";
-import type { PlanCategory, PlanOrientation, StandOccupant } from "@features/floor-plan/lib/types";
+import type { PlanCategory, PlanItem, PlanLayout, PlanOrientation } from "@features/floor-plan/lib/types";
 import { useElementWidth } from "@shared/hooks/use-element-width";
 import { useUrlHash } from "@shared/hooks/use-url-hash";
 
@@ -14,11 +13,6 @@ import { useUrlHash } from "@shared/hooks/use-url-hash";
 export const EXPLORER_TALL_BREAKPOINT = 560;
 /** Elemento seleccionado cuando la URL no indica otro. */
 const DEFAULT_ITEM_ID = "stage";
-
-const BASE_VIEW_BOXES = {
-  wide: getBaseViewBox(PLAN_LAYOUTS.wide),
-  tall: getBaseViewBox(PLAN_LAYOUTS.tall),
-} as const;
 
 interface SelectOptions {
   /** Acerca la vista al elemento. */
@@ -33,9 +27,14 @@ interface SelectOptions {
  */
 export function useFloorPlanExplorer(
   viewportRef: RefObject<HTMLElement | null>,
-  occupants: readonly StandOccupant[],
+  items: readonly PlanItem[],
+  layouts: Readonly<Record<PlanOrientation, PlanLayout>>,
 ) {
-  const { items, itemsById } = usePlanItems(occupants);
+  const itemsById = useMemo(() => indexItems(items), [items]);
+  const baseViewBoxes = useMemo(
+    () => ({ wide: getBaseViewBox(layouts.wide), tall: getBaseViewBox(layouts.tall) }),
+    [layouts],
+  );
   const [hash, setHash] = useUrlHash();
   const [visibleCategories, setVisibleCategories] = useState<ReadonlySet<PlanCategory>>(
     () => new Set(PLAN_CATEGORIES),
@@ -44,8 +43,8 @@ export function useFloorPlanExplorer(
   const width = useElementWidth(viewportRef);
   const orientation: PlanOrientation = width !== null && width < EXPLORER_TALL_BREAKPOINT ? "tall" : "wide";
   const viewports = {
-    wide: usePlanViewport(BASE_VIEW_BOXES.wide),
-    tall: usePlanViewport(BASE_VIEW_BOXES.tall),
+    wide: usePlanViewport(baseViewBoxes.wide),
+    tall: usePlanViewport(baseViewBoxes.tall),
   };
   const flash = usePlanFlash(viewportRef);
   const { animateTo: animateWide } = viewports.wide;
@@ -57,16 +56,16 @@ export function useFloorPlanExplorer(
   /** Acerca las dos orientaciones al elemento (sólo una está visible). */
   const focusItem = useCallback(
     (id: string) => {
-      const wideRect = findItemRect(PLAN_LAYOUTS.wide, id);
-      const tallRect = findItemRect(PLAN_LAYOUTS.tall, id);
+      const wideRect = findItemRect(layouts.wide, id);
+      const tallRect = findItemRect(layouts.tall, id);
       if (wideRect) {
-        animateWide(focusViewBox(wideRect, BASE_VIEW_BOXES.wide));
+        animateWide(focusViewBox(wideRect, baseViewBoxes.wide));
       }
       if (tallRect) {
-        animateTall(focusViewBox(tallRect, BASE_VIEW_BOXES.tall));
+        animateTall(focusViewBox(tallRect, baseViewBoxes.tall));
       }
     },
-    [animateTall, animateWide],
+    [animateTall, animateWide, baseViewBoxes, layouts],
   );
 
   // Última selección hecha desde la página: así se distingue de un cambio externo del hash.

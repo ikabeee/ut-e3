@@ -1,33 +1,34 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { EventSchedule } from "@features/event/components/event-schedule";
-import { EVENT_SCHEDULE } from "@features/event/lib/event-program";
+import type { ScheduleEntry } from "@features/event/lib/types";
 import { FloorPlanOverview } from "@features/floor-plan/components/floor-plan-overview";
-import { PLAN_ZONES } from "@features/floor-plan/lib/plan-places";
-import type { StandOccupant } from "@features/floor-plan/lib/types";
+import type { PlanItem, PlanLayout, PlanOrientation } from "@features/floor-plan/lib/types";
 import { usePrefersReducedMotion } from "@shared/hooks/use-prefers-reduced-motion";
 
 /** Stand seleccionado al cargar la portada. */
 const INITIAL_SELECTION = "A1";
 
-const ZONE_TITLES: ReadonlyMap<string, string> = new Map(
-  Object.entries(PLAN_ZONES).map(([id, zone]) => [id, zone.title]),
-);
-
 interface ProgramAndFloorPlanProps {
-  /** Quienes ocupan los stands de equipo del croquis. */
-  occupants: readonly StandOccupant[];
+  /** Título del programa: la fecha corta del evento. */
+  scheduleTitle: string;
+  schedule: readonly ScheduleEntry[];
+  /** Stands y zonas del croquis (`buildPlanItems`). */
+  items: readonly PlanItem[];
+  layouts: Readonly<Record<PlanOrientation, PlanLayout>>;
 }
 
 /**
  * Programa del día y croquis de la portada. Comparten la selección: cada actividad del
  * programa lleva al croquis y señala su zona.
  */
-export function ProgramAndFloorPlan({ occupants }: Readonly<ProgramAndFloorPlanProps>) {
+export function ProgramAndFloorPlan({ scheduleTitle, schedule, items, layouts }: Readonly<ProgramAndFloorPlanProps>) {
   const [selectedId, setSelectedId] = useState(INITIAL_SELECTION);
   const mapRef = useRef<HTMLElement>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
+  // Nombre visible de cada zona del croquis, para los enlaces del programa.
+  const zoneTitles = useMemo(() => new Map(items.map((item) => [item.id, item.title])), [items]);
 
   const locateZone = (zoneId: string) => {
     mapRef.current?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth" });
@@ -36,11 +37,11 @@ export function ProgramAndFloorPlan({ occupants }: Readonly<ProgramAndFloorPlanP
 
   return (
     <>
-      <EventSchedule entries={EVENT_SCHEDULE} zoneTitles={ZONE_TITLES} onLocate={locateZone} />
+      <EventSchedule title={scheduleTitle} entries={schedule} zoneTitles={zoneTitles} onLocate={locateZone} />
       <section ref={mapRef} id="floor-plan" className="section-block">
         <div className="page-wrap">
           <h2 className="type-giant">Croquis</h2>
-          <FloorPlanOverview occupants={occupants} selectedId={selectedId} onSelect={setSelectedId} />
+          <FloorPlanOverview items={items} layouts={layouts} selectedId={selectedId} onSelect={setSelectedId} />
         </div>
       </section>
     </>

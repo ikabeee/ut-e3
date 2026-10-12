@@ -1,22 +1,22 @@
-import type { EventActivity, ScheduleEntry } from "@features/event/lib/types";
+import type { EventActivity, EventHero, EventIntro, ScheduleEntry } from "@features/event/lib/types";
 
 /**
  * Contenido editable de la portada: presentación, actividades y programa del día.
  * Los `zoneId` del programa deben existir en `floor-plan/lib/plan-places.ts`.
  */
-export const EVENT_INTRO = {
+export const EVENT_INTRO: EventIntro = {
   title: ["Juegos hechos", "en la UT Cancún"],
   lead: "Los equipos de la División de Ingeniería y Tecnologías presentan los videojuegos que desarrollaron. Cada equipo tiene un stand con su juego listo para jugar.",
   details:
     "Recorre los stands, prueba las demos y platica con quienes los hicieron. Durante el día hay torneos y sorteos. La entrada es libre.",
-} as const;
+};
 
-export const EVENT_HERO = {
+export const EVENT_HERO: EventHero = {
   title: "Showcase de videojuegos",
   summary: "Pruébalos, compite en los torneos y participa en los sorteos.",
   callToAction: "Quiero participar",
   reelLabel: "Reel 2026",
-} as const;
+};
 
 /** Descripción del encabezado con el número real de juegos del catálogo. */
 export function describeShowcase(gameCount: number) {

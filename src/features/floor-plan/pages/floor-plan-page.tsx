@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { FloorPlanExplorer } from "@features/floor-plan/components/floor-plan-explorer";
 import { PLAN_ITEM_COVER_SIZES } from "@features/floor-plan/components/plan-item-card";
+import { buildPlanItems } from "@features/floor-plan/lib/plan-items";
+import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 import { GameMedia } from "@features/games/components/game-media";
 import { toStandOccupant } from "@features/games/lib/game-stand";
 import { listGames } from "@features/games/lib/server/games-queries";
@@ -21,7 +23,7 @@ export async function FloorPlanPage() {
   return (
     <main className="pt-[clamp(28px,4vw,48px)]">
       <div className="page-wrap">
-        <FloorPlanExplorer occupants={occupants} />
+        <FloorPlanExplorer items={buildPlanItems(occupants)} layouts={PLAN_LAYOUTS} />
       </div>
     </main>
   );

@@ -4,7 +4,6 @@ import { FitSvgText } from "@features/floor-plan/components/fit-svg-text";
 import { PlanItemShape } from "@features/floor-plan/components/plan-item-shape";
 import { getStandCells } from "@features/floor-plan/lib/plan-layouts";
 import { splitStandName } from "@features/floor-plan/lib/plan-items";
-import { PLAN_ZONES } from "@features/floor-plan/lib/plan-places";
 import type { PlanCategory, PlanItem, PlanLayout, PlanOrientation, ZoneId } from "@features/floor-plan/lib/types";
 
 /** `overview`: croquis resumido del inicio. `explorer`: croquis interactivo de /floor-plan. */
@@ -105,7 +104,11 @@ export function FloorPlanDrawing({
 
       {(Object.entries(layout.zones) as [Exclude<ZoneId, "entry">, NonNullable<PlanLayout["zones"]["stage"]>][]).map(
         ([id, zone]) => {
-          const isActivity = PLAN_ZONES[id].category === "act";
+          const item = itemsById.get(id);
+          if (!item) {
+            return null;
+          }
+          const isActivity = item.category === "act";
           const color = isActivity ? "var(--accent)" : "var(--muted)";
           const [x, y, width] = zone.rect;
           const fontSize = zone.fontSize ?? 18;
@@ -113,7 +116,7 @@ export function FloorPlanDrawing({
             <PlanItemShape
               key={id}
               id={id}
-              label={PLAN_ZONES[id].title}
+              label={item.title}
               rect={zone.rect}
               fill={color}
               fillOpacity={isActivity ? 0.14 : 0.22}

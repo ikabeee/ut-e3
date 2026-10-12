@@ -5,11 +5,11 @@ import { cn } from "@heroui/react";
 import { FloorPlanDrawing, type FloorPlanSelectionProps } from "@features/floor-plan/components/floor-plan-drawing";
 import { usePlanGestures } from "@features/floor-plan/hooks/use-plan-gestures";
 import type { PlanViewport } from "@features/floor-plan/hooks/use-plan-viewport";
-import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 import { toViewBoxAttribute } from "@features/floor-plan/lib/plan-viewport";
-import type { PlanOrientation } from "@features/floor-plan/lib/types";
+import type { PlanLayout, PlanOrientation } from "@features/floor-plan/lib/types";
 
 interface ExplorerCanvasProps extends FloorPlanSelectionProps {
+  layout: PlanLayout;
   orientation: PlanOrientation;
   viewport: PlanViewport;
   /** Muestra u oculta esta orientación con container queries. */
@@ -20,6 +20,7 @@ interface ExplorerCanvasProps extends FloorPlanSelectionProps {
 
 /** Un croquis interactivo (una orientación) con arrastre, zoom y teclado. */
 export function ExplorerCanvas({
+  layout,
   orientation,
   viewport,
   className,
@@ -61,7 +62,7 @@ export function ExplorerCanvas({
       onKeyDown={handlers.onKeyDown}
     >
       <FloorPlanDrawing
-        layout={PLAN_LAYOUTS[orientation]}
+        layout={layout}
         orientation={orientation}
         variant="explorer"
         onSelectItem={(id) => {
