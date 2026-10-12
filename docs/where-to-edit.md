@@ -82,7 +82,9 @@ ls -lh public/media/
 | Colores (azul acid, negros, grises) | `src/shared/styles/theme.css` (paleta `--utg-*`) |
 | Tipografías | `src/shared/lib/fonts.ts` y `--font-*` en `src/shared/styles/theme.css` |
 | Botones (rellenos, bordes, medidas) | `src/shared/styles/components.css` |
-| Utilidades de texto (`type-giant`, `type-mono`, `type-tiny`...) | `src/shared/styles/typography.css` |
+| Variantes de botones y toggles (flechas del exhibidor y de la galería, zoom, géneros, filtros, pausa del reel) | `button--*` y `toggle-button--*` en `src/shared/styles/components.css` (lista en [`docs/design-system.md`](./design-system.md#variantes)) |
+| Degradados sobre imágenes y fondo del exhibidor 3D | `shade-*` y `coverflow-*` en `src/shared/styles/components.css`; sus colores en `src/shared/styles/theme.css` |
+| Utilidades de texto (`type-giant`, `type-section`, `type-mono`, `type-tiny`...) | `src/shared/styles/typography.css` |
 | Logo UTG | `src/shared/components/utg-logo.tsx` e icono `src/app/icon.svg` |
 | Ícono de la app instalada (PWA) | `src/app/icon.svg` y luego `npm run pwa:icons` (ver abajo) |
 | Nombre, colores y accesos directos de la app instalada | `src/app/manifest.ts` (colores en `themeColor` de `src/shared/lib/site-config.ts`) |
