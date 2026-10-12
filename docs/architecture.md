@@ -24,8 +24,8 @@ valida las que existen. No se dejan carpetas vacías ni `.gitkeep`.
 
 | Feature | Responsabilidad | Usa |
 | --- | --- | --- |
-| `games` | Catálogo, detalle, carrusel de destacados, exhibidor 3D, API `/api/games`. | `event` (fecha y calendario en el detalle) |
-| `floor-plan` | Croquis: zonas, stands, layouts, zoom, filtros y directorio. | `games` (cada juego ocupa su stand) |
+| `games` | Catálogo, detalle, carrusel de destacados, exhibidor 3D, API `/api/games`. | `event` (fecha y calendario en el detalle) y `floor-plan` (sólo el tipo `StandOccupant`, en `lib/game-stand.ts`) |
+| `floor-plan` | Croquis: zonas, stands, layouts, zoom, filtros y directorio. | Nada. Su page compone los juegos como `StandOccupant` |
 | `event` | Contenido del evento: reel, actividades, programa, ubicación y cierre. | Nada |
 | `home` | Compone la portada y conecta el programa con el croquis. | `event`, `games`, `floor-plan` |
 | `example` | Scaffold para copiar; no se monta en ninguna ruta. | Nada |
@@ -37,14 +37,33 @@ Fuera de `pages/`, una feature sólo importa las que declara `FEATURE_DEPENDENCI
 cierra uno, ESLint se detiene con el ciclo en el mensaje.
 
 ```
-home ──> event
-  │ └──> floor-plan ──> games ──> event
-  └────────────────────> games
+home ─┬─> event
+      ├─> games ─┬─> event
+      │          └─> floor-plan
+      └─> floor-plan
 ```
 
-Las `pages/` son la excepción: pueden componer cualquier feature, porque nada las importa salvo
-`src/app/` y por eso nunca forman parte de un ciclo. Cuando dos features necesitan hablar y la
-arista cerraría un ciclo, se conectan en una page (o en `home`, que compone la portada).
+`event` y `floor-plan` no dependen de nadie. Las `pages/` son la excepción: pueden componer
+cualquier feature, porque nada las importa salvo `src/app/` y por eso nunca forman parte de un
+ciclo. Cuando dos features necesitan hablar y la arista cerraría un ciclo, se conectan en una page
+(o en `home`, que compone la portada).
+
+### Croquis y juegos: capa anticorrupción
+
+El croquis no conoce `Game`. Declara lo que necesita de quien ocupa un stand (`StandOccupant` en
+`floor-plan/lib/types.ts`: stand, título, antetítulo, descripción y portada) y cada dominio que
+ocupa stands se traduce a ese tipo en su propia feature:
+
+```
+games/lib/game-stand.ts       toStandOccupant(game, cover) -> StandOccupant
+floor-plan/pages/...          listGames() -> toStandOccupant(game, <GameMedia />) -> FloorPlanExplorer
+home/pages/home-page.tsx      lo mismo para el croquis de la portada
+```
+
+La portada llega como `ReactNode` (slot): `PlanItemCard` la pinta sin importar `GameMedia`. Así
+`floor-plan` se prueba con sus propios ocupantes (`__tests__/plan-fixtures.ts`) y conectar Prisma a
+`games` no toca el croquis. Si mañana ocupan stands equipos o patrocinadores, basta otro
+`toStandOccupant` en su feature.
 
 ## Reglas que valida ESLint
 
@@ -101,7 +120,7 @@ GameRepository (mock hoy, Prisma después)
 | Responsabilidad única | Cada archivo hace una cosa: `game-filters.ts` filtra, `plan-viewport.ts` calcula el zoom, `use-gallery.ts` maneja la galería y `GameGallery` sólo la pinta. |
 | Abierto/cerrado | Las variantes de `Button` de HeroUI se extienden con CSS (`components.css`) sin tocar HeroUI; `GameCard` y `PlanItemCard` tienen variantes en lugar de copias. |
 | Sustitución de Liskov | Cualquier implementación de `GameRepository` (mock o Prisma) sirve igual a `games-queries.ts`. |
-| Segregación de interfaces | Los componentes reciben sólo lo que usan (`ArtLabels` en vez del juego completo; `EventSchedule` recibe nombres de zona, no el croquis). |
+| Segregación de interfaces | Los componentes reciben sólo lo que usan (`ArtLabels` en vez del juego completo; `EventSchedule` recibe nombres de zona, no el croquis; el croquis recibe `StandOccupant`, no `Game`). |
 | Inversión de dependencias | `games-queries.ts` depende de la interfaz `GameRepository`, no de la fuente de datos. |
 
 ## Agregar una feature

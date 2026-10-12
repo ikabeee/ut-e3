@@ -5,9 +5,11 @@ import { PlanItemCard } from "@features/floor-plan/components/plan-item-card";
 import { PlanLegend } from "@features/floor-plan/components/plan-legend";
 import { usePlanItems } from "@features/floor-plan/hooks/use-plan-items";
 import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
-import type { PlanOrientation } from "@features/floor-plan/lib/types";
+import type { PlanOrientation, StandOccupant } from "@features/floor-plan/lib/types";
 
 interface FloorPlanOverviewProps {
+  /** Quienes ocupan los stands de equipo. */
+  occupants: readonly StandOccupant[];
   selectedId: string;
   onSelect: (id: string) => void;
 }
@@ -21,8 +23,8 @@ const ORIENTATIONS: { orientation: PlanOrientation; className: string }[] = [
  * Croquis resumido de la portada (`.map-wrap`): el plano sin zoom, el panel del elemento
  * seleccionado y la leyenda. La selección la controla quien lo usa (el programa la cambia).
  */
-export function FloorPlanOverview({ selectedId, onSelect }: Readonly<FloorPlanOverviewProps>) {
-  const { itemsById } = usePlanItems();
+export function FloorPlanOverview({ occupants, selectedId, onSelect }: Readonly<FloorPlanOverviewProps>) {
+  const { itemsById } = usePlanItems(occupants);
   const selectedItem = itemsById.get(selectedId);
 
   return (

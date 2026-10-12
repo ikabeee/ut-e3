@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { FloorPlanExplorer } from "@features/floor-plan/components/floor-plan-explorer";
-import { FloorPlanSkeleton } from "@features/floor-plan/components/floor-plan-skeleton";
-import { getGamesHydrationState } from "@features/games/lib/server/games-prefetch";
-import { QueryHydrationBoundary } from "@shared/components/query-hydration-boundary";
+import { PLAN_ITEM_COVER_SIZES } from "@features/floor-plan/components/plan-item-card";
+import { GameMedia } from "@features/games/components/game-media";
+import { toStandOccupant } from "@features/games/lib/game-stand";
+import { listGames } from "@features/games/lib/server/games-queries";
 import { routes } from "@shared/lib/site-config";
 
 export const floorPlanPageMetadata: Metadata = {
@@ -13,15 +13,15 @@ export const floorPlanPageMetadata: Metadata = {
   alternates: { canonical: routes.floorPlan },
 };
 
-export function FloorPlanPage() {
+/** Compone el croquis con los juegos: cada juego ocupa su stand (`toStandOccupant`). */
+export async function FloorPlanPage() {
+  const games = await listGames();
+  const occupants = games.map((game) => toStandOccupant(game, <GameMedia game={game} sizes={PLAN_ITEM_COVER_SIZES} />));
+
   return (
     <main className="pt-[clamp(28px,4vw,48px)]">
       <div className="page-wrap">
-        <Suspense fallback={<FloorPlanSkeleton />}>
-          <QueryHydrationBoundary state={getGamesHydrationState()}>
-            <FloorPlanExplorer />
-          </QueryHydrationBoundary>
-        </Suspense>
+        <FloorPlanExplorer occupants={occupants} />
       </div>
     </main>
   );

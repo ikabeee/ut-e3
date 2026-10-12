@@ -25,8 +25,8 @@ import sonarjs from "eslint-plugin-sonarjs";
 const FEATURE_DEPENDENCIES = {
   event: [],
   example: [],
-  "floor-plan": ["games"],
-  games: ["event"],
+  "floor-plan": [],
+  games: ["event", "floor-plan"],
   home: ["event", "floor-plan", "games"],
 };
 

@@ -1,7 +1,14 @@
-import { screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { renderWithGames } from "@features/games/__tests__/render-with-games";
+import { toStandOccupant } from "@features/games/lib/game-stand";
+import { MOCK_GAMES } from "@features/games/lib/mock-games";
 import { ProgramAndFloorPlan } from "@features/home/components/program-and-floor-plan";
+
+function renderSection() {
+  const occupants = MOCK_GAMES.map((game) => toStandOccupant(game, null));
+
+  return render(<ProgramAndFloorPlan occupants={occupants} />);
+}
 
 function panelTitle() {
   return screen.getAllByRole("heading", { level: 3 })[0];
@@ -13,7 +20,7 @@ describe("ProgramAndFloorPlan", () => {
   });
 
   it("starts with stand A1 selected on the map", () => {
-    renderWithGames(<ProgramAndFloorPlan />);
+    renderSection();
 
     expect(panelTitle()).toHaveTextContent("Ceniza Protocol");
     expect(screen.getByText("Stand A1 · Acción")).toBeInTheDocument();
@@ -21,7 +28,7 @@ describe("ProgramAndFloorPlan", () => {
 
   it("locates an activity of the program on the map", async () => {
     const user = userEvent.setup();
-    renderWithGames(<ProgramAndFloorPlan />);
+    renderSection();
 
     const [schedule] = screen.getAllByRole("list").map((list) => within(list));
     await user.click(schedule.getAllByRole("button", { name: /Arena de torneos/ })[0]);
@@ -32,7 +39,7 @@ describe("ProgramAndFloorPlan", () => {
 
   it("selects a stand clicked on the map", async () => {
     const user = userEvent.setup();
-    renderWithGames(<ProgramAndFloorPlan />);
+    renderSection();
 
     const [wideMap] = screen.getAllByRole("group", { name: "Croquis del evento con zonas y stands" });
     await user.click(within(wideMap).getByRole("button", { name: "Stand C4" }));

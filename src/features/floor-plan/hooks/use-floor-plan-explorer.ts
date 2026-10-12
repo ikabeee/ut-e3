@@ -6,7 +6,7 @@ import { findItemRect, getBaseViewBox, PLAN_LAYOUTS } from "@features/floor-plan
 import { toggleCategory } from "@features/floor-plan/lib/plan-items";
 import { PLAN_CATEGORIES } from "@features/floor-plan/lib/plan-places";
 import { focusViewBox } from "@features/floor-plan/lib/plan-viewport";
-import type { PlanCategory, PlanOrientation } from "@features/floor-plan/lib/types";
+import type { PlanCategory, PlanOrientation, StandOccupant } from "@features/floor-plan/lib/types";
 import { useElementWidth } from "@shared/hooks/use-element-width";
 import { useUrlHash } from "@shared/hooks/use-url-hash";
 
@@ -31,8 +31,11 @@ interface SelectOptions {
  * Estado del croquis interactivo: selección (guardada en la URL, `/floor-plan#A1`), filtros,
  * orientación y zoom de cada orientación.
  */
-export function useFloorPlanExplorer(viewportRef: RefObject<HTMLElement | null>) {
-  const { items, itemsById } = usePlanItems();
+export function useFloorPlanExplorer(
+  viewportRef: RefObject<HTMLElement | null>,
+  occupants: readonly StandOccupant[],
+) {
+  const { items, itemsById } = usePlanItems(occupants);
   const [hash, setHash] = useUrlHash();
   const [visibleCategories, setVisibleCategories] = useState<ReadonlySet<PlanCategory>>(
     () => new Set(PLAN_CATEGORIES),
