@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getEventContent } from "@features/event/lib/event-content";
 import { FloorPlanExplorer } from "@features/floor-plan/components/floor-plan-explorer";
 import { PLAN_ITEM_COVER_SIZES } from "@features/floor-plan/components/plan-item-card";
 import { buildPlanItems } from "@features/floor-plan/lib/plan-items";
@@ -15,7 +16,10 @@ export const floorPlanPageMetadata: Metadata = {
   alternates: { canonical: routes.floorPlan },
 };
 
-/** Compone el croquis con los juegos: cada juego ocupa su stand (`toStandOccupant`). */
+/**
+ * Compone el croquis con los juegos (cada uno ocupa su stand, `toStandOccupant`) y con los
+ * horarios del programa del evento que citan algunas zonas.
+ */
 export async function FloorPlanPage() {
   const games = await listGames();
   const occupants = games.map((game) => toStandOccupant(game, <GameMedia game={game} sizes={PLAN_ITEM_COVER_SIZES} />));
@@ -23,7 +27,7 @@ export async function FloorPlanPage() {
   return (
     <main className="pt-[clamp(28px,4vw,48px)]">
       <div className="page-wrap">
-        <FloorPlanExplorer items={buildPlanItems(occupants)} layouts={PLAN_LAYOUTS} />
+        <FloorPlanExplorer items={buildPlanItems(occupants, getEventContent().highlights)} layouts={PLAN_LAYOUTS} />
       </div>
     </main>
   );

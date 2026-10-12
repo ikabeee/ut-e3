@@ -54,7 +54,7 @@ export async function HomePage() {
             <ProgramAndFloorPlan
               scheduleTitle={event.info.shortDateLabel}
               schedule={event.schedule}
-              items={buildPlanItems(occupants)}
+              items={buildPlanItems(occupants, event.highlights)}
               layouts={PLAN_LAYOUTS}
             />
             <VenueSection venue={event.venue} />

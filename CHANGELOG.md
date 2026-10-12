@@ -6,6 +6,15 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Cambiado
+
+- La fecha, los horarios de torneos y sorteos, la sede y la organización se escriben una sola vez y
+  los textos los componen: las tarjetas de la portada, el aviso de torneo del detalle, la Arena y
+  Premios del croquis, el enlace de Google Calendar y los datos estructurados ya no pueden quedar
+  desactualizados. La dirección que se copia se arma con la misma dirección que se muestra.
+- "Características" del detalle muestra los jugadores de cada juego (`players`) y "Acerca del juego"
+  usa el texto del juego cuando lo tiene (`about`).
+
 ### Agregado
 
 - Documentación del modelo de datos (`docs/data-model.md`): diagrama ER en Mermaid para juegos,

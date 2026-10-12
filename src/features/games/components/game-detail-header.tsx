@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getGamePath } from "@features/games/lib/game-links";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { Game } from "@features/games/lib/types";
 import { routes } from "@shared/lib/site-config";
 
@@ -12,23 +13,23 @@ export function GameDetailHeader({ game }: Readonly<GameDetailHeaderProps>) {
   return (
     <>
       <Link href={routes.games} className="type-tiny touch-target relative mb-[18px] inline-block text-muted no-underline hover:text-accent">
-        ← Todos los juegos
+        {GAMES_COPY.detail.backToCatalog}
       </Link>
       <header className="flex flex-col gap-[10px]">
         <h1 className="font-wide text-[clamp(28px,4.4vw,60px)] leading-[.95] font-bold tracking-[-.035em] uppercase">
           {game.name}
         </h1>
         <p className="type-tiny m-0 text-muted">
-          {game.team} · Stand {game.stand}
+          {GAMES_COPY.detail.teamAndStand(game)}
         </p>
       </header>
-      <nav aria-label="Secciones del juego" className="type-tiny my-6 flex gap-6 border-b border-border">
+      <nav aria-label={GAMES_COPY.detail.sectionsLabel} className="type-tiny my-6 flex gap-6 border-b border-border">
         <Link
           href={getGamePath(game.slug)}
           aria-current="page"
           className="touch-target relative -mb-px border-b-2 border-accent py-3 text-accent no-underline"
         >
-          Información general
+          {GAMES_COPY.detail.overviewTab}
         </Link>
       </nav>
     </>

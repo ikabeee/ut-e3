@@ -9,6 +9,7 @@ import { PlanTooltip } from "@features/floor-plan/components/plan-tooltip";
 import { PlanZoomControls } from "@features/floor-plan/components/plan-zoom-controls";
 import { useFloorPlanExplorer } from "@features/floor-plan/hooks/use-floor-plan-explorer";
 import { usePlanTooltip } from "@features/floor-plan/hooks/use-plan-tooltip";
+import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
 import type { PlanItem, PlanLayout, PlanOrientation } from "@features/floor-plan/lib/types";
 import { usePrefersReducedMotion } from "@shared/hooks/use-prefers-reduced-motion";
 
@@ -50,10 +51,9 @@ export function FloorPlanExplorer({ items, layouts }: Readonly<FloorPlanExplorer
     <>
       <header className="mb-5 flex flex-wrap items-end justify-between gap-5">
         <div>
-          <h1 className="type-giant">Croquis</h1>
+          <h1 className="type-giant">{FLOOR_PLAN_COPY.explorer.heading}</h1>
           <p className="mt-[14px] mb-0 max-w-[52ch] text-[clamp(15px,1.2vw,18px)] leading-[1.4] text-copy">
-            Ubica los stands de cada equipo, el main stage, la arena de torneos y los servicios del evento. Toca
-            cualquier punto del mapa para ver su información.
+            {FLOOR_PLAN_COPY.explorer.description}
           </p>
         </div>
         <PlanCategoryFilters visibleCategories={explorer.visibleCategories} onToggle={explorer.toggleCategory} />

@@ -5,14 +5,22 @@ Después de cualquier cambio corre `npm run lint`, `npm run typecheck` y `npm te
 
 ## Contenido del evento
 
+Cada dato se escribe **una sola vez**: los textos que lo citan (tarjetas, detalle del juego,
+croquis, Google Calendar, datos estructurados) lo componen. No vuelvas a escribir una hora, la
+sede o el nombre de la división dentro de un texto.
+
 | Quiero cambiar... | Archivo |
 | --- | --- |
-| Fecha, horario, "Entrada libre", enlace de Google Calendar | `src/features/event/lib/event-info.ts` (`EVENT_INFO`) |
-| Sede, dirección, texto que se copia, enlace de Google Maps | `src/features/event/lib/event-info.ts` (`EVENT_VENUE`) |
+| Fecha y horario del evento | `startsAt` y `endsAt` en `src/features/event/lib/event-info.ts`. De ahí salen "27.11.2026", "27.11.26", "10:00—20:00" y el enlace de Google Calendar |
+| "Entrada libre" | `admission` en `src/features/event/lib/event-info.ts` |
+| Sede, dirección (por partes), enlace de Google Maps | `src/features/event/lib/event-info.ts` (`EVENT_VENUE`). La dirección visible y la que se copia se arman con `streetAddress`, `postalCode`, `locality` y `region` |
+| Nombre de la división y de la universidad | `organization` en `src/shared/lib/site-config.ts` (lo usan la presentación, "Acerca del juego", el stand C1, el pie y los datos estructurados) |
 | Título y descripción del encabezado, texto del botón principal | `src/features/event/lib/event-program.ts` (`EVENT_HERO`) |
 | "Juegos hechos en la UT Cancún" y sus dos párrafos | `src/features/event/lib/event-program.ts` (`EVENT_INTRO`) |
-| Tarjetas de torneos y sorteos (horarios incluidos) | `src/features/event/lib/event-program.ts` (`EVENT_ACTIVITIES`) |
 | Programa del día | `src/features/event/lib/event-program.ts` (`EVENT_SCHEDULE`) |
+| Horarios de torneos (inscripción, rondas, finales) y de sorteos | El renglón del programa marcado con `milestone` en `EVENT_SCHEDULE`. Las tarjetas de la portada, el aviso de torneo del detalle y la Arena y Premios del croquis los toman de ahí |
+| Textos de las tarjetas de torneos y sorteos | `buildEventActivities` en `src/features/event/lib/event-program.ts` |
+| Textos de la interfaz del evento ("Ubicación", "Copiar dirección", controles del reel, esquema) | `src/features/event/lib/event-copy.ts` (`EVENT_COPY`) |
 | Video del encabezado | Reemplaza `public/media/reel.webm`, `reel.mp4` y `reel.jpg` (mismos nombres) |
 | Ancho mínimo para que el reel se reproduzca solo | `REEL_AUTOPLAY_MIN_WIDTH` en `src/features/event/lib/event-media.ts` |
 | Esquema de la carretera | `src/features/event/components/venue-map.tsx` |
@@ -42,10 +50,10 @@ ls -lh public/media/
 
 | Quiero cambiar... | Archivo |
 | --- | --- |
-| Juegos, equipos, géneros, stands, descripciones (mientras sean mock) | `src/features/games/lib/mock-games.ts` |
+| Juegos, equipos, géneros, stands, descripciones, jugadores y "Acerca del juego" propio (mientras sean mock) | `src/features/games/lib/mock-games.ts` (`players`, `about`) |
 | Portada de un juego | Agrega la imagen en `public/` y ponla en `image.src` del juego; sin imagen se genera arte |
 | Colores del arte generado de un juego | `art.palette` del juego (`acid`, `black`, `white`, `panel`, `light`) |
-| Textos de "Acerca del juego", características y ficha | `src/features/games/lib/game-details.ts` |
+| Textos de la interfaz de juegos (botones, títulos, "Acerca del juego" genérico, aviso de torneo, características y ficha) | `src/features/games/lib/games-copy.ts` (`GAMES_COPY`) |
 | Criterio de "Más juegos" | `getRelatedGames` en `src/features/games/lib/game-details.ts` |
 | Campos en los que busca el buscador | `filterGames` en `src/features/games/lib/game-filters.ts` |
 | Velocidad del carrusel de destacados | `FEATURED_SLIDE_DURATION` en `src/features/games/hooks/use-featured-carousel.ts` |
@@ -57,6 +65,8 @@ ls -lh public/media/
 | Quiero cambiar... | Archivo |
 | --- | --- |
 | Nombre y descripción de zonas (escenario, arena, premios, servicios...) | `src/features/floor-plan/lib/plan-places.ts` (`PLAN_ZONES`; ids en inglés: `stage`, `arena`, `raffles`...) |
+| Frases de la Arena y de Premios que citan horarios | `PLAN_ZONE_SCHEDULE_NOTES` en `src/features/floor-plan/lib/floor-plan-copy.ts` (los horarios vienen del programa) |
+| Textos de la interfaz del croquis (filtros, leyenda, zoom, encabezado) | `src/features/floor-plan/lib/floor-plan-copy.ts` |
 | Stands informativos C1-C4 | `src/features/floor-plan/lib/plan-places.ts` (`INFO_STANDS`) |
 | Posición o tamaño de zonas, pasillos y stands | `src/features/floor-plan/lib/plan-layouts.ts` (horizontal y vertical) |
 | Asignar un juego a un stand | Campo `stand` del juego |

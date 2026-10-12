@@ -2,6 +2,7 @@
 
 import { FitSvgText } from "@features/floor-plan/components/fit-svg-text";
 import { PlanItemShape } from "@features/floor-plan/components/plan-item-shape";
+import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
 import { getStandCells } from "@features/floor-plan/lib/plan-layouts";
 import { splitStandName } from "@features/floor-plan/lib/plan-items";
 import type { PlanCategory, PlanItem, PlanLayout, PlanOrientation, ZoneId } from "@features/floor-plan/lib/types";
@@ -73,7 +74,7 @@ export function FloorPlanDrawing({
         fill="var(--foreground)"
         style={{ fontFamily: MONO, paintOrder: "stroke", stroke: "var(--background)", strokeWidth: 5, pointerEvents: "none" }}
       >
-        PÚBLICO
+        {FLOOR_PLAN_COPY.drawing.publicArea.toLocaleUpperCase("es")}
       </text>
     </>
   );
@@ -148,7 +149,7 @@ export function FloorPlanDrawing({
 
       <PlanItemShape
         id="entry"
-        label="Entrada"
+        label={itemsById.get("entry")?.title ?? FLOOR_PLAN_COPY.drawing.entry}
         rect={layout.entry}
         fill="var(--accent)"
         fillOpacity={0.06}
@@ -172,7 +173,7 @@ export function FloorPlanDrawing({
           fill="var(--accent)"
           style={{ fontFamily: MONO }}
         >
-          ENTRADA
+          {FLOOR_PLAN_COPY.drawing.entry.toLocaleUpperCase("es")}
         </text>
       )}
 
@@ -198,7 +199,7 @@ export function FloorPlanDrawing({
               <PlanItemShape
                 key={code}
                 id={code}
-                label={isExplorer && item ? `Stand ${code}, ${item.title}` : `Stand ${code}`}
+                label={FLOOR_PLAN_COPY.drawing.standLabel(code, isExplorer ? item?.title : undefined)}
                 rect={rect}
                 fill={isTeam ? "var(--accent)" : "var(--background)"}
                 fillOpacity={isTeam ? 0.2 : 1}

@@ -1,3 +1,5 @@
+import type { ScheduleHighlights } from "@features/event/lib/types";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { Game } from "@features/games/lib/types";
 
 /** Pasillo del stand: la letra del código ("B7" -> "B"). */
@@ -7,18 +9,21 @@ export function getStandAisle(stand: string) {
 
 /** Etiquetas de "Características" del detalle. */
 export function getGameFeatures(game: Game) {
-  return ["Demo jugable", "Un jugador", ...(game.hasTournament ? ["Competitivo"] : [])];
+  const { features } = GAMES_COPY;
+  return [features.demo, features.players(game.players), ...(game.hasTournament ? [features.competitive] : [])];
 }
 
-/** Párrafos de "Acerca del juego". */
-export function describeGame(game: Game) {
-  const paragraphs = [
-    `${game.name} es el proyecto de ${game.team}, ${game.members} estudiantes de la División de Ingeniería y Tecnologías de la UT Cancún. En el evento vas a poder jugar una demo de unos 10 minutos y platicar con el equipo sobre cómo lo hicieron.`,
-  ];
+/** Horarios del programa del evento que cita el detalle de un juego. */
+export type GameScheduleTimes = Pick<ScheduleHighlights, "tournamentSignupDeadline" | "tournamentFinalsAt">;
+
+/**
+ * Párrafos de "Acerca del juego": los del juego o, si no trae, el texto genérico; más el aviso
+ * de torneo con los horarios del programa (`schedule`, que pasa la page desde `event`).
+ */
+export function describeGame(game: Game, schedule: GameScheduleTimes) {
+  const paragraphs = game.about ? [...game.about] : [GAMES_COPY.detail.about(game)];
   if (game.hasTournament) {
-    paragraphs.push(
-      "Este juego tiene torneo. Inscríbete en la Arena antes de las 12:00; las finales se juegan en el main stage a las 17:00.",
-    );
+    paragraphs.push(GAMES_COPY.detail.tournamentNote(schedule));
   }
   return paragraphs;
 }
@@ -30,13 +35,14 @@ export interface GameFact {
 
 /** Ficha lateral del juego. */
 export function getGameFacts(game: Game, eventDateLabel: string): GameFact[] {
+  const { facts } = GAMES_COPY;
   return [
-    { label: "Equipo", value: game.team.replace(/^Equipo /, "") },
-    { label: "Integrantes", value: String(game.members) },
-    { label: "Género", value: game.genre },
-    { label: "Stand", value: game.stand },
-    { label: "Torneo", value: game.hasTournament ? "Sí" : "No" },
-    { label: "Evento", value: eventDateLabel },
+    { label: facts.team, value: game.team.replace(/^Equipo /, "") },
+    { label: facts.members, value: String(game.members) },
+    { label: facts.genre, value: game.genre },
+    { label: facts.stand, value: game.stand },
+    { label: facts.tournament, value: game.hasTournament ? facts.yes : facts.no },
+    { label: facts.event, value: eventDateLabel },
   ];
 }
 

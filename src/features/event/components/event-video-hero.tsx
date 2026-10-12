@@ -1,5 +1,6 @@
 import { EventReel } from "@features/event/components/event-reel";
 import { HeroCtaLink } from "@features/event/components/hero-cta-link";
+import { EVENT_COPY } from "@features/event/lib/event-copy";
 import type { EventHero, EventInfo, EventReelMedia } from "@features/event/lib/types";
 import { UtgLogo } from "@shared/components/utg-logo";
 
@@ -21,7 +22,7 @@ export function EventVideoHero({ hero, info, venueShortName, description, reel }
           {info.dateLabel} · {venueShortName} · {info.admission}
         </p>
         <h1 className="m-0 flex flex-col gap-[clamp(8px,1vw,14px)]">
-          <UtgLogo variant="flat" label="UTG" className="block h-auto w-[clamp(220px,34vw,520px)]" />
+          <UtgLogo variant="flat" label={EVENT_COPY.hero.logoLabel} className="block h-auto w-[clamp(220px,34vw,520px)]" />
           <span className="font-wide text-[clamp(18px,2.6vw,38px)] leading-none font-bold tracking-[-.03em] uppercase">
             {hero.title}
           </span>

@@ -5,6 +5,7 @@ import { GameArtwork } from "@features/games/components/game-artwork";
 import { useGallery } from "@features/games/hooks/use-gallery";
 import type { ArtLabels } from "@features/games/lib/game-art";
 import type { GalleryShot } from "@features/games/lib/game-gallery";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { ArrowButton } from "@shared/components/arrow-button";
 
 interface GameGalleryProps {
@@ -26,7 +27,7 @@ export function GameGallery({ gameName, shots, labels }: Readonly<GameGalleryPro
 
   return (
     <>
-      <section aria-label="Galería" className="relative aspect-video max-w-full overflow-hidden bg-surface" {...swipeHandlers}>
+      <section aria-label={GAMES_COPY.detail.gallery} className="relative aspect-video max-w-full overflow-hidden bg-surface" {...swipeHandlers}>
         <div className="absolute inset-0">
           {shots.map((shot, index) => (
             <div
@@ -47,13 +48,13 @@ export function GameGallery({ gameName, shots, labels }: Readonly<GameGalleryPro
             </div>
           ))}
         </div>
-        <ArrowButton direction="previous" label="Imagen anterior" className={cn(NAV_BUTTON_CLASS, "left-3")} onPress={showPrevious} />
-        <ArrowButton direction="next" label="Imagen siguiente" className={cn(NAV_BUTTON_CLASS, "right-3")} onPress={showNext} />
+        <ArrowButton direction="previous" label={GAMES_COPY.detail.previousImage} className={cn(NAV_BUTTON_CLASS, "left-3")} onPress={showPrevious} />
+        <ArrowButton direction="next" label={GAMES_COPY.detail.nextImage} className={cn(NAV_BUTTON_CLASS, "right-3")} onPress={showNext} />
       </section>
 
       <div
         role="tablist"
-        aria-label="Imágenes"
+        aria-label={GAMES_COPY.detail.images}
         className="scrollbar-none -mt-4 grid auto-cols-[clamp(110px,16%,170px)] grid-flow-col gap-[10px] overflow-x-auto"
       >
         {shots.map((shot, index) => (
@@ -62,7 +63,7 @@ export function GameGallery({ gameName, shots, labels }: Readonly<GameGalleryPro
             type="button"
             role="tab"
             aria-selected={index === activeIndex}
-            aria-label={`Imagen ${index + 1}`}
+            aria-label={GAMES_COPY.detail.image(index + 1)}
             onClick={() => showShot(index)}
             className="group relative aspect-video cursor-pointer overflow-hidden border border-border bg-surface p-0 aria-selected:border-accent"
           >

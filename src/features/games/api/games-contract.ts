@@ -13,9 +13,11 @@ export interface GameDto {
   genre: string;
   team: string;
   members: number;
+  players: number;
   stand: string;
   hasTournament: boolean;
   description: string;
+  about: string[] | null;
   image: { src: string; position: string } | null;
   art: { seed: number; palette: [ArtColor, ArtColor] };
 }
@@ -30,9 +32,11 @@ export function toGameDto(game: Game): GameDto {
     genre: game.genre,
     team: game.team,
     members: game.members,
+    players: game.players,
     stand: game.stand,
     hasTournament: game.hasTournament,
     description: game.description,
+    about: game.about ? [...game.about] : null,
     image: game.image ? { src: game.image.src, position: game.image.position } : null,
     art: { seed: game.art.seed, palette: [game.art.palette[0], game.art.palette[1]] },
   };
@@ -70,6 +74,16 @@ function readArtColor(value: unknown, path: string): ArtColor {
   return ART_COLORS.find((color) => color === value) ?? fail(path);
 }
 
+function parseAbout(value: unknown, path: string): Game["about"] {
+  if (value === null) {
+    return null;
+  }
+  if (!Array.isArray(value)) {
+    fail(path);
+  }
+  return value.map((paragraph, index) => (typeof paragraph === "string" ? paragraph : fail(`${path}[${index}]`)));
+}
+
 function parseImage(value: unknown, path: string): Game["image"] {
   if (value === null) {
     return null;
@@ -98,9 +112,11 @@ function parseGame(value: unknown, path: string): Game {
     genre: readString(game, "genre", path),
     team: readString(game, "team", path),
     members: readNumber(game, "members", path),
+    players: readNumber(game, "players", path),
     stand: readString(game, "stand", path),
     hasTournament: readBoolean(game, "hasTournament", path),
     description: readString(game, "description", path),
+    about: parseAbout(game.about, `${path}.about`),
     image: parseImage(game.image, `${path}.image`),
     art: parseArt(game.art, `${path}.art`),
   };

@@ -10,8 +10,7 @@ const venue: EventVenue = {
   name: "Centro de Convenciones",
   shortName: "CC",
   landmark: "Zona hotelera · Km 9",
-  address: "Blvd. Kukulcán Km 9, Cancún.",
-  copyableAddress: "Centro de Convenciones, Blvd. Kukulcán Km 9, Cancún",
+  streetAddress: "Blvd. Kukulcán Km 9",
   locality: "Cancún",
   region: "Quintana Roo",
   postalCode: "77500",
@@ -54,6 +53,8 @@ describe("event sections", () => {
 
     expect(screen.getByRole("heading", { level: 3, name: "Centro de Convenciones" })).toBeInTheDocument();
     expect(screen.getByText("Zona hotelera · Km 9")).toBeInTheDocument();
+    expect(screen.getByText("Blvd. Kukulcán Km 9, C.P. 77500, Cancún, Quintana Roo.")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /la CC está sobre la carretera/ })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Abrir en Google Maps/ })).toHaveAttribute("href", "https://maps.example/cc");
   });
 });

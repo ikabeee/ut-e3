@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
-import { PLAN_CATEGORY_LABELS } from "@features/floor-plan/lib/plan-places";
+import { PLAN_CATEGORY_LABELS } from "@features/floor-plan/lib/floor-plan-copy";
 import type { PlanItem, TooltipAnchor } from "@features/floor-plan/lib/types";
 
 const OFFSET = 14;

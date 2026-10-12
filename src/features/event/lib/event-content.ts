@@ -1,6 +1,12 @@
 import { EVENT_INFO, EVENT_VENUE } from "@features/event/lib/event-info";
 import { EVENT_REEL } from "@features/event/lib/event-media";
-import { EVENT_ACTIVITIES, EVENT_HERO, EVENT_INTRO, EVENT_SCHEDULE } from "@features/event/lib/event-program";
+import {
+  buildEventActivities,
+  EVENT_HERO,
+  EVENT_INTRO,
+  EVENT_SCHEDULE,
+  getScheduleHighlights,
+} from "@features/event/lib/event-program";
 import type { EventContent } from "@features/event/lib/types";
 
 /**
@@ -10,13 +16,16 @@ import type { EventContent } from "@features/event/lib/types";
  * reciben todo por props.
  */
 export function getEventContent(): EventContent {
+  const highlights = getScheduleHighlights(EVENT_SCHEDULE);
+
   return {
     info: EVENT_INFO,
     venue: EVENT_VENUE,
     hero: EVENT_HERO,
     intro: EVENT_INTRO,
-    activities: EVENT_ACTIVITIES,
+    activities: buildEventActivities(highlights),
     schedule: EVENT_SCHEDULE,
+    highlights,
     reel: EVENT_REEL,
   };
 }

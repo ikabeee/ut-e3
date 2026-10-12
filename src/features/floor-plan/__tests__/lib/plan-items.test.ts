@@ -6,11 +6,11 @@ import {
   splitStandName,
   toggleCategory,
 } from "@features/floor-plan/lib/plan-items";
-import { STAND_OCCUPANT_FIXTURES } from "@features/floor-plan/__tests__/plan-fixtures";
+import { PLAN_ZONE_TIMES_FIXTURE, STAND_OCCUPANT_FIXTURES } from "@features/floor-plan/__tests__/plan-fixtures";
 import { PLAN_CATEGORIES } from "@features/floor-plan/lib/plan-places";
 
 describe("buildPlanItems", () => {
-  const items = buildPlanItems(STAND_OCCUPANT_FIXTURES);
+  const items = buildPlanItems(STAND_OCCUPANT_FIXTURES, PLAN_ZONE_TIMES_FIXTURE);
   const itemsById = indexItems(items);
 
   it("creates one item per team stand, info stand and zone", () => {
@@ -23,7 +23,7 @@ describe("buildPlanItems", () => {
 
   it("keeps the cover of the occupant and leaves the rest without one", () => {
     const cover = "portada";
-    const [first] = buildPlanItems([{ ...STAND_OCCUPANT_FIXTURES[0], cover }]);
+    const [first] = buildPlanItems([{ ...STAND_OCCUPANT_FIXTURES[0], cover }], PLAN_ZONE_TIMES_FIXTURE);
 
     expect(first.cover).toBe(cover);
     expect(itemsById.get("C1")?.cover).toBeNull();
@@ -37,6 +37,16 @@ describe("buildPlanItems", () => {
     expect(groups[0].items.map((item) => item.id)).toEqual(STAND_OCCUPANT_FIXTURES.map((occupant) => occupant.stand));
     expect(groups[2].items.map((item) => item.id)).toEqual(["stage", "arena", "raffles", "entry"]);
     expect(groups[3].items.map((item) => item.id)).toEqual(["food", "info", "wc", "rest"]);
+  });
+
+  it("adds the times of the schedule to the zones that mention them", () => {
+    expect(itemsById.get("arena")?.description).toBe(
+      "Estaciones para las rondas de los torneos. Inscríbete aquí antes de las 11:30.",
+    );
+    expect(itemsById.get("raffles")?.description).toBe(
+      "Exhibición de los premios. Los sorteos se hacen en el main stage a las 14:00 y 18:00.",
+    );
+    expect(itemsById.get("food")?.description).toBe("Puestos de comida y bebidas con mesas para descansar.");
   });
 
   it.each([
