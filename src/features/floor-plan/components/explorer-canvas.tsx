@@ -2,14 +2,15 @@
 
 import { useRef, type PointerEvent } from "react";
 import { cn } from "@heroui/react";
-import { FloorPlanDrawing, type FloorPlanSelectionProps } from "@features/floor-plan/components/floor-plan-drawing";
+import { FloorPlanDrawing } from "@features/floor-plan/components/floor-plan-drawing";
 import { usePlanGestures } from "@features/floor-plan/hooks/use-plan-gestures";
 import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
+import type { PlanSelection } from "@features/floor-plan/lib/plan-interaction";
 import type { PlanViewport } from "@features/floor-plan/hooks/use-plan-viewport";
 import { toViewBoxAttribute } from "@features/floor-plan/lib/plan-viewport";
 import type { PlanLayout, PlanOrientation } from "@features/floor-plan/lib/types";
 
-interface ExplorerCanvasProps extends FloorPlanSelectionProps {
+interface ExplorerCanvasProps extends PlanSelection {
   layout: PlanLayout;
   orientation: PlanOrientation;
   viewport: PlanViewport;
