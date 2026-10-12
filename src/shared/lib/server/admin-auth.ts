@@ -8,9 +8,9 @@ import { safeEqual } from "@shared/lib/server/secrets";
  *
  * Las Server Actions son endpoints públicos, así que cada acción de escritura del catálogo
  * comprueba las credenciales antes de tocar la base. Se usan las de HTTP Basic
- * (`ADMIN_USER` y `ADMIN_PASSWORD` en el entorno): el panel de administración pedirá esas
- * credenciales para `/admin` y el navegador las reenvía en cada acción. Sin las variables
- * configuradas, todas las acciones se rechazan.
+ * (`ADMIN_USER` y `ADMIN_PASSWORD` en el entorno): `src/proxy.ts` las pide en `/admin` y el
+ * navegador las reenvía en cada acción. Sin las variables configuradas, todas las acciones se
+ * rechazan.
  */
 export const ADMIN_UNAUTHORIZED_MESSAGE = "No tienes permiso para hacer cambios.";
 
@@ -26,9 +26,17 @@ export function matchesBasicCredentials(authorization: string | null, user: stri
   return userMatches && passwordMatches;
 }
 
+/**
+ * `true` si el encabezado `Authorization` es de un administrador. Sin credenciales configuradas,
+ * nunca. Lo usan `proxy.ts` (para pedir usuario y contraseña en `/admin`) e `isAdminRequest`.
+ */
+export function isAdminAuthorization(authorization: string | null, credentials: AdminCredentials | null = env.admin) {
+  if (!credentials) return false;
+  return matchesBasicCredentials(authorization, credentials.user, credentials.password);
+}
+
 /** `true` si la petición actual viene de un administrador. Sin credenciales configuradas, nunca. */
 export async function isAdminRequest(credentials: AdminCredentials | null = env.admin) {
-  if (!credentials) return false;
   const requestHeaders = await headers();
-  return matchesBasicCredentials(requestHeaders.get("authorization"), credentials.user, credentials.password);
+  return isAdminAuthorization(requestHeaders.get("authorization"), credentials);
 }

@@ -57,7 +57,7 @@ El worker escrito a mano resuelve los dos problemas que Serwist resolvía:
 | Imágenes (`/_next/image`, `/mock/*` y el póster) | Stale-while-revalidate, máximo 60 entradas (se borran las más antiguas). Sólo las que ya se vieron. | `ut-e3-images-<versión>` |
 | `/api/*` | Network first con respaldo en caché. | `ut-e3-api-<versión>` |
 | Video `/media/reel.webm` y `.mp4`, peticiones con `Range` | Nunca pasan por el worker. Sin conexión se ve el póster. | |
-| Otro dominio, métodos distintos de GET, `/sw.js` | Nunca pasan por el worker. | |
+| Otro dominio, métodos distintos de GET, `/sw.js` y el panel `/admin` | Nunca pasan por el worker. | |
 | Lo demás del mismo origen (manifest, ícono...) | Red; si falla, cualquier copia guardada. | |
 
 Además, `experimental.useOffline` hace que Next deje pendiente (y reintente al volver la red) una

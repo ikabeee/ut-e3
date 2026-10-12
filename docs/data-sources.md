@@ -97,7 +97,7 @@ Prisma / mock  ->  GameRepository  ->  getGameRepository() (DATA_SOURCE)  ->  ga
 ## Acciones de administración (CRUD)
 
 Las funciones de `lib/server/*-queries.ts` hacen el trabajo y las Server Actions de
-`lib/*-actions.ts` son lo que llamará el panel de administración (todavía no existe su interfaz).
+`lib/*-actions.ts` son lo que llama el panel de administración (ver abajo).
 
 ```
 games/lib/server/games-admin-queries.ts     CRUD de juegos (incluye los que no tienen portada)
@@ -117,8 +117,8 @@ Cada acción usa `runAdminAction()` (`@shared/lib/server/admin-action`), que:
 2. Valida los datos (`*-validation.ts`) y responde con errores por campo en español.
 3. Traduce las restricciones de la base (duplicados, `CHECK`, llaves foráneas) a mensajes
    (`@shared/lib/server/db-errors`).
-4. Invalida la caché del sitio con `updateTag(GAMES_CACHE_TAG)`. En el navegador, el panel debe
-   invalidar también `gamesQueryKeys.all` de TanStack Query.
+4. Invalida la caché del sitio con `updateTag(GAMES_CACHE_TAG)` y vuelve a renderizar la página
+   que la llamó (`refresh()`), así las listas del panel se actualizan solas.
 
 Todas devuelven un `ActionResult` (`@shared/lib/action-result`):
 
@@ -130,6 +130,27 @@ if (result.ok) {
   // result.error y result.fieldErrors?.name
 }
 ```
+
+### Panel de administración (`src/features/admin`)
+
+`/admin` es la interfaz de esas acciones. Para abrirlo en local, define `ADMIN_USER` y
+`ADMIN_PASSWORD` en `.env` (con `DATA_SOURCE=prisma`) y entra con esas credenciales; el navegador
+las recuerda y las manda en cada acción.
+
+| Sección | Qué hace |
+| --- | --- |
+| `/admin` | Resumen: equipos (con stand), juegos (visibles) y ganadores. |
+| `/admin/teams` | Alta y edición de equipos, stand, integrantes y llave del escáner (se muestra una sola vez). |
+| `/admin/games` | Alta y edición de juegos, géneros extra, plataformas y fotos; "Hacer portada" lo publica. |
+| `/admin/catalog` | Géneros y plataformas. |
+| `/admin/raffle` | Sortear ganadores, marcarlos como avisados y generar un QR nuevo a un visitante. |
+
+- **Protección**: `src/proxy.ts` responde `401` sin las credenciales; las páginas
+  (`lib/server/admin-queries.ts`) y las acciones (`runAdminAction`) las vuelven a comprobar, por si
+  una ruta queda fuera del `matcher`. El service worker no guarda `/admin` y `robots.txt` lo excluye.
+- **Formularios**: `AdminActionForm` manda los campos a la acción y muestra los errores por campo;
+  `AdminActionButton` ejecuta borrados y acciones de un clic (con confirmación). Los textos están
+  en `lib/admin-copy.ts`.
 
 ## Visitantes, check-ins y sorteo (`src/features/visitors`)
 

@@ -16,7 +16,12 @@ export function RaffleTicketForm() {
       <TextField name="phone" type="tel" isRequired autoComplete="tel" className="flex flex-col gap-1">
         <Label>{copy.phoneLabel}</Label>
         {/* 16 px: con menos, iOS hace zoom al escribir. */}
-        <Input placeholder={copy.phonePlaceholder} inputMode="tel" className="text-base" />
+        <Input
+          placeholder={copy.phonePlaceholder}
+          inputMode="tel"
+          onInput={form.clearFieldError}
+          className="text-base"
+        />
         <Description>{copy.phoneHint}</Description>
         <FieldError />
       </TextField>

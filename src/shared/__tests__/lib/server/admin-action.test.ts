@@ -1,12 +1,12 @@
 /** @jest-environment node */
-import { updateTag } from "next/cache";
+import { refresh, updateTag } from "next/cache";
 import { ActionRuleError } from "@shared/lib/action-rule-error";
 import { runAdminAction } from "@shared/lib/server/admin-action";
 import { isAdminRequest } from "@shared/lib/server/admin-auth";
 import { RecordNotFoundError } from "@shared/lib/record-not-found-error";
 import { ValidationError } from "@shared/lib/validation";
 
-jest.mock("next/cache", () => ({ updateTag: jest.fn() }));
+jest.mock("next/cache", () => ({ refresh: jest.fn(), updateTag: jest.fn() }));
 jest.mock("@shared/lib/server/admin-auth", () => ({
   ...jest.requireActual("@shared/lib/server/admin-auth"),
   isAdminRequest: jest.fn(),
@@ -18,6 +18,7 @@ describe("runAdminAction", () => {
   beforeEach(() => {
     jest.mocked(isAdminRequest).mockResolvedValue(true);
     jest.mocked(updateTag).mockClear();
+    jest.mocked(refresh).mockClear();
   });
 
   it("rejects the request before running anything when it is not an admin", async () => {
@@ -34,6 +35,7 @@ describe("runAdminAction", () => {
   it("returns the data and invalidates the cache tags", async () => {
     await expect(runAdminAction(async () => ({ id: "1" }), options)).resolves.toEqual({ ok: true, data: { id: "1" } });
     expect(updateTag).toHaveBeenCalledWith("games");
+    expect(refresh).toHaveBeenCalled();
   });
 
   it("returns the field errors of a validation error without invalidating", async () => {

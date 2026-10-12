@@ -24,6 +24,8 @@ export function getRequestStrategy(request: StrategyRequest, origin: string): Re
   if (request.destination === "video" || request.headers.has("range")) return "bypass";
   if (url.pathname.startsWith("/media/") && /\.(webm|mp4)$/.test(url.pathname)) return "bypass";
   if (url.pathname === "/sw.js") return "bypass";
+  // El panel de administración (`ADMIN_PATH`) es privado: nunca se guarda en la caché del navegador.
+  if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) return "bypass";
 
   // Peticiones RSC: navegación interna y prefetch del router de Next.
   if (request.headers.get("RSC") === "1" || url.searchParams.has("_rsc")) return "rsc";
