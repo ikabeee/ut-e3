@@ -1,0 +1,20 @@
+# Dependencias y salidas de compilación o de pruebas
+node_modules
+.next
+coverage
+out
+build
+public
+
+# Archivos generados: no se editan a mano
+package-lock.json
+next-env.d.ts
+src/shared/lib/prisma/contract.json
+src/shared/lib/prisma/contract.d.ts
+src/shared/lib/prisma/ops.json
+src/shared/lib/prisma/migration.json
+migrations/snapshots
+
+# Markdown: Prettier rellena las tablas con espacios para alinearlas, así que editar una celda larga
+# reescribe la tabla completa. Las tablas de docs/ quedan en formato compacto (| --- |).
+*.md

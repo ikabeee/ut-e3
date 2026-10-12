@@ -11,6 +11,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -52,6 +54,8 @@
     "eslint-plugin-sonarjs": "^4.2.2",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
+    "prettier": "3.9.9",
+    "prettier-plugin-tailwindcss": "0.8.1",
     "prisma": "8.0.0-rc.22",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3"

@@ -1,7 +1,7 @@
 name: CI
 
-# Puerta de calidad: todo PR hacia develop o main debe pasar lint
-# (incluye las reglas de SonarQube), typecheck, pruebas y build.
+# Puerta de calidad: todo PR hacia develop o main debe pasar lint (incluye las reglas
+# de SonarQube), formato (Prettier), typecheck, pruebas y build.
 on:
   pull_request:
     branches: [develop, main]
@@ -28,6 +28,7 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+      - run: npm run format:check
       - run: npm run typecheck
       - run: npm test -- --coverage
       - run: npm run build
