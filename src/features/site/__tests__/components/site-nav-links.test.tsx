@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { SiteNavLinks } from "@shared/components/site-nav-links";
+import { SiteNavLinks } from "@features/site/components/site-nav-links";
 
 const mockUsePathname = jest.fn<string, []>();
 

@@ -11,7 +11,9 @@ const organization = {
 } as const;
 
 /**
- * Datos generales del sitio (nombre, URL pública, organización y textos de SEO).
+ * Datos generales del sitio (nombre, URL pública, organización y textos de SEO). No conoce las
+ * rutas ni las secciones: cada feature declara su ruta en `lib/*-links.ts` y la navegación vive en
+ * la feature `site`.
  * La URL pública viene de `NEXT_PUBLIC_SITE_URL`, validada en `@shared/lib/env`: es
  * obligatoria en producción y genera las URLs absolutas de metadata, sitemap y Open Graph.
  */
@@ -28,11 +30,4 @@ export const siteConfig = {
   shareImage: "/media/reel.jpg",
   /** Color de la barra del navegador y del fondo de la app instalada (`--utg-black`). */
   themeColor: "#000000",
-} as const;
-
-/** Rutas principales del sitio. */
-export const routes = {
-  home: "/",
-  games: "/games",
-  floorPlan: "/floor-plan",
 } as const;

@@ -3,27 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@heroui/react";
+import { isNavLinkActive, NAV_LINKS } from "@features/site/lib/navigation";
 import { ScrambleText } from "@shared/components/scramble-text";
-import { routes } from "@shared/lib/site-config";
 
-interface NavLink {
-  href: string;
-  label: string;
-  /** Prefijo de ruta que marca el enlace como página actual. */
-  activePrefix?: string;
-}
-
-// "Inicio" no se resalta: en el diseño sólo se marcan las secciones internas.
-const NAV_LINKS: readonly NavLink[] = [
-  { href: routes.home, label: "Inicio" },
-  { href: routes.games, label: "Juegos", activePrefix: routes.games },
-  { href: routes.floorPlan, label: "Croquis", activePrefix: routes.floorPlan },
-];
-
-export function isNavLinkActive(link: NavLink, pathname: string) {
-  return link.activePrefix !== undefined && pathname.startsWith(link.activePrefix);
-}
-
+/** Enlaces de la navegación principal; el de la sección actual se marca en azul. */
 export function SiteNavLinks() {
   const pathname = usePathname();
 
