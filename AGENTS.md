@@ -79,7 +79,8 @@ src/
 │   ├── home/                 # Portada (/): compone event, games y floor-plan
 │   ├── offline/              # Sin conexión: service worker (/sw.js), avisos y página /offline
 │   ├── site/                 # Marco del sitio: navegación, pie, 404 y página de error
-│   └── teams/                # Equipos e integrantes: CRUD y Server Actions del panel
+│   ├── teams/                # Equipos e integrantes: CRUD y Server Actions del panel
+│   └── visitors/             # Pasaporte (/passport): QR, check-ins del escáner, sorteo y afluencia
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
     ├── components/           # Primitivos del diseño: botones, QueryProvider, JsonLd, logo...
@@ -365,8 +366,10 @@ Lee la guía correspondiente en `node_modules/next/dist/docs/` antes de escribir
   Las Server Actions son endpoints públicos: las de administración envuelven su trabajo en
   `runAdminAction()` (`@shared/lib/server/admin-action`), que comprueba permisos (`ADMIN_USER` /
   `ADMIN_PASSWORD`), traduce los errores esperados (validación, registro no encontrado,
-  restricciones de la base) y llama `updateTag`. Devuelven un `ActionResult`
-  (`@shared/lib/action-result`) en lugar de lanzar errores esperados.
+  restricciones de la base) y llama `updateTag`. Las públicas (las del visitante) usan
+  `runServerAction()` (`@shared/lib/server/server-action`), igual pero sin permisos. Devuelven un
+  `ActionResult` (`@shared/lib/action-result`) en lugar de lanzar errores esperados; los
+  formularios las llaman con `useServerActionForm` (`@shared/hooks/use-server-action-form`).
 - Metadata con `export const metadata` o `generateMetadata`.
 - Imports con path aliases (ver "Imports y path aliases").
 

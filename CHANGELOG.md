@@ -26,6 +26,15 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   géneros y plataformas) con Server Actions protegidas por `ADMIN_USER` / `ADMIN_PASSWORD`,
   validación con mensajes en español y llaves de escáner por equipo.
 - `IMAGE_REMOTE_HOSTS`: dominios permitidos para las fotos de los juegos por URL.
+- Pasaporte (`/passport`): registro sin login con gamertag, QR personal, avance de juegos
+  probados y formulario del boleto del sorteo al completar todos los stands. Abrir el QR
+  (`/v/<token>`) recupera el pasaporte en un navegador nuevo. Enlace "Mi QR" en la navegación y
+  acceso directo en la app instalada.
+- Endpoint del escáner de los stands (`/api/check-ins`): lotes idempotentes de escaneos con la
+  llave del equipo.
+- Afluencia en vivo de cada stand en el croquis (se refresca cada 30 segundos).
+- Server Actions de administración para el sorteo (sortear, listar y avisar a ganadores) y para
+  generar un QR nuevo a un visitante.
 - El sitio se puede instalar como app: manifest con íconos PNG de 192 y 512 px, ícono
   `maskable`, `apple-touch-icon` para iOS y accesos directos a "Juegos" y "Croquis"
   (`npm run pwa:icons` regenera los íconos desde `src/app/icon.svg`).

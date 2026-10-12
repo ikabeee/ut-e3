@@ -12,7 +12,10 @@ interface PlanItemCardProps {
   variant: "overview" | "explorer";
 }
 
-/** Panel con la información del stand o zona seleccionada; los stands de equipo llevan su portada. */
+/**
+ * Panel con la información del stand o zona seleccionada; los stands de equipo llevan su portada
+ * y, si la page lo compone, su estado en vivo.
+ */
 export function PlanItemCard({ item, variant }: Readonly<PlanItemCardProps>) {
   const isOverview = variant === "overview";
   const Heading = isOverview ? "h3" : "h2";
@@ -36,6 +39,7 @@ export function PlanItemCard({ item, variant }: Readonly<PlanItemCardProps>) {
         <p className={cn("m-0", isOverview ? "text-base leading-[1.25]" : "text-[15px] leading-[1.3]")}>
           {item.description}
         </p>
+        {item.status}
       </PaperCard>
     </div>
   );

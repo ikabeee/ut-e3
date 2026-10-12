@@ -7,6 +7,7 @@ import { buildPlanItems } from "@features/floor-plan/lib/plan-items";
 import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 import { GameMedia } from "@features/games/components/game-media";
 import { toStandOccupants } from "@features/games/lib/game-stand";
+import { StandTrafficBadge } from "@features/visitors/components/stand-traffic-badge";
 import { listGames } from "@features/games/lib/server/games-queries";
 
 export const floorPlanPageMetadata: Metadata = {
@@ -22,7 +23,10 @@ export const floorPlanPageMetadata: Metadata = {
  */
 export async function FloorPlanPage() {
   const games = await listGames();
-  const occupants = toStandOccupants(games, (game) => <GameMedia game={game} sizes={PLAN_ITEM_COVER_SIZES} />);
+  // Cada stand de equipo lleva la portada del juego y su afluencia en vivo (feature `visitors`).
+  const occupants = toStandOccupants(games, (game) => <GameMedia game={game} sizes={PLAN_ITEM_COVER_SIZES} />).map(
+    (occupant) => ({ ...occupant, status: <StandTrafficBadge standCode={occupant.stand} /> }),
+  );
 
   return (
     <main className="pt-[clamp(28px,4vw,48px)]">

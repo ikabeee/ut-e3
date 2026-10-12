@@ -45,6 +45,11 @@ export interface StandOccupant {
   description: string;
   /** Portada del panel (imagen o arte). La pinta quien conoce al ocupante; `null` si no tiene. */
   cover: ReactNode;
+  /**
+   * Estado en vivo del stand bajo la descripción (por ejemplo, su afluencia). Lo compone la page
+   * con la feature que lo conoce; el croquis sólo lo coloca.
+   */
+  status?: ReactNode;
 }
 
 /** Cualquier punto seleccionable del croquis, listo para el panel y el directorio. */
@@ -60,6 +65,8 @@ export interface PlanItem {
   description: string;
   /** Portada del ocupante (sólo en stands de equipo). */
   cover: ReactNode;
+  /** Estado en vivo del stand (sólo en stands de equipo, si la page lo compone). */
+  status?: ReactNode;
 }
 
 export type PlanOrientation = "wide" | "tall";

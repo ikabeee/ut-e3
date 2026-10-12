@@ -29,8 +29,9 @@ const FEATURE_DEPENDENCIES = {
   games: ["event", "floor-plan"],
   home: ["event", "floor-plan", "games"],
   offline: ["floor-plan", "games", "home"],
-  site: ["floor-plan", "games", "home"],
+  site: ["floor-plan", "games", "home", "visitors"],
   teams: ["games"],
+  visitors: ["event", "floor-plan"],
 };
 
 const FEATURES = readdirSync(new URL("./src/features", import.meta.url), { withFileTypes: true })

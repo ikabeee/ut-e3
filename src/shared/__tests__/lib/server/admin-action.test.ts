@@ -1,5 +1,6 @@
 /** @jest-environment node */
 import { updateTag } from "next/cache";
+import { ActionRuleError } from "@shared/lib/action-rule-error";
 import { runAdminAction } from "@shared/lib/server/admin-action";
 import { isAdminRequest } from "@shared/lib/server/admin-auth";
 import { RecordNotFoundError } from "@shared/lib/record-not-found-error";
@@ -48,12 +49,18 @@ describe("runAdminAction", () => {
     expect(updateTag).not.toHaveBeenCalled();
   });
 
-  it("explains missing records and violated constraints", async () => {
+  it("explains missing records, broken rules and violated constraints", async () => {
     await expect(
       runAdminAction(async () => {
         throw new RecordNotFoundError("El género ya no existe.");
       }, options),
     ).resolves.toEqual({ ok: false, error: "El género ya no existe." });
+
+    await expect(
+      runAdminAction(async () => {
+        throw new ActionRuleError("Te faltan 3 juegos.");
+      }, options),
+    ).resolves.toEqual({ ok: false, error: "Te faltan 3 juegos." });
 
     await expect(
       runAdminAction(async () => {

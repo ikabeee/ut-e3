@@ -1,17 +1,7 @@
 import "server-only";
-import { updateTag } from "next/cache";
-import { actionError, actionOk, type ActionResult } from "@shared/lib/action-result";
+import { actionError, type ActionResult } from "@shared/lib/action-result";
 import { ADMIN_UNAUTHORIZED_MESSAGE, isAdminRequest } from "@shared/lib/server/admin-auth";
-import { describeConstraintViolation, getConstraintViolation } from "@shared/lib/server/db-errors";
-import { RecordNotFoundError } from "@shared/lib/record-not-found-error";
-import { ValidationError } from "@shared/lib/validation";
-
-interface AdminActionOptions {
-  /** Etiquetas de caché de Next.js a invalidar si el cambio se guarda (`updateTag`). */
-  invalidateTags?: readonly string[];
-  /** Mensajes para restricciones de la base, por prefijo de su nombre (`genre_slug_key`). */
-  constraintMessages?: Readonly<Record<string, string>>;
-}
+import { runServerAction, type ServerActionOptions } from "@shared/lib/server/server-action";
 
 /**
  * Esqueleto de toda Server Action de administración:
@@ -23,29 +13,10 @@ interface AdminActionOptions {
  */
 export async function runAdminAction<T>(
   operation: () => Promise<T>,
-  { invalidateTags = [], constraintMessages = {} }: AdminActionOptions = {},
+  options: ServerActionOptions = {},
 ): Promise<ActionResult<T>> {
   if (!(await isAdminRequest())) {
     return actionError(ADMIN_UNAUTHORIZED_MESSAGE);
   }
-
-  try {
-    const data = await operation();
-    for (const tag of invalidateTags) {
-      updateTag(tag);
-    }
-    return actionOk(data);
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      return actionError(error.message, error.fieldErrors);
-    }
-    if (error instanceof RecordNotFoundError) {
-      return actionError(error.message);
-    }
-    const violation = getConstraintViolation(error);
-    if (violation) {
-      return actionError(describeConstraintViolation(violation, constraintMessages));
-    }
-    throw error;
-  }
+  return runServerAction(operation, options);
 }

@@ -11,7 +11,7 @@ export function SiteNavLinks() {
   const pathname = usePathname();
 
   return (
-    <ul className="m-0 scrollbar-none flex min-w-0 flex-1 list-none items-center gap-[clamp(14px,3vw,40px)] overflow-x-auto px-gutter font-nav text-[13px] leading-[1.3] font-medium tracking-[.02em] uppercase [font-variation-settings:'wdth'_87.5] max-[420px]:gap-3 max-[420px]:text-[11px]">
+    <ul className="m-0 scrollbar-none flex min-w-0 flex-1 list-none items-center gap-[clamp(14px,3vw,40px)] overflow-x-auto px-gutter font-nav text-[13px] leading-[1.3] font-medium tracking-[.02em] uppercase [font-variation-settings:'wdth'_87.5] max-[420px]:gap-3 max-[420px]:text-[11px] max-[400px]:gap-2">
       {NAV_LINKS.map((link) => {
         const isActive = isNavLinkActive(link, pathname);
         return (
