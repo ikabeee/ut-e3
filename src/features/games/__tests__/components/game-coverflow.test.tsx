@@ -21,6 +21,12 @@ describe("GameCoverflow", () => {
     expect(currentCase()).toHaveAttribute("href", "/games/pulso-cero");
   });
 
+  it("renders nothing while there are no published games", () => {
+    const { container } = renderWithGames(<GameCoverflow />, []);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it("brings a side case to the front instead of opening it", async () => {
     const user = userEvent.setup();
     renderWithGames(<GameCoverflow />);

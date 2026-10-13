@@ -6,11 +6,26 @@ import { FeaturedThumbnails } from "@features/games/components/featured-thumbnai
 import { useFeaturedCarousel } from "@features/games/hooks/use-featured-carousel";
 import { useGames } from "@features/games/hooks/use-games";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
+import type { Game } from "@features/games/lib/types";
 import { ArrowButton } from "@shared/components/arrow-button";
 
-/** Carrusel de destacados de la portada (`.hero`): imagen grande, título y miniaturas. */
+/**
+ * Carrusel de destacados de la portada (`.hero`): imagen grande, título y miniaturas. Mientras no
+ * haya juegos publicados (base de datos recién creada) no se muestra.
+ */
 export function FeaturedGamesCarousel() {
   const games = useGames();
+
+  if (games.length === 0) return null;
+
+  return <FeaturedCarousel games={games} />;
+}
+
+interface FeaturedCarouselProps {
+  games: readonly Game[];
+}
+
+function FeaturedCarousel({ games }: Readonly<FeaturedCarouselProps>) {
   const carousel = useFeaturedCarousel(games.length);
 
   return (

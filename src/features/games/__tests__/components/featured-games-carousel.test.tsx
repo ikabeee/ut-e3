@@ -37,6 +37,12 @@ describe("FeaturedGamesCarousel", () => {
     jest.useRealTimers();
   });
 
+  it("renders nothing while there are no published games", () => {
+    const { container } = renderWithGames(<FeaturedGamesCarousel />, []);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it("starts with the first game and marks its thumbnail", () => {
     renderWithGames(<FeaturedGamesCarousel />);
 

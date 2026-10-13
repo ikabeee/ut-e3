@@ -19,9 +19,10 @@ function searchableText(game: Game) {
 export function filterGames(games: readonly Game[], { genre, keyword }: GameFilters) {
   const query = normalizeText(keyword.trim());
 
-  return games.filter(
-    (game) => (genre === null || game.genre === genre) && (query === "" || searchableText(game).includes(query)),
-  );
+  const matchesGenre = (game: Game) => genre === null || game.genre === genre;
+  const matchesQuery = (game: Game) => query === "" || searchableText(game).includes(query);
+
+  return games.filter((game) => matchesGenre(game) && matchesQuery(game));
 }
 
 /** Seleccionar el género activo lo quita; seleccionar otro lo reemplaza. */

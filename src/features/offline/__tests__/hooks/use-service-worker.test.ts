@@ -16,6 +16,10 @@ class FakeTarget {
   emit(type: string) {
     for (const listener of this.listeners.get(type) ?? []) listener();
   }
+
+  listenerCount(type: string) {
+    return this.listeners.get(type)?.size ?? 0;
+  }
 }
 
 class FakeWorker extends FakeTarget {
@@ -98,5 +102,20 @@ describe("useServiceWorker", () => {
 
     act(() => result.current.applyUpdate());
     expect(waiting.postMessage).toHaveBeenCalledWith({ type: "SKIP_WAITING" });
+  });
+
+  it("removes its listeners from the registration and the workers when it unmounts", async () => {
+    const waiting = new FakeWorker();
+    container.registration.waiting = waiting;
+
+    const { unmount } = renderHook(() => useServiceWorker());
+    await waitFor(() => expect(container.registration.listenerCount("updatefound")).toBe(1));
+    expect(waiting.listenerCount("statechange")).toBe(1);
+
+    unmount();
+
+    expect(container.listenerCount("controllerchange")).toBe(0);
+    expect(container.registration.listenerCount("updatefound")).toBe(0);
+    expect(waiting.listenerCount("statechange")).toBe(0);
   });
 });

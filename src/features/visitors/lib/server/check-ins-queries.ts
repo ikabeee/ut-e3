@@ -35,6 +35,46 @@ function getStatus(id: string, insertedIds: ReadonlySet<string>, knownIds: Reado
   return knownIds.has(id) ? "duplicate" : "unknown";
 }
 
+interface CheckInRow {
+  id: string;
+  visitorId: string;
+  gameId: string;
+  scannedAt: string;
+}
+
+/** Hash del token de cada escaneo, por id del escaneo. Lo que no es un QR de visitante se omite. */
+function hashScannedTokens(items: readonly CheckInItem[]) {
+  const tokenHashById = new Map<string, string>();
+
+  for (const item of items) {
+    const token = extractVisitorToken(item.token);
+
+    if (token) tokenHashById.set(item.id, hashSecret(token));
+  }
+
+  return tokenHashById;
+}
+
+/** Id de cada visitante por el hash de su token, con una sola consulta para todo el lote. */
+async function findVisitorIdsByTokenHash(tokenHashes: string[]) {
+  if (tokenHashes.length === 0) return new Map<string, string>();
+
+  const visitors = await db.orm.public.Visitor.select("id", "qrTokenHash")
+    .where((visitor) => visitor.qrTokenHash.in(tokenHashes))
+    .all();
+
+  return new Map(visitors.map((visitor) => [visitor.qrTokenHash, visitor.id]));
+}
+
+/** Guarda las filas y devuelve los ids que sí se insertaron (los repetidos se omiten). */
+async function insertCheckIns(rows: CheckInRow[]) {
+  if (rows.length === 0) return new Set<string>();
+
+  const inserted = await db.orm.public.CheckIn.select("id").createAll(rows, { onConflict: "skip" });
+
+  return new Set(inserted.map((row) => row.id));
+}
+
 /**
  * Guarda un lote de escaneos del juego. Los QR desconocidos se descartan sin abortar el lote
  * y `ON CONFLICT DO NOTHING` (sin columna) ignora tanto un reenvío (mismo id) como un segundo
@@ -45,38 +85,22 @@ export async function recordCheckIns(
   items: readonly CheckInItem[],
   now = new Date(),
 ): Promise<CheckInResult[]> {
-  const tokenHashById = new Map(
-    items.flatMap((item) => {
-      const token = extractVisitorToken(item.token);
+  const tokenHashById = hashScannedTokens(items);
+  const visitorIdByHash = await findVisitorIdsByTokenHash([...new Set(tokenHashById.values())]);
 
-      return token ? [[item.id, hashSecret(token)] as const] : [];
-    }),
-  );
+  const rows: CheckInRow[] = [];
 
-  const tokenHashes = [...new Set(tokenHashById.values())];
-
-  const visitors =
-    tokenHashes.length > 0
-      ? await db.orm.public.Visitor.select("id", "qrTokenHash")
-          .where((visitor) => visitor.qrTokenHash.in(tokenHashes))
-          .all()
-      : [];
-
-  const visitorIdByHash = new Map(visitors.map((visitor) => [visitor.qrTokenHash, visitor.id]));
-
-  const rows = items.flatMap((item) => {
+  for (const item of items) {
     const tokenHash = tokenHashById.get(item.id);
     const visitorId = tokenHash ? visitorIdByHash.get(tokenHash) : undefined;
 
-    if (!visitorId) return [];
+    if (visitorId) {
+      const scannedAt = clampScannedAt(item.scannedAt, EVENT_INFO.startsAt, now);
+      rows.push({ id: item.id, visitorId, gameId, scannedAt });
+    }
+  }
 
-    return [{ id: item.id, visitorId, gameId, scannedAt: clampScannedAt(item.scannedAt, EVENT_INFO.startsAt, now) }];
-  });
-
-  const inserted =
-    rows.length > 0 ? await db.orm.public.CheckIn.select("id").createAll(rows, { onConflict: "skip" }) : [];
-
-  const insertedIds = new Set(inserted.map((row) => row.id));
+  const insertedIds = await insertCheckIns(rows);
   const knownIds = new Set(rows.map((row) => row.id));
 
   return items.map((item) => ({ id: item.id, status: getStatus(item.id, insertedIds, knownIds) }));

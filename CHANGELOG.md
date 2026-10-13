@@ -70,6 +70,24 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   relleno. La galería del detalle muestra las fotos reales del juego (sin flechas si sólo tiene
   la portada).
 
+### Corregido
+
+- La portada ya no falla con el catálogo vacío (`DATA_SOURCE=prisma` antes de publicar juegos):
+  el carrusel de destacados y el exhibidor 3D no se muestran hasta que haya juegos.
+- Pedir el boleto sin stands asignados responde "El sorteo se abre cuando los equipos tengan stand
+  asignado" en lugar de "Te faltan 0 juegos".
+- Las etiquetas animadas ya no se quedan revueltas si cambian a media animación ("Copiar" ->
+  "Copiado").
+- El carrusel de destacados no consume un cuadro de animación por frame mientras está en pausa
+  (con movimiento reducido, toda la visita); el título destacado se reajusta una vez por cuadro al
+  redimensionar; el aviso de actualización quita sus listeners del service worker al desmontarse.
+
+### Seguridad
+
+- El service worker ya no guarda el pasaporte (`/passport`) ni el enlace del QR (`/v/<token>`) en
+  la caché del navegador: mostraban el gamertag y el token secreto del QR. Sin conexión responden
+  la página `/offline`.
+
 ## [0.2.0] - 2026-10-10
 
 ### Agregado

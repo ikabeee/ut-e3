@@ -50,6 +50,27 @@ describe("ScrambleText", () => {
     expect(visibleLabel).toHaveTextContent(/^Juegos$/);
   });
 
+  it("shows the new label right away when it changes in the middle of the animation", () => {
+    const { rerender } = render(
+      <button type="button">
+        <ScrambleText text="Copiar dirección" />
+      </button>,
+    );
+    const button = screen.getByRole("button");
+
+    fireEvent.mouseEnter(button);
+    act(() => {
+      jest.advanceTimersByTime(SCRAMBLE_FRAME_MS);
+    });
+    rerender(
+      <button type="button">
+        <ScrambleText text="Copiado" />
+      </button>,
+    );
+
+    expect(button.querySelector("[aria-hidden='true']")).toHaveTextContent(/^Copiado$/);
+  });
+
   it("does not animate when the user prefers reduced motion", () => {
     mockReducedMotion(true);
     render(

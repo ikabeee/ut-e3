@@ -24,32 +24,41 @@ export function useServiceWorker() {
       return;
     }
 
-    // Recarga sólo cuando la persona aceptó la actualización (no en la primera instalación).
-    const handleControllerChange = () => {
-      if (isUpdating.current) window.location.reload();
+    let cancelled = false;
+    // El registro y los workers viven más que este componente: sus listeners se quitan al
+    // desmontar para no retener el componente (y su estado) en memoria.
+    const removeListeners: (() => void)[] = [];
+
+    const listen = (target: EventTarget, type: string, listener: () => void) => {
+      target.addEventListener(type, listener);
+      removeListeners.push(() => target.removeEventListener(type, listener));
     };
 
-    container.addEventListener("controllerchange", handleControllerChange);
-
-    let cancelled = false;
+    // Recarga sólo cuando la persona aceptó la actualización (no en la primera instalación).
+    listen(container, "controllerchange", () => {
+      if (isUpdating.current) window.location.reload();
+    });
 
     const showWhenInstalled = (worker: ServiceWorker | null) => {
       if (!worker) return;
 
       const update = () => {
         // Sólo es "versión nueva" si ya había un worker controlando la página.
-        if (!cancelled && worker.state === "installed" && container.controller) setWaitingWorker(worker);
+        if (worker.state === "installed" && container.controller) setWaitingWorker(worker);
       };
 
       update();
-      worker.addEventListener("statechange", update);
+      listen(worker, "statechange", update);
     };
 
     container
       .register(SERVICE_WORKER_PATH, { scope: "/", updateViaCache: "none" })
       .then((registration) => {
+        // El registro puede terminar después de desmontar: entonces ya no se escucha nada.
+        if (cancelled) return;
+
         showWhenInstalled(registration.waiting);
-        registration.addEventListener("updatefound", () => showWhenInstalled(registration.installing));
+        listen(registration, "updatefound", () => showWhenInstalled(registration.installing));
       })
       .catch(() => {
         // Sin service worker el sitio funciona igual, sólo que no sin conexión.
@@ -57,7 +66,8 @@ export function useServiceWorker() {
 
     return () => {
       cancelled = true;
-      container.removeEventListener("controllerchange", handleControllerChange);
+
+      for (const removeListener of removeListeners) removeListener();
     };
   }, []);
 

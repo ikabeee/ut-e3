@@ -242,6 +242,20 @@ describe("runServiceWorker: fetch", () => {
     expect(await (await request("/not-stored", { mode: "navigate" }))?.text()).toBe("offline page");
   });
 
+  it("never stores the passport, which carries the visitor's QR token, and shows /offline without network", async () => {
+    const online = setup(async () => new FakeResponse("passport with token"));
+
+    expect(await (await online.request("/passport", { mode: "navigate" }))?.text()).toBe("passport with token");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(await online.storage.match(`${ORIGIN}/passport`)).toBeUndefined();
+
+    const { storage, request } = setup(offline);
+    const pages = await storage.open("ut-e3-pages-v2");
+    await pages.put(`${ORIGIN}/offline`, new FakeResponse("offline page"));
+
+    expect(await (await request("/passport", { mode: "navigate" }))?.text()).toBe("offline page");
+  });
+
   it("answers with the stored page when the network takes longer than the time limit", async () => {
     const { storage, request } = setup(() => new Promise(() => undefined));
     const pages = await storage.open("ut-e3-pages-v2");

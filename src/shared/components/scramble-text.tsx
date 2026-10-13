@@ -50,6 +50,9 @@ export function ScrambleText({ text, className }: Readonly<ScrambleTextProps>) {
     return () => {
       host.removeEventListener("mouseenter", startScramble);
       window.clearInterval(timer);
+      // Si la etiqueta cambia a media animación ("Copiar" -> "Copiado"), no se queda el cuadro
+      // revuelto de la etiqueta anterior.
+      setScrambled(null);
     };
   }, [text, prefersReducedMotion]);
 
