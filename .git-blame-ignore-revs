@@ -4,3 +4,6 @@
 
 # style: aplicar formato con Prettier (#60)
 4f1e355a3fb528e2bb62f19623dbb395304dec52
+
+# style: aplicar el espaciado legible de anti-slop (#71)
+d378feb9aeda6236ee1bc68aceff725d8b9f8540
