@@ -26,7 +26,9 @@ la revisión base de abajo en lugar de sobrescribir los cambios locales.
 ## Integración local (fuera de esta carpeta)
 
 - `.oxlintrc.json`: registra `./tools/oxlint/anti-slop/index.ts` como `anti-slop` y activa en `"error"`
-  las 18 reglas genéricas y `oxc/no-accumulating-spread`. Ignora las carpetas de agentes, esta carpeta y
+  las 18 reglas genéricas y `oxc/no-accumulating-spread`. `no-runtime-typeof` usa la opción de upstream
+  `allowInTypeGuards: true`: sin librería de esquemas, la validación de datos externos vive en type guards
+  (`value is T`), que `no-unknown-parameters` ya acepta. Ignora las carpetas de agentes, esta carpeta y
   los mismos artefactos generados que ignora ESLint (`next-env.d.ts`, `contract.d.ts`, `migrations/`).
 - `tools/oxlint/package.json` (`"type": "module"`): Node carga el plugin como ES module sin el aviso
   `MODULE_TYPELESS_PACKAGE_JSON` y sin cambiar el tipo de módulo del resto del proyecto.
