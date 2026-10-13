@@ -30,27 +30,29 @@ export function useAutoplayProgress({ duration, isPaused, stepKey, onComplete }:
       progress.current = 0;
     }
 
+    // En pausa no se programa ningún cuadro (con movimiento reducido la pausa dura toda la visita):
+    // el avance se queda guardado en `progress` y el efecto vuelve a correr al reanudar.
+    if (isPaused) {
+      return;
+    }
+
     let startedAt: number | null = null;
     let frame = 0;
 
     const tick = (now: number) => {
+      // Al reanudar, el paso continúa desde el avance guardado.
       startedAt ??= now - progress.current * duration;
+      progress.current = Math.min(1, (now - startedAt) / duration);
 
-      if (isPaused) {
-        startedAt = now - progress.current * duration;
-      } else {
-        progress.current = Math.min(1, (now - startedAt) / duration);
+      if (barRef.current) {
+        barRef.current.style.width = `${progress.current * 100}%`;
+      }
 
-        if (barRef.current) {
-          barRef.current.style.width = `${progress.current * 100}%`;
-        }
+      if (progress.current >= 1) {
+        progress.current = 0;
+        onCompleteRef.current();
 
-        if (progress.current >= 1) {
-          progress.current = 0;
-          onCompleteRef.current();
-
-          return;
-        }
+        return;
       }
 
       frame = requestAnimationFrame(tick);

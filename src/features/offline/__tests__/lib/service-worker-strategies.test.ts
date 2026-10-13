@@ -40,6 +40,10 @@ describe("getRequestStrategy", () => {
     ["/api/games", {}, "api"],
     ["/manifest.webmanifest", {}, "network"],
     ["/administration-guide", { mode: "navigate" as const }, "page"],
+    ["/passport", { mode: "navigate" as const }, "private-page"],
+    ["/v/0123456789abcdef0123456789abcdef", { mode: "navigate" as const }, "private-page"],
+    ["/passport?_rsc=abc", {}, "rsc"],
+    ["/passport-guide", { mode: "navigate" as const }, "page"],
   ])("%s -> %s", (path, overrides, expected) => {
     expect(getRequestStrategy(request(path, overrides), ORIGIN)).toBe(expected);
   });

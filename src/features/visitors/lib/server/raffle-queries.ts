@@ -36,13 +36,15 @@ export async function claimRaffleTicket(token: string, phone: string): Promise<R
   if (existing) return existing;
 
   const requiredGames = await listRequiredGames();
+
+  // Sin stands asignados no hay juegos que probar: el sorteo todavía no abre.
+  if (requiredGames.length === 0) throw new ActionRuleError(VISITORS_COPY.raffle.noStands);
+
   const checkedGames = await db.orm.public.CheckIn.select("gameId").where({ visitorId: visitor.id }).all();
   const checkedIds = new Set(checkedGames.map((checkIn) => checkIn.gameId));
   const missing = requiredGames.filter((game) => !checkedIds.has(game.id)).length;
 
-  if (requiredGames.length === 0 || missing > 0) {
-    throw new ActionRuleError(VISITORS_COPY.raffle.notYet(missing));
-  }
+  if (missing > 0) throw new ActionRuleError(VISITORS_COPY.raffle.notYet(missing));
 
   // Si dos peticiones llegan a la vez, la segunda no inserta nada y lee el boleto de la primera.
   const [created] = await db.orm.public.RaffleTicket.select("ticketNumber", "wonAt").createAll(

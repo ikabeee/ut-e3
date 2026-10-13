@@ -9,6 +9,7 @@ export type RequestStrategy =
   | "bypass" // El navegador la resuelve sin el service worker (otro origen, POST, video...).
   | "static" // Cache first: `/_next/static/*` lleva hash en el nombre y nunca cambia.
   | "page" // Network first con tiempo límite; respaldo en caché y luego `/offline`.
+  | "private-page" // Red sin guardar copia (datos de un visitante); sin conexión, `/offline`.
   | "rsc" // Navegación interna de Next: red con tiempo límite; si falla, recarga completa.
   | "image" // Stale-while-revalidate con límite de entradas.
   | "api" // Network first con respaldo en caché.
@@ -34,7 +35,13 @@ export function getRequestStrategy(request: StrategyRequest, origin: string): Re
   // Peticiones RSC: navegación interna y prefetch del router de Next.
   if (request.headers.get("RSC") === "1" || url.searchParams.has("_rsc")) return "rsc";
 
-  if (request.mode === "navigate") return "page";
+  if (request.mode === "navigate") {
+    // El pasaporte (`PASSPORT_PATH`) y el enlace del QR (`VISITOR_QR_PATH`) muestran el gamertag y
+    // el token secreto del visitante: no se guardan, así el token no sale de la cookie `httpOnly`.
+    const isPrivatePage = url.pathname === "/passport" || url.pathname.startsWith("/v/");
+
+    return isPrivatePage ? "private-page" : "page";
+  }
 
   if (url.pathname.startsWith("/_next/static/")) return "static";
 

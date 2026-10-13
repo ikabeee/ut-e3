@@ -11,6 +11,7 @@ import { useGames } from "@features/games/hooks/use-games";
 import { getCoverflowPlacement } from "@features/games/lib/coverflow-layout";
 import { getGamePath } from "@features/games/lib/game-links";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
+import type { Game } from "@features/games/lib/types";
 import { ArrowButton } from "@shared/components/arrow-button";
 
 // Medidas del exhibidor (ver `coverflow-layout.ts`). Por debajo de 640 px de ancho cambian
@@ -21,9 +22,23 @@ const RACK_VARIABLES = [
   "[--ch:calc(var(--cw)*1.36)] [--cd:max(6px,calc(var(--cw)*.07))]",
 ].join(" ");
 
-/** Exhibidor 3D de la portada (`.fan`): cajas de juegos con reflejo, cantos y perspectiva. */
+/**
+ * Exhibidor 3D de la portada (`.fan`): cajas de juegos con reflejo, cantos y perspectiva. Mientras
+ * no haya juegos publicados (base de datos recién creada) no se muestra.
+ */
 export function GameCoverflow() {
   const games = useGames();
+
+  if (games.length === 0) return null;
+
+  return <CoverflowRack games={games} />;
+}
+
+interface CoverflowRackProps {
+  games: readonly Game[];
+}
+
+function CoverflowRack({ games }: Readonly<CoverflowRackProps>) {
   const router = useRouter();
   const coverflow = useCoverflow(games.length);
   const currentGame = games[coverflow.current];

@@ -210,6 +210,15 @@ export function runServiceWorker(
     return cached ?? Response.error();
   }
 
+  /** Página con datos de una persona: siempre de la red y nunca se guarda; sin conexión, `/offline`. */
+  async function privatePage(request: Request) {
+    try {
+      return await scope.fetch(request);
+    } catch {
+      return offlinePage();
+    }
+  }
+
   /**
    * Navegación interna de Next (RSC). No se guarda: si la red falla, un 503 hace que Next cambie
    * a una navegación completa, que este mismo worker responde con el HTML guardado o `/offline`.
@@ -259,6 +268,8 @@ export function runServiceWorker(
         return cacheFirst(request);
       case "page":
         return networkFirst(request, cacheNames.pages, pageKey(request.url), offlinePage);
+      case "private-page":
+        return privatePage(request);
       case "rsc":
         return rscRequest(request);
       case "image":

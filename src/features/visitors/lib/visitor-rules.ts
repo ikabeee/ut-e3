@@ -109,11 +109,15 @@ export function extractVisitorToken(scanned: string) {
  * servidor. Así un reloj adelantado no altera la afluencia y uno atrasado no pierde el escaneo.
  */
 export function clampScannedAt(deviceTime: string, eventStart: string, now: Date) {
-  const scanned = Date.parse(deviceTime);
-  const start = Date.parse(eventStart);
-  const clamped = Math.min(Math.max(Number.isNaN(scanned) ? now.getTime() : scanned, start), now.getTime());
+  const receivedAt = now.getTime();
+  const deviceMs = Date.parse(deviceTime);
+  // Una hora ilegible cuenta como la hora en que el escaneo llegó al servidor.
+  const scannedAt = Number.isNaN(deviceMs) ? receivedAt : deviceMs;
 
-  return new Date(clamped).toISOString();
+  const notBeforeStart = Math.max(scannedAt, Date.parse(eventStart));
+  const notAfterReceived = Math.min(notBeforeStart, receivedAt);
+
+  return new Date(notAfterReceived).toISOString();
 }
 
 function isCheckInItem(value: unknown): value is CheckInItem {
