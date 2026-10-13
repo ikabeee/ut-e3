@@ -3,6 +3,7 @@ import { useActiveThumbScroll } from "@features/games/hooks/use-active-thumb-scr
 
 function TestThumbs({ activeIndex }: Readonly<{ activeIndex: number }>) {
   const trackRef = useActiveThumbScroll<HTMLDivElement>(activeIndex);
+
   return (
     <div ref={trackRef}>
       <button type="button">Uno</button>

@@ -1,7 +1,9 @@
 import { EVENT_COPY } from "@features/event/lib/event-copy";
 
 const MONO = "var(--font-mono)";
+
 const WIDE = "var(--font-wide)";
+
 const ROAD = "M70 40 C140 140 250 210 300 250 S430 330 470 370";
 
 // Retícula de puntos cada 24 unidades, como en el diseño.

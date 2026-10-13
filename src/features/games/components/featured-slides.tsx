@@ -22,6 +22,7 @@ export function FeaturedSlides({ games, current, previous }: Readonly<FeaturedSl
     <div className="absolute inset-0 -z-1">
       {games.map((slide, index) => {
         const isCurrent = index === current;
+
         return (
           <div
             key={slide.slug}

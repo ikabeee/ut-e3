@@ -16,6 +16,7 @@ export function useActiveThumbScroll<T extends HTMLElement>(activeIndex: number)
   useEffect(() => {
     const track = trackRef.current;
     const thumb = track?.children[activeIndex];
+
     if (track && thumb instanceof HTMLElement) {
       track.scrollTo({
         left: thumb.offsetLeft - track.offsetLeft - THUMB_SCROLL_OFFSET,

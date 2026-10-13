@@ -9,6 +9,7 @@ import { OFFLINE_PATH } from "@features/offline/lib/service-worker-config";
  */
 export function buildPrecacheRoutes(gameSlugs: readonly string[]): string[] {
   const pages = [HOME_PATH, GAMES_PATH, FLOOR_PLAN_PATH, OFFLINE_PATH, ...gameSlugs.map(getGamePath)];
+
   return [...new Set(pages)];
 }
 

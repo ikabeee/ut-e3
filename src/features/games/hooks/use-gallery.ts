@@ -23,13 +23,16 @@ export function useGallery(shotCount: number) {
       if (isTypingTarget(event.target)) {
         return;
       }
+
       if (event.key === "ArrowRight") {
         showNext();
       } else if (event.key === "ArrowLeft") {
         showPrevious();
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
+
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [showNext, showPrevious]);
 

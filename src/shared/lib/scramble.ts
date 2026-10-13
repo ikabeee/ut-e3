@@ -20,6 +20,7 @@ export function scrambleFrame(label: string, frame: number, random: () => number
       if (character === " " || index < revealed) {
         return character;
       }
+
       return SCRAMBLE_GLYPHS[Math.floor(random() * SCRAMBLE_GLYPHS.length)];
     })
     .join("");

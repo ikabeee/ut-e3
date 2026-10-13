@@ -15,6 +15,7 @@ export async function getStandTraffic(): Promise<StandTrafficReport> {
   cacheLife({ stale: 30, revalidate: 30, expire: 60 });
 
   const since = new Date(Date.now() - TRAFFIC_WINDOW_MINUTES * 60_000).toISOString();
+
   const teams = await db.orm.public.Team.select("standCode")
     .where((team) => team.standCode.isNotNull())
     .include("game", (game) =>

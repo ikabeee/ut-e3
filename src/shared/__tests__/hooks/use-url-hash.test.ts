@@ -3,6 +3,7 @@ import { useUrlHash } from "@shared/hooks/use-url-hash";
 
 function renderWithHash(hash: string) {
   window.history.replaceState(null, "", `/floor-plan${hash}`);
+
   return renderHook(() => useUrlHash());
 }
 

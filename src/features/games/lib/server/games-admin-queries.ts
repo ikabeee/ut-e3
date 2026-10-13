@@ -45,22 +45,28 @@ function toGameRecord({ extraGenres, platforms, images, ...game }: GameRecordRow
 
 async function findGameOrThrow(id: string): Promise<GameRecord> {
   const row = isUuid(id) ? await gameRecords().where({ id }).first() : null;
+
   if (!row) throw new RecordNotFoundError(GAME_NOT_FOUND);
+
   return toGameRecord(row);
 }
 
 export async function listGameRecords(): Promise<GameRecord[]> {
   await connection();
+
   const rows = await gameRecords()
     .orderBy([(game) => game.sortOrder.asc(), (game) => game.name.asc()])
     .all();
+
   return rows.map(toGameRecord);
 }
 
 export async function getGameRecord(id: string): Promise<GameRecord | null> {
   await connection();
+
   if (!isUuid(id)) return null;
   const row = await gameRecords().where({ id }).first();
+
   return row ? toGameRecord(row) : null;
 }
 
@@ -70,6 +76,7 @@ export async function getGameRecord(id: string): Promise<GameRecord | null> {
  */
 function splitGameInput(input: GameInput) {
   const { teamId, genreId, slug, name, description, about, players, itchioUrl, sortOrder } = input;
+
   return {
     game: { teamId, genreId, slug, name, description, about, players, itchioUrl, sortOrder },
     extraGenreIds: input.extraGenreIds,
@@ -80,14 +87,18 @@ function splitGameInput(input: GameInput) {
 /** Crea el juego con sus plataformas y géneros extra en una transacción. */
 export async function createGame(input: GameInput): Promise<GameRecord> {
   const { game, extraGenreIds, platformIds } = splitGameInput(input);
+
   const created = await db.transaction(async (tx) => {
     const row = await tx.orm.public.Game.create(game);
     await tx.orm.public.GamePlatform.createAll(platformIds.map((platformId) => ({ gameId: row.id, platformId })));
+
     if (extraGenreIds.length > 0) {
       await tx.orm.public.GameGenre.createAll(extraGenreIds.map((genreId) => ({ gameId: row.id, genreId })));
     }
+
     return row;
   });
+
   return findGameOrThrow(created.id);
 }
 
@@ -98,20 +109,24 @@ export async function updateGame(id: string, input: GameInput): Promise<GameReco
 
   await db.transaction(async (tx) => {
     const updated = await tx.orm.public.Game.where({ id }).update(game);
+
     if (!updated) throw new RecordNotFoundError(GAME_NOT_FOUND);
 
     await tx.orm.public.GamePlatform.where({ gameId: id }).deleteAll();
     await tx.orm.public.GamePlatform.createAll(platformIds.map((platformId) => ({ gameId: id, platformId })));
     await tx.orm.public.GameGenre.where({ gameId: id }).deleteAll();
+
     if (extraGenreIds.length > 0) {
       await tx.orm.public.GameGenre.createAll(extraGenreIds.map((genreId) => ({ gameId: id, genreId })));
     }
   });
+
   return findGameOrThrow(id);
 }
 
 /** Borra el juego con sus fotos. Falla (llave foránea) si ya tiene check-ins. */
 export async function deleteGame(id: string): Promise<void> {
   const deleted = isUuid(id) ? await db.orm.public.Game.where({ id }).delete() : null;
+
   if (!deleted) throw new RecordNotFoundError(GAME_NOT_FOUND);
 }

@@ -33,9 +33,11 @@ interface TextRule {
 export function validate<T>(raw: RawInput, read: (field: FieldReader) => T): T {
   const errors: FieldErrors = {};
   const data = read(createFieldReader(raw, errors));
+
   if (Object.keys(errors).length > 0) {
     throw new ValidationError(errors);
   }
+
   return data;
 }
 
@@ -58,6 +60,7 @@ export interface FieldReader {
 function createFieldReader(raw: RawInput, errors: FieldErrors): FieldReader {
   const readString = (name: string) => {
     const value = raw[name];
+
     return typeof value === "string" ? value.trim() : "";
   };
 
@@ -72,52 +75,66 @@ function createFieldReader(raw: RawInput, errors: FieldErrors): FieldReader {
   return {
     text(name, rule) {
       const value = readString(name);
+
       if (!value) {
         errors[name] = `${rule.label} es obligatorio.`;
       } else {
         checkText(name, value, rule);
       }
+
       return value;
     },
 
     optionalText(name, rule) {
       const value = readString(name);
+
       if (!value) return null;
       checkText(name, value, rule);
+
       return value;
     },
 
     integer(name, { label, min, max, fallback }) {
       const value = raw[name];
+
       if ((value === undefined || value === null || value === "") && fallback !== undefined) {
         return fallback;
       }
+
       const number = typeof value === "number" ? value : Number(value);
+
       if (!Number.isInteger(number) || number < min || number > max) {
         errors[name] = `${label} debe ser un número entero entre ${min} y ${max}.`;
+
         return fallback ?? min;
       }
+
       return number;
     },
 
     boolean(name) {
       const value = raw[name];
+
       return value === true || value === "true" || value === "on";
     },
 
     oneOf(name, values, label) {
       const value = readString(name);
       const match = values.find((candidate) => candidate === value);
+
       if (!match) {
         errors[name] = `Elige un valor válido para ${label}.`;
+
         return values[0];
       }
+
       return match;
     },
 
     list(name) {
       const value = raw[name];
       const items = Array.isArray(value) ? value : [value];
+
       return [...new Set(items.filter((item): item is string => typeof item === "string" && item.trim() !== ""))];
     },
 

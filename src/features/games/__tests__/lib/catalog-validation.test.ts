@@ -2,7 +2,9 @@ import { parseCatalogOptionInput, parseGameImageInput, parseGameInput } from "@f
 import { ValidationError } from "@shared/lib/validation";
 
 const TEAM_ID = "6d94503f-3e3b-4e6e-8bc6-445cd33ed099";
+
 const GENRE_ID = "8c49deed-39e3-4206-b49e-af7023940ae8";
+
 const PLATFORM_ID = "7db42818-6594-4783-909c-be90f74aa2b4";
 
 const validGame = {
@@ -23,6 +25,7 @@ function fieldErrors(run: () => unknown) {
     if (error instanceof ValidationError) return error.fieldErrors;
     throw error;
   }
+
   return {};
 }
 

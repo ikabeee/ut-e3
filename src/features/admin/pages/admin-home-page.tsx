@@ -9,6 +9,7 @@ export const adminHomePageMetadata = buildAdminMetadata("home");
 
 async function AdminHomeContent() {
   const summary = await getAdminSummary();
+
   return <AdminSummaryList summary={summary} />;
 }
 

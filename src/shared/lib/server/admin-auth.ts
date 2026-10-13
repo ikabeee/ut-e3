@@ -19,10 +19,12 @@ export function matchesBasicCredentials(authorization: string | null, user: stri
   if (!authorization?.startsWith("Basic ")) return false;
   const decoded = Buffer.from(authorization.slice("Basic ".length), "base64").toString("utf8");
   const separator = decoded.indexOf(":");
+
   if (separator === -1) return false;
   // Ambas comparaciones se hacen siempre para no revelar cuál falló por el tiempo de respuesta.
   const userMatches = safeEqual(decoded.slice(0, separator), user);
   const passwordMatches = safeEqual(decoded.slice(separator + 1), password);
+
   return userMatches && passwordMatches;
 }
 
@@ -32,11 +34,13 @@ export function matchesBasicCredentials(authorization: string | null, user: stri
  */
 export function isAdminAuthorization(authorization: string | null, credentials: AdminCredentials | null = env.admin) {
   if (!credentials) return false;
+
   return matchesBasicCredentials(authorization, credentials.user, credentials.password);
 }
 
 /** `true` si la petición actual viene de un administrador. Sin credenciales configuradas, nunca. */
 export async function isAdminRequest(credentials: AdminCredentials | null = env.admin) {
   const requestHeaders = await headers();
+
   return isAdminAuthorization(requestHeaders.get("authorization"), credentials);
 }

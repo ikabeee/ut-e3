@@ -16,6 +16,7 @@ export function PassportRaffle({ passport }: Readonly<PassportRaffleProps>) {
   if (stage === "ticket" && passport.ticket) {
     return <RaffleTicketCard ticket={passport.ticket} />;
   }
+
   if (stage === "claim") {
     return (
       <div className="flex flex-col gap-4">
@@ -24,6 +25,7 @@ export function PassportRaffle({ passport }: Readonly<PassportRaffleProps>) {
       </div>
     );
   }
+
   return (
     <p className="m-0 text-copy-warm">
       {passport.requiredCount > 0 ? copy.locked(countMissingGames(passport)) : copy.noStands}

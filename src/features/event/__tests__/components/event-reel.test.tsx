@@ -11,6 +11,7 @@ interface BrowserConditions {
 }
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
 const originalMatchMedia = window.matchMedia;
 
 /** Callbacks de los IntersectionObserver creados, para simular que el reel entra a la vista. */
@@ -33,6 +34,7 @@ function simulateBrowser({
     [REEL_AUTOPLAY_MEDIA_QUERY]: isWideScreen,
     [REDUCED_MOTION_QUERY]: prefersReducedMotion,
   };
+
   window.matchMedia = (query: string) =>
     ({
       matches: matches[query] ?? false,
@@ -62,9 +64,11 @@ const reel = (
 
 function getVideo(container: HTMLElement) {
   const video = container.querySelector("video");
+
   if (!video) {
     throw new Error("No se encontró el video del reel");
   }
+
   return video;
 }
 

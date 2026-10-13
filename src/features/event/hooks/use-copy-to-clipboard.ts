@@ -4,6 +4,7 @@ async function writeToClipboard(text: string) {
   if (!navigator.clipboard) {
     throw new Error("El portapapeles no está disponible.");
   }
+
   await navigator.clipboard.writeText(text);
 }
 

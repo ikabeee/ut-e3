@@ -53,10 +53,12 @@ function assertValidFeatureGraph(graph) {
     if (path.includes(feature)) {
       throw new Error(`FEATURE_DEPENDENCIES tiene un ciclo: ${[...path, feature].join(" -> ")}.`);
     }
+
     for (const dependency of graph[feature] ?? []) {
       visit(dependency, [...path, feature]);
     }
   };
+
   Object.keys(graph).forEach((feature) => visit(feature, []));
 }
 
@@ -169,6 +171,7 @@ const routeHandlerImports = {
 /** Features que `feature` no puede importar según `FEATURE_DEPENDENCIES`. */
 function forbiddenFeatures(feature) {
   const allowed = new Set([feature, ...(FEATURE_DEPENDENCIES[feature] ?? [])]);
+
   return FEATURES.filter((name) => !allowed.has(name)).map((name) => ({
     group: [`@features/${name}/**`],
     message: `\`${feature}\` no depende de \`${name}\` (FEATURE_DEPENDENCIES en eslint.config.mjs). Combínalas en una page o agrega la dependencia sin crear un ciclo.`,
@@ -237,6 +240,7 @@ const featureLayerConfigs = FEATURES.flatMap((feature) =>
 );
 
 const routeHandlerFiles = ["src/app/**/route.ts"];
+
 const metadataFiles = ["src/app/sitemap.ts", "src/app/robots.ts", "src/app/manifest.ts"];
 
 const eslintConfig = defineConfig([

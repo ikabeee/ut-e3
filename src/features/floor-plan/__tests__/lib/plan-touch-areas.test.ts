@@ -3,6 +3,7 @@ import { expandWithinNeighbors, getTouchRects, TOUCH_MARGIN } from "@features/fl
 import type { PlanOrientation, PlanRect } from "@features/floor-plan/lib/types";
 
 const BOUNDS: PlanRect = [0, 0, 1000, 1000];
+
 const MIN_TOUCH_PX = 44;
 
 /**
@@ -60,6 +61,7 @@ describe("expandWithinNeighbors", () => {
 describe.each(Object.keys(PLAN_LAYOUTS) as PlanOrientation[])("getTouchRects (%s)", (orientation) => {
   const layout = PLAN_LAYOUTS[orientation];
   const touchRects = getTouchRects(layout);
+
   const visibleRects = new Map<string, PlanRect>([
     ...Object.entries(layout.zones).map(([id, zone]): [string, PlanRect] => [id, zone.rect]),
     ["entry", layout.entry],
@@ -69,6 +71,7 @@ describe.each(Object.keys(PLAN_LAYOUTS) as PlanOrientation[])("getTouchRects (%s
     expect(touchRects.get("info")).toBeDefined();
     expect(touchRects.get("entry")).toBeDefined();
     expect(touchRects.get("B9")).toBeDefined();
+
     for (const [id, rect] of visibleRects) {
       expect(contains(touchRects.get(id) as PlanRect, rect)).toBe(true);
     }
@@ -76,18 +79,21 @@ describe.each(Object.keys(PLAN_LAYOUTS) as PlanOrientation[])("getTouchRects (%s
 
   it("never overlaps another touch area, a visible item or the public area", () => {
     const entries = [...touchRects];
+
     for (const [id, rect] of entries) {
       for (const [otherId, other] of entries) {
         if (id !== otherId) {
           expect([id, otherId, overlaps(rect, other)]).toEqual([id, otherId, false]);
         }
       }
+
       expect([id, overlaps(rect, layout.publicArea)]).toEqual([id, false]);
     }
   });
 
   it("measures at least 44 px on the smallest screen where this orientation is shown", () => {
     const scale = SMALLEST_RENDERED_WIDTH[orientation] / layout.width;
+
     for (const [id, [, , width, height]] of touchRects) {
       expect([id, Math.min(width, height) * scale >= MIN_TOUCH_PX]).toEqual([id, true]);
     }

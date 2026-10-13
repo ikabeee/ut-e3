@@ -30,6 +30,7 @@ export function ActionLink({
   className,
 }: Readonly<ActionLinkProps>) {
   const classes = buttonVariants({ variant, size, fullWidth, className });
+
   const content = (
     <>
       <ScrambleText text={children} />

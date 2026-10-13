@@ -37,6 +37,7 @@ class FakeContainer extends FakeTarget {
 }
 
 let container: FakeContainer;
+
 const originalEnv = process.env.NODE_ENV;
 
 function setNodeEnv(value: string) {

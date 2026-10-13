@@ -36,6 +36,7 @@ export const GAMES_COPY = {
     /** Contador: "4 de 18 juegos" o "2 de 18 juegos · Puzle". */
     results: (visible: number, total: number, genre: string | null) => {
       const count = `${visible} de ${total} juegos`;
+
       return genre === null ? count : `${count} · ${genre}`;
     },
     empty: "Ningún juego coincide con tu búsqueda.",

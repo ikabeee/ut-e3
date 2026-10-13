@@ -13,6 +13,7 @@ export const adminRafflePageMetadata = buildAdminMetadata("raffle");
 
 async function AdminRaffleContent() {
   const winners = await getAdminRaffleWinners();
+
   return (
     <>
       <AdminPanel title={ADMIN_COPY.raffle.drawTitle} hint={ADMIN_COPY.raffle.drawHint}>

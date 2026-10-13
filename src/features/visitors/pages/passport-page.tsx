@@ -22,9 +22,11 @@ type PassportPageProps = PageProps<"/passport">;
 /** Lee la cookie del visitante: sin registro muestra el formulario; con registro, su pasaporte. */
 async function PassportContent({ searchParams }: Readonly<PassportPageProps>) {
   const [passport, query] = await Promise.all([getCurrentVisitorPassport(), searchParams]);
+
   if (!passport) {
     return <VisitorRegistrationForm hasUnknownQr={query[UNKNOWN_QR_SEARCH_PARAM] === "unknown"} />;
   }
+
   return <VisitorPassportView passport={passport} />;
 }
 

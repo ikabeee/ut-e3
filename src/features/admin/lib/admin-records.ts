@@ -50,6 +50,7 @@ export function toCoverImageInput(image: GameImageRecord) {
 /** Siguiente posición libre de la galería (0-4) para una foto nueva. */
 export function getNextImageSortOrder(images: readonly Pick<GameImageRecord, "sortOrder">[]) {
   const next = Math.max(-1, ...images.map((image) => image.sortOrder)) + 1;
+
   return Math.min(next, 4);
 }
 

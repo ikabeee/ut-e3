@@ -37,6 +37,7 @@ export const homePageMetadata: Metadata = {
 export async function HomePage() {
   const games = await listGames();
   const event = getEventContent();
+
   // Cada stand de equipo lleva la portada del juego y su afluencia en vivo (feature `visitors`).
   const occupants = toStandOccupants(games, (game) => <GameMedia game={game} sizes={PLAN_ITEM_COVER_SIZES} />).map(
     (occupant) => ({ ...occupant, status: <StandTrafficBadge standCode={occupant.stand} /> }),

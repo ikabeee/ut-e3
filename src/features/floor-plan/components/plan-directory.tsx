@@ -21,6 +21,7 @@ export function PlanDirectory({ items, selectedId, visibleCategories, onSelect }
           <p className="m-0 mb-1 type-tiny text-muted">{PLAN_CATEGORY_LABELS[category]}</p>
           {groupItems.map((item) => {
             const isCurrent = item.id === selectedId;
+
             return (
               <button
                 key={item.id}

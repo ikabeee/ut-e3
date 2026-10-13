@@ -19,6 +19,7 @@ export const adminCatalogPageMetadata = buildAdminMetadata("catalog");
 async function AdminCatalogContent() {
   const { genres, platforms } = await getAdminCatalog();
   const copy = ADMIN_COPY.catalog;
+
   return (
     <div className="grid grid-cols-2 items-start gap-[clamp(16px,2vw,24px)] max-[900px]:grid-cols-1">
       <CatalogOptionList

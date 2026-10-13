@@ -17,22 +17,26 @@ async function requireAdmin() {
 export async function getAdminSummary() {
   await requireAdmin();
   const [teams, games, winners] = await Promise.all([listTeams(), listGameRecords(), listRaffleWinners()]);
+
   return summarizeAdmin(teams, games, winners.length);
 }
 
 export async function getAdminTeams() {
   await requireAdmin();
+
   return listTeams();
 }
 
 export async function getAdminGames() {
   await requireAdmin();
+
   const [games, teams, genres, platforms] = await Promise.all([
     listGameRecords(),
     listTeams(),
     listGenres(),
     listPlatforms(),
   ]);
+
   return {
     games,
     options: { teams: toAdminOptions(teams), genres: toAdminOptions(genres), platforms: toAdminOptions(platforms) },
@@ -42,10 +46,12 @@ export async function getAdminGames() {
 export async function getAdminCatalog() {
   await requireAdmin();
   const [genres, platforms] = await Promise.all([listGenres(), listPlatforms()]);
+
   return { genres, platforms };
 }
 
 export async function getAdminRaffleWinners() {
   await requireAdmin();
+
   return listRaffleWinners();
 }

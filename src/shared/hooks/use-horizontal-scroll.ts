@@ -11,9 +11,11 @@ export function useHorizontalScroll<T extends HTMLElement>(itemsPerStep: number)
     (direction: -1 | 1) => {
       const track = ref.current;
       const firstItem = track?.firstElementChild;
+
       if (!track || !(firstItem instanceof HTMLElement)) {
         return;
       }
+
       const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
       track.scrollBy({ left: direction * (firstItem.offsetWidth + gap) * itemsPerStep, behavior: "smooth" });
     },

@@ -80,6 +80,7 @@ describe("FloorPlanExplorer", () => {
     for (const name of ["Stands de equipo", "Stands informativos"]) {
       await user.click(filters.getByRole("button", { name }));
     }
+
     await user.click(filters.getByRole("button", { name: "Escenario y actividades" }));
 
     for (const button of filters.getAllByRole("button")) {

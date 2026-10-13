@@ -18,5 +18,6 @@ export function hashSecret(secret: string) {
 export function safeEqual(received: string, expected: string) {
   const receivedBuffer = Buffer.from(received);
   const expectedBuffer = Buffer.from(expected);
+
   return receivedBuffer.length === expectedBuffer.length && timingSafeEqual(receivedBuffer, expectedBuffer);
 }

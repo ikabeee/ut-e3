@@ -11,6 +11,7 @@ interface AdminSummaryListProps {
 /** Resumen del panel: una tarjeta por sección con sus cantidades y un enlace. */
 export function AdminSummaryList({ summary }: Readonly<AdminSummaryListProps>) {
   const copy = ADMIN_COPY.home;
+
   const sections = [
     { id: "teams", text: copy.teams(summary.teams, summary.teamsWithStand) },
     { id: "games", text: copy.games(summary.games, summary.visibleGames) },

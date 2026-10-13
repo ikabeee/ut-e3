@@ -30,5 +30,6 @@ export function getQueryClient() {
   }
 
   browserQueryClient ??= makeQueryClient();
+
   return browserQueryClient;
 }

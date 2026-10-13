@@ -10,10 +10,12 @@ jest.mock("@features/visitors/lib/server/check-ins-queries", () => ({
 }));
 
 const KEY = "0123456789abcdef0123456789abcdef";
+
 const SCAN = { id: "6d94503f-3e3b-4e6e-8bc6-445cd33ed099", token: "qr", scannedAt: "2026-11-27T17:30:00Z" };
 
 function request(method: "GET" | "POST", body?: unknown, key: string | null = KEY) {
   const rawBody = typeof body === "string" ? body : JSON.stringify(body);
+
   return new Request("http://localhost/api/check-ins", {
     method,
     headers: key ? { [SCANNER_KEY_HEADER]: key } : {},

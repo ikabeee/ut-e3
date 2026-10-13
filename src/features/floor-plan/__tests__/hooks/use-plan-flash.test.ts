@@ -10,6 +10,7 @@ function buildPlan() {
   const shape = container.querySelector("rect") as SVGRectElement;
   const animate = jest.fn();
   shape.animate = animate;
+
   return { container, animate };
 }
 

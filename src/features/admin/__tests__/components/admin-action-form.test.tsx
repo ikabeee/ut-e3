@@ -28,9 +28,11 @@ describe("AdminActionForm", () => {
 
   it("shows the error of each field and the general error", async () => {
     const user = userEvent.setup();
+
     const action = jest
       .fn()
       .mockResolvedValue(actionError("Revisa los campos marcados.", { name: "El nombre es obligatorio." }));
+
     renderForm(action);
 
     await user.click(screen.getByRole("button", { name: "Crear equipo" }));
@@ -42,9 +44,11 @@ describe("AdminActionForm", () => {
 
   it("clears the error of a field as soon as it is edited, before the next submit", async () => {
     const user = userEvent.setup();
+
     const action = jest
       .fn()
       .mockResolvedValue(actionError("Revisa los campos marcados.", { name: "El nombre es obligatorio." }));
+
     renderForm(action);
 
     await user.click(screen.getByRole("button", { name: "Crear equipo" }));

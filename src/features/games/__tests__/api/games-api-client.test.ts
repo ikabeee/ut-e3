@@ -8,7 +8,9 @@ function mockFetch(response: { ok: boolean; status?: number; body?: unknown }) {
     status: response.status ?? 200,
     json: async () => response.body,
   });
+
   globalThis.fetch = fetchMock;
+
   return fetchMock;
 }
 

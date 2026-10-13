@@ -12,6 +12,7 @@ interface GamePlayLocationProps {
 /** "Dónde jugarlo": stand, pasillo, fecha y horario (`.where`). */
 export function GamePlayLocation({ game, eventDateLabel, eventHoursLabel }: Readonly<GamePlayLocationProps>) {
   const { playLocation } = GAMES_COPY.detail;
+
   const cells = [
     { label: playLocation.stand, value: formatStand(game.stand) },
     { label: playLocation.aisle, value: getStandAisle(game.stand) },

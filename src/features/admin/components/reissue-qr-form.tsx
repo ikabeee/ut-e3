@@ -19,6 +19,7 @@ export function ReissueQrForm() {
     const gamertag = typeof input.gamertag === "string" ? input.gamertag : "";
     const result = await reissueVisitorQrAction(gamertag);
     setReissued(result.ok ? result.data : null);
+
     return result;
   };
 

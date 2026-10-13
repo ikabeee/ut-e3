@@ -20,6 +20,7 @@ export function useServiceWorker() {
       void container.getRegistrations().then((registrations) => {
         for (const registration of registrations) void registration.unregister();
       });
+
       return;
     }
 
@@ -27,15 +28,19 @@ export function useServiceWorker() {
     const handleControllerChange = () => {
       if (isUpdating.current) window.location.reload();
     };
+
     container.addEventListener("controllerchange", handleControllerChange);
 
     let cancelled = false;
+
     const showWhenInstalled = (worker: ServiceWorker | null) => {
       if (!worker) return;
+
       const update = () => {
         // Sólo es "versión nueva" si ya había un worker controlando la página.
         if (!cancelled && worker.state === "installed" && container.controller) setWaitingWorker(worker);
       };
+
       update();
       worker.addEventListener("statechange", update);
     };

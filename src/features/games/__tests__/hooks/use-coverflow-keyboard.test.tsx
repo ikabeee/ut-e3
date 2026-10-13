@@ -7,6 +7,7 @@ const CASES = ["Uno", "Dos", "Tres"];
 // Exhibidor mínimo: tres enlaces, sólo el del frente es enfocable.
 function TestCoverflow({ onOpenCurrent }: Readonly<{ onOpenCurrent: () => void }>) {
   const [current, setCurrent] = useState(1);
+
   const keyboard = useCoverflowKeyboard({
     current,
     goNext: () => setCurrent((index) => Math.min(CASES.length - 1, index + 1)),

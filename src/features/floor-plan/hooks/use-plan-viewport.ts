@@ -46,19 +46,24 @@ export function usePlanViewport(base: ViewBox) {
   const animateTo = useCallback(
     (target: ViewBox, duration: number = VIEWPORT_ANIMATION_MS.focus) => {
       stopAnimation();
+
       if (prefersReducedMotion) {
         setViewBox(target);
+
         return;
       }
+
       const from = viewBoxRef.current;
       // El tiempo se mide desde el primer cuadro para no depender del reloj de quien llama.
       let startedAt: number | null = null;
+
       const step = (now: number) => {
         startedAt ??= now;
         const progress = Math.min(1, Math.max(0, (now - startedAt) / duration));
         setViewBox(interpolateViewBox(from, target, easeOutCubic(progress)));
         frameRef.current = progress < 1 ? requestAnimationFrame(step) : null;
       };
+
       frameRef.current = requestAnimationFrame(step);
     },
     [prefersReducedMotion, setViewBox, stopAnimation],

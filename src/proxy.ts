@@ -12,6 +12,7 @@ export function proxy(request: NextRequest) {
   if (isAdminAuthorization(request.headers.get("authorization"))) {
     return NextResponse.next();
   }
+
   return new NextResponse(ADMIN_COPY.unauthorized, {
     status: 401,
     headers: {

@@ -22,6 +22,7 @@ export function getCoverflowPlacement(index: number, current: number): Coverflow
   const offset = index - current;
   const distance = Math.abs(offset);
   const side = Math.sign(offset);
+
   const transform =
     offset === 0
       ? "translate3d(0px, 0, 0px) rotateY(0deg)"

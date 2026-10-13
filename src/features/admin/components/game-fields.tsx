@@ -13,6 +13,7 @@ interface GameFieldsProps {
 /** Campos de un juego (alta y edición). */
 export function GameFields({ options, game }: Readonly<GameFieldsProps>) {
   const copy = ADMIN_COPY.games;
+
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-4 max-[640px]:grid-cols-1">

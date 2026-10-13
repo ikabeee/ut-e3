@@ -12,6 +12,7 @@ const getConnection = () => (navigator as Navigator & { connection?: NetworkConn
 function subscribeToWideScreen(onChange: () => void) {
   const mediaQuery = window.matchMedia(REEL_AUTOPLAY_MEDIA_QUERY);
   mediaQuery.addEventListener("change", onChange);
+
   return () => mediaQuery.removeEventListener("change", onChange);
 }
 
@@ -20,6 +21,7 @@ const getWideScreenSnapshot = () => window.matchMedia(REEL_AUTOPLAY_MEDIA_QUERY)
 function subscribeToSaveData(onChange: () => void) {
   const connection = getConnection();
   connection?.addEventListener?.("change", onChange);
+
   return () => connection?.removeEventListener?.("change", onChange);
 }
 

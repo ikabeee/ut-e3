@@ -4,6 +4,7 @@ import { useOffline } from "next/offline";
 function subscribe(onChange: () => void) {
   window.addEventListener("online", onChange);
   window.addEventListener("offline", onChange);
+
   return () => {
     window.removeEventListener("online", onChange);
     window.removeEventListener("offline", onChange);
@@ -25,5 +26,6 @@ const getServerSnapshot = () => false;
 export function useIsOffline() {
   const isNextOffline = useOffline();
   const isBrowserOffline = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
   return isNextOffline || isBrowserOffline;
 }

@@ -11,6 +11,7 @@ export const TRAFFIC_THRESHOLDS = { medium: 5, high: 10 } as const;
 
 export function getTrafficLevel(recentCheckIns: number): TrafficLevel {
   if (recentCheckIns >= TRAFFIC_THRESHOLDS.high) return "high";
+
   return recentCheckIns >= TRAFFIC_THRESHOLDS.medium ? "medium" : "low";
 }
 

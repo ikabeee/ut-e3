@@ -7,6 +7,7 @@ import { isUuid, SLUG_PATTERN, validate, type RawInput } from "@shared/lib/valid
 // en español para el panel de administración.
 
 const ITCHIO_URL_PATTERN = /^https:\/\/[a-z0-9-]+\.itch\.io\//;
+
 const SLUG_MESSAGE = "El slug sólo lleva minúsculas, números y guiones (por ejemplo ruta-9).";
 
 /** Género o plataforma. */
@@ -40,15 +41,21 @@ export function parseGameInput(raw: RawInput): GameInput {
 
     // Reglas entre campos que la base no puede expresar con un CHECK.
     if (!isUuid(input.teamId)) field.invalid("teamId", "Elige un equipo.");
+
     if (!isUuid(input.genreId)) field.invalid("genreId", "Elige el género principal.");
+
     if (input.platformIds.length === 0) field.invalid("platformIds", "Elige al menos una plataforma.");
+
     if (input.platformIds.some((id) => !isUuid(id)))
       field.invalid("platformIds", "Hay una plataforma que ya no existe.");
+
     if (input.extraGenreIds.some((id) => !isUuid(id)))
       field.invalid("extraGenreIds", "Hay un género que ya no existe.");
+
     if (input.extraGenreIds.includes(input.genreId)) {
       field.invalid("extraGenreIds", "Los géneros extra no pueden repetir el género principal.");
     }
+
     return input;
   });
 }
@@ -69,6 +76,7 @@ export function parseGameImageInput(
       isCover: field.boolean("isCover"),
       sortOrder: field.integer("sortOrder", { label: "La posición", min: 0, max: 4 }),
     };
+
     if (!isAllowedImageUrl(input.imageUrl, imageHosts)) {
       const allowed = imageHosts.length > 0 ? `: ${imageHosts.join(", ")}` : " (no hay ninguno configurado)";
       field.invalid(
@@ -76,6 +84,7 @@ export function parseGameImageInput(
         `La imagen debe ser una ruta del sitio (/...) o una URL https de un dominio permitido${allowed}.`,
       );
     }
+
     return input;
   });
 }

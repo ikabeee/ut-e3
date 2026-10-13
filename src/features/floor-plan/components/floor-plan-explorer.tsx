@@ -42,6 +42,7 @@ export function FloorPlanExplorer({ items, layouts }: Readonly<FloorPlanExplorer
 
   const selectFromDirectory = (id: string) => {
     explorer.select(id, { flash: true });
+
     if (window.innerWidth < STACKED_LAYOUT_MAX_WIDTH) {
       viewportRef.current?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "center" });
     }

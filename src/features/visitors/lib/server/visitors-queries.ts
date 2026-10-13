@@ -25,12 +25,14 @@ export async function listRequiredGames(): Promise<RequiredGame[]> {
     .include("game", (game) => game.select("id", "slug", "name"))
     .orderBy((team) => team.standCode.asc())
     .all();
+
   return teams.flatMap(({ standCode, game }) => (standCode && game ? [{ ...game, standCode }] : []));
 }
 
 /** Busca al visitante dueño de un token; `null` si el token no existe o ya se reemplazó. */
 export async function findVisitorByToken(token: string) {
   if (!isVisitorToken(token)) return null;
+
   return db.orm.public.Visitor.select("id", "gamertag")
     .where({ qrTokenHash: hashSecret(token) })
     .first();
@@ -40,12 +42,14 @@ export async function findVisitorByToken(token: string) {
 export async function registerVisitor(gamertag: string): Promise<{ token: string }> {
   const token = generateSecret();
   await db.orm.public.Visitor.create({ gamertag, qrTokenHash: hashSecret(token) });
+
   return { token };
 }
 
 /** Pasaporte del visitante dueño del token, o `null` si el token ya no es válido. */
 export async function getVisitorPassport(token: string): Promise<VisitorPassport | null> {
   await connection();
+
   if (!isVisitorToken(token)) return null;
 
   const visitor = await db.orm.public.Visitor.select("gamertag")
@@ -53,9 +57,11 @@ export async function getVisitorPassport(token: string): Promise<VisitorPassport
     .include("checkIns", (checkIns) => checkIns.select("gameId"))
     .include("raffleTicket", (ticket) => ticket.select("ticketNumber", "wonAt"))
     .first();
+
   if (!visitor) return null;
 
   const checkedGameIds = new Set(visitor.checkIns.map((checkIn) => checkIn.gameId));
+
   const games = (await listRequiredGames()).map(({ id, slug, name, standCode }) => ({
     slug,
     name,
@@ -76,6 +82,7 @@ export async function getVisitorPassport(token: string): Promise<VisitorPassport
 /** Pasaporte del visitante de esta petición (cookie), o `null` si no se ha registrado. */
 export async function getCurrentVisitorPassport(): Promise<VisitorPassport | null> {
   const token = await getVisitorToken();
+
   return token ? getVisitorPassport(token) : null;
 }
 
@@ -85,9 +92,12 @@ export async function getCurrentVisitorPassport(): Promise<VisitorPassport | nul
  */
 export async function reissueVisitorQr(gamertag: string): Promise<ReissuedVisitorQr> {
   const token = generateSecret();
+
   const updated = await db.orm.public.Visitor.where({ gamertag: normalizeGamertag(gamertag) }).update({
     qrTokenHash: hashSecret(token),
   });
+
   if (!updated) throw new RecordNotFoundError("No hay ningún visitante con ese gamertag.");
+
   return { gamertag: updated.gamertag, qrUrl: buildVisitorQrUrl(siteConfig.url, token) };
 }

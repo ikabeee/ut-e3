@@ -8,6 +8,7 @@ function fieldErrors(run: () => unknown) {
     if (error instanceof ValidationError) return error.fieldErrors;
     throw error;
   }
+
   return {};
 }
 

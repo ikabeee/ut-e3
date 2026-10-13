@@ -19,5 +19,6 @@ export async function runAdminAction<T>(
   if (!(await isAdminRequest())) {
     return actionError(ADMIN_UNAUTHORIZED_MESSAGE);
   }
+
   return runServerAction(operation, { refreshPage: true, ...options });
 }

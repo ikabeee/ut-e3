@@ -18,8 +18,11 @@ function isCount(value: unknown): value is number {
 function parseStand(value: unknown, path: string): StandTraffic {
   if (!isRecord(value)) fail(path);
   const { standCode, recentCheckIns } = value;
+
   if (typeof standCode !== "string") fail(`${path}.standCode`);
+
   if (!isCount(recentCheckIns)) fail(`${path}.recentCheckIns`);
+
   return { standCode, recentCheckIns };
 }
 
@@ -27,16 +30,21 @@ function parseStand(value: unknown, path: string): StandTraffic {
 export function parseStandTrafficResponse(value: unknown): StandTrafficReport {
   if (!isRecord(value)) fail("se esperaba un objeto");
   const { windowMinutes, stands } = value;
+
   if (!isCount(windowMinutes)) fail("windowMinutes");
+
   if (!Array.isArray(stands)) fail("stands");
+
   return { windowMinutes, stands: stands.map((stand, index) => parseStand(stand, `stands[${index}]`)) };
 }
 
 /** Lee la afluencia desde el Route Handler y valida la respuesta. Se ejecuta en el navegador. */
 export async function fetchStandTraffic(): Promise<StandTrafficReport> {
   const response = await fetch(STAND_TRAFFIC_API_PATH);
+
   if (!response.ok) {
     throw new Error(`No se pudo cargar la afluencia (${response.status}).`);
   }
+
   return parseStandTrafficResponse(await response.json());
 }

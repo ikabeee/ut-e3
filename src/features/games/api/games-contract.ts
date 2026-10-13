@@ -62,21 +62,25 @@ function asObject(value: unknown, path: string): JsonObject {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     fail(path);
   }
+
   return value as JsonObject;
 }
 
 function readString(source: JsonObject, key: string, path: string): string {
   const value = source[key];
+
   return typeof value === "string" ? value : fail(`${path}.${key}`);
 }
 
 function readOptionalString(source: JsonObject, key: string, path: string): string | null {
   const value = source[key];
+
   return value === null ? null : readString(source, key, path);
 }
 
 function readNumber(source: JsonObject, key: string, path: string): number {
   const value = source[key];
+
   return typeof value === "number" && Number.isFinite(value) ? value : fail(`${path}.${key}`);
 }
 
@@ -84,6 +88,7 @@ function parseStrings(value: unknown, path: string): string[] {
   if (!Array.isArray(value)) {
     fail(path);
   }
+
   return value.map((item, index) => (typeof item === "string" ? item : fail(`${path}[${index}]`)));
 }
 
@@ -93,6 +98,7 @@ function parseAbout(value: unknown, path: string): Game["about"] {
 
 function parseImage(value: unknown, path: string): GameImage {
   const image = asObject(value, path);
+
   return {
     src: readString(image, "src", path),
     alt: readString(image, "alt", path),
@@ -104,11 +110,13 @@ function parseGallery(value: unknown, path: string): GameImage[] {
   if (!Array.isArray(value)) {
     fail(path);
   }
+
   return value.map((image, index) => parseImage(image, `${path}[${index}]`));
 }
 
 function parseGame(value: unknown, path: string): Game {
   const game = asObject(value, path);
+
   return {
     slug: readString(game, "slug", path),
     name: readString(game, "name", path),
@@ -135,5 +143,6 @@ export function parseGamesResponse(value: unknown): Game[] {
   if (!Array.isArray(value)) {
     fail("se esperaba una lista");
   }
+
   return value.map((game, index) => parseGame(game, `[${index}]`));
 }

@@ -19,6 +19,7 @@ import { buildServiceWorkerScript } from "@features/offline/lib/service-worker-s
  */
 function getServiceWorkerVersion() {
   if (process.env.SERVICE_WORKER_VERSION) return process.env.SERVICE_WORKER_VERSION;
+
   try {
     return readFileSync(path.join(process.cwd(), ".next", "BUILD_ID"), "utf8").trim();
   } catch {

@@ -5,6 +5,7 @@ import manifest from "@app/manifest";
 /** Lee ancho y alto de la cabecera IHDR de un PNG de `public/`. */
 function readPngSize(src: string) {
   const png = readFileSync(path.join(process.cwd(), "public", src));
+
   return `${png.readUInt32BE(16)}x${png.readUInt32BE(20)}`;
 }
 
@@ -30,6 +31,7 @@ describe("manifest", () => {
       "512x512 any",
       "512x512 maskable",
     ]);
+
     for (const icon of pngIcons) {
       expect(readPngSize(icon.src)).toBe(icon.sizes);
     }

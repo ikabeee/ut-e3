@@ -8,7 +8,9 @@ import { standTrafficQueryOptions } from "@features/visitors/lib/visitors-query-
  */
 export function useStandTraffic(standCode: string) {
   const { data } = useQuery(standTrafficQueryOptions());
+
   if (!data) return null;
   const traffic = findStandTraffic(data.stands, standCode);
+
   return traffic ? { recentCheckIns: traffic.recentCheckIns, windowMinutes: data.windowMinutes } : null;
 }

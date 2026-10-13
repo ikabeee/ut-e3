@@ -20,6 +20,7 @@ export function getVisitorCookieOptions() {
 /** Token del visitante de esta petición, o `null` si no se ha registrado en este navegador. */
 export async function getVisitorToken() {
   const token = (await cookies()).get(VISITOR_COOKIE)?.value;
+
   return isVisitorToken(token) ? token : null;
 }
 

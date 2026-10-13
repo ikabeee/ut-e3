@@ -32,6 +32,7 @@ export function buildPlanItems(occupants: readonly StandOccupant[], times: PlanZ
   const zones = (Object.keys(PLAN_ZONES) as ZoneId[]).map((id): PlanItem => {
     const zone = PLAN_ZONES[id];
     const scheduleNote = PLAN_ZONE_SCHEDULE_NOTES[id]?.(times);
+
     return {
       id,
       category: zone.category,
@@ -51,6 +52,7 @@ export function getItemKicker(item: PlanItem) {
   if (item.category === "team" || item.category === "info") {
     return FLOOR_PLAN_COPY.standKicker(item.code, item.subtitle);
   }
+
   return item.subtitle;
 }
 
@@ -58,6 +60,7 @@ export function getItemKicker(item: PlanItem) {
 export function splitStandName(name: string): [string, string] {
   const words = name.toUpperCase().split(" ");
   const half = Math.ceil(words.length / 2);
+
   return [words.slice(0, half).join(" "), words.slice(half).join(" ")];
 }
 
@@ -78,11 +81,14 @@ export function toggleCategory(active: ReadonlySet<PlanCategory>, category: Plan
   if (active.has(category) && active.size === 1) {
     return new Set(PLAN_CATEGORIES);
   }
+
   const next = new Set(active);
+
   if (next.has(category)) {
     next.delete(category);
   } else {
     next.add(category);
   }
+
   return next;
 }

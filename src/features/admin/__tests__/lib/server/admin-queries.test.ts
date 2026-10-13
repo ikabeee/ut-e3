@@ -9,17 +9,24 @@ jest.mock("next/navigation", () => ({
     throw new Error("NEXT_NOT_FOUND");
   }),
 }));
+
 jest.mock("@shared/lib/server/admin-auth", () => ({ isAdminRequest: jest.fn() }));
+
 jest.mock("@features/games/lib/server/catalog-options-queries", () => ({
   listGenres: jest.fn(),
   listPlatforms: jest.fn(),
 }));
+
 jest.mock("@features/games/lib/server/games-admin-queries", () => ({ listGameRecords: jest.fn() }));
+
 jest.mock("@features/teams/lib/server/teams-queries", () => ({ listTeams: jest.fn() }));
+
 jest.mock("@features/visitors/lib/server/raffle-queries", () => ({ listRaffleWinners: jest.fn() }));
 
 const team = { id: "team-1", name: "Equipo Grava", standCode: "A1", members: [], gameSlug: null };
+
 const genre = { id: "genre-1", slug: "accion", name: "Acción" };
+
 const platform = { id: "platform-1", slug: "web", name: "Web" };
 
 describe("admin queries", () => {

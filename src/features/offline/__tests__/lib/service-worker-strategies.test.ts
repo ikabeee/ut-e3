@@ -9,6 +9,7 @@ const ORIGIN = "https://showcase.example";
 // Cabeceras mínimas (has/get sin distinguir mayúsculas), independientes del entorno de pruebas.
 function headers(init: Record<string, string> = {}) {
   const values = new Map(Object.entries(init).map(([key, value]) => [key.toLowerCase(), value]));
+
   return {
     has: (name: string) => values.has(name.toLowerCase()),
     get: (name: string) => values.get(name.toLowerCase()) ?? null,

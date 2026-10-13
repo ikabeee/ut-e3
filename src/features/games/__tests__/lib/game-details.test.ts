@@ -11,9 +11,11 @@ import type { Game } from "@features/games/lib/types";
 
 function findGame(slug: string): Game {
   const game = GAME_FIXTURES.find((candidate) => candidate.slug === slug);
+
   if (!game) {
     throw new Error(`Missing mock game ${slug}`);
   }
+
   return game;
 }
 
