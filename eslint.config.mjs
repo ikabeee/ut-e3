@@ -294,6 +294,8 @@ const eslintConfig = defineConfig([
     // Artefactos generados por Prisma 8:
     "src/shared/lib/prisma/contract.d.ts",
     "migrations/**",
+    // Plugin de Oxlint copiado de anti-slop (ver tools/oxlint/anti-slop/UPSTREAM.md):
+    "tools/oxlint/anti-slop/**",
   ]),
 ]);
 

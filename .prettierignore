@@ -15,6 +15,8 @@ src/shared/lib/prisma/ops.json
 src/shared/lib/prisma/migration.json
 # Migraciones: las genera `npm run db:migration:plan` (se revisan, no se reformatean)
 migrations
+# Plugin de Oxlint copiado de anti-slop: conserva el formato de upstream para comparar actualizaciones
+tools/oxlint/anti-slop
 
 # Markdown: Prettier rellena las tablas con espacios para alinearlas, así que editar una celda larga
 # reescribe la tabla completa. Las tablas de docs/ quedan en formato compacto (| --- |).

@@ -11,9 +11,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:oxlint": "oxlint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "next typegen && tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit && tsc -p tools/oxlint",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -40,6 +41,7 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@oxlint/plugins": "1.88.0",
     "@prisma/cli-engine": "0.7.0",
     "@tailwindcss/turbopack": "^4.3.3",
     "@tanstack/eslint-plugin-query": "^5.104.1",
@@ -58,6 +60,7 @@
     "eslint-plugin-sonarjs": "^4.2.2",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
+    "oxlint": "1.88.0",
     "prettier": "3.9.9",
     "prettier-plugin-tailwindcss": "0.8.1",
     "prisma": "8.0.0-rc.22",
