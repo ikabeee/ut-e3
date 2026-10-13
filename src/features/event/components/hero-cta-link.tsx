@@ -6,7 +6,9 @@ interface HeroCtaLinkProps {
 }
 
 const GLYPH = "↗";
+
 const GLYPH_CLASS = "grid size-5 place-items-center font-mono text-lg leading-none font-bold";
+
 const SLICE_CLASS = `${GLYPH_CLASS} pointer-events-none absolute top-1/2 left-1/2 -mt-2.5 -ml-2.5 opacity-0`;
 
 /**

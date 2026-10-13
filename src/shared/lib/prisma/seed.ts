@@ -37,6 +37,7 @@ interface SeedData {
 }
 
 const seedData = seedJson as SeedData;
+
 const skipOn = <Field extends string>(...conflictOn: Field[]) => ({ onConflict: "skip" as const, conflictOn });
 
 const db = postgres<Contract>({ contractJson, url: process.env["DATABASE_URL"]! });
@@ -52,6 +53,7 @@ async function seedCatalogLookups() {
 
   const genres = await db.orm.public.Genre.select("id", "slug").all();
   const platforms = await db.orm.public.Platform.select("id", "slug").all();
+
   return {
     genreIds: new Map(genres.map((genre) => [genre.slug, genre.id])),
     platformIds: new Map(platforms.map((platform) => [platform.slug, platform.id])),
@@ -61,6 +63,7 @@ async function seedCatalogLookups() {
 /** Crea los equipos que faltan y devuelve las llaves de escáner de los nuevos. */
 async function seedTeams() {
   const scannerKeys = new Map(seedData.teams.map((team) => [team.name, randomBytes(16).toString("hex")]));
+
   const created = await db.orm.public.Team.createAll(
     seedData.teams.map((team) => ({
       name: team.name,
@@ -71,16 +74,21 @@ async function seedTeams() {
   );
 
   const teams = await db.orm.public.Team.select("id", "name").all();
+
   const teamsWithMembers = new Set(
     (await db.orm.public.TeamMember.select("teamId").all()).map((member) => member.teamId),
   );
+
   const teamIds = new Map(teams.map((team) => [team.name, team.id]));
 
   const members = seedData.teams.flatMap((team) => {
     const teamId = teamIds.get(team.name)!;
+
     if (teamsWithMembers.has(teamId)) return [];
+
     return team.members.map((member, index) => ({ ...member, teamId, sortOrder: index }));
   });
+
   if (members.length > 0) {
     await db.orm.public.TeamMember.createAll(members);
   }
@@ -140,6 +148,7 @@ async function main() {
   const gameCount = await seedGames(teamIds, genreIds, platformIds);
 
   console.log(`Seeds listos: ${genreIds.size} géneros, ${platformIds.size} plataformas, ${gameCount} juegos.`);
+
   if (newScannerKeys.length > 0) {
     console.log("\nLlaves de escáner de los equipos nuevos (sólo se muestran una vez; la base guarda su hash):");
     console.table(newScannerKeys);

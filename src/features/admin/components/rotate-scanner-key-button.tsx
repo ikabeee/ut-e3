@@ -17,6 +17,7 @@ export function RotateScannerKeyButton({ teamId }: Readonly<RotateScannerKeyButt
   const rotate = async () => {
     const result = await rotateTeamScannerKeyAction(teamId);
     setScannerKey(result.ok ? result.data.scannerKey : null);
+
     return result;
   };
 

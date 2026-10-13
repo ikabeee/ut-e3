@@ -11,6 +11,7 @@ import { useUrlHash } from "@shared/hooks/use-url-hash";
 
 /** Debajo de este ancho el croquis usa la orientación vertical. */
 export const EXPLORER_TALL_BREAKPOINT = 560;
+
 /** Elemento seleccionado cuando la URL no indica otro. */
 const DEFAULT_ITEM_ID = "stage";
 
@@ -31,19 +32,23 @@ export function useFloorPlanExplorer(
   layouts: Readonly<Record<PlanOrientation, PlanLayout>>,
 ) {
   const itemsById = useMemo(() => indexItems(items), [items]);
+
   const baseViewBoxes = useMemo(
     () => ({ wide: getBaseViewBox(layouts.wide), tall: getBaseViewBox(layouts.tall) }),
     [layouts],
   );
+
   const [hash, setHash] = useUrlHash();
   const [visibleCategories, setVisibleCategories] = useState<ReadonlySet<PlanCategory>>(() => new Set(PLAN_CATEGORIES));
 
   const width = useElementWidth(viewportRef);
   const orientation: PlanOrientation = width !== null && width < EXPLORER_TALL_BREAKPOINT ? "tall" : "wide";
+
   const viewports = {
     wide: usePlanViewport(baseViewBoxes.wide),
     tall: usePlanViewport(baseViewBoxes.tall),
   };
+
   const flash = usePlanFlash(viewportRef);
   const { animateTo: animateWide } = viewports.wide;
   const { animateTo: animateTall } = viewports.tall;
@@ -56,9 +61,11 @@ export function useFloorPlanExplorer(
     (id: string) => {
       const wideRect = findItemRect(layouts.wide, id);
       const tallRect = findItemRect(layouts.tall, id);
+
       if (wideRect) {
         animateWide(focusViewBox(wideRect, baseViewBoxes.wide));
       }
+
       if (tallRect) {
         animateTall(focusViewBox(tallRect, baseViewBoxes.tall));
       }
@@ -74,11 +81,14 @@ export function useFloorPlanExplorer(
       if (!itemsById.has(id)) {
         return;
       }
+
       lastSelectedId.current = id;
       setHash(id);
+
       if (focus) {
         focusItem(id);
       }
+
       if (shouldFlash) {
         flash(id);
       }

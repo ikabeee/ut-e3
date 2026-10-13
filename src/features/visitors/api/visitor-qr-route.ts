@@ -23,8 +23,10 @@ export async function GET(_request: Request, context: RouteContext<"/v/[token]">
       "Cache-Control": "no-store",
     },
   });
+
   if (visitor) {
     response.cookies.set(VISITOR_COOKIE, token, getVisitorCookieOptions());
   }
+
   return response;
 }

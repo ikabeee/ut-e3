@@ -1,6 +1,7 @@
 import { Skeleton } from "@heroui/react";
 
 const GENRE_PLACEHOLDERS = ["first", "second", "third", "fourth"] as const;
+
 const CARD_PLACEHOLDERS = ["a", "b", "c", "d", "e"] as const;
 
 /** Silueta del catálogo mientras llegan los datos (mantiene el layout y evita saltos). */

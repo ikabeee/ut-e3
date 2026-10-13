@@ -35,6 +35,7 @@ export function CoverflowCover({ game, isCurrent, isReflection = false }: Readon
 /** Cantos laterales de la caja (`.c-edge`). */
 export function CoverflowEdges() {
   const edgeClass = "coverflow-edge absolute top-0 h-[var(--ch)] w-[var(--cd)] [backface-visibility:hidden]";
+
   return (
     <>
       <span

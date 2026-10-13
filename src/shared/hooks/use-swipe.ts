@@ -18,8 +18,10 @@ export function useSwipe(onSwipe: (direction: SwipeDirection) => void, threshold
       if (startX.current === null) {
         return;
       }
+
       const deltaX = (event.changedTouches[0]?.clientX ?? startX.current) - startX.current;
       startX.current = null;
+
       if (Math.abs(deltaX) > threshold) {
         onSwipe(deltaX < 0 ? 1 : -1);
       }

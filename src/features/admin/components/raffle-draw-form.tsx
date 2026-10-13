@@ -6,6 +6,7 @@ import { drawRaffleWinnersAction } from "@features/visitors/lib/visitors-actions
 /** Sorteo de ganadores entre los boletos que todavía no han ganado. */
 export function RaffleDrawForm() {
   const copy = ADMIN_COPY.raffle;
+
   return (
     <AdminActionForm action={drawRaffleWinnersAction} submitLabel={copy.draw} successMessage={copy.drawn}>
       <div className="max-w-60">

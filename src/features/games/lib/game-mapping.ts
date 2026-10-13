@@ -37,6 +37,7 @@ export function splitParagraphs(text: string | null): string[] | null {
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
+
   return paragraphs.length > 0 ? paragraphs : null;
 }
 
@@ -47,6 +48,7 @@ export function splitParagraphs(text: string | null): string[] | null {
  */
 export function toGame(row: GameRow): Game | null {
   const cover = row.images.find((image) => image.isCover);
+
   if (!cover || !row.team || !row.genre) return null;
 
   const screenshots = row.images.filter((image) => !image.isCover).toSorted((a, b) => a.sortOrder - b.sortOrder);

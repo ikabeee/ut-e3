@@ -28,15 +28,19 @@ interface SqlErrorShape {
 /** Devuelve la restricción violada, o `null` si el error es de otro tipo. */
 export function getConstraintViolation(error: unknown): ConstraintViolation | null {
   let current: unknown = error;
+
   for (let depth = 0; depth < 4 && typeof current === "object" && current !== null; depth++) {
     const candidate = current as SqlErrorShape;
     const sqlState = typeof candidate.sqlState === "string" ? candidate.sqlState : candidate.code;
     const kind = typeof sqlState === "string" ? KIND_BY_SQL_STATE[sqlState] : undefined;
+
     if (kind) {
       return { kind, constraint: typeof candidate.constraint === "string" ? candidate.constraint : "" };
     }
+
     current = candidate.cause;
   }
+
   return null;
 }
 
@@ -49,6 +53,7 @@ export function describeConstraintViolation(
   messages: Readonly<Record<string, string>>,
 ): string {
   const match = Object.keys(messages).find((prefix) => violation.constraint.startsWith(prefix));
+
   if (match) return messages[match];
 
   switch (violation.kind) {

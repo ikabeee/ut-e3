@@ -11,6 +11,7 @@ import { resolveScheduleZones } from "@features/home/lib/schedule-zones";
 
 function renderSection() {
   const event = getEventContent();
+
   const items = buildPlanItems(
     toStandOccupants(GAME_FIXTURES, () => null),
     event.highlights,

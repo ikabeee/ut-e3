@@ -35,6 +35,7 @@ export function FloorPlanOverview({ items, layouts, selectedId, onSelect }: Read
       <div className="@container min-w-0 overflow-hidden border border-border bg-background">
         {ORIENTATIONS.map(({ orientation, className }) => {
           const layout = layouts[orientation];
+
           return (
             <svg
               key={orientation}

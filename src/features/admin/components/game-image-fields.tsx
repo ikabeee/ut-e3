@@ -12,6 +12,7 @@ interface GameImageFieldsProps {
 /** Campos de una foto de un juego (alta y edición). */
 export function GameImageFields({ image, nextSortOrder = 0 }: Readonly<GameImageFieldsProps>) {
   const copy = ADMIN_COPY.games;
+
   return (
     <div className="flex flex-col gap-4">
       <AdminTextField

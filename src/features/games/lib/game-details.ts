@@ -14,6 +14,7 @@ export function getStandAisle(stand: string | null) {
 /** Etiquetas de "Características" del detalle: la demo, los jugadores y las plataformas. */
 export function getGameFeatures(game: Game) {
   const { features } = GAMES_COPY;
+
   return [features.demo, features.players(game.players), ...game.platforms];
 }
 
@@ -30,6 +31,7 @@ export interface GameFact {
 /** Ficha lateral del juego. */
 export function getGameFacts(game: Game, eventDateLabel: string): GameFact[] {
   const { facts } = GAMES_COPY;
+
   return [
     { label: facts.team, value: game.team.replace(/^Equipo /, "") },
     { label: facts.members, value: String(game.members) },

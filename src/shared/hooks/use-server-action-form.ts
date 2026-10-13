@@ -8,6 +8,7 @@ const NO_FIELD_ERRORS: FieldErrors = {};
 function withoutFieldError<T>(result: ActionResult<T> | null, name: string): ActionResult<T> | null {
   if (!result || result.ok || !result.fieldErrors?.[name]) return result;
   const fieldErrors = Object.fromEntries(Object.entries(result.fieldErrors).filter(([field]) => field !== name));
+
   return Object.keys(fieldErrors).length > 0 ? { ...result, fieldErrors } : null;
 }
 
@@ -38,12 +39,14 @@ export function useServerActionForm<T>(action: FormAction<T>, onSuccess?: (data:
     startTransition(async () => {
       const next = await action(input);
       setResult(next);
+
       if (next.ok) onSuccess?.(next.data);
     });
   };
 
   const clearFieldError = (event: FormEvent<HTMLElement>) => {
     const field = event.target;
+
     if (
       field instanceof HTMLInputElement ||
       field instanceof HTMLTextAreaElement ||
@@ -54,6 +57,7 @@ export function useServerActionForm<T>(action: FormAction<T>, onSuccess?: (data:
   };
 
   const failure = result && !result.ok ? result : null;
+
   return {
     submit,
     clearFieldError,

@@ -40,9 +40,11 @@ export function normalizeGamertag(raw: string) {
 export function parseVisitorRegistration(raw: RawInput) {
   return validate(raw, (field) => {
     const gamertag = normalizeGamertag(field.text("gamertag", { label: "El gamertag", max: 40 }));
+
     if (gamertag && !GAMERTAG_PATTERN.test(gamertag)) {
       field.invalid("gamertag", "Usa de 3 a 24 caracteres: letras sin acento, números, guion bajo, punto o guion.");
     }
+
     return { gamertag };
   });
 }
@@ -53,8 +55,11 @@ export function parseVisitorRegistration(raw: RawInput) {
  */
 export function normalizePhone(raw: string) {
   const compact = raw.trim().replace(/[\s().-]/g, "");
+
   if (/^\d{10}$/.test(compact)) return `${DEFAULT_PHONE_PREFIX}${compact}`;
+
   if (/^00\d+$/.test(compact)) return `+${compact.slice(2)}`;
+
   return compact;
 }
 
@@ -62,9 +67,11 @@ export function normalizePhone(raw: string) {
 export function parseRaffleClaim(raw: RawInput) {
   return validate(raw, (field) => {
     const phone = normalizePhone(field.text("phone", { label: "El teléfono", max: 30 }));
+
     if (phone && !PHONE_PATTERN.test(phone)) {
       field.invalid("phone", "Escribe tu número a 10 dígitos o con lada internacional (+52...).");
     }
+
     return { phone };
   });
 }
@@ -90,8 +97,10 @@ export function buildVisitorQrUrl(siteUrl: string, token: string) {
  */
 export function extractVisitorToken(scanned: string) {
   const value = scanned.trim().toLowerCase();
+
   if (isVisitorToken(value)) return value;
   const match = /\/v\/([0-9a-f]{32})\/?(?:[?#].*)?$/.exec(value);
+
   return match?.[1] ?? null;
 }
 
@@ -103,12 +112,14 @@ export function clampScannedAt(deviceTime: string, eventStart: string, now: Date
   const scanned = Date.parse(deviceTime);
   const start = Date.parse(eventStart);
   const clamped = Math.min(Math.max(Number.isNaN(scanned) ? now.getTime() : scanned, start), now.getTime());
+
   return new Date(clamped).toISOString();
 }
 
 function isCheckInItem(value: unknown): value is CheckInItem {
   if (typeof value !== "object" || value === null) return false;
   const { id, token, scannedAt } = value as Record<string, unknown>;
+
   return (
     isUuid(id) &&
     typeof token === "string" &&
@@ -126,15 +137,19 @@ function isCheckInItem(value: unknown): value is CheckInItem {
 export function parseCheckInBatch(body: unknown): CheckInItem[] {
   const checkIns =
     typeof body === "object" && body !== null ? (body as Record<string, unknown>)["checkIns"] : undefined;
+
   if (!Array.isArray(checkIns) || checkIns.length === 0 || checkIns.length > CHECK_IN_BATCH_LIMIT) {
     throw new ValidationError({ checkIns: `Envía de 1 a ${CHECK_IN_BATCH_LIMIT} escaneos en "checkIns".` });
   }
+
   const invalidIndex = checkIns.findIndex((item) => !isCheckInItem(item));
+
   if (invalidIndex !== -1) {
     throw new ValidationError({
       [`checkIns.${invalidIndex}`]: "Cada escaneo necesita un id (UUID), el token del QR y scannedAt (ISO 8601).",
     });
   }
+
   return (checkIns as CheckInItem[]).map(({ id, token, scannedAt }) => ({ id: id.toLowerCase(), token, scannedAt }));
 }
 
@@ -145,9 +160,11 @@ export function parseCheckInBatch(body: unknown): CheckInItem[] {
 export function pickRandom<T>(items: readonly T[], count: number, randomInt: (max: number) => number): T[] {
   const pool = [...items];
   const picked = Math.min(count, pool.length);
+
   for (let index = 0; index < picked; index += 1) {
     const swap = index + randomInt(pool.length - index);
     [pool[index], pool[swap]] = [pool[swap], pool[index]];
   }
+
   return pool.slice(0, picked);
 }

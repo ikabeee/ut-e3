@@ -7,6 +7,7 @@ import { RecordNotFoundError } from "@shared/lib/record-not-found-error";
 import { ValidationError } from "@shared/lib/validation";
 
 jest.mock("next/cache", () => ({ refresh: jest.fn(), updateTag: jest.fn() }));
+
 jest.mock("@shared/lib/server/admin-auth", () => ({
   ...jest.requireActual("@shared/lib/server/admin-auth"),
   isAdminRequest: jest.fn(),

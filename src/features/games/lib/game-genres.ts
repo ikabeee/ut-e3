@@ -6,6 +6,7 @@ import type { Game, GenreSummary } from "@features/games/lib/types";
  */
 export function summarizeGenres(games: readonly Game[]): GenreSummary[] {
   const gamesByGenre = new Map<string, Game[]>();
+
   for (const game of games) {
     gamesByGenre.set(game.genre, [...(gamesByGenre.get(game.genre) ?? []), game]);
   }

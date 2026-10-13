@@ -38,5 +38,6 @@ export function canAutoplayReel({ isWideScreen, prefersSaveData, prefersReducedM
 /** Código de tiempo del reel en minutos, segundos y cuadros: 75.5 s -> "01:15:15". */
 export function formatTimecode(seconds: number, framesPerSecond: number = EVENT_REEL.framesPerSecond) {
   const pad = (value: number) => String(Math.floor(value)).padStart(2, "0");
+
   return `${pad(seconds / 60)}:${pad(seconds % 60)}:${pad((seconds % 1) * framesPerSecond)}`;
 }

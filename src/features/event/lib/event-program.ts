@@ -56,9 +56,11 @@ export const EVENT_SCHEDULE: readonly ScheduleEntry[] = [
 export function getScheduleHighlights(schedule: readonly ScheduleEntry[]): ScheduleHighlights {
   const timeOf = (milestone: Exclude<ScheduleMilestone, "raffle">) => {
     const entry = schedule.find((candidate) => candidate.milestone === milestone);
+
     if (!entry) {
       throw new Error(`El programa no marca el horario "${milestone}" (EVENT_SCHEDULE en event-program.ts).`);
     }
+
     return entry.time;
   };
 

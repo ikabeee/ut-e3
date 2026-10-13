@@ -25,14 +25,17 @@ export function useVideoPlayback(videoRef: RefObject<HTMLVideoElement | null>) {
 
   useEffect(() => {
     const video = videoRef.current;
+
     if (!video) {
       return;
     }
+
     const syncPaused = () => setIsPaused(video.paused);
     const syncTime = () => setTimecode(formatTimecode(video.currentTime));
     video.addEventListener("play", syncPaused);
     video.addEventListener("pause", syncPaused);
     video.addEventListener("timeupdate", syncTime);
+
     return () => {
       video.removeEventListener("play", syncPaused);
       video.removeEventListener("pause", syncPaused);
@@ -42,6 +45,7 @@ export function useVideoPlayback(videoRef: RefObject<HTMLVideoElement | null>) {
 
   useEffect(() => {
     const video = videoRef.current;
+
     if (hasSource && video && playRequest > 0) {
       video.play().catch(() => setIsPaused(true));
     }
@@ -50,29 +54,37 @@ export function useVideoPlayback(videoRef: RefObject<HTMLVideoElement | null>) {
   // Reproducción automática: sólo si el cliente lo permite y cuando el reel está a la vista.
   useEffect(() => {
     const video = videoRef.current;
+
     if (!video) {
       return;
     }
+
     if (!canAutoplay) {
       // Si la persona activa el movimiento reducido o el ahorro de datos, el reel se detiene.
       video.pause();
+
       return;
     }
+
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) {
         observer.disconnect();
         requestPlay();
       }
     });
+
     observer.observe(video);
+
     return () => observer.disconnect();
   }, [canAutoplay, requestPlay, videoRef]);
 
   const togglePlayback = useCallback(() => {
     const video = videoRef.current;
+
     if (!video) {
       return;
     }
+
     if (video.paused) {
       requestPlay();
     } else {

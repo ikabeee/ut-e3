@@ -12,6 +12,7 @@ function renderBadge(standCode: string) {
       { standCode: "B7", recentCheckIns: 12 },
     ],
   });
+
   return render(
     <QueryClientProvider client={queryClient}>
       <StandTrafficBadge standCode={standCode} />

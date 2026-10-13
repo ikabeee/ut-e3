@@ -12,6 +12,7 @@ export const adminTeamsPageMetadata = buildAdminMetadata("teams");
 
 async function AdminTeamsContent() {
   const teams = await getAdminTeams();
+
   return (
     <>
       <AdminPanel title={ADMIN_COPY.teams.createTitle}>

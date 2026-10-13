@@ -13,6 +13,7 @@ import { RecordNotFoundError } from "@shared/lib/record-not-found-error";
 // quien probó todos los juegos con stand, y el sorteo elige entre los boletos que existen.
 
 const NOT_A_WINNER = "Ese boleto no existe o no ha ganado.";
+
 const INVALID_PASSPORT =
   "Tu pasaporte ya no es válido. Abre la captura de tu QR o pide ayuda en el módulo de información.";
 
@@ -27,15 +28,18 @@ function ticketOf(visitorId: string) {
  */
 export async function claimRaffleTicket(token: string, phone: string): Promise<RaffleTicket> {
   const visitor = await findVisitorByToken(token);
+
   if (!visitor) throw new RecordNotFoundError(INVALID_PASSPORT);
 
   const existing = await ticketOf(visitor.id).first();
+
   if (existing) return existing;
 
   const requiredGames = await listRequiredGames();
   const checkedGames = await db.orm.public.CheckIn.select("gameId").where({ visitorId: visitor.id }).all();
   const checkedIds = new Set(checkedGames.map((checkIn) => checkIn.gameId));
   const missing = requiredGames.filter((game) => !checkedIds.has(game.id)).length;
+
   if (requiredGames.length === 0 || missing > 0) {
     throw new ActionRuleError(VISITORS_COPY.raffle.notYet(missing));
   }
@@ -48,8 +52,11 @@ export async function claimRaffleTicket(token: string, phone: string): Promise<R
       conflictOn: ["visitorId"],
     },
   );
+
   const ticket = created ?? (await ticketOf(visitor.id).first());
+
   if (!ticket) throw new RecordNotFoundError(INVALID_PASSPORT);
+
   return ticket;
 }
 
@@ -57,6 +64,7 @@ function winnersWhere(ticketNumbers?: readonly number[]) {
   const winners = db.orm.public.RaffleTicket.select("ticketNumber", "phone", "wonAt", "notifiedAt")
     .where((ticket) => ticket.wonAt.isNotNull())
     .include("visitor", (visitor) => visitor.select("gamertag"));
+
   return ticketNumbers ? winners.where((ticket) => ticket.ticketNumber.in([...ticketNumbers])) : winners;
 }
 
@@ -75,9 +83,11 @@ function toWinner(row: NonNullable<WinnerRow>): RaffleWinner {
 /** Ganadores en el orden en que salieron (panel de administración). */
 export async function listRaffleWinners(): Promise<RaffleWinner[]> {
   await connection();
+
   const rows = await winnersWhere()
     .orderBy([(ticket) => ticket.wonAt.asc(), (ticket) => ticket.ticketNumber.asc()])
     .all();
+
   return rows.map(toWinner);
 }
 
@@ -89,6 +99,7 @@ export async function drawRaffleWinners(count: number): Promise<RaffleWinner[]> 
   const candidates = await db.orm.public.RaffleTicket.select("ticketNumber")
     .where((ticket) => ticket.wonAt.isNull())
     .all();
+
   if (candidates.length === 0) throw new ActionRuleError("No quedan boletos sin premio para sortear.");
 
   const picked = pickRandom(
@@ -96,24 +107,31 @@ export async function drawRaffleWinners(count: number): Promise<RaffleWinner[]> 
     count,
     (max) => randomInt(max),
   );
+
   // `wonAt IS NULL` otra vez: si dos sorteos corren a la vez, un boleto no gana dos veces.
   const updated = await db.orm.public.RaffleTicket.where((ticket) => ticket.ticketNumber.in(picked))
     .where((ticket) => ticket.wonAt.isNull())
     .updateAll({ wonAt: new Date().toISOString() });
+
   const rows = await winnersWhere(updated.map((ticket) => ticket.ticketNumber))
     .orderBy((ticket) => ticket.ticketNumber.asc())
     .all();
+
   return rows.map(toWinner);
 }
 
 /** Marca que ya se le avisó al ganador (mensaje para presentarse en el main stage). */
 export async function markRaffleWinnerNotified(ticketNumber: number): Promise<RaffleWinner> {
   if (!Number.isSafeInteger(ticketNumber)) throw new RecordNotFoundError(NOT_A_WINNER);
+
   const updated = await db.orm.public.RaffleTicket.where({ ticketNumber })
     .where((ticket) => ticket.wonAt.isNotNull())
     .update({ notifiedAt: new Date().toISOString() });
+
   if (!updated) throw new RecordNotFoundError(NOT_A_WINNER);
   const [winner] = await winnersWhere([ticketNumber]).all();
+
   if (!winner) throw new RecordNotFoundError(NOT_A_WINNER);
+
   return toWinner(winner);
 }

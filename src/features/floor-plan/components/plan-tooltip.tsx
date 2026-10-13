@@ -5,6 +5,7 @@ import { PLAN_CATEGORY_LABELS } from "@features/floor-plan/lib/floor-plan-copy";
 import type { PlanItem, TooltipAnchor } from "@features/floor-plan/lib/types";
 
 const OFFSET = 14;
+
 const EDGE = 8;
 
 /** Etiqueta que sigue al puntero sobre el croquis (`.tip`); se voltea si no cabe. */
@@ -14,17 +15,22 @@ export function PlanTooltip({ item, anchor }: Readonly<{ item: PlanItem; anchor:
   // Se mide después de pintar el contenido y se voltea si se sale del croquis.
   useLayoutEffect(() => {
     const tip = ref.current;
+
     if (!tip) {
       return;
     }
+
     let x = anchor.x + OFFSET;
     let y = anchor.y + OFFSET;
+
     if (x + tip.offsetWidth > anchor.containerWidth - EDGE) {
       x = anchor.x - tip.offsetWidth - OFFSET;
     }
+
     if (y + tip.offsetHeight > anchor.containerHeight - EDGE) {
       y = anchor.y - tip.offsetHeight - OFFSET;
     }
+
     tip.style.transform = `translate(${x}px, ${y}px)`;
   }, [anchor, item]);
 

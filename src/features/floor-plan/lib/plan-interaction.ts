@@ -26,6 +26,7 @@ export function getItemInteraction(
   { itemsById, selectedId, visibleCategories, onSelectItem }: PlanSelection,
 ): PlanItemInteraction {
   const item = itemsById.get(id);
+
   return {
     isSelected: selectedId === id,
     isHidden: item !== undefined && visibleCategories !== undefined && !visibleCategories.has(item.category),

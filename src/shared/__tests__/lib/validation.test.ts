@@ -7,6 +7,7 @@ function errorsOf(run: () => unknown) {
     if (error instanceof ValidationError) return error.fieldErrors;
     throw error;
   }
+
   return {};
 }
 
@@ -62,6 +63,7 @@ describe("validate", () => {
 
   it("accepts only the allowed values", () => {
     const groups = ["IDYGS101", "IDYGS102"] as const;
+
     const errors = errorsOf(() =>
       validate({ group: "X" }, (field) => ({ group: field.oneOf("group", groups, "el grupo") })),
     );

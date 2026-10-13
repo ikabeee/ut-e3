@@ -27,6 +27,7 @@ export function GameCoverflow() {
   const router = useRouter();
   const coverflow = useCoverflow(games.length);
   const currentGame = games[coverflow.current];
+
   const keyboard = useCoverflowKeyboard({
     current: coverflow.current,
     goNext: coverflow.goNext,
@@ -56,6 +57,7 @@ export function GameCoverflow() {
       >
         {games.map((game, index) => {
           const placement = getCoverflowPlacement(index, coverflow.current);
+
           return (
             <Link
               key={game.slug}

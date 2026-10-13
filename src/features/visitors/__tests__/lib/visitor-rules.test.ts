@@ -13,6 +13,7 @@ import {
 import { ValidationError } from "@shared/lib/validation";
 
 const TOKEN = "0123456789abcdef0123456789abcdef";
+
 const CHECK_IN_ID = "6d94503f-3e3b-4e6e-8bc6-445cd33ed099";
 
 function fieldErrors(run: () => unknown) {
@@ -22,6 +23,7 @@ function fieldErrors(run: () => unknown) {
     if (error instanceof ValidationError) return error.fieldErrors;
     throw error;
   }
+
   return {};
 }
 

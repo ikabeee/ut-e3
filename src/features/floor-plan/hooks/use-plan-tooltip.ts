@@ -20,10 +20,13 @@ export function usePlanTooltip(containerRef: RefObject<HTMLElement | null>) {
       const container = containerRef.current;
       const target = event.target instanceof Element ? event.target.closest("[data-plan-item]") : null;
       const itemId = target?.getAttribute("data-plan-item");
+
       if (!container || !itemId || event.pointerType === "touch") {
         setTooltip(null);
+
         return;
       }
+
       const rect = container.getBoundingClientRect();
       setTooltip({
         itemId,

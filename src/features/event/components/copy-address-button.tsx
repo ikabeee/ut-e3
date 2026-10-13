@@ -13,6 +13,7 @@ export function CopyAddressButton({ address }: Readonly<CopyAddressButtonProps>)
   const { copy, isCopied, hasFailed, isPending } = useCopyToClipboard();
 
   let label: string = EVENT_COPY.copyAddress.idle;
+
   if (isCopied) {
     label = EVENT_COPY.copyAddress.copied;
   } else if (hasFailed) {

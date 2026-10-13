@@ -25,6 +25,7 @@ export function FeaturedThumbnails({ games, current, onSelect, progressBarRef }:
     >
       {games.map((thumb, index) => {
         const isCurrent = index === current;
+
         return (
           <button
             key={thumb.slug}

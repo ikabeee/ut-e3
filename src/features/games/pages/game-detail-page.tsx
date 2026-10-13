@@ -22,12 +22,14 @@ type GameDetailPageProps = PageProps<"/games/[slug]">;
 /** Prerenderiza el detalle de todos los juegos en el build (SEO y carga instantánea). */
 export async function generateGameDetailStaticParams() {
   const games = await listGames();
+
   return games.map((game) => ({ slug: game.slug }));
 }
 
 export async function generateGameDetailMetadata({ params }: GameDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
   const game = await getGameBySlug(slug);
+
   if (!game) {
     return { title: "Juego no encontrado" };
   }
@@ -37,6 +39,7 @@ export async function generateGameDetailMetadata({ params }: GameDetailPageProps
     description: game.description,
     images: [{ url: game.image.src, alt: game.image.alt }],
   });
+
   return {
     title: game.name,
     description: `${game.description} ${game.team} · Stand ${formatStand(game.stand)} · ${game.genre}.`,
@@ -49,9 +52,11 @@ export async function generateGameDetailMetadata({ params }: GameDetailPageProps
 export async function GameDetailPage({ params }: GameDetailPageProps) {
   const { slug } = await params;
   const [game, games] = await Promise.all([getGameBySlug(slug), listGames()]);
+
   if (!game) {
     notFound();
   }
+
   const { info } = getEventContent();
 
   return (

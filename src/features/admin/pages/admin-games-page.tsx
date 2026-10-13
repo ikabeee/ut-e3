@@ -12,6 +12,7 @@ export const adminGamesPageMetadata = buildAdminMetadata("games");
 
 async function AdminGamesContent() {
   const { games, options } = await getAdminGames();
+
   return (
     <>
       <AdminPanel title={ADMIN_COPY.games.createTitle}>

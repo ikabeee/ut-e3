@@ -5,12 +5,15 @@ import { mkdir, readFile } from "node:fs/promises";
 import sharp from "sharp";
 
 const sourceUrl = new URL("../src/app/icon.svg", import.meta.url);
+
 const outputUrl = new URL("../public/icons/", import.meta.url);
 
 // Mismo color que `siteConfig.themeColor` (src/shared/lib/site-config.ts) y `--utg-black`.
 const BACKGROUND_COLOR = "#000000";
+
 // Zona segura de los íconos maskable: el sistema puede recortar todo fuera del 80 % central.
 const MASKABLE_SAFE_ZONE = 0.8;
+
 // Densidad alta para que el SVG (viewBox de 18 px) se rasterice nítido a 512 px.
 const SVG_DENSITY = 2400;
 

@@ -39,6 +39,7 @@ export function PlanStandBlock({ block, nameSize, variant, selection, touchRects
         const isTeam = item?.category === "team";
         const [x, y, width, height] = rect;
         const [firstLine, secondLine] = splitStandName(item?.title ?? "");
+
         const nameProps = {
           maxWidth: width - 14,
           x: x + 8,
@@ -47,6 +48,7 @@ export function PlanStandBlock({ block, nameSize, variant, selection, touchRects
           fill: "var(--foreground)",
           className: "pointer-events-none font-mono",
         };
+
         return (
           <PlanItemShape
             key={code}

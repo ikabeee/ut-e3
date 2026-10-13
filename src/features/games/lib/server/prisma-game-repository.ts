@@ -24,6 +24,7 @@ function publishedGames() {
 function toGames(rows: readonly GameRow[]): Game[] {
   return rows.flatMap((row) => {
     const game = toGame(row);
+
     return game ? [game] : [];
   });
 }
@@ -37,6 +38,7 @@ export const prismaGameRepository: GameRepository = {
     const rows = await publishedGames()
       .orderBy([(game) => game.sortOrder.asc(), (game) => game.name.asc()])
       .all();
+
     return toGames(rows);
   },
 
@@ -44,6 +46,7 @@ export const prismaGameRepository: GameRepository = {
     const row = await publishedGames()
       .where((game) => game.slug.eq(slug))
       .first();
+
     return row ? toGame(row) : null;
   },
 };

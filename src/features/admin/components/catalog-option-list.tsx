@@ -19,6 +19,7 @@ interface CatalogOptionListProps {
 
 function CatalogOptionFields({ option }: Readonly<{ option?: CatalogOption }>) {
   const copy = ADMIN_COPY.catalog;
+
   return (
     <div className="grid grid-cols-2 gap-4 max-[560px]:grid-cols-1">
       <AdminTextField name="name" label={copy.name} defaultValue={option?.name} isRequired />

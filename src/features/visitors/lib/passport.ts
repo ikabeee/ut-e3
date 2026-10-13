@@ -11,6 +11,7 @@ export type RaffleStage = "locked" | "claim" | "ticket";
 export function getRaffleStage(passport: VisitorPassport): RaffleStage {
   if (passport.ticket) return "ticket";
   const isComplete = passport.requiredCount > 0 && passport.checkedCount >= passport.requiredCount;
+
   return isComplete ? "claim" : "locked";
 }
 

@@ -45,7 +45,9 @@ export async function claimRaffleTicketAction(input: RawInput) {
     async () => {
       const { phone } = parseRaffleClaim(input);
       const token = await getVisitorToken();
+
       if (!token) throw new RecordNotFoundError(NO_PASSPORT);
+
       return claimRaffleTicket(token, phone);
     },
     { constraintMessages: VISITOR_CONSTRAINT_MESSAGES, refreshPage: true },

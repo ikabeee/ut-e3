@@ -56,6 +56,7 @@ class FakeCacheStorage {
 
   async open(name: string) {
     if (!this.caches.has(name)) this.caches.set(name, new FakeCache());
+
     return this.caches.get(name)!;
   }
 
@@ -70,8 +71,10 @@ class FakeCacheStorage {
   async match(request: RequestInfo | URL) {
     for (const cache of this.caches.values()) {
       const found = await cache.match(request);
+
       if (found) return found;
     }
+
     return undefined;
   }
 }
@@ -80,6 +83,7 @@ const ORIGIN = "https://showcase.example";
 
 function fakeHeaders(init: Record<string, string> = {}) {
   const values = new Map(Object.entries(init).map(([key, value]) => [key.toLowerCase(), value]));
+
   return {
     has: (name: string) => values.has(name.toLowerCase()),
     get: (name: string) => values.get(name.toLowerCase()) ?? null,
@@ -98,11 +102,13 @@ const config: ServiceWorkerConfig = {
 };
 
 type Listener = (event: unknown) => void;
+
 type NetworkHandler = (url: string) => Promise<FakeResponse>;
 
 function setup(network: NetworkHandler) {
   const listeners = new Map<string, Listener>();
   const storage = new FakeCacheStorage();
+
   const scope = {
     location: { origin: ORIGIN },
     caches: storage,
@@ -111,11 +117,13 @@ function setup(network: NetworkHandler) {
     clients: { claim: jest.fn(async () => undefined) },
     addEventListener: (type: string, listener: Listener) => listeners.set(type, listener),
   };
+
   runServiceWorker(scope as unknown as ServiceWorkerScope, config, { getRequestStrategy, extractStaticAssetUrls });
 
   async function lifecycle(type: "install" | "activate") {
     let done: Promise<unknown> = Promise.resolve();
     listeners.get(type)?.({ waitUntil: (promise: Promise<unknown>) => (done = promise) });
+
     return done;
   }
 
@@ -134,6 +142,7 @@ function setup(network: NetworkHandler) {
       },
       respondWith: (promise: Promise<FakeResponse>) => (response = promise),
     });
+
     return response;
   }
 
@@ -141,12 +150,15 @@ function setup(network: NetworkHandler) {
 }
 
 const offline: NetworkHandler = () => Promise.reject(new TypeError("Failed to fetch"));
+
 const pageCache = (storage: FakeCacheStorage) => storage.caches.get("ut-e3-pages-v2");
 
 const originalResponse = globalThis.Response;
+
 beforeAll(() => {
   globalThis.Response = FakeResponse as unknown as typeof Response;
 });
+
 afterAll(() => {
   globalThis.Response = originalResponse;
 });
@@ -161,6 +173,7 @@ describe("runServiceWorker: install", () => {
       [`${ORIGIN}/_next/static/media/font.woff2`]: "font",
       [`${ORIGIN}/icons/icon-192.png`]: "png",
     };
+
     const { storage, lifecycle } = setup(
       async (url) => new FakeResponse(files[url] ?? null, { status: files[url] ? 200 : 404 }),
     );

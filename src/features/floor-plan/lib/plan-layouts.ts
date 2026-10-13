@@ -118,6 +118,7 @@ export function getStandCells(block: PlanLayout["standBlocks"][number]): StandCe
   return Array.from({ length: block.rows * block.columns }, (_, index) => {
     const column = index % block.columns;
     const row = Math.floor(index / block.columns);
+
     return {
       code: `${block.prefix}${index + 1}`,
       rect: [originX + column * stepX, originY + row * stepY, width, height] as const,
@@ -130,16 +131,21 @@ export function findItemRect(layout: PlanLayout, id: string): PlanRect | null {
   if (id === "entry") {
     return layout.entry;
   }
+
   const zone = layout.zones[id as keyof PlanLayout["zones"]];
+
   if (zone) {
     return zone.rect;
   }
+
   for (const block of layout.standBlocks) {
     const cell = getStandCells(block).find((candidate) => candidate.code === id);
+
     if (cell) {
       return cell.rect;
     }
   }
+
   return null;
 }
 

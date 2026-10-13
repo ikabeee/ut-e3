@@ -7,8 +7,10 @@ export const GAMES_API_PATH = "/api/games";
 /** Lee los juegos desde el Route Handler y valida la respuesta. Se ejecuta en el navegador. */
 export async function fetchGames(): Promise<Game[]> {
   const response = await fetch(GAMES_API_PATH);
+
   if (!response.ok) {
     throw new Error(`No se pudieron cargar los juegos (${response.status}).`);
   }
+
   return parseGamesResponse(await response.json());
 }

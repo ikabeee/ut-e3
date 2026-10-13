@@ -17,18 +17,23 @@ export function FitSvgText({ maxWidth, children, ...textProps }: Readonly<FitSvg
 
   useEffect(() => {
     const text = ref.current;
+
     if (!text) {
       return;
     }
+
     let isActive = true;
+
     const fit = () => {
       if (!isActive) {
         return;
       }
+
       text.removeAttribute("textLength");
       text.removeAttribute("lengthAdjust");
       // jsdom (pruebas) no implementa la medición de texto.
       const length = typeof text.getComputedTextLength === "function" ? text.getComputedTextLength() : 0;
+
       if (length > maxWidth) {
         text.setAttribute("textLength", String(maxWidth));
         text.setAttribute("lengthAdjust", "spacingAndGlyphs");
@@ -38,9 +43,11 @@ export function FitSvgText({ maxWidth, children, ...textProps }: Readonly<FitSvg
     fit();
     document.fonts.ready.then(fit).catch(() => undefined);
     const observer = new ResizeObserver(fit);
+
     if (text.ownerSVGElement) {
       observer.observe(text.ownerSVGElement);
     }
+
     return () => {
       isActive = false;
       observer.disconnect();

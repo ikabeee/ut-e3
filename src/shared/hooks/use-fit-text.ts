@@ -11,19 +11,23 @@ const SAFETY = 0.97;
 export function useFitText(ref: RefObject<HTMLElement | null>, text: string) {
   useLayoutEffect(() => {
     const element = ref.current;
+
     if (!element) {
       return;
     }
 
     let isActive = true;
+
     const fit = () => {
       if (!isActive) {
         return;
       }
+
       element.style.fontSize = "";
       const maxFontSize = Number.parseFloat(getComputedStyle(element).fontSize);
       const available = element.parentElement?.clientWidth ?? 0;
       const widest = Math.max(0, ...[...element.children].map((word) => word.getBoundingClientRect().width));
+
       if (available > 0 && widest > available) {
         element.style.fontSize = `${Math.floor(((maxFontSize * available) / widest) * SAFETY)}px`;
       }
@@ -32,6 +36,7 @@ export function useFitText(ref: RefObject<HTMLElement | null>, text: string) {
     fit();
     document.fonts.ready.then(fit).catch(() => undefined);
     window.addEventListener("resize", fit);
+
     return () => {
       isActive = false;
       window.removeEventListener("resize", fit);

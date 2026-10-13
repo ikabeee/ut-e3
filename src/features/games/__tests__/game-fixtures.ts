@@ -5,6 +5,7 @@ type GameFixtureInput = Pick<Game, "slug" | "name" | "genre" | "team" | "stand">
 /** Completa un juego de prueba con valores neutros para lo que la prueba no necesita. */
 export function makeGameFixture(game: GameFixtureInput): Game {
   const image = game.image ?? { src: `/mock/games/${game.slug}.jpg`, alt: `Portada de ${game.name}`, position: null };
+
   return {
     members: 4,
     players: 1,

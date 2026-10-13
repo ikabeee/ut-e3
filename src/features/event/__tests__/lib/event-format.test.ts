@@ -8,6 +8,7 @@ import {
 } from "@features/event/lib/event-format";
 
 const STARTS_AT = "2026-11-27T10:00:00-05:00";
+
 const ENDS_AT = "2026-11-27T20:00:00-05:00";
 
 describe("event date labels", () => {

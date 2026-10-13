@@ -38,10 +38,13 @@ function growInterval(
 ): Interval {
   let low = Math.max(limits[0], start - margin);
   let high = Math.min(limits[1], end + margin);
+
   for (const [blockerStart, blockerEnd] of blockers) {
     if (blockerStart >= end) high = Math.min(high, (end + blockerStart) / 2);
+
     if (blockerEnd <= start) low = Math.max(low, (blockerEnd + start) / 2);
   }
+
   return [low, high];
 }
 
@@ -71,6 +74,7 @@ export function expandWithinNeighbors(
     [limits.left, limits.right],
     margin,
   );
+
   const [top, bottom] = growInterval(
     ownY,
     others
@@ -97,6 +101,7 @@ export function getTouchRects(layout: PlanLayout): ReadonlyMap<string, PlanRect>
       getStandCells(block).map(({ code, rect }): [string, PlanRect] => [code, rect]),
     ),
   ];
+
   const obstacles = [...targets.map(([, rect]) => rect), layout.publicArea];
   const bounds: PlanRect = [0, 0, layout.width, layout.height];
 

@@ -18,9 +18,11 @@ interface StandTrafficBadgeProps {
 /** Afluencia en vivo de un stand (se refresca cada 30 segundos). No muestra nada mientras carga. */
 export function StandTrafficBadge({ standCode }: Readonly<StandTrafficBadgeProps>) {
   const traffic = useStandTraffic(standCode);
+
   if (!traffic) return null;
 
   const level = getTrafficLevel(traffic.recentCheckIns);
+
   return (
     <p className="m-0 flex items-center gap-2 type-tiny">
       <span aria-hidden="true" className={cn("size-2 shrink-0 rounded-full", LEVEL_DOT_CLASS[level])} />

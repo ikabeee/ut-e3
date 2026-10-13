@@ -20,10 +20,12 @@ const GAME_REPOSITORIES: Partial<Record<DataSource, GameRepository>> = {
  */
 export function getGameRepository(dataSource: DataSource = env.dataSource): GameRepository {
   const repository = GAME_REPOSITORIES[dataSource];
+
   if (!repository) {
     throw new Error(
       `DATA_SOURCE="${dataSource}" todavía no tiene repositorio de juegos. Créalo en lib/server/ y regístralo en game-repositories.ts (ver docs/data-sources.md).`,
     );
   }
+
   return repository;
 }

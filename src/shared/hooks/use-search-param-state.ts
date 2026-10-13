@@ -17,11 +17,13 @@ export function useSearchParamState(name: string) {
   const setValue = useCallback(
     (nextValue: string | null) => {
       const url = new URL(window.location.href);
+
       if (nextValue === null) {
         url.searchParams.delete(name);
       } else {
         url.searchParams.set(name, nextValue);
       }
+
       replaceLocation(`${url.pathname}${url.search}${url.hash}`);
     },
     [name],

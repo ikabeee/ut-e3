@@ -3,6 +3,7 @@ import { PlanItemShape } from "@features/floor-plan/components/plan-item-shape";
 import type { PlanRect } from "@features/floor-plan/lib/types";
 
 const RECT: PlanRect = [30, 826, 130, 46];
+
 const TOUCH_RECT: PlanRect = [20, 822, 150, 58];
 
 function renderShape(props: { touchRect?: PlanRect; isHidden?: boolean; onSelect?: () => void } = {}) {
@@ -24,6 +25,7 @@ function renderShape(props: { touchRect?: PlanRect; isHidden?: boolean; onSelect
       </PlanItemShape>
     </svg>,
   );
+
   return container.querySelectorAll("rect");
 }
 

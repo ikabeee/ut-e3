@@ -24,13 +24,16 @@ const DEFAULT_ZONE_FONT_SIZE = 18;
 export function PlanZones({ zones, variant, selection, touchRects }: Readonly<PlanZonesProps>) {
   return (Object.entries(zones) as [Exclude<ZoneId, "entry">, ZoneShape][]).map(([id, zone]) => {
     const item = selection.itemsById.get(id);
+
     if (!item) {
       return null;
     }
+
     const isActivity = item.category === "act";
     const color = isActivity ? "var(--accent)" : "var(--muted)";
     const [x, y, width] = zone.rect;
     const fontSize = zone.fontSize ?? DEFAULT_ZONE_FONT_SIZE;
+
     return (
       <PlanItemShape
         key={id}

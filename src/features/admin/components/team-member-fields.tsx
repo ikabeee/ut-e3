@@ -14,6 +14,7 @@ interface TeamMemberFieldsProps {
 /** Campos de un integrante nuevo. */
 export function TeamMemberFields({ nextSortOrder }: Readonly<TeamMemberFieldsProps>) {
   const copy = ADMIN_COPY.teams;
+
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)] gap-4 max-[760px]:grid-cols-1">

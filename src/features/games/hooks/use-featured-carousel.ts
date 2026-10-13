@@ -6,6 +6,7 @@ import { wrapIndex } from "@shared/lib/math";
 
 /** Tiempo que se muestra cada juego antes de pasar al siguiente (ms). */
 export const FEATURED_SLIDE_DURATION = 6500;
+
 /** Desplazamiento mínimo del dedo para cambiar de juego. */
 const SWIPE_THRESHOLD = 60;
 
@@ -30,15 +31,18 @@ export function useFeaturedCarousel(count: number) {
     (index: number) =>
       setSlides((state) => {
         const next = wrapIndex(index, count);
+
         return next === state.current ? state : { current: next, previous: state.current };
       }),
     [count],
   );
+
   const goBy = useCallback(
     (step: number) =>
       setSlides((state) => ({ current: wrapIndex(state.current + step, count), previous: state.current })),
     [count],
   );
+
   const goNext = useCallback(() => goBy(1), [goBy]);
   const goPrevious = useCallback(() => goBy(-1), [goBy]);
 

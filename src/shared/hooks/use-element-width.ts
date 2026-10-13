@@ -6,15 +6,19 @@ export function useElementWidth(ref: RefObject<HTMLElement | null>) {
 
   useEffect(() => {
     const element = ref.current;
+
     if (!element) {
       return;
     }
+
     const observer = new ResizeObserver(([entry]) => {
       if (entry) {
         setWidth(entry.contentRect.width);
       }
     });
+
     observer.observe(element);
+
     return () => observer.disconnect();
   }, [ref]);
 

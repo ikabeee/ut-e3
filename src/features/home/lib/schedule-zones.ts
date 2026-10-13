@@ -22,6 +22,7 @@ export function resolveScheduleZones(schedule: readonly ScheduleEntry[], zones: 
         `El programa enlaza "${entry.title}" con la zona "${entry.zoneId}", que no existe en el croquis (PLAN_ZONES en floor-plan/lib/plan-places.ts).`,
       );
     }
+
     return { ...entry, zoneTitle: zones[entry.zoneId].title };
   });
 }

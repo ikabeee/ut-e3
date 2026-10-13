@@ -29,6 +29,7 @@ const nextConfig: NextConfig = {
       source,
       headers: [{ key: "Cache-Control", value: MEDIA_CACHE_CONTROL }],
     }));
+
     // El service worker nunca se guarda en caché HTTP: así el navegador detecta cada versión nueva.
     const serviceWorker = {
       source: "/sw.js",
@@ -37,6 +38,7 @@ const nextConfig: NextConfig = {
         { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
       ],
     };
+
     return [...media, serviceWorker];
   },
   turbopack: {

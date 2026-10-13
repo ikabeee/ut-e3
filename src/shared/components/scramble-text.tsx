@@ -21,26 +21,32 @@ export function ScrambleText({ text, className }: Readonly<ScrambleTextProps>) {
 
   useEffect(() => {
     const host = ref.current?.closest("a, button");
+
     if (!host || prefersReducedMotion) {
       return;
     }
 
     let timer: number | undefined;
+
     const startScramble = () => {
       window.clearInterval(timer);
       let frame = 0;
       timer = window.setInterval(() => {
         frame += 1;
+
         if (frame >= SCRAMBLE_FRAMES) {
           window.clearInterval(timer);
           setScrambled(null);
+
           return;
         }
+
         setScrambled(scrambleFrame(text, frame));
       }, SCRAMBLE_FRAME_MS);
     };
 
     host.addEventListener("mouseenter", startScramble);
+
     return () => {
       host.removeEventListener("mouseenter", startScramble);
       window.clearInterval(timer);

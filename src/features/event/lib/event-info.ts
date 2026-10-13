@@ -28,8 +28,11 @@ export const EVENT_VENUE: EventVenue = {
 // Fecha y horario del evento (hora de Cancún, UTC-5). Es el único lugar donde se escriben: las
 // etiquetas ("27.11.2026", "10:00—20:00") y el enlace de Google Calendar salen de aquí.
 const name = "UTG · Showcase de videojuegos";
+
 const startsAt = "2026-11-27T10:00:00-05:00";
+
 const endsAt = "2026-11-27T20:00:00-05:00";
+
 const admission = "Entrada libre";
 
 /** Datos del evento (fecha, horario y enlaces). */

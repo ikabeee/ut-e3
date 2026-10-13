@@ -26,24 +26,31 @@ export async function runServerAction<T>(
 ): Promise<ActionResult<T>> {
   try {
     const data = await operation();
+
     for (const tag of invalidateTags) {
       updateTag(tag);
     }
+
     if (refreshPage) {
       refresh();
     }
+
     return actionOk(data);
   } catch (error) {
     if (error instanceof ValidationError) {
       return actionError(error.message, error.fieldErrors);
     }
+
     if (error instanceof RecordNotFoundError || error instanceof ActionRuleError) {
       return actionError(error.message);
     }
+
     const violation = getConstraintViolation(error);
+
     if (violation) {
       return actionError(describeConstraintViolation(violation, constraintMessages));
     }
+
     throw error;
   }
 }

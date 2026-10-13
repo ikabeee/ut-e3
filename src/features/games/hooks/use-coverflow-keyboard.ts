@@ -30,6 +30,7 @@ export function useCoverflowKeyboard({ current, goNext, goPrevious, onOpenCurren
       onOpenCurrent();
     } else if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
       focusCurrentAfterMove.current = true;
+
       if (event.key === "ArrowRight") {
         goNext();
       } else {

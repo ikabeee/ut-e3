@@ -33,8 +33,10 @@ export function AdminActionForm<T>({
 }: Readonly<AdminActionFormProps<T>>) {
   const formRef = useRef<HTMLFormElement | null>(null);
   const [succeeded, setSucceeded] = useState(false);
+
   const form = useServerActionForm(action, () => {
     setSucceeded(true);
+
     if (resetOnSuccess) formRef.current?.reset();
   });
 

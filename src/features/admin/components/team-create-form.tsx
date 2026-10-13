@@ -15,6 +15,7 @@ export function TeamCreateForm() {
   const createAndKeepKey = async (input: RawInput) => {
     const result = await createTeamAction(input);
     setScannerKey(result.ok ? result.data.scannerKey : null);
+
     return result;
   };
 

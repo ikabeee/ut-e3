@@ -5,6 +5,7 @@ import { getGalleryShots } from "@features/games/lib/game-gallery";
 import { GAME_FIXTURES, makeGameFixture } from "@features/games/__tests__/game-fixtures";
 
 const cover = { src: "/mock/games/ruta-9.jpg", alt: "Portada de Ruta 9", position: null };
+
 const game = makeGameFixture({
   ...GAME_FIXTURES[3],
   image: cover,

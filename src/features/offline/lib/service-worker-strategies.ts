@@ -20,21 +20,30 @@ export function getRequestStrategy(request: StrategyRequest, origin: string): Re
   const url = new URL(request.url);
 
   if (request.method !== "GET" || url.origin !== origin) return "bypass";
+
   // El video del reel nunca se guarda: pesa mucho y sin conexión basta el póster.
   if (request.destination === "video" || request.headers.has("range")) return "bypass";
+
   if (url.pathname.startsWith("/media/") && /\.(webm|mp4)$/.test(url.pathname)) return "bypass";
+
   if (url.pathname === "/sw.js") return "bypass";
+
   // El panel de administración (`ADMIN_PATH`) es privado: nunca se guarda en la caché del navegador.
   if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) return "bypass";
 
   // Peticiones RSC: navegación interna y prefetch del router de Next.
   if (request.headers.get("RSC") === "1" || url.searchParams.has("_rsc")) return "rsc";
+
   if (request.mode === "navigate") return "page";
+
   if (url.pathname.startsWith("/_next/static/")) return "static";
+
   if (url.pathname.startsWith("/_next/image") || url.pathname.startsWith("/mock/") || request.destination === "image") {
     return "image";
   }
+
   if (url.pathname.startsWith("/api/")) return "api";
+
   return "network";
 }
 
@@ -54,6 +63,7 @@ export function extractStaticAssetUrls(text: string, baseUrl: string, origin: st
   for (const [, raw] of [...paths, ...cssUrls]) {
     if (raw.startsWith("data:")) continue;
     const url = new URL(raw.replaceAll("&amp;", "&"), baseUrl);
+
     if (url.origin === origin && url.pathname.startsWith("/_next/static/")) {
       found.add(url.href);
     }

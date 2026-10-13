@@ -46,12 +46,14 @@ export function runServiceWorker(
   helpers: ServiceWorkerHelpers,
 ) {
   const origin = scope.location.origin;
+
   const cacheNames = {
     static: `${config.cachePrefix}-static-${config.version}`,
     pages: `${config.cachePrefix}-pages-${config.version}`,
     images: `${config.cachePrefix}-images-${config.version}`,
     api: `${config.cachePrefix}-api-${config.version}`,
   };
+
   const currentCaches = new Set(Object.values(cacheNames));
   const offlineUrl = new URL(config.offlineUrl, origin).href;
 
@@ -64,6 +66,7 @@ export function runServiceWorker(
   /** Clave de una página en caché: sin `?query` (`/games?genre=Puzle` usa el HTML de `/games`). */
   function pageKey(requestUrl: string) {
     const url = new URL(requestUrl);
+
     return `${url.origin}${url.pathname}`;
   }
 
@@ -88,9 +91,12 @@ export function runServiceWorker(
       await Promise.allSettled(
         batch.map(async (assetUrl) => {
           const response = await scope.fetch(assetUrl);
+
           if (!isCacheable(response)) return;
+
           if (new URL(assetUrl).pathname.endsWith(".css")) {
             const css = await response.clone().text();
+
             for (const nested of helpers.extractStaticAssetUrls(css, assetUrl, origin)) {
               if (!seen.has(nested)) {
                 seen.add(nested);
@@ -98,6 +104,7 @@ export function runServiceWorker(
               }
             }
           }
+
           await cache.put(assetUrl, response);
         }),
       );
@@ -114,8 +121,10 @@ export function runServiceWorker(
         const url = new URL(path, origin).href;
         // `no-cache`: revalida con el servidor en lugar de usar la caché HTTP del navegador.
         const response = await scope.fetch(url, { cache: "no-cache" });
+
         if (!isCacheable(response)) throw new Error(`No se pudo precargar ${path}: ${response.status}`);
         const html = await response.clone().text();
+
         for (const assetUrl of helpers.extractStaticAssetUrls(html, url, origin)) assetUrls.add(assetUrl);
         await pages.put(url, response);
       }),
@@ -125,6 +134,7 @@ export function runServiceWorker(
     if (!(await pages.match(offlineUrl))) {
       throw new Error("No se pudo precargar la página sin conexión");
     }
+
     await precacheStaticAssets(assetUrls);
     await precacheAppAssets();
   }
@@ -136,6 +146,7 @@ export function runServiceWorker(
       config.precacheAssetUrls.map(async (path) => {
         const url = new URL(path, origin).href;
         const response = await scope.fetch(url, { cache: "no-cache" });
+
         if (isCacheable(response)) await cache.put(url, response);
       }),
     );
@@ -153,10 +164,13 @@ export function runServiceWorker(
   async function cacheFirst(request: Request) {
     const cache = await scope.caches.open(cacheNames.static);
     const cached = await cache.match(request);
+
     if (cached) return cached;
 
     const response = await scope.fetch(request);
+
     if (isCacheable(response)) void cache.put(request, response.clone()).catch(() => undefined);
+
     return response;
   }
 
@@ -166,16 +180,20 @@ export function runServiceWorker(
    */
   async function networkFirst(request: Request, cacheName: string, key: string, fallback: () => Promise<Response>) {
     const cache = await scope.caches.open(cacheName);
+
     const network = scope.fetch(request).then((response) => {
       if (isCacheable(response)) void cache.put(key, response.clone()).catch(() => undefined);
+
       return response;
     });
+
     network.catch(() => undefined);
 
     try {
       return await Promise.race([network, timeout(config.networkTimeoutMs)]);
     } catch {
       const cached = await cache.match(key);
+
       if (cached) return cached;
     }
 
@@ -188,6 +206,7 @@ export function runServiceWorker(
 
   async function offlinePage() {
     const cached = await scope.caches.match(offlineUrl);
+
     return cached ?? Response.error();
   }
 
@@ -207,18 +226,22 @@ export function runServiceWorker(
     const cache = await scope.caches.open(cacheNames.images);
     // También busca en las demás cachés: los íconos de la app se precargan en la de estáticos.
     const cached = (await cache.match(request)) ?? (await scope.caches.match(request));
+
     const network = scope.fetch(request).then(async (response) => {
       if (isCacheable(response)) {
         await cache.put(request, response.clone());
         await trimCache(cacheNames.images, config.maxImageEntries);
       }
+
       return response;
     });
 
     if (cached) {
       network.catch(() => undefined);
+
       return cached;
     }
+
     return network;
   }
 
@@ -259,11 +282,13 @@ export function runServiceWorker(
 
   scope.addEventListener("message", (event) => {
     const data = event.data as { type?: unknown } | null;
+
     if (data?.type === config.skipWaitingMessage) void scope.skipWaiting();
   });
 
   scope.addEventListener("fetch", (event) => {
     const strategy = helpers.getRequestStrategy(event.request, origin);
+
     if (strategy === "bypass") return;
     event.respondWith(respond(event.request, strategy));
   });

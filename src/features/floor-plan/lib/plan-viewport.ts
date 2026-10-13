@@ -2,6 +2,7 @@ import type { PlanRect, ViewBox } from "@features/floor-plan/lib/types";
 
 /** Acercamiento máximo: la vista puede ser hasta 6 veces más chica que el croquis. */
 const MAX_ZOOM = 6;
+
 /** Fracción de la vista que puede salir del croquis al arrastrar. */
 const OVERSCROLL = 0.25;
 
@@ -18,6 +19,7 @@ export function clampViewBox(view: ViewBox, base: ViewBox): ViewBox {
   const minWidth = base.width / MAX_ZOOM;
   const width = Math.min(base.width, Math.max(minWidth, view.width));
   const height = (width * base.height) / base.width;
+
   if (width >= base.width) {
     return { ...base };
   }
@@ -27,6 +29,7 @@ export function clampViewBox(view: ViewBox, base: ViewBox): ViewBox {
   let y = resized ? view.y + (view.height - height) / 2 : view.y;
   x = Math.min(Math.max(x, base.x - width * OVERSCROLL), base.x + base.width - width * (1 - OVERSCROLL));
   y = Math.min(Math.max(y, base.y - height * OVERSCROLL), base.y + base.height - height * (1 - OVERSCROLL));
+
   return { x, y, width, height };
 }
 
@@ -57,6 +60,7 @@ export function focusViewBox([x, y, width, height]: PlanRect, base: ViewBox): Vi
   const candidateWidth = Math.max(width * 4.5, base.width / 2);
   const viewHeight = Math.max(candidateWidth * aspect, height * 2.4);
   const viewWidth = viewHeight / aspect;
+
   return clampViewBox(
     { x: x + width / 2 - viewWidth / 2, y: y + height / 2 - viewHeight / 2, width: viewWidth, height: viewHeight },
     base,
@@ -70,6 +74,7 @@ export function getZoomPercent(view: ViewBox, base: ViewBox) {
 
 export function interpolateViewBox(from: ViewBox, to: ViewBox, progress: number): ViewBox {
   const mix = (a: number, b: number) => a + (b - a) * progress;
+
   return {
     x: mix(from.x, to.x),
     y: mix(from.y, to.y),

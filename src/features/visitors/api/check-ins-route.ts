@@ -28,7 +28,9 @@ function describeGame(game: ScannerGame) {
 /** `GET /api/check-ins`: el escáner comprueba su llave y a qué juego registra los escaneos. */
 export async function GET(request: Request) {
   const game = await authenticateScanner(request);
+
   if (!game) return errorResponse(401, UNAUTHORIZED);
+
   return Response.json({ game: describeGame(game) }, { headers: NO_STORE });
 }
 
@@ -38,9 +40,11 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   const game = await authenticateScanner(request);
+
   if (!game) return errorResponse(401, UNAUTHORIZED);
 
   let body: unknown;
+
   try {
     body = await request.json();
   } catch {
@@ -49,6 +53,7 @@ export async function POST(request: Request) {
 
   try {
     const results = await recordCheckIns(game.gameId, parseCheckInBatch(body));
+
     return Response.json({ game: describeGame(game), results }, { headers: NO_STORE });
   } catch (error) {
     if (error instanceof ValidationError) return errorResponse(400, error.message, error.fieldErrors);

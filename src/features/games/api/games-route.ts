@@ -13,5 +13,6 @@ import { listGames } from "@features/games/lib/server/games-queries";
  */
 export async function GET() {
   const games = await listGames();
+
   return Response.json(games.map(toGameDto));
 }

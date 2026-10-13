@@ -19,18 +19,23 @@ export function buildQrCode(text: string): QrCodeShape {
 
   const size = qr.getModuleCount();
   const segments: string[] = [];
+
   for (let row = 0; row < size; row += 1) {
     let col = 0;
+
     while (col < size) {
       if (!qr.isDark(row, col)) {
         col += 1;
         continue;
       }
+
       const start = col;
+
       while (col < size && qr.isDark(row, col)) col += 1;
       const length = col - start;
       segments.push(`M${start} ${row}h${length}v1h-${length}z`);
     }
   }
+
   return { size, path: segments.join("") };
 }

@@ -10,5 +10,6 @@ import { dehydrateForPrerender } from "@shared/lib/server/dehydrate-for-prerende
  */
 export async function getGamesHydrationState() {
   const games = await listGames();
+
   return dehydrateForPrerender([{ queryKey: gamesQueryKeys.list(), data: games }], [GAMES_CACHE_TAG]);
 }

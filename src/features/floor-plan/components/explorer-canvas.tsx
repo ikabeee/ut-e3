@@ -36,6 +36,7 @@ export function ExplorerCanvas({
 
   const handlePointerMove = (event: PointerEvent<SVGSVGElement>) => {
     const isPressed = handlers.onPointerMove(event);
+
     if (isPressed) {
       onPointerLeave();
     } else {
