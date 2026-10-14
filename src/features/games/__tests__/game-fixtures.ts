@@ -21,8 +21,7 @@ export function makeGameFixture(game: GameFixtureInput): Game {
 
 /**
  * Juegos de prueba de `games` y de las features que los muestran. Son independientes de los datos
- * del sitio (`lib/mock/` hoy, la base de datos después): agregar o cambiar un juego del catálogo no
- * rompe las pruebas, y borrar el mock no las deja sin datos.
+ * del sitio: agregar o cambiar un juego del catálogo en la base de datos no rompe las pruebas.
  *
  * Cubren los casos que prueban: géneros con uno y dos juegos, juegos con encuadre propio, con varias
  * plataformas y con capturas, y textos con acentos para el buscador.
