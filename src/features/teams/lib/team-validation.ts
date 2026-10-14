@@ -8,7 +8,7 @@ import {
   type TeamMemberInput,
   type UpdateGameByLeaderInput,
 } from "@features/teams/lib/types";
-import { validate, type RawInput } from "@shared/lib/validation";
+import { isString, validate, type RawInput } from "@shared/lib/validation";
 
 const EMAIL_PATTERN = /^[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}$/;
 
@@ -52,9 +52,9 @@ export function parseCreateTeamInput(raw: RawInput): CreateTeamInput {
   const leaderGroupName = raw["leaderGroupName"] ?? raw["groupName"];
 
   const hasAnyLeaderField = Boolean(
-    (typeof leaderFullName === "string" && leaderFullName.trim()) ||
-    (typeof leaderEmail === "string" && leaderEmail.trim()) ||
-    (typeof leaderGroupName === "string" && leaderGroupName.trim()),
+    (isString(leaderFullName) && leaderFullName.trim()) ||
+    (isString(leaderEmail) && leaderEmail.trim()) ||
+    (isString(leaderGroupName) && leaderGroupName.trim()),
   );
 
   if (!hasAnyLeaderField) {

@@ -1,5 +1,6 @@
 import {
   parseAddMemberByLeaderInput,
+  parseCreateTeamInput,
   parseCreateTeamLeaderInput,
   parseTeamInput,
   parseTeamMemberInput,
@@ -34,6 +35,52 @@ describe("parseTeamInput", () => {
   });
 });
 
+describe("parseCreateTeamInput", () => {
+  it("accepts a team without leader fields", () => {
+    expect(parseCreateTeamInput({ name: "Equipo Grava", standCode: "A1" })).toEqual({
+      name: "Equipo Grava",
+      standCode: "A1",
+      leader: null,
+    });
+  });
+
+  it("accepts a team with initial leader fields", () => {
+    expect(
+      parseCreateTeamInput({
+        name: "Equipo Grava",
+        standCode: "A1",
+        leaderFullName: "Ana López",
+        leaderEmail: "alopez@ute3.edu.mx",
+        leaderGroupName: "IDYGS102",
+      }),
+    ).toEqual({
+      name: "Equipo Grava",
+      standCode: "A1",
+      leader: {
+        fullName: "Ana López",
+        email: "alopez@ute3.edu.mx",
+        groupName: "IDYGS102",
+      },
+    });
+  });
+
+  it("validates leader fields if any is provided", () => {
+    expect(
+      fieldErrors(() =>
+        parseCreateTeamInput({
+          name: "Equipo Grava",
+          standCode: "A1",
+          leaderFullName: "Ana López",
+          leaderEmail: "invalid-email",
+          leaderGroupName: "IDYGS102",
+        }),
+      ),
+    ).toEqual({
+      email: "Introduce un correo electrónico válido.",
+    });
+  });
+});
+
 describe("parseTeamMemberInput", () => {
   it("accepts a member of one of the groups", () => {
     expect(parseTeamMemberInput({ fullName: "Ana López", groupName: "IDYGS102", isLeader: "true" })).toEqual({
@@ -58,29 +105,25 @@ describe("parseCreateTeamLeaderInput", () => {
         fullName: "Ana López",
         email: "alopez@ute3.edu.mx",
         groupName: "IDYGS102",
-        password: "Password123!",
       }),
     ).toEqual({
       fullName: "Ana López",
       email: "alopez@ute3.edu.mx",
       groupName: "IDYGS102",
-      password: "Password123!",
     });
   });
 
-  it("rejects invalid email or short password", () => {
+  it("rejects invalid email", () => {
     expect(
       fieldErrors(() =>
         parseCreateTeamLeaderInput({
           fullName: "Ana López",
           email: "invalid-email",
           groupName: "IDYGS102",
-          password: "short",
         }),
       ),
     ).toEqual({
       email: "Introduce un correo electrónico válido.",
-      password: "La contraseña debe tener al menos 8 caracteres.",
     });
   });
 });
