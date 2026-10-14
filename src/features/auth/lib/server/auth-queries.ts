@@ -76,7 +76,7 @@ export async function registerTeamWithLeader(input: RegisterTeamInput): Promise<
   const confirmationToken = generateSecret();
   const confirmationTokenHash = hashSecret(confirmationToken);
   const confirmationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-  const passwordHash = hashPassword(input.password);
+  const passwordHash = input.password ? hashPassword(input.password) : "";
   const cleanEmail = input.email.trim().toLowerCase();
 
   const team = await db.orm.public.Team.create({
@@ -100,6 +100,75 @@ export async function registerTeamWithLeader(input: RegisterTeamInput): Promise<
   await sendConfirmationEmail(cleanEmail, input.fullName.trim(), confirmationToken);
 
   return { teamId: team.id, token: confirmationToken };
+}
+
+export interface ConfirmationTokenInfo {
+  valid: boolean;
+  fullName?: string;
+  email?: string;
+}
+
+/**
+ * Valida si el token de confirmación existe, no ha expirado y la cuenta no está confirmada aún.
+ */
+export async function checkConfirmationToken(token: string): Promise<ConfirmationTokenInfo> {
+  await connection();
+
+  if (!token || token.length !== 32) return { valid: false };
+  const tokenHash = hashSecret(token);
+
+  const member = await db.orm.public.TeamMember.select(
+    "id",
+    "email",
+    "fullName",
+    "isConfirmed",
+    "confirmationExpiresAt",
+  )
+    .where({ confirmationTokenHash: tokenHash })
+    .first();
+
+  if (!member || member.isConfirmed) return { valid: false };
+
+  if (member.confirmationExpiresAt && new Date(member.confirmationExpiresAt).getTime() < Date.now()) {
+    return { valid: false };
+  }
+
+  return {
+    valid: true,
+    fullName: member.fullName,
+    email: member.email,
+  };
+}
+
+/**
+ * Establece la contraseña del usuario y activa su cuenta confirmando el registro.
+ */
+export async function confirmEmailAndSetPassword(token: string, password: string): Promise<boolean> {
+  await connection();
+
+  if (!token || token.length !== 32 || password.length < 8) return false;
+  const tokenHash = hashSecret(token);
+
+  const member = await db.orm.public.TeamMember.select("id", "isConfirmed", "confirmationExpiresAt")
+    .where({ confirmationTokenHash: tokenHash })
+    .first();
+
+  if (!member || member.isConfirmed) return false;
+
+  if (member.confirmationExpiresAt && new Date(member.confirmationExpiresAt).getTime() < Date.now()) {
+    return false;
+  }
+
+  const passwordHash = hashPassword(password);
+
+  await db.orm.public.TeamMember.where({ id: member.id }).update({
+    passwordHash,
+    isConfirmed: true,
+    confirmationTokenHash: null,
+    confirmationExpiresAt: null,
+  });
+
+  return true;
 }
 
 /**
