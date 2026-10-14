@@ -1,11 +1,6 @@
 "use server";
 
-import { GAMES_CACHE_TAG } from "@features/games/lib/server/games-queries";
-import {
-  addMemberByLeader,
-  deleteMemberByLeader,
-  updateGameByLeader,
-} from "@features/teams/lib/server/team-portal-queries";
+import { GAMES_CACHE_TAG } from "@features/games/lib/games-cache";
 import { parseAddMemberByLeaderInput, parseUpdateGameByLeaderInput } from "@features/teams/lib/team-validation";
 import { ActionRuleError } from "@shared/lib/action-rule-error";
 import { actionError, type ActionResult } from "@shared/lib/action-result";
@@ -25,11 +20,14 @@ async function getAuthenticatedTeamId(): Promise<string> {
 
 const portalOptions = { invalidateTags: [GAMES_CACHE_TAG], refreshPage: true };
 
+const getPortalQueries = async () => import("@features/teams/lib/server/team-portal-queries");
+
 /** Acción para que el líder agregue un integrante a su equipo. */
 export async function addMemberByLeaderAction(input: RawInput): Promise<ActionResult<void>> {
   try {
     const teamId = await getAuthenticatedTeamId();
     const parsed = parseAddMemberByLeaderInput(input);
+    const { addMemberByLeader } = await getPortalQueries();
 
     return runServerAction(() => addMemberByLeader(teamId, parsed), portalOptions);
   } catch (error) {
@@ -41,6 +39,7 @@ export async function addMemberByLeaderAction(input: RawInput): Promise<ActionRe
 export async function deleteMemberByLeaderAction(memberId: string): Promise<ActionResult<void>> {
   try {
     const teamId = await getAuthenticatedTeamId();
+    const { deleteMemberByLeader } = await getPortalQueries();
 
     return runServerAction(() => deleteMemberByLeader(teamId, memberId), portalOptions);
   } catch (error) {
@@ -53,6 +52,7 @@ export async function updateGameByLeaderAction(input: RawInput): Promise<ActionR
   try {
     const teamId = await getAuthenticatedTeamId();
     const parsed = parseUpdateGameByLeaderInput(input);
+    const { updateGameByLeader } = await getPortalQueries();
 
     return runServerAction(() => updateGameByLeader(teamId, parsed), portalOptions);
   } catch (error) {
