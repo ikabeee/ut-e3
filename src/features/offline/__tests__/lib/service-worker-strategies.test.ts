@@ -10,6 +10,7 @@ const ORIGIN = "https://showcase.example";
 function headers(init: Record<string, string> = {}) {
   const values = new Map(Object.entries(init).map(([key, value]) => [key.toLowerCase(), value]));
 
+  // SAFETY: El objeto solo implementa has y get para satisfacer el uso de Headers en las pruebas.
   return {
     has: (name: string) => values.has(name.toLowerCase()),
     get: (name: string) => values.get(name.toLowerCase()) ?? null,

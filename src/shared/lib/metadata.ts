@@ -8,6 +8,7 @@ type OpenGraph = NonNullable<Metadata["openGraph"]>;
  * `openGraph` del layout cuando una página define el suyo, así que se completan aquí.
  */
 export function buildOpenGraph(overrides: Partial<OpenGraph> = {}): OpenGraph {
+  // SAFETY: los valores base satisfacen la variante website de OpenGraph y se combinan con las sobreescrituras.
   return {
     type: "website",
     locale: siteConfig.locale,

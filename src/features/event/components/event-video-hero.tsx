@@ -16,7 +16,7 @@ interface EventVideoHeroProps {
 /** Portada: fecha, logo, título, descripción y llamado a participar sobre el reel. */
 export function EventVideoHero({ hero, info, venueShortName, description, reel }: Readonly<EventVideoHeroProps>) {
   return (
-    <EventReel reel={reel} reelLabel={hero.reelLabel}>
+    <EventReel reel={reel}>
       <div className="page-wrap flex w-full flex-col items-start gap-[clamp(14px,1.8vw,22px)] pb-[clamp(72px,9vw,120px)]">
         <p className="m-0 font-mono text-xs font-medium tracking-[.08em] text-copy-strong uppercase">
           {info.dateLabel} · {venueShortName} · {info.admission}

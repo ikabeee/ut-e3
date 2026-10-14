@@ -1,6 +1,6 @@
 "use client";
 
-import { PlanItemShape } from "@features/floor-plan/components/plan-item-shape";
+import { PlanItemGraphic } from "@features/floor-plan/components/plan-item-shape";
 import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
 import { getItemInteraction, type PlanSelection } from "@features/floor-plan/lib/plan-interaction";
 import type { FloorPlanVariant, PlanLayout, PlanRect } from "@features/floor-plan/lib/types";
@@ -24,7 +24,7 @@ export function PlanEntry({ layout, variant, selection, touchRect }: Readonly<Pl
 
   return (
     <>
-      <PlanItemShape
+      <PlanItemGraphic
         id="entry"
         label={selection.itemsById.get("entry")?.title ?? FLOOR_PLAN_COPY.drawing.entry}
         rect={layout.entry}
@@ -36,7 +36,7 @@ export function PlanEntry({ layout, variant, selection, touchRect }: Readonly<Pl
         {...getItemInteraction("entry", selection)}
       >
         <path d={arrowPath} stroke="var(--accent)" strokeWidth={3} fill="none" />
-      </PlanItemShape>
+      </PlanItemGraphic>
       {variant === "overview" ? (
         <text
           x={layout.entryLabelAt?.[0] ?? center}

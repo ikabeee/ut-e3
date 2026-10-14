@@ -50,8 +50,7 @@ export function getRelatedGames(games: readonly Game[], current: Game, limit = 5
   const distance = (index: number) => (index - currentIndex + games.length) % games.length;
 
   return games
-    .map((game, index) => ({ game, index }))
-    .filter(({ game }) => game.slug !== current.slug)
+    .flatMap((game, index) => (game.slug === current.slug ? [] : [{ game, index }]))
     .sort(
       (a, b) =>
         Number(b.game.genre === current.genre) - Number(a.game.genre === current.genre) ||

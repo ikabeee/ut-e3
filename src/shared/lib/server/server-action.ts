@@ -15,6 +15,11 @@ export interface ServerActionOptions {
   refreshPage?: boolean;
 }
 
+export interface ServerActionDependencies {
+  updateTag?: (tag: string) => void;
+  refresh?: () => void;
+}
+
 /**
  * Ejecuta el trabajo de una Server Action y convierte los errores esperados (validación,
  * registro no encontrado, regla de negocio, restricción de la base) en un `ActionResult`
@@ -23,16 +28,20 @@ export interface ServerActionOptions {
 export async function runServerAction<T>(
   operation: () => Promise<T>,
   { invalidateTags = [], constraintMessages = {}, refreshPage = false }: ServerActionOptions = {},
+  deps: ServerActionDependencies = {},
 ): Promise<ActionResult<T>> {
+  const onUpdateTag = deps.updateTag ?? updateTag;
+  const onRefresh = deps.refresh ?? refresh;
+
   try {
     const data = await operation();
 
     for (const tag of invalidateTags) {
-      updateTag(tag);
+      onUpdateTag(tag);
     }
 
     if (refreshPage) {
-      refresh();
+      onRefresh();
     }
 
     return actionOk(data);

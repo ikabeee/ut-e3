@@ -18,7 +18,7 @@ const validGame = {
   platformIds: [PLATFORM_ID],
 };
 
-function fieldErrors(run: () => unknown) {
+function fieldErrors(run: () => void) {
   try {
     run();
   } catch (error) {

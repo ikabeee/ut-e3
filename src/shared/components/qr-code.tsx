@@ -25,8 +25,7 @@ export function QrCode({ value, label, className }: Readonly<QrCodeProps>) {
       viewBox={`${-QUIET_ZONE} ${-QUIET_ZONE} ${side} ${side}`}
       role="img"
       aria-label={label}
-      shapeRendering="crispEdges"
-      className={cn("block h-auto w-full", className)}
+      className={cn("block h-auto w-full [shape-rendering:crispEdges]", className)}
     >
       <rect x={-QUIET_ZONE} y={-QUIET_ZONE} width={side} height={side} fill="#fff" />
       <path d={path} fill="#000" />

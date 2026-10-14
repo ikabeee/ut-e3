@@ -292,6 +292,7 @@ export function runServiceWorker(
   });
 
   scope.addEventListener("message", (event) => {
+    // SAFETY: Se comprueba la estructura del mensaje recibido antes de acceder a su propiedad type.
     const data = event.data as { type?: unknown } | null;
 
     if (data?.type === config.skipWaitingMessage) void scope.skipWaiting();

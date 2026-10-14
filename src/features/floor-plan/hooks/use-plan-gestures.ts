@@ -140,14 +140,14 @@ export function usePlanGestures(svgRef: RefObject<SVGSVGElement | null>, viewpor
   const onKeyDown = (event: KeyboardEvent<SVGSVGElement>) => {
     const step = viewBoxRef.current.width * KEYBOARD_PAN;
 
-    const moves: Record<string, [number, number]> = {
-      ArrowLeft: [-step, 0],
-      ArrowRight: [step, 0],
-      ArrowUp: [0, -step],
-      ArrowDown: [0, step],
-    };
+    const moves = new Map<string, [number, number]>([
+      ["ArrowLeft", [-step, 0]],
+      ["ArrowRight", [step, 0]],
+      ["ArrowUp", [0, -step]],
+      ["ArrowDown", [0, step]],
+    ]);
 
-    const move = moves[event.key];
+    const move = moves.get(event.key);
 
     if (move && event.target === event.currentTarget) {
       event.preventDefault();

@@ -45,7 +45,7 @@ export const PLAN_ZONES: Record<ZoneId, PlanZone> = {
 };
 
 /** Stands informativos (pasillo central). Los stands de equipo salen del juego asignado. */
-export const INFO_STANDS: Record<string, InfoStand> = {
+export const INFO_STANDS = {
   C1: {
     title: "Ingeniería y Tecnologías",
     description: `Stand de la ${division}. Conoce las carreras y los proyectos de la división.`,
@@ -59,7 +59,7 @@ export const INFO_STANDS: Record<string, InfoStand> = {
     title: "Patrocinadores",
     description: "Stand de las marcas que apoyan el evento y los premios de los sorteos.",
   },
-};
+} satisfies Record<string, InfoStand>;
 
 /** Orden de las categorías en filtros, leyenda y directorio. */
 export const PLAN_CATEGORIES: readonly PlanCategory[] = ["team", "info", "act", "srv"];

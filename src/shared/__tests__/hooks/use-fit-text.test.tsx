@@ -42,8 +42,14 @@ describe("useFitText", () => {
 
   it("shrinks the title when its widest word does not fit", () => {
     jest.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(100);
-    jest.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({ width: 200 } as DOMRect);
-    jest.spyOn(window, "getComputedStyle").mockReturnValue({ fontSize: "40px" } as CSSStyleDeclaration);
+
+    // SAFETY: la prueba simula el ancho de la caja delimitadora en jsdom.
+    const rect = { width: 200 } as DOMRect;
+    jest.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue(rect);
+
+    // SAFETY: la prueba solo lee fontSize del objeto de estilos computados en jsdom.
+    const style = { fontSize: "40px" } as CSSStyleDeclaration;
+    jest.spyOn(window, "getComputedStyle").mockReturnValue(style);
 
     const { getByRole } = render(<FitTitle text="Ceniza Protocol" />);
 

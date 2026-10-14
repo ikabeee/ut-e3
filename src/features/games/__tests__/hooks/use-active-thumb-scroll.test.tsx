@@ -39,6 +39,7 @@ describe("useActiveThumbScroll", () => {
   });
 
   it("jumps without animation when the person prefers reduced motion", () => {
+    // SAFETY: The stub delegates to the existing MediaQueryList and only changes its preference flag.
     window.matchMedia = ((query: string) => ({ ...matchMedia(query), matches: true })) as typeof window.matchMedia;
 
     render(<TestThumbs activeIndex={1} />);

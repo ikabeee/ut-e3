@@ -8,7 +8,7 @@ import type { ReissuedVisitorQr } from "@features/visitors/lib/types";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 import { reissueVisitorQrAction } from "@features/visitors/lib/visitors-actions";
 import { QrCode } from "@shared/components/qr-code";
-import type { RawInput } from "@shared/lib/validation";
+import { isString, type RawInput } from "@shared/lib/validation";
 
 /** QR nuevo para un visitante que perdió el suyo: lo muestra para escanearlo en el momento. */
 export function ReissueQrForm() {
@@ -16,7 +16,7 @@ export function ReissueQrForm() {
   const [reissued, setReissued] = useState<ReissuedVisitorQr | null>(null);
 
   const reissue = async (input: RawInput) => {
-    const gamertag = typeof input.gamertag === "string" ? input.gamertag : "";
+    const gamertag = isString(input.gamertag) ? input.gamertag : "";
     const result = await reissueVisitorQrAction(gamertag);
     setReissued(result.ok ? result.data : null);
 

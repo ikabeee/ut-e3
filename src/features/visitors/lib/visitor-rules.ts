@@ -120,17 +120,41 @@ export function clampScannedAt(deviceTime: string, eventStart: string, now: Date
   return new Date(notAfterReceived).toISOString();
 }
 
+export interface RawCheckInItem {
+  readonly id?: unknown;
+  readonly token?: unknown;
+  readonly scannedAt?: unknown;
+}
+
+export interface CheckInBatchPayload {
+  readonly checkIns?: readonly unknown[] | null;
+}
+
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+function isRawCheckInItem(value: unknown): value is RawCheckInItem {
+  return typeof value === "object" && value !== null;
+}
+
 function isCheckInItem(value: unknown): value is CheckInItem {
-  if (typeof value !== "object" || value === null) return false;
-  const { id, token, scannedAt } = value as Record<string, unknown>;
+  if (!isRawCheckInItem(value)) return false;
+
+  const { id, token, scannedAt } = value;
 
   return (
+    isString(id) &&
     isUuid(id) &&
-    typeof token === "string" &&
+    isString(token) &&
     token.length <= 512 &&
-    typeof scannedAt === "string" &&
+    isString(scannedAt) &&
     !Number.isNaN(Date.parse(scannedAt))
   );
+}
+
+function isCheckInBatchPayload(value: CheckInBatchPayload | null | undefined): value is CheckInBatchPayload {
+  return typeof value === "object" && value !== null;
 }
 
 /**
@@ -138,23 +162,32 @@ function isCheckInItem(value: unknown): value is CheckInItem {
  * leído no invalida el lote (se responde como `unknown`), pero un id o una fecha inválidos sí,
  * porque los genera el propio escáner.
  */
-export function parseCheckInBatch(body: unknown): CheckInItem[] {
-  const checkIns =
-    typeof body === "object" && body !== null ? (body as Record<string, unknown>)["checkIns"] : undefined;
+export function parseCheckInBatch(body: CheckInBatchPayload | null | undefined): CheckInItem[] {
+  const checkIns = isCheckInBatchPayload(body) ? body.checkIns : undefined;
 
   if (!Array.isArray(checkIns) || checkIns.length === 0 || checkIns.length > CHECK_IN_BATCH_LIMIT) {
     throw new ValidationError({ checkIns: `Envía de 1 a ${CHECK_IN_BATCH_LIMIT} escaneos en "checkIns".` });
   }
 
-  const invalidIndex = checkIns.findIndex((item) => !isCheckInItem(item));
+  const validated: CheckInItem[] = [];
 
-  if (invalidIndex !== -1) {
-    throw new ValidationError({
-      [`checkIns.${invalidIndex}`]: "Cada escaneo necesita un id (UUID), el token del QR y scannedAt (ISO 8601).",
+  for (let index = 0; index < checkIns.length; index += 1) {
+    const item = checkIns[index];
+
+    if (!isCheckInItem(item)) {
+      throw new ValidationError({
+        [`checkIns.${index}`]: "Cada escaneo necesita un id (UUID), el token del QR y scannedAt (ISO 8601).",
+      });
+    }
+
+    validated.push({
+      id: item.id.toLowerCase(),
+      token: item.token,
+      scannedAt: item.scannedAt,
     });
   }
 
-  return (checkIns as CheckInItem[]).map(({ id, token, scannedAt }) => ({ id: id.toLowerCase(), token, scannedAt }));
+  return validated;
 }
 
 /**

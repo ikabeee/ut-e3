@@ -23,8 +23,8 @@ const getServerSnapshot = () => false;
  * - `navigator.onLine`: cubre la página que ya abrió sin conexión desde el service worker, donde
  *   todavía no ha fallado ninguna petición del router y no llega el evento `offline`.
  */
-export function useIsOffline() {
-  const isNextOffline = useOffline();
+export function useIsOffline(getNextOffline = useOffline) {
+  const isNextOffline = getNextOffline();
   const isBrowserOffline = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   return isNextOffline || isBrowserOffline;

@@ -4,6 +4,7 @@ import { cn } from "@heroui/react";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import { ADMIN_SECTION_PATHS, type AdminSection } from "@features/admin/lib/admin-links";
 
+// SAFETY: Las llaves de ADMIN_SECTION_PATHS son exactamente las secciones de AdminSection.
 const SECTIONS = Object.keys(ADMIN_SECTION_PATHS) as AdminSection[];
 
 interface AdminShellProps {

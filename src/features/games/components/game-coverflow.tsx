@@ -27,19 +27,29 @@ const RACK_VARIABLES = [
  * no haya juegos publicados (base de datos recién creada) no se muestra.
  */
 export function GameCoverflow() {
+  const router = useRouter();
+
+  return <GameCoverflowContent navigate={(path) => router.push(path)} />;
+}
+
+interface GameCoverflowContentProps {
+  navigate(path: string): void;
+}
+
+export function GameCoverflowContent({ navigate }: Readonly<GameCoverflowContentProps>) {
   const games = useGames();
 
   if (games.length === 0) return null;
 
-  return <CoverflowRack games={games} />;
+  return <CoverflowRack games={games} navigate={navigate} />;
 }
 
 interface CoverflowRackProps {
   games: readonly Game[];
+  navigate(path: string): void;
 }
 
-function CoverflowRack({ games }: Readonly<CoverflowRackProps>) {
-  const router = useRouter();
+function CoverflowRack({ games, navigate }: Readonly<CoverflowRackProps>) {
   const coverflow = useCoverflow(games.length);
   const currentGame = games[coverflow.current];
 
@@ -47,7 +57,7 @@ function CoverflowRack({ games }: Readonly<CoverflowRackProps>) {
     current: coverflow.current,
     goNext: coverflow.goNext,
     goPrevious: coverflow.goPrevious,
-    onOpenCurrent: () => router.push(getGamePath(currentGame.slug)),
+    onOpenCurrent: () => navigate(getGamePath(currentGame.slug)),
   });
 
   const handleCaseClick = (event: MouseEvent<HTMLAnchorElement>, index: number) => {

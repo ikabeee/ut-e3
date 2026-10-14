@@ -36,14 +36,14 @@ export function usePlanFlash(containerRef: RefObject<HTMLElement | null>) {
 
       const container = containerRef.current;
       // Los ids son códigos de stand ("A1") o de zona ("stage"): no requieren escaparse.
-      const shapes = container?.querySelectorAll<SVGRectElement>(`[data-plan-item="${id}"] [data-plan-fill]`);
+      const fillElements = container?.querySelectorAll<SVGRectElement>(`[data-plan-item="${id}"] [data-plan-fill]`);
 
-      if (!container || !shapes?.length || typeof shapes[0].animate !== "function") {
+      if (!container || !fillElements?.length || !fillElements[0].animate) {
         return;
       }
 
       const keyframes = getFlashKeyframes(container);
-      shapes.forEach((shape) => shape.animate(keyframes, FLASH_TIMING));
+      fillElements.forEach((element) => element.animate(keyframes, FLASH_TIMING));
     },
     [containerRef, prefersReducedMotion],
   );

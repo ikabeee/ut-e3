@@ -1,6 +1,14 @@
+type JsonLdPrimitive = string | number | boolean | null;
+
+export type JsonLdValue = JsonLdPrimitive | readonly JsonLdValue[] | { readonly [key: string]: JsonLdValue };
+
+export type JsonLdRecord = {
+  readonly [key: string]: JsonLdValue;
+};
+
 interface JsonLdProps {
   /** Objeto de schema.org (por ejemplo `{ "@context": "https://schema.org", "@type": "Event" }`). */
-  data: Record<string, unknown>;
+  data: JsonLdRecord;
 }
 
 /**

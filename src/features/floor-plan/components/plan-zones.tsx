@@ -2,9 +2,9 @@
 
 import { cn } from "@heroui/react";
 import { FitSvgText } from "@features/floor-plan/components/fit-svg-text";
-import { PlanItemShape } from "@features/floor-plan/components/plan-item-shape";
+import { PlanItemGraphic } from "@features/floor-plan/components/plan-item-shape";
 import { getItemInteraction, type PlanSelection } from "@features/floor-plan/lib/plan-interaction";
-import type { FloorPlanVariant, PlanLayout, PlanRect, ZoneId, ZoneShape } from "@features/floor-plan/lib/types";
+import type { FloorPlanVariant, PlanLayout, PlanRect } from "@features/floor-plan/lib/types";
 
 interface PlanZonesProps {
   zones: PlanLayout["zones"];
@@ -22,7 +22,9 @@ const DEFAULT_ZONE_FONT_SIZE = 18;
  * gris. Una zona sin datos en `itemsById` no se pinta.
  */
 export function PlanZones({ zones, variant, selection, touchRects }: Readonly<PlanZonesProps>) {
-  return (Object.entries(zones) as [Exclude<ZoneId, "entry">, ZoneShape][]).map(([id, zone]) => {
+  return Object.entries(zones).map(([id, zone]) => {
+    if (!zone) return null;
+
     const item = selection.itemsById.get(id);
 
     if (!item) {
@@ -35,7 +37,7 @@ export function PlanZones({ zones, variant, selection, touchRects }: Readonly<Pl
     const fontSize = zone.fontSize ?? DEFAULT_ZONE_FONT_SIZE;
 
     return (
-      <PlanItemShape
+      <PlanItemGraphic
         key={id}
         id={id}
         label={item.title}
@@ -61,7 +63,7 @@ export function PlanZones({ zones, variant, selection, touchRects }: Readonly<Pl
         >
           {zone.label}
         </FitSvgText>
-      </PlanItemShape>
+      </PlanItemGraphic>
     );
   });
 }

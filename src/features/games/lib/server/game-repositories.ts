@@ -1,5 +1,5 @@
 import "server-only";
-import type { GameRepository } from "@features/games/lib/game-repository";
+import { selectGameRepository, type GameRepository } from "@features/games/lib/game-repository";
 import { mockGameRepository } from "@features/games/lib/mock/mock-game-repository";
 import { prismaGameRepository } from "@features/games/lib/server/prisma-game-repository";
 import { env, type DataSource } from "@shared/lib/env";
@@ -19,13 +19,5 @@ const GAME_REPOSITORIES: Partial<Record<DataSource, GameRepository>> = {
  * detiene en lugar de publicar un sitio sin juegos.
  */
 export function getGameRepository(dataSource: DataSource = env.dataSource): GameRepository {
-  const repository = GAME_REPOSITORIES[dataSource];
-
-  if (!repository) {
-    throw new Error(
-      `DATA_SOURCE="${dataSource}" todavía no tiene repositorio de juegos. Créalo en lib/server/ y regístralo en game-repositories.ts (ver docs/data-sources.md).`,
-    );
-  }
-
-  return repository;
+  return selectGameRepository(dataSource, GAME_REPOSITORIES);
 }

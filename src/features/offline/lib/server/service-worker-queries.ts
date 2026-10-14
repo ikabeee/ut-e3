@@ -1,7 +1,7 @@
 import "server-only";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { listGames } from "@features/games/lib/server/games-queries";
+import type { listGames } from "@features/games/lib/server/games-queries";
 import { buildPrecacheRoutes, PRECACHE_ASSET_URLS } from "@features/offline/lib/precache-routes";
 import {
   CACHE_PREFIX,
@@ -11,6 +11,9 @@ import {
   SKIP_WAITING_MESSAGE,
 } from "@features/offline/lib/service-worker-config";
 import { buildServiceWorkerScript } from "@features/offline/lib/service-worker-script";
+
+const defaultListGames: typeof listGames = async () =>
+  (await import("@features/games/lib/server/games-queries")).listGames();
 
 /**
  * Versión del sitio: el id de cada `next build` (`.next/BUILD_ID`, que Next escribe antes de
@@ -28,8 +31,8 @@ function getServiceWorkerVersion() {
 }
 
 /** Código de `/sw.js`. Los juegos salen de la caché de Next, así que la ruta se prerenderiza. */
-export async function getServiceWorkerScript() {
-  const games = await listGames();
+export async function getServiceWorkerScript(fetchGames = defaultListGames) {
+  const games = await fetchGames();
 
   return buildServiceWorkerScript({
     version: getServiceWorkerVersion(),

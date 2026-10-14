@@ -56,6 +56,7 @@ describe("ScrambleText", () => {
         <ScrambleText text="Copiar dirección" />
       </button>,
     );
+
     const button = screen.getByRole("button");
 
     fireEvent.mouseEnter(button);

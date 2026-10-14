@@ -1,8 +1,5 @@
 import { act, render, screen } from "@testing-library/react";
-import { useOffline } from "next/offline";
 import { OfflineBanner } from "@features/offline/components/offline-banner";
-
-jest.mock("next/offline", () => ({ useOffline: jest.fn(() => false) }));
 
 const MESSAGE = "Sin conexión. Lo que ya visitaste sigue disponible.";
 
@@ -12,25 +9,23 @@ function setBrowserOnline(isOnline: boolean) {
 
 afterEach(() => {
   setBrowserOnline(true);
-  jest.mocked(useOffline).mockReturnValue(false);
 });
 
 describe("OfflineBanner", () => {
   it("keeps an empty status region while online", () => {
-    render(<OfflineBanner />);
+    render(<OfflineBanner getNextOffline={() => false} />);
 
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 
   it("shows the notice when Next detects failed requests", () => {
-    jest.mocked(useOffline).mockReturnValue(true);
-    render(<OfflineBanner />);
+    render(<OfflineBanner getNextOffline={() => true} />);
 
     expect(screen.getByRole("status")).toHaveTextContent(MESSAGE);
   });
 
   it("shows the notice when the browser goes offline and hides it when it comes back", () => {
-    render(<OfflineBanner />);
+    render(<OfflineBanner getNextOffline={() => false} />);
 
     act(() => {
       setBrowserOnline(false);

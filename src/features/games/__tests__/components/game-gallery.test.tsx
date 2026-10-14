@@ -9,9 +9,12 @@ const cover = { src: "/mock/games/ruta-9.jpg", alt: "Portada de Ruta 9", positio
 const game = makeGameFixture({
   ...GAME_FIXTURES[3],
   image: cover,
-  gallery: [cover, 1, 2, 3].map((shot) =>
-    typeof shot === "number" ? { src: `/mock/games/ruta-9-${shot}.jpg`, alt: `Captura ${shot}`, position: null } : shot,
-  ),
+  gallery: [
+    cover,
+    { src: "/mock/games/ruta-9-1.jpg", alt: "Captura 1", position: null },
+    { src: "/mock/games/ruta-9-2.jpg", alt: "Captura 2", position: null },
+    { src: "/mock/games/ruta-9-3.jpg", alt: "Captura 3", position: null },
+  ],
 });
 
 function renderGallery(shots = getGalleryShots(game)) {

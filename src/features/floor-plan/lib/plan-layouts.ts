@@ -132,7 +132,7 @@ export function findItemRect(layout: PlanLayout, id: string): PlanRect | null {
     return layout.entry;
   }
 
-  const zone = layout.zones[id as keyof PlanLayout["zones"]];
+  const zone = Object.entries(layout.zones).find(([zoneId]) => zoneId === id)?.[1];
 
   if (zone) {
     return zone.rect;

@@ -1,7 +1,17 @@
 import type { FieldErrors } from "@shared/lib/action-result";
 
+export type RawInputValue = string | number | boolean | null | undefined | readonly unknown[];
+
 /** Datos de un formulario tal como llegan a una Server Action. */
-export type RawInput = Record<string, unknown>;
+export type RawInput = { readonly [key: string]: RawInputValue };
+
+export function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+export function isNumber(value: unknown): value is number {
+  return typeof value === "number";
+}
 
 /** Lo lanza `validate()` cuando algún campo no es válido; `fieldErrors` dice cuál y por qué. */
 export class ValidationError extends Error {
@@ -61,7 +71,7 @@ function createFieldReader(raw: RawInput, errors: FieldErrors): FieldReader {
   const readString = (name: string) => {
     const value = raw[name];
 
-    return typeof value === "string" ? value.trim() : "";
+    return isString(value) ? value.trim() : "";
   };
 
   const checkText = (name: string, value: string, rule: TextRule) => {
@@ -101,7 +111,7 @@ function createFieldReader(raw: RawInput, errors: FieldErrors): FieldReader {
         return fallback;
       }
 
-      const number = typeof value === "number" ? value : Number(value);
+      const number = isNumber(value) ? value : Number(value);
 
       if (!Number.isInteger(number) || number < min || number > max) {
         errors[name] = `${label} debe ser un número entero entre ${min} y ${max}.`;

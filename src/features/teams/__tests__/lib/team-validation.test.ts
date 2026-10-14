@@ -1,7 +1,7 @@
 import { parseTeamInput, parseTeamMemberInput } from "@features/teams/lib/team-validation";
 import { ValidationError } from "@shared/lib/validation";
 
-function fieldErrors(run: () => unknown) {
+function fieldErrors(run: () => void) {
   try {
     run();
   } catch (error) {

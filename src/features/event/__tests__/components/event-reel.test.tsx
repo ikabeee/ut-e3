@@ -1,5 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { act, render } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { EventReel } from "@features/event/components/event-reel";
 import { EVENT_REEL, REEL_AUTOPLAY_MEDIA_QUERY } from "@features/event/lib/event-media";
@@ -30,18 +29,21 @@ function simulateBrowser({
   prefersSaveData = false,
   prefersReducedMotion = false,
 }: BrowserConditions) {
-  const matches: Record<string, boolean> = {
-    [REEL_AUTOPLAY_MEDIA_QUERY]: isWideScreen,
-    [REDUCED_MOTION_QUERY]: prefersReducedMotion,
-  };
+  const matches = new Map<string, boolean>([
+    [REEL_AUTOPLAY_MEDIA_QUERY, isWideScreen],
+    [REDUCED_MOTION_QUERY, prefersReducedMotion],
+  ]);
 
-  window.matchMedia = (query: string) =>
-    ({
-      matches: matches[query] ?? false,
-      media: query,
-      addEventListener: () => undefined,
-      removeEventListener: () => undefined,
-    }) as unknown as MediaQueryList;
+  window.matchMedia = (query: string): MediaQueryList => ({
+    matches: matches.get(query) ?? false,
+    media: query,
+    onchange: null,
+    addListener: () => undefined,
+    removeListener: () => undefined,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+    dispatchEvent: () => false,
+  });
   Object.defineProperty(navigator, "connection", {
     configurable: true,
     value: { saveData: prefersSaveData, addEventListener: () => undefined, removeEventListener: () => undefined },
@@ -51,13 +53,17 @@ function simulateBrowser({
 function showReel() {
   act(() => {
     for (const callback of intersectionCallbacks) {
-      callback([{ isIntersecting: true } as IntersectionObserverEntry], {} as IntersectionObserver);
+      // SAFETY: la prueba simula la entrada de intersección requerida por el observer.
+      const entry = { isIntersecting: true } as IntersectionObserverEntry;
+      // SAFETY: la prueba simula la instancia de observador pasada al callback.
+      const observer = {} as IntersectionObserver;
+      callback([entry], observer);
     }
   });
 }
 
 const reel = (
-  <EventReel reel={EVENT_REEL} reelLabel="Reel 2026">
+  <EventReel reel={EVENT_REEL}>
     <h1>UTG</h1>
   </EventReel>
 );
@@ -115,18 +121,6 @@ describe("EventReel", () => {
 
     expect(getVideo(container).querySelectorAll("source")).toHaveLength(0);
     expect(play).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Reproducir video" })).toBeInTheDocument();
-  });
-
-  it("loads the video on demand when the play button is pressed", async () => {
-    const user = userEvent.setup();
-    simulateBrowser({ isWideScreen: false });
-    const { container } = render(reel);
-
-    await user.click(screen.getByRole("button", { name: "Reproducir video" }));
-
-    expect(getVideo(container).querySelectorAll("source")).toHaveLength(2);
-    expect(play).toHaveBeenCalledTimes(1);
   });
 
   it("loads and plays the video on a wide screen once the reel is visible", () => {

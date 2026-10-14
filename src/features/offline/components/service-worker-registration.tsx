@@ -4,9 +4,15 @@ import { Button } from "@heroui/react";
 import { useServiceWorker } from "@features/offline/hooks/use-service-worker";
 import { OFFLINE_COPY } from "@features/offline/lib/offline-copy";
 
+export interface ServiceWorkerRegistrationProps {
+  useWorker?: typeof useServiceWorker;
+}
+
 /** Registra el service worker y muestra el aviso "Hay una versión nueva" cuando corresponde. */
-export function ServiceWorkerRegistration() {
-  const { isUpdateAvailable, applyUpdate } = useServiceWorker();
+export function ServiceWorkerRegistration({
+  useWorker = useServiceWorker,
+}: Readonly<ServiceWorkerRegistrationProps> = {}) {
+  const { isUpdateAvailable, applyUpdate } = useWorker();
 
   return (
     <div role="status" className="w-full max-w-xl">

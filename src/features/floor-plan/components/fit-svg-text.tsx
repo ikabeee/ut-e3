@@ -32,7 +32,7 @@ export function FitSvgText({ maxWidth, children, ...textProps }: Readonly<FitSvg
       text.removeAttribute("textLength");
       text.removeAttribute("lengthAdjust");
       // jsdom (pruebas) no implementa la medición de texto.
-      const length = typeof text.getComputedTextLength === "function" ? text.getComputedTextLength() : 0;
+      const length = text.getComputedTextLength ? text.getComputedTextLength() : 0;
 
       if (length > maxWidth) {
         text.setAttribute("textLength", String(maxWidth));

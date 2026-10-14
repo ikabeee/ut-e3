@@ -1,7 +1,7 @@
 "use client";
 
 import { FitSvgText } from "@features/floor-plan/components/fit-svg-text";
-import { PlanItemShape } from "@features/floor-plan/components/plan-item-shape";
+import { PlanItemGraphic } from "@features/floor-plan/components/plan-item-shape";
 import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
 import { getItemInteraction, type PlanSelection } from "@features/floor-plan/lib/plan-interaction";
 import { getStandCells } from "@features/floor-plan/lib/plan-layouts";
@@ -50,7 +50,7 @@ export function PlanStandBlock({ block, nameSize, variant, selection, touchRects
         };
 
         return (
-          <PlanItemShape
+          <PlanItemGraphic
             key={code}
             id={code}
             // En el croquis interactivo el lector de pantalla también oye el nombre del ocupante.
@@ -81,7 +81,7 @@ export function PlanStandBlock({ block, nameSize, variant, selection, touchRects
                 {secondLine}
               </FitSvgText>
             ) : null}
-          </PlanItemShape>
+          </PlanItemGraphic>
         );
       })}
     </g>

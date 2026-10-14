@@ -45,13 +45,23 @@ export async function dehydrateForPrerender(
     queries: queryClient
       .getQueryCache()
       .getAll()
-      .filter((query) => defaultShouldDehydrateQuery(query))
-      .map((query) => ({
-        dehydratedAt: updatedAt,
-        queryHash: query.queryHash,
-        queryKey: query.queryKey,
-        state: query.state,
-        ...(query.meta ? { meta: query.meta } : {}),
-      })),
+      .flatMap((query) => {
+        if (!defaultShouldDehydrateQuery(query)) {
+          return [];
+        }
+
+        const item = {
+          dehydratedAt: updatedAt,
+          queryHash: query.queryHash,
+          queryKey: query.queryKey,
+          state: query.state,
+        };
+
+        if (query.meta) {
+          return [{ ...item, meta: query.meta }];
+        }
+
+        return [item];
+      }),
   };
 }

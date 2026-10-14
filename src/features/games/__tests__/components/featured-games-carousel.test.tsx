@@ -25,6 +25,7 @@ function advance(milliseconds: number) {
 
 describe("FeaturedGamesCarousel", () => {
   beforeAll(() => {
+    // SAFETY: TestPointerEvent implements the PointerEvent constructor used by the jsdom tests.
     globalThis.PointerEvent ??= TestPointerEvent as typeof PointerEvent;
   });
 

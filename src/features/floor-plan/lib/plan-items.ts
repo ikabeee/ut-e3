@@ -1,6 +1,12 @@
 import { FLOOR_PLAN_COPY, PLAN_ZONE_SCHEDULE_NOTES } from "@features/floor-plan/lib/floor-plan-copy";
 import { INFO_STANDS, PLAN_CATEGORIES, PLAN_ZONES } from "@features/floor-plan/lib/plan-places";
-import type { PlanCategory, PlanItem, PlanZoneTimes, StandOccupant, ZoneId } from "@features/floor-plan/lib/types";
+import {
+  ZONE_IDS,
+  type PlanCategory,
+  type PlanItem,
+  type PlanZoneTimes,
+  type StandOccupant,
+} from "@features/floor-plan/lib/types";
 
 /**
  * Todo lo seleccionable del croquis, en el orden del directorio: stands de equipo (en el orden
@@ -29,7 +35,7 @@ export function buildPlanItems(occupants: readonly StandOccupant[], times: PlanZ
     cover: null,
   }));
 
-  const zones = (Object.keys(PLAN_ZONES) as ZoneId[]).map((id): PlanItem => {
+  const zones = ZONE_IDS.map((id): PlanItem => {
     const zone = PLAN_ZONES[id];
     const scheduleNote = PLAN_ZONE_SCHEDULE_NOTES[id]?.(times);
 

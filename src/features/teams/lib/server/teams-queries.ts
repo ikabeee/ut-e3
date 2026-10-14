@@ -105,7 +105,10 @@ export async function addTeamMember(teamId: string, input: TeamMemberInput): Pro
       await tx.orm.public.TeamMember.where({ teamId, isLeader: true }).updateAll({ isLeader: false });
     }
 
-    await tx.orm.public.TeamMember.create({ ...input, teamId });
+    const email = input.email ?? `member.${Date.now()}.${generateSecret().slice(0, 8)}@ute3.edu.mx`;
+    const passwordHash = input.passwordHash ?? "";
+
+    await tx.orm.public.TeamMember.create({ ...input, teamId, email, passwordHash });
   });
 
   return findTeamOrThrow(teamId);

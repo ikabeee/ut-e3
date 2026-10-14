@@ -5,7 +5,7 @@ import { cn } from "@heroui/react";
 import type { PlanItemInteraction } from "@features/floor-plan/lib/plan-interaction";
 import type { PlanRect } from "@features/floor-plan/lib/types";
 
-interface PlanItemShapeProps extends PlanItemInteraction {
+interface PlanItemGraphicProps extends PlanItemInteraction {
   id: string;
   label: string;
   rect: PlanRect;
@@ -26,7 +26,7 @@ const SELECTED_FILL: CSSProperties = { fill: "var(--accent)", fillOpacity: 1 };
  * texto negro) y filtro. Se activa con clic, Enter o Espacio. En pantallas táctiles un
  * rectángulo transparente (`touchRect`) agranda el área de toque sin cambiar el dibujo.
  */
-export function PlanItemShape({
+export function PlanItemGraphic({
   id,
   label,
   rect: [x, y, width, height],
@@ -39,7 +39,7 @@ export function PlanItemShape({
   isHidden = false,
   onSelect,
   children,
-}: Readonly<PlanItemShapeProps>) {
+}: Readonly<PlanItemGraphicProps>) {
   const handleKeyDown = (event: KeyboardEvent<SVGGElement>) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();

@@ -68,18 +68,18 @@ export function expandWithinNeighbors(
 
   const [left, right] = growInterval(
     ownX,
-    others
-      .filter((other) => overlapsWithin(ownY, [other.top, other.bottom], margin))
-      .map((other) => [other.left, other.right]),
+    others.flatMap((other): Interval[] =>
+      overlapsWithin(ownY, [other.top, other.bottom], margin) ? [[other.left, other.right]] : [],
+    ),
     [limits.left, limits.right],
     margin,
   );
 
   const [top, bottom] = growInterval(
     ownY,
-    others
-      .filter((other) => overlapsWithin(ownX, [other.left, other.right], margin))
-      .map((other) => [other.top, other.bottom]),
+    others.flatMap((other): Interval[] =>
+      overlapsWithin(ownX, [other.left, other.right], margin) ? [[other.top, other.bottom]] : [],
+    ),
     [limits.top, limits.bottom],
     margin,
   );

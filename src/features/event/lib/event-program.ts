@@ -68,7 +68,7 @@ export function getScheduleHighlights(schedule: readonly ScheduleEntry[]): Sched
     tournamentSignupDeadline: timeOf("tournamentSignupDeadline"),
     tournamentRoundsAt: timeOf("tournamentRounds"),
     tournamentFinalsAt: timeOf("tournamentFinals"),
-    raffleTimes: schedule.filter((entry) => entry.milestone === "raffle").map((entry) => entry.time),
+    raffleTimes: schedule.flatMap((entry) => (entry.milestone === "raffle" ? [entry.time] : [])),
   };
 }
 

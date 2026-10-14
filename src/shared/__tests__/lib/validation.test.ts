@@ -1,6 +1,6 @@
 import { isUuid, SLUG_PATTERN, ValidationError, validate } from "@shared/lib/validation";
 
-function errorsOf(run: () => unknown) {
+function errorsOf(run: () => void) {
   try {
     run();
   } catch (error) {

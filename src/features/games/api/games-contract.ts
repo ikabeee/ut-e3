@@ -1,4 +1,5 @@
 import type { Game, GameImage } from "@features/games/lib/types";
+import type { JsonObject, JsonValue } from "@shared/lib/json-value";
 
 /**
  * Contrato HTTP de `/api/games`: lo que viaja entre el Route Handler y el navegador.
@@ -52,24 +53,38 @@ export function toGameDto(game: Game): GameDto {
   };
 }
 
-type JsonObject = Record<string, unknown>;
-
 function fail(path: string): never {
   throw new Error(`La respuesta de la API de juegos no tiene el formato esperado (${path}).`);
 }
 
-function asObject(value: unknown, path: string): JsonObject {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+function isJsonObject(value: JsonValue): value is JsonObject {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isJsonArray(value: JsonValue | undefined): value is JsonValue[] {
+  return Array.isArray(value);
+}
+
+function isString(value: JsonValue | undefined): value is string {
+  return typeof value === "string";
+}
+
+function isFiniteNumber(value: JsonValue | undefined): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function asObject(value: JsonValue, path: string): JsonObject {
+  if (!isJsonObject(value)) {
     fail(path);
   }
 
-  return value as JsonObject;
+  return value;
 }
 
 function readString(source: JsonObject, key: string, path: string): string {
   const value = source[key];
 
-  return typeof value === "string" ? value : fail(`${path}.${key}`);
+  return isString(value) ? value : fail(`${path}.${key}`);
 }
 
 function readOptionalString(source: JsonObject, key: string, path: string): string | null {
@@ -81,22 +96,23 @@ function readOptionalString(source: JsonObject, key: string, path: string): stri
 function readNumber(source: JsonObject, key: string, path: string): number {
   const value = source[key];
 
-  return typeof value === "number" && Number.isFinite(value) ? value : fail(`${path}.${key}`);
+  return isFiniteNumber(value) ? value : fail(`${path}.${key}`);
 }
 
-function parseStrings(value: unknown, path: string): string[] {
-  if (!Array.isArray(value)) {
+function parseStrings(value: JsonValue | undefined, path: string): string[] {
+  if (!isJsonArray(value)) {
     fail(path);
   }
 
-  return value.map((item, index) => (typeof item === "string" ? item : fail(`${path}[${index}]`)));
+  return value.map((item, index) => (isString(item) ? item : fail(`${path}[${index}]`)));
 }
 
-function parseAbout(value: unknown, path: string): Game["about"] {
+function parseAbout(value: JsonValue | undefined, path: string): Game["about"] {
   return value === null ? null : parseStrings(value, path);
 }
 
-function parseImage(value: unknown, path: string): GameImage {
+function parseImage(value: JsonValue | undefined, path: string): GameImage {
+  if (value === undefined) fail(path);
   const image = asObject(value, path);
 
   return {
@@ -106,15 +122,15 @@ function parseImage(value: unknown, path: string): GameImage {
   };
 }
 
-function parseGallery(value: unknown, path: string): GameImage[] {
-  if (!Array.isArray(value)) {
+function parseGallery(value: JsonValue | undefined, path: string): GameImage[] {
+  if (!isJsonArray(value)) {
     fail(path);
   }
 
   return value.map((image, index) => parseImage(image, `${path}[${index}]`));
 }
 
-function parseGame(value: unknown, path: string): Game {
+function parseGame(value: JsonValue, path: string): Game {
   const game = asObject(value, path);
 
   return {
@@ -139,8 +155,8 @@ function parseGame(value: unknown, path: string): Game {
  * el primer campo inválido (por ejemplo `[3].image.alt`); TanStack Query lo muestra como error
  * de la query.
  */
-export function parseGamesResponse(value: unknown): Game[] {
-  if (!Array.isArray(value)) {
+export function parseGamesResponse(value: JsonValue): Game[] {
+  if (!isJsonArray(value)) {
     fail("se esperaba una lista");
   }
 

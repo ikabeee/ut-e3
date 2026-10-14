@@ -7,6 +7,7 @@ interface NetworkConnection extends EventTarget {
   saveData?: boolean;
 }
 
+// SAFETY: la Network Information API no forma parte de los tipos estándar de Navigator en TypeScript.
 const getConnection = () => (navigator as Navigator & { connection?: NetworkConnection }).connection;
 
 function subscribeToWideScreen(onChange: () => void) {

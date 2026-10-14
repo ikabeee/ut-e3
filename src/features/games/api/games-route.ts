@@ -11,8 +11,12 @@ import { listGames } from "@features/games/lib/server/games-queries";
  * mano. Los errores tampoco se atrapan: en el build detienen el prerender y, al revalidar,
  * Next.js sigue sirviendo la última respuesta buena en lugar de guardar un error.
  */
-export async function GET() {
-  const games = await listGames();
+export function createGamesRoute(fetchGames: typeof listGames = listGames) {
+  return async function GET() {
+    const games = await fetchGames();
 
-  return Response.json(games.map(toGameDto));
+    return Response.json(games.map(toGameDto));
+  };
 }
+
+export const GET = createGamesRoute();

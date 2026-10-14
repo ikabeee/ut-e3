@@ -1,19 +1,24 @@
-import { mockGameRepository } from "@features/games/lib/mock/mock-game-repository";
-import { getGameRepository } from "@features/games/lib/server/game-repositories";
-import { prismaGameRepository } from "@features/games/lib/server/prisma-game-repository";
+import { selectGameRepository, type GameRepository } from "@features/games/lib/game-repository";
 
-// La prueba sólo revisa la elección del repositorio: no carga el cliente de Prisma.
-jest.mock("@features/games/lib/server/prisma-game-repository", () => ({
-  prismaGameRepository: { listGames: jest.fn(), findGameBySlug: jest.fn() },
-}));
+const mockRepository: GameRepository = {
+  listGames: async () => [],
+  findGameBySlug: async () => null,
+};
 
-describe("getGameRepository", () => {
-  it("uses the mocks by default", () => {
-    expect(getGameRepository()).toBe(mockGameRepository);
-    expect(getGameRepository("mock")).toBe(mockGameRepository);
+const postgresRepository: GameRepository = {
+  listGames: async () => [],
+  findGameBySlug: async () => null,
+};
+
+const repositories = { mock: mockRepository, prisma: postgresRepository };
+
+describe("selectGameRepository", () => {
+  it("selects the repository registered for the source", () => {
+    expect(selectGameRepository("mock", repositories)).toBe(mockRepository);
+    expect(selectGameRepository("prisma", repositories)).toBe(postgresRepository);
   });
 
-  it("uses PostgreSQL with DATA_SOURCE=prisma", () => {
-    expect(getGameRepository("prisma")).toBe(prismaGameRepository);
+  it("fails when the source has no registered repository", () => {
+    expect(() => selectGameRepository("prisma", { mock: mockRepository })).toThrow('DATA_SOURCE="prisma"');
   });
 });

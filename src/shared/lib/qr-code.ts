@@ -1,6 +1,6 @@
 import qrcode from "qrcode-generator";
 
-export interface QrCodeShape {
+export interface QrCodeGeometry {
   /** Módulos por lado, sin la zona de silencio. */
   size: number;
   /** Trazo SVG de los módulos oscuros: un rectángulo de 1 de alto por cada tramo de un renglón. */
@@ -12,7 +12,7 @@ export interface QrCodeShape {
  * navegador). Usa corrección de errores "M" (15%): se sigue leyendo desde una captura de
  * pantalla con poco brillo o un poco borrosa.
  */
-export function buildQrCode(text: string): QrCodeShape {
+export function buildQrCode(text: string): QrCodeGeometry {
   const qr = qrcode(0, "M");
   qr.addData(text);
   qr.make();

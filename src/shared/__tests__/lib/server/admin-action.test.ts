@@ -1,32 +1,31 @@
 /** @jest-environment node */
-import { refresh, updateTag } from "next/cache";
 import { ActionRuleError } from "@shared/lib/action-rule-error";
 import { runAdminAction } from "@shared/lib/server/admin-action";
-import { isAdminRequest } from "@shared/lib/server/admin-auth";
 import { RecordNotFoundError } from "@shared/lib/record-not-found-error";
 import { ValidationError } from "@shared/lib/validation";
 
-jest.mock("next/cache", () => ({ refresh: jest.fn(), updateTag: jest.fn() }));
-
-jest.mock("@shared/lib/server/admin-auth", () => ({
-  ...jest.requireActual("@shared/lib/server/admin-auth"),
-  isAdminRequest: jest.fn(),
-}));
-
 const options = { invalidateTags: ["games"], constraintMessages: { genre_slug_key: "Ese slug ya existe." } };
 
-describe("runAdminAction", () => {
-  beforeEach(() => {
-    jest.mocked(isAdminRequest).mockResolvedValue(true);
-    jest.mocked(updateTag).mockClear();
-    jest.mocked(refresh).mockClear();
-  });
+const createDeps = (isAdminValue = true) => {
+  const updateTag = jest.fn();
+  const refresh = jest.fn();
 
+  return {
+    deps: {
+      isAdmin: async () => isAdminValue,
+      cache: { updateTag, refresh },
+    },
+    updateTag,
+    refresh,
+  };
+};
+
+describe("runAdminAction", () => {
   it("rejects the request before running anything when it is not an admin", async () => {
-    jest.mocked(isAdminRequest).mockResolvedValue(false);
+    const { deps } = createDeps(false);
     const operation = jest.fn();
 
-    await expect(runAdminAction(operation, options)).resolves.toEqual({
+    await expect(runAdminAction(operation, options, deps)).resolves.toEqual({
       ok: false,
       error: "No tienes permiso para hacer cambios.",
     });
@@ -34,15 +33,26 @@ describe("runAdminAction", () => {
   });
 
   it("returns the data and invalidates the cache tags", async () => {
-    await expect(runAdminAction(async () => ({ id: "1" }), options)).resolves.toEqual({ ok: true, data: { id: "1" } });
+    const { deps, updateTag, refresh } = createDeps(true);
+
+    await expect(runAdminAction(async () => ({ id: "1" }), options, deps)).resolves.toEqual({
+      ok: true,
+      data: { id: "1" },
+    });
     expect(updateTag).toHaveBeenCalledWith("games");
     expect(refresh).toHaveBeenCalled();
   });
 
   it("returns the field errors of a validation error without invalidating", async () => {
-    const result = await runAdminAction(async () => {
-      throw new ValidationError({ name: "El nombre es obligatorio." });
-    }, options);
+    const { deps, updateTag } = createDeps(true);
+
+    const result = await runAdminAction(
+      async () => {
+        throw new ValidationError({ name: "El nombre es obligatorio." });
+      },
+      options,
+      deps,
+    );
 
     expect(result).toEqual({
       ok: false,
@@ -53,30 +63,50 @@ describe("runAdminAction", () => {
   });
 
   it("explains missing records, broken rules and violated constraints", async () => {
+    const { deps } = createDeps(true);
+
     await expect(
-      runAdminAction(async () => {
-        throw new RecordNotFoundError("El género ya no existe.");
-      }, options),
+      runAdminAction(
+        async () => {
+          throw new RecordNotFoundError("El género ya no existe.");
+        },
+        options,
+        deps,
+      ),
     ).resolves.toEqual({ ok: false, error: "El género ya no existe." });
 
     await expect(
-      runAdminAction(async () => {
-        throw new ActionRuleError("Te faltan 3 juegos.");
-      }, options),
+      runAdminAction(
+        async () => {
+          throw new ActionRuleError("Te faltan 3 juegos.");
+        },
+        options,
+        deps,
+      ),
     ).resolves.toEqual({ ok: false, error: "Te faltan 3 juegos." });
 
     await expect(
-      runAdminAction(async () => {
-        throw Object.assign(new Error("duplicate"), { sqlState: "23505", constraint: "genre_slug_key" });
-      }, options),
+      runAdminAction(
+        async () => {
+          throw Object.assign(new Error("duplicate"), { sqlState: "23505", constraint: "genre_slug_key" });
+        },
+        options,
+        deps,
+      ),
     ).resolves.toEqual({ ok: false, error: "Ese slug ya existe." });
   });
 
   it("rethrows unexpected errors", async () => {
+    const { deps } = createDeps(true);
+
     await expect(
-      runAdminAction(async () => {
-        throw new Error("connection refused");
-      }, options),
+      runAdminAction(
+        async () => {
+          throw new Error("connection refused");
+        },
+        options,
+        deps,
+      ),
     ).rejects.toThrow("connection refused");
   });
 });

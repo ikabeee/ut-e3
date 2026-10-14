@@ -2,8 +2,9 @@ import "server-only";
 import { EVENT_INFO } from "@features/event/lib/event-info";
 import type { CheckInItem, CheckInResult, CheckInStatus } from "@features/visitors/lib/types";
 import { clampScannedAt, extractVisitorToken } from "@features/visitors/lib/visitor-rules";
-import { db } from "@shared/lib/prisma/db";
 import { hashSecret } from "@shared/lib/server/secrets";
+
+const getDb = async () => (await import("@shared/lib/prisma/db")).db;
 
 // Check-ins que envía el escáner de cada stand (POST /api/check-ins). El juego sale de la
 // llave del escáner, nunca de lo que manda el cliente, y guardar el lote es idempotente: el
@@ -21,6 +22,8 @@ export interface ScannerGame {
 export async function findScannerGame(scannerKey: string): Promise<ScannerGame | null> {
   if (!SCANNER_KEY_PATTERN.test(scannerKey)) return null;
 
+  const db = await getDb();
+
   const team = await db.orm.public.Team.select("standCode")
     .where({ scannerKeyHash: hashSecret(scannerKey) })
     .include("game", (game) => game.select("id", "name"))
@@ -35,11 +38,16 @@ function getStatus(id: string, insertedIds: ReadonlySet<string>, knownIds: Reado
   return knownIds.has(id) ? "duplicate" : "unknown";
 }
 
-interface CheckInRow {
+export interface CheckInRow {
   id: string;
   visitorId: string;
   gameId: string;
   scannedAt: string;
+}
+
+export interface RecordCheckInsDependencies {
+  findVisitorIds?: (tokenHashes: string[]) => Promise<Map<string, string>>;
+  insertRows?: (rows: CheckInRow[]) => Promise<Set<string>>;
 }
 
 /** Hash del token de cada escaneo, por id del escaneo. Lo que no es un QR de visitante se omite. */
@@ -59,6 +67,8 @@ function hashScannedTokens(items: readonly CheckInItem[]) {
 async function findVisitorIdsByTokenHash(tokenHashes: string[]) {
   if (tokenHashes.length === 0) return new Map<string, string>();
 
+  const db = await getDb();
+
   const visitors = await db.orm.public.Visitor.select("id", "qrTokenHash")
     .where((visitor) => visitor.qrTokenHash.in(tokenHashes))
     .all();
@@ -70,6 +80,7 @@ async function findVisitorIdsByTokenHash(tokenHashes: string[]) {
 async function insertCheckIns(rows: CheckInRow[]) {
   if (rows.length === 0) return new Set<string>();
 
+  const db = await getDb();
   const inserted = await db.orm.public.CheckIn.select("id").createAll(rows, { onConflict: "skip" });
 
   return new Set(inserted.map((row) => row.id));
@@ -84,9 +95,15 @@ export async function recordCheckIns(
   gameId: string,
   items: readonly CheckInItem[],
   now = new Date(),
+  deps: RecordCheckInsDependencies = {},
 ): Promise<CheckInResult[]> {
+  const findVisitorIds = deps.findVisitorIds ?? findVisitorIdsByTokenHash;
+  const insert = deps.insertRows ?? insertCheckIns;
+
   const tokenHashById = hashScannedTokens(items);
-  const visitorIdByHash = await findVisitorIdsByTokenHash([...new Set(tokenHashById.values())]);
+  const tokenHashes = [...new Set(tokenHashById.values())];
+
+  const visitorIdByHash = tokenHashes.length > 0 ? await findVisitorIds(tokenHashes) : new Map<string, string>();
 
   const rows: CheckInRow[] = [];
 
@@ -100,7 +117,7 @@ export async function recordCheckIns(
     }
   }
 
-  const insertedIds = await insertCheckIns(rows);
+  const insertedIds = rows.length > 0 ? await insert(rows) : new Set<string>();
   const knownIds = new Set(rows.map((row) => row.id));
 
   return items.map((item) => ({ id: item.id, status: getStatus(item.id, insertedIds, knownIds) }));

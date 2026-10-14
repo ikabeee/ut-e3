@@ -7,9 +7,13 @@ function buildPlan() {
   container.style.setProperty("--utg-white", "#fafafa");
   container.innerHTML = `<svg><g data-plan-item="A1"><rect data-plan-fill></rect></g></svg>`;
   document.body.append(container);
-  const shape = container.querySelector("rect") as SVGRectElement;
+
+  const fillElement = container.querySelector<SVGRectElement>("rect");
+
+  if (!fillElement) throw new Error("El stand debe tener un rectángulo para parpadear.");
+
   const animate = jest.fn();
-  shape.animate = animate;
+  fillElement.animate = animate;
 
   return { container, animate };
 }
@@ -26,7 +30,7 @@ describe("usePlanFlash", () => {
     result.current("A1");
 
     expect(animate).toHaveBeenCalledTimes(1);
-    const [keyframes] = animate.mock.calls[0] as [Keyframe[]];
+    const keyframes = animate.mock.calls[0]?.[0];
     expect(keyframes).toContainEqual(expect.objectContaining({ fill: "#fafafa" }));
   });
 

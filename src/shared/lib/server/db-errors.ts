@@ -11,34 +11,49 @@ export interface ConstraintViolation {
   constraint: string;
 }
 
-const KIND_BY_SQL_STATE: Record<string, ConstraintKind> = {
+const KIND_BY_SQL_STATE = {
   "23505": "unique",
   "23514": "check",
   "23503": "foreign-key",
   "23502": "not-null",
-};
+} as const satisfies Record<string, ConstraintKind>;
 
-interface SqlErrorShape {
-  sqlState?: unknown;
-  code?: unknown;
-  constraint?: unknown;
-  cause?: unknown;
+interface DatabaseErrorPayload {
+  readonly sqlState?: unknown;
+  readonly code?: unknown;
+  readonly constraint?: unknown;
+  readonly cause?: unknown;
+}
+
+function isDatabaseErrorPayload(value: unknown): value is DatabaseErrorPayload {
+  return typeof value === "object" && value !== null;
+}
+
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+type SqlState = keyof typeof KIND_BY_SQL_STATE;
+
+function isSqlState(value: unknown): value is SqlState {
+  return isString(value) && value in KIND_BY_SQL_STATE;
 }
 
 /** Devuelve la restricción violada, o `null` si el error es de otro tipo. */
-export function getConstraintViolation(error: unknown): ConstraintViolation | null {
-  let current: unknown = error;
+export function getConstraintViolation(cause: unknown): ConstraintViolation | null {
+  let current: unknown = cause;
 
-  for (let depth = 0; depth < 4 && typeof current === "object" && current !== null; depth++) {
-    const candidate = current as SqlErrorShape;
-    const sqlState = typeof candidate.sqlState === "string" ? candidate.sqlState : candidate.code;
-    const kind = typeof sqlState === "string" ? KIND_BY_SQL_STATE[sqlState] : undefined;
+  for (let depth = 0; depth < 4 && isDatabaseErrorPayload(current); depth += 1) {
+    const rawCode = isString(current.sqlState) ? current.sqlState : current.code;
 
-    if (kind) {
-      return { kind, constraint: typeof candidate.constraint === "string" ? candidate.constraint : "" };
+    if (isSqlState(rawCode)) {
+      const kind = KIND_BY_SQL_STATE[rawCode];
+      const constraint = isString(current.constraint) ? current.constraint : "";
+
+      return { kind, constraint };
     }
 
-    current = candidate.cause;
+    current = current.cause;
   }
 
   return null;

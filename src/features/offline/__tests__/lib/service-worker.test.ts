@@ -1,4 +1,4 @@
-import { runServiceWorker, type ServiceWorkerScope } from "@features/offline/lib/service-worker";
+import { runServiceWorker } from "@features/offline/lib/service-worker";
 import type { ServiceWorkerConfig } from "@features/offline/lib/service-worker-config";
 import { extractStaticAssetUrls, getRequestStrategy } from "@features/offline/lib/service-worker-strategies";
 
@@ -28,8 +28,17 @@ class FakeResponse {
   }
 }
 
-const keyOf = (request: RequestInfo | URL) =>
-  typeof request === "string" ? request : String((request as Request).url ?? request);
+function isStringRequest(value: RequestInfo | URL): value is string {
+  return typeof value === "string";
+}
+
+const keyOf = (request: RequestInfo | URL): string => {
+  if (isStringRequest(request)) return request;
+
+  if ("url" in request) return request.url;
+
+  return String(request);
+};
 
 class FakeCache {
   readonly entries = new Map<string, FakeResponse>();
@@ -101,7 +110,23 @@ const config: ServiceWorkerConfig = {
   skipWaitingMessage: "SKIP_WAITING",
 };
 
-type Listener = (event: unknown) => void;
+interface ServiceWorkerTestEvent {
+  waitUntil?: (promise: Promise<unknown>) => void;
+  respondWith?: (promise: Promise<FakeResponse>) => void;
+  request?: {
+    url: string;
+    method: string;
+    mode: string;
+    destination: string;
+    headers: {
+      has: (name: string) => boolean;
+      get: (name: string) => string | null;
+    };
+  };
+  data?: unknown;
+}
+
+type Listener = (event: ServiceWorkerTestEvent) => void;
 
 type NetworkHandler = (url: string) => Promise<FakeResponse>;
 
@@ -118,7 +143,8 @@ function setup(network: NetworkHandler) {
     addEventListener: (type: string, listener: Listener) => listeners.set(type, listener),
   };
 
-  runServiceWorker(scope as unknown as ServiceWorkerScope, config, { getRequestStrategy, extractStaticAssetUrls });
+  // SAFETY: El objeto scope emula la interfaz ServiceWorkerScope para simular el worker en pruebas.
+  runServiceWorker(scope as never, config, { getRequestStrategy, extractStaticAssetUrls });
 
   async function lifecycle(type: "install" | "activate") {
     let done: Promise<unknown> = Promise.resolve();
@@ -156,7 +182,8 @@ const pageCache = (storage: FakeCacheStorage) => storage.caches.get("ut-e3-pages
 const originalResponse = globalThis.Response;
 
 beforeAll(() => {
-  globalThis.Response = FakeResponse as unknown as typeof Response;
+  // SAFETY: FakeResponse emula la clase Response durante la ejecución de las pruebas.
+  globalThis.Response = FakeResponse as never;
 });
 
 afterAll(() => {
@@ -165,17 +192,17 @@ afterAll(() => {
 
 describe("runServiceWorker: install", () => {
   it("precaches the pages and the hashed files they use, including fonts referenced by CSS", async () => {
-    const files: Record<string, string> = {
-      [`${ORIGIN}/`]: '<link href="/_next/static/chunks/app.css"><script src="/_next/static/chunks/main.js">',
-      [`${ORIGIN}/offline`]: '<script src="/_next/static/chunks/main.js">',
-      [`${ORIGIN}/_next/static/chunks/app.css`]: "@font-face{src:url(../media/font.woff2)}",
-      [`${ORIGIN}/_next/static/chunks/main.js`]: "console.log(1)",
-      [`${ORIGIN}/_next/static/media/font.woff2`]: "font",
-      [`${ORIGIN}/icons/icon-192.png`]: "png",
-    };
+    const files = new Map<string, string>([
+      [`${ORIGIN}/`, '<link href="/_next/static/chunks/app.css"><script src="/_next/static/chunks/main.js">'],
+      [`${ORIGIN}/offline`, '<script src="/_next/static/chunks/main.js">'],
+      [`${ORIGIN}/_next/static/chunks/app.css`, "@font-face{src:url(../media/font.woff2)}"],
+      [`${ORIGIN}/_next/static/chunks/main.js`, "console.log(1)"],
+      [`${ORIGIN}/_next/static/media/font.woff2`, "font"],
+      [`${ORIGIN}/icons/icon-192.png`, "png"],
+    ]);
 
     const { storage, lifecycle } = setup(
-      async (url) => new FakeResponse(files[url] ?? null, { status: files[url] ? 200 : 404 }),
+      async (url) => new FakeResponse(files.get(url) ?? null, { status: files.has(url) ? 200 : 404 }),
     );
 
     await lifecycle("install");

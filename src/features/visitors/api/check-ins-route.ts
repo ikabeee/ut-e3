@@ -1,6 +1,6 @@
 import "server-only";
-import { findScannerGame, recordCheckIns, type ScannerGame } from "@features/visitors/lib/server/check-ins-queries";
-import { parseCheckInBatch } from "@features/visitors/lib/visitor-rules";
+import type { findScannerGame, recordCheckIns, ScannerGame } from "@features/visitors/lib/server/check-ins-queries";
+import { type CheckInBatchPayload, parseCheckInBatch } from "@features/visitors/lib/visitor-rules";
 import { ValidationError } from "@shared/lib/validation";
 
 // Endpoint del escáner del stand (`src/app/api/check-ins/route.ts` sólo lo re-exporta). La llave
@@ -17,46 +17,66 @@ function errorResponse(status: number, error: string, fieldErrors?: Record<strin
   return Response.json(fieldErrors ? { error, fieldErrors } : { error }, { status, headers: NO_STORE });
 }
 
-async function authenticateScanner(request: Request) {
-  return findScannerGame(request.headers.get(SCANNER_KEY_HEADER)?.trim().toLowerCase() ?? "");
-}
-
 function describeGame(game: ScannerGame) {
   return { name: game.gameName, standCode: game.standCode };
 }
 
-/** `GET /api/check-ins`: el escáner comprueba su llave y a qué juego registra los escaneos. */
-export async function GET(request: Request) {
-  const game = await authenticateScanner(request);
-
-  if (!game) return errorResponse(401, UNAUTHORIZED);
-
-  return Response.json({ game: describeGame(game) }, { headers: NO_STORE });
+export interface CheckInsRouteDependencies {
+  findGame?: typeof findScannerGame;
+  saveCheckIns?: typeof recordCheckIns;
 }
 
-/**
- * `POST /api/check-ins`: guarda un lote `{ checkIns: [{ id, token, scannedAt }] }` y responde el
- * estado de cada escaneo (`created`, `duplicate` o `unknown`). Se puede reenviar el mismo lote.
- */
-export async function POST(request: Request) {
-  const game = await authenticateScanner(request);
+const defaultFindScannerGame: typeof findScannerGame = async (key) =>
+  (await import("@features/visitors/lib/server/check-ins-queries")).findScannerGame(key);
 
-  if (!game) return errorResponse(401, UNAUTHORIZED);
+const defaultRecordCheckIns: typeof recordCheckIns = async (gameId, checkIns) =>
+  (await import("@features/visitors/lib/server/check-ins-queries")).recordCheckIns(gameId, checkIns);
 
-  let body: unknown;
+export function createCheckInsRoute(deps: CheckInsRouteDependencies = {}) {
+  const findGame = deps.findGame ?? defaultFindScannerGame;
+  const saveCheckIns = deps.saveCheckIns ?? defaultRecordCheckIns;
 
-  try {
-    body = await request.json();
-  } catch {
-    return errorResponse(400, "El cuerpo debe ser JSON.");
+  async function authenticateScanner(request: Request) {
+    return findGame(request.headers.get(SCANNER_KEY_HEADER)?.trim().toLowerCase() ?? "");
   }
 
-  try {
-    const results = await recordCheckIns(game.gameId, parseCheckInBatch(body));
+  async function handleGet(request: Request) {
+    const game = await authenticateScanner(request);
 
-    return Response.json({ game: describeGame(game), results }, { headers: NO_STORE });
-  } catch (error) {
-    if (error instanceof ValidationError) return errorResponse(400, error.message, error.fieldErrors);
-    throw error;
+    if (!game) return errorResponse(401, UNAUTHORIZED);
+
+    return Response.json({ game: describeGame(game) }, { headers: NO_STORE });
   }
+
+  async function handlePost(request: Request) {
+    const game = await authenticateScanner(request);
+
+    if (!game) return errorResponse(401, UNAUTHORIZED);
+
+    let body: CheckInBatchPayload | null | undefined;
+
+    try {
+      // SAFETY: El cuerpo JSON se valida campo por campo mediante parseCheckInBatch.
+      body = (await request.json()) as CheckInBatchPayload;
+    } catch {
+      return errorResponse(400, "El cuerpo debe ser JSON.");
+    }
+
+    try {
+      const results = await saveCheckIns(game.gameId, parseCheckInBatch(body));
+
+      return Response.json({ game: describeGame(game), results }, { headers: NO_STORE });
+    } catch (error) {
+      if (error instanceof ValidationError) return errorResponse(400, error.message, error.fieldErrors);
+      throw error;
+    }
+  }
+
+  return { GET: handleGet, POST: handlePost };
 }
+
+const defaultRoutes = createCheckInsRoute();
+
+export const GET = defaultRoutes.GET;
+
+export const POST = defaultRoutes.POST;

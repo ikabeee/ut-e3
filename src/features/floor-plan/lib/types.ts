@@ -6,7 +6,9 @@ import type { ReactNode } from "react";
  */
 export type PlanCategory = "team" | "info" | "act" | "srv";
 
-export type ZoneId = "stage" | "arena" | "raffles" | "food" | "info" | "wc" | "rest" | "entry";
+export const ZONE_IDS = ["stage", "arena", "raffles", "food", "info", "wc", "rest", "entry"] as const;
+
+export type ZoneId = (typeof ZONE_IDS)[number];
 
 /** Zona del recinto (escenario, arena, servicios, entrada...). */
 export interface PlanZone {
@@ -77,7 +79,7 @@ export type FloorPlanVariant = "overview" | "explorer";
 /** Rectángulo `[x, y, ancho, alto]` en coordenadas del SVG. */
 export type PlanRect = readonly [number, number, number, number];
 
-export interface ZoneShape {
+export interface ZoneGeometry {
   rect: PlanRect;
   label: string;
   /** Tamaño de la etiqueta; 18 si se omite. */
@@ -106,7 +108,7 @@ export interface PlanLayout {
   wall: string;
   /** Límites de la retícula de puntos: `[x0, x1, y0, y1]`. */
   dots: readonly [number, number, number, number];
-  zones: Partial<Record<Exclude<ZoneId, "entry">, ZoneShape>>;
+  zones: Partial<Record<Exclude<ZoneId, "entry">, ZoneGeometry>>;
   publicArea: PlanRect;
   entry: PlanRect;
   /** Posición del texto "ENTRADA" en el croquis del inicio; `null` lo pone bajo la entrada. */

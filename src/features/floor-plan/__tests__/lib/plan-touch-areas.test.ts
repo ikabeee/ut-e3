@@ -58,6 +58,7 @@ describe("expandWithinNeighbors", () => {
   });
 });
 
+// SAFETY: PLAN_LAYOUTS is a Record for every PlanOrientation, so all keys are valid orientations.
 describe.each(Object.keys(PLAN_LAYOUTS) as PlanOrientation[])("getTouchRects (%s)", (orientation) => {
   const layout = PLAN_LAYOUTS[orientation];
   const touchRects = getTouchRects(layout);
@@ -73,7 +74,10 @@ describe.each(Object.keys(PLAN_LAYOUTS) as PlanOrientation[])("getTouchRects (%s
     expect(touchRects.get("B9")).toBeDefined();
 
     for (const [id, rect] of visibleRects) {
-      expect(contains(touchRects.get(id) as PlanRect, rect)).toBe(true);
+      const touchRect = touchRects.get(id);
+      expect(touchRect).toBeDefined();
+
+      if (touchRect) expect(contains(touchRect, rect)).toBe(true);
     }
   });
 
