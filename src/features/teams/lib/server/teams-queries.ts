@@ -159,6 +159,7 @@ export async function createTeamLeader(teamId: string, input: CreateTeamLeaderIn
   await connection();
 
   const team = await db.orm.public.Team.where({ id: teamId }).first();
+
   if (!team) throw new RecordNotFoundError(TEAM_NOT_FOUND);
 
   const passwordHash = hashPassword(input.password);

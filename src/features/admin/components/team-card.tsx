@@ -104,6 +104,7 @@ export function TeamCard({ team }: Readonly<TeamCardProps>) {
                 label={copy.removeMember}
                 confirmLabel={ADMIN_COPY.common.confirmDelete}
                 variant="tertiary"
+                successMessage={copy.memberRemoved}
               />
             </li>
           ))}
@@ -127,6 +128,7 @@ export function TeamCard({ team }: Readonly<TeamCardProps>) {
           label={ADMIN_COPY.common.delete}
           confirmLabel={ADMIN_COPY.common.confirmDelete}
           variant="danger"
+          successMessage={ADMIN_COPY.teams.deleted}
         />
       </div>
     </AdminPanel>

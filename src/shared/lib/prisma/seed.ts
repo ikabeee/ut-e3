@@ -43,7 +43,6 @@ const skipOn = <Field extends string>(...conflictOn: Field[]) => ({ onConflict: 
 
 const db = postgres<Contract>({ contractJson, url: process.env["DATABASE_URL"]! });
 
-/** Hash con el que se guardan las llaves de los escáneres (nunca la llave). */
 function hashSecret(secret: string) {
   return createHash("sha256").update(secret).digest("hex");
 }

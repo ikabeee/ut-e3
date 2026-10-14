@@ -26,6 +26,7 @@ export const ADMIN_COPY = {
     optional: "Opcional",
     noneSelected: "Elige una opción",
     edit: "Editar",
+    unexpectedError: "Ocurrió un error inesperado.",
   },
   home: {
     intro:
@@ -56,6 +57,8 @@ export const ADMIN_COPY = {
     addMember: "Agregar integrante",
     memberAdded: "Integrante agregado.",
     removeMember: "Quitar",
+    memberRemoved: "Integrante eliminado.",
+    deleted: "Equipo eliminado.",
     rotateKey: "Generar llave nueva del escáner",
     rotateKeyConfirm: "Sí, generar (la anterior deja de servir)",
     scannerKeyTitle: "Llave del escáner",

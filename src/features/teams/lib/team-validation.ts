@@ -46,6 +46,7 @@ export function parseCreateTeamLeaderInput(raw: RawInput): CreateTeamLeaderInput
     });
 
     const password = field.text("password", { label: "La contraseña", max: 72 });
+
     if (password.length < 8) {
       field.invalid("password", "La contraseña debe tener al menos 8 caracteres.");
     }
