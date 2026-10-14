@@ -1,10 +1,12 @@
 import "server-only";
 import { connection } from "next/server";
+import { sendVisitorQrEmail } from "@features/visitors/lib/server/visitor-email-service";
 import type { ReissuedVisitorQr, VisitorPassport } from "@features/visitors/lib/types";
 import { buildVisitorQrUrl, isVisitorToken, normalizeGamertag } from "@features/visitors/lib/visitor-rules";
 import { getVisitorToken } from "@features/visitors/lib/server/visitor-session";
 import { db } from "@shared/lib/prisma/db";
 import { RecordNotFoundError } from "@shared/lib/record-not-found-error";
+import type { sendMail } from "@shared/lib/server/mailer";
 import { generateSecret, hashSecret } from "@shared/lib/server/secrets";
 import { siteConfig } from "@shared/lib/site-config";
 
@@ -29,19 +31,46 @@ export async function listRequiredGames(): Promise<RequiredGame[]> {
   return teams.flatMap(({ standCode, game }) => (standCode && game ? [{ ...game, standCode }] : []));
 }
 
+export interface RegisterVisitorInput {
+  fullName?: string | null;
+  email?: string | null;
+  gamertag: string;
+}
+
 /** Busca al visitante dueño de un token; `null` si el token no existe o ya se reemplazó. */
 export async function findVisitorByToken(token: string) {
   if (!isVisitorToken(token)) return null;
 
-  return db.orm.public.Visitor.select("id", "gamertag")
+  return db.orm.public.Visitor.select("id", "gamertag", "fullName", "email")
     .where({ qrTokenHash: hashSecret(token) })
     .first();
 }
 
-/** Registra al visitante y devuelve el token de su QR. Falla si el gamertag ya existe. */
-export async function registerVisitor(gamertag: string): Promise<{ token: string }> {
+/** Registra al visitante, devuelve el token de su QR y envía copia por correo si tiene correo. */
+export async function registerVisitor(
+  input: string | RegisterVisitorInput,
+  mailSender?: typeof sendMail,
+): Promise<{ token: string }> {
   const token = generateSecret();
-  await db.orm.public.Visitor.create({ gamertag, qrTokenHash: hashSecret(token) });
+  const data = typeof input === "string" ? { gamertag: input } : input;
+  const gamertag = normalizeGamertag(data.gamertag);
+  const fullName = data.fullName?.trim() || null;
+  const email = data.email?.trim().toLowerCase() || null;
+
+  await db.orm.public.Visitor.create({
+    gamertag,
+    fullName,
+    email,
+    qrTokenHash: hashSecret(token),
+  });
+
+  if (email && fullName) {
+    try {
+      await sendVisitorQrEmail(email, fullName, token, mailSender);
+    } catch (error) {
+      console.error("No se pudo enviar el correo con el código al visitante:", error);
+    }
+  }
 
   return { token };
 }

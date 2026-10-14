@@ -86,6 +86,54 @@ async function insertCheckIns(rows: CheckInRow[]) {
   return new Set(inserted.map((row) => row.id));
 }
 
+async function awardRaffleTicketForVisitor(
+  db: Awaited<ReturnType<typeof getDb>>,
+  visitorId: string,
+  requiredIds: Set<string>,
+  sendEmail: (email: string, name: string, ticketNumber: number) => Promise<unknown>,
+): Promise<void> {
+  const existingTicket = await db.orm.public.RaffleTicket.select("ticketNumber").where({ visitorId }).first();
+  if (existingTicket) return;
+
+  const checkIns = await db.orm.public.CheckIn.select("gameId").where({ visitorId }).all();
+  const checkedIds = new Set(checkIns.map((c) => c.gameId));
+
+  const completedAll = [...requiredIds].every((id) => checkedIds.has(id));
+  if (!completedAll) return;
+
+  const [ticket] = await db.orm.public.RaffleTicket.select("ticketNumber").createAll([{ visitorId }], {
+    onConflict: "skip",
+    conflictOn: ["visitorId"],
+  });
+
+  if (!ticket) return;
+
+  const visitor = await db.orm.public.Visitor.select("email", "fullName", "gamertag").where({ id: visitorId }).first();
+  if (visitor?.email) {
+    try {
+      await sendEmail(visitor.email, visitor.fullName || visitor.gamertag, ticket.ticketNumber);
+    } catch (error) {
+      console.error("No se pudo enviar el correo del boleto del sorteo:", error);
+    }
+  }
+}
+
+async function checkAndAwardCompletedRaffleTickets(visitorIds: readonly string[]): Promise<void> {
+  if (visitorIds.length === 0) return;
+
+  const db = await getDb();
+  const { listRequiredGames } = await import("@features/visitors/lib/server/visitors-queries");
+  const requiredGames = await listRequiredGames();
+  if (requiredGames.length === 0) return;
+
+  const requiredIds = new Set(requiredGames.map((g) => g.id));
+  const { sendVisitorRaffleTicketEmail } = await import("@features/visitors/lib/server/visitor-email-service");
+
+  for (const visitorId of visitorIds) {
+    await awardRaffleTicketForVisitor(db, visitorId, requiredIds, sendVisitorRaffleTicketEmail);
+  }
+}
+
 /**
  * Guarda un lote de escaneos del juego. Los QR desconocidos se descartan sin abortar el lote
  * y `ON CONFLICT DO NOTHING` (sin columna) ignora tanto un reenvío (mismo id) como un segundo
@@ -119,6 +167,15 @@ export async function recordCheckIns(
 
   const insertedIds = rows.length > 0 ? await insert(rows) : new Set<string>();
   const knownIds = new Set(rows.map((row) => row.id));
+
+  if (insertedIds.size > 0) {
+    const affectedVisitorIds = [...new Set(rows.filter((r) => insertedIds.has(r.id)).map((r) => r.visitorId))];
+    try {
+      await checkAndAwardCompletedRaffleTickets(affectedVisitorIds);
+    } catch (error) {
+      console.error("Error al procesar boletos automáticos del sorteo:", error);
+    }
+  }
 
   return items.map((item) => ({ id: item.id, status: getStatus(item.id, insertedIds, knownIds) }));
 }

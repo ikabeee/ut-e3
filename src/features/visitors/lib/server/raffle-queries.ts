@@ -30,6 +30,7 @@ export interface ClaimRaffleTicketDependencies {
   findExistingTicket?: (visitorId: string) => Promise<RaffleTicket | null>;
   fetchCheckedGameIds?: (visitorId: string) => Promise<string[]>;
   createTicket?: (visitorId: string, phone: string) => Promise<RaffleTicket | null>;
+  sendTicketEmail?: (email: string, fullName: string, ticketNumber: number) => Promise<boolean>;
 }
 
 const defaultFindVisitor: typeof findVisitorByToken = async (token) =>
@@ -57,6 +58,12 @@ const defaultCreateTicket = async (visitorId: string, phone: string) => {
   });
 
   return created ?? (await (await ticketOf(visitorId)).first());
+};
+
+const defaultSendTicketEmail = async (email: string, fullName: string, ticketNumber: number) => {
+  const { sendVisitorRaffleTicketEmail } = await import("@features/visitors/lib/server/visitor-email-service");
+
+  return sendVisitorRaffleTicketEmail(email, fullName, ticketNumber);
 };
 
 /**
@@ -97,6 +104,15 @@ export async function claimRaffleTicket(
 
   if (!ticket) throw new RecordNotFoundError(INVALID_PASSPORT);
 
+  const sendTicketEmail = deps.sendTicketEmail ?? defaultSendTicketEmail;
+  if (visitor.email) {
+    try {
+      await sendTicketEmail(visitor.email, visitor.fullName || visitor.gamertag, ticket.ticketNumber);
+    } catch (error) {
+      console.error("No se pudo enviar el correo del boleto del sorteo:", error);
+    }
+  }
+
   return ticket;
 }
 
@@ -112,7 +128,7 @@ async function winnersWhere(ticketNumbers?: readonly number[]) {
 
 interface WinnerRow {
   readonly ticketNumber: number;
-  readonly phone: string;
+  readonly phone: string | null;
   readonly wonAt: string | null;
   readonly notifiedAt: string | null;
   readonly visitor?: { readonly gamertag: string } | null;
@@ -122,7 +138,7 @@ function toWinner(row: WinnerRow): RaffleWinner {
   return {
     ticketNumber: row.ticketNumber,
     gamertag: row.visitor?.gamertag ?? "",
-    phone: row.phone,
+    phone: row.phone ?? "",
     wonAt: row.wonAt ?? "",
     notifiedAt: row.notifiedAt,
   };
