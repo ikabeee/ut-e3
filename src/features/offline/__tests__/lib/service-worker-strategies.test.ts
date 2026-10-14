@@ -36,7 +36,7 @@ describe("getRequestStrategy", () => {
     ["/games?_rsc=abc", {}, "rsc"],
     ["/games", { headers: headers({ RSC: "1" }) }, "rsc"],
     ["/_next/image?url=%2Fmock%2Fgames%2Fa.png&w=640&q=75", {}, "image"],
-    ["/mock/games/ruta-9.png", {}, "image"],
+    ["/games/ruta-9.png", {}, "image"],
     ["/media/reel.jpg", { destination: "image" as const }, "image"],
     ["/api/games", {}, "api"],
     ["/manifest.webmanifest", {}, "network"],
@@ -70,7 +70,7 @@ describe("extractStaticAssetUrls", () => {
       <link rel="stylesheet" href="/_next/static/chunks/app.css" />
       <script src="/_next/static/chunks/main.js" async></script>
       <script>self.__next_f.push([1,"I[\\"/_next/static/chunks/page.js\\"]"])</script>
-      <img src="/mock/games/ruta-9.png" />
+      <img src="/games/ruta-9.png" />
       <script src="https://cdn.example/_next/static/chunks/external.js"></script>`;
 
     expect(extractStaticAssetUrls(html, `${ORIGIN}/games`, ORIGIN)).toEqual([

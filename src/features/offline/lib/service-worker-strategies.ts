@@ -45,7 +45,12 @@ export function getRequestStrategy(request: StrategyRequest, origin: string): Re
 
   if (url.pathname.startsWith("/_next/static/")) return "static";
 
-  if (url.pathname.startsWith("/_next/image") || url.pathname.startsWith("/mock/") || request.destination === "image") {
+  if (
+    url.pathname.startsWith("/_next/image") ||
+    url.pathname.startsWith("/games/") ||
+    url.pathname.startsWith("/mock/") ||
+    request.destination === "image"
+  ) {
     return "image";
   }
 

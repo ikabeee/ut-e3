@@ -24,8 +24,16 @@ const nextConfig: NextConfig = {
       hostname,
     })),
   },
+  async rewrites() {
+    return [
+      {
+        source: "/mock/games/:path*",
+        destination: "/games/:path*",
+      },
+    ];
+  },
   async headers() {
-    const media = ["/media/:path*", "/mock/:path*"].map((source) => ({
+    const media = ["/media/:path*", "/games/:path*", "/mock/:path*"].map((source) => ({
       source,
       headers: [{ key: "Cache-Control", value: MEDIA_CACHE_CONTROL }],
     }));

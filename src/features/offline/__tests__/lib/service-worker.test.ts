@@ -317,11 +317,11 @@ describe("runServiceWorker: fetch", () => {
   it("keeps at most maxImageEntries images", async () => {
     const { storage, request } = setup(async (url) => new FakeResponse(url));
 
-    for (const name of ["a", "b", "c"]) await request(`/mock/games/${name}.png`);
+    for (const name of ["a", "b", "c"]) await request(`/games/${name}.png`);
 
     expect([...storage.caches.get("ut-e3-images-v2")!.entries.keys()]).toEqual([
-      `${ORIGIN}/mock/games/b.png`,
-      `${ORIGIN}/mock/games/c.png`,
+      `${ORIGIN}/games/b.png`,
+      `${ORIGIN}/games/c.png`,
     ]);
   });
 
