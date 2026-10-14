@@ -45,7 +45,7 @@ export function ConfirmEmailStatus({ isConfirmed }: Readonly<ConfirmEmailStatusP
               href={REGISTER_PATH}
               className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold"
             >
-              Reintentar registro
+              {copy.retryRegister}
             </Link>
           </div>
         )}

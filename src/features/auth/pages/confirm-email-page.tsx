@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ConfirmEmailStatus } from "@features/auth/components/confirm-email-status";
+import { ConfirmPasswordForm } from "@features/auth/components/confirm-password-form";
 import { AUTH_COPY } from "@features/auth/lib/auth-copy";
 import { CONFIRM_EMAIL_PATH } from "@features/auth/lib/auth-links";
-import { confirmEmailToken } from "@features/auth/lib/server/auth-queries";
+import { checkConfirmationToken } from "@features/auth/lib/server/auth-queries";
 
 export const confirmEmailPageMetadata: Metadata = {
   title: AUTH_COPY.confirmEmail.title,
@@ -19,9 +20,18 @@ interface ConfirmEmailPageProps {
 async function ConfirmEmailContent({ searchParams }: Readonly<ConfirmEmailPageProps>) {
   const query = searchParams ? await searchParams : {};
   const token = query.token ?? "";
-  const isConfirmed = token ? await confirmEmailToken(token) : false;
 
-  return <ConfirmEmailStatus isConfirmed={isConfirmed} />;
+  if (!token) {
+    return <ConfirmEmailStatus isConfirmed={false} />;
+  }
+
+  const tokenStatus = await checkConfirmationToken(token);
+
+  if (!tokenStatus.valid) {
+    return <ConfirmEmailStatus isConfirmed={false} />;
+  }
+
+  return <ConfirmPasswordForm token={token} fullName={tokenStatus.fullName} email={tokenStatus.email} />;
 }
 
 export function ConfirmEmailPage(props: Readonly<ConfirmEmailPageProps>) {
