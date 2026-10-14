@@ -25,11 +25,13 @@
     "db:migrate": "prisma db migrate",
     "db:verify": "prisma db verify",
     "db:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/shared/lib/prisma/seed.ts",
-    "docker:up": "docker compose up -d --wait db && docker compose run --rm --build migrate && docker compose up -d --build app",
+    "docker:up": "docker compose up -d --wait db",
     "docker:down": "docker compose down",
-    "pwa:icons": "node scripts/generate-pwa-icons.mjs"
+    "pwa:icons": "node scripts/generate-pwa-icons.mjs",
+    "email:test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-email.ts"
   },
   "dependencies": {
+    "@gravity-ui/icons": "^2.22.1",
     "@heroui/react": "^3.2.6",
     "@heroui/styles": "^3.2.6",
     "@prisma/orm-postgres": "8.0.0-rc.17",
