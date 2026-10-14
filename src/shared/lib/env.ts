@@ -106,6 +106,7 @@ export const DEFAULT_EMAIL_FROM = '"UT Game Showcase" <no-reply@showcase.ute3.ed
 /** Valida o normaliza la dirección de remitente de correos. */
 export function parseEmailFrom(value: string | undefined): string {
   const from = value?.trim();
+
   return from || DEFAULT_EMAIL_FROM;
 }
 

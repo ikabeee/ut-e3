@@ -35,6 +35,7 @@ export function createMailerTransporter(config: SmtpConfig) {
 }
 
 let cachedTransporter: MailerTransporter | null = null;
+
 let initialized = false;
 
 /**
@@ -53,6 +54,7 @@ export function getMailerTransporter(): MailerTransporter | null {
   }
 
   initialized = true;
+
   return cachedTransporter;
 }
 
@@ -79,9 +81,11 @@ export async function verifyMailerConnection(): Promise<{ success: boolean; erro
 
   try {
     await transporter.verify();
+
     return { success: true };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : "Error desconocido al conectar con el servidor SMTP.";
+
     return { success: false, error: errorMsg };
   }
 }
@@ -101,13 +105,16 @@ export async function sendMail(options: SendMailOptions): Promise<SendMailResult
     console.log(`De:       ${from}`);
     console.log(`Para:     ${to}`);
     console.log(`Asunto:   ${options.subject}`);
+
     if (options.replyTo) {
       console.log(`Reply-To: ${options.replyTo}`);
     }
+
     if (options.text) {
       console.log("----------------------- Contenido Texto --------------------------");
       console.log(options.text);
     }
+
     console.log("==================================================================\n");
 
     return {
@@ -117,6 +124,7 @@ export async function sendMail(options: SendMailOptions): Promise<SendMailResult
   }
 
   try {
+    // SAFETY: Nodemailer sendMail resuelve con un objeto de información que contiene messageId opcional.
     const info = (await transporter.sendMail({
       from,
       to,

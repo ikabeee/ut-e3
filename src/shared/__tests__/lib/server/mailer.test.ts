@@ -8,7 +8,11 @@ import {
 } from "@shared/lib/server/mailer";
 import { env, type SmtpConfig } from "@shared/lib/env";
 
-jest.mock("nodemailer");
+const realCreateTransport = nodemailer.createTransport;
+
+function createTestTransporter() {
+  return realCreateTransport({ jsonTransport: true, secure: true });
+}
 
 describe("mailer", () => {
   const mockConfig: SmtpConfig = {
@@ -25,14 +29,18 @@ describe("mailer", () => {
     resetMailerTransporter();
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe("createMailerTransporter", () => {
     it("creates a nodemailer transporter with correct config", () => {
-      const mockTransporter = { verify: jest.fn(), sendMail: jest.fn() };
-      (nodemailer.createTransport as jest.Mock).mockReturnValue(mockTransporter);
+      const mockTransporter = createTestTransporter();
+      const spy = jest.spyOn(nodemailer, "createTransport").mockReturnValue(mockTransporter);
 
       const transporter = createMailerTransporter(mockConfig);
 
-      expect(nodemailer.createTransport).toHaveBeenCalledWith({
+      expect(spy).toHaveBeenCalledWith({
         host: "smtp.example.com",
         port: 587,
         secure: false,
@@ -59,8 +67,8 @@ describe("mailer", () => {
 
     it("returns and caches transporter when env.smtp is configured", () => {
       const originalSmtp = env.smtp;
-      const mockTransporter = { verify: jest.fn(), sendMail: jest.fn() };
-      (nodemailer.createTransport as jest.Mock).mockReturnValue(mockTransporter);
+      const mockTransporter = createTestTransporter();
+      const spy = jest.spyOn(nodemailer, "createTransport").mockReturnValue(mockTransporter);
 
       env.smtp = mockConfig;
 
@@ -70,12 +78,13 @@ describe("mailer", () => {
 
         expect(t1).toBe(mockTransporter);
         expect(t2).toBe(mockTransporter);
-        expect(nodemailer.createTransport).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledTimes(1);
 
         resetMailerTransporter();
         const t3 = getMailerTransporter();
+
         expect(t3).toBe(mockTransporter);
-        expect(nodemailer.createTransport).toHaveBeenCalledTimes(2);
+        expect(spy).toHaveBeenCalledTimes(2);
       } finally {
         env.smtp = originalSmtp;
       }
@@ -89,6 +98,7 @@ describe("mailer", () => {
 
       try {
         const result = await verifyMailerConnection();
+
         expect(result.success).toBe(false);
         expect(result.error).toContain("No hay configuración SMTP disponible");
       } finally {
@@ -98,15 +108,15 @@ describe("mailer", () => {
 
     it("returns success if transporter verify resolves", async () => {
       const originalSmtp = env.smtp;
-      const mockVerify = jest.fn().mockResolvedValue(true);
-      (nodemailer.createTransport as jest.Mock).mockReturnValue({
-        verify: mockVerify,
-      });
+      const mockTransporter = createTestTransporter();
+      const mockVerify = jest.spyOn(mockTransporter, "verify").mockImplementation(async () => true);
+      jest.spyOn(nodemailer, "createTransport").mockReturnValue(mockTransporter);
 
       env.smtp = mockConfig;
 
       try {
         const result = await verifyMailerConnection();
+
         expect(result.success).toBe(true);
         expect(mockVerify).toHaveBeenCalled();
       } finally {
@@ -116,15 +126,18 @@ describe("mailer", () => {
 
     it("returns error message if transporter verify fails", async () => {
       const originalSmtp = env.smtp;
-      const mockVerify = jest.fn().mockRejectedValue(new Error("Connection refused"));
-      (nodemailer.createTransport as jest.Mock).mockReturnValue({
-        verify: mockVerify,
+      const mockTransporter = createTestTransporter();
+
+      jest.spyOn(mockTransporter, "verify").mockImplementation(async () => {
+        throw new Error("Connection refused");
       });
+      jest.spyOn(nodemailer, "createTransport").mockReturnValue(mockTransporter);
 
       env.smtp = mockConfig;
 
       try {
         const result = await verifyMailerConnection();
+
         expect(result.success).toBe(false);
         expect(result.error).toBe("Connection refused");
       } finally {
@@ -158,10 +171,19 @@ describe("mailer", () => {
 
     it("sends email with transporter when configured", async () => {
       const originalSmtp = env.smtp;
-      const mockSendMail = jest.fn().mockResolvedValue({ messageId: "msg-12345" });
-      (nodemailer.createTransport as jest.Mock).mockReturnValue({
-        sendMail: mockSendMail,
-      });
+      const mockTransporter = createTestTransporter();
+
+      const mockSendMail = jest.spyOn(mockTransporter, "sendMail").mockImplementation(async () => ({
+        envelope: { from: "test@example.com", to: ["dest1@example.com", "dest2@example.com"] },
+        messageId: "msg-12345",
+        message: "{}",
+        accepted: ["dest1@example.com", "dest2@example.com"],
+        rejected: [],
+        pending: [],
+        response: "250 OK",
+      }));
+
+      jest.spyOn(nodemailer, "createTransport").mockReturnValue(mockTransporter);
 
       env.smtp = mockConfig;
 
@@ -191,11 +213,15 @@ describe("mailer", () => {
 
     it("catches errors from transporter.sendMail and returns failure result", async () => {
       const originalSmtp = env.smtp;
-      const mockSendMail = jest.fn().mockRejectedValue(new Error("SMTP timeout"));
-      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-      (nodemailer.createTransport as jest.Mock).mockReturnValue({
-        sendMail: mockSendMail,
+      const mockTransporter = createTestTransporter();
+
+      jest.spyOn(mockTransporter, "sendMail").mockImplementation(async () => {
+        throw new Error("SMTP timeout");
       });
+
+      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+      jest.spyOn(nodemailer, "createTransport").mockReturnValue(mockTransporter);
 
       env.smtp = mockConfig;
 

@@ -14,10 +14,12 @@ async function main() {
   const port = rawPort ? Number(rawPort) : 587;
   const user = process.env["SMTP_USER"]?.trim();
   const pass = process.env["SMTP_PASSWORD"];
+
   const secure =
     process.env["SMTP_SECURE"] !== undefined
       ? process.env["SMTP_SECURE"].trim().toLowerCase() === "true"
       : port === 465;
+
   const from = process.env["EMAIL_FROM"]?.trim() || '"UT Game Showcase" <no-reply@showcase.ute3.edu.mx>';
 
   console.log("=================================================");
@@ -34,6 +36,7 @@ async function main() {
     console.warn("⚠️  Credenciales SMTP incompletas en las variables de entorno.");
     console.warn("   Para enviar correos reales, configura SMTP_HOST, SMTP_USER y SMTP_PASSWORD en tu archivo .env.");
     console.log("   (En desarrollo local sin SMTP, la app imprime los correos en la terminal automáticamente).\n");
+
     return;
   }
 
@@ -45,6 +48,7 @@ async function main() {
   });
 
   console.log("Probando conexión con el servidor SMTP...");
+
   try {
     await transporter.verify();
     console.log("✅ Conexión SMTP verificada con éxito.\n");
@@ -54,8 +58,10 @@ async function main() {
   }
 
   const recipient = process.argv[2];
+
   if (recipient) {
     console.log(`Enviando correo de prueba a ${recipient}...`);
+
     try {
       const info = await transporter.sendMail({
         from,
@@ -70,6 +76,7 @@ async function main() {
           </div>
         `,
       });
+
       console.log(`✅ Correo de prueba enviado con éxito. Message ID: ${info.messageId}`);
     } catch (error) {
       console.error("❌ Error al enviar el correo de prueba:", error);
