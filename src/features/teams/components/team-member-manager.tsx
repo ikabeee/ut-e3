@@ -1,10 +1,12 @@
 "use client";
 
 import { useRef, useTransition } from "react";
+import { Persons } from "@gravity-ui/icons";
 import { FieldError, Form, Input, Label, TextField, toast } from "@heroui/react";
 import { addMemberByLeaderAction, deleteMemberByLeaderAction } from "@features/teams/lib/team-portal-actions";
 import { STUDENT_GROUPS, type TeamPortalMember } from "@features/teams/lib/types";
 import { ActionButton } from "@shared/components/action-button";
+import { EmptyState } from "@shared/components/empty-state";
 import { PaperCard } from "@shared/components/paper-card";
 import { useServerActionForm } from "@shared/hooks/use-server-action-form";
 
@@ -50,7 +52,12 @@ export function TeamMemberManager({ members }: Readonly<TeamMemberManagerProps>)
       {/* Lista de integrantes actuales */}
       <div className="divide-y divide-paper-foreground/15 border-b border-paper-foreground/15 pb-4">
         {members.length === 0 ? (
-          <p className="py-2 text-sm text-paper-foreground/60">Aún no hay integrantes registrados.</p>
+          <EmptyState
+            icon={Persons}
+            size="sm"
+            title="Aún no hay integrantes registrados."
+            className="my-2 border-paper-foreground/15 text-paper-foreground/70 [&_svg]:text-paper-foreground/50"
+          />
         ) : null}
         {members.map((member) => (
           <div key={member.id} className="flex flex-wrap items-center justify-between gap-3 py-3">

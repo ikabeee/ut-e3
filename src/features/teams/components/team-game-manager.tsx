@@ -1,7 +1,9 @@
+import { Boxes3 } from "@gravity-ui/icons";
 import { FieldError, Form, Input, Label, TextArea, TextField, toast } from "@heroui/react";
 import { updateGameByLeaderAction } from "@features/teams/lib/team-portal-actions";
 import type { TeamPortalGame } from "@features/teams/lib/types";
 import { ActionButton } from "@shared/components/action-button";
+import { EmptyState } from "@shared/components/empty-state";
 import { PaperCard } from "@shared/components/paper-card";
 import { useServerActionForm } from "@shared/hooks/use-server-action-form";
 
@@ -18,9 +20,13 @@ export function TeamGameManager({ game }: Readonly<TeamGameManagerProps>) {
     return (
       <PaperCard className="p-6">
         <h3 className="font-wide text-lg font-bold tracking-[-.02em] uppercase">Información del Videojuego</h3>
-        <p className="mt-2 text-sm text-paper-foreground/70">
-          Tu equipo aún no tiene un juego vinculado. Consulta con el administrador del evento para asignarlo.
-        </p>
+        <EmptyState
+          icon={Boxes3}
+          size="sm"
+          title="Tu equipo aún no tiene un juego vinculado."
+          description="Consulta con el administrador del evento para asignarlo."
+          className="mt-4 border-paper-foreground/15 text-paper-foreground/70 [&_svg]:text-paper-foreground/50"
+        />
       </PaperCard>
     );
   }
