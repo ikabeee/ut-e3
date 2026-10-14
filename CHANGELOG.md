@@ -75,6 +75,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Eliminado
 
+- Mocks de la aplicación: se eliminaron los datos mock en memoria (`src/features/games/lib/mock/`),
+  la selección de fuentes de datos (`DATA_SOURCE`) y la carpeta `public/mock/`, conectando la
+  aplicación de forma 100% dinámica a PostgreSQL mediante Prisma 8. Las imágenes de portada se
+  trasladaron a `public/games/`.
 - El arte generado de los juegos sin imagen y el campo de torneo por juego (`hasTournament`),
   que ya no existen en el modelo de datos. Los 14 juegos del mock sin imagen usan una portada de
   relleno. La galería del detalle muestra las fotos reales del juego (sin flechas si sólo tiene
