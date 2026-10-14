@@ -1,5 +1,18 @@
 // Matchers de DOM para las pruebas (`toBeInTheDocument`, `toHaveAttribute`, ...).
 import "@testing-library/jest-dom";
+import { TextDecoder, TextEncoder } from "node:util";
+
+if (typeof global.TextEncoder === "undefined") {
+  global.TextEncoder = TextEncoder;
+  global.TextDecoder = TextDecoder as typeof global.TextDecoder;
+}
+
+if (typeof global.Request === "undefined" && typeof Request !== "undefined") {
+  global.Request = Request as unknown as typeof global.Request;
+  global.Response = Response as unknown as typeof global.Response;
+  global.Headers = Headers as unknown as typeof global.Headers;
+  global.fetch = fetch as unknown as typeof global.fetch;
+}
 
 // Las pruebas de Route Handlers corren en el entorno `node` (`@jest-environment node`), que no
 // tiene `window`: ahí no hace falta simular las APIs del navegador.
