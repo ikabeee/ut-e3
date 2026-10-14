@@ -1,6 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
+import { TeamGameManager } from "@features/teams/components/team-game-manager";
+import { TeamMemberManager } from "@features/teams/components/team-member-manager";
 import { TeamScanner } from "@features/teams/components/team-scanner";
 import type { TeamPortalData } from "@features/teams/lib/types";
 import { getTrafficLevel, type TrafficLevel } from "@features/visitors/lib/stand-traffic";
@@ -95,28 +97,11 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
       {/* Escáner de Códigos QR */}
       <TeamScanner />
 
-      {/* Integrantes del equipo */}
-      <PaperCard className="gap-4 p-6">
-        <h3 className="font-wide text-lg font-bold tracking-[-.02em] uppercase">Integrantes del Equipo</h3>
-        <div className="divide-y divide-paper-foreground/15">
-          {data.members.map((member) => (
-            <div key={member.id} className="flex items-center justify-between py-3">
-              <div>
-                <p className="font-semibold text-paper-foreground">
-                  {member.fullName}
-                  {member.isLeader ? (
-                    <span className="text-primary ml-2 text-xs font-bold uppercase">(Líder)</span>
-                  ) : null}
-                </p>
-                <p className="text-xs text-paper-foreground/70">{member.email}</p>
-              </div>
-              <span className="rounded bg-paper-foreground/10 px-2 py-1 text-xs font-medium text-paper-foreground">
-                {member.groupName}
-              </span>
-            </div>
-          ))}
-        </div>
-      </PaperCard>
+      {/* Gestión de Integrantes del equipo por el Líder */}
+      <TeamMemberManager members={data.members} />
+
+      {/* Gestión de la Ficha del Juego por el Líder */}
+      <TeamGameManager game={data.game} />
     </div>
   );
 }
