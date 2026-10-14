@@ -3,16 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { TeamPortalView } from "@features/teams/components/team-portal-view";
 import type { TeamPortalData } from "@features/teams/lib/types";
 
-jest.mock("@features/teams/lib/team-portal-actions", () => ({
-  addMemberByLeaderAction: jest.fn(),
-  deleteMemberByLeaderAction: jest.fn(),
-  updateGameByLeaderAction: jest.fn(),
-}));
-
-jest.mock("@features/teams/lib/team-scanner-actions", () => ({
-  recordTeamScanAction: jest.fn(),
-}));
-
 const mockPortalData: TeamPortalData = {
   id: "team-1",
   name: "Equipo Pixel",
