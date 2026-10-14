@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { Boxes3 } from "@gravity-ui/icons";
 import { cn } from "@heroui/react";
 import { getPlanItemPath } from "@features/floor-plan/lib/floor-plan-links";
 import type { PassportGame } from "@features/visitors/lib/types";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
+import { EmptyState } from "@shared/components/empty-state";
 
 interface PassportGameListProps {
   games: readonly PassportGame[];
@@ -13,7 +15,7 @@ export function PassportGameList({ games }: Readonly<PassportGameListProps>) {
   const copy = VISITORS_COPY.games;
 
   if (games.length === 0) {
-    return <p className="m-0 text-copy-warm">{copy.empty}</p>;
+    return <EmptyState icon={Boxes3} title={copy.empty} />;
   }
 
   return (
