@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Persons } from "@gravity-ui/icons";
+import { logoutAction } from "@features/auth/lib/auth-actions";
 import { AdminPanel } from "@features/admin/components/admin-panel";
 import { AdminShell } from "@features/admin/components/admin-shell";
 import { AdminSkeleton } from "@features/admin/components/admin-skeleton";
@@ -31,7 +32,7 @@ async function AdminTeamsContent() {
 /** Equipos (`/admin/teams`): alta, stand, integrantes y llave del escáner. */
 export function AdminTeamsPage() {
   return (
-    <AdminShell current="teams">
+    <AdminShell current="teams" onLogout={logoutAction}>
       <Suspense fallback={<AdminSkeleton />}>
         <AdminTeamsContent />
       </Suspense>

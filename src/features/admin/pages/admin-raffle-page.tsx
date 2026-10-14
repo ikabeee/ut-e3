@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { logoutAction } from "@features/auth/lib/auth-actions";
 import { AdminPanel } from "@features/admin/components/admin-panel";
 import { AdminShell } from "@features/admin/components/admin-shell";
 import { AdminSkeleton } from "@features/admin/components/admin-skeleton";
@@ -32,7 +33,7 @@ async function AdminRaffleContent() {
 /** Sorteo (`/admin/raffle`): sortear, avisar a los ganadores y reponer QR perdidos. */
 export function AdminRafflePage() {
   return (
-    <AdminShell current="raffle">
+    <AdminShell current="raffle" onLogout={logoutAction}>
       <Suspense fallback={<AdminSkeleton />}>
         <AdminRaffleContent />
       </Suspense>
