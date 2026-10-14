@@ -7,6 +7,7 @@ const mockPortalData: TeamPortalData = {
   id: "team-1",
   name: "Equipo Pixel",
   standCode: "B2",
+  scannerKey: "stand-scanner-key-xyz",
   totalCheckIns: 42,
   recentCheckIns: 5,
   game: {
@@ -28,6 +29,10 @@ const mockPortalData: TeamPortalData = {
 };
 
 describe("TeamPortalView", () => {
+  beforeEach(() => {
+    window.location.hash = "";
+  });
+
   it("renders sidebar with team details and defaults to overview", () => {
     render(<TeamPortalView data={mockPortalData} />);
 
@@ -62,5 +67,29 @@ describe("TeamPortalView", () => {
 
     // Integrantes section should now be visible
     expect(screen.getByText("Líder Mario")).toBeInTheDocument();
+  });
+
+  it("displays scanner key in overview and copies to clipboard when button is clicked", async () => {
+    const user = userEvent.setup();
+    const writeTextMock = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: writeTextMock,
+      },
+    });
+
+    render(<TeamPortalView data={mockPortalData} />);
+
+    expect(screen.getByText("Llave de Escáner de tu Stand")).toBeInTheDocument();
+    expect(screen.getByText("stand-scanner-key-xyz")).toBeInTheDocument();
+
+    const copyButton = screen.getByRole("button", { name: /copiar llave/i });
+    expect(copyButton).toBeInTheDocument();
+
+    await user.click(copyButton);
+
+    expect(writeTextMock).toHaveBeenCalledWith("stand-scanner-key-xyz");
+    expect(await screen.findByRole("button", { name: /¡llave copiada al portapapeles!/i })).toBeInTheDocument();
   });
 });

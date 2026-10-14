@@ -2,6 +2,7 @@ import {
   STAND_CODE_PATTERN,
   STUDENT_GROUPS,
   type AddMemberByLeaderInput,
+  type CreateGameByLeaderInput,
   type CreateTeamInput,
   type CreateTeamLeaderInput,
   type TeamInput,
@@ -93,5 +94,15 @@ export function parseUpdateGameByLeaderInput(raw: RawInput): UpdateGameByLeaderI
   return validate(raw, (field) => ({
     description: field.text("description", { label: "La descripción del juego", max: 300 }),
     itchioUrl: field.optionalText("itchioUrl", { label: "El enlace de itch.io", max: 255 }) ?? null,
+  }));
+}
+
+/** Valida los datos para que el líder registre por primera vez el juego de su equipo. */
+export function parseCreateGameByLeaderInput(raw: RawInput): CreateGameByLeaderInput {
+  return validate(raw, (field) => ({
+    name: field.text("name", { label: "El nombre del juego", max: 80 }),
+    description: field.text("description", { label: "La descripción del juego", max: 300 }),
+    itchioUrl: field.optionalText("itchioUrl", { label: "El enlace de itch.io", max: 255 }) ?? null,
+    players: field.integer("players", { label: "El número de jugadores", min: 1, max: 16, fallback: 1 }),
   }));
 }

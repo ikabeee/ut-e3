@@ -1,38 +1,89 @@
-import { Boxes3 } from "@gravity-ui/icons";
+"use client";
+
 import { FieldError, Form, Input, Label, TextArea, TextField, toast } from "@heroui/react";
-import { updateGameByLeaderAction } from "@features/teams/lib/team-portal-actions";
+import { createGameByLeaderAction, updateGameByLeaderAction } from "@features/teams/lib/team-portal-actions";
 import { TEAMS_COPY } from "@features/teams/lib/teams-copy";
 import type { TeamPortalGame } from "@features/teams/lib/types";
 import { ActionButton } from "@shared/components/action-button";
-import { EmptyState } from "@shared/components/empty-state";
 import { PaperCard } from "@shared/components/paper-card";
 import { useServerActionForm } from "@shared/hooks/use-server-action-form";
 
-interface TeamGameManagerProps {
+export interface TeamGameManagerProps {
   game: TeamPortalGame | null;
+  createAction?: typeof createGameByLeaderAction;
+  updateAction?: typeof updateGameByLeaderAction;
 }
 
-export function TeamGameManager({ game }: Readonly<TeamGameManagerProps>) {
+function TeamGameRegisterForm({
+  action = createGameByLeaderAction,
+}: Readonly<{ action?: typeof createGameByLeaderAction }>) {
   const copy = TEAMS_COPY.gameManager;
 
-  const form = useServerActionForm(updateGameByLeaderAction, () => {
-    toast.success(copy.successToast);
+  const form = useServerActionForm(action, () => {
+    toast.success(copy.registerSuccessToast);
   });
 
-  if (!game) {
-    return (
-      <PaperCard className="p-6">
-        <h3 className="font-wide text-lg font-bold tracking-[-.02em] uppercase">{copy.infoTitle}</h3>
-        <EmptyState
-          icon={Boxes3}
-          size="sm"
-          title={copy.emptyTitle}
-          description={copy.emptyDescription}
-          className="mt-4 border-paper-foreground/15 text-paper-foreground/70 [&_svg]:text-paper-foreground/50"
-        />
-      </PaperCard>
-    );
-  }
+  return (
+    <PaperCard className="gap-6 p-6">
+      <div>
+        <h3 className="font-wide text-lg font-bold tracking-[-.02em] uppercase">{copy.registerTitle}</h3>
+        <p className="mt-1 text-xs text-paper-foreground/70">{copy.registerDescription}</p>
+      </div>
+
+      <Form onSubmit={form.submit} validationErrors={form.fieldErrors} className="flex flex-col gap-4">
+        <TextField name="name" isRequired className="flex flex-col gap-1">
+          <Label className="text-xs font-bold text-paper-foreground uppercase">{copy.nameLabel}</Label>
+          <Input placeholder={copy.namePlaceholder} onInput={form.clearFieldError} className="text-base" />
+          <FieldError />
+        </TextField>
+
+        <TextField name="description" isRequired className="flex flex-col gap-1">
+          <Label className="text-xs font-bold text-paper-foreground uppercase">{copy.synopsisLabel}</Label>
+          <TextArea
+            placeholder={copy.synopsisPlaceholder}
+            rows={4}
+            onInput={form.clearFieldError}
+            className="text-base"
+          />
+          <FieldError />
+        </TextField>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <TextField name="players" type="number" defaultValue="1" className="flex flex-col gap-1">
+            <Label className="text-xs font-bold text-paper-foreground uppercase">{copy.playersLabel}</Label>
+            <Input min={1} max={16} onInput={form.clearFieldError} className="text-base" />
+            <FieldError />
+          </TextField>
+
+          <TextField name="itchioUrl" type="url" className="flex flex-col gap-1">
+            <Label className="text-xs font-bold text-paper-foreground uppercase">{copy.itchioLabel}</Label>
+            <Input placeholder={copy.itchioPlaceholder} onInput={form.clearFieldError} className="text-base" />
+            <FieldError />
+          </TextField>
+        </div>
+
+        <ActionButton
+          type="submit"
+          variant="primary"
+          isPending={form.isPending}
+          className="mt-2 self-start font-bold uppercase"
+        >
+          {form.isPending ? copy.registeringButton : copy.registerButton}
+        </ActionButton>
+      </Form>
+    </PaperCard>
+  );
+}
+
+function TeamGameUpdateForm({
+  game,
+  action = updateGameByLeaderAction,
+}: Readonly<{ game: TeamPortalGame; action?: typeof updateGameByLeaderAction }>) {
+  const copy = TEAMS_COPY.gameManager;
+
+  const form = useServerActionForm(action, () => {
+    toast.success(copy.successToast);
+  });
 
   return (
     <PaperCard className="gap-6 p-6">
@@ -45,10 +96,9 @@ export function TeamGameManager({ game }: Readonly<TeamGameManagerProps>) {
       </div>
 
       <Form onSubmit={form.submit} validationErrors={form.fieldErrors} className="flex flex-col gap-4">
-        <TextField name="description" isRequired className="flex flex-col gap-1">
+        <TextField name="description" isRequired defaultValue={game.description ?? ""} className="flex flex-col gap-1">
           <Label className="text-xs font-bold text-paper-foreground uppercase">{copy.synopsisLabel}</Label>
           <TextArea
-            defaultValue={game.description ?? ""}
             placeholder={copy.synopsisPlaceholder}
             rows={4}
             onInput={form.clearFieldError}
@@ -57,15 +107,9 @@ export function TeamGameManager({ game }: Readonly<TeamGameManagerProps>) {
           <FieldError />
         </TextField>
 
-        <TextField name="itchioUrl" className="flex flex-col gap-1">
+        <TextField name="itchioUrl" type="url" defaultValue={game.itchioUrl ?? ""} className="flex flex-col gap-1">
           <Label className="text-xs font-bold text-paper-foreground uppercase">{copy.itchioLabel}</Label>
-          <Input
-            type="url"
-            defaultValue={game.itchioUrl ?? ""}
-            placeholder={copy.itchioPlaceholder}
-            onInput={form.clearFieldError}
-            className="text-base"
-          />
+          <Input placeholder={copy.itchioPlaceholder} onInput={form.clearFieldError} className="text-base" />
           <FieldError />
         </TextField>
 
@@ -80,4 +124,12 @@ export function TeamGameManager({ game }: Readonly<TeamGameManagerProps>) {
       </Form>
     </PaperCard>
   );
+}
+
+export function TeamGameManager({ game, createAction, updateAction }: Readonly<TeamGameManagerProps>) {
+  if (!game) {
+    return <TeamGameRegisterForm action={createAction} />;
+  }
+
+  return <TeamGameUpdateForm game={game} action={updateAction} />;
 }

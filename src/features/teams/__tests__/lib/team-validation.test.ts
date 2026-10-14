@@ -1,5 +1,6 @@
 import {
   parseAddMemberByLeaderInput,
+  parseCreateGameByLeaderInput,
   parseCreateTeamInput,
   parseCreateTeamLeaderInput,
   parseTeamInput,
@@ -152,6 +153,66 @@ describe("parseUpdateGameByLeaderInput", () => {
     ).toEqual({
       description: "Un juego de aventura espacial.",
       itchioUrl: "https://studio.itch.io/space-adventure",
+    });
+  });
+});
+
+describe("parseCreateGameByLeaderInput", () => {
+  it("validates full game input with players and itchioUrl", () => {
+    expect(
+      parseCreateGameByLeaderInput({
+        name: "Odisea Espacial",
+        description: "Un juego de plataformas en gravedad cero.",
+        itchioUrl: "https://studio.itch.io/odisea",
+        players: "4",
+      }),
+    ).toEqual({
+      name: "Odisea Espacial",
+      description: "Un juego de plataformas en gravedad cero.",
+      itchioUrl: "https://studio.itch.io/odisea",
+      players: 4,
+    });
+  });
+
+  it("defaults players to 1 and itchioUrl to null when omitted", () => {
+    expect(
+      parseCreateGameByLeaderInput({
+        name: "Laberinto",
+        description: "Un juego de puzzles.",
+      }),
+    ).toEqual({
+      name: "Laberinto",
+      description: "Un juego de puzzles.",
+      itchioUrl: null,
+      players: 1,
+    });
+  });
+
+  it("rejects empty name and empty description", () => {
+    expect(
+      fieldErrors(() =>
+        parseCreateGameByLeaderInput({
+          name: "",
+          description: "",
+        }),
+      ),
+    ).toEqual({
+      name: "El nombre del juego es obligatorio.",
+      description: "La descripción del juego es obligatorio.",
+    });
+  });
+
+  it("rejects invalid players range", () => {
+    expect(
+      fieldErrors(() =>
+        parseCreateGameByLeaderInput({
+          name: "Juego",
+          description: "Descripción válida.",
+          players: 20,
+        }),
+      ),
+    ).toEqual({
+      players: "El número de jugadores debe ser un número entero entre 1 y 16.",
     });
   });
 });

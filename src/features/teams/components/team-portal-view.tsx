@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, useTransition, type ReactNode } from "react";
 import Link from "next/link";
-import { cn } from "@heroui/react";
+import { cn, toast } from "@heroui/react";
 import { TeamGameManager } from "@features/teams/components/team-game-manager";
 import { TeamMemberManager } from "@features/teams/components/team-member-manager";
 import { TeamScanner } from "@features/teams/components/team-scanner";
@@ -142,6 +142,31 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
 
   const currentSection = SECTIONS.find((s) => s.id === activeSection) ?? SECTIONS[0];
   const copy = TEAMS_COPY;
+
+  const [isKeyCopied, setIsKeyCopied] = useState(false);
+
+  useEffect(() => {
+    if (!isKeyCopied) return;
+
+    const timer = setTimeout(() => setIsKeyCopied(false), 2000);
+
+    return () => clearTimeout(timer);
+  }, [isKeyCopied]);
+
+  const handleCopyScannerKey = async () => {
+    if (!data.scannerKey) return;
+
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(data.scannerKey);
+      }
+
+      setIsKeyCopied(true);
+      toast.success(copy.overview.scannerKeyCopied);
+    } catch {
+      // Fallback
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground md:flex-row">
@@ -327,6 +352,31 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
                   <p className="mt-1 text-xs text-paper-foreground/60">{copy.overview.trafficSubtitle}</p>
                 </PaperCard>
               </div>
+
+              {/* Llave del Escáner del Stand */}
+              <PaperCard className="p-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h3 className="font-wide text-base font-bold tracking-tight text-paper-foreground uppercase">
+                      {copy.overview.scannerKeyTitle}
+                    </h3>
+                    <p className="mt-1 text-xs text-paper-foreground/70">{copy.overview.scannerKeySubtitle}</p>
+                  </div>
+                  {data.scannerKey ? (
+                    <ActionButton
+                      variant="secondary"
+                      size="sm"
+                      onPress={handleCopyScannerKey}
+                      className="shrink-0 self-start font-mono text-xs uppercase sm:self-auto"
+                    >
+                      {isKeyCopied ? copy.overview.scannerKeyCopied : copy.overview.scannerKeyCopy}
+                    </ActionButton>
+                  ) : null}
+                </div>
+                <div className="mt-4 rounded border border-paper-foreground/15 bg-paper-foreground/5 p-3 font-mono text-sm tracking-wider break-all text-paper-foreground select-all">
+                  {data.scannerKey ?? copy.overview.scannerKeyMissing}
+                </div>
+              </PaperCard>
 
               {/* Estado del juego y accesos directos */}
               <div className="flex flex-col gap-4 rounded border border-border bg-surface/30 p-6">

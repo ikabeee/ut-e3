@@ -1,102 +1,103 @@
 import { render, screen } from "@testing-library/react";
-import { redirect } from "next/navigation";
 import { TeamPortalPage, teamPortalPageMetadata } from "@features/teams/pages/team-portal-page";
-import { getTeamPortalData } from "@features/teams/lib/server/team-portal-queries";
 import { TEAMS_COPY } from "@features/teams/lib/teams-copy";
 import type { TeamPortalData } from "@features/teams/lib/types";
-import { getAuthSession } from "@shared/lib/server/session";
 
-jest.mock("next/navigation", () => ({
-  redirect: jest.fn((url: string) => {
-    throw new Error(`NEXT_REDIRECT:${url}`);
-  }),
-}));
-
-jest.mock("@shared/lib/server/session", () => ({
-  getAuthSession: jest.fn(),
-}));
-
-jest.mock("@features/teams/lib/server/team-portal-queries", () => ({
-  getTeamPortalData: jest.fn(),
-}));
-
-jest.mock("@features/teams/components/team-portal-view", () => ({
-  TeamPortalView: ({ data }: { data: TeamPortalData }) => (
-    <div data-testid="team-portal-view">{data.name}</div>
-  ),
-}));
-
-const mockGetAuthSession = getAuthSession as jest.MockedFunction<typeof getAuthSession>;
-const mockGetTeamPortalData = getTeamPortalData as jest.MockedFunction<typeof getTeamPortalData>;
-const mockRedirect = redirect as unknown as jest.Mock;
-
-type AsyncComponent = () => Promise<React.JSX.Element>;
+type AsyncComponent = (props: { deps?: unknown }) => Promise<React.JSX.Element | null>;
 
 interface SuspensePropsWithAsyncChild {
   children: { type: AsyncComponent };
 }
 
 describe("TeamPortalPage", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it("exports metadata with noindex robots and correct copy", () => {
     expect(teamPortalPageMetadata.title).toBe(TEAMS_COPY.page.title);
     expect(teamPortalPageMetadata.robots).toEqual({ index: false, follow: false });
   });
 
   it("redirects to login with logout flag when there is no session", async () => {
-    mockGetAuthSession.mockResolvedValue(null);
+    const mockRedirect = jest.fn((url: string) => {
+      throw new Error(`NEXT_REDIRECT:${url}`);
+    });
 
-    const Page = TeamPortalPage();
+    const deps = {
+      getSession: jest.fn().mockResolvedValue(null),
+      redirectFn: mockRedirect,
+    };
+
+    const Page = TeamPortalPage({ deps });
+    // SAFETY: Next.js Suspense wrapper exposes children with async component type.
     const content = (Page.props as SuspensePropsWithAsyncChild).children;
 
-    await expect(content.type()).rejects.toThrow("NEXT_REDIRECT:/login?logout=true");
+    await expect(content.type({ deps })).rejects.toThrow("NEXT_REDIRECT:/login?logout=true");
     expect(mockRedirect).toHaveBeenCalledWith("/login?logout=true");
   });
 
   it("redirects to login with logout flag when session role is not team", async () => {
-    mockGetAuthSession.mockResolvedValue({
-      role: "admin",
-      userId: "u-1",
-      email: "admin@ut.edu",
+    const mockRedirect = jest.fn((url: string) => {
+      throw new Error(`NEXT_REDIRECT:${url}`);
     });
 
-    const Page = TeamPortalPage();
+    const deps = {
+      getSession: jest.fn().mockResolvedValue({
+        role: "admin",
+        userId: "u-1",
+        email: "admin@ut.edu",
+      }),
+      redirectFn: mockRedirect,
+    };
+
+    const Page = TeamPortalPage({ deps });
+    // SAFETY: Next.js Suspense wrapper exposes children with async component type.
     const content = (Page.props as SuspensePropsWithAsyncChild).children;
 
-    await expect(content.type()).rejects.toThrow("NEXT_REDIRECT:/login?logout=true");
+    await expect(content.type({ deps })).rejects.toThrow("NEXT_REDIRECT:/login?logout=true");
     expect(mockRedirect).toHaveBeenCalledWith("/login?logout=true");
   });
 
   it("redirects to login with logout flag when session has no teamId", async () => {
-    mockGetAuthSession.mockResolvedValue({
-      role: "team",
-      userId: "u-2",
-      email: "leader@ut.edu",
+    const mockRedirect = jest.fn((url: string) => {
+      throw new Error(`NEXT_REDIRECT:${url}`);
     });
 
-    const Page = TeamPortalPage();
+    const deps = {
+      getSession: jest.fn().mockResolvedValue({
+        role: "team",
+        userId: "u-2",
+        email: "leader@ut.edu",
+      }),
+      redirectFn: mockRedirect,
+    };
+
+    const Page = TeamPortalPage({ deps });
+    // SAFETY: Next.js Suspense wrapper exposes children with async component type.
     const content = (Page.props as SuspensePropsWithAsyncChild).children;
 
-    await expect(content.type()).rejects.toThrow("NEXT_REDIRECT:/login?logout=true");
+    await expect(content.type({ deps })).rejects.toThrow("NEXT_REDIRECT:/login?logout=true");
     expect(mockRedirect).toHaveBeenCalledWith("/login?logout=true");
   });
 
   it("redirects to login with logout flag when team was deleted by sysadmin (data is null)", async () => {
-    mockGetAuthSession.mockResolvedValue({
-      role: "team",
-      userId: "u-2",
-      email: "leader@ut.edu",
-      teamId: "deleted-team-id",
+    const mockRedirect = jest.fn((url: string) => {
+      throw new Error(`NEXT_REDIRECT:${url}`);
     });
-    mockGetTeamPortalData.mockResolvedValue(null);
 
-    const Page = TeamPortalPage();
+    const deps = {
+      getSession: jest.fn().mockResolvedValue({
+        role: "team",
+        userId: "u-2",
+        email: "leader@ut.edu",
+        teamId: "deleted-team-id",
+      }),
+      getPortalData: jest.fn().mockResolvedValue(null),
+      redirectFn: mockRedirect,
+    };
+
+    const Page = TeamPortalPage({ deps });
+    // SAFETY: Next.js Suspense wrapper exposes children with async component type.
     const content = (Page.props as SuspensePropsWithAsyncChild).children;
 
-    await expect(content.type()).rejects.toThrow("NEXT_REDIRECT:/login?logout=true");
+    await expect(content.type({ deps })).rejects.toThrow("NEXT_REDIRECT:/login?logout=true");
     expect(mockRedirect).toHaveBeenCalledWith("/login?logout=true");
   });
 
@@ -105,24 +106,30 @@ describe("TeamPortalPage", () => {
       id: "team-1",
       name: "Equipo Alfa",
       standCode: "A1",
+      scannerKey: null,
       totalCheckIns: 5,
       recentCheckIns: 2,
       game: null,
       members: [],
     };
-    mockGetAuthSession.mockResolvedValue({
-      role: "team",
-      userId: "u-2",
-      email: "leader@ut.edu",
-      teamId: "team-1",
-    });
-    mockGetTeamPortalData.mockResolvedValue(mockData);
 
-    const Page = TeamPortalPage();
-    const content = await (Page.props as SuspensePropsWithAsyncChild).children.type();
+    const deps = {
+      getSession: jest.fn().mockResolvedValue({
+        role: "team",
+        userId: "u-2",
+        email: "leader@ut.edu",
+        teamId: "team-1",
+      }),
+      getPortalData: jest.fn().mockResolvedValue(mockData),
+    };
 
-    render(content);
-    expect(screen.getByTestId("team-portal-view")).toHaveTextContent("Equipo Alfa");
+    const Page = TeamPortalPage({ deps });
+    // SAFETY: Next.js Suspense wrapper exposes children with async component type.
+    const content = await (Page.props as SuspensePropsWithAsyncChild).children.type({ deps });
+
+    // SAFETY: content is not null when session and team data exist.
+    render(content!);
+    expect(screen.getByRole("heading", { name: "Equipo Alfa" })).toBeInTheDocument();
   });
 
   it("uses TeamPortalLoading spinner as fallback", () => {

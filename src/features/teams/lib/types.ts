@@ -101,6 +101,7 @@ export interface TeamPortalData {
   id: string;
   name: string;
   standCode: string | null;
+  scannerKey: string | null;
   game: TeamPortalGame | null;
   members: TeamPortalMember[];
   totalCheckIns: number;

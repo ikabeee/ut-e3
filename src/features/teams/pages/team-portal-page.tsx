@@ -5,9 +5,9 @@ import { logoutAction } from "@features/auth/lib/auth-actions";
 import { LOGIN_PATH } from "@features/auth/lib/auth-links";
 import { TeamPortalLoading } from "@features/teams/components/team-portal-loading";
 import { TeamPortalView } from "@features/teams/components/team-portal-view";
-import { getTeamPortalData } from "@features/teams/lib/server/team-portal-queries";
 import { TEAMS_COPY } from "@features/teams/lib/teams-copy";
-import { getAuthSession } from "@shared/lib/server/session";
+import type { TeamPortalData } from "@features/teams/lib/types";
+import { getAuthSession, type SessionPayload } from "@shared/lib/server/session";
 
 export const teamPortalPageMetadata: Metadata = {
   title: TEAMS_COPY.page.title,
@@ -15,26 +15,42 @@ export const teamPortalPageMetadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-async function TeamPortalContent() {
-  const session = await getAuthSession();
+export interface TeamPortalPageDependencies {
+  getSession?: () => Promise<SessionPayload | null>;
+  getPortalData?: (teamId: string) => Promise<TeamPortalData | null>;
+  redirectFn?: (url: string) => void;
+}
+
+const getPortalQueries = async () => import("@features/teams/lib/server/team-portal-queries");
+
+async function TeamPortalContent({ deps }: { deps?: TeamPortalPageDependencies }) {
+  const readSession = deps?.getSession ?? getAuthSession;
+  const doRedirect = deps?.redirectFn ?? redirect;
+
+  const session = await readSession();
 
   if (!session || session.role !== "team" || !session.teamId) {
-    redirect(`${LOGIN_PATH}?logout=true`);
+    doRedirect(`${LOGIN_PATH}?logout=true`);
+
+    return null;
   }
 
-  const data = await getTeamPortalData(session.teamId);
+  const readPortalData = deps?.getPortalData ?? (await getPortalQueries()).getTeamPortalData;
+  const data = await readPortalData(session.teamId);
 
   if (!data) {
-    redirect(`${LOGIN_PATH}?logout=true`);
+    doRedirect(`${LOGIN_PATH}?logout=true`);
+
+    return null;
   }
 
   return <TeamPortalView data={data} onLogout={logoutAction} />;
 }
 
-export function TeamPortalPage() {
+export function TeamPortalPage({ deps }: { deps?: TeamPortalPageDependencies } = {}) {
   return (
     <Suspense fallback={<TeamPortalLoading />}>
-      <TeamPortalContent />
+      <TeamPortalContent deps={deps} />
     </Suspense>
   );
 }

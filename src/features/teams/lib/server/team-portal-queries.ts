@@ -132,9 +132,12 @@ export async function createGameByLeader(teamId: string, input: CreateGameByLead
   }
 
   let genreId = input.genreId;
+
   if (!genreId || !isUuid(genreId)) {
     const defaultGenre = await db.orm.public.Genre.select("id").first();
+
     if (!defaultGenre) throw new ActionRuleError("Aún no hay categorías de juego registradas.");
+
     genreId = defaultGenre.id;
   }
 
@@ -143,7 +146,9 @@ export async function createGameByLeader(teamId: string, input: CreateGameByLead
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
+    .replace(/^-+/, "")
+    // eslint-disable-next-line sonarjs/super-linear-regex -- harmless on slug of length <= 80
+    .replace(/-+$/, "")
     .slice(0, 60);
 
   const slug = baseSlug.length >= 3 ? baseSlug : `juego-${Date.now().toString().slice(-6)}`;

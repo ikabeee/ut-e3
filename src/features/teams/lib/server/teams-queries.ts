@@ -130,7 +130,9 @@ export async function deleteTeam(id: string): Promise<void> {
 /** Genera una llave de escáner nueva; la anterior deja de funcionar. */
 export async function rotateTeamScannerKey(id: string): Promise<TeamWithScannerKey> {
   if (!isUuid(id)) throw new RecordNotFoundError(TEAM_NOT_FOUND);
+
   const scannerKey = generateSecret();
+
   const updated = await db.orm.public.Team.where({ id }).update({
     scannerKeyHash: hashSecret(scannerKey),
     scannerKey,

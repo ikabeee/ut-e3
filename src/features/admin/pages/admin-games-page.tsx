@@ -1,10 +1,8 @@
 import { Suspense } from "react";
 import { Boxes3 } from "@gravity-ui/icons";
 import { logoutAction } from "@features/auth/lib/auth-actions";
-import { AdminPanel } from "@features/admin/components/admin-panel";
 import { AdminShell } from "@features/admin/components/admin-shell";
 import { AdminSkeleton } from "@features/admin/components/admin-skeleton";
-import { GameCreateForm } from "@features/admin/components/game-create-form";
 import { GameRecordCard } from "@features/admin/components/game-record-card";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import { buildAdminMetadata } from "@features/admin/lib/admin-metadata";
@@ -18,9 +16,6 @@ async function AdminGamesContent() {
 
   return (
     <>
-      <AdminPanel title={ADMIN_COPY.games.createTitle}>
-        <GameCreateForm options={options} />
-      </AdminPanel>
       {games.length === 0 ? <EmptyState icon={Boxes3} title={ADMIN_COPY.games.empty} /> : null}
       {games.map((game) => (
         <GameRecordCard key={game.id} game={game} options={options} />
