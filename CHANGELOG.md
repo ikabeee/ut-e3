@@ -8,6 +8,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Componente compartido `EmptyState` (`@shared/components/empty-state`) para centrar los estados
+  vacíos de todo el proyecto (catálogo de juegos, pasaporte de visitantes, panel de administración
+  y portal de equipos) con iconos SVG oficiales de Gravity UI (`@gravity-ui/icons`), variantes de
+  tamaño y estética acorde al tema UTG.
 - Sitio sin conexión (PWA): service worker que guarda la portada, el catálogo, cada juego y el
   croquis en la primera visita; aviso "Sin conexión", página `/offline` y aviso "Hay una versión
   nueva" para actualizar. Ver `docs/pwa.md`.
@@ -59,6 +63,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 - Móvil: los stands y zonas del croquis (en la portada y en `/floor-plan`) se pueden tocar con un
   área de 44 px o más desde pantallas de 360 px. Info, WC, Comida y Descanso medían 37 a 41 px.
   El área extra es invisible, sólo existe con dedo y no invade las zonas vecinas.
+- Docker: `docker-compose.yml` se simplifica para mantener exclusivamente el servicio de base
+  de datos PostgreSQL (`db`), retirando los servicios de `app` y `migrate`.
 - Pruebas: viven en la carpeta `__tests__/` de cada feature (y de `src/shared/` y `src/app/`) en lugar
   de junto a cada archivo. El helper `renderWithGames` reemplaza el `QueryClient` repetido en las
   pruebas de componentes que leen el catálogo.
