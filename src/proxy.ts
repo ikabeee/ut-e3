@@ -1,14 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import { isAdminAuthorization } from "@shared/lib/server/admin-auth";
-import { AUTH_COOKIE_NAME, decodeSessionCookie } from "@shared/lib/server/session";
+import { AUTH_COOKIE_NAME, decodeSessionCookie, type SessionPayload } from "@shared/lib/server/session";
 
-function checkLoginRedirect(pathname: string, role?: string, url?: string): NextResponse | null {
-  if (pathname !== "/login" || !url) return null;
+function checkLoginRedirect(
+  pathname: string,
+  session?: SessionPayload | null,
+  url?: string,
+  isLogout?: boolean,
+): NextResponse | null {
+  if (pathname !== "/login" || !url || isLogout) return null;
 
-  if (role === "admin") return NextResponse.redirect(new URL("/admin", url));
+  if (session?.role === "admin") return NextResponse.redirect(new URL("/admin", url));
 
-  if (role === "team") return NextResponse.redirect(new URL("/team", url));
+  if (session?.role === "team" && session.teamId) return NextResponse.redirect(new URL("/team", url));
 
   return null;
 }
@@ -32,10 +37,10 @@ function checkAdminAccess(request: NextRequest, isAdmin: boolean): NextResponse 
   });
 }
 
-function checkTeamAccess(request: NextRequest, role?: string): NextResponse {
-  if (role === "team") return NextResponse.next();
+function checkTeamAccess(request: NextRequest, session?: SessionPayload | null): NextResponse {
+  if (session?.role === "team" && session.teamId) return NextResponse.next();
 
-  if (role === "admin") return NextResponse.redirect(new URL("/admin", request.url));
+  if (session?.role === "admin") return NextResponse.redirect(new URL("/admin", request.url));
 
   return NextResponse.redirect(new URL("/login?redirect=/team", request.url));
 }
@@ -44,11 +49,18 @@ function checkTeamAccess(request: NextRequest, role?: string): NextResponse {
  * Middleware de protección de rutas y control de acceso por roles.
  */
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
   const cookieValue = request.cookies.get(AUTH_COOKIE_NAME)?.value;
   const session = decodeSessionCookie(cookieValue);
+  const isLogout = searchParams.get("logout") === "true";
 
-  const loginRedirect = checkLoginRedirect(pathname, session?.role, request.url);
+  if (pathname === "/login" && isLogout) {
+    const response = NextResponse.next();
+    response.cookies.delete(AUTH_COOKIE_NAME);
+    return response;
+  }
+
+  const loginRedirect = checkLoginRedirect(pathname, session, request.url, isLogout);
 
   if (loginRedirect) return loginRedirect;
 
@@ -61,7 +73,7 @@ export function proxy(request: NextRequest) {
   }
 
   if (pathname.startsWith("/team")) {
-    return checkTeamAccess(request, session?.role);
+    return checkTeamAccess(request, session);
   }
 
   return NextResponse.next();
