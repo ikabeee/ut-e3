@@ -105,6 +105,7 @@ export async function claimRaffleTicket(
   if (!ticket) throw new RecordNotFoundError(INVALID_PASSPORT);
 
   const sendTicketEmail = deps.sendTicketEmail ?? defaultSendTicketEmail;
+
   if (visitor.email) {
     try {
       await sendTicketEmail(visitor.email, visitor.fullName || visitor.gamertag, ticket.ticketNumber);

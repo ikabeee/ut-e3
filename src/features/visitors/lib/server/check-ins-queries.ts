@@ -48,6 +48,7 @@ export interface CheckInRow {
 export interface RecordCheckInsDependencies {
   findVisitorIds?: (tokenHashes: string[]) => Promise<Map<string, string>>;
   insertRows?: (rows: CheckInRow[]) => Promise<Set<string>>;
+  awardRaffleTickets?: (visitorIds: readonly string[]) => Promise<void>;
 }
 
 /** Hash del token de cada escaneo, por id del escaneo. Lo que no es un QR de visitante se omite. */
@@ -90,15 +91,17 @@ async function awardRaffleTicketForVisitor(
   db: Awaited<ReturnType<typeof getDb>>,
   visitorId: string,
   requiredIds: Set<string>,
-  sendEmail: (email: string, name: string, ticketNumber: number) => Promise<unknown>,
+  sendEmail: (email: string, name: string, ticketNumber: number) => Promise<boolean>,
 ): Promise<void> {
   const existingTicket = await db.orm.public.RaffleTicket.select("ticketNumber").where({ visitorId }).first();
+
   if (existingTicket) return;
 
   const checkIns = await db.orm.public.CheckIn.select("gameId").where({ visitorId }).all();
   const checkedIds = new Set(checkIns.map((c) => c.gameId));
 
   const completedAll = [...requiredIds].every((id) => checkedIds.has(id));
+
   if (!completedAll) return;
 
   const [ticket] = await db.orm.public.RaffleTicket.select("ticketNumber").createAll([{ visitorId }], {
@@ -109,6 +112,7 @@ async function awardRaffleTicketForVisitor(
   if (!ticket) return;
 
   const visitor = await db.orm.public.Visitor.select("email", "fullName", "gamertag").where({ id: visitorId }).first();
+
   if (visitor?.email) {
     try {
       await sendEmail(visitor.email, visitor.fullName || visitor.gamertag, ticket.ticketNumber);
@@ -124,6 +128,7 @@ async function checkAndAwardCompletedRaffleTickets(visitorIds: readonly string[]
   const db = await getDb();
   const { listRequiredGames } = await import("@features/visitors/lib/server/visitors-queries");
   const requiredGames = await listRequiredGames();
+
   if (requiredGames.length === 0) return;
 
   const requiredIds = new Set(requiredGames.map((g) => g.id));
@@ -169,9 +174,12 @@ export async function recordCheckIns(
   const knownIds = new Set(rows.map((row) => row.id));
 
   if (insertedIds.size > 0) {
-    const affectedVisitorIds = [...new Set(rows.filter((r) => insertedIds.has(r.id)).map((r) => r.visitorId))];
+    const affectedVisitorIds = [...new Set(rows.flatMap((r) => (insertedIds.has(r.id) ? [r.visitorId] : [])))];
+
+    const awardTickets = deps.awardRaffleTickets ?? checkAndAwardCompletedRaffleTickets;
+
     try {
-      await checkAndAwardCompletedRaffleTickets(affectedVisitorIds);
+      await awardTickets(affectedVisitorIds);
     } catch (error) {
       console.error("Error al procesar boletos automáticos del sorteo:", error);
     }

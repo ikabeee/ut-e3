@@ -24,9 +24,12 @@ const findVisitorIdsMock = jest.fn(async (hashes: string[]) => {
   return map;
 });
 
+const mockAwardRaffleTickets = jest.fn(async () => {});
+
 const deps = {
   findVisitorIds: findVisitorIdsMock,
   insertRows: mockCreateAll,
+  awardRaffleTickets: mockAwardRaffleTickets,
 };
 
 const TOKEN = "0123456789abcdef0123456789abcdef";
@@ -39,6 +42,7 @@ describe("recordCheckIns", () => {
     mockAlreadyStored.clear();
     mockCreateAll.mockClear();
     findVisitorIdsMock.mockClear();
+    mockAwardRaffleTickets.mockClear();
   });
 
   it("stores the scans of known visitors and reports created, duplicate and unknown", async () => {
@@ -60,6 +64,7 @@ describe("recordCheckIns", () => {
       { id: "scan-1", visitorId: "visitor-1", gameId: "game-1", scannedAt: "2026-11-27T17:30:00.000Z" },
       { id: "scan-2", visitorId: "visitor-1", gameId: "game-1", scannedAt: "2026-11-27T17:30:00.000Z" },
     ]);
+    expect(mockAwardRaffleTickets).toHaveBeenCalledWith(["visitor-1"]);
   });
 
   it("does not query or insert anything when no scan is a visitor QR", async () => {

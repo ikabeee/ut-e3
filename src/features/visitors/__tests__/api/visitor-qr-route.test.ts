@@ -13,6 +13,7 @@ describe("GET /v/<token>", () => {
       fullName: null,
       email: null,
     }));
+
     const route = createVisitorQrRoute(findVisitor);
 
     const response = await route(new Request(`http://localhost/v/${TOKEN.toUpperCase()}`), {

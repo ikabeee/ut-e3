@@ -76,12 +76,15 @@ export function parseVisitorRegistration(raw: RawInput) {
 
     const rawGamertag = field.optionalText("gamertag", { label: "El apodo", max: 40 });
     const fullName = field.text("fullName", { label: "El nombre", max: 120 });
-    const email = field.text("email", {
-      label: "El correo electrónico",
-      max: 120,
-      pattern: /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/,
-      patternMessage: "Escribe un correo electrónico válido.",
-    }).toLowerCase();
+
+    const email = field
+      .text("email", {
+        label: "El correo electrónico",
+        max: 120,
+        pattern: /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/,
+        patternMessage: "Escribe un correo electrónico válido.",
+      })
+      .toLowerCase();
 
     const gamertag = rawGamertag ? normalizeGamertag(rawGamertag) : deriveGamertag(fullName, email);
 

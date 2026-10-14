@@ -9,6 +9,7 @@ import { RecordNotFoundError } from "@shared/lib/record-not-found-error";
 import type { sendMail } from "@shared/lib/server/mailer";
 import { generateSecret, hashSecret } from "@shared/lib/server/secrets";
 import { siteConfig } from "@shared/lib/site-config";
+import { isString } from "@shared/lib/validation";
 
 // Visitantes: registro con gamertag, pasaporte (QR + avance + boleto) y reemisión del QR.
 // La base sólo guarda el hash del token; el token sólo lo conocen la cookie y el QR.
@@ -52,7 +53,7 @@ export async function registerVisitor(
   mailSender?: typeof sendMail,
 ): Promise<{ token: string }> {
   const token = generateSecret();
-  const data = typeof input === "string" ? { gamertag: input } : input;
+  const data = isString(input) ? { gamertag: input } : input;
   const gamertag = normalizeGamertag(data.gamertag);
   const fullName = data.fullName?.trim() || null;
   const email = data.email?.trim().toLowerCase() || null;
