@@ -3,8 +3,9 @@ import { cacheLife, cacheTag } from "next/cache";
 import type { GameRepository } from "@features/games/lib/game-repository";
 import { getGameRepository } from "@features/games/lib/server/game-repositories";
 
-/** Etiqueta de caché de los juegos: invalídala con `updateTag(GAMES_CACHE_TAG)` tras una mutación. */
-export const GAMES_CACHE_TAG = "games";
+import { GAMES_CACHE_TAG } from "@features/games/lib/games-cache";
+
+export { GAMES_CACHE_TAG };
 
 // Las consultas se cachean con "use cache": las páginas se prerenderizan (SEO y rendimiento)
 // y siguen funcionando igual con Prisma, que no permite prerenderizar consultas sin caché.
