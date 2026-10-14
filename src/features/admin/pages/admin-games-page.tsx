@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Boxes3 } from "@gravity-ui/icons";
+import { logoutAction } from "@features/auth/lib/auth-actions";
 import { AdminPanel } from "@features/admin/components/admin-panel";
 import { AdminShell } from "@features/admin/components/admin-shell";
 import { AdminSkeleton } from "@features/admin/components/admin-skeleton";
@@ -31,7 +32,7 @@ async function AdminGamesContent() {
 /** Juegos (`/admin/games`): datos, géneros, plataformas y fotos de cada juego. */
 export function AdminGamesPage() {
   return (
-    <AdminShell current="games">
+    <AdminShell current="games" onLogout={logoutAction}>
       <Suspense fallback={<AdminSkeleton />}>
         <AdminGamesContent />
       </Suspense>
