@@ -1,6 +1,7 @@
 import "server-only";
 import { connection } from "next/server";
 import type {
+  CreateTeamInput,
   CreateTeamLeaderInput,
   Team,
   TeamInput,
@@ -8,7 +9,6 @@ import type {
   TeamMemberInput,
   TeamWithScannerKey,
 } from "@features/teams/lib/types";
-import { hashPassword } from "@features/auth/lib/server/auth-passwords";
 import { sendConfirmationEmail } from "@features/auth/lib/server/email-service";
 import { db } from "@shared/lib/prisma/db";
 import { RecordNotFoundError } from "@shared/lib/record-not-found-error";
@@ -71,12 +71,42 @@ export async function getTeam(id: string): Promise<Team | null> {
   return row ? toTeam(row) : null;
 }
 
-/** Crea el equipo con una llave de escáner nueva (sólo se devuelve esta vez). */
-export async function createTeam(input: TeamInput): Promise<TeamWithScannerKey> {
+/** Crea el equipo con una llave de escáner nueva (sólo se devuelve esta vez) y opcionalmente su líder inicial. */
+export async function createTeam(input: CreateTeamInput): Promise<TeamWithScannerKey> {
   const scannerKey = generateSecret();
-  const created = await db.orm.public.Team.create({ ...input, scannerKeyHash: hashSecret(scannerKey) });
+  let createdTeamId = "";
 
-  return { team: await findTeamOrThrow(created.id), scannerKey };
+  await db.transaction(async (tx) => {
+    const created = await tx.orm.public.Team.create({
+      name: input.name,
+      standCode: input.standCode,
+      scannerKeyHash: hashSecret(scannerKey),
+    });
+    createdTeamId = created.id;
+
+    if (input.leader) {
+      const token = generateSecret();
+      const confirmationTokenHash = hashSecret(token);
+      const confirmationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+      await tx.orm.public.TeamMember.create({
+        teamId: created.id,
+        fullName: input.leader.fullName,
+        email: input.leader.email.toLowerCase(),
+        groupName: input.leader.groupName,
+        isLeader: true,
+        sortOrder: 0,
+        passwordHash: "",
+        isConfirmed: false,
+        confirmationTokenHash,
+        confirmationExpiresAt,
+      });
+
+      await sendConfirmationEmail(input.leader.email.toLowerCase(), input.leader.fullName, token);
+    }
+  });
+
+  return { team: await findTeamOrThrow(createdTeamId), scannerKey };
 }
 
 export async function updateTeam(id: string, input: TeamInput): Promise<Team> {
@@ -162,7 +192,6 @@ export async function createTeamLeader(teamId: string, input: CreateTeamLeaderIn
 
   if (!team) throw new RecordNotFoundError(TEAM_NOT_FOUND);
 
-  const passwordHash = hashPassword(input.password);
   const token = generateSecret();
   const confirmationTokenHash = hashSecret(token);
   const confirmationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
@@ -171,7 +200,7 @@ export async function createTeamLeader(teamId: string, input: CreateTeamLeaderIn
     // Si ya existía un líder, remueve la bandera de líder
     await tx.orm.public.TeamMember.where({ teamId, isLeader: true }).updateAll({ isLeader: false });
 
-    // Crea el nuevo usuario líder
+    // Crea el nuevo usuario líder (sin contraseña inicial)
     await tx.orm.public.TeamMember.create({
       teamId,
       fullName: input.fullName,
@@ -179,7 +208,7 @@ export async function createTeamLeader(teamId: string, input: CreateTeamLeaderIn
       groupName: input.groupName,
       isLeader: true,
       sortOrder: 0,
-      passwordHash,
+      passwordHash: "",
       isConfirmed: false,
       confirmationTokenHash,
       confirmationExpiresAt,
