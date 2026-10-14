@@ -99,34 +99,7 @@ async function seedTeams() {
   );
 
   const teams = await db.orm.public.Team.select("id", "name").all();
-
-  const teamsWithMembers = new Set(
-    (await db.orm.public.TeamMember.select("teamId").all()).map((member) => member.teamId),
-  );
-
   const teamIds = new Map(teams.map((team) => [team.name, team.id]));
-  const defaultMemberPasswordHash = hashPassword("Equipo123!");
-
-  const members = seedData.teams.flatMap((team) => {
-    const teamId = teamIds.get(team.name)!;
-
-    if (teamsWithMembers.has(teamId)) return [];
-
-    const slug = team.name.toLowerCase().replace(/[^a-z0-9]/g, "");
-
-    return team.members.map((member, index) => ({
-      ...member,
-      teamId,
-      sortOrder: index,
-      email: `${slug}.m${index + 1}@ute3.edu.mx`,
-      passwordHash: defaultMemberPasswordHash,
-      isConfirmed: true,
-    }));
-  });
-
-  if (members.length > 0) {
-    await db.orm.public.TeamMember.createAll(members);
-  }
 
   return {
     teamIds,
