@@ -8,6 +8,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Alta de equipos con usuario líder inicial opcional en el panel de administración: el líder se crea
+  sin contraseña inicial y recibe un correo con enlace seguro para establecer su contraseña y
+  activar su cuenta (`/confirm-email?token=...`). Se mantiene la bandera `isConfirmed` para detectar
+  si el usuario ya confirmó o no su registro, impidiendo el inicio de sesión hasta su activación.
+
 - Configuración centralizada de Node Mailer (`@shared/lib/server/mailer`) para el envío de correos
   salientes (confirmaciones de cuenta de líderes de equipo), con soporte para variables de entorno
   SMTP validadas, vista previa en consola para desarrollo local sin servidor de correo, pruebas
@@ -54,6 +59,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- Limpieza de código y anti-patrones detectados por `anti-ai-slop` (`npm run lint:oxlint`): erradicación
+  de monkey-patching y mocks de módulos (`jest.mock`) a favor de inyección de dependencias en
+  componentes y servicios, justificación formal de aserciones de tipos con comentarios `SAFETY:`,
+  eliminación de aserciones encadenadas (`as unknown as`), normalización de espaciado estructural legible
+  y sustitución de comprobaciones de `typeof` en runtime por guardas de tipo canónicas.
 - La fecha, los horarios de torneos y sorteos, la sede y la organización se escriben una sola vez y
   los textos los componen: las tarjetas de la portada, el aviso de torneo del detalle, la Arena y
   Premios del croquis, el enlace de Google Calendar y los datos estructurados ya no pueden quedar
