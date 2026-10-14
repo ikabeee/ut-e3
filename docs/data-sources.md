@@ -78,8 +78,6 @@ Prisma  ->  GameRepository  ->  getGameRepository()  ->  games-queries.ts ("use 
 - Si agregas o cambias un campo de `Game` que el navegador necesita, actualiza también `GameDto`,
   `toGameDto` y `parseGamesResponse` en `api/games-contract.ts`: TypeScript marca el error en
   `toGameDto` y la prueba `games-contract.test.ts` comprueba que el viaje por HTTP no pierde datos.
-- Cuando la base de datos tenga los juegos de los equipos, se puede borrar la carpeta `lib/mock/`
-  (con su prueba), quitar `mock` de `game-repositories.ts` y borrar las portadas de `public/mock/`.
 
 ## Acciones de administración (CRUD)
 
@@ -142,7 +140,7 @@ las recuerda y las manda en cada acción.
 ## Visitantes, check-ins y sorteo (`src/features/visitors`)
 
 Las reglas y las sentencias están explicadas en [`data-model.md`](./data-model.md) ("Participación
-de visitantes"). Esta feature siempre usa PostgreSQL: no tiene versión mock.
+de visitantes").
 
 ```
 lib/visitor-rules.ts              Reglas puras: gamertag, teléfono, token del QR, lote del escáner, ajuste de hora
@@ -252,3 +250,38 @@ a la base de datos, `getEventContent()` se convierte en una consulta cacheada en
 - La descripción de la portada usa el número real de juegos del catálogo.
 - El reel de `public/media/` es el del diseño: reemplázalo por el video oficial del evento
   conservando los nombres de archivo.
+
+## Servicio de correo saliente (Nodemailer / SMTP)
+
+El envío de correos salientes (como la confirmación de cuenta de líderes de equipo) está
+centralizado en `@shared/lib/server/mailer.ts` utilizando **Nodemailer**.
+
+### Variables de entorno (`.env`)
+
+| Variable | Descripción | Valor por defecto |
+| --- | --- | --- |
+| `SMTP_HOST` | Host del servidor SMTP (ej. `smtp.gmail.com`, `sandbox.smtp.mailtrap.io`) | Ninguno (desactivado) |
+| `SMTP_PORT` | Puerto de conexión SMTP (ej. `587`, `465`, `2525`) | `587` |
+| `SMTP_SECURE` | Conexión SSL/TLS directa (`true` para puerto 465, `false` para STARTTLS) | Infiere `true` si puerto 465, sino `false` |
+| `SMTP_USER` | Usuario o correo de autenticación SMTP | Ninguno |
+| `SMTP_PASSWORD` | Contraseña o token de aplicación SMTP | Ninguno |
+| `EMAIL_FROM` | Dirección y remitente por defecto | `"UT Game Showcase" <no-reply@showcase.ute3.edu.mx>` |
+
+### Modo desarrollo local (sin SMTP)
+
+Si no se configuran `SMTP_HOST`, `SMTP_USER` o `SMTP_PASSWORD` en `.env`, el sistema opera en modo
+**desarrollo**: en lugar de fallar o depender de un servicio externo, imprime una vista previa con
+el destinatario, asunto y enlace de confirmación directamente en la consola (`[NODEMAILER DEV PREVIEW]`).
+
+### Comprobación y pruebas de correo
+
+Para validar las credenciales SMTP o enviar un correo de prueba sin levantar el servidor:
+
+```bash
+# Verifica la conexión con el servidor SMTP:
+npm run email:test
+
+# Envía un correo real de prueba al destinatario especificado:
+npm run email:test -- mi-correo@ejemplo.com
+```
+
