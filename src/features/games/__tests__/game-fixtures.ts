@@ -4,7 +4,7 @@ type GameFixtureInput = Pick<Game, "slug" | "name" | "genre" | "team" | "stand">
 
 /** Completa un juego de prueba con valores neutros para lo que la prueba no necesita. */
 export function makeGameFixture(game: GameFixtureInput): Game {
-  const image = game.image ?? { src: `/mock/games/${game.slug}.jpg`, alt: `Portada de ${game.name}`, position: null };
+  const image = game.image ?? { src: `/games/${game.slug}.jpg`, alt: `Portada de ${game.name}`, position: null };
 
   return {
     members: 4,
@@ -37,7 +37,7 @@ export const GAME_FIXTURES: readonly Game[] = [
     stand: "A1",
     description: "Shooter de extracción en una ciudad sepultada por ceniza volcánica.",
     platforms: ["Windows", "Web (navegador)"],
-    image: { src: "/mock/games/ceniza-protocol.jpg", alt: "Portada de Ceniza Protocol", position: "70% 30%" },
+    image: { src: "/games/ceniza-protocol.jpg", alt: "Portada de Ceniza Protocol", position: "70% 30%" },
   }),
   makeGameFixture({
     slug: "los-ultimos-faros",
@@ -45,7 +45,7 @@ export const GAME_FIXTURES: readonly Game[] = [
     genre: "Aventura",
     team: "Equipo Marea",
     stand: "A2",
-    image: { src: "/mock/games/los-ultimos-faros.jpg", alt: "Portada de Los Últimos Faros", position: "50% 30%" },
+    image: { src: "/games/los-ultimos-faros.jpg", alt: "Portada de Los Últimos Faros", position: "50% 30%" },
   }),
   makeGameFixture({
     slug: "hormigon",
@@ -62,10 +62,10 @@ export const GAME_FIXTURES: readonly Game[] = [
     team: "Equipo Ruido",
     stand: "A4",
     itchioUrl: "https://ruido.itch.io/ruta-9",
-    image: { src: "/mock/games/ruta-9.jpg", alt: "Portada de Ruta 9", position: "60% 35%" },
+    image: { src: "/games/ruta-9.jpg", alt: "Portada de Ruta 9", position: "60% 35%" },
     gallery: [
-      { src: "/mock/games/ruta-9.jpg", alt: "Portada de Ruta 9", position: "60% 35%" },
-      { src: "/mock/games/ruta-9-pits.jpg", alt: "Ruta 9: entrada a pits", position: null },
+      { src: "/games/ruta-9.jpg", alt: "Portada de Ruta 9", position: "60% 35%" },
+      { src: "/games/ruta-9-pits.jpg", alt: "Ruta 9: entrada a pits", position: null },
     ],
   }),
   makeGameFixture({

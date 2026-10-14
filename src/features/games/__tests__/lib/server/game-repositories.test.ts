@@ -1,24 +1,8 @@
-import { selectGameRepository, type GameRepository } from "@features/games/lib/game-repository";
+import { getGameRepository } from "@features/games/lib/server/game-repositories";
+import { prismaGameRepository } from "@features/games/lib/server/prisma-game-repository";
 
-const mockRepository: GameRepository = {
-  listGames: async () => [],
-  findGameBySlug: async () => null,
-};
-
-const postgresRepository: GameRepository = {
-  listGames: async () => [],
-  findGameBySlug: async () => null,
-};
-
-const repositories = { mock: mockRepository, prisma: postgresRepository };
-
-describe("selectGameRepository", () => {
-  it("selects the repository registered for the source", () => {
-    expect(selectGameRepository("mock", repositories)).toBe(mockRepository);
-    expect(selectGameRepository("prisma", repositories)).toBe(postgresRepository);
-  });
-
-  it("fails when the source has no registered repository", () => {
-    expect(() => selectGameRepository("prisma", { mock: mockRepository })).toThrow('DATA_SOURCE="prisma"');
+describe("getGameRepository", () => {
+  it("returns the prisma game repository", () => {
+    expect(getGameRepository()).toBe(prismaGameRepository);
   });
 });
