@@ -196,13 +196,7 @@ export function AdminShell({ current, children, onLogout }: Readonly<AdminShellP
 
         {/* Acciones inferiores del sidebar */}
         <div className="border-t border-border pt-4">
-          <ActionButton
-            variant="secondary"
-            size="sm"
-            onPress={handleLogout}
-            isPending={isPending}
-            className="w-full"
-          >
+          <ActionButton variant="secondary" size="sm" onPress={handleLogout} isPending={isPending} className="w-full">
             {ADMIN_COPY.nav.logout}
           </ActionButton>
         </div>
