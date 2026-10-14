@@ -78,10 +78,7 @@ describe("parseGameImageInput", () => {
 
   it("accepts site paths and https URLs of an allowed host", () => {
     expect(
-      parseGameImageInput(
-        { imageUrl: "/games/ruta-9.jpg", altText: "Portada", sortOrder: 0, isCover: true },
-        hosts,
-      ),
+      parseGameImageInput({ imageUrl: "/games/ruta-9.jpg", altText: "Portada", sortOrder: 0, isCover: true }, hosts),
     ).toEqual({
       imageUrl: "/games/ruta-9.jpg",
       altText: "Portada",

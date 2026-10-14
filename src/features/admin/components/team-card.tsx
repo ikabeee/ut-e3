@@ -101,7 +101,8 @@ export function TeamCard({ team }: Readonly<TeamCardProps>) {
                 {member.fullName} <span className="type-tiny text-muted">· {member.groupName}</span>
                 {member.isLeader ? (
                   <span className="type-tiny text-accent">
-                    {" "}· {copy.leader} (
+                    {" "}
+                    · {copy.leader} (
                     <span className={member.isConfirmed ? "text-success" : "text-warning"}>
                       {member.isConfirmed ? "Confirmado" : "Pendiente"}
                     </span>

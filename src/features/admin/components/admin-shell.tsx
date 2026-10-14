@@ -139,13 +139,7 @@ export function AdminShell({ current, children, onLogout }: Readonly<AdminShellP
             })}
           </nav>
           <div className="mt-2 border-t border-border pt-3">
-            <ActionButton
-              variant="secondary"
-              size="sm"
-              onPress={handleLogout}
-              isPending={isPending}
-              className="w-full"
-            >
+            <ActionButton variant="secondary" size="sm" onPress={handleLogout} isPending={isPending} className="w-full">
               {ADMIN_COPY.nav.logout}
             </ActionButton>
           </div>

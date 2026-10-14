@@ -46,7 +46,11 @@ export function TeamCreateForm() {
             </div>
 
             <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_minmax(0,1fr)] gap-4 max-[760px]:grid-cols-1">
-              <AdminTextField name="leaderFullName" label="Nombre completo del líder" placeholder="ej. Ana Sofía López" />
+              <AdminTextField
+                name="leaderFullName"
+                label="Nombre completo del líder"
+                placeholder="ej. Ana Sofía López"
+              />
               <AdminTextField
                 name="leaderEmail"
                 label="Correo institucional"
