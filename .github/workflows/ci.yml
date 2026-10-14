@@ -59,5 +59,3 @@ jobs:
         env:
           # Obligatoria en producción (src/shared/lib/env.ts); basta un valor de ejemplo.
           NEXT_PUBLIC_SITE_URL: https://example.com
-          # El build prerenderiza el catálogo con los juegos de la base sembrada arriba.
-          DATA_SOURCE: prisma
