@@ -1,4 +1,5 @@
-import { useState, useTransition, type FormEvent } from "react";
+import { useState, useTransition, type SyntheticEvent } from "react";
+import { toast } from "@heroui/react";
 import type { ActionResult, FieldErrors, FormAction } from "@shared/lib/action-result";
 import { formDataToInput } from "@shared/lib/form-input";
 
@@ -17,34 +18,38 @@ function withoutFieldError<T>(result: ActionResult<T> | null, name: string): Act
  * `isPending` mientras corre, el `error` general y los `fieldErrors` para el `Form` de
  * HeroUI (`validationErrors`).
  *
- * `clearFieldError` (en el `onInput` de un campo o de un contenedor de campos: el evento burbujea)
- * borra el error de un campo en cuanto el usuario lo edita. Si se borrara al perder el foco (lo
- * que hace React Aria), el texto del error desaparecería justo al presionar el botón de enviar, el
- * botón se movería y el clic no llegaría a él.
+ * Los errores generales se muestran automáticamente mediante un toast de peligro (`toast.danger`).
  *
- * ```tsx
- * const form = useServerActionForm(action); // `action` llega como prop desde la page
- * <Form onSubmit={form.submit} validationErrors={form.fieldErrors}>
- *   <TextField name="gamertag"><Input onInput={form.clearFieldError} /></TextField>
- * </Form>
- * ```
+ * `clearFieldError` (en el `onInput` de un campo o de un contenedor de campos: el evento burbujea)
+ * borra el error de un campo en cuanto el usuario lo edita.
  */
 export function useServerActionForm<T>(action: FormAction<T>, onSuccess?: (data: T) => void) {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<ActionResult<T> | null>(null);
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     const input = formDataToInput(new FormData(event.currentTarget));
-    startTransition(async () => {
-      const next = await action(input);
-      setResult(next);
 
-      if (next.ok) onSuccess?.(next.data);
+    startTransition(async () => {
+      try {
+        const next = await action(input);
+        setResult(next);
+
+        if (next.ok) {
+          onSuccess?.(next.data);
+        } else if (next.error) {
+          toast.danger(next.error);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Ocurrió un error inesperado al procesar la solicitud.";
+        setResult({ ok: false, error: message });
+        toast.danger(message);
+      }
     });
   };
 
-  const clearFieldError = (event: FormEvent<HTMLElement>) => {
+  const clearFieldError = (event: SyntheticEvent<HTMLElement>) => {
     const field = event.target;
 
     if (

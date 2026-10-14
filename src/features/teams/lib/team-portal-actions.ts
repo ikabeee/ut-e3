@@ -7,6 +7,7 @@ import {
   updateGameByLeader,
 } from "@features/teams/lib/server/team-portal-queries";
 import { parseAddMemberByLeaderInput, parseUpdateGameByLeaderInput } from "@features/teams/lib/team-validation";
+import { ActionRuleError } from "@shared/lib/action-rule-error";
 import { actionError, type ActionResult } from "@shared/lib/action-result";
 import { runServerAction } from "@shared/lib/server/server-action";
 import { getAuthSession } from "@shared/lib/server/session";
@@ -14,8 +15,9 @@ import type { RawInput } from "@shared/lib/validation";
 
 async function getAuthenticatedTeamId(): Promise<string> {
   const session = await getAuthSession();
-  if (!session || session.role !== "team" || !session.teamId) {
-    throw new Error("No tienes autorización para administrar este equipo.");
+
+  if (session?.role !== "team" || !session.teamId) {
+    throw new ActionRuleError("No tienes autorización para administrar este equipo.");
   }
 
   return session.teamId;

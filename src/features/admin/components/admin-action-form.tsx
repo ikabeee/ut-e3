@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState, type FormEvent, type ReactNode } from "react";
-import { cn, Form } from "@heroui/react";
+import { useRef, useState, type ReactNode, type SyntheticEvent } from "react";
+import { cn, Form, toast } from "@heroui/react";
 import { ActionButton } from "@shared/components/action-button";
 import { useServerActionForm } from "@shared/hooks/use-server-action-form";
 import type { FormAction } from "@shared/lib/action-result";
@@ -37,10 +37,12 @@ export function AdminActionForm<T>({
   const form = useServerActionForm(action, () => {
     setSucceeded(true);
 
+    if (successMessage) toast.success(successMessage);
+
     if (resetOnSuccess) formRef.current?.reset();
   });
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = (event: SyntheticEvent<HTMLFormElement>) => {
     formRef.current = event.currentTarget;
     setSucceeded(false);
     form.submit(event);

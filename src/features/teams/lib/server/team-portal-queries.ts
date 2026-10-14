@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import type { AddMemberByLeaderInput, TeamPortalData, UpdateGameByLeaderInput } from "@features/teams/lib/types";
 import { TRAFFIC_WINDOW_MINUTES } from "@features/visitors/lib/visitor-rules";
 import { db } from "@shared/lib/prisma/db";
+import { ActionRuleError } from "@shared/lib/action-rule-error";
 import { RecordNotFoundError } from "@shared/lib/record-not-found-error";
 import { generateSecret } from "@shared/lib/server/secrets";
 import { isUuid } from "@shared/lib/validation";
@@ -106,7 +107,7 @@ export async function deleteMemberByLeader(teamId: string, memberId: string): Pr
   }
 
   if (member.isLeader) {
-    throw new Error("No puedes eliminar la cuenta del líder del equipo.");
+    throw new ActionRuleError("No puedes eliminar la cuenta del líder del equipo.");
   }
 
   await db.orm.public.TeamMember.where({ id: memberId }).delete();

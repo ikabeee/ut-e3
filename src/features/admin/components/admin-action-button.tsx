@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Button } from "@heroui/react";
+import { Button, toast } from "@heroui/react";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import type { ActionResult } from "@shared/lib/action-result";
 
@@ -12,6 +12,8 @@ interface AdminActionButtonProps {
   /** Si existe, pide confirmar antes de ejecutar (borrados y acciones que no se deshacen). */
   confirmLabel?: string;
   variant?: "primary" | "outline" | "tertiary" | "danger";
+  /** Mensaje de confirmación en toast que se muestra si la acción termina con éxito. */
+  successMessage?: string;
 }
 
 /** Botón del panel que ejecuta una acción (borrar, marcar portada, avisado...) y muestra su error. */
@@ -20,6 +22,7 @@ export function AdminActionButton({
   label,
   confirmLabel,
   variant = "outline",
+  successMessage,
 }: Readonly<AdminActionButtonProps>) {
   const [isPending, startTransition] = useTransition();
   const [isConfirming, setIsConfirming] = useState(false);
@@ -28,8 +31,23 @@ export function AdminActionButton({
   const run = () => {
     setIsConfirming(false);
     startTransition(async () => {
-      const result = await action();
-      setError(result.ok ? null : result.error);
+      try {
+        const result = await action();
+
+        if (result.ok) {
+          setError(null);
+          if (successMessage) {
+            toast.success(successMessage);
+          }
+        } else {
+          setError(result.error);
+          toast.danger(result.error);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : ADMIN_COPY.common.unexpectedError;
+        setError(message);
+        toast.danger(message);
+      }
     });
   };
 

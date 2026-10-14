@@ -1,4 +1,4 @@
-import { FieldError, Form, Input, Label, TextArea, TextField } from "@heroui/react";
+import { FieldError, Form, Input, Label, TextArea, TextField, toast } from "@heroui/react";
 import { updateGameByLeaderAction } from "@features/teams/lib/team-portal-actions";
 import type { TeamPortalGame } from "@features/teams/lib/types";
 import { ActionButton } from "@shared/components/action-button";
@@ -10,7 +10,9 @@ interface TeamGameManagerProps {
 }
 
 export function TeamGameManager({ game }: Readonly<TeamGameManagerProps>) {
-  const form = useServerActionForm(updateGameByLeaderAction);
+  const form = useServerActionForm(updateGameByLeaderAction, () => {
+    toast.success("Ficha del videojuego actualizada exitosamente.");
+  });
 
   if (!game) {
     return (
@@ -36,8 +38,6 @@ export function TeamGameManager({ game }: Readonly<TeamGameManagerProps>) {
       </div>
 
       <Form onSubmit={form.submit} validationErrors={form.fieldErrors} className="flex flex-col gap-4">
-        {form.error ? <p className="rounded bg-danger/10 p-2 text-xs font-semibold text-danger">{form.error}</p> : null}
-
         <TextField name="description" isRequired className="flex flex-col gap-1">
           <Label className="text-xs font-bold text-paper-foreground uppercase">Sinopsis / Descripción</Label>
           <TextArea

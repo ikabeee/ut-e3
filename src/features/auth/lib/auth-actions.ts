@@ -5,6 +5,7 @@ import { AUTH_COPY } from "@features/auth/lib/auth-copy";
 import { parseLoginInput, parseRegisterTeamInput } from "@features/auth/lib/auth-validation";
 import { authenticateUser, confirmEmailToken, registerTeamWithLeader } from "@features/auth/lib/server/auth-queries";
 import { clearAuthSession, saveAuthSession } from "@features/auth/lib/server/auth-session";
+import { ActionRuleError } from "@shared/lib/action-rule-error";
 import type { ActionResult } from "@shared/lib/action-result";
 import { runServerAction } from "@shared/lib/server/server-action";
 import type { RawInput } from "@shared/lib/validation";
@@ -14,21 +15,32 @@ const REGISTRATION_CONSTRAINTS = {
   team_member_email_key: "Ya existe una cuenta registrada con ese correo electrónico.",
 };
 
+export interface LoginActionDeps {
+  authenticateUser?: typeof authenticateUser;
+  saveAuthSession?: typeof saveAuthSession;
+}
+
 /** Inicia sesión verificando credenciales en la base de datos y creando la sesión httpOnly. */
-export async function loginAction(input: RawInput): Promise<ActionResult<{ redirectTo: string }>> {
+export async function loginAction(
+  input: RawInput,
+  deps?: LoginActionDeps,
+): Promise<ActionResult<{ redirectTo: string }>> {
+  const authenticate = deps?.authenticateUser ?? authenticateUser;
+  const saveSession = deps?.saveAuthSession ?? saveAuthSession;
+
   return runServerAction(async () => {
     const valid = parseLoginInput(input);
-    const result = await authenticateUser(valid.identifier, valid.password);
+    const result = await authenticate(valid.identifier, valid.password);
 
     if (result.unconfirmed) {
-      throw new Error(AUTH_COPY.login.errors.unconfirmedEmail);
+      throw new ActionRuleError(AUTH_COPY.login.errors.unconfirmedEmail);
     }
 
     if (!result.success || !result.session) {
-      throw new Error(AUTH_COPY.login.errors.invalidCredentials);
+      throw new ActionRuleError(AUTH_COPY.login.errors.invalidCredentials);
     }
 
-    await saveAuthSession(result.session);
+    await saveSession(result.session);
 
     const redirectTo = result.session.role === "admin" ? ADMIN_PORTAL_PATH : TEAM_PORTAL_PATH;
 
@@ -55,7 +67,7 @@ export async function confirmEmailAction(token: string): Promise<ActionResult<{ 
     const ok = await confirmEmailToken(token);
 
     if (!ok) {
-      throw new Error(AUTH_COPY.confirmEmail.errorMessage);
+      throw new ActionRuleError(AUTH_COPY.confirmEmail.errorMessage);
     }
 
     return { confirmed: true };

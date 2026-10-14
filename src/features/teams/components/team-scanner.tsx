@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
-import { Alert, FieldError, Form, Input, Label, TextField } from "@heroui/react";
+import { Alert, FieldError, Form, Input, Label, TextField, toast } from "@heroui/react";
 import { scanVisitorQrAction } from "@features/teams/lib/team-scanner-actions";
 import type { TeamScanResult } from "@features/teams/lib/types";
 import { ActionButton } from "@shared/components/action-button";
@@ -91,6 +91,7 @@ export function TeamScanner() {
         setLastResult(res.data);
       } else {
         setErrorMsg(res.error);
+        toast.danger(res.error);
         setLastResult(null);
       }
     });
@@ -114,7 +115,9 @@ export function TeamScanner() {
 
       setIsCameraActive(true);
     } catch {
-      setCameraError("No se pudo acceder a la cámara. Verifica los permisos del navegador.");
+      const msg = "No se pudo acceder a la cámara. Verifica los permisos del navegador.";
+      setCameraError(msg);
+      toast.danger(msg);
       setIsCameraActive(false);
     }
   };

@@ -1,5 +1,6 @@
 "use client";
 
+import { ToastProvider } from "@heroui/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import type { ReactNode } from "react";
@@ -12,6 +13,7 @@ export function QueryProvider({ children }: Readonly<{ children: ReactNode }>) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ToastProvider placement="bottom end" />
       {children}
       {/* Rendered only in development; it is excluded from production builds. */}
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />

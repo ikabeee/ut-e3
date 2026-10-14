@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useTransition } from "react";
-import { FieldError, Form, Input, Label, TextField } from "@heroui/react";
+import { FieldError, Form, Input, Label, TextField, toast } from "@heroui/react";
 import { addMemberByLeaderAction, deleteMemberByLeaderAction } from "@features/teams/lib/team-portal-actions";
 import { STUDENT_GROUPS, type TeamPortalMember } from "@features/teams/lib/types";
 import { ActionButton } from "@shared/components/action-button";
@@ -18,11 +18,23 @@ export function TeamMemberManager({ members }: Readonly<TeamMemberManagerProps>)
 
   const form = useServerActionForm(addMemberByLeaderAction, () => {
     formRef.current?.reset();
+    toast.success("Integrante registrado exitosamente.");
   });
 
   const handleDelete = (memberId: string) => {
     startDeleteTransition(async () => {
-      await deleteMemberByLeaderAction(memberId);
+      try {
+        const res = await deleteMemberByLeaderAction(memberId);
+
+        if (!res.ok) {
+          toast.danger(res.error);
+        } else {
+          toast.success("Integrante eliminado exitosamente.");
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Error al eliminar integrante.";
+        toast.danger(message);
+      }
     });
   };
 
@@ -79,10 +91,6 @@ export function TeamMemberManager({ members }: Readonly<TeamMemberManagerProps>)
           validationErrors={form.fieldErrors}
           className="mt-3 flex flex-col gap-4"
         >
-          {form.error ? (
-            <p className="rounded bg-danger/10 p-2 text-xs font-semibold text-danger">{form.error}</p>
-          ) : null}
-
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <TextField name="fullName" isRequired className="flex flex-col gap-1">
               <Label className="text-xs font-bold text-paper-foreground uppercase">Nombre Completo</Label>

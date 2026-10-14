@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import type { TeamScanResult } from "@features/teams/lib/types";
 import { recordCheckIns } from "@features/visitors/lib/server/check-ins-queries";
 import { extractVisitorToken } from "@features/visitors/lib/visitor-rules";
+import { ActionRuleError } from "@shared/lib/action-rule-error";
 import { db } from "@shared/lib/prisma/db";
 import { hashSecret } from "@shared/lib/server/secrets";
 
@@ -19,7 +20,7 @@ export async function recordTeamVisitorCheckIn(teamId: string, scannedInput: str
     .first();
 
   if (!team?.game) {
-    throw new Error("El equipo no tiene un juego asignado para registrar visitas.");
+    throw new ActionRuleError("El equipo no tiene un juego asignado para registrar visitas.");
   }
 
   const token = extractVisitorToken(scannedInput);

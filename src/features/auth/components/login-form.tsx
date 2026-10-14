@@ -19,7 +19,7 @@ export function LoginForm({ confirmed = false }: Readonly<LoginFormProps>) {
   });
 
   return (
-    <PaperCard className="w-full max-w-[500px] gap-6 p-[clamp(24px,4vw,36px)]">
+    <PaperCard className="w-full max-w-125 gap-6 p-[clamp(24px,4vw,36px)]">
       <div className="flex flex-col gap-2">
         <h1 className="font-wide text-2xl font-bold tracking-[-.03em] uppercase">{copy.heading}</h1>
         <p className="m-0 text-[15px] leading-[1.4] text-paper-foreground/80">{copy.subheading}</p>
@@ -53,20 +53,10 @@ export function LoginForm({ confirmed = false }: Readonly<LoginFormProps>) {
           <FieldError />
         </TextField>
 
-        {form.error && Object.keys(form.fieldErrors).length === 0 ? (
-          <p role="alert" className="m-0 text-sm font-medium text-danger">
-            {form.error}
-          </p>
-        ) : null}
-
         <ActionButton type="submit" variant="primary" isPending={form.isPending} arrow="ne" className="mt-2">
           {form.isPending ? copy.submitting : copy.submitButton}
         </ActionButton>
       </Form>
-
-      <div className="border-t border-paper-foreground/15 pt-4 text-center text-xs text-paper-foreground/70">
-        {copy.noAccountPrompt}
-      </div>
     </PaperCard>
   );
 }
