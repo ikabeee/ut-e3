@@ -31,12 +31,12 @@ async function TeamPortalContent() {
 
 export function TeamPortalPage() {
   return (
-    <main className="page-wrap py-10">
-      <Suspense
-        fallback={<div className="font-display py-20 text-center text-paper-foreground/70">Cargando portal...</div>}
-      >
-        <TeamPortalContent />
-      </Suspense>
-    </main>
+    <Suspense
+      fallback={
+        <div className="font-display flex min-h-screen items-center justify-center text-muted">Cargando portal...</div>
+      }
+    >
+      <TeamPortalContent />
+    </Suspense>
   );
 }
