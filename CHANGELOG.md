@@ -8,6 +8,17 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Registro y alta de videojuegos por parte de los líderes de equipo desde su propio portal (`/team`):
+  formulario para dar de alta el juego del equipo con nombre, descripción, enlace a itch.io y cantidad
+  de jugadores.
+- Visualización y botón para copiar al portapapeles la llave de escáner del stand (`scannerKey`) en el
+  resumen del portal de equipos (`/team`).
+- Control de acceso basado en roles (RBAC) estricto en el proxy de autenticación: los administradores
+  (`role === 'admin'`) están restringidos al panel `/admin` (se redirigen a `/admin` si intentan `/team`),
+  mientras que los equipos (`role === 'team'`) están restringidos a `/team` (se redirigen a `/team` si intentan
+  `/admin`).
+- Envío automático de boletos del sorteo por correo a los visitantes en cuanto completan la prueba
+  de todos los videojuegos requeridos en la exhibición, y copia de su código QR personal al registrarse.
 - Alta de equipos con usuario líder inicial opcional en el panel de administración: el líder se crea
   sin contraseña inicial y recibe un correo con enlace seguro para establecer su contraseña y
   activar su cuenta (`/confirm-email?token=...`). Se mantiene la bandera `isConfirmed` para detectar
@@ -59,6 +70,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- Panel de administración: se retiró el formulario de alta manual de videojuegos (`/admin/games`),
+  trasladando la responsabilidad del registro inicial y mantenimiento de la información del juego
+  directamente a los líderes de cada equipo desde su portal (`/team`). El administrador ahora se
+  enfoca en la asignación de stands, catálogo global, fotografías y sorteo.
 - Limpieza de código y anti-patrones detectados por `anti-ai-slop` (`npm run lint:oxlint`): erradicación
   de monkey-patching y mocks de módulos (`jest.mock`) a favor de inyección de dependencias en
   componentes y servicios, justificación formal de aserciones de tipos con comentarios `SAFETY:`,
