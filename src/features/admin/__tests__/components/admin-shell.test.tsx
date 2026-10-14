@@ -19,8 +19,8 @@ describe("AdminShell", () => {
       .find((el) => el.getAttribute("aria-current") === "page");
     expect(activeLink).toBeDefined();
 
-    // "Ver sitio público" should NOT exist
-    expect(screen.queryByText(/ver sitio público/i)).not.toBeInTheDocument();
+    // Link to public site exists
+    expect(screen.getAllByRole("link", { name: /ver sitio público/i })[0]).toHaveAttribute("href", "/");
 
     // Logout button exists
     expect(screen.getAllByRole("button", { name: /cerrar sesión/i })[0]).toBeInTheDocument();
@@ -46,6 +46,7 @@ describe("AdminShell", () => {
   });
 
   it("calls onLogout when logout button is clicked", async () => {
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
     const user = userEvent.setup();
     const handleLogout = jest.fn().mockResolvedValue({ ok: true, data: { redirectTo: "/login" } });
 
@@ -59,5 +60,6 @@ describe("AdminShell", () => {
     await user.click(logoutButtons[0]);
 
     expect(handleLogout).toHaveBeenCalledTimes(1);
+    consoleErrorSpy.mockRestore();
   });
 });
