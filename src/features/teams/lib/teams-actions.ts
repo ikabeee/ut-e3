@@ -1,7 +1,12 @@
 "use server";
 
 import { GAMES_CACHE_TAG } from "@features/games/lib/server/games-queries";
-import { parseCreateTeamLeaderInput, parseTeamInput, parseTeamMemberInput } from "@features/teams/lib/team-validation";
+import {
+  parseCreateTeamInput,
+  parseCreateTeamLeaderInput,
+  parseTeamInput,
+  parseTeamMemberInput,
+} from "@features/teams/lib/team-validation";
 import {
   addTeamMember,
   createTeam,
@@ -24,15 +29,16 @@ const TEAM_CONSTRAINT_MESSAGES = {
   team_stand_code_key: "Ese stand ya está asignado a otro equipo.",
   team_stand_code_format: "El stand debe ser A1-A9 o B1-B9.",
   team_member_one_leader: "El equipo ya tiene un líder.",
+  team_member_email_key: "Ya existe una cuenta registrada con ese correo electrónico.",
   check_in_game_id_fkey: "No se puede borrar: el juego del equipo ya tiene check-ins.",
   team_member_team_id_fkey: "El equipo ya no existe.",
 };
 
 const options = { invalidateTags: [GAMES_CACHE_TAG], constraintMessages: TEAM_CONSTRAINT_MESSAGES };
 
-/** Crea un equipo. La respuesta trae la llave del escáner, que sólo se muestra esta vez. */
+/** Crea un equipo (y opcionalmente a su líder inicial). La respuesta trae la llave del escáner. */
 export async function createTeamAction(input: RawInput) {
-  return runAdminAction(() => createTeam(parseTeamInput(input)), options);
+  return runAdminAction(() => createTeam(parseCreateTeamInput(input)), options);
 }
 
 export async function updateTeamAction(teamId: string, input: RawInput) {
