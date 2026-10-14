@@ -1,10 +1,9 @@
 import "server-only";
-import nodemailer, { type Transporter } from "nodemailer";
-import type SMTPTransport from "nodemailer/lib/smtp-transport";
+import nodemailer from "nodemailer";
 import { env, type SmtpConfig } from "@shared/lib/env";
 
 export interface SendMailOptions {
-  to: string | readonly string[];
+  to: string | string[];
   subject: string;
   html: string;
   text?: string;
@@ -18,10 +17,12 @@ export interface SendMailResult {
   error?: string;
 }
 
+export type MailerTransporter = ReturnType<typeof createMailerTransporter>;
+
 /**
  * Crea una nueva instancia de Transporter de Nodemailer con la configuración SMTP provista.
  */
-export function createMailerTransporter(config: SmtpConfig): Transporter<SMTPTransport.SentMessageInfo> {
+export function createMailerTransporter(config: SmtpConfig) {
   return nodemailer.createTransport({
     host: config.host,
     port: config.port,
@@ -33,14 +34,14 @@ export function createMailerTransporter(config: SmtpConfig): Transporter<SMTPTra
   });
 }
 
-let cachedTransporter: Transporter<SMTPTransport.SentMessageInfo> | null = null;
+let cachedTransporter: MailerTransporter | null = null;
 let initialized = false;
 
 /**
  * Obtiene el transporter singleton configurado con las variables de entorno.
  * Si las credenciales no están configuradas, devuelve `null`.
  */
-export function getMailerTransporter(): Transporter<SMTPTransport.SentMessageInfo> | null {
+export function getMailerTransporter(): MailerTransporter | null {
   if (initialized) {
     return cachedTransporter;
   }
@@ -116,14 +117,14 @@ export async function sendMail(options: SendMailOptions): Promise<SendMailResult
   }
 
   try {
-    const info = await transporter.sendMail({
+    const info = (await transporter.sendMail({
       from,
       to,
       subject: options.subject,
       html: options.html,
       text: options.text,
       replyTo: options.replyTo,
-    });
+    })) as { messageId?: string };
 
     return {
       success: true,
