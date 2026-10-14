@@ -1,75 +1,52 @@
 import "server-only";
-import nodemailer from "nodemailer";
 import { CONFIRM_EMAIL_PATH } from "@features/auth/lib/auth-links";
 import { siteConfig } from "@shared/lib/site-config";
-
-function getTransporter() {
-  const host = process.env["SMTP_HOST"];
-  const port = Number(process.env["SMTP_PORT"] || "587");
-  const user = process.env["SMTP_USER"];
-  const pass = process.env["SMTP_PASSWORD"];
-
-  if (host && user && pass) {
-    return nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-    });
-  }
-
-  return null;
-}
+import { sendMail } from "@shared/lib/server/mailer";
 
 /**
- * Envía el correo de confirmación de cuenta con nodemailer.
+ * Envía el correo de confirmación de cuenta con nodemailer (vía `@shared/lib/server/mailer`).
  * Si no hay credenciales SMTP configuradas en local, imprime el enlace directamente
  * en la consola para facilitar el desarrollo.
  */
 export async function sendConfirmationEmail(email: string, fullName: string, token: string): Promise<boolean> {
   const confirmUrl = `${siteConfig.url}${CONFIRM_EMAIL_PATH}?token=${token}`;
-  const from = process.env["EMAIL_FROM"] || `"UTG Showcase" <no-reply@showcase.ute3.edu.mx>`;
   const subject = "Confirma tu cuenta - UT Game Showcase";
 
-  const transporter = getTransporter();
+  const text = `Hola ${fullName},
 
-  if (!transporter) {
-    console.log("\n=======================================================");
-    console.log(`[EMAIL DEV] Para: ${fullName} <${email}>`);
-    console.log(`[EMAIL DEV] Asunto: ${subject}`);
-    console.log(`[EMAIL DEV] Enlace de confirmación: ${confirmUrl}`);
-    console.log("=======================================================\n");
+Gracias por registrar a tu equipo en el UT Game Showcase.
+Para activar tu cuenta y poder acceder al portal de escáner de tu stand, confirma tu correo electrónico dando clic en el siguiente enlace:
 
-    return true;
-  }
+${confirmUrl}
+
+Si el enlace no funciona directamente, cópialo y pégalo en la barra de tu navegador.
+
+Si no solicitaste este registro, puedes ignorar este mensaje.`;
 
   const html = `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1a1a1a; background: #ffffff; border-radius: 8px; border: 1px solid #eaeaea;">
-      <h2 style="color: #000; margin-top: 0;">UT Game Showcase</h2>
-      <p>Hola <strong>${fullName}</strong>,</p>
-      <p>Gracias por registrar a tu equipo en el showcase de videojuegos. Para activar tu cuenta y poder acceder al portal de escáner de tu stand, confirma tu correo electrónico dando clic en el siguiente enlace:</p>
-      <div style="text-align: center; margin: 32px 0;">
-        <a href="${confirmUrl}" style="background-color: #0070f3; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Confirmar mi correo</a>
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; color: #1a1a1a; background: #ffffff; border-radius: 8px; border: 1px solid #eaeaea;">
+      <div style="margin-bottom: 24px; border-bottom: 2px solid #000; padding-bottom: 12px;">
+        <h1 style="color: #000; margin: 0; font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px;">UT Game Showcase</h1>
+        <p style="margin: 4px 0 0; font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">División de Ingeniería y Tecnologías · UT Cancún</p>
       </div>
-      <p style="font-size: 13px; color: #666;">Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:</p>
-      <p style="font-size: 12px; color: #888; word-break: break-all;"><a href="${confirmUrl}">${confirmUrl}</a></p>
-      <hr style="border: none; border-top: 1px solid #eaeaea; margin: 24px 0;" />
-      <p style="font-size: 11px; color: #999; margin-bottom: 0;">Si no solicitaste este registro, puedes ignorar este correo.</p>
+      <p style="font-size: 15px; line-height: 1.5; margin: 16px 0;">Hola <strong>${fullName}</strong>,</p>
+      <p style="font-size: 15px; line-height: 1.5; margin: 16px 0;">Gracias por registrar a tu equipo en el showcase de videojuegos. Para activar tu cuenta y poder acceder al portal de escáner de tu stand, confirma tu correo electrónico dando clic en el siguiente enlace:</p>
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${confirmUrl}" style="background-color: #000000; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;">Confirmar mi correo</a>
+      </div>
+      <p style="font-size: 13px; color: #666; line-height: 1.5;">Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:</p>
+      <p style="font-size: 12px; color: #0070f3; word-break: break-all;"><a href="${confirmUrl}" style="color: #0070f3;">${confirmUrl}</a></p>
+      <hr style="border: none; border-top: 1px solid #eaeaea; margin: 28px 0;" />
+      <p style="font-size: 11px; color: #999; margin: 0; line-height: 1.4;">Si no solicitaste este registro, puedes ignorar este mensaje.</p>
     </div>
   `;
 
-  try {
-    await transporter.sendMail({
-      from,
-      to: email,
-      subject,
-      html,
-    });
+  const result = await sendMail({
+    to: email,
+    subject,
+    text,
+    html,
+  });
 
-    return true;
-  } catch (error) {
-    console.error("Error al enviar correo con nodemailer:", error);
-
-    return false;
-  }
+  return result.success;
 }
