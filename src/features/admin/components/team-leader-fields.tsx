@@ -19,13 +19,9 @@ export function TeamLeaderFields() {
         />
         <AdminSelectField name="groupName" label="Grupo" options={GROUP_OPTIONS} isRequired />
       </div>
-      <AdminTextField
-        name="password"
-        label="Contraseña inicial"
-        type="password"
-        description="Mínimo 8 caracteres. El líder podrá usarla al confirmar su cuenta."
-        isRequired
-      />
+      <p className="m-0 text-xs text-muted">
+        El líder recibirá un correo de confirmación para establecer su contraseña y activar su cuenta.
+      </p>
     </div>
   );
 }
