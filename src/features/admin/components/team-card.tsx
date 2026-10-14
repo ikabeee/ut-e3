@@ -97,6 +97,7 @@ export function TeamCard({ team }: Readonly<TeamCardProps>) {
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {team.members.map((member) => (
             <li key={member.id} className="flex flex-wrap items-center justify-between gap-3">
+              <span>
                 {member.fullName} <span className="type-tiny text-muted">· {member.groupName}</span>
                 {member.isLeader ? (
                   <span className="type-tiny text-accent">
