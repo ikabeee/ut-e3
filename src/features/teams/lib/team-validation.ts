@@ -2,6 +2,7 @@ import {
   STAND_CODE_PATTERN,
   STUDENT_GROUPS,
   type AddMemberByLeaderInput,
+  type CreateTeamInput,
   type CreateTeamLeaderInput,
   type TeamInput,
   type TeamMemberInput,
@@ -25,17 +26,7 @@ export function parseTeamInput(raw: RawInput): TeamInput {
   }));
 }
 
-/** Valida los datos de un integrante. */
-export function parseTeamMemberInput(raw: RawInput): TeamMemberInput {
-  return validate(raw, (field) => ({
-    fullName: field.text("fullName", { label: "El nombre completo", max: 120 }),
-    groupName: field.oneOf("groupName", STUDENT_GROUPS, "el grupo"),
-    isLeader: field.boolean("isLeader"),
-    sortOrder: field.integer("sortOrder", { label: "El orden", min: 0, max: 99, fallback: 0 }),
-  }));
-}
-
-/** Valida los datos para que el sysadmin cree el usuario líder de un equipo. */
+/** Valida los datos para que el sysadmin cree el usuario líder de un equipo (sin contraseña inicial). */
 export function parseCreateTeamLeaderInput(raw: RawInput): CreateTeamLeaderInput {
   return validate(raw, (field) => {
     const email = field.text("email", {
@@ -45,19 +36,48 @@ export function parseCreateTeamLeaderInput(raw: RawInput): CreateTeamLeaderInput
       patternMessage: "Introduce un correo electrónico válido.",
     });
 
-    const password = field.text("password", { label: "La contraseña", max: 72 });
-
-    if (password.length < 8) {
-      field.invalid("password", "La contraseña debe tener al menos 8 caracteres.");
-    }
-
     return {
       fullName: field.text("fullName", { label: "El nombre completo del líder", max: 120 }),
       email,
-      password,
       groupName: field.oneOf("groupName", STUDENT_GROUPS, "el grupo"),
     };
   });
+}
+
+/** Valida los datos para crear un equipo, opcionalmente con su usuario líder inicial. */
+export function parseCreateTeamInput(raw: RawInput): CreateTeamInput {
+  const base = parseTeamInput(raw);
+  const leaderFullName = raw["leaderFullName"] ?? raw["fullName"];
+  const leaderEmail = raw["leaderEmail"] ?? raw["email"];
+  const leaderGroupName = raw["leaderGroupName"] ?? raw["groupName"];
+
+  const hasAnyLeaderField = Boolean(
+    (typeof leaderFullName === "string" && leaderFullName.trim()) ||
+    (typeof leaderEmail === "string" && leaderEmail.trim()) ||
+    (typeof leaderGroupName === "string" && leaderGroupName.trim()),
+  );
+
+  if (!hasAnyLeaderField) {
+    return { ...base, leader: null };
+  }
+
+  const leader = parseCreateTeamLeaderInput({
+    fullName: leaderFullName,
+    email: leaderEmail,
+    groupName: leaderGroupName,
+  });
+
+  return { ...base, leader };
+}
+
+/** Valida los datos de un integrante. */
+export function parseTeamMemberInput(raw: RawInput): TeamMemberInput {
+  return validate(raw, (field) => ({
+    fullName: field.text("fullName", { label: "El nombre completo", max: 120 }),
+    groupName: field.oneOf("groupName", STUDENT_GROUPS, "el grupo"),
+    isLeader: field.boolean("isLeader"),
+    sortOrder: field.integer("sortOrder", { label: "El orden", min: 0, max: 99, fallback: 0 }),
+  }));
 }
 
 /** Valida los datos para que un líder agregue un integrante a su equipo. */

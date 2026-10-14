@@ -14,7 +14,7 @@ export interface TeamMember {
   groupName: StudentGroup;
   isLeader: boolean;
   sortOrder: number;
-  isConfirmed?: boolean;
+  isConfirmed: boolean;
 }
 
 /** Equipo tal como lo ve el panel de administración. */
@@ -46,7 +46,12 @@ export interface CreateTeamLeaderInput {
   fullName: string;
   email: string;
   groupName: StudentGroup;
-  password: string;
+}
+
+export interface CreateTeamInput {
+  name: string;
+  standCode: string | null;
+  leader?: CreateTeamLeaderInput | null;
 }
 
 export interface AddMemberByLeaderInput {
