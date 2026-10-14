@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
+import { useEffect, useRef, useState, useTransition, type SyntheticEvent } from "react";
 import { Alert, FieldError, Form, Input, Label, TextField, toast } from "@heroui/react";
 import { scanVisitorQrAction } from "@features/teams/lib/team-scanner-actions";
 import type { TeamScanResult } from "@features/teams/lib/types";
@@ -177,7 +177,7 @@ export function TeamScanner() {
     };
   }, []);
 
-  const handleManualSubmit = (e: FormEvent) => {
+  const handleManualSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!manualInput.trim()) return;
