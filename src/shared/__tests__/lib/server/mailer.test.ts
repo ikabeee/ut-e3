@@ -48,13 +48,11 @@ describe("mailer", () => {
   describe("getMailerTransporter and resetMailerTransporter", () => {
     it("returns null when env.smtp is not configured", () => {
       const originalSmtp = env.smtp;
-      // @ts-expect-error mutating readonly property for testing
       env.smtp = null;
 
       try {
         expect(getMailerTransporter()).toBeNull();
       } finally {
-        // @ts-expect-error restore
         env.smtp = originalSmtp;
       }
     });
@@ -64,7 +62,6 @@ describe("mailer", () => {
       const mockTransporter = { verify: jest.fn(), sendMail: jest.fn() };
       (nodemailer.createTransport as jest.Mock).mockReturnValue(mockTransporter);
 
-      // @ts-expect-error mutating readonly property for testing
       env.smtp = mockConfig;
 
       try {
@@ -80,7 +77,6 @@ describe("mailer", () => {
         expect(t3).toBe(mockTransporter);
         expect(nodemailer.createTransport).toHaveBeenCalledTimes(2);
       } finally {
-        // @ts-expect-error restore
         env.smtp = originalSmtp;
       }
     });
@@ -89,7 +85,6 @@ describe("mailer", () => {
   describe("verifyMailerConnection", () => {
     it("returns error if no transporter is available", async () => {
       const originalSmtp = env.smtp;
-      // @ts-expect-error mutating readonly property for testing
       env.smtp = null;
 
       try {
@@ -97,7 +92,6 @@ describe("mailer", () => {
         expect(result.success).toBe(false);
         expect(result.error).toContain("No hay configuración SMTP disponible");
       } finally {
-        // @ts-expect-error restore
         env.smtp = originalSmtp;
       }
     });
@@ -109,7 +103,6 @@ describe("mailer", () => {
         verify: mockVerify,
       });
 
-      // @ts-expect-error mutating readonly property for testing
       env.smtp = mockConfig;
 
       try {
@@ -117,7 +110,6 @@ describe("mailer", () => {
         expect(result.success).toBe(true);
         expect(mockVerify).toHaveBeenCalled();
       } finally {
-        // @ts-expect-error restore
         env.smtp = originalSmtp;
       }
     });
@@ -129,7 +121,6 @@ describe("mailer", () => {
         verify: mockVerify,
       });
 
-      // @ts-expect-error mutating readonly property for testing
       env.smtp = mockConfig;
 
       try {
@@ -137,7 +128,6 @@ describe("mailer", () => {
         expect(result.success).toBe(false);
         expect(result.error).toBe("Connection refused");
       } finally {
-        // @ts-expect-error restore
         env.smtp = originalSmtp;
       }
     });
@@ -146,7 +136,6 @@ describe("mailer", () => {
   describe("sendMail", () => {
     it("prints dev preview and succeeds when no transporter configured", async () => {
       const originalSmtp = env.smtp;
-      // @ts-expect-error mutating readonly property for testing
       env.smtp = null;
       const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
@@ -163,7 +152,6 @@ describe("mailer", () => {
         expect(consoleSpy).toHaveBeenCalled();
       } finally {
         consoleSpy.mockRestore();
-        // @ts-expect-error restore
         env.smtp = originalSmtp;
       }
     });
@@ -175,7 +163,6 @@ describe("mailer", () => {
         sendMail: mockSendMail,
       });
 
-      // @ts-expect-error mutating readonly property for testing
       env.smtp = mockConfig;
 
       try {
@@ -198,7 +185,6 @@ describe("mailer", () => {
           replyTo: "support@example.com",
         });
       } finally {
-        // @ts-expect-error restore
         env.smtp = originalSmtp;
       }
     });
@@ -211,7 +197,6 @@ describe("mailer", () => {
         sendMail: mockSendMail,
       });
 
-      // @ts-expect-error mutating readonly property for testing
       env.smtp = mockConfig;
 
       try {
@@ -225,7 +210,6 @@ describe("mailer", () => {
         expect(result.error).toBe("SMTP timeout");
       } finally {
         consoleErrorSpy.mockRestore();
-        // @ts-expect-error restore
         env.smtp = originalSmtp;
       }
     });
