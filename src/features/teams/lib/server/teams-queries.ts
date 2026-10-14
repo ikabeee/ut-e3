@@ -81,7 +81,9 @@ export async function createTeam(input: CreateTeamInput): Promise<TeamWithScanne
       name: input.name,
       standCode: input.standCode,
       scannerKeyHash: hashSecret(scannerKey),
+      scannerKey,
     });
+
     createdTeamId = created.id;
 
     if (input.leader) {
@@ -129,7 +131,10 @@ export async function deleteTeam(id: string): Promise<void> {
 export async function rotateTeamScannerKey(id: string): Promise<TeamWithScannerKey> {
   if (!isUuid(id)) throw new RecordNotFoundError(TEAM_NOT_FOUND);
   const scannerKey = generateSecret();
-  const updated = await db.orm.public.Team.where({ id }).update({ scannerKeyHash: hashSecret(scannerKey) });
+  const updated = await db.orm.public.Team.where({ id }).update({
+    scannerKeyHash: hashSecret(scannerKey),
+    scannerKey,
+  });
 
   if (!updated) throw new RecordNotFoundError(TEAM_NOT_FOUND);
 

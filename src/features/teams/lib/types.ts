@@ -59,6 +59,14 @@ export interface AddMemberByLeaderInput {
   groupName: StudentGroup;
 }
 
+export interface CreateGameByLeaderInput {
+  name: string;
+  description: string;
+  genreId?: string | null;
+  itchioUrl?: string | null;
+  players?: number;
+}
+
 export interface UpdateGameByLeaderInput {
   description: string;
   itchioUrl?: string | null;
