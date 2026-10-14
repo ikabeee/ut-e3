@@ -7,7 +7,7 @@ interface AdminTextFieldProps {
   description?: string;
   placeholder?: string;
   isRequired?: boolean;
-  type?: "text" | "url" | "number";
+  type?: "text" | "url" | "number" | "email" | "password";
   /** Área de texto de varias líneas (por ejemplo, "Acerca del juego"). */
   multiline?: boolean;
 }

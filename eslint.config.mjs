@@ -23,7 +23,7 @@ import sonarjs from "eslint-plugin-sonarjs";
  * de docs/architecture.md.
  */
 const FEATURE_DEPENDENCIES = {
-  admin: ["games", "teams", "visitors"],
+  admin: ["auth", "games", "teams", "visitors"],
   auth: [],
   event: [],
   "floor-plan": [],
@@ -31,7 +31,7 @@ const FEATURE_DEPENDENCIES = {
   home: ["event", "floor-plan", "games"],
   offline: ["floor-plan", "games", "home"],
   site: ["floor-plan", "games", "home", "visitors"],
-  teams: ["games", "visitors"],
+  teams: ["auth", "games", "visitors"],
   visitors: ["event", "floor-plan"],
 };
 

@@ -1,4 +1,10 @@
-import { parseTeamInput, parseTeamMemberInput } from "@features/teams/lib/team-validation";
+import {
+  parseAddMemberByLeaderInput,
+  parseCreateTeamLeaderInput,
+  parseTeamInput,
+  parseTeamMemberInput,
+  parseUpdateGameByLeaderInput,
+} from "@features/teams/lib/team-validation";
 import { ValidationError } from "@shared/lib/validation";
 
 function fieldErrors(run: () => void) {
@@ -41,6 +47,68 @@ describe("parseTeamMemberInput", () => {
   it("rejects groups that do not exist", () => {
     expect(fieldErrors(() => parseTeamMemberInput({ fullName: "Ana López", groupName: "IDYGS999" }))).toEqual({
       groupName: "Elige un valor válido para el grupo.",
+    });
+  });
+});
+
+describe("parseCreateTeamLeaderInput", () => {
+  it("accepts valid leader user input", () => {
+    expect(
+      parseCreateTeamLeaderInput({
+        fullName: "Ana López",
+        email: "alopez@ute3.edu.mx",
+        groupName: "IDYGS102",
+        password: "Password123!",
+      }),
+    ).toEqual({
+      fullName: "Ana López",
+      email: "alopez@ute3.edu.mx",
+      groupName: "IDYGS102",
+      password: "Password123!",
+    });
+  });
+
+  it("rejects invalid email or short password", () => {
+    expect(
+      fieldErrors(() =>
+        parseCreateTeamLeaderInput({
+          fullName: "Ana López",
+          email: "invalid-email",
+          groupName: "IDYGS102",
+          password: "short",
+        }),
+      ),
+    ).toEqual({
+      email: "Introduce un correo electrónico válido.",
+      password: "La contraseña debe tener al menos 8 caracteres.",
+    });
+  });
+});
+
+describe("parseAddMemberByLeaderInput", () => {
+  it("validates member name and group", () => {
+    expect(
+      parseAddMemberByLeaderInput({
+        fullName: "Carlos Mendoza",
+        groupName: "IDYGS101",
+      }),
+    ).toEqual({
+      fullName: "Carlos Mendoza",
+      groupName: "IDYGS101",
+    });
+  });
+});
+
+describe("parseUpdateGameByLeaderInput", () => {
+  it("validates game description and optional itchio url", () => {
+    expect(
+      parseUpdateGameByLeaderInput({
+        description: "Un juego de aventura espacial.",
+        itchioUrl: "https://studio.itch.io/space-adventure",
+      }),
+    ).toEqual({
+      description: "Un juego de aventura espacial.",
+      itchioUrl: "https://studio.itch.io/space-adventure",
     });
   });
 });

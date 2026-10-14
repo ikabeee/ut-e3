@@ -1,6 +1,15 @@
 import "server-only";
 import { connection } from "next/server";
-import type { Team, TeamInput, TeamMember, TeamMemberInput, TeamWithScannerKey } from "@features/teams/lib/types";
+import type {
+  CreateTeamLeaderInput,
+  Team,
+  TeamInput,
+  TeamMember,
+  TeamMemberInput,
+  TeamWithScannerKey,
+} from "@features/teams/lib/types";
+import { hashPassword } from "@features/auth/lib/server/auth-passwords";
+import { sendConfirmationEmail } from "@features/auth/lib/server/email-service";
 import { db } from "@shared/lib/prisma/db";
 import { RecordNotFoundError } from "@shared/lib/record-not-found-error";
 import { generateSecret, hashSecret } from "@shared/lib/server/secrets";
@@ -17,7 +26,7 @@ function teamsWithDetails() {
   return db.orm.public.Team.select("id", "name", "standCode")
     .include("members", (members) =>
       members
-        .select("id", "teamId", "fullName", "groupName", "isLeader", "sortOrder")
+        .select("id", "teamId", "fullName", "email", "groupName", "isLeader", "sortOrder", "isConfirmed")
         .orderBy([(member) => member.sortOrder.asc(), (member) => member.fullName.asc()]),
     )
     .include("game", (game) => game.select("slug"));
@@ -138,4 +147,46 @@ export async function deleteTeamMember(id: string): Promise<Team> {
   if (!deleted) throw new RecordNotFoundError(MEMBER_NOT_FOUND);
 
   return findTeamOrThrow(deleted.teamId);
+}
+
+/**
+ * Crea o actualiza el usuario líder de un equipo (exclusivo para el sysadmin).
+ * Envía un correo con el enlace de confirmación vía nodemailer.
+ */
+export async function createTeamLeader(teamId: string, input: CreateTeamLeaderInput): Promise<Team> {
+  if (!isUuid(teamId)) throw new RecordNotFoundError(TEAM_NOT_FOUND);
+
+  await connection();
+
+  const team = await db.orm.public.Team.where({ id: teamId }).first();
+  if (!team) throw new RecordNotFoundError(TEAM_NOT_FOUND);
+
+  const passwordHash = hashPassword(input.password);
+  const token = generateSecret();
+  const confirmationTokenHash = hashSecret(token);
+  const confirmationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+  await db.transaction(async (tx) => {
+    // Si ya existía un líder, remueve la bandera de líder
+    await tx.orm.public.TeamMember.where({ teamId, isLeader: true }).updateAll({ isLeader: false });
+
+    // Crea el nuevo usuario líder
+    await tx.orm.public.TeamMember.create({
+      teamId,
+      fullName: input.fullName,
+      email: input.email.toLowerCase(),
+      groupName: input.groupName,
+      isLeader: true,
+      sortOrder: 0,
+      passwordHash,
+      isConfirmed: false,
+      confirmationTokenHash,
+      confirmationExpiresAt,
+    });
+  });
+
+  // Envía el correo de confirmación
+  await sendConfirmationEmail(input.email.toLowerCase(), input.fullName, token);
+
+  return findTeamOrThrow(teamId);
 }

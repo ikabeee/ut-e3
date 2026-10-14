@@ -1,10 +1,11 @@
 "use server";
 
 import { GAMES_CACHE_TAG } from "@features/games/lib/server/games-queries";
-import { parseTeamInput, parseTeamMemberInput } from "@features/teams/lib/team-validation";
+import { parseCreateTeamLeaderInput, parseTeamInput, parseTeamMemberInput } from "@features/teams/lib/team-validation";
 import {
   addTeamMember,
   createTeam,
+  createTeamLeader,
   deleteTeam,
   deleteTeamMember,
   rotateTeamScannerKey,
@@ -57,4 +58,9 @@ export async function updateTeamMemberAction(memberId: string, input: RawInput) 
 
 export async function deleteTeamMemberAction(memberId: string) {
   return runAdminAction(() => deleteTeamMember(memberId), options);
+}
+
+/** Crea o actualiza el usuario líder de un equipo y envía correo de confirmación. */
+export async function createTeamLeaderAction(teamId: string, input: RawInput) {
+  return runAdminAction(() => createTeamLeader(teamId, parseCreateTeamLeaderInput(input)), options);
 }

@@ -10,9 +10,11 @@ export interface TeamMember {
   id: string;
   teamId: string;
   fullName: string;
+  email: string;
   groupName: StudentGroup;
   isLeader: boolean;
   sortOrder: number;
+  isConfirmed?: boolean;
 }
 
 /** Equipo tal como lo ve el panel de administración. */
@@ -40,6 +42,23 @@ export interface TeamMemberInput {
   passwordHash?: string;
 }
 
+export interface CreateTeamLeaderInput {
+  fullName: string;
+  email: string;
+  groupName: StudentGroup;
+  password: string;
+}
+
+export interface AddMemberByLeaderInput {
+  fullName: string;
+  groupName: StudentGroup;
+}
+
+export interface UpdateGameByLeaderInput {
+  description: string;
+  itchioUrl?: string | null;
+}
+
 /**
  * Equipo recién creado (o con su llave renovada). `scannerKey` es la llave del escáner del
  * stand: sólo se muestra esta vez, la base guarda su hash.
@@ -61,6 +80,8 @@ export interface TeamPortalGame {
   id: string;
   name: string;
   slug: string;
+  description?: string;
+  itchioUrl?: string | null;
 }
 
 export interface TeamPortalData {
@@ -71,12 +92,6 @@ export interface TeamPortalData {
   members: TeamPortalMember[];
   totalCheckIns: number;
   recentCheckIns: number;
-}
-
-export interface TeamScanResult {
-  status: "created" | "duplicate" | "unknown";
-  gamertag?: string;
-  gameName?: string;
 }
 
 export interface TeamScanResult {
