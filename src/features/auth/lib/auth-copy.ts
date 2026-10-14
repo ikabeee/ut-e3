@@ -21,7 +21,7 @@ export const AUTH_COPY = {
     title: "Registro de equipo",
     description: "Registra tu equipo y a tu integrante líder para gestionar el stand y escanear visitantes.",
     heading: "Registro de nuevo equipo",
-    subheading: "Ingresa los datos del equipo y del líder responsable.",
+    subheading: "Ingresa los datos del equipo y del líder. Se enviará un correo para establecer su contraseña.",
     teamNameLabel: "Nombre del equipo",
     teamNamePlaceholder: "ej. Equipo Grava",
     teamNameHint: "Hasta 80 caracteres. Nombre con el que se identificará tu equipo en el evento.",
@@ -38,7 +38,7 @@ export const AUTH_COPY = {
     loginLink: "Inicia sesión",
     successHeading: "¡Registro recibido!",
     successMessage:
-      "Hemos enviado un enlace de confirmación a tu correo electrónico. Por favor revisa tu bandeja de entrada para activar tu cuenta.",
+      "Hemos enviado un enlace de confirmación a tu correo electrónico. Por favor revisa tu bandeja de entrada para establecer tu contraseña y activar tu cuenta.",
   },
   confirmEmail: {
     title: "Confirmación de correo",
@@ -48,9 +48,25 @@ export const AUTH_COPY = {
     successHeading: "¡Correo verificado con éxito!",
     successMessage: "Tu cuenta ha sido activada correctamente. Ya puedes iniciar sesión.",
     goToLogin: "Ir a iniciar sesión",
+    retryRegister: "Reintentar registro",
     errorHeading: "Enlace no válido o expirado",
     errorMessage:
       "El enlace de confirmación no es válido o ya ha expirado. Si necesitas ayuda, contacta a un administrador.",
+  },
+  confirmPassword: {
+    title: "Establece tu contraseña",
+    description: (fullName?: string, email?: string) =>
+      fullName && email
+        ? `Hola ${fullName} (${email}), define una contraseña segura para activar tu cuenta de líder de equipo.`
+        : "Define una contraseña segura para activar tu cuenta de líder de equipo.",
+    passwordLabel: "Nueva contraseña",
+    confirmPasswordLabel: "Confirmar contraseña",
+    passwordHint: "Mínimo 8 caracteres.",
+    submitButton: "Confirmar y establecer contraseña",
+    submitting: "Guardando...",
+    successHeading: "¡Cuenta activada!",
+    successMessage:
+      "Tu contraseña ha sido establecida y tu cuenta ha sido confirmada con éxito. Ya puedes iniciar sesión con tu correo institucional.",
   },
   session: {
     logout: "Cerrar sesión",

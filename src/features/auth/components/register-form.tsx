@@ -109,13 +109,6 @@ export function RegisterForm() {
           <FieldError />
         </TextField>
 
-        <TextField name="password" isRequired className="flex flex-col gap-1">
-          <Label className="text-paper-foreground">{copy.accountKeyLabel}</Label>
-          <Input type="password" onInput={form.clearFieldError} autoComplete="new-password" className="text-base" />
-          <Description className="text-paper-foreground/70">{copy.passwordHint}</Description>
-          <FieldError />
-        </TextField>
-
         {form.error && Object.keys(form.fieldErrors).length === 0 ? (
           <p role="alert" className="m-0 text-sm font-medium text-danger">
             {form.error}
