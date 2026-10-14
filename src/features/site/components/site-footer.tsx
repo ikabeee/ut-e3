@@ -4,12 +4,15 @@ import { usePathname } from "next/navigation";
 import { siteConfig } from "@shared/lib/site-config";
 
 /** Pie del sitio: nombre del showcase y organización. No se muestra en paneles privados. */
-export function SiteFooter() {
-  const pathname = usePathname();
+export interface SiteFooterViewProps {
+  pathname: string;
+}
 
+export function SiteFooterView({ pathname }: Readonly<SiteFooterViewProps>) {
   if (pathname.startsWith("/admin") || pathname.startsWith("/team")) {
     return null;
   }
+
   return (
     <footer>
       <div className="page-wrap flex flex-wrap justify-between gap-4 pt-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] type-tiny">
@@ -18,4 +21,11 @@ export function SiteFooter() {
       </div>
     </footer>
   );
+}
+
+/** Pie del sitio: nombre del showcase y organización. No se muestra en paneles privados. */
+export function SiteFooter() {
+  const pathname = usePathname();
+
+  return <SiteFooterView pathname={pathname} />;
 }

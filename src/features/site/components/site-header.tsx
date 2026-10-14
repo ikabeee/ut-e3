@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HOME_PATH } from "@features/home/lib/home-links";
-import { SiteNavLinks } from "@features/site/components/site-nav-links";
+import { SiteNavLinksView } from "@features/site/components/site-nav-links";
 import { SITE_COPY } from "@features/site/lib/site-copy";
 import { UtgLogo } from "@shared/components/utg-logo";
 
@@ -12,12 +12,15 @@ import { UtgLogo } from "@shared/components/utg-logo";
  * extiende el fondo debajo de la barra de estado y del notch (el layout usa `viewportFit: "cover"`).
  * No se muestra en los paneles privados (administración y portal de equipos).
  */
-export function SiteHeader() {
-  const pathname = usePathname();
+export interface SiteHeaderViewProps {
+  pathname: string;
+}
 
+export function SiteHeaderView({ pathname }: Readonly<SiteHeaderViewProps>) {
   if (pathname.startsWith("/admin") || pathname.startsWith("/team")) {
     return null;
   }
+
   return (
     <nav
       aria-label={SITE_COPY.header.navigationLabel}
@@ -33,7 +36,18 @@ export function SiteHeader() {
           className="block h-[34px] w-auto transition-transform duration-[250ms] group-hover:translate-x-[-1px] group-hover:translate-y-[-2px]"
         />
       </Link>
-      <SiteNavLinks />
+      <SiteNavLinksView pathname={pathname} />
     </nav>
   );
+}
+
+/**
+ * Barra de navegación fija con el logo y las secciones del sitio. El relleno `safe-area-inset-*`
+ * extiende el fondo debajo de la barra de estado y del notch (el layout usa `viewportFit: "cover"`).
+ * No se muestra en los paneles privados (administración y portal de equipos).
+ */
+export function SiteHeader() {
+  const pathname = usePathname();
+
+  return <SiteHeaderView pathname={pathname} />;
 }
