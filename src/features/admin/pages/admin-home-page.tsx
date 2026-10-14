@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { logoutAction } from "@features/auth/lib/auth-actions";
 import { AdminShell } from "@features/admin/components/admin-shell";
 import { AdminSkeleton } from "@features/admin/components/admin-skeleton";
 import { AdminSummaryList } from "@features/admin/components/admin-summary-list";
@@ -16,7 +17,7 @@ async function AdminHomeContent() {
 /** Portada del panel (`/admin`): cuántos equipos, juegos y ganadores hay. */
 export function AdminHomePage() {
   return (
-    <AdminShell current="home">
+    <AdminShell current="home" onLogout={logoutAction}>
       <Suspense fallback={<AdminSkeleton />}>
         <AdminHomeContent />
       </Suspense>

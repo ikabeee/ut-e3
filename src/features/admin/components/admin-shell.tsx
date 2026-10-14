@@ -194,6 +194,7 @@ export function AdminShell({ current, children, onLogout }: Readonly<AdminShellP
           </nav>
         </div>
 
+        {/* Acciones inferiores del sidebar */}
         <div className="border-t border-border pt-4">
           <ActionButton
             variant="secondary"

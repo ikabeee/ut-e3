@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { logoutAction } from "@features/auth/lib/auth-actions";
 import { AdminShell } from "@features/admin/components/admin-shell";
 import { AdminSkeleton } from "@features/admin/components/admin-skeleton";
 import { CatalogOptionList } from "@features/admin/components/catalog-option-list";
@@ -45,7 +46,7 @@ async function AdminCatalogContent() {
 /** Géneros y plataformas (`/admin/catalog`) que se eligen en cada juego. */
 export function AdminCatalogPage() {
   return (
-    <AdminShell current="catalog">
+    <AdminShell current="catalog" onLogout={logoutAction}>
       <Suspense fallback={<AdminSkeleton />}>
         <AdminCatalogContent />
       </Suspense>
