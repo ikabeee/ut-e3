@@ -11,12 +11,12 @@ describe("buildOpenGraph", () => {
   });
 
   it("keeps the defaults it does not override", () => {
-    const openGraph = buildOpenGraph({ title: "Ruta 9", images: [{ url: "/mock/games/ruta-9.jpg" }] });
+    const openGraph = buildOpenGraph({ title: "Ruta 9", images: [{ url: "/games/ruta-9.jpg" }] });
 
     expect(openGraph).toMatchObject({
       siteName: siteConfig.title,
       title: "Ruta 9",
-      images: [{ url: "/mock/games/ruta-9.jpg" }],
+      images: [{ url: "/games/ruta-9.jpg" }],
     });
   });
 });

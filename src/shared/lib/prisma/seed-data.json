@@ -122,7 +122,7 @@
         "platforms": ["windows", "web"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/ceniza-protocol.jpg",
+          "imageUrl": "/games/ceniza-protocol.jpg",
           "altText": "Portada de Ceniza Protocol",
           "cropPosition": "70% 30%"
         }
@@ -161,7 +161,7 @@
         "platforms": ["windows", "android"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/los-ultimos-faros.jpg",
+          "imageUrl": "/games/los-ultimos-faros.jpg",
           "altText": "Portada de Los Últimos Faros",
           "cropPosition": "50% 30%"
         }
@@ -195,7 +195,7 @@
         "platforms": ["windows"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/hormigon.jpg",
+          "imageUrl": "/games/hormigon.jpg",
           "altText": "Portada de Hormigón",
           "cropPosition": "60% 40%"
         }
@@ -234,7 +234,7 @@
         "platforms": ["windows", "web"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/ruta-9.jpg",
+          "imageUrl": "/games/ruta-9.jpg",
           "altText": "Portada de Ruta 9",
           "cropPosition": "60% 35%"
         }
@@ -278,7 +278,7 @@
         "platforms": ["windows"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/subsuelo.jpg",
+          "imageUrl": "/games/subsuelo.jpg",
           "altText": "Portada de Subsuelo",
           "cropPosition": null
         }
@@ -317,7 +317,7 @@
         "platforms": ["windows", "android"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/kaiju-mercado.jpg",
+          "imageUrl": "/games/kaiju-mercado.jpg",
           "altText": "Portada de Kaiju Mercado",
           "cropPosition": null
         }
@@ -351,7 +351,7 @@
         "platforms": ["windows", "web"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/eco-nulo.jpg",
+          "imageUrl": "/games/eco-nulo.jpg",
           "altText": "Portada de Eco/Nulo",
           "cropPosition": null
         }
@@ -395,7 +395,7 @@
         "platforms": ["windows"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/templo-404.jpg",
+          "imageUrl": "/games/templo-404.jpg",
           "altText": "Portada de Templo 404",
           "cropPosition": null
         }
@@ -434,7 +434,7 @@
         "platforms": ["windows"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/marea-roja.jpg",
+          "imageUrl": "/games/marea-roja.jpg",
           "altText": "Portada de Marea Roja",
           "cropPosition": null
         }
@@ -468,7 +468,7 @@
         "platforms": ["windows", "web", "android"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/neon-taqueria.jpg",
+          "imageUrl": "/games/neon-taqueria.jpg",
           "altText": "Portada de Neón Taquería",
           "cropPosition": null
         }
@@ -507,7 +507,7 @@
         "platforms": ["windows"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/pulso-cero.jpg",
+          "imageUrl": "/games/pulso-cero.jpg",
           "altText": "Portada de Pulso Cero",
           "cropPosition": null
         }
@@ -551,7 +551,7 @@
         "platforms": ["windows"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/xibalba-run.jpg",
+          "imageUrl": "/games/xibalba-run.jpg",
           "altText": "Portada de Xibalbá Run",
           "cropPosition": null
         }
@@ -590,7 +590,7 @@
         "platforms": ["windows", "web"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/turbina.jpg",
+          "imageUrl": "/games/turbina.jpg",
           "altText": "Portada de Turbina",
           "cropPosition": null
         }
@@ -624,7 +624,7 @@
         "platforms": ["windows", "android"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/sombra-jade.jpg",
+          "imageUrl": "/games/sombra-jade.jpg",
           "altText": "Portada de Sombra Jade",
           "cropPosition": null
         }
@@ -663,7 +663,7 @@
         "platforms": ["windows"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/granja-orbital.jpg",
+          "imageUrl": "/games/granja-orbital.jpg",
           "altText": "Portada de Granja Orbital",
           "cropPosition": null
         }
@@ -707,7 +707,7 @@
         "platforms": ["windows", "web"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/lucha-pixel.jpg",
+          "imageUrl": "/games/lucha-pixel.jpg",
           "altText": "Portada de Lucha Pixel",
           "cropPosition": null
         }
@@ -741,7 +741,7 @@
         "platforms": ["windows"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/cenote.jpg",
+          "imageUrl": "/games/cenote.jpg",
           "altText": "Portada de Cenote",
           "cropPosition": null
         }
@@ -780,7 +780,7 @@
         "platforms": ["windows", "android"],
         "itchioUrl": null,
         "cover": {
-          "imageUrl": "/mock/games/circuito-7.jpg",
+          "imageUrl": "/games/circuito-7.jpg",
           "altText": "Portada de Circuito 7",
           "cropPosition": null
         }

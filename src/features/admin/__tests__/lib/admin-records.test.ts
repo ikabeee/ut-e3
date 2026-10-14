@@ -10,7 +10,7 @@ import type { GameImageRecord } from "@features/games/lib/types";
 
 const image = (overrides: Partial<GameImageRecord> = {}): GameImageRecord => ({
   id: "image-1",
-  imageUrl: "/mock/games/ruta-9.jpg",
+  imageUrl: "/games/ruta-9.jpg",
   altText: "Ruta 9",
   cropPosition: null,
   isCover: false,
@@ -47,7 +47,7 @@ describe("summarizeAdmin", () => {
 describe("toCoverImageInput", () => {
   it("keeps the image fields and marks it as the cover", () => {
     expect(toCoverImageInput(image({ cropPosition: "60% 35%", sortOrder: 2 }))).toEqual({
-      imageUrl: "/mock/games/ruta-9.jpg",
+      imageUrl: "/games/ruta-9.jpg",
       altText: "Ruta 9",
       cropPosition: "60% 35%",
       sortOrder: 2,
