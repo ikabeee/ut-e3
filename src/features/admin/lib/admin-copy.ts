@@ -9,6 +9,7 @@ export const ADMIN_COPY = {
   unauthorized: "Necesitas el usuario y la contraseña del panel (ADMIN_USER y ADMIN_PASSWORD).",
   nav: {
     label: "Secciones del panel",
+    logout: "Cerrar sesión",
     sections: {
       home: "Resumen",
       teams: "Equipos",
@@ -26,6 +27,7 @@ export const ADMIN_COPY = {
     optional: "Opcional",
     noneSelected: "Elige una opción",
     edit: "Editar",
+    logout: "Cerrar sesión",
     unexpectedError: "Ocurrió un error inesperado.",
   },
   home: {
@@ -95,7 +97,7 @@ export const ADMIN_COPY = {
     addImage: "Agregar foto",
     imageAdded: "Foto agregada.",
     imageUrl: "URL o ruta de la foto",
-    imageUrlHint: "Una ruta del sitio (/mock/games/...) o una URL https de un dominio de IMAGE_REMOTE_HOSTS.",
+    imageUrlHint: "Una ruta del sitio (/games/...) o una URL https de un dominio de IMAGE_REMOTE_HOSTS.",
     altText: "Texto alternativo",
     cropPosition: "Encuadre",
     cropPositionHint: "Opcional, como en CSS: 60% 35%.",
