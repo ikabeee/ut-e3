@@ -1,3 +1,4 @@
+import { LayoutList } from "@gravity-ui/icons";
 import { AdminActionButton } from "@features/admin/components/admin-action-button";
 import { AdminActionForm } from "@features/admin/components/admin-action-form";
 import { AdminDisclosure } from "@features/admin/components/admin-disclosure";
@@ -5,6 +6,7 @@ import { AdminPanel } from "@features/admin/components/admin-panel";
 import { AdminTextField } from "@features/admin/components/admin-text-field";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import type { CatalogOption } from "@features/games/lib/types";
+import { EmptyState } from "@shared/components/empty-state";
 import type { ActionResult, FormAction } from "@shared/lib/action-result";
 import type { RawInput } from "@shared/lib/validation";
 
@@ -39,7 +41,7 @@ export function CatalogOptionList({
 }: Readonly<CatalogOptionListProps>) {
   return (
     <AdminPanel title={title}>
-      {options.length === 0 ? <p className="m-0 text-sm text-muted">{ADMIN_COPY.catalog.empty}</p> : null}
+      {options.length === 0 ? <EmptyState icon={LayoutList} size="sm" title={ADMIN_COPY.catalog.empty} /> : null}
       <ul className="m-0 flex list-none flex-col p-0">
         {options.map((option) => (
           <li key={option.id} className="flex flex-col gap-2 border-t border-border pt-3 pb-1">

@@ -1,8 +1,10 @@
+import { Cup } from "@gravity-ui/icons";
 import { AdminActionButton } from "@features/admin/components/admin-action-button";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import { formatAdminDateTime } from "@features/admin/lib/admin-records";
 import { markRaffleWinnerNotifiedAction } from "@features/visitors/lib/visitors-actions";
 import type { RaffleWinner } from "@features/visitors/lib/types";
+import { EmptyState } from "@shared/components/empty-state";
 
 interface RaffleWinnerListProps {
   winners: readonly RaffleWinner[];
@@ -13,7 +15,7 @@ export function RaffleWinnerList({ winners }: Readonly<RaffleWinnerListProps>) {
   const copy = ADMIN_COPY.raffle;
 
   if (winners.length === 0) {
-    return <p className="m-0 text-sm text-muted">{copy.noWinners}</p>;
+    return <EmptyState icon={Cup} size="sm" title={copy.noWinners} />;
   }
 
   return (

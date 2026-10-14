@@ -1,4 +1,6 @@
+import { Picture } from "@gravity-ui/icons";
 import { ActionLink } from "@shared/components/action-link";
+import { EmptyState } from "@shared/components/empty-state";
 import { AdminActionButton } from "@features/admin/components/admin-action-button";
 import { AdminActionForm } from "@features/admin/components/admin-action-form";
 import { AdminDisclosure } from "@features/admin/components/admin-disclosure";
@@ -44,7 +46,7 @@ export function GameRecordCard({ game, options }: Readonly<GameRecordCardProps>)
 
       <div className="flex flex-col gap-3 border-t border-border pt-4">
         <h3 className="m-0 type-tiny text-muted">{copy.images}</h3>
-        {game.images.length === 0 ? <p className="m-0 text-sm text-muted">{copy.noImages}</p> : null}
+        {game.images.length === 0 ? <EmptyState icon={Picture} size="sm" title={copy.noImages} /> : null}
         <ul className="m-0 flex list-none flex-col gap-3 p-0">
           {game.images.map((image) => (
             <GameImageItem key={image.id} image={image} />

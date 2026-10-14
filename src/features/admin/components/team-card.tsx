@@ -1,3 +1,4 @@
+import { Persons } from "@gravity-ui/icons";
 import { AdminActionButton } from "@features/admin/components/admin-action-button";
 import { AdminActionForm } from "@features/admin/components/admin-action-form";
 import { AdminDisclosure } from "@features/admin/components/admin-disclosure";
@@ -15,6 +16,7 @@ import {
   updateTeamAction,
 } from "@features/teams/lib/teams-actions";
 import type { Team } from "@features/teams/lib/types";
+import { EmptyState } from "@shared/components/empty-state";
 
 interface TeamCardProps {
   team: Team;
@@ -91,7 +93,7 @@ export function TeamCard({ team }: Readonly<TeamCardProps>) {
 
       <div className="flex flex-col gap-3 border-t border-border pt-4">
         <h3 className="m-0 type-tiny text-muted">{copy.members}</h3>
-        {team.members.length === 0 ? <p className="m-0 text-sm text-muted">{copy.noMembers}</p> : null}
+        {team.members.length === 0 ? <EmptyState icon={Persons} size="sm" title={copy.noMembers} /> : null}
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {team.members.map((member) => (
             <li key={member.id} className="flex flex-wrap items-center justify-between gap-3">
