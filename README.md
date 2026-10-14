@@ -32,20 +32,14 @@ Requisitos: **Node.js ≥ 22.18**. Para la base de datos, **Docker** (PostgreSQL
 
 ```bash
 npm install
-cp .env.example .env   # DATABASE_URL, NEXT_PUBLIC_SITE_URL y DATA_SOURCE
-npm run dev            # http://localhost:3000
-```
-
-Con `DATA_SOURCE=mock` (el valor por defecto) el sitio usa los juegos del diseño y no necesita
-base de datos. Para trabajar con PostgreSQL:
-
-```bash
+cp .env.example .env   # DATABASE_URL y NEXT_PUBLIC_SITE_URL
 docker compose up -d --wait db    # PostgreSQL en localhost:5432
 npm run db:migrate                # crea las tablas
 npm run db:seed                   # datos de ejemplo: 18 equipos con su juego
+npm run dev            # http://localhost:3000
 ```
 
-Para levantar todo en Docker (base, migraciones, seeds y el sitio) usa `npm run docker:up`. Los
+Para levantar PostgreSQL en Docker usa `docker compose up -d --wait db` o `npm run docker:up`. Los
 detalles están en [`docs/data-sources.md`](./docs/data-sources.md).
 
 El build de producción exige `NEXT_PUBLIC_SITE_URL` (URL absoluta `http(s)` sin `/` final,
@@ -71,7 +65,7 @@ mensaje que explica el problema. En desarrollo y pruebas se usa `http://localhos
 | `npm run db:migrate` | Aplica las migraciones pendientes. |
 | `npm run db:seed` | Carga los datos de ejemplo (se puede correr varias veces). |
 | `npm run db:verify` | Comprueba que la base coincide con el contrato. |
-| `npm run docker:up` | Levanta PostgreSQL, aplica migraciones y seeds, y sirve el sitio en Docker. |
+| `npm run docker:up` | Levanta PostgreSQL en Docker (espera a que esté lista). |
 | `npm run docker:down` | Detiene los contenedores (los datos se conservan en el volumen). |
 
 ## Estructura (screaming architecture)

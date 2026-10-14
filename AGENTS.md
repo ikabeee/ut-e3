@@ -51,7 +51,7 @@ npm run db:update          # aplica el contrato a la BD LOCAL (sin migraciones)
 npm run db:migration:plan  # genera una migración formal en migrations/app/
 npm run db:migrate         # aplica migraciones pendientes
 npm run db:seed            # datos de ejemplo (idempotente)
-npm run docker:up          # PostgreSQL + migraciones + seeds + sitio en Docker
+npm run docker:up          # levanta PostgreSQL en Docker
 ```
 
 Para trabajar con la base, levántala con `docker compose up -d --wait db` y corre
@@ -66,8 +66,8 @@ Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm
 La estructura de carpetas "grita" el dominio, no el framework.
 Cada dominio es una **feature** dentro de `src/features/`. La feature `example` es el scaffold
 mínimo; `games` es la referencia completa (datos, TanStack Query, componentes y pages).
-El contrato de Prisma implementa el modelo de `docs/data-model.md`. El sitio lee los juegos de
-PostgreSQL con `DATA_SOURCE=prisma` o los del diseño con `DATA_SOURCE=mock` (ver `docs/data-sources.md`).
+El contrato de Prisma implementa el modelo de `docs/data-model.md`. El sitio lee los juegos
+directamente de PostgreSQL mediante Prisma (ver `docs/data-sources.md`).
 
 ```
 src/
@@ -133,8 +133,8 @@ código: `lib/game-filters.ts` -> `__tests__/lib/game-filters.test.ts`. Lo mismo
   `.test` es un helper de prueba y no cuenta en la cobertura.
 - Los componentes que leen el catálogo de juegos se prueban con `renderWithGames(<Componente />)`
   (`@features/games/__tests__/render-with-games`): monta un `QueryClient` con los juegos de prueba
-  (`GAME_FIXTURES`, `@features/games/__tests__/game-fixtures`) ya en caché. Las pruebas no usan los
-  juegos mock del sitio, así que cambiar el catálogo no las rompe.
+  (`GAME_FIXTURES`, `@features/games/__tests__/game-fixtures`) ya en caché. Las pruebas son
+  independientes de la base de datos, así que cambiar el catálogo no las rompe.
 - Las pruebas de `src/app/` importan las rutas con el alias `@app/*` (`@app/error`).
 - Una prueba sigue las reglas de dependencias de la carpeta que prueba (`__tests__/lib/` las de
   `lib/`, etc.), pero además puede importar `@app/*` y los helpers de `__tests__/`. ESLint impide que
@@ -329,7 +329,7 @@ import { getQueryClient } from "@shared/lib/query/get-query-client";
 
 - `docs/where-to-edit.md`: dónde cambiar cada contenido o estilo.
 - `docs/architecture.md`: capas, flujo de datos, rendimiento y SOLID.
-- `docs/data-sources.md`: base de datos local, fuentes de datos (mock o Prisma) y acciones de administración.
+- `docs/data-sources.md`: base de datos local (PostgreSQL con Prisma) y acciones de administración.
 - `docs/data-model.md`: diagrama ER propuesto (juegos, equipos, stands, check-ins y rifa).
 - `docs/design-system.md`: tema UTG sobre HeroUI.
 - `docs/versioning.md` y `CHANGELOG.md`: versionado semántico y releases con git flow.

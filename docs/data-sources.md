@@ -14,20 +14,17 @@ npm run db:seed                   # géneros, plataformas y los 18 equipos con s
 npm run dev
 ```
 
-- **Todo en Docker**: `npm run docker:up` levanta la base, corre migraciones y seeds (servicio
-  `migrate`, que se reconstruye cada vez para tomar las migraciones nuevas) y construye y sirve el
-  sitio en `http://localhost:3000`. `npm run docker:down` lo
-  detiene. `DATA_SOURCE` (de `.env`) se usa en el build y al servir; con `prisma`, el build
-  necesita la base con datos porque prerenderiza el catálogo, por eso el script levanta `db` y
-  `migrate` antes de construir `app`.
+- **Base en Docker**: `npm run docker:up` (o `docker compose up -d --wait db`)
+  levanta PostgreSQL en `localhost:5432`. `npm run docker:down` lo detiene. Luego corre
+  `npm run db:migrate` y `npm run db:seed` en tu máquina para aplicar las migraciones y seeds.
 - **Seeds** (`src/shared/lib/prisma/seed.ts` y `seed-data.json`): se pueden correr varias
-  veces, no duplican ni modifican lo que ya existe. Son los mismos 18 juegos del mock; las
-  portadas están en `public/mock/games/` (las que dicen "PORTADA DE EJEMPLO" son de relleno).
+  veces, no duplican ni modifican lo que ya existe. Carga los 18 equipos con su juego; las
+  portadas están en `public/games/`.
 - **Llaves de escáner**: el seed genera una llave aleatoria por equipo nuevo y la imprime una
   sola vez; la base sólo guarda su hash. Si las pierdes en tu base local, bórrala y vuelve a
   sembrar.
 - **Empezar de cero**: `docker compose down -v` borra el volumen con los datos.
-- **Puertos ocupados**: cambia `POSTGRES_PORT` o `APP_PORT` en `.env` (y el puerto de
+- **Puertos ocupados**: cambia `POSTGRES_PORT` en `.env` (y el puerto de
   `DATABASE_URL`).
 
 ### Cambiar el modelo
@@ -40,19 +37,11 @@ npm run dev
 4. `npm run db:migrate` la aplica. El CI levanta PostgreSQL, aplica las migraciones, carga los
    seeds y corre `npm run db:verify`.
 
-## Fuentes de datos: mock o PostgreSQL
+## Fuente de datos: PostgreSQL (Prisma)
 
-La fuente se elige con la variable `DATA_SOURCE`, validada en `src/shared/lib/env.ts`:
-
-- `mock` (por defecto): los 18 juegos del diseño en memoria. No necesita base de datos; sirve
-  para trabajar en la interfaz.
-- `prisma`: PostgreSQL de `DATABASE_URL` (con migraciones y seeds). Es la que usan Docker y el
-  build del CI.
-
-Las dos implementan la misma interfaz (`GameRepository`), así que componentes, hooks y pages no
-cambian. Los mocks son contenido del sitio, no datos de prueba: las pruebas usan sus propios
-fixtures (`__tests__/game-fixtures.ts`), así que cambiar el mock no rompe ninguna. El mock y los
-seeds tienen los mismos juegos.
+El sitio lee los datos dinámicamente de PostgreSQL mediante Prisma 8. Las pruebas usan sus
+propios fixtures (`__tests__/game-fixtures.ts`), así que cambiar los datos de la base no rompe
+ninguna prueba.
 
 ## Juegos (`src/features/games`)
 
@@ -60,24 +49,22 @@ seeds tienen los mismos juegos.
 lib/types.ts                          Tipo de dominio `Game` (lo único que conoce el resto de la app)
 lib/game-repository.ts                Contrato `GameRepository` (listGames, findGameBySlug)
 lib/game-mapping.ts                   toGame(fila): arma `Game` desde las tablas (pura, con pruebas)
-lib/server/prisma-game-repository.ts  GameRepository sobre PostgreSQL (DATA_SOURCE=prisma)
-lib/mock/mock-games.ts                MOCK: los 18 juegos del diseño (DATA_SOURCE=mock)
-lib/mock/mock-game-repository.ts      MOCK: implementación en memoria de GameRepository
-lib/server/game-repositories.ts       getGameRepository(): elige el repositorio según DATA_SOURCE
+lib/server/prisma-game-repository.ts  GameRepository sobre PostgreSQL (Prisma)
+lib/server/game-repositories.ts       getGameRepository(): devuelve prismaGameRepository
 lib/server/games-queries.ts           Consultas cacheadas ("use cache" + cacheTag("games"))
 lib/server/games-prefetch.ts          Estado de TanStack Query prellenado en el servidor
 lib/games-query-options.ts            queryOptions y query keys de TanStack Query
 api/games-route.ts                    GET /api/games (src/app/api/games/route.ts sólo lo re-exporta)
 api/games-contract.ts                 GameDto: lo que viaja por HTTP y su validación en el navegador
 api/games-api-client.ts               fetchGames(): fetch a /api/games + parseGamesResponse()
-__tests__/game-fixtures.ts            Juegos de prueba (las pruebas no dependen del mock)
-public/mock/games/*.jpg               Portadas de referencia del diseño o de relleno
+__tests__/game-fixtures.ts            Juegos de prueba independientes de la base de datos
+public/games/*.jpg                    Portadas de los juegos
 ```
 
 Flujo de datos:
 
 ```
-Prisma / mock  ->  GameRepository  ->  getGameRepository() (DATA_SOURCE)  ->  games-queries.ts ("use cache")
+Prisma  ->  GameRepository  ->  getGameRepository()  ->  games-queries.ts ("use cache")
                                           |-> pages (Server Components) -> QueryHydrationBoundary
                                           |-> api/games-route.ts (GameDto) -> fetchGames() en el navegador
                                                                    TanStack Query -> useGames()

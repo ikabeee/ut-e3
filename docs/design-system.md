@@ -54,7 +54,7 @@ márgenes), `section-block` (espacio entre secciones) y `scrollbar-none`.
 | Buscador | `SearchField` de HeroUI |
 | Barra de controles | `Toolbar` de HeroUI |
 | Insignia | `Chip` de HeroUI |
-| Estado vacío / carga | `EmptyState` y `Skeleton` de HeroUI |
+| Estado vacío / carga | `EmptyState` (`@shared/components/empty-state`, centrado con iconos de Gravity UI) y `Skeleton` de HeroUI |
 
 ## Variantes
 
