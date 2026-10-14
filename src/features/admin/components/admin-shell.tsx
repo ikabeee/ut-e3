@@ -60,6 +60,16 @@ const SECTION_ICONS: Record<AdminSection, ReactNode> = {
   ),
 };
 
+const LOGOUT_ICON = (
+  <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+    />
+  </svg>
+);
+
 interface AdminShellProps {
   current: AdminSection;
   children: ReactNode;
@@ -139,7 +149,14 @@ export function AdminShell({ current, children, onLogout }: Readonly<AdminShellP
             })}
           </nav>
           <div className="mt-2 border-t border-border pt-3">
-            <ActionButton variant="secondary" size="sm" onPress={handleLogout} isPending={isPending} className="w-full">
+            <ActionButton
+              variant="secondary"
+              size="sm"
+              icon={LOGOUT_ICON}
+              onPress={handleLogout}
+              isPending={isPending}
+              className="w-full"
+            >
               {ADMIN_COPY.nav.logout}
             </ActionButton>
           </div>
@@ -190,7 +207,14 @@ export function AdminShell({ current, children, onLogout }: Readonly<AdminShellP
 
         {/* Acciones inferiores del sidebar */}
         <div className="border-t border-border pt-4">
-          <ActionButton variant="secondary" size="sm" onPress={handleLogout} isPending={isPending} className="w-full">
+          <ActionButton
+            variant="secondary"
+            size="sm"
+            icon={LOGOUT_ICON}
+            onPress={handleLogout}
+            isPending={isPending}
+            className="w-full"
+          >
             {ADMIN_COPY.nav.logout}
           </ActionButton>
         </div>

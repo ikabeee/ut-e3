@@ -17,13 +17,16 @@ describe("AdminShell", () => {
     const activeLink = screen
       .getAllByRole("link", { name: /equipos/i })
       .find((el) => el.getAttribute("aria-current") === "page");
+
     expect(activeLink).toBeDefined();
 
     // "Ver sitio público" should NOT exist
     expect(screen.queryByText(/ver sitio público/i)).not.toBeInTheDocument();
 
-    // Logout button exists
-    expect(screen.getAllByRole("button", { name: /cerrar sesión/i })[0]).toBeInTheDocument();
+    // Logout button exists and has icon
+    const logoutBtn = screen.getAllByRole("button", { name: /cerrar sesión/i })[0];
+    expect(logoutBtn).toBeInTheDocument();
+    expect(logoutBtn.querySelector("svg")).toBeInTheDocument();
 
     // Children rendered in main area
     expect(screen.getByText("Contenido de equipos")).toBeInTheDocument();

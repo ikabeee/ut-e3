@@ -36,6 +36,7 @@ export function AdminActionButton({
 
         if (result.ok) {
           setError(null);
+
           if (successMessage) {
             toast.success(successMessage);
           }
