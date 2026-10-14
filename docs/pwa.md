@@ -55,7 +55,7 @@ El worker escrito a mano resuelve los dos problemas que Serwist resolvía:
 | Pasaporte `/passport` y enlace del QR `/v/<token>` | Red sin guardar copia: muestran el gamertag y el token secreto del QR, que no debe salir de la cookie `httpOnly`. Sin conexión responde `/offline`; el visitante usa la captura de su QR. | No se guardan |
 | Peticiones RSC de Next (`?_rsc=` o cabecera `RSC: 1`) | Red con tiempo límite de 3 s. Si falla, responde 503 y Next cambia a una navegación completa, que el worker responde con el HTML guardado. Así la navegación interna no se queda colgada. | No se guardan |
 | Manifest e íconos (`/manifest.webmanifest`, `/icon.svg`, `/icons/*.png`) | Se precargan al instalar (≈30 KB) para que la app instalada muestre su ícono sin conexión. Si alguno falla, la instalación sigue. Si cambian los íconos de `src/app/manifest.ts`, actualiza `PRECACHE_ASSET_URLS`. | `ut-e3-static-<versión>` |
-| Imágenes (`/_next/image`, `/mock/*` y el póster) | Stale-while-revalidate, máximo 60 entradas (se borran las más antiguas). Sólo las que ya se vieron. | `ut-e3-images-<versión>` |
+| Imágenes (`/_next/image`, `/games/*` y el póster) | Stale-while-revalidate, máximo 60 entradas (se borran las más antiguas). Sólo las que ya se vieron. | `ut-e3-images-<versión>` |
 | `/api/*` | Network first con respaldo en caché. | `ut-e3-api-<versión>` |
 | Video `/media/reel.webm` y `.mp4`, peticiones con `Range` | Nunca pasan por el worker. Sin conexión se ve el póster. | |
 | Otro dominio, métodos distintos de GET, `/sw.js` y el panel `/admin` | Nunca pasan por el worker. | |

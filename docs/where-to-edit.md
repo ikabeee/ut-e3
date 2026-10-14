@@ -50,11 +50,9 @@ ls -lh public/media/
 
 | Quiero cambiar... | Archivo |
 | --- | --- |
-| Juegos, equipos, integrantes, géneros, plataformas, stands, descripciones, jugadores y "Acerca del juego" | La base de datos (`DATA_SOURCE=prisma`), con las acciones de `games-actions.ts` y `teams-actions.ts` (panel de administración en `/admin`) |
+| Juegos, equipos, integrantes, géneros, plataformas, stands, descripciones, jugadores y "Acerca del juego" | La base de datos, con las acciones de `games-actions.ts` y `teams-actions.ts` (panel de administración en `/admin`) |
 | Datos de ejemplo de la base | `src/shared/lib/prisma/seed-data.json` (y `npm run db:seed`) |
-| Juegos sin base de datos (`DATA_SOURCE=mock`) | `src/features/games/lib/mock/mock-games.ts`. Las pruebas no dependen de este archivo |
 | Juegos de las pruebas | `src/features/games/__tests__/game-fixtures.ts` (los usa también `renderWithGames`) |
-| Fuente de los juegos (mock o base de datos) | `DATA_SOURCE` en `.env` y `src/features/games/lib/server/game-repositories.ts` |
 | Portada y galería de un juego | Tabla `game_image` (`is_cover` marca la portada); un juego sin portada no se muestra |
 | Dominios permitidos para fotos por URL | `IMAGE_REMOTE_HOSTS` en `.env` |
 | Mensajes de error del panel (duplicados, formatos) | `*_CONSTRAINT_MESSAGES` en `games-actions.ts` y `teams-actions.ts` |

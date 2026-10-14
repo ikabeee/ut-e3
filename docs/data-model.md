@@ -8,8 +8,7 @@ Modelo relacional en PostgreSQL para los tres requerimientos de la plataforma:
    probó todos los juegos, deja su teléfono y obtiene un boleto para el sorteo.
 3. **Afluencia en tiempo real** de cada stand, aunque el internet del recinto falle.
 
-Es la base para escribir `src/shared/lib/prisma/contract.prisma`. Todavía no hay modelos en el
-contrato; los datos del sitio siguen siendo mock (ver [`data-sources.md`](./data-sources.md)).
+Es la base que implementa `src/shared/lib/prisma/contract.prisma` (ver [`data-sources.md`](./data-sources.md)).
 
 Los diagramas siguen la guía de ERD de Mermaid de
 [`mermaid-diagrams`](https://github.com/davila7/claude-code-templates/blob/main/cli-tool/components/skills/creative-design/mermaid-diagrams/references/erd-diagrams.md)
