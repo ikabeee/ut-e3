@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { getEventContent } from "@features/event/lib/event-content";
 import { GameAbout } from "@features/games/components/game-about";
 import { GameDetailHeader } from "@features/games/components/game-detail-header";
+import { GameDetailSkeleton } from "@features/games/components/game-detail-skeleton";
 import { GameGallery } from "@features/games/components/game-gallery";
 import { GamePlayLocation } from "@features/games/components/game-play-location";
 import { GameSidebar } from "@features/games/components/game-sidebar";
@@ -49,7 +51,7 @@ export async function generateGameDetailMetadata({ params }: GameDetailPageProps
   };
 }
 
-export async function GameDetailPage({ params }: GameDetailPageProps) {
+async function GameDetailContent({ params }: Readonly<GameDetailPageProps>) {
   const { slug } = await params;
   const [game, games] = await Promise.all([getGameBySlug(slug), listGames()]);
 
@@ -60,31 +62,41 @@ export async function GameDetailPage({ params }: GameDetailPageProps) {
   const { info } = getEventContent();
 
   return (
-    <main className="pt-[clamp(24px,4vw,48px)]">
+    <>
       <JsonLd data={buildGameStructuredData(game, siteConfig.url)} />
-      <div className="page-wrap">
-        <GameDetailHeader game={game} />
+      <GameDetailHeader game={game} />
 
-        <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-[clamp(24px,4vw,56px)] max-[980px]:grid-cols-1">
-          <div className="flex min-w-0 flex-col gap-7">
-            <GameGallery shots={getGalleryShots(game)} />
-            <p className="m-0 max-w-[62ch] text-[clamp(17px,1.5vw,20px)] leading-[1.4] text-copy-strong">
-              {game.description}
-            </p>
-            <GameTags game={game} />
-            <GameAbout paragraphs={describeGame(game)} />
-            <GamePlayLocation game={game} eventDateLabel={info.dateLabel} eventHoursLabel={info.hoursLabel} />
-          </div>
-
-          <GameSidebar
-            game={game}
-            eventDateLabel={info.dateLabel}
-            admissionLabel={info.admission}
-            calendarUrl={info.calendarUrl}
-          />
+      <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-[clamp(24px,4vw,56px)] max-[980px]:grid-cols-1">
+        <div className="flex min-w-0 flex-col gap-7">
+          <GameGallery shots={getGalleryShots(game)} />
+          <p className="m-0 max-w-[62ch] text-[clamp(17px,1.5vw,20px)] leading-[1.4] text-copy-strong">
+            {game.description}
+          </p>
+          <GameTags game={game} />
+          <GameAbout paragraphs={describeGame(game)} />
+          <GamePlayLocation game={game} eventDateLabel={info.dateLabel} eventHoursLabel={info.hoursLabel} />
         </div>
 
-        <RelatedGames games={getRelatedGames(games, game)} />
+        <GameSidebar
+          game={game}
+          eventDateLabel={info.dateLabel}
+          admissionLabel={info.admission}
+          calendarUrl={info.calendarUrl}
+        />
+      </div>
+
+      <RelatedGames games={getRelatedGames(games, game)} />
+    </>
+  );
+}
+
+export function GameDetailPage(props: GameDetailPageProps) {
+  return (
+    <main className="pt-[clamp(24px,4vw,48px)]">
+      <div className="page-wrap">
+        <Suspense fallback={<GameDetailSkeleton />}>
+          <GameDetailContent {...props} />
+        </Suspense>
       </div>
     </main>
   );
