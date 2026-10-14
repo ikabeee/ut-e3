@@ -2,6 +2,7 @@ import "server-only";
 import { headers } from "next/headers";
 import { env, type AdminCredentials } from "@shared/lib/env";
 import { safeEqual } from "@shared/lib/server/secrets";
+import { getAuthSession, type SessionPayload } from "@shared/lib/server/session";
 
 /**
  * Autorización de las Server Actions de administración.
@@ -38,9 +39,21 @@ export function isAdminAuthorization(authorization: string | null, credentials: 
   return matchesBasicCredentials(authorization, credentials.user, credentials.password);
 }
 
-/** `true` si la petición actual viene de un administrador. Sin credenciales configuradas, nunca. */
-export async function isAdminRequest(credentials: AdminCredentials | null = env.admin) {
-  const requestHeaders = await headers();
+/** `true` si la petición actual viene de un administrador (sesión activa o Basic Auth). */
+export async function isAdminRequest(
+  credentials: AdminCredentials | null = env.admin,
+  readHeaders: () => Promise<Headers> = headers,
+  readSession: () => Promise<SessionPayload | null> = getAuthSession,
+) {
+  try {
+    const session = await readSession();
+
+    if (session?.role === "admin") return true;
+  } catch {
+    // Fuera de request scope (ej. tests unitarios sin sesión) o sin cookies
+  }
+
+  const requestHeaders = await readHeaders();
 
   return isAdminAuthorization(requestHeaders.get("authorization"), credentials);
 }
