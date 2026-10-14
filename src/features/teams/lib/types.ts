@@ -36,6 +36,8 @@ export interface TeamMemberInput {
   groupName: StudentGroup;
   isLeader: boolean;
   sortOrder: number;
+  email?: string;
+  passwordHash?: string;
 }
 
 /**
@@ -45,4 +47,40 @@ export interface TeamMemberInput {
 export interface TeamWithScannerKey {
   team: Team;
   scannerKey: string;
+}
+
+export interface TeamPortalMember {
+  id: string;
+  fullName: string;
+  email: string;
+  groupName: StudentGroup;
+  isLeader: boolean;
+}
+
+export interface TeamPortalGame {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface TeamPortalData {
+  id: string;
+  name: string;
+  standCode: string | null;
+  game: TeamPortalGame | null;
+  members: TeamPortalMember[];
+  totalCheckIns: number;
+  recentCheckIns: number;
+}
+
+export interface TeamScanResult {
+  status: "created" | "duplicate" | "unknown";
+  gamertag?: string;
+  gameName?: string;
+}
+
+export interface TeamScanResult {
+  status: "created" | "duplicate" | "unknown";
+  gamertag?: string;
+  gameName?: string;
 }
