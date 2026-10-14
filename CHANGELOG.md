@@ -8,6 +8,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Configuración centralizada de Node Mailer (`@shared/lib/server/mailer`) para el envío de correos
+  salientes (confirmaciones de cuenta de líderes de equipo), con soporte para variables de entorno
+  SMTP validadas, vista previa en consola para desarrollo local sin servidor de correo, pruebas
+  unitarias y script `npm run email:test` para comprobaciones rápidas.
 - Componente compartido `EmptyState` (`@shared/components/empty-state`) para centrar los estados
   vacíos de todo el proyecto (catálogo de juegos, pasaporte de visitantes, panel de administración
   y portal de equipos) con iconos SVG oficiales de Gravity UI (`@gravity-ui/icons`), variantes de
