@@ -2,13 +2,14 @@ import "server-only";
 import type { GameRepository } from "@features/games/lib/game-repository";
 import { toGame, type GameRow } from "@features/games/lib/game-mapping";
 import type { Game } from "@features/games/lib/types";
-import { db } from "@shared/lib/prisma/db";
+
+const getDb = async () => (await import("@shared/lib/prisma/db")).db;
 
 /**
  * Juegos con portada, con su equipo (y el número de integrantes), su género principal, sus
  * plataformas y sus fotos. Los juegos sin portada no se muestran en el sitio.
  */
-function publishedGames() {
+function publishedGames(db: Awaited<ReturnType<typeof getDb>>) {
   return db.orm.public.Game.select("slug", "name", "description", "about", "players", "itchioUrl")
     .where((game) => game.images.some((image) => image.isCover.eq(true)))
     .include("team", (team) => team.select("name", "standCode").include("members", (members) => members.count()))
@@ -30,12 +31,14 @@ function toGames(rows: readonly GameRow[]): Game[] {
 }
 
 /**
- * `GameRepository` sobre PostgreSQL (`DATA_SOURCE=prisma`). Las funciones de
+ * `GameRepository` sobre PostgreSQL (Prisma). Las funciones de
  * `games-queries.ts` lo llaman dentro de `"use cache"`, así que no usa `connection()`.
  */
 export const prismaGameRepository: GameRepository = {
   async listGames() {
-    const rows = await publishedGames()
+    const db = await getDb();
+
+    const rows = await publishedGames(db)
       .orderBy([(game) => game.sortOrder.asc(), (game) => game.name.asc()])
       .all();
 
@@ -43,7 +46,9 @@ export const prismaGameRepository: GameRepository = {
   },
 
   async findGameBySlug(slug) {
-    const row = await publishedGames()
+    const db = await getDb();
+
+    const row = await publishedGames(db)
       .where((game) => game.slug.eq(slug))
       .first();
 

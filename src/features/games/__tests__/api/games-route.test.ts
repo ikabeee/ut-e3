@@ -1,16 +1,13 @@
 /**
  * @jest-environment node
  */
-import { GET } from "@features/games/api/games-route";
 import { parseGamesResponse } from "@features/games/api/games-contract";
+import { createGamesRoute } from "@features/games/api/games-route";
 import { GAME_FIXTURES } from "@features/games/__tests__/game-fixtures";
-
-jest.mock("@features/games/lib/server/games-queries", () => ({
-  listGames: async () => GAME_FIXTURES.slice(0, 2),
-}));
 
 describe("GET /api/games", () => {
   it("responds with the games in the HTTP contract", async () => {
+    const GET = createGamesRoute(async () => GAME_FIXTURES.slice(0, 2));
     const response = await GET();
 
     expect(response.headers.get("content-type")).toContain("application/json");
