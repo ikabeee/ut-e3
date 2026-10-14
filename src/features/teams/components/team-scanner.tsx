@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition, type SyntheticEvent } from "react";
 import { Alert, FieldError, Form, Input, Label, TextField, toast } from "@heroui/react";
 import { scanVisitorQrAction } from "@features/teams/lib/team-scanner-actions";
+import { TEAMS_COPY } from "@features/teams/lib/teams-copy";
 import type { TeamScanResult } from "@features/teams/lib/types";
 import { ActionButton } from "@shared/components/action-button";
 import { PaperCard } from "@shared/components/paper-card";
@@ -21,16 +22,14 @@ declare global {
 }
 
 function TeamScanAlert({ result }: Readonly<{ result: TeamScanResult }>) {
+  const copy = TEAMS_COPY.scanner;
+
   if (result.status === "created") {
     return (
       <Alert status="success">
         <Alert.Content>
-          <Alert.Title>¡Visita registrada con éxito!</Alert.Title>
-          <Alert.Description>
-            {result.gamertag
-              ? `Se sumó la visita del visitante: @${result.gamertag}`
-              : "Visita registrada correctamente en este juego."}
-          </Alert.Description>
+          <Alert.Title>{copy.alertSuccessTitle}</Alert.Title>
+          <Alert.Description>{copy.alertSuccessDescription(result.gamertag)}</Alert.Description>
         </Alert.Content>
       </Alert>
     );
@@ -40,12 +39,8 @@ function TeamScanAlert({ result }: Readonly<{ result: TeamScanResult }>) {
     return (
       <Alert status="warning">
         <Alert.Content>
-          <Alert.Title>Visita ya registrada previamente</Alert.Title>
-          <Alert.Description>
-            {result.gamertag
-              ? `El visitante @${result.gamertag} ya había probado este juego.`
-              : "Este código QR ya fue escaneado en este stand."}
-          </Alert.Description>
+          <Alert.Title>{copy.alertDuplicateTitle}</Alert.Title>
+          <Alert.Description>{copy.alertDuplicateDescription(result.gamertag)}</Alert.Description>
         </Alert.Content>
       </Alert>
     );
@@ -54,14 +49,15 @@ function TeamScanAlert({ result }: Readonly<{ result: TeamScanResult }>) {
   return (
     <Alert status="danger">
       <Alert.Content>
-        <Alert.Title>Código QR no reconocido</Alert.Title>
-        <Alert.Description>Verifica que el código corresponda a un pasaporte de visitante válido.</Alert.Description>
+        <Alert.Title>{copy.alertUnknownTitle}</Alert.Title>
+        <Alert.Description>{copy.alertUnknownDescription}</Alert.Description>
       </Alert.Content>
     </Alert>
   );
 }
 
 export function TeamScanner() {
+  const copy = TEAMS_COPY.scanner;
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [manualInput, setManualInput] = useState("");
@@ -115,7 +111,7 @@ export function TeamScanner() {
 
       setIsCameraActive(true);
     } catch {
-      const msg = "No se pudo acceder a la cámara. Verifica los permisos del navegador.";
+      const msg = copy.cameraError;
       setCameraError(msg);
       toast.danger(msg);
       setIsCameraActive(false);
@@ -191,17 +187,15 @@ export function TeamScanner() {
       <PaperCard className="gap-5 p-[clamp(20px,3vw,32px)]">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="font-wide text-xl font-bold tracking-[-.02em] uppercase">Escáner de Visitantes</h2>
-            <p className="m-0 text-sm text-paper-foreground/80">
-              Escanea el código QR del pasaporte del visitante cuando juegue tu demo.
-            </p>
+            <h2 className="font-wide text-xl font-bold tracking-[-.02em] uppercase">{copy.title}</h2>
+            <p className="m-0 text-sm text-paper-foreground/80">{copy.subtitle}</p>
           </div>
 
           <ActionButton
             variant={isCameraActive ? "secondary" : "primary"}
             onPress={isCameraActive ? stopCamera : startCamera}
           >
-            {isCameraActive ? "Detener cámara" : "Activar cámara"}
+            {isCameraActive ? copy.stopCamera : copy.startCamera}
           </ActionButton>
         </div>
 
@@ -235,11 +229,11 @@ export function TeamScanner() {
         ) : null}
 
         <Form onSubmit={handleManualSubmit} className="flex flex-col gap-3 pt-2">
-          <Label className="text-sm font-semibold text-paper-foreground">Ingreso manual de código o URL</Label>
+          <Label className="text-sm font-semibold text-paper-foreground">{copy.manualInputLabel}</Label>
           <div className="flex flex-wrap gap-2">
             <TextField className="min-w-[260px] flex-1">
               <Input
-                placeholder="Pega la URL del QR o el token (ej. /v/... o 32 dígitos)"
+                placeholder={copy.manualInputPlaceholder}
                 value={manualInput}
                 onChange={(e) => setManualInput(e.target.value)}
                 autoCapitalize="none"
@@ -249,7 +243,7 @@ export function TeamScanner() {
               <FieldError />
             </TextField>
             <ActionButton type="submit" variant="secondary" isPending={isPending}>
-              Registrar visita
+              {copy.submitManual}
             </ActionButton>
           </div>
         </Form>

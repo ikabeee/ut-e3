@@ -6,6 +6,7 @@ import { cn } from "@heroui/react";
 import { TeamGameManager } from "@features/teams/components/team-game-manager";
 import { TeamMemberManager } from "@features/teams/components/team-member-manager";
 import { TeamScanner } from "@features/teams/components/team-scanner";
+import { TEAMS_COPY } from "@features/teams/lib/teams-copy";
 import type { TeamPortalData } from "@features/teams/lib/types";
 import { getTrafficLevel, type TrafficLevel } from "@features/visitors/lib/stand-traffic";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
@@ -33,8 +34,8 @@ interface SectionConfig {
 const SECTIONS: readonly SectionConfig[] = [
   {
     id: "overview",
-    label: "Resumen",
-    description: "Métricas de visitas y afluencia en tiempo real de tu stand",
+    label: TEAMS_COPY.sections.overview.label,
+    description: TEAMS_COPY.sections.overview.description,
     icon: (
       <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path
@@ -47,8 +48,8 @@ const SECTIONS: readonly SectionConfig[] = [
   },
   {
     id: "scanner",
-    label: "Escáner QR",
-    description: "Escanea los códigos QR de los visitantes para registrar sus partidas",
+    label: TEAMS_COPY.sections.scanner.label,
+    description: TEAMS_COPY.sections.scanner.description,
     icon: (
       <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path
@@ -61,8 +62,8 @@ const SECTIONS: readonly SectionConfig[] = [
   },
   {
     id: "members",
-    label: "Integrantes",
-    description: "Gestiona a tus compañeros de equipo para la ficha pública",
+    label: TEAMS_COPY.sections.members.label,
+    description: TEAMS_COPY.sections.members.description,
     icon: (
       <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path
@@ -75,8 +76,8 @@ const SECTIONS: readonly SectionConfig[] = [
   },
   {
     id: "game",
-    label: "Ficha del Juego",
-    description: "Información, descripción y enlaces de tu videojuego en exhibición",
+    label: TEAMS_COPY.sections.game.label,
+    description: TEAMS_COPY.sections.game.description,
     icon: (
       <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path
@@ -89,6 +90,16 @@ const SECTIONS: readonly SectionConfig[] = [
   },
 ];
 
+const LOGOUT_ICON = (
+  <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+    />
+  </svg>
+);
+
 interface TeamPortalViewProps {
   data: TeamPortalData;
   onLogout?: () => Promise<ActionResult<{ redirectTo: string }>>;
@@ -96,8 +107,11 @@ interface TeamPortalViewProps {
 
 function resolveSection(hash: string): TeamSection {
   if (hash === "scanner" || hash === "escaner") return "scanner";
+
   if (hash === "members" || hash === "integrantes") return "members";
+
   if (hash === "game" || hash === "juego") return "game";
+
   return "overview";
 }
 
@@ -127,6 +141,7 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
   };
 
   const currentSection = SECTIONS.find((s) => s.id === activeSection) ?? SECTIONS[0];
+  const copy = TEAMS_COPY;
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground md:flex-row">
@@ -136,14 +151,16 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
           <UtgLogo variant="extruded" className="h-6 w-auto" />
           <div className="flex flex-col">
             <span className="font-wide text-xs font-bold tracking-tight text-foreground uppercase">{data.name}</span>
-            <span className="type-tiny text-accent">Stand {data.standCode ?? "S/A"}</span>
+            <span className="type-tiny text-accent">
+              {data.standCode ? copy.portal.stand(data.standCode) : copy.portal.stand(copy.portal.standUnassigned)}
+            </span>
           </div>
         </div>
         <button
           type="button"
           onClick={() => setIsMobileMenuOpen((prev) => !prev)}
           className="flex h-9 w-9 items-center justify-center rounded border border-border text-foreground hover:bg-surface"
-          aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú de navegación"}
+          aria-label={isMobileMenuOpen ? copy.portal.ariaCloseMenu : copy.portal.ariaOpenMenu}
           aria-expanded={isMobileMenuOpen}
         >
           {isMobileMenuOpen ? (
@@ -161,7 +178,7 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
       {/* Menú desplegable para móviles */}
       {isMobileMenuOpen ? (
         <div className="sticky top-[53px] z-30 flex flex-col gap-2 border-b border-border bg-surface/95 p-4 backdrop-blur-md md:hidden">
-          <nav aria-label="Navegación del portal" className="flex flex-col gap-1">
+          <nav aria-label={copy.portal.ariaNav} className="flex flex-col gap-1">
             {SECTIONS.map((section) => {
               const isActive = section.id === activeSection;
 
@@ -185,8 +202,15 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
             })}
           </nav>
           <div className="mt-2 border-t border-border pt-3">
-            <ActionButton variant="secondary" size="sm" onPress={handleLogout} isPending={isPending} className="w-full">
-              Cerrar sesión
+            <ActionButton
+              variant="secondary"
+              size="sm"
+              icon={LOGOUT_ICON}
+              onPress={handleLogout}
+              isPending={isPending}
+              className="w-full"
+            >
+              {copy.portal.logout}
             </ActionButton>
           </div>
         </div>
@@ -204,16 +228,16 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
               />
             </Link>
             <div>
-              <span className="block type-tiny tracking-wider text-muted uppercase">Portal de Equipo</span>
+              <span className="block type-tiny tracking-wider text-muted uppercase">{copy.portal.header}</span>
               <h2 className="font-wide text-base font-bold tracking-tight text-foreground uppercase">{data.name}</h2>
               <div className="mt-2 flex items-center gap-2">
                 {data.standCode ? (
                   <span className="rounded bg-accent/20 px-2 py-0.5 text-xs font-bold tracking-wider text-accent uppercase">
-                    Stand {data.standCode}
+                    {copy.portal.stand(data.standCode)}
                   </span>
                 ) : (
                   <span className="rounded bg-surface px-2 py-0.5 text-xs font-semibold text-muted">
-                    Stand por asignar
+                    {copy.portal.standPending}
                   </span>
                 )}
               </div>
@@ -221,7 +245,7 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
           </div>
 
           {/* Navegación por secciones */}
-          <nav aria-label="Navegación del portal" className="flex flex-col gap-1.5">
+          <nav aria-label={copy.portal.ariaNav} className="flex flex-col gap-1.5">
             {SECTIONS.map((section) => {
               const isActive = section.id === activeSection;
 
@@ -248,8 +272,15 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
 
         {/* Acciones inferiores del sidebar */}
         <div className="border-t border-border pt-4">
-          <ActionButton variant="secondary" size="sm" onPress={handleLogout} isPending={isPending} className="w-full">
-            Cerrar sesión
+          <ActionButton
+            variant="secondary"
+            size="sm"
+            icon={LOGOUT_ICON}
+            onPress={handleLogout}
+            isPending={isPending}
+            className="w-full"
+          >
+            {copy.portal.logout}
           </ActionButton>
         </div>
       </aside>
@@ -258,7 +289,7 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
       <main className="min-w-0 flex-1 overflow-y-auto p-6 md:p-10 lg:p-12">
         <div className="mx-auto flex max-w-5xl flex-col gap-8">
           <header className="flex flex-col gap-1 border-b border-border pb-4">
-            <span className="type-tiny tracking-wider text-muted uppercase">Portal · {data.name}</span>
+            <span className="type-tiny tracking-wider text-muted uppercase">{copy.portal.portalTeam(data.name)}</span>
             <h1 className="font-wide text-2xl font-bold tracking-tight text-foreground uppercase md:text-3xl">
               {currentSection.label}
             </h1>
@@ -271,17 +302,17 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <PaperCard className="p-6">
                   <p className="text-xs font-bold tracking-wider text-paper-foreground/70 uppercase">
-                    Total de Visitas Registradas
+                    {copy.overview.totalVisitsTitle}
                   </p>
                   <p className="mt-2 text-4xl font-extrabold tracking-tight text-paper-foreground">
                     {data.totalCheckIns}
                   </p>
-                  <p className="mt-1 text-xs text-paper-foreground/60">Visitantes que han jugado la demo</p>
+                  <p className="mt-1 text-xs text-paper-foreground/60">{copy.overview.totalVisitsSubtitle}</p>
                 </PaperCard>
 
                 <PaperCard className="p-6">
                   <p className="text-xs font-bold tracking-wider text-paper-foreground/70 uppercase">
-                    Afluencia Actual (Últimos 15 min)
+                    {copy.overview.trafficTitle}
                   </p>
                   <div className="mt-2 flex items-center gap-3">
                     <span
@@ -289,25 +320,23 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
                     >
                       {VISITORS_COPY.traffic.levels[trafficLevel]}
                     </span>
-                    <span className="text-2xl font-bold text-paper-foreground">{data.recentCheckIns} visitas</span>
+                    <span className="text-2xl font-bold text-paper-foreground">
+                      {copy.overview.visitsCount(data.recentCheckIns)}
+                    </span>
                   </div>
-                  <p className="mt-1 text-xs text-paper-foreground/60">
-                    Refleja el flujo en tiempo real en el croquis interactivo
-                  </p>
+                  <p className="mt-1 text-xs text-paper-foreground/60">{copy.overview.trafficSubtitle}</p>
                 </PaperCard>
               </div>
 
               {/* Estado del juego y accesos directos */}
               <div className="flex flex-col gap-4 rounded border border-border bg-surface/30 p-6">
                 <div>
-                  <span className="type-tiny text-muted uppercase">Información del Juego</span>
+                  <span className="type-tiny text-muted uppercase">{copy.overview.gameInfoTitle}</span>
                   <h3 className="mt-1 font-wide text-lg font-bold text-foreground uppercase">
-                    {data.game ? data.game.name : "Videojuego por registrar"}
+                    {data.game ? data.game.name : copy.overview.gamePendingTitle}
                   </h3>
                   <p className="mt-1 text-xs text-copy">
-                    {data.game?.description
-                      ? data.game.description
-                      : "Registra la información de tu juego para que los visitantes puedan conocerlo."}
+                    {data.game?.description ? data.game.description : copy.overview.gamePendingDesc}
                   </p>
                 </div>
 
@@ -317,7 +346,7 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
                     onClick={() => handleSelectSection("scanner")}
                     className="flex items-center gap-2 rounded bg-accent px-4 py-2 font-mono text-xs font-bold tracking-wider text-background uppercase transition-opacity hover:opacity-90"
                   >
-                    <span>Abrir Escáner QR</span>
+                    <span>{copy.overview.openScanner}</span>
                     <span>→</span>
                   </button>
                   <button
@@ -325,14 +354,14 @@ export function TeamPortalView({ data, onLogout }: Readonly<TeamPortalViewProps>
                     onClick={() => handleSelectSection("game")}
                     className="flex items-center gap-2 rounded border border-border bg-surface px-4 py-2 font-mono text-xs font-bold tracking-wider text-foreground uppercase transition-colors hover:bg-surface/80"
                   >
-                    <span>Editar Ficha</span>
+                    <span>{copy.overview.editGame}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSelectSection("members")}
                     className="flex items-center gap-2 rounded border border-border bg-surface px-4 py-2 font-mono text-xs font-bold tracking-wider text-foreground uppercase transition-colors hover:bg-surface/80"
                   >
-                    <span>Gestionar Integrantes ({data.members.length})</span>
+                    <span>{copy.overview.manageMembers(data.members.length)}</span>
                   </button>
                 </div>
               </div>

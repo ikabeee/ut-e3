@@ -4,6 +4,7 @@ import { useRef, useTransition } from "react";
 import { Persons } from "@gravity-ui/icons";
 import { FieldError, Form, Input, Label, TextField, toast } from "@heroui/react";
 import { addMemberByLeaderAction, deleteMemberByLeaderAction } from "@features/teams/lib/team-portal-actions";
+import { TEAMS_COPY } from "@features/teams/lib/teams-copy";
 import { STUDENT_GROUPS, type TeamPortalMember } from "@features/teams/lib/types";
 import { ActionButton } from "@shared/components/action-button";
 import { EmptyState } from "@shared/components/empty-state";
@@ -17,10 +18,11 @@ interface TeamMemberManagerProps {
 export function TeamMemberManager({ members }: Readonly<TeamMemberManagerProps>) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
+  const copy = TEAMS_COPY.memberManager;
 
   const form = useServerActionForm(addMemberByLeaderAction, () => {
     formRef.current?.reset();
-    toast.success("Integrante registrado exitosamente.");
+    toast.success(copy.addSuccessToast);
   });
 
   const handleDelete = (memberId: string) => {
@@ -31,10 +33,10 @@ export function TeamMemberManager({ members }: Readonly<TeamMemberManagerProps>)
         if (!res.ok) {
           toast.danger(res.error);
         } else {
-          toast.success("Integrante eliminado exitosamente.");
+          toast.success(copy.deleteSuccessToast);
         }
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Error al eliminar integrante.";
+        const message = err instanceof Error ? err.message : copy.deleteErrorFallback;
         toast.danger(message);
       }
     });
@@ -43,10 +45,8 @@ export function TeamMemberManager({ members }: Readonly<TeamMemberManagerProps>)
   return (
     <PaperCard className="gap-6 p-6">
       <div>
-        <h3 className="font-wide text-lg font-bold tracking-[-.02em] uppercase">Integrantes del Equipo</h3>
-        <p className="mt-1 text-xs text-paper-foreground/70">
-          Registra a tus compañeros de equipo para que figuren en la ficha pública del juego.
-        </p>
+        <h3 className="font-wide text-lg font-bold tracking-[-.02em] uppercase">{copy.title}</h3>
+        <p className="mt-1 text-xs text-paper-foreground/70">{copy.description}</p>
       </div>
 
       {/* Lista de integrantes actuales */}
@@ -55,7 +55,7 @@ export function TeamMemberManager({ members }: Readonly<TeamMemberManagerProps>)
           <EmptyState
             icon={Persons}
             size="sm"
-            title="Aún no hay integrantes registrados."
+            title={copy.emptyTitle}
             className="my-2 border-paper-foreground/15 text-paper-foreground/70 [&_svg]:text-paper-foreground/50"
           />
         ) : null}
@@ -65,11 +65,11 @@ export function TeamMemberManager({ members }: Readonly<TeamMemberManagerProps>)
               <p className="font-semibold text-paper-foreground">
                 {member.fullName}
                 {member.isLeader ? (
-                  <span className="text-primary ml-2 text-xs font-bold uppercase">(Líder)</span>
+                  <span className="text-primary ml-2 text-xs font-bold uppercase">{copy.leaderBadge}</span>
                 ) : null}
               </p>
               <p className="text-xs text-paper-foreground/70">
-                {member.email} · Grupo: {member.groupName}
+                {member.email} · {copy.groupLabel}: {member.groupName}
               </p>
             </div>
 
@@ -80,7 +80,7 @@ export function TeamMemberManager({ members }: Readonly<TeamMemberManagerProps>)
                 isPending={isDeleting}
                 onPress={() => handleDelete(member.id)}
               >
-                Eliminar
+                {copy.deleteButton}
               </ActionButton>
             ) : null}
           </div>
@@ -90,7 +90,7 @@ export function TeamMemberManager({ members }: Readonly<TeamMemberManagerProps>)
       {/* Formulario para agregar nuevo integrante */}
       <div>
         <h4 className="font-wide text-sm font-bold tracking-wider text-paper-foreground/90 uppercase">
-          Agregar Nuevo Integrante
+          {copy.addTitle}
         </h4>
         <Form
           ref={formRef}
@@ -100,14 +100,14 @@ export function TeamMemberManager({ members }: Readonly<TeamMemberManagerProps>)
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <TextField name="fullName" isRequired className="flex flex-col gap-1">
-              <Label className="text-xs font-bold text-paper-foreground uppercase">Nombre Completo</Label>
-              <Input placeholder="ej. Juan Pablo Hernández" onInput={form.clearFieldError} className="text-base" />
+              <Label className="text-xs font-bold text-paper-foreground uppercase">{copy.fullNameLabel}</Label>
+              <Input placeholder={copy.fullNamePlaceholder} onInput={form.clearFieldError} className="text-base" />
               <FieldError />
             </TextField>
 
             <div className="flex flex-col gap-1">
               <label htmlFor="group-select" className="text-xs font-bold text-paper-foreground uppercase">
-                Grupo Estudiantil
+                {copy.studentGroupLabel}
               </label>
               <select
                 id="group-select"
@@ -130,7 +130,7 @@ export function TeamMemberManager({ members }: Readonly<TeamMemberManagerProps>)
             isPending={form.isPending}
             className="mt-2 self-start font-bold uppercase"
           >
-            {form.isPending ? "Guardando..." : "Agregar integrante"}
+            {form.isPending ? copy.savingButton : copy.saveButton}
           </ActionButton>
         </Form>
       </div>
