@@ -24,14 +24,14 @@ import sonarjs from "eslint-plugin-sonarjs";
  */
 const FEATURE_DEPENDENCIES = {
   admin: ["games", "teams", "visitors"],
+  auth: [],
   event: [],
-  example: [],
   "floor-plan": [],
   games: ["event", "floor-plan"],
   home: ["event", "floor-plan", "games"],
   offline: ["floor-plan", "games", "home"],
   site: ["floor-plan", "games", "home", "visitors"],
-  teams: ["games"],
+  teams: ["games", "visitors"],
   visitors: ["event", "floor-plan"],
 };
 
