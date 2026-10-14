@@ -1,17 +1,6 @@
 /** @jest-environment node */
 
-jest.mock("@features/auth/lib/server/auth-queries", () => ({
-  authenticateUser: jest.fn(),
-  confirmEmailToken: jest.fn(),
-  registerTeamWithLeader: jest.fn(),
-}));
-
-jest.mock("@features/auth/lib/server/auth-session", () => ({
-  saveAuthSession: jest.fn(),
-  clearAuthSession: jest.fn(),
-}));
-
-import { loginAction } from "@features/auth/lib/auth-actions";
+import { confirmEmailAndSetPasswordAction, loginAction } from "@features/auth/lib/auth-actions";
 import { AUTH_COPY } from "@features/auth/lib/auth-copy";
 
 describe("loginAction", () => {
@@ -86,6 +75,45 @@ describe("loginAction", () => {
     expect(result).toEqual({
       ok: true,
       data: { redirectTo: "/team" },
+    });
+  });
+});
+
+describe("confirmEmailAndSetPasswordAction", () => {
+  it("confirms email and sets password successfully", async () => {
+    const confirmMock = jest.fn().mockResolvedValue(true);
+
+    const result = await confirmEmailAndSetPasswordAction(
+      {
+        token: "1234567890abcdef1234567890abcdef",
+        password: "new-secure-password",
+        confirmPassword: "new-secure-password",
+      },
+      { confirmEmailAndSetPassword: confirmMock },
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      data: { confirmed: true },
+    });
+    expect(confirmMock).toHaveBeenCalledWith("1234567890abcdef1234567890abcdef", "new-secure-password");
+  });
+
+  it("returns error result when token is invalid or expired", async () => {
+    const confirmMock = jest.fn().mockResolvedValue(false);
+
+    const result = await confirmEmailAndSetPasswordAction(
+      {
+        token: "1234567890abcdef1234567890abcdef",
+        password: "new-secure-password",
+        confirmPassword: "new-secure-password",
+      },
+      { confirmEmailAndSetPassword: confirmMock },
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      error: AUTH_COPY.confirmEmail.errorMessage,
     });
   });
 });

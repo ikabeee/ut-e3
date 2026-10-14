@@ -8,7 +8,12 @@ import { sendMail } from "@shared/lib/server/mailer";
  * Si no hay credenciales SMTP configuradas en local, imprime el enlace directamente
  * en la consola para facilitar el desarrollo.
  */
-export async function sendConfirmationEmail(email: string, fullName: string, token: string): Promise<boolean> {
+export async function sendConfirmationEmail(
+  email: string,
+  fullName: string,
+  token: string,
+  mailSender: typeof sendMail = sendMail,
+): Promise<boolean> {
   const confirmUrl = `${siteConfig.url}${CONFIRM_EMAIL_PATH}?token=${token}`;
   const subject = "Activa tu cuenta y establece tu contraseña - UT Game Showcase";
 
@@ -41,7 +46,7 @@ Si no solicitaste este registro, puedes ignorar este mensaje.`;
     </div>
   `;
 
-  const result = await sendMail({
+  const result = await mailSender({
     to: email,
     subject,
     text,
