@@ -1,6 +1,6 @@
 /** Foto de un juego: la portada o una captura de la galería. */
 export interface GameImage {
-  /** URL https:// o ruta del sitio, por ejemplo `/mock/games/ruta-9.jpg`. */
+  /** URL https:// o ruta del sitio, por ejemplo `/games/ruta-9.jpg`. */
   src: string;
   /** Texto alternativo de la imagen. */
   alt: string;

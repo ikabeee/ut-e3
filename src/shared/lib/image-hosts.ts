@@ -14,7 +14,7 @@ export function parseImageHosts(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
-/** Ruta del sitio (`/mock/games/...`) o URL https de un dominio permitido. */
+/** Ruta del sitio (`/games/...`) o URL https de un dominio permitido. */
 export function isAllowedImageUrl(url: string, hosts: readonly string[]) {
   if (/^\/[^/]/.test(url)) return true;
 

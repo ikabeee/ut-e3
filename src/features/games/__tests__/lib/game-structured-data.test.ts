@@ -8,7 +8,7 @@ describe("buildGameStructuredData", () => {
       name: "Ceniza Protocol",
       genre: "Acción",
       url: "https://utg.example/games/ceniza-protocol",
-      image: "https://utg.example/mock/games/ceniza-protocol.jpg",
+      image: "https://utg.example/games/ceniza-protocol.jpg",
       author: { "@type": "Organization", name: "Equipo Grava" },
     });
   });

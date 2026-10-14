@@ -12,7 +12,7 @@ describe("image hosts", () => {
   it("allows site paths and https URLs of the listed hosts only", () => {
     const hosts = ["img.itch.zone"];
 
-    expect(isAllowedImageUrl("/mock/games/ruta-9.jpg", hosts)).toBe(true);
+    expect(isAllowedImageUrl("/games/ruta-9.jpg", hosts)).toBe(true);
     expect(isAllowedImageUrl("https://img.itch.zone/a.png", hosts)).toBe(true);
     expect(isAllowedImageUrl("data:image/png;base64,AAAA", hosts)).toBe(false);
     expect(isAllowedImageUrl("https://evil.example/a.png", hosts)).toBe(false);
