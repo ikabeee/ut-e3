@@ -22,6 +22,12 @@ export interface RegisterTeamInput {
   teamName: string;
   fullName: string;
   email: string;
-  password: string;
   groupName: StudentGroup;
+  password?: string;
+}
+
+export interface ConfirmPasswordInput {
+  token: string;
+  password: string;
+  confirmPassword: string;
 }
