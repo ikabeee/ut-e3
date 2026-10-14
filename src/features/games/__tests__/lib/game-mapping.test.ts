@@ -11,9 +11,9 @@ const row: GameRow = {
   genre: { name: "Carreras" },
   platforms: [{ platform: { name: "Windows" } }, { platform: { name: "Android" } }],
   images: [
-    { imageUrl: "/mock/games/shot-2.jpg", altText: "Captura 2", cropPosition: null, isCover: false, sortOrder: 2 },
-    { imageUrl: "/mock/games/ruta-9.jpg", altText: "Portada", cropPosition: "60% 35%", isCover: true, sortOrder: 0 },
-    { imageUrl: "/mock/games/shot-1.jpg", altText: "Captura 1", cropPosition: null, isCover: false, sortOrder: 1 },
+    { imageUrl: "/games/shot-2.jpg", altText: "Captura 2", cropPosition: null, isCover: false, sortOrder: 2 },
+    { imageUrl: "/games/ruta-9.jpg", altText: "Portada", cropPosition: "60% 35%", isCover: true, sortOrder: 0 },
+    { imageUrl: "/games/shot-1.jpg", altText: "Captura 1", cropPosition: null, isCover: false, sortOrder: 1 },
   ],
 };
 
@@ -28,7 +28,7 @@ describe("toGame", () => {
       stand: "A4",
       about: null,
       itchioUrl: "https://ruido.itch.io/ruta-9",
-      image: { src: "/mock/games/ruta-9.jpg", alt: "Portada", position: "60% 35%" },
+      image: { src: "/games/ruta-9.jpg", alt: "Portada", position: "60% 35%" },
     });
   });
 
