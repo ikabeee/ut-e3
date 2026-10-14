@@ -37,10 +37,33 @@ export function VisitorRegistrationForm({ hasUnknownQr }: Readonly<VisitorRegist
       ) : null}
 
       <Form onSubmit={form.submit} validationErrors={form.fieldErrors} className="flex flex-col gap-4">
-        <TextField name="gamertag" isRequired autoComplete="nickname" className="flex flex-col gap-1">
-          {/* La tarjeta es clara: la etiqueta usa el texto de la tarjeta, no el del tema oscuro. */}
+        <TextField name="fullName" isRequired autoComplete="name" className="flex flex-col gap-1">
+          <Label className="text-paper-foreground">{copy.fullNameLabel}</Label>
+          <Input
+            placeholder={copy.fullNamePlaceholder}
+            onInput={form.clearFieldError}
+            autoCapitalize="words"
+            className="text-base"
+          />
+          <FieldError />
+        </TextField>
+
+        <TextField name="email" isRequired autoComplete="email" className="flex flex-col gap-1">
+          <Label className="text-paper-foreground">{copy.emailLabel}</Label>
+          <Input
+            type="email"
+            placeholder={copy.emailPlaceholder}
+            onInput={form.clearFieldError}
+            autoCapitalize="none"
+            spellCheck={false}
+            className="text-base"
+          />
+          <Description className="text-paper-foreground/70">{copy.emailHint}</Description>
+          <FieldError />
+        </TextField>
+
+        <TextField name="gamertag" autoComplete="nickname" className="flex flex-col gap-1">
           <Label className="text-paper-foreground">{copy.gamertagLabel}</Label>
-          {/* 16 px: con menos, iOS hace zoom al escribir. */}
           <Input
             placeholder={copy.gamertagPlaceholder}
             onInput={form.clearFieldError}
@@ -51,6 +74,7 @@ export function VisitorRegistrationForm({ hasUnknownQr }: Readonly<VisitorRegist
           <Description className="text-paper-foreground/70">{copy.gamertagHint}</Description>
           <FieldError />
         </TextField>
+
         {form.error && Object.keys(form.fieldErrors).length === 0 ? (
           <p role="alert" className="m-0 text-sm text-danger">
             {form.error}

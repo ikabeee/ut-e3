@@ -19,20 +19,22 @@ import type { RawInput } from "@shared/lib/validation";
 // son del panel de administración.
 
 const VISITOR_CONSTRAINT_MESSAGES = {
+  visitor_email_key: "Ya existe un registro con este correo electrónico.",
   visitor_gamertag_key:
-    "Ese gamertag ya está registrado. Si es tuyo, abre la captura de tu QR o pide ayuda en el módulo de información.",
+    "Ese nombre de usuario ya está registrado. Si es tuyo, abre la captura de tu código o pide ayuda en el módulo de información.",
   visitor_gamertag_format: "Usa de 3 a 24 caracteres: letras sin acento, números, guion bajo, punto o guion.",
   raffle_ticket_phone_key: "Ese teléfono ya tiene un boleto. Usa otro número.",
   raffle_ticket_phone_format: "Escribe tu número a 10 dígitos o con lada internacional (+52...).",
 };
 
-const NO_PASSPORT = "Primero regístrate con tu gamertag para obtener tu QR.";
+const NO_PASSPORT = "Primero regístrate con tu nombre y correo para obtener tu código de acceso.";
 
-/** Registra al visitante y guarda su QR en la cookie; la página se vuelve a renderizar sola. */
+/** Registra al visitante y guarda su código en la sesión; la página se vuelve a renderizar sola. */
 export async function registerVisitorAction(input: RawInput) {
   return runServerAction(
     async () => {
-      const { token } = await registerVisitor(parseVisitorRegistration(input).gamertag);
+      const parsed = parseVisitorRegistration(input);
+      const { token } = await registerVisitor(parsed);
       await saveVisitorToken(token);
     },
     { constraintMessages: VISITOR_CONSTRAINT_MESSAGES },

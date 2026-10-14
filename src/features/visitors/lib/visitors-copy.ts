@@ -29,16 +29,21 @@ export const VISITORS_COPY = {
       "Prueba los juegos de todos los stands. Cada equipo escanea tu QR cuando juegas su demo y, cuando completes el pasaporte, obtienes un boleto para el sorteo del main stage.",
   },
   registration: {
-    title: "Obtén tu QR",
+    title: "Obtén tu código de acceso",
     intro:
-      "Escribe tu gamertag y te damos un QR personal. Muéstralo en cada stand para registrar los juegos que pruebas.",
-    unknownQrTitle: "Ese QR ya no es válido",
+      "Ingresa tu nombre y correo para recibir tu código personal. Te enviaremos una copia a tu correo y, al completar todos los juegos, recibirás tu número para el sorteo.",
+    unknownQrTitle: "Ese código ya no es válido",
     unknownQrDescription:
       "Si ya te habías registrado, pide ayuda en el módulo de información para recuperar tu pasaporte.",
-    gamertagLabel: "Gamertag",
-    gamertagPlaceholder: "neo_99",
-    gamertagHint: "De 3 a 24 caracteres: letras sin acento, números, guion bajo, punto o guion.",
-    submit: "Crear mi QR",
+    fullNameLabel: "Nombre completo",
+    fullNamePlaceholder: "ej. Sofía Martínez",
+    emailLabel: "Correo electrónico",
+    emailPlaceholder: "ej. smartinez@correo.com",
+    emailHint: "Aquí te enviaremos una copia de tu código y tu boleto del sorteo.",
+    gamertagLabel: "Nombre de usuario (opcional)",
+    gamertagPlaceholder: "sofiagamer",
+    gamertagHint: "De 3 a 24 caracteres sin espacios. Si lo dejas vacío, se generará a partir de tu nombre.",
+    submit: "Comenzar recorrido",
   },
   qr: {
     kicker: "Tu QR personal",

@@ -32,20 +32,68 @@ export const TRAFFIC_WINDOW_MINUTES = 15;
 /** Máximo de ganadores por sorteo. */
 export const MAX_RAFFLE_WINNERS = 50;
 
+export interface VisitorRegistrationInput {
+  fullName: string;
+  email: string;
+  gamertag: string;
+}
+
 export function normalizeGamertag(raw: string) {
   return raw.trim().replace(/^@/, "").toLowerCase();
 }
 
-/** Formulario de registro: sólo el gamertag. */
+/** Genera un apodo válido a partir del nombre o correo si no se proporciona uno. */
+export function deriveGamertag(fullName: string, email: string): string {
+  const base = fullName
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, ".")
+    .replace(/\.+/g, ".")
+    .replace(/^\.|\.$/g, "");
+
+  const emailPrefix = (email.split("@")[0] ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const candidate = (base.length >= 3 ? base : emailPrefix).slice(0, 20);
+
+  return candidate.length >= 3 ? candidate : `${candidate || "vis"}123`;
+}
+
+/** Formulario de registro del visitante: nombre, correo y opcionalmente apodo. */
 export function parseVisitorRegistration(raw: RawInput) {
   return validate(raw, (field) => {
-    const gamertag = normalizeGamertag(field.text("gamertag", { label: "El gamertag", max: 40 }));
+    const hasExplicitFields = Boolean(raw["fullName"] || raw["email"]);
 
-    if (gamertag && !GAMERTAG_PATTERN.test(gamertag)) {
+    if (!hasExplicitFields) {
+      const gamertag = normalizeGamertag(field.text("gamertag", { label: "El gamertag", max: 40 }));
+
+      if (gamertag && !GAMERTAG_PATTERN.test(gamertag)) {
+        field.invalid("gamertag", "Usa de 3 a 24 caracteres: letras sin acento, números, guion bajo, punto o guion.");
+      }
+
+      return { gamertag };
+    }
+
+    const rawGamertag = field.optionalText("gamertag", { label: "El apodo", max: 40 });
+    const fullName = field.text("fullName", { label: "El nombre", max: 120 });
+    const email = field.text("email", {
+      label: "El correo electrónico",
+      max: 120,
+      pattern: /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/,
+      patternMessage: "Escribe un correo electrónico válido.",
+    }).toLowerCase();
+
+    const gamertag = rawGamertag ? normalizeGamertag(rawGamertag) : deriveGamertag(fullName, email);
+
+    if (rawGamertag && !GAMERTAG_PATTERN.test(gamertag)) {
       field.invalid("gamertag", "Usa de 3 a 24 caracteres: letras sin acento, números, guion bajo, punto o guion.");
     }
 
-    return { gamertag };
+    return {
+      fullName,
+      email,
+      gamertag,
+    };
   });
 }
 
