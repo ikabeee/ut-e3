@@ -54,8 +54,11 @@ describe("TeamPortalView", () => {
     expect(screen.getAllByRole("button", { name: /integrantes/i })[0]).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: /ficha del juego/i })[0]).toBeInTheDocument();
 
-    // Link to public site exists
-    expect(screen.getAllByRole("link", { name: /ver sitio público/i })[0]).toHaveAttribute("href", "/");
+    // "Ver sitio público" should NOT exist
+    expect(screen.queryByText(/ver sitio público/i)).not.toBeInTheDocument();
+
+    // Logout button exists
+    expect(screen.getAllByRole("button", { name: /cerrar sesión/i })[0]).toBeInTheDocument();
   });
 
   it("switches section when sidebar button is clicked", async () => {
