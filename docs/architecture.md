@@ -130,7 +130,7 @@ existe, `resolveScheduleZones` lanza un error y el build de la portada se detien
 ## Flujo de datos
 
 ```
-GameRepository (mock o Prisma, según DATA_SOURCE)
+GameRepository (Prisma)
   -> lib/server/games-queries.ts  "use cache" + cacheTag("games")
        -> pages                   getGamesHydrationState() -> QueryHydrationBoundary
        -> api/games-route.ts      GET /api/games: juegos -> GameDto (api/games-contract.ts)
@@ -191,9 +191,9 @@ Visitantes (sin login)
 | --- | --- |
 | Responsabilidad única | Cada archivo hace una cosa: `game-filters.ts` filtra, `plan-viewport.ts` calcula el zoom, `use-gallery.ts` maneja la galería y `GameGallery` sólo la pinta. Los componentes grandes son composiciones: `FloorPlanDrawing` junta `PlanDefs`, `PlanFloor`, `PlanZones`, `PlanPublicArea`, `PlanEntry` y `PlanStandBlock` (la selección y los filtros los resuelve `getItemInteraction` en `lib/`); `FeaturedGamesCarousel` junta `FeaturedSlides`, `FeaturedCaption` y `FeaturedThumbnails`; el teclado del exhibidor vive en `useCoverflowKeyboard` y el desplazamiento de las miniaturas en `useActiveThumbScroll`. |
 | Abierto/cerrado | Las variantes de `Button` y `ToggleButton` de HeroUI se extienden con clases con nombre en `components.css` (`button--plate`, `toggle-button--filter`...) sin tocar HeroUI ni redefinirlas en `className`; `GameCard` y `PlanItemCard` tienen variantes en lugar de copias. |
-| Sustitución de Liskov | Cualquier implementación de `GameRepository` (mock, Prisma o el repositorio falso de las pruebas) sirve igual a `games-queries.ts`. |
+| Sustitución de Liskov | Cualquier implementación de `GameRepository` (Prisma o el repositorio falso de las pruebas) sirve igual a `games-queries.ts`. |
 | Segregación de interfaces | Los componentes reciben sólo lo que usan (`GameImageView` recibe una foto, no el juego; `EventSchedule` recibe nombres de zona, no el croquis; el croquis recibe `StandOccupant`, no `Game`). |
-| Inversión de dependencias | `games-queries.ts` depende de la interfaz `GameRepository`, no de la fuente de datos. La elección vive fuera, en `getGameRepository()` (`lib/server/game-repositories.ts`), y se configura con `DATA_SOURCE`. |
+| Inversión de dependencias | `games-queries.ts` depende de la interfaz `GameRepository`, no directamente de Prisma, permitiendo inyectar repositorios falsos en pruebas. |
 
 ## Agregar una feature
 
