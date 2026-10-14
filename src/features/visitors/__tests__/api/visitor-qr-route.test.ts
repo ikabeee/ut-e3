@@ -7,7 +7,12 @@ const TOKEN = "0123456789abcdef0123456789abcdef";
 
 describe("GET /v/<token>", () => {
   it("restores the passport cookie and goes to the passport without leaking the token", async () => {
-    const findVisitor = jest.fn(async () => ({ id: "visitor-1", gamertag: "neo_99" }));
+    const findVisitor = jest.fn(async () => ({
+      id: "visitor-1",
+      gamertag: "neo_99",
+      fullName: null,
+      email: null,
+    }));
     const route = createVisitorQrRoute(findVisitor);
 
     const response = await route(new Request(`http://localhost/v/${TOKEN.toUpperCase()}`), {

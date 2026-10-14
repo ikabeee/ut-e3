@@ -17,7 +17,7 @@ describe("claimRaffleTicket", () => {
 
   it("explains that the raffle is not open while no team has a stand", async () => {
     const deps = {
-      findVisitor: async () => ({ id: "visitor-1", gamertag: "pixel" }),
+      findVisitor: async () => ({ id: "visitor-1", gamertag: "pixel", fullName: null, email: null }),
       fetchRequiredGames: async () => [],
       findExistingTicket: async () => null,
       fetchCheckedGameIds: async () => mockCheckedGameIds,
@@ -30,7 +30,7 @@ describe("claimRaffleTicket", () => {
     mockCheckedGameIds.push("game-1");
 
     const deps = {
-      findVisitor: async () => ({ id: "visitor-1", gamertag: "pixel" }),
+      findVisitor: async () => ({ id: "visitor-1", gamertag: "pixel", fullName: null, email: null }),
       fetchRequiredGames: async () => [game("game-1", "A1"), game("game-2", "A2")],
       findExistingTicket: async () => null,
       fetchCheckedGameIds: async () => mockCheckedGameIds,
