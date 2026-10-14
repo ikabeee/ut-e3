@@ -52,6 +52,10 @@ export function proxy(request: NextRequest) {
 
   if (loginRedirect) return loginRedirect;
 
+  if (pathname === "/register") {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
   if (pathname.startsWith("/admin")) {
     return checkAdminAccess(request, session?.role === "admin");
   }
@@ -64,5 +68,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*", "/team", "/team/:path*", "/login"],
+  matcher: ["/admin", "/admin/:path*", "/team", "/team/:path*", "/login", "/register"],
 };

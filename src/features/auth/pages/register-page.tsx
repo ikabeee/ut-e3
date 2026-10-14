@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { RegisterForm } from "@features/auth/components/register-form";
+import { redirect } from "next/navigation";
 import { AUTH_COPY } from "@features/auth/lib/auth-copy";
-import { REGISTER_PATH } from "@features/auth/lib/auth-links";
+import { LOGIN_PATH, REGISTER_PATH } from "@features/auth/lib/auth-links";
 
 export const registerPageMetadata: Metadata = {
   title: AUTH_COPY.register.title,
@@ -11,9 +11,5 @@ export const registerPageMetadata: Metadata = {
 };
 
 export function RegisterPage() {
-  return (
-    <main className="page-wrap flex min-h-[calc(100vh-200px)] items-center justify-center py-12">
-      <RegisterForm />
-    </main>
-  );
+  redirect(LOGIN_PATH);
 }

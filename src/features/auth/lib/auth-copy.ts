@@ -9,8 +9,8 @@ export const AUTH_COPY = {
     accountKeyLabel: "Contraseña de acceso",
     submitButton: "Iniciar sesión",
     submitting: "Verificando...",
-    noAccountPrompt: "¿Aún no tienes equipo registrado?",
-    registerLink: "Registra a tu equipo aquí",
+    noAccountPrompt: "El acceso y creación de cuentas de equipo es gestionado por el administrador del evento.",
+    registerLink: "",
     errors: {
       invalidCredentials: "El usuario o la contraseña son incorrectos.",
       unconfirmedEmail:

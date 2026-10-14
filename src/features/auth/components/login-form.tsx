@@ -1,10 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { Alert, FieldError, Form, Input, Label, TextField } from "@heroui/react";
 import { loginAction } from "@features/auth/lib/auth-actions";
 import { AUTH_COPY } from "@features/auth/lib/auth-copy";
-import { REGISTER_PATH } from "@features/auth/lib/auth-links";
 import { ActionButton } from "@shared/components/action-button";
 import { PaperCard } from "@shared/components/paper-card";
 import { useServerActionForm } from "@shared/hooks/use-server-action-form";
@@ -66,11 +64,8 @@ export function LoginForm({ confirmed = false }: Readonly<LoginFormProps>) {
         </ActionButton>
       </Form>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-paper-foreground/15 pt-4 text-sm">
-        <span className="text-paper-foreground/70">{copy.noAccountPrompt}</span>
-        <Link href={REGISTER_PATH} className="text-primary hover:text-primary/80 font-semibold underline">
-          {copy.registerLink}
-        </Link>
+      <div className="border-t border-paper-foreground/15 pt-4 text-center text-xs text-paper-foreground/70">
+        {copy.noAccountPrompt}
       </div>
     </PaperCard>
   );
