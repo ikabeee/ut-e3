@@ -18,7 +18,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'a840174eae3d06ad4bd1c8fc164989bf53c92d053dc9873f411cabed6bf2c3a4'>;
+  StorageHashBase<'b87db88914300599e097c86374fde741242c42fe1f1d32e4d6bf19354a0910dd'>;
 export type ExecutionHash =
   ExecutionHashBase<'220e9f8fc092c36dd35040e4a60fae423eef7404c35e9f4c3eae85918499b377'>;
 export type ProfileHash =
@@ -297,7 +297,7 @@ export type FieldOutputTypes = {
     readonly RaffleTicket: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly notifiedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
-      readonly phone: CodecTypes['pg/text@1']['output'];
+      readonly phone: CodecTypes['pg/text@1']['output'] | null;
       readonly ticketNumber: CodecTypes['pg/int4@1']['output'];
       readonly visitorId: CodecTypes['pg/uuid@1']['output'];
       readonly wonAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
@@ -306,6 +306,7 @@ export type FieldOutputTypes = {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
+      readonly scannerKey: CodecTypes['pg/text@1']['output'] | null;
       readonly scannerKeyHash: CodecTypes['pg/text@1']['output'];
       readonly standCode: CodecTypes['pg/text@1']['output'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -327,6 +328,8 @@ export type FieldOutputTypes = {
     };
     readonly Visitor: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly email: CodecTypes['pg/text@1']['output'] | null;
+      readonly fullName: CodecTypes['pg/text@1']['output'] | null;
       readonly gamertag: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly qrTokenHash: CodecTypes['pg/text@1']['output'];
@@ -399,7 +402,7 @@ export type FieldInputTypes = {
     readonly RaffleTicket: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly notifiedAt: CodecTypes['pg/timestamptz-string@1']['input'] | null;
-      readonly phone: CodecTypes['pg/text@1']['input'];
+      readonly phone: CodecTypes['pg/text@1']['input'] | null;
       readonly ticketNumber: CodecTypes['pg/int4@1']['input'];
       readonly visitorId: CodecTypes['pg/uuid@1']['input'];
       readonly wonAt: CodecTypes['pg/timestamptz-string@1']['input'] | null;
@@ -408,6 +411,7 @@ export type FieldInputTypes = {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
+      readonly scannerKey: CodecTypes['pg/text@1']['input'] | null;
       readonly scannerKeyHash: CodecTypes['pg/text@1']['input'];
       readonly standCode: CodecTypes['pg/text@1']['input'] | null;
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -429,6 +433,8 @@ export type FieldInputTypes = {
     };
     readonly Visitor: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly email: CodecTypes['pg/text@1']['input'] | null;
+      readonly fullName: CodecTypes['pg/text@1']['input'] | null;
       readonly gamertag: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly qrTokenHash: CodecTypes['pg/text@1']['input'];
@@ -501,7 +507,7 @@ export type StorageColumnTypes = {
     readonly raffle_ticket: {
       readonly created_at: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly notified_at: CodecTypes['pg/timestamptz-string@1']['output'] | null;
-      readonly phone: CodecTypes['pg/text@1']['output'];
+      readonly phone: CodecTypes['pg/text@1']['output'] | null;
       readonly ticket_number: CodecTypes['pg/int4@1']['output'];
       readonly visitor_id: CodecTypes['pg/uuid@1']['output'];
       readonly won_at: CodecTypes['pg/timestamptz-string@1']['output'] | null;
@@ -510,6 +516,7 @@ export type StorageColumnTypes = {
       readonly created_at: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
+      readonly scanner_key: CodecTypes['pg/text@1']['output'] | null;
       readonly scanner_key_hash: CodecTypes['pg/text@1']['output'];
       readonly stand_code: CodecTypes['pg/text@1']['output'] | null;
       readonly updated_at: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -531,6 +538,8 @@ export type StorageColumnTypes = {
     };
     readonly visitor: {
       readonly created_at: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly email: CodecTypes['pg/text@1']['output'] | null;
+      readonly full_name: CodecTypes['pg/text@1']['output'] | null;
       readonly gamertag: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly qr_token_hash: CodecTypes['pg/text@1']['output'];
@@ -603,7 +612,7 @@ export type StorageColumnInputTypes = {
     readonly raffle_ticket: {
       readonly created_at: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly notified_at: CodecTypes['pg/timestamptz-string@1']['input'] | null;
-      readonly phone: CodecTypes['pg/text@1']['input'];
+      readonly phone: CodecTypes['pg/text@1']['input'] | null;
       readonly ticket_number: CodecTypes['pg/int4@1']['input'];
       readonly visitor_id: CodecTypes['pg/uuid@1']['input'];
       readonly won_at: CodecTypes['pg/timestamptz-string@1']['input'] | null;
@@ -612,6 +621,7 @@ export type StorageColumnInputTypes = {
       readonly created_at: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
+      readonly scanner_key: CodecTypes['pg/text@1']['input'] | null;
       readonly scanner_key_hash: CodecTypes['pg/text@1']['input'];
       readonly stand_code: CodecTypes['pg/text@1']['input'] | null;
       readonly updated_at: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -633,6 +643,8 @@ export type StorageColumnInputTypes = {
     };
     readonly visitor: {
       readonly created_at: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly email: CodecTypes['pg/text@1']['input'] | null;
+      readonly full_name: CodecTypes['pg/text@1']['input'] | null;
       readonly gamertag: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly qr_token_hash: CodecTypes['pg/text@1']['input'];
@@ -730,7 +742,7 @@ export namespace Models {
   export type public_RaffleTicket = {
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     notifiedAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
-    phone: CodecTypes['pg/text@1']['output'];
+    phone: CodecTypes['pg/text@1']['output'] | null;
     ticketNumber: CodecTypes['pg/int4@1']['output'];
     visitorId: CodecTypes['pg/uuid@1']['output'];
     wonAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
@@ -741,6 +753,7 @@ export namespace Models {
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     id: CodecTypes['pg/uuid@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
+    scannerKey: CodecTypes['pg/text@1']['output'] | null;
     scannerKeyHash: CodecTypes['pg/text@1']['output'];
     standCode: CodecTypes['pg/text@1']['output'] | null;
     updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -767,6 +780,8 @@ export namespace Models {
   };
   export type public_Visitor = {
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    email: CodecTypes['pg/text@1']['output'] | null;
+    fullName: CodecTypes['pg/text@1']['output'] | null;
     gamertag: CodecTypes['pg/text@1']['output'];
     id: CodecTypes['pg/uuid@1']['output'];
     qrTokenHash: CodecTypes['pg/text@1']['output'];
@@ -1360,7 +1375,7 @@ type ContractBase = Omit<
                 readonly phone: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
+                  readonly nullable: true;
                   readonly many: false;
                 };
                 readonly ticket_number: {
@@ -1387,10 +1402,7 @@ type ContractBase = Omit<
                 };
               };
               primaryKey: { readonly columns: readonly ['ticket_number'] };
-              uniques: readonly [
-                { readonly columns: readonly ['visitor_id'] },
-                { readonly columns: readonly ['phone'] },
-              ];
+              uniques: readonly [{ readonly columns: readonly ['visitor_id'] }];
               indexes: readonly [];
               foreignKeys: readonly [
                 {
@@ -1425,6 +1437,12 @@ type ContractBase = Omit<
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly scanner_key: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
                   readonly many: false;
                 };
                 readonly scanner_key_hash: {
@@ -1591,6 +1609,18 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
+                readonly email: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly full_name: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly gamertag: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
@@ -1619,6 +1649,7 @@ type ContractBase = Omit<
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [
                 { readonly columns: readonly ['gamertag'] },
+                { readonly columns: readonly ['email'] },
                 { readonly columns: readonly ['qr_token_hash'] },
               ];
               indexes: readonly [];
@@ -2205,7 +2236,7 @@ type ContractBase = Omit<
                 };
               };
               readonly phone: {
-                readonly nullable: false;
+                readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly ticketNumber: {
@@ -2268,6 +2299,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly scannerKey: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly scannerKeyHash: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -2313,6 +2348,7 @@ type ContractBase = Omit<
                 readonly createdAt: { readonly column: 'created_at' };
                 readonly id: { readonly column: 'id' };
                 readonly name: { readonly column: 'name' };
+                readonly scannerKey: { readonly column: 'scanner_key' };
                 readonly scannerKeyHash: { readonly column: 'scanner_key_hash' };
                 readonly standCode: { readonly column: 'stand_code' };
                 readonly updatedAt: { readonly column: 'updated_at' };
@@ -2423,6 +2459,14 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamptz-string@1';
                 };
               };
+              readonly email: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly fullName: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly gamertag: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -2473,6 +2517,8 @@ type ContractBase = Omit<
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly createdAt: { readonly column: 'created_at' };
+                readonly email: { readonly column: 'email' };
+                readonly fullName: { readonly column: 'full_name' };
                 readonly gamertag: { readonly column: 'gamertag' };
                 readonly id: { readonly column: 'id' };
                 readonly qrTokenHash: { readonly column: 'qr_token_hash' };

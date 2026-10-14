@@ -877,7 +877,7 @@
                 }
               },
               "phone": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -971,6 +971,13 @@
                   "kind": "scalar"
                 }
               },
+              "scannerKey": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "scannerKeyHash": {
                 "nullable": false,
                 "type": {
@@ -1036,6 +1043,9 @@
                 },
                 "name": {
                   "column": "name"
+                },
+                "scannerKey": {
+                  "column": "scanner_key"
                 },
                 "scannerKeyHash": {
                   "column": "scanner_key_hash"
@@ -1224,6 +1234,20 @@
                   "kind": "scalar"
                 }
               },
+              "email": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "fullName": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "gamertag": {
                 "nullable": false,
                 "type": {
@@ -1290,6 +1314,12 @@
               "fields": {
                 "createdAt": {
                   "column": "created_at"
+                },
+                "email": {
+                  "column": "email"
+                },
+                "fullName": {
+                  "column": "full_name"
                 },
                 "gamertag": {
                   "column": "gamertag"
@@ -2084,8 +2114,8 @@
                   "prefix": "raffle_ticket_notified_winner"
                 },
                 {
-                  "expression": "phone ~ '^[+][1-9][0-9]{7,14}$'",
-                  "name": "raffle_ticket_phone_format_904f0b6b",
+                  "expression": "phone IS NULL OR phone ~ '^[+][1-9][0-9]{7,14}$'",
+                  "name": "raffle_ticket_phone_format_c5b9a619",
                   "prefix": "raffle_ticket_phone_format"
                 }
               ],
@@ -2103,7 +2133,7 @@
                 "phone": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
-                  "nullable": false
+                  "nullable": true
                 },
                 "ticket_number": {
                   "codecId": "pg/int4@1",
@@ -2160,11 +2190,6 @@
                   "columns": [
                     "visitor_id"
                   ]
-                },
-                {
-                  "columns": [
-                    "phone"
-                  ]
                 }
               ]
             },
@@ -2179,6 +2204,11 @@
                   "expression": "scanner_key_hash ~ '^[0-9a-f]{64}$'",
                   "name": "team_scanner_key_hash_hex_8e430906",
                   "prefix": "team_scanner_key_hash_hex"
+                },
+                {
+                  "expression": "scanner_key IS NULL OR char_length(scanner_key) <= 64",
+                  "name": "team_scanner_key_length_82ac93e3",
+                  "prefix": "team_scanner_key_length"
                 },
                 {
                   "expression": "stand_code ~ '^[AB][1-9]$'",
@@ -2201,6 +2231,11 @@
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
                   "nullable": false
+                },
+                "scanner_key": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
                 },
                 "scanner_key_hash": {
                   "codecId": "pg/text@1",
@@ -2418,6 +2453,16 @@
             "visitor": {
               "checks": [
                 {
+                  "expression": "email IS NULL OR char_length(email) <= 120",
+                  "name": "visitor_email_length_c38bbc66",
+                  "prefix": "visitor_email_length"
+                },
+                {
+                  "expression": "full_name IS NULL OR char_length(full_name) <= 120",
+                  "name": "visitor_full_name_length_9668a46d",
+                  "prefix": "visitor_full_name_length"
+                },
+                {
                   "expression": "gamertag ~ '^[a-z0-9_.-]{3,24}$'",
                   "name": "visitor_gamertag_format_aeff463d",
                   "prefix": "visitor_gamertag_format"
@@ -2433,6 +2478,16 @@
                   "codecId": "pg/timestamptz-string@1",
                   "dataType": "pg/timestamptz",
                   "nullable": false
+                },
+                "email": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
+                "full_name": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
                 },
                 "gamertag": {
                   "codecId": "pg/text@1",
@@ -2470,6 +2525,11 @@
                 },
                 {
                   "columns": [
+                    "email"
+                  ]
+                },
+                {
+                  "columns": [
                     "qr_token_hash"
                   ]
                 }
@@ -2491,7 +2551,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "a840174eae3d06ad4bd1c8fc164989bf53c92d053dc9873f411cabed6bf2c3a4"
+    "storageHash": "b87db88914300599e097c86374fde741242c42fe1f1d32e4d6bf19354a0910dd"
   },
   "execution": {
     "executionHash": "220e9f8fc092c36dd35040e4a60fae423eef7404c35e9f4c3eae85918499b377",
