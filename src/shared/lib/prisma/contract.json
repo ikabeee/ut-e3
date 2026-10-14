@@ -4,6 +4,10 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
+    "admin_user": {
+      "model": "AdminUser",
+      "namespace": "public"
+    },
     "check_in": {
       "model": "CheckIn",
       "namespace": "public"
@@ -72,6 +76,77 @@
           }
         },
         "models": {
+          "AdminUser": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "email": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "passwordHash": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "username": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "email": {
+                  "column": "email"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "passwordHash": {
+                  "column": "password_hash"
+                },
+                "updatedAt": {
+                  "column": "updated_at"
+                },
+                "username": {
+                  "column": "username"
+                }
+              },
+              "namespaceId": "public",
+              "table": "admin_user"
+            }
+          },
           "CheckIn": {
             "fields": {
               "createdAt": {
@@ -978,10 +1053,31 @@
           },
           "TeamMember": {
             "fields": {
+              "confirmationExpiresAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "confirmationTokenHash": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "email": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -1012,10 +1108,24 @@
                   "kind": "scalar"
                 }
               },
+              "isConfirmed": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "isLeader": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "passwordHash": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -1061,8 +1171,17 @@
             },
             "storage": {
               "fields": {
+                "confirmationExpiresAt": {
+                  "column": "confirmation_expires_at"
+                },
+                "confirmationTokenHash": {
+                  "column": "confirmation_token_hash"
+                },
                 "createdAt": {
                   "column": "created_at"
+                },
+                "email": {
+                  "column": "email"
                 },
                 "fullName": {
                   "column": "full_name"
@@ -1073,8 +1192,14 @@
                 "id": {
                   "column": "id"
                 },
+                "isConfirmed": {
+                  "column": "is_confirmed"
+                },
                 "isLeader": {
                   "column": "is_leader"
+                },
+                "passwordHash": {
+                  "column": "password_hash"
                 },
                 "sortOrder": {
                   "column": "sort_order"
@@ -1192,6 +1317,76 @@
       "public": {
         "entries": {
           "table": {
+            "admin_user": {
+              "checks": [
+                {
+                  "expression": "char_length(email) <= 120",
+                  "name": "admin_user_email_length_31ba217c",
+                  "prefix": "admin_user_email_length"
+                },
+                {
+                  "expression": "char_length(password_hash) <= 255",
+                  "name": "admin_user_password_hash_length_f028b397",
+                  "prefix": "admin_user_password_hash_length"
+                },
+                {
+                  "expression": "char_length(username) <= 40",
+                  "name": "admin_user_username_length_9b9aec6b",
+                  "prefix": "admin_user_username_length"
+                }
+              ],
+              "columns": {
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": false
+                },
+                "email": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "password_hash": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "updated_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": false
+                },
+                "username": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "username"
+                  ]
+                },
+                {
+                  "columns": [
+                    "email"
+                  ]
+                }
+              ]
+            },
             "check_in": {
               "checks": [
                 {
@@ -2051,6 +2246,16 @@
             "team_member": {
               "checks": [
                 {
+                  "expression": "confirmation_token_hash IS NULL OR confirmation_token_hash ~ '^[0-9a-f]{64}$'",
+                  "name": "team_member_confirmation_token_hash_hex_dd81ef3d",
+                  "prefix": "team_member_confirmation_token_hash_hex"
+                },
+                {
+                  "expression": "char_length(email) <= 120",
+                  "name": "team_member_email_length_31ba217c",
+                  "prefix": "team_member_email_length"
+                },
+                {
                   "expression": "char_length(full_name) <= 120",
                   "name": "team_member_full_name_length_700f57e9",
                   "prefix": "team_member_full_name_length"
@@ -2059,12 +2264,32 @@
                   "expression": "\"group_name\" IN ('IDYGS101', 'IDYGS102', 'IDYGS103')",
                   "name": "team_member_group_name_check_b42f413d",
                   "prefix": "team_member_group_name_check"
+                },
+                {
+                  "expression": "char_length(password_hash) <= 255",
+                  "name": "team_member_password_hash_length_f028b397",
+                  "prefix": "team_member_password_hash_length"
                 }
               ],
               "columns": {
+                "confirmation_expires_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": true
+                },
+                "confirmation_token_hash": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
                 "created_at": {
                   "codecId": "pg/timestamptz-string@1",
                   "dataType": "pg/timestamptz",
+                  "nullable": false
+                },
+                "email": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
                   "nullable": false
                 },
                 "full_name": {
@@ -2088,6 +2313,15 @@
                   "dataType": "pg/uuid",
                   "nullable": false
                 },
+                "is_confirmed": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
                 "is_leader": {
                   "codecId": "pg/bool@1",
                   "dataType": "pg/bool",
@@ -2095,6 +2329,11 @@
                     "kind": "literal",
                     "value": false
                   },
+                  "nullable": false
+                },
+                "password_hash": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
                   "nullable": false
                 },
                 "sort_order": {
@@ -2163,7 +2402,18 @@
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "email"
+                  ]
+                },
+                {
+                  "columns": [
+                    "confirmation_token_hash"
+                  ]
+                }
+              ]
             },
             "visitor": {
               "checks": [
@@ -2241,12 +2491,49 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "7918648351f58b232b28d91336c18f6fbceb65497594d935ebc4f9f6169370ca"
+    "storageHash": "a840174eae3d06ad4bd1c8fc164989bf53c92d053dc9873f411cabed6bf2c3a4"
   },
   "execution": {
-    "executionHash": "140e10bd7fba9d172f96f3aacfd15fa9573272948ef7d96d86ccbaddb713e34c",
+    "executionHash": "220e9f8fc092c36dd35040e4a60fae423eef7404c35e9f4c3eae85918499b377",
     "mutations": {
       "defaults": [
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "admin_user",
+            "field": "created_at",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "admin_user",
+            "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "admin_user",
+            "field": "updated_at",
+            "namespace": "public"
+          }
+        },
         {
           "onCreate": {
             "id": "timestampNow",

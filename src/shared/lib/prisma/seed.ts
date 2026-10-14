@@ -9,7 +9,7 @@
  * propio cliente en lugar de importar `db.ts` (que es `server-only`) y usa rutas `./`.
  */
 import "dotenv/config";
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes, scryptSync } from "node:crypto";
 import postgres from "@prisma/orm-postgres/runtime";
 import type { Contract } from "./contract.d";
 import contractJson from "./contract.json" with { type: "json" };
@@ -36,6 +36,7 @@ interface SeedData {
   }[];
 }
 
+// SAFETY: seed-data.json es un archivo estático del repositorio que cumple la estructura de SeedData.
 const seedData = seedJson as SeedData;
 
 const skipOn = <Field extends string>(...conflictOn: Field[]) => ({ onConflict: "skip" as const, conflictOn });
@@ -45,6 +46,30 @@ const db = postgres<Contract>({ contractJson, url: process.env["DATABASE_URL"]! 
 /** Hash con el que se guardan las llaves de los escáneres (nunca la llave). */
 function hashSecret(secret: string) {
   return createHash("sha256").update(secret).digest("hex");
+}
+
+function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const hash = scryptSync(password, salt, 64).toString("hex");
+
+  return `${salt}:${hash}`;
+}
+
+async function seedAdmin() {
+  const username = process.env["ADMIN_USER"] || "admin";
+  const email = "admin@ute3.edu.mx";
+  const password = process.env["ADMIN_PASSWORD"] || "admin1234";
+
+  await db.orm.public.AdminUser.createAll(
+    [
+      {
+        username,
+        email,
+        passwordHash: hashPassword(password),
+      },
+    ],
+    skipOn("username"),
+  );
 }
 
 async function seedCatalogLookups() {
@@ -80,13 +105,23 @@ async function seedTeams() {
   );
 
   const teamIds = new Map(teams.map((team) => [team.name, team.id]));
+  const defaultMemberPasswordHash = hashPassword("Equipo123!");
 
   const members = seedData.teams.flatMap((team) => {
     const teamId = teamIds.get(team.name)!;
 
     if (teamsWithMembers.has(teamId)) return [];
 
-    return team.members.map((member, index) => ({ ...member, teamId, sortOrder: index }));
+    const slug = team.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    return team.members.map((member, index) => ({
+      ...member,
+      teamId,
+      sortOrder: index,
+      email: `${slug}.m${index + 1}@ute3.edu.mx`,
+      passwordHash: defaultMemberPasswordHash,
+      isConfirmed: true,
+    }));
   });
 
   if (members.length > 0) {
@@ -143,6 +178,7 @@ async function seedGames(
 }
 
 async function main() {
+  await seedAdmin();
   const { genreIds, platformIds } = await seedCatalogLookups();
   const { teamIds, newScannerKeys } = await seedTeams();
   const gameCount = await seedGames(teamIds, genreIds, platformIds);

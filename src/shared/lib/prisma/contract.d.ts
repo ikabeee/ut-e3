@@ -18,9 +18,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'7918648351f58b232b28d91336c18f6fbceb65497594d935ebc4f9f6169370ca'>;
+  StorageHashBase<'a840174eae3d06ad4bd1c8fc164989bf53c92d053dc9873f411cabed6bf2c3a4'>;
 export type ExecutionHash =
-  ExecutionHashBase<'140e10bd7fba9d172f96f3aacfd15fa9573272948ef7d96d86ccbaddb713e34c'>;
+  ExecutionHashBase<'220e9f8fc092c36dd35040e4a60fae423eef7404c35e9f4c3eae85918499b377'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -234,6 +234,14 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
 
 export type FieldOutputTypes = {
   readonly public: {
+    readonly AdminUser: {
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly email: CodecTypes['pg/text@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly passwordHash: CodecTypes['pg/text@1']['output'];
+      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly username: CodecTypes['pg/text@1']['output'];
+    };
     readonly CheckIn: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly gameId: CodecTypes['pg/uuid@1']['output'];
@@ -303,11 +311,16 @@ export type FieldOutputTypes = {
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
     readonly TeamMember: {
+      readonly confirmationExpiresAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly confirmationTokenHash: CodecTypes['pg/text@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly email: CodecTypes['pg/text@1']['output'];
       readonly fullName: CodecTypes['pg/text@1']['output'];
       readonly groupName: 'IDYGS101' | 'IDYGS102' | 'IDYGS103';
       readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly isConfirmed: CodecTypes['pg/bool@1']['output'];
       readonly isLeader: CodecTypes['pg/bool@1']['output'];
+      readonly passwordHash: CodecTypes['pg/text@1']['output'];
       readonly sortOrder: CodecTypes['pg/int2@1']['output'];
       readonly teamId: CodecTypes['pg/uuid@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -323,6 +336,14 @@ export type FieldOutputTypes = {
 };
 export type FieldInputTypes = {
   readonly public: {
+    readonly AdminUser: {
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly email: CodecTypes['pg/text@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly passwordHash: CodecTypes['pg/text@1']['input'];
+      readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly username: CodecTypes['pg/text@1']['input'];
+    };
     readonly CheckIn: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly gameId: CodecTypes['pg/uuid@1']['input'];
@@ -392,11 +413,16 @@ export type FieldInputTypes = {
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
     readonly TeamMember: {
+      readonly confirmationExpiresAt: CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly confirmationTokenHash: CodecTypes['pg/text@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly email: CodecTypes['pg/text@1']['input'];
       readonly fullName: CodecTypes['pg/text@1']['input'];
       readonly groupName: 'IDYGS101' | 'IDYGS102' | 'IDYGS103';
       readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly isConfirmed: CodecTypes['pg/bool@1']['input'];
       readonly isLeader: CodecTypes['pg/bool@1']['input'];
+      readonly passwordHash: CodecTypes['pg/text@1']['input'];
       readonly sortOrder: CodecTypes['pg/int2@1']['input'];
       readonly teamId: CodecTypes['pg/uuid@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -412,6 +438,14 @@ export type FieldInputTypes = {
 };
 export type StorageColumnTypes = {
   readonly public: {
+    readonly admin_user: {
+      readonly created_at: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly email: CodecTypes['pg/text@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly password_hash: CodecTypes['pg/text@1']['output'];
+      readonly updated_at: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly username: CodecTypes['pg/text@1']['output'];
+    };
     readonly check_in: {
       readonly created_at: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly game_id: CodecTypes['pg/uuid@1']['output'];
@@ -481,11 +515,16 @@ export type StorageColumnTypes = {
       readonly updated_at: CodecTypes['pg/timestamptz-string@1']['output'];
     };
     readonly team_member: {
+      readonly confirmation_expires_at: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+      readonly confirmation_token_hash: CodecTypes['pg/text@1']['output'] | null;
       readonly created_at: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly email: CodecTypes['pg/text@1']['output'];
       readonly full_name: CodecTypes['pg/text@1']['output'];
       readonly group_name: 'IDYGS101' | 'IDYGS102' | 'IDYGS103';
       readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly is_confirmed: CodecTypes['pg/bool@1']['output'];
       readonly is_leader: CodecTypes['pg/bool@1']['output'];
+      readonly password_hash: CodecTypes['pg/text@1']['output'];
       readonly sort_order: CodecTypes['pg/int2@1']['output'];
       readonly team_id: CodecTypes['pg/uuid@1']['output'];
       readonly updated_at: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -501,6 +540,14 @@ export type StorageColumnTypes = {
 };
 export type StorageColumnInputTypes = {
   readonly public: {
+    readonly admin_user: {
+      readonly created_at: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly email: CodecTypes['pg/text@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly password_hash: CodecTypes['pg/text@1']['input'];
+      readonly updated_at: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly username: CodecTypes['pg/text@1']['input'];
+    };
     readonly check_in: {
       readonly created_at: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly game_id: CodecTypes['pg/uuid@1']['input'];
@@ -570,11 +617,16 @@ export type StorageColumnInputTypes = {
       readonly updated_at: CodecTypes['pg/timestamptz-string@1']['input'];
     };
     readonly team_member: {
+      readonly confirmation_expires_at: CodecTypes['pg/timestamptz-string@1']['input'] | null;
+      readonly confirmation_token_hash: CodecTypes['pg/text@1']['input'] | null;
       readonly created_at: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly email: CodecTypes['pg/text@1']['input'];
       readonly full_name: CodecTypes['pg/text@1']['input'];
       readonly group_name: 'IDYGS101' | 'IDYGS102' | 'IDYGS103';
       readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly is_confirmed: CodecTypes['pg/bool@1']['input'];
       readonly is_leader: CodecTypes['pg/bool@1']['input'];
+      readonly password_hash: CodecTypes['pg/text@1']['input'];
       readonly sort_order: CodecTypes['pg/int2@1']['input'];
       readonly team_id: CodecTypes['pg/uuid@1']['input'];
       readonly updated_at: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -590,6 +642,15 @@ export type StorageColumnInputTypes = {
 };
 
 export namespace Models {
+  export type public_AdminUser = {
+    createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    email: CodecTypes['pg/text@1']['output'];
+    id: CodecTypes['pg/uuid@1']['output'];
+    passwordHash: CodecTypes['pg/text@1']['output'];
+    updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    username: CodecTypes['pg/text@1']['output'];
+    readonly [RelationKeys]?: never;
+  };
   export type public_CheckIn = {
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     gameId: CodecTypes['pg/uuid@1']['output'];
@@ -688,11 +749,16 @@ export namespace Models {
     readonly [RelationKeys]?: 'game' | 'members';
   };
   export type public_TeamMember = {
+    confirmationExpiresAt: CodecTypes['pg/timestamptz-string@1']['output'] | null;
+    confirmationTokenHash: CodecTypes['pg/text@1']['output'] | null;
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    email: CodecTypes['pg/text@1']['output'];
     fullName: CodecTypes['pg/text@1']['output'];
     groupName: 'IDYGS101' | 'IDYGS102' | 'IDYGS103';
     id: CodecTypes['pg/uuid@1']['output'];
+    isConfirmed: CodecTypes['pg/bool@1']['output'];
     isLeader: CodecTypes['pg/bool@1']['output'];
+    passwordHash: CodecTypes['pg/text@1']['output'];
     sortOrder: CodecTypes['pg/int2@1']['output'];
     teamId: CodecTypes['pg/uuid@1']['output'];
     updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -713,6 +779,7 @@ export namespace Models {
 
 export declare const models: {
   public: {
+    AdminUser: Models.public_AdminUser;
     CheckIn: Models.public_CheckIn;
     Game: Models.public_Game;
     GameGenre: Models.public_GameGenre;
@@ -745,6 +812,53 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
+            readonly admin_user: {
+              columns: {
+                readonly created_at: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly email: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly password_hash: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly updated_at: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly username: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [
+                { readonly columns: readonly ['username'] },
+                { readonly columns: readonly ['email'] },
+              ];
+              indexes: readonly [];
+              foreignKeys: readonly [];
+            };
             readonly check_in: {
               columns: {
                 readonly created_at: {
@@ -1343,9 +1457,27 @@ type ContractBase = Omit<
             };
             readonly team_member: {
               columns: {
+                readonly confirmation_expires_at: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly confirmation_token_hash: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly created_at: {
                   readonly dataType: 'pg/timestamptz';
                   readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly email: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                   readonly many: false;
                 };
@@ -1367,6 +1499,16 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
+                readonly is_confirmed: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                  readonly many: false;
+                };
                 readonly is_leader: {
                   readonly dataType: 'pg/bool';
                   readonly codecId: 'pg/bool@1';
@@ -1375,6 +1517,12 @@ type ContractBase = Omit<
                     readonly kind: 'literal';
                     readonly value: DefaultLiteralValue<'pg/bool@1', false>;
                   };
+                  readonly many: false;
+                };
+                readonly password_hash: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
                   readonly many: false;
                 };
                 readonly sort_order: {
@@ -1401,7 +1549,10 @@ type ContractBase = Omit<
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
+              uniques: readonly [
+                { readonly columns: readonly ['email'] },
+                { readonly columns: readonly ['confirmation_token_hash'] },
+              ];
               indexes: readonly [
                 {
                   readonly name: 'team_member_one_leader_da663291';
@@ -1490,6 +1641,10 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
+    readonly admin_user: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'AdminUser';
+    };
     readonly check_in: { readonly namespace: 'public' & NamespaceId; readonly model: 'CheckIn' };
     readonly game: { readonly namespace: 'public' & NamespaceId; readonly model: 'Game' };
     readonly game_genre: {
@@ -1521,6 +1676,53 @@ type ContractBase = Omit<
     readonly namespaces: {
       readonly public: {
         readonly models: {
+          readonly AdminUser: {
+            readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+              readonly email: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly passwordHash: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+              readonly username: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'admin_user';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'created_at' };
+                readonly email: { readonly column: 'email' };
+                readonly id: { readonly column: 'id' };
+                readonly passwordHash: { readonly column: 'password_hash' };
+                readonly updatedAt: { readonly column: 'updated_at' };
+                readonly username: { readonly column: 'username' };
+              };
+            };
+          };
           readonly CheckIn: {
             readonly fields: {
               readonly createdAt: {
@@ -2119,12 +2321,27 @@ type ContractBase = Omit<
           };
           readonly TeamMember: {
             readonly fields: {
+              readonly confirmationExpiresAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+              readonly confirmationTokenHash: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
                   readonly codecId: 'pg/timestamptz-string@1';
                 };
+              };
+              readonly email: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly fullName: {
                 readonly nullable: false;
@@ -2138,9 +2355,17 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
               };
+              readonly isConfirmed: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
               readonly isLeader: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly passwordHash: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly sortOrder: {
                 readonly nullable: false;
@@ -2173,11 +2398,16 @@ type ContractBase = Omit<
               readonly table: 'team_member';
               readonly namespaceId: 'public';
               readonly fields: {
+                readonly confirmationExpiresAt: { readonly column: 'confirmation_expires_at' };
+                readonly confirmationTokenHash: { readonly column: 'confirmation_token_hash' };
                 readonly createdAt: { readonly column: 'created_at' };
+                readonly email: { readonly column: 'email' };
                 readonly fullName: { readonly column: 'full_name' };
                 readonly groupName: { readonly column: 'group_name' };
                 readonly id: { readonly column: 'id' };
+                readonly isConfirmed: { readonly column: 'is_confirmed' };
                 readonly isLeader: { readonly column: 'is_leader' };
+                readonly passwordHash: { readonly column: 'password_hash' };
                 readonly sortOrder: { readonly column: 'sort_order' };
                 readonly teamId: { readonly column: 'team_id' };
                 readonly updatedAt: { readonly column: 'updated_at' };
@@ -2303,6 +2533,31 @@ type ContractBase = Omit<
     readonly executionHash: ExecutionHash;
     readonly mutations: {
       readonly defaults: readonly [
+        {
+          readonly onCreate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'admin_user';
+            readonly field: 'created_at';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'admin_user';
+            readonly field: 'id';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
+          readonly onUpdate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'admin_user';
+            readonly field: 'updated_at';
+            readonly namespace: 'public';
+          };
+        },
         {
           readonly onCreate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
           readonly ref: {

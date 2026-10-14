@@ -8,7 +8,6 @@
 // - Los textos son `String` (text) con un CHECK de longitud: equivale a varchar(n) en
 //   PostgreSQL y el ORM los recibe como string normal.
 // - Las relaciones inversas (members, images...) se declaran para poder usar `.include()`.
-
 enum StudentGroup {
   @@type("pg/text@1")
   IDYGS101 = "IDYGS101"
@@ -17,9 +16,25 @@ enum StudentGroup {
 }
 
 // ---------------------------------------------------------------------------
+// Administradores de la plataforma
+// ---------------------------------------------------------------------------
+model AdminUser {
+  id           Uuid                       @id @default(uuid())
+  username     String                     @unique
+  email        String                     @unique
+  passwordHash String                     @map("password_hash")
+  createdAt    temporal.createdAtString() @map("created_at")
+  updatedAt    temporal.updatedAtString() @map("updated_at")
+
+  @@check(expression: "char_length(username) <= 40", name: "admin_user_username_length")
+  @@check(expression: "char_length(email) <= 120", name: "admin_user_email_length")
+  @@check(expression: "char_length(password_hash) <= 255", name: "admin_user_password_hash_length")
+  @@map("admin_user")
+}
+
+// ---------------------------------------------------------------------------
 // Catálogo: equipos y juegos
 // ---------------------------------------------------------------------------
-
 model Team {
   id             Uuid                       @id @default(uuid())
   name           String                     @unique
@@ -39,19 +54,27 @@ model Team {
 }
 
 model TeamMember {
-  id        Uuid                       @id @default(uuid())
-  teamId    Uuid                       @map("team_id")
-  team      Team                       @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  fullName  String                     @map("full_name")
-  groupName StudentGroup               @map("group_name")
-  isLeader  Boolean                    @default(false) @map("is_leader")
-  sortOrder SmallInt                   @default(0) @map("sort_order")
-  createdAt temporal.createdAtString() @map("created_at")
-  updatedAt temporal.updatedAtString() @map("updated_at")
+  id                    Uuid                       @id @default(uuid())
+  teamId                Uuid                       @map("team_id")
+  team                  Team                       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  fullName              String                     @map("full_name")
+  email                 String                     @unique @map("email")
+  passwordHash          String                     @map("password_hash")
+  isConfirmed           Boolean                    @default(false) @map("is_confirmed")
+  confirmationTokenHash String?                    @unique @map("confirmation_token_hash")
+  confirmationExpiresAt TimestamptzString?         @map("confirmation_expires_at")
+  groupName             StudentGroup               @map("group_name")
+  isLeader              Boolean                    @default(false) @map("is_leader")
+  sortOrder             SmallInt                   @default(0) @map("sort_order")
+  createdAt             temporal.createdAtString() @map("created_at")
+  updatedAt             temporal.updatedAtString() @map("updated_at")
 
   @@index([teamId])
   @@index([teamId], where: "is_leader", unique: true, name: "team_member_one_leader")
   @@check(expression: "char_length(full_name) <= 120", name: "team_member_full_name_length")
+  @@check(expression: "char_length(email) <= 120", name: "team_member_email_length")
+  @@check(expression: "char_length(password_hash) <= 255", name: "team_member_password_hash_length")
+  @@check(expression: "confirmation_token_hash IS NULL OR confirmation_token_hash ~ '^[0-9a-f]{64}$'", name: "team_member_confirmation_token_hash_hex")
   @@map("team_member")
 }
 
@@ -164,7 +187,6 @@ model GameImage {
 // ---------------------------------------------------------------------------
 // Participación de visitantes: check-ins y sorteo
 // ---------------------------------------------------------------------------
-
 model Visitor {
   id           Uuid                       @id @default(uuid())
   /// En minúsculas: letras sin acento, números, "_", "." y "-".
