@@ -28,9 +28,9 @@ valida las que existen. No se dejan carpetas vacías ni `.gitkeep`.
 | `games` | Catálogo, detalle, carrusel de destacados, exhibidor 3D, API `/api/games`. | `event` (fecha y calendario en el detalle) y `floor-plan` (sólo el tipo `StandOccupant`, en `lib/game-stand.ts`) |
 | `floor-plan` | Croquis: zonas, stands, layouts, zoom, filtros y directorio. | Nada. Su page compone los juegos como `StandOccupant` |
 | `event` | Contenido del evento: reel, actividades, programa, ubicación y cierre. | Nada |
-| `home` | Compone la portada y conecta el programa con el croquis. | `event`, `games`, `floor-plan` |
-| `offline` | Service worker (`/sw.js`), aviso de conexión, aviso de versión nueva y página `/offline` (ver `docs/pwa.md`). | `games`, `floor-plan` y `home` (sus rutas, para precargarlas y enlazarlas desde `/offline`) |
-| `site` | Marco del sitio: cabecera, navegación, pie, 404 y página de error. | `games`, `floor-plan`, `home` y `visitors` (sólo sus rutas, para la navegación) |
+| `landing` | Portada (`/`) en tema claro: hero, grupos, introducción, juegos, dinámicas y programa. | `event`, `games`, `teams` |
+| `offline` | Service worker (`/sw.js`), aviso de conexión, aviso de versión nueva y página `/offline` (ver `docs/pwa.md`). | `games`, `floor-plan` y `landing` (sus rutas, para precargarlas y enlazarlas desde `/offline`) |
+| `site` | Marco del sitio: cabecera, navegación, pie, 404 y página de error. | `games`, `floor-plan`, `landing` y `visitors` (sólo sus rutas, para la navegación) |
 | `teams` | Equipos e integrantes: CRUD, llaves de escáner y Server Actions del panel. | `games` (invalida la caché de los juegos, que muestran el equipo y su stand) |
 | `visitors` | Pasaporte (`/passport`): registro con gamertag, QR, check-ins del escáner (`/api/check-ins`), boleto, sorteo y afluencia de los stands (`/api/stand-traffic`). | `event` (inicio del evento para ajustar la hora de los escaneos) y `floor-plan` (la ruta de cada stand) |
 | `example` | Scaffold para copiar; no se monta en ninguna ruta. | Nada |
@@ -42,10 +42,12 @@ Fuera de `pages/`, una feature sólo importa las que declara `FEATURE_DEPENDENCI
 cierra uno, ESLint se detiene con el ciclo en el mensaje.
 
 ```
-site ─────┬─> home ─┬─> event
-offline ──┤         ├─> games ─┬─> event
-          │         │          └─> floor-plan
-          │         └─> floor-plan
+site ─────┬─> landing ─┬─> event
+offline ──┤            ├─> games ─┬─> event
+          │            │          └─> floor-plan
+          │            └─> teams ─┬─> auth
+          │                       ├─> games
+          │                       └─> visitors
           ├─> games
           ├─> floor-plan
           └─> visitors (sólo site) ─┬─> event
@@ -57,7 +59,7 @@ teams ─────> games
 rutas que cada feature declara en su `lib/*-links.ts`, y nadie depende de ellos. Las `pages/` son la excepción: pueden componer
 cualquier feature, porque nada las importa salvo `src/app/` y por eso nunca forman parte de un
 ciclo. Cuando dos features necesitan hablar y la arista cerraría un ciclo, se conectan en una page
-(o en `home`, que compone la portada).
+(o en `landing`, que compone la portada).
 
 ### Qué va en `shared/` y qué en una feature
 
@@ -79,7 +81,7 @@ Dos excepciones razonadas:
 
 La afluencia en vivo de cada stand (`StandTrafficBadge`, feature `visitors`) llega al croquis igual
 que la portada: como `status` del `StandOccupant`, un `ReactNode` que componen las pages
-(`floor-plan-page.tsx` y `home-page.tsx`). Así `floor-plan` no depende de `visitors` (que ya usa
+(`floor-plan-page.tsx`). Así `floor-plan` no depende de `visitors` (que ya usa
 `floor-plan` para enlazar cada stand) y no se cierra un ciclo.
 
 ### Croquis y juegos: capa anticorrupción
@@ -91,28 +93,12 @@ ocupa stands se traduce a ese tipo en su propia feature:
 ```
 games/lib/game-stand.ts       toStandOccupants(games, cover) -> StandOccupant[] (sólo juegos con stand)
 floor-plan/pages/...          listGames() -> toStandOccupants(games, (game) => <GameMedia />) -> FloorPlanExplorer
-home/pages/home-page.tsx      lo mismo para el croquis de la portada
 ```
 
 La portada llega como `ReactNode` (slot): `PlanItemCard` la pinta sin importar `GameMedia`. Así
 `floor-plan` se prueba con sus propios ocupantes (`__tests__/plan-fixtures.ts`) y conectar Prisma a
 `games` no toca el croquis. Si mañana ocupan stands equipos o patrocinadores, basta otro
 `toStandOccupants` en su feature.
-
-### Programa y croquis: el enlace se resuelve en la portada
-
-Cada renglón del programa (`event`) apunta a una zona del croquis (`floor-plan`) con `zoneId`.
-`event` no puede importar el tipo `ZoneId` (cerraría el ciclo `event -> floor-plan` /
-`games -> event`), así que la relación se resuelve en quien compone las dos features:
-
-```
-home/lib/schedule-zones.ts   resolveScheduleZones(EVENT_SCHEDULE, PLAN_ZONES) -> LocatedScheduleEntry[]
-home/pages/home-page.tsx     pasa el programa ya resuelto a ProgramAndFloorPlan -> EventSchedule
-```
-
-`EventSchedule` recibe el nombre de cada zona ya validado (`zoneTitle`). Si un `zoneId` no
-existe, `resolveScheduleZones` lanza un error y el build de la portada se detiene; además,
-`__tests__/lib/schedule-zones.test.ts` cruza `EVENT_SCHEDULE` con `PLAN_ZONES` en `npm test`.
 
 ## Reglas que valida ESLint
 

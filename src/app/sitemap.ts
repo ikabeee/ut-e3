@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { FLOOR_PLAN_PATH } from "@features/floor-plan/lib/floor-plan-links";
 import { GAMES_PATH, getGamePath } from "@features/games/lib/game-links";
 import { listGames } from "@features/games/lib/server/games-queries";
-import { HOME_PATH } from "@features/home/lib/home-links";
+import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { siteConfig } from "@shared/lib/site-config";
 
 const absoluteUrl = (path: string) => new URL(path, siteConfig.url).toString();

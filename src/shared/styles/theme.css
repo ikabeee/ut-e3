@@ -74,6 +74,47 @@
     --gutter: clamp(16px, 2.4vw, 32px);
     --nav-height: 56px;
   }
+
+  /*
+   * Tema claro de la landing. Se aplica a un contenedor (`<div class="light" data-theme="light">`),
+   * no a <html>: el resto del sitio sigue oscuro. Valores del Figma "NUEVA PROPUESTA":
+   * fondo #FFFFFF, texto #030303, botón amarillo #FCF94E.
+   */
+  .light,
+  [data-theme="light"] {
+    color-scheme: light;
+
+    --utg-light-ink: #030303;
+    --utg-light-surface: #f4f4f4;
+    --utg-light-rule: #d6d6d6;
+    --utg-light-muted: #5c5c5c;
+    --utg-yellow: #fcf94e;
+
+    --background: var(--utg-white);
+    --foreground: var(--utg-light-ink);
+    --surface: var(--utg-light-surface);
+    --surface-foreground: var(--utg-light-ink);
+    --surface-secondary: var(--utg-light-surface);
+    --surface-secondary-foreground: var(--utg-light-ink);
+    --surface-tertiary: var(--utg-light-rule);
+    --surface-tertiary-foreground: var(--utg-light-ink);
+    --overlay: var(--utg-white);
+    --overlay-foreground: var(--utg-light-ink);
+    --muted: var(--utg-light-muted);
+    --default: var(--utg-light-surface);
+    --default-foreground: var(--utg-light-ink);
+    --accent: var(--utg-yellow);
+    --accent-foreground: var(--utg-light-ink);
+    --border: var(--utg-light-rule);
+    --separator: var(--utg-light-rule);
+    --focus: var(--utg-light-ink);
+    --link: var(--utg-light-ink);
+
+    --field-background: var(--utg-white);
+    --field-foreground: var(--utg-light-ink);
+    --field-placeholder: var(--utg-light-muted);
+    --field-border: var(--utg-light-rule);
+  }
 }
 
 @theme inline {

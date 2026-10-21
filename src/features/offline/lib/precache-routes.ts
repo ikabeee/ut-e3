@@ -1,6 +1,6 @@
 import { FLOOR_PLAN_PATH } from "@features/floor-plan/lib/floor-plan-links";
 import { GAMES_PATH, getGamePath } from "@features/games/lib/game-links";
-import { HOME_PATH } from "@features/home/lib/home-links";
+import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { OFFLINE_PATH } from "@features/offline/lib/service-worker-config";
 
 /**

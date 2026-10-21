@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HOME_PATH } from "@features/home/lib/home-links";
+import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { SiteNavLinksView } from "@features/site/components/site-nav-links";
 import { SITE_COPY } from "@features/site/lib/site-copy";
 import { UtgLogo } from "@shared/components/utg-logo";

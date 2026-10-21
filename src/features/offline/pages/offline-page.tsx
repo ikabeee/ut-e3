@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { FLOOR_PLAN_PATH } from "@features/floor-plan/lib/floor-plan-links";
 import { GAMES_PATH } from "@features/games/lib/game-links";
-import { HOME_PATH } from "@features/home/lib/home-links";
+import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { OFFLINE_COPY } from "@features/offline/lib/offline-copy";
 import { ActionLink } from "@shared/components/action-link";
 

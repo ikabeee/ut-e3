@@ -81,8 +81,8 @@ describe("getEventContent", () => {
   it("derives the date labels and the calendar link from the start and end of the event", () => {
     const { info } = getEventContent();
 
-    expect(info).toMatchObject({ dateLabel: "27.11.2026", shortDateLabel: "27.11.26", hoursLabel: "10:00—20:00" });
-    expect(new URL(info.calendarUrl).searchParams.get("dates")).toBe("20261127T150000Z/20261128T010000Z");
+    expect(info).toMatchObject({ dateLabel: "20.11.2026", shortDateLabel: "20.11.26", hoursLabel: "10:00—20:00" });
+    expect(new URL(info.calendarUrl).searchParams.get("dates")).toBe("20261120T150000Z/20261121T010000Z");
   });
 });
 
@@ -90,7 +90,7 @@ describe("buildEventStructuredData", () => {
   it("describes a free, in-person schema.org Event at the UT Cancún", () => {
     expect(buildEventStructuredData("https://utg.example", 18)).toMatchObject({
       "@type": "Event",
-      startDate: "2026-11-27T10:00:00-05:00",
+      startDate: "2026-11-20T10:00:00-05:00",
       isAccessibleForFree: true,
       eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
       image: "https://utg.example/media/reel.jpg",

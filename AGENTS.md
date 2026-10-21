@@ -78,7 +78,7 @@ src/
 │   ├── example/              # Scaffold mínimo: cópialo para crear tus features
 │   ├── floor-plan/           # Croquis interactivo (/floor-plan): zonas, stands, zoom y directorio
 │   ├── games/                # Catálogo (/games), detalle (/games/[slug]), API y carruseles
-│   ├── home/                 # Portada (/): compone event, games y floor-plan
+│   ├── landing/              # Portada (/) en tema claro: hero, grupos, juegos, dinámicas y programa
 │   ├── offline/              # Sin conexión: service worker (/sw.js), avisos y página /offline
 │   ├── site/                 # Marco del sitio: navegación, pie, 404 y página de error
 │   ├── teams/                # Equipos e integrantes: CRUD y Server Actions del panel
