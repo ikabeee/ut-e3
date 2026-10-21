@@ -105,7 +105,7 @@ function parseStrings(value: JsonValue | undefined, path: string): string[] {
   }
 
   return value.map((item, index) => (isString(item) ? item : fail(`${path}[${index}]`)));
-}
+}x
 
 function parseAbout(value: JsonValue | undefined, path: string): Game["about"] {
   return value === null ? null : parseStrings(value, path);
