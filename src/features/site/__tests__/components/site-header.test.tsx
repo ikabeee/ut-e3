@@ -27,4 +27,28 @@ describe("SiteHeader and SiteFooter visibility", () => {
     const { container: footerContainer } = render(<SiteFooterView pathname="/team" />);
     expect(footerContainer.firstChild).toBeNull();
   });
+
+  it("renders the light variant with the landing links on the home page", () => {
+    render(<SiteHeaderView pathname="/" />);
+
+    const nav = screen.getByRole("navigation", { name: "Principal" });
+    expect(nav).toHaveAttribute("data-theme", "light");
+    expect(nav).toHaveClass("light");
+    expect(screen.getAllByRole("link").filter((link) => nav.contains(link) && link.textContent)).toHaveLength(5);
+    expect(screen.getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Juegos" })).toHaveAttribute("href", "/games");
+    expect(screen.getByRole("link", { name: "Dinámicas" })).toHaveAttribute("href", "/#dynamics");
+    expect(screen.getByRole("link", { name: "Programa" })).toHaveAttribute("href", "/#program");
+    expect(screen.getByRole("link", { name: "Croquis" })).toHaveAttribute("href", "/floor-plan");
+  });
+
+  it("keeps the dark header and the previous links on other pages", () => {
+    render(<SiteHeaderView pathname="/games" />);
+
+    const nav = screen.getByRole("navigation", { name: "Principal" });
+    expect(nav).not.toHaveAttribute("data-theme");
+    expect(nav).not.toHaveClass("light");
+    expect(screen.getByRole("link", { name: "Mi QR" })).toHaveAttribute("href", "/passport");
+    expect(screen.queryByRole("link", { name: "Dinámicas" })).not.toBeInTheDocument();
+  });
 });

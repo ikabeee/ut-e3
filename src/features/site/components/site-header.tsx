@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { cn } from "@heroui/react";
 import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { SiteNavLinksView } from "@features/site/components/site-nav-links";
 import { SITE_COPY } from "@features/site/lib/site-copy";
@@ -21,10 +22,16 @@ export function SiteHeaderView({ pathname }: Readonly<SiteHeaderViewProps>) {
     return null;
   }
 
+  const isLanding = pathname === HOME_PATH;
+
   return (
     <nav
       aria-label={SITE_COPY.header.navigationLabel}
-      className="sticky top-0 z-40 box-content flex h-nav items-stretch border-b border-separator bg-background pt-[env(safe-area-inset-top,0px)] pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)]"
+      data-theme={isLanding ? "light" : undefined}
+      className={cn(
+        isLanding && "light text-foreground",
+        "sticky top-0 z-40 box-content flex h-nav items-stretch border-b border-separator bg-background pt-[env(safe-area-inset-top,0px)] pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)]",
+      )}
     >
       <Link
         href={HOME_PATH}

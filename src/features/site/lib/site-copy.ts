@@ -8,6 +8,8 @@ export const SITE_COPY = {
     home: "Inicio",
     games: "Juegos",
     floorPlan: "Croquis",
+    dynamics: "Dinámicas",
+    program: "Programa",
     /** La página se llama "Pasaporte"; en la navegación basta "Mi QR" para que quepa en 360 px. */
     passport: "Mi QR",
   },
