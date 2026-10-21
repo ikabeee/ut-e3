@@ -77,20 +77,28 @@
 
   /*
    * Tema claro de la landing. Se aplica a un contenedor (`<div class="light" data-theme="light">`),
-   * no a <html>: el resto del sitio sigue oscuro. Valores del Figma "NUEVA PROPUESTA":
-   * fondo #FFFFFF, texto #030303, botón amarillo #FCF94E.
+   * no a <html>: el resto del sitio sigue oscuro. Valores exactos del Figma "NUEVA PROPUESTA".
    */
   .light,
   [data-theme="light"] {
     color-scheme: light;
 
+    --utg-light-bg: #fefdfd;
     --utg-light-ink: #030303;
-    --utg-light-surface: #f4f4f4;
-    --utg-light-rule: #d6d6d6;
-    --utg-light-muted: #5c5c5c;
+    --utg-light-surface: #f6f6f6;
+    --utg-light-rule: #d9d9d9;
+    --utg-light-muted: #737373;
     --utg-yellow: #fcf94e;
 
-    --background: var(--utg-white);
+    /* Colores de la landing sin equivalente semántico en HeroUI */
+    --utg-light-band: #0d0d0d;
+    --utg-light-charcoal: #171717;
+    --utg-light-coral: #ef6762;
+    --utg-light-crimson: #be2525;
+    --utg-light-pill: #f6fd79;
+    --utg-light-orange: #fba80b;
+
+    --background: var(--utg-light-bg);
     --foreground: var(--utg-light-ink);
     --surface: var(--utg-light-surface);
     --surface-foreground: var(--utg-light-ink);
@@ -98,7 +106,7 @@
     --surface-secondary-foreground: var(--utg-light-ink);
     --surface-tertiary: var(--utg-light-rule);
     --surface-tertiary-foreground: var(--utg-light-ink);
-    --overlay: var(--utg-white);
+    --overlay: var(--utg-light-bg);
     --overlay-foreground: var(--utg-light-ink);
     --muted: var(--utg-light-muted);
     --default: var(--utg-light-surface);
@@ -110,10 +118,25 @@
     --focus: var(--utg-light-ink);
     --link: var(--utg-light-ink);
 
-    --field-background: var(--utg-white);
+    --field-background: var(--utg-light-bg);
     --field-foreground: var(--utg-light-ink);
     --field-placeholder: var(--utg-light-muted);
     --field-border: var(--utg-light-rule);
+
+    /*
+     * Una sola tipografía. Las utilidades de Tailwind (`font-sans`, `font-wide`...) leen las variables de
+     * `next/font`; los estilos base (`h1`, `.type-mono`...) leen `--font-sans`, `--font-wide`, etc., que
+     * se resuelven en :root. Hay que reemplazar los dos grupos.
+     */
+    --font-archivo: var(--font-line-seed-jp);
+    --font-jetbrains-mono: var(--font-line-seed-jp);
+    --font-martian-mono: var(--font-line-seed-jp);
+    --font-syncopate: var(--font-line-seed-jp);
+    --font-sans: var(--font-line-seed-jp), Helvetica, Arial, sans-serif;
+    --font-mono: var(--font-sans);
+    --font-wide: var(--font-sans);
+    --font-nav: var(--font-sans);
+    font-family: var(--font-sans);
   }
 }
 
@@ -133,6 +156,14 @@
   /* Cajas del exhibidor 3D */
   --color-case-border: var(--utg-case-border);
   --color-case-face: var(--utg-case-face);
+
+  /* Tema claro de la landing (valores en `.light`) */
+  --color-landing-band: var(--utg-light-band);
+  --color-landing-charcoal: var(--utg-light-charcoal);
+  --color-landing-coral: var(--utg-light-coral);
+  --color-landing-crimson: var(--utg-light-crimson);
+  --color-landing-pill: var(--utg-light-pill);
+  --color-landing-orange: var(--utg-light-orange);
 
   /* Sombra de una portada sobre otras (géneros del catálogo) */
   --shadow-cover: 0 10px 30px color-mix(in srgb, var(--utg-black) 70%, transparent);

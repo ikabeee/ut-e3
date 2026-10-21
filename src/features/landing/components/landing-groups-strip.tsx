@@ -9,10 +9,10 @@ export function LandingGroupsStrip({ groups }: Readonly<LandingGroupsStripProps>
   return (
     <ul
       aria-label={LANDING_COPY.groups.ariaLabel}
-      className="page-wrap flex flex-wrap items-center justify-center gap-x-8 gap-y-3 rounded-[25px] bg-foreground py-5 text-background"
+      className="page-wrap flex flex-wrap items-center justify-center gap-x-8 gap-y-3 rounded-[25px] bg-foreground py-5 text-background/77"
     >
       {groups.map((group) => (
-        <li key={group} className="type-mono">
+        <li key={group} className="text-[1.4rem]">
           {group}
         </li>
       ))}

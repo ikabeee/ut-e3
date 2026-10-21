@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { LandingHero } from "@features/landing/components/landing-hero";
+import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 
 const props = {
-  dateLabel: "20.11.2026",
+  dateLabel: "20 Nov 2026",
   venueLabel: "UT Cancún",
   admissionLabel: "Entrada libre",
-  division: "División X",
   gamesHref: "/games",
   calendarUrl: "https://calendar.example/event",
 };
@@ -29,8 +29,8 @@ describe("LandingHero", () => {
   it("shows the event data it receives", () => {
     render(<LandingHero {...props} />);
 
-    expect(screen.getByText(/20\.11\.2026 · UT Cancún · Entrada libre/)).toBeInTheDocument();
-    expect(screen.getByText("División X")).toBeInTheDocument();
+    expect(screen.getByText("20 Nov 2026 • UT Cancún | Entrada libre")).toBeInTheDocument();
+    expect(screen.getByText(LANDING_COPY.hero.division)).toBeInTheDocument();
   });
 });
 

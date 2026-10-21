@@ -1,13 +1,18 @@
 /**
- * Textos de la landing por sección. La fecha, la sede, la entrada y los horarios no se escriben aquí:
- * salen de `EVENT_INFO`, `EVENT_VENUE` y `EVENT_SCHEDULE` (feature `event`).
+ * Textos de la landing por sección, con las mayúsculas del Figma aplicadas por CSS (`uppercase` o
+ * `capitalize`) donde el diseño las transforma. La fecha, la sede, la entrada y los horarios no se
+ * escriben aquí: salen de `EVENT_INFO`, `EVENT_VENUE` y `EVENT_SCHEDULE` (feature `event`).
  */
 export const LANDING_COPY = {
+  wordmark: {
+    // Nombre accesible del logotipo VIDE [+] JUEG [o] S, que se dibuja con piezas decorativas.
+    label: "Videojuegos",
+  },
   hero: {
     kicker: "Showcase",
-    title: "Videojuegos",
-    // El título se parte para intercalar los iconos del diseño: VIDE[+]JUEG[o]S.
-    titleParts: ["VIDE", "JUEG", "S"],
+    division: "División de Ingeniería",
+    // "20 Nov 2026 • UT Cancún | Entrada Libre"
+    dateLine: (date: string, venue: string, admission: string) => `${date} • ${venue} | ${admission}`,
     imageAlt: "Manos sosteniendo un control de videojuegos",
     viewGames: "Ver juegos",
     addToCalendar: "Agendar fecha",
@@ -24,7 +29,6 @@ export const LANDING_COPY = {
   },
   games: {
     teamCount: (count: number) => `Hay un total de ${count} equipos. Cada equipo desarrolló un videojuego.`,
-    title: "Videojuegos",
     carouselLabel: "Carrusel de videojuegos",
     previous: "Juego anterior",
     next: "Juego siguiente",
@@ -38,15 +42,13 @@ export const LANDING_COPY = {
     playersLabel: (count: number) => `${count} Jugadores`,
     raffleRequirement: (gameCount: number) => `Quienes prueben los ${gameCount} juegos`,
     openLabel: (title: string) => `Ver ${title}`,
-    logoParts: ["VIDE", "JUEG", "S"],
-    logoLabel: "Videojuegos",
   },
   program: {
     title: "Programa del evento",
     subtitle: "¡No te quedes con las ganas!",
     scheduleHeading: "Horario",
     countdownLabel: "Tiempo faltante para el evento",
-    units: { days: "Días", hours: "Horas", minutes: "Minutos", seconds: "Segundos" },
+    units: { days: "Days", hours: "Hours", minutes: "Minutes", seconds: "Seconds" },
     brand: "UTGAMES",
     scheduleTimeLabel: (title: string, time: string, zone: string) => `${title}, ${time}, ${zone}`,
     countdownSummary: (days: number, hours: number, minutes: number) =>

@@ -14,7 +14,7 @@ describe("LandingDynamics", () => {
   it("shows tournament format, quota and prize", () => {
     render(<LandingDynamics dynamics={EVENT_DYNAMICS} gamesCount={18} />);
 
-    expect(screen.getAllByText("1 vs 1")).toHaveLength(2);
+    expect(screen.getAllByText("1 VS 1")).toHaveLength(2);
     expect(screen.getAllByText("64 Jugadores")).toHaveLength(2);
     expect(screen.getByText("Premio al campeón")).toBeInTheDocument();
     expect(screen.getByText("Premio para los 3 primeros")).toBeInTheDocument();

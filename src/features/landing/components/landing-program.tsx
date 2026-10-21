@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { LocatedScheduleEntry } from "@features/event/lib/types";
 import { LandingCountdown } from "@features/landing/components/landing-countdown";
+import { LandingIcon } from "@features/landing/components/landing-icon";
 import { splitClockTime } from "@features/landing/lib/countdown";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { cn } from "@heroui/react";
@@ -34,15 +35,15 @@ export function LandingProgram({ schedule, dateLabel, calendarUrl, startsAt }: R
           >
             {title}
           </h2>
-          <p className="text-xl text-foreground/75">{subtitle}</p>
+          <p className="text-xl text-foreground/73">{subtitle}</p>
           <a
             href={calendarUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="relative inline-flex min-h-11 items-center gap-4 rounded-full border border-foreground px-8 py-3 text-lg text-foreground"
           >
-            {LANDING_COPY.hero.addToCalendar}
-            <Image src="/landing/program/calendar.svg" alt="" width={24} height={24} unoptimized />
+            <span className="capitalize">{LANDING_COPY.hero.addToCalendar}</span>
+            <LandingIcon name="calendar" className="size-6" />
           </a>
         </div>
         <div className="relative flex flex-col gap-8 bg-[url('/landing/program/schedule-card-shape.svg')] bg-[length:100%_100%] bg-no-repeat px-5 pt-24 pb-8 sm:px-10">
@@ -55,7 +56,7 @@ export function LandingProgram({ schedule, dateLabel, calendarUrl, startsAt }: R
             <span className="text-3xl font-bold text-foreground">{brand}</span>
           </div>
           <div className="relative flex flex-col gap-1">
-            <p className="text-xl text-foreground/75">{dateLabel}</p>
+            <p className="text-xl text-foreground/73">{dateLabel}</p>
             <h3 className="text-4xl font-bold text-foreground uppercase sm:text-5xl">{scheduleHeading}</h3>
           </div>
           <ol className="relative flex flex-col gap-4">
@@ -83,7 +84,7 @@ export function LandingProgram({ schedule, dateLabel, calendarUrl, startsAt }: R
                     <span className="text-3xl font-black tabular-nums">{time}</span>
                     <span className="text-xl font-bold">{period}</span>
                   </span>
-                  <span className="rounded bg-danger px-3 py-1 text-sm font-black text-danger-foreground">
+                  <span className="rounded bg-landing-coral px-3 py-1 text-sm font-black text-background">
                     {entry.zoneTitle}
                   </span>
                 </li>

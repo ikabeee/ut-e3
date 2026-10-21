@@ -2,7 +2,9 @@ import {
   buildGoogleCalendarUrl,
   formatCopyableAddress,
   formatDateLabel,
+  formatDayMonthYearLabel,
   formatHoursLabel,
+  formatMonthDayYearLabel,
   formatShortDateLabel,
   formatVenueAddress,
 } from "@features/event/lib/event-format";
@@ -20,6 +22,23 @@ describe("event date labels", () => {
 
   it("rejects a date that is not ISO 8601", () => {
     expect(() => formatDateLabel("27/11/2026")).toThrow("Fecha inválida");
+  });
+});
+
+describe("event date labels in Spanish words", () => {
+  it("writes the day, the abbreviated month and the year", () => {
+    expect(formatDayMonthYearLabel(STARTS_AT)).toBe("27 Nov 2026");
+    expect(formatDayMonthYearLabel("2026-01-05T09:00:00-05:00")).toBe("5 Ene 2026");
+  });
+
+  it("writes the full month, the day and the year", () => {
+    expect(formatMonthDayYearLabel(STARTS_AT)).toBe("Noviembre 27, 2026");
+    expect(formatMonthDayYearLabel("2026-01-05T09:00:00-05:00")).toBe("Enero 5, 2026");
+  });
+
+  it("rejects a date that is not ISO 8601", () => {
+    expect(() => formatDayMonthYearLabel("27/11/2026")).toThrow("Fecha inválida");
+    expect(() => formatMonthDayYearLabel("27/11/2026")).toThrow("Fecha inválida");
   });
 });
 

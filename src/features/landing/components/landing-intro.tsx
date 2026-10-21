@@ -12,13 +12,13 @@ export function LandingIntro({ division }: Readonly<LandingIntroProps>) {
   return (
     <div className="page-wrap flex flex-col gap-6 py-12 md:py-20">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-        <h2 className="max-w-xl text-3xl leading-tight font-bold uppercase md:text-5xl">{title}</h2>
-        <p className="max-w-xs text-sm text-muted">{lead(division)}</p>
+        <h2 className="max-w-xl text-3xl leading-tight font-bold uppercase md:text-[3.75rem]">{title}</h2>
+        <p className="max-w-[517px] text-lg text-foreground/64 capitalize">{lead(division)}</p>
       </div>
-      <hr className="border-border" />
-      <ul className="flex flex-col gap-2 text-muted md:flex-row md:justify-between">
+      <hr className="border-foreground" />
+      <ul className="flex flex-col gap-2 text-foreground/64 uppercase md:flex-row md:justify-between">
         {tagline.map((item, index) => (
-          <li key={item} className="flex items-center gap-4 type-mono">
+          <li key={item} className="flex items-center gap-4 text-xl">
             {index > 0 ? (
               <span aria-hidden="true" className="hidden md:inline">
                 →

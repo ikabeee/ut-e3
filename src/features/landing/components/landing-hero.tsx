@@ -1,59 +1,56 @@
 import Image from "next/image";
+import Link from "next/link";
+import { LandingIcon } from "@features/landing/components/landing-icon";
+import { LandingWordmark } from "@features/landing/components/landing-wordmark";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
-import { ActionLink } from "@shared/components/action-link";
 
 interface LandingHeroProps {
   dateLabel: string;
   venueLabel: string;
   admissionLabel: string;
-  division: string;
   gamesHref: string;
   calendarUrl: string;
 }
 
-// El radio de la píldora del diseño (~53 px) reemplaza a propósito el radio 0 del tema.
-const PILL = "rounded-full";
-const ICON = "inline-block size-[0.8em] shrink-0 rounded-full align-middle";
+const CTA =
+  "inline-flex h-[63px] w-full max-w-[260px] items-center rounded-full text-xl capitalize outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus";
 
 /** Cabecera de la portada: título, datos del evento, llamadas a la acción e imagen. */
 export function LandingHero({
   dateLabel,
   venueLabel,
   admissionLabel,
-  division,
   gamesHref,
   calendarUrl,
 }: Readonly<LandingHeroProps>) {
-  const { kicker, title, titleParts, imageAlt, viewGames, addToCalendar } = LANDING_COPY.hero;
-  const [start, middle, end] = titleParts;
+  const { kicker, division, dateLine, imageAlt, viewGames, addToCalendar } = LANDING_COPY.hero;
 
   return (
     <div className="page-wrap flex flex-col items-center gap-6 pt-10 text-center">
       <div className="flex w-full flex-col items-center justify-between gap-2 md:flex-row">
-        <p className="type-mono">{kicker}</p>
-        <p className="type-mono text-muted">{division}</p>
+        <p className="text-[clamp(1.75rem,3vw,2.875rem)] leading-none font-bold uppercase">{kicker}</p>
+        <p className="text-[clamp(1rem,1.6vw,1.5rem)] text-foreground/64 uppercase">{division}</p>
       </div>
-      <h1
-        aria-label={title}
-        className="flex flex-wrap items-center justify-center gap-x-[0.08em] text-[clamp(2.5rem,13vw,7.5rem)] leading-none font-bold"
-      >
-        <span aria-hidden="true">{start}</span>
-        <span aria-hidden="true" className={`${ICON} relative bg-accent`}>
-          <span className="absolute top-1/2 left-1/4 h-[10%] w-1/2 -translate-y-1/2 bg-foreground" />
-          <span className="absolute top-1/4 left-1/2 h-1/2 w-[10%] -translate-x-1/2 bg-foreground" />
-        </span>
-        <span aria-hidden="true">{middle}</span>
-        <span aria-hidden="true" className={`${ICON} border-[0.1em] border-danger bg-danger/20`} />
-        <span aria-hidden="true">{end}</span>
+      <h1>
+        <LandingWordmark size="hero" />
       </h1>
-      <p className="type-mono text-muted">{`${dateLabel} · ${venueLabel} · ${admissionLabel}`}</p>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <ActionLink href={gamesHref} variant="primary" className={PILL}>
+      <p className="text-xl text-foreground/64 capitalize">{dateLine(dateLabel, venueLabel, admissionLabel)}</p>
+      <div className="flex w-full flex-col items-center justify-center gap-7 sm:flex-row">
+        <Link href={gamesHref} className={`${CTA} gap-7 border border-foreground/20 bg-accent pl-2 text-foreground`}>
+          <span className="grid size-[55px] place-items-center rounded-full bg-foreground text-background">
+            <LandingIcon name="gamepad" className="size-6" />
+          </span>
           {viewGames}
-        </ActionLink>
-        <ActionLink href={calendarUrl} variant="outline" isExternal className={PILL}>
+        </Link>
+        <a
+          href={calendarUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${CTA} justify-center gap-5 border border-foreground`}
+        >
           {addToCalendar}
-        </ActionLink>
+          <LandingIcon name="calendar" className="size-6" />
+        </a>
       </div>
       <div className="relative w-full max-w-[997px] px-4 md:px-0">
         <span
