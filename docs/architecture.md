@@ -28,7 +28,7 @@ valida las que existen. No se dejan carpetas vacías ni `.gitkeep`.
 | `games` | Catálogo, detalle, carrusel de destacados, exhibidor 3D, API `/api/games`. | `event` (fecha y calendario en el detalle) y `floor-plan` (sólo el tipo `StandOccupant`, en `lib/game-stand.ts`) |
 | `floor-plan` | Croquis: zonas, stands, layouts, zoom, filtros y directorio. | Nada. Su page compone los juegos como `StandOccupant` |
 | `event` | Contenido del evento: reel, actividades, programa, ubicación y cierre. | Nada |
-| `landing` | Portada (`/`) en tema claro: hero, grupos, introducción, juegos, dinámicas y programa. | `event`, `games`, `teams` |
+| `landing` | Portada (`/`) en tema claro: hero, grupos, introducción, juegos, dinámicas y programa. | `event`, `floor-plan` (une el programa con sus zonas), `games`, `teams` |
 | `offline` | Service worker (`/sw.js`), aviso de conexión, aviso de versión nueva y página `/offline` (ver `docs/pwa.md`). | `games`, `floor-plan` y `landing` (sus rutas, para precargarlas y enlazarlas desde `/offline`) |
 | `site` | Marco del sitio: cabecera, navegación, pie, 404 y página de error. | `games`, `floor-plan`, `landing` y `visitors` (sólo sus rutas, para la navegación) |
 | `teams` | Equipos e integrantes: CRUD, llaves de escáner y Server Actions del panel. | `games` (invalida la caché de los juegos, que muestran el equipo y su stand) |
@@ -43,7 +43,8 @@ cierra uno, ESLint se detiene con el ciclo en el mensaje.
 
 ```
 site ─────┬─> landing ─┬─> event
-offline ──┤            ├─> games ─┬─> event
+offline ──┤            ├─> floor-plan
+          │            ├─> games ─┬─> event
           │            │          └─> floor-plan
           │            └─> teams ─┬─> auth
           │                       ├─> games

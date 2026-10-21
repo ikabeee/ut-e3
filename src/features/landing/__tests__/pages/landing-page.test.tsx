@@ -1,4 +1,5 @@
-import { render } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithGames } from "@features/games/__tests__/render-with-games";
 import { LandingPage, landingPageMetadata } from "@features/landing/pages/landing-page";
 
 jest.mock("@features/games/lib/server/games-queries", () => ({
@@ -17,8 +18,8 @@ describe("LandingPage", () => {
     expect(landingPageMetadata.alternates).toEqual({ canonical: "/" });
   });
 
-  it("renders the section slots in order inside the light theme scope", async () => {
-    const { container } = render(await LandingPage());
+  it("renders every section in order inside the light theme scope", async () => {
+    const { container } = renderWithGames(await LandingPage());
 
     const scope = container.querySelector("[data-theme='light']");
     const ids = Array.from(scope?.querySelectorAll("main > section") ?? []).map((section) => section.id);
@@ -27,8 +28,16 @@ describe("LandingPage", () => {
     expect(ids).toEqual(["hero", "groups", "intro", "games", "dynamics", "program"]);
   });
 
-  it("keeps the schema.org Event JSON-LD of the old home", async () => {
-    const { container } = render(await LandingPage());
+  it("wires the real data into the sections", async () => {
+    renderWithGames(await LandingPage());
+
+    expect(screen.getByRole("heading", { level: 1, name: "Videojuegos" })).toBeInTheDocument();
+    expect(screen.getByText("IDYGS 101")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Ver juegos/i })).toHaveAttribute("href", "/games");
+  });
+
+  it("publishes the schema.org Event JSON-LD", async () => {
+    const { container } = renderWithGames(await LandingPage());
 
     const json = JSON.parse(container.querySelector("script[type='application/ld+json']")?.textContent ?? "{}");
 
