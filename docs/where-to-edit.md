@@ -22,7 +22,10 @@ sede o el nombre de la división dentro de un texto.
 | Textos de las tarjetas de torneos y sorteos | `buildEventActivities` en `src/features/event/lib/event-program.ts` |
 | Textos de la interfaz del evento ("Ubicación", "Copiar dirección", controles del reel, esquema) | `src/features/event/lib/event-copy.ts` (`EVENT_COPY`) |
 | Textos de la portada (hero, introducción, juegos, dinámicas y programa) | `src/features/landing/lib/landing-copy.ts` (`LANDING_COPY`). La fecha, la sede y la división salen de sus dueños |
-| Colores del tema claro de la portada | Bloque `.light` de `src/shared/styles/theme.css` |
+| Colores del tema claro de la portada | Bloque `.light` de `src/shared/styles/theme.css` (incluye los colores `landing-*`) |
+| Tarjetas de videojuegos de la portada y total de equipos | `src/features/landing/lib/landing-games.ts` (`LANDING_GAMES`, `LANDING_TEAM_COUNT`). Son estáticas: la portada no lee la base de datos |
+| Torneos y gran rifa de la portada | `src/features/event/lib/event-dynamics.ts` (`EVENT_DYNAMICS`) |
+| Imágenes e iconos de la portada | `public/landing/<sección>/` e iconos vectoriales en `public/landing/icons/` |
 | Video del encabezado | Reemplaza `public/media/reel.webm`, `reel.mp4` y `reel.jpg` (mismos nombres) |
 | Ancho mínimo para que el reel se reproduzca solo | `REEL_AUTOPLAY_MIN_WIDTH` en `src/features/event/lib/event-media.ts` |
 | Esquema de la carretera | `src/features/event/components/venue-map.tsx` |

@@ -8,9 +8,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
-- Nueva portada `landing` en tema claro (cimientos): reemplaza la feature `home`, mueve `HOME_PATH` a
-  `landing/lib/landing-links.ts` y deja las secciones listas para llenarse. La fecha del evento pasa al
-  20 de noviembre de 2026.
+- Nueva portada estática en tema claro, fiel al diseño "Nueva propuesta": hero, grupos, introducción,
+  videojuegos, torneos y dinámicas, y programa con cuenta regresiva. Reemplaza la feature `home`, no
+  consulta la base de datos y usa la tipografía LINE Seed JP. La cabecera de la portada pasa a la
+  variante clara. La fecha del evento pasa al 20 de noviembre de 2026.
 - Registro y alta de videojuegos por parte de los líderes de equipo desde su propio portal (`/team`):
   formulario para dar de alta el juego del equipo con nombre, descripción, enlace a itch.io y cantidad
   de jugadores.
