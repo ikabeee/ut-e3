@@ -34,7 +34,9 @@ describe("SiteHeader and SiteFooter visibility", () => {
     const nav = screen.getByRole("navigation", { name: "Principal" });
     expect(nav).toHaveAttribute("data-theme", "light");
     expect(nav).toHaveClass("light");
-    expect(screen.getAllByRole("link").filter((link) => nav.contains(link) && link.textContent)).toHaveLength(5);
+    // Los cinco enlaces del Figma más el de la marca (cubo + "UTGAMES").
+    expect(screen.getAllByRole("link").filter((link) => nav.contains(link) && link.textContent)).toHaveLength(6);
+    expect(screen.getByRole("link", { name: "UTG, inicio" })).toHaveTextContent("UTGAMES");
     expect(screen.getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "Juegos" })).toHaveAttribute("href", "/games");
     expect(screen.getByRole("link", { name: "Dinámicas" })).toHaveAttribute("href", "/#dynamics");
