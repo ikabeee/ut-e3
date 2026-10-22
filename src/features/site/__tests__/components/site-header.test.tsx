@@ -8,7 +8,7 @@ describe("SiteHeader and SiteFooter visibility", () => {
     expect(headerContainer.firstChild).not.toBeNull();
     expect(screen.getByRole("navigation", { name: "Principal" })).toBeInTheDocument();
 
-    const { container: footerContainer } = render(<SiteFooterView pathname="/" />);
+    const { container: footerContainer } = render(<SiteFooterView pathname="/games" />);
     expect(footerContainer.firstChild).not.toBeNull();
   });
 
