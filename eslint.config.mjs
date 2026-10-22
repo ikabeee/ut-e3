@@ -28,9 +28,9 @@ const FEATURE_DEPENDENCIES = {
   event: [],
   "floor-plan": [],
   games: ["event", "floor-plan"],
-  home: ["event", "floor-plan", "games"],
-  offline: ["floor-plan", "games", "home"],
-  site: ["floor-plan", "games", "home", "visitors"],
+  landing: ["event", "floor-plan", "games", "teams"],
+  offline: ["floor-plan", "games", "landing"],
+  site: ["floor-plan", "games", "landing", "visitors"],
   teams: ["auth", "games", "visitors"],
   visitors: ["event", "floor-plan"],
 };

@@ -77,7 +77,7 @@ src/
 │   ├── event/            # Fecha, sede, programa, reel, ubicación
 │   ├── floor-plan/       # Croquis interactivo
 │   ├── games/            # Catálogo, detalle, carruseles y API
-│   ├── home/             # Portada (compone las demás features)
+│   ├── landing/          # Portada en tema claro (compone las demás features)
 │   ├── offline/          # Sin conexión: service worker, avisos y página /offline
 │   ├── site/             # Navegación, pie, 404 y página de error
 │   ├── teams/            # Equipos e integrantes (CRUD del panel)

@@ -1,6 +1,6 @@
 "use client";
 
-import { HOME_PATH } from "@features/home/lib/home-links";
+import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { SITE_COPY } from "@features/site/lib/site-copy";
 import { ActionButton } from "@shared/components/action-button";
 import { ActionLink } from "@shared/components/action-link";

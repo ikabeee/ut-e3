@@ -11,7 +11,7 @@ sede o el nombre de la división dentro de un texto.
 
 | Quiero cambiar... | Archivo |
 | --- | --- |
-| Fecha y horario del evento | `startsAt` y `endsAt` en `src/features/event/lib/event-info.ts`. De ahí salen "27.11.2026", "27.11.26", "10:00—20:00" y el enlace de Google Calendar |
+| Fecha y horario del evento | `startsAt` y `endsAt` en `src/features/event/lib/event-info.ts`. De ahí salen "20.11.2026", "20.11.26", "10:00—20:00" y el enlace de Google Calendar |
 | "Entrada libre" | `admission` en `src/features/event/lib/event-info.ts` |
 | Sede, dirección (por partes), enlace de Google Maps | `src/features/event/lib/event-info.ts` (`EVENT_VENUE`). La dirección visible y la que se copia se arman con `streetAddress`, `postalCode`, `locality` y `region` |
 | Nombre de la división y de la universidad | `organization` en `src/shared/lib/site-config.ts` (lo usan la presentación, "Acerca del juego", el stand C1, el pie y los datos estructurados) |
@@ -21,6 +21,11 @@ sede o el nombre de la división dentro de un texto.
 | Horarios de torneos (inscripción, rondas, finales) y de sorteos | El renglón del programa marcado con `milestone` en `EVENT_SCHEDULE`. Las tarjetas de la portada, el aviso de torneo del detalle y la Arena y Premios del croquis los toman de ahí |
 | Textos de las tarjetas de torneos y sorteos | `buildEventActivities` en `src/features/event/lib/event-program.ts` |
 | Textos de la interfaz del evento ("Ubicación", "Copiar dirección", controles del reel, esquema) | `src/features/event/lib/event-copy.ts` (`EVENT_COPY`) |
+| Textos de la portada (hero, introducción, juegos, dinámicas y programa) | `src/features/landing/lib/landing-copy.ts` (`LANDING_COPY`). La fecha, la sede y la división salen de sus dueños |
+| Colores del tema claro de la portada | Bloque `.light` de `src/shared/styles/theme.css` (incluye los colores `landing-*`) |
+| Tarjetas de videojuegos de la portada y total de equipos | `src/features/landing/lib/landing-games.ts` (`LANDING_GAMES`, `LANDING_TEAM_COUNT`). Son estáticas: la portada no lee la base de datos |
+| Torneos y gran rifa de la portada | `src/features/event/lib/event-dynamics.ts` (`EVENT_DYNAMICS`) |
+| Imágenes e iconos de la portada | `public/landing/<sección>/` e iconos vectoriales en `public/landing/icons/` |
 | Video del encabezado | Reemplaza `public/media/reel.webm`, `reel.mp4` y `reel.jpg` (mismos nombres) |
 | Ancho mínimo para que el reel se reproduzca solo | `REEL_AUTOPLAY_MIN_WIDTH` en `src/features/event/lib/event-media.ts` |
 | Esquema de la carretera | `src/features/event/components/venue-map.tsx` |
@@ -78,7 +83,6 @@ ls -lh public/media/
 | Cuándo un stand o zona se ve seleccionado u oculto por los filtros | `getItemInteraction` en `src/features/floor-plan/lib/plan-interaction.ts` |
 | Área táctil de stands y zonas en el teléfono | `TOUCH_MARGIN` en `src/features/floor-plan/lib/plan-touch-areas.ts` (si mueves zonas en `plan-layouts.ts`, `npm test` avisa si alguna queda por debajo de 44 px) |
 | Asignar un juego a un stand | Campo `stand` del juego |
-| Stand seleccionado al abrir la portada | `INITIAL_SELECTION` en `src/features/home/components/program-and-floor-plan.tsx` |
 | Zoom máximo y márgenes al arrastrar | `src/features/floor-plan/lib/plan-viewport.ts` |
 
 ## Pasaporte y sorteo

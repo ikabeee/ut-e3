@@ -1,15 +1,16 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { siteConfig } from "@shared/lib/site-config";
 
-/** Pie del sitio: nombre del showcase y organización. No se muestra en paneles privados. */
+/** Pie del sitio: nombre del showcase y organización. No se muestra en la portada ni en paneles privados. */
 export interface SiteFooterViewProps {
   pathname: string;
 }
 
 export function SiteFooterView({ pathname }: Readonly<SiteFooterViewProps>) {
-  if (pathname.startsWith("/admin") || pathname.startsWith("/team")) {
+  if (pathname === HOME_PATH || pathname.startsWith("/admin") || pathname.startsWith("/team")) {
     return null;
   }
 

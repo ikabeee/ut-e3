@@ -29,6 +29,39 @@ export function formatShortDateLabel(isoDateTime: string) {
   return `${day}.${month}.${year.slice(2)}`;
 }
 
+const MONTH_NAMES = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+];
+
+function readMonthName(month: string) {
+  return MONTH_NAMES[Number(month) - 1];
+}
+
+/** "2026-11-20T10:00:00-05:00" -> "20 Nov 2026". */
+export function formatDayMonthYearLabel(isoDateTime: string) {
+  const { year, month, day } = readLocalParts(isoDateTime);
+
+  return `${Number(day)} ${readMonthName(month).slice(0, 3)} ${year}`;
+}
+
+/** "2026-11-20T10:00:00-05:00" -> "Noviembre 20, 2026". */
+export function formatMonthDayYearLabel(isoDateTime: string) {
+  const { year, month, day } = readLocalParts(isoDateTime);
+
+  return `${readMonthName(month)} ${Number(day)}, ${year}`;
+}
+
 /** Inicio y fin -> "10:00—20:00". */
 export function formatHoursLabel(startsAt: string, endsAt: string) {
   return `${readLocalParts(startsAt).time}—${readLocalParts(endsAt).time}`;

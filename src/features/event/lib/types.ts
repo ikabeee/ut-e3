@@ -101,6 +101,31 @@ export interface ScheduleHighlights {
   raffleTimes: readonly string[];
 }
 
+/** Imagen decorativa sobre el fondo de una tarjeta; `className` la ubica en porcentajes de la tarjeta. */
+export interface EventDynamicLayer {
+  src: string;
+  className: string;
+  /** Posición del recorte de la imagen dentro de su caja (por defecto, alineada arriba). */
+  imageClassName?: string;
+}
+
+/** Torneo o sorteo de la portada. Los horarios salen de `EVENT_SCHEDULE`, no de aquí. */
+export interface EventDynamic {
+  id: string;
+  kind: "tournament" | "raffle";
+  title: string;
+  /** Formato del torneo ("1 vs 1"). */
+  format?: string;
+  /** Cupo de jugadores del torneo. */
+  players?: number;
+  prize: string;
+  /** Sin fondo, la tarjeta usa el color de superficie del tema (el sorteo). */
+  backgroundImage?: string;
+  /** Proporción y radio propios de la tarjeta (clases de Tailwind); sin esto, 606/416 y radio 25,6 px. */
+  cardClassName?: string;
+  layers?: readonly EventDynamicLayer[];
+}
+
 /** Todo el contenido del evento, leído en un solo lugar (`getEventContent`). */
 export interface EventContent {
   info: EventInfo;
@@ -112,4 +137,5 @@ export interface EventContent {
   /** Horarios del programa que citan otros textos (torneos y sorteos). */
   highlights: ScheduleHighlights;
   reel: EventReelMedia;
+  dynamics: readonly EventDynamic[];
 }

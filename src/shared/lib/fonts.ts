@@ -1,4 +1,4 @@
-import { Archivo, JetBrains_Mono, Martian_Mono, Syncopate } from "next/font/google";
+import { Archivo, JetBrains_Mono, LINE_Seed_JP, Martian_Mono, Syncopate } from "next/font/google";
 
 // Tipografías del diseño, servidas desde el propio dominio por next/font (sin peticiones a
 // Google ni saltos de layout). Cada una expone una variable CSS que usa src/shared/styles/theme.css.
@@ -38,4 +38,14 @@ const martianMono = Martian_Mono({
   display: "swap",
 });
 
-export const fontVariables = [syncopate, archivo, jetbrainsMono, martianMono].map((font) => font.variable).join(" ");
+/** Tipografía única del tema claro (la landing y su cabecera): `theme.css` la pone en lugar de las demás. */
+const lineSeedJp = LINE_Seed_JP({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "700", "800"],
+  variable: "--font-line-seed-jp",
+  display: "swap",
+});
+
+export const fontVariables = [syncopate, archivo, jetbrainsMono, martianMono, lineSeedJp]
+  .map((font) => font.variable)
+  .join(" ");

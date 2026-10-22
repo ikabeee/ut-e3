@@ -1,3 +1,4 @@
+import { EVENT_DYNAMICS } from "@features/event/lib/event-dynamics";
 import { EVENT_INFO, EVENT_VENUE } from "@features/event/lib/event-info";
 import { EVENT_REEL } from "@features/event/lib/event-media";
 import {
@@ -27,5 +28,6 @@ export function getEventContent(): EventContent {
     schedule: EVENT_SCHEDULE,
     highlights,
     reel: EVENT_REEL,
+    dynamics: EVENT_DYNAMICS,
   };
 }
