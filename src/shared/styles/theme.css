@@ -94,6 +94,7 @@
     --utg-light-band: #0d0d0d;
     --utg-light-charcoal: #171717;
     --utg-light-coral: #ef6762;
+    --utg-light-coral-soft: #f36c69;
     --utg-light-crimson: #be2525;
     --utg-light-pill: #f6fd79;
     --utg-light-orange: #fba80b;
@@ -161,6 +162,7 @@
   --color-landing-band: var(--utg-light-band);
   --color-landing-charcoal: var(--utg-light-charcoal);
   --color-landing-coral: var(--utg-light-coral);
+  --color-landing-coral-light: var(--utg-light-coral-soft);
   --color-landing-crimson: var(--utg-light-crimson);
   --color-landing-pill: var(--utg-light-pill);
   --color-landing-orange: var(--utg-light-orange);
