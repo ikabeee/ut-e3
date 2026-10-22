@@ -2,7 +2,6 @@ import { readdirSync } from "node:fs";
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
-import tanstackQuery from "@tanstack/eslint-plugin-query";
 import sonarjs from "eslint-plugin-sonarjs";
 
 // Reglas de la screaming architecture (ver AGENTS.md, "Reglas de dependencias", y
@@ -19,20 +18,10 @@ import sonarjs from "eslint-plugin-sonarjs";
  * cargar esta configuración. Las `pages/` pueden componer cualquier feature, porque sólo
  * `src/app` las importa y por eso nunca cierran un ciclo.
  *
- * Una feature nueva empieza sin dependencias; si necesita otra, agrégala aquí y en la tabla
- * de docs/architecture.md.
+ * Una feature nueva empieza sin dependencias; si necesita otra, agrégala aquí.
  */
 const FEATURE_DEPENDENCIES = {
-  admin: ["auth", "games", "teams", "visitors"],
-  auth: [],
-  event: [],
-  "floor-plan": [],
-  games: ["event", "floor-plan"],
-  landing: ["event", "floor-plan", "games", "teams"],
-  offline: ["floor-plan", "games", "landing"],
-  site: ["floor-plan", "games", "landing", "visitors"],
-  teams: ["auth", "games", "visitors"],
-  visitors: ["event", "floor-plan"],
+  landing: [],
 };
 
 const FEATURES = readdirSync(new URL("./src/features", import.meta.url), { withFileTypes: true })
@@ -249,7 +238,6 @@ const eslintConfig = defineConfig([
   // Lineamientos de SonarQube (los mismos que reporta SonarLint/SonarCloud).
   sonarjs.configs.recommended,
   // Buenas prácticas de TanStack Query (query keys, queryFn estables, etc.).
-  ...tanstackQuery.configs["flat/recommended"],
   { files: [`src/**/*.${SOURCE}`, "src/**/*.mts"], rules: restrict([]) },
   // Ciclos entre archivos (también dentro de una misma feature). No se analizan los paquetes de
   // node_modules: no pueden importar código del proyecto y recorrerlos multiplica el tiempo de lint.

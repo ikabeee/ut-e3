@@ -1,7 +1,7 @@
 import { cn } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
-import type { EventDynamic } from "@features/event/lib/types";
+import type { EventDynamic } from "@features/landing/lib/types";
 import { LandingIcon } from "@features/landing/components/landing-icon";
 import { LandingWordmark } from "@features/landing/components/landing-wordmark";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";

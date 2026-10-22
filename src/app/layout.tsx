@@ -1,8 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { OfflineNotices } from "@features/offline/components/offline-notices";
-import { SiteFooter } from "@features/site/components/site-footer";
-import { SiteHeader } from "@features/site/components/site-header";
-import { QueryProvider } from "@shared/components/query-provider";
 import { fontVariables } from "@shared/lib/fonts";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
@@ -38,14 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // El diseño tiene un solo tema oscuro: se fija el tema "dark" de HeroUI.
     <html lang="es" className={`dark ${fontVariables}`} data-theme="dark">
-      <body className="bg-background text-foreground">
-        <QueryProvider>
-          <SiteHeader />
-          {children}
-          <SiteFooter />
-        </QueryProvider>
-        <OfflineNotices />
-      </body>
+      <body className="bg-background text-foreground">{children}</body>
     </html>
   );
 }

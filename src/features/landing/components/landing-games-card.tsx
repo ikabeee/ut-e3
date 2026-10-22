@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { GAMES_PATH } from "@features/games/lib/game-links";
+import { LANDING_GAMES_HREF } from "@features/landing/lib/landing-links";
 import { LandingIcon } from "@features/landing/components/landing-icon";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import type { LandingGame } from "@features/landing/lib/landing-games";
@@ -33,7 +33,7 @@ export function LandingGamesCard({ game }: Readonly<{ game: LandingGame }>) {
       </span>
       <p className="absolute top-[77.1%] left-[8.5%] w-[72.6%] text-[3.8cqw] leading-[1.2] capitalize">{description}</p>
       <Link
-        href={GAMES_PATH}
+        href={LANDING_GAMES_HREF}
         aria-label={LANDING_COPY.games.viewGame(name)}
         className="absolute top-[2.9%] right-[5.7%] grid size-[17cqw] place-items-center rounded-full bg-landing-band text-background"
       >

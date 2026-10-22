@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { EVENT_DYNAMICS } from "@features/event/lib/event-dynamics";
+import { EVENT_DYNAMICS } from "@features/landing/lib/event-content";
 import { LandingDynamics } from "@features/landing/components/landing-dynamics";
 
 describe("LandingDynamics", () => {

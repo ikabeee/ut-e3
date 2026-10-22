@@ -26,7 +26,7 @@ describe("LandingGamesCarousel", () => {
     const [first] = LANDING_GAMES;
     expect(screen.getAllByRole("article")).toHaveLength(CARDS);
     expect(screen.getByRole("heading", { name: first.name })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: COPY.viewGame(first.name) })).toHaveAttribute("href", "/games");
+    expect(screen.getByRole("link", { name: COPY.viewGame(first.name) })).toHaveAttribute("href", "/#games");
   });
 
   it("starts the counter on 1 over the team total when the track has no layout", () => {

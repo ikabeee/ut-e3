@@ -1,46 +1,29 @@
 # UT Game Showcase (UTG)
 
-Sitio del showcase de videojuegos de la División de Ingeniería y Tecnologías de la UT Cancún:
-presenta el evento, el catálogo de juegos de los equipos y el croquis para ubicar cada stand.
+Sitio del showcase de videojuegos de la División de Ingeniería y Tecnologías de la UT Cancún.
 Proyecto comunitario: contribuyen estudiantes de toda la generación.
 
-## Páginas
-
-| Ruta | Pantalla del diseño | Qué hace |
-| --- | --- | --- |
-| `/` | `index.html` | Reel, juegos destacados, evento, exhibidor 3D, programa, croquis y ubicación. |
-| `/games` | `juegos.html` | Catálogo con carrusel de géneros, buscador y filtros compartibles (`?genre=`). |
-| `/games/[slug]` | `juego.html` | Detalle de cada juego: galería, ficha, dónde jugarlo y más juegos. |
-| `/floor-plan` | `croquis.html` | Croquis interactivo con zoom, filtros, directorio y enlaces por stand (`#A1`). |
-| `/api/games` | | Lista de juegos en JSON para TanStack Query. |
-| `/sitemap.xml`, `/robots.txt` | | SEO. |
+Hoy el sitio es sólo la portada estática (`/`): hero, grupos, introducción, juegos, dinámicas y
+programa. La versión anterior (catálogo, croquis, pasaporte, panel y base de datos) se conserva en
+la rama `archive/develop-v1`.
 
 ## Stack
 
 - [Next.js 16.4](https://nextjs.org) (App Router, Cache Components, Partial Prefetching) + React 19
 - TypeScript 6
 - [HeroUI v3](https://heroui.com/en/docs/react/components) moldeado al diseño UTG (tema propio)
-- [TanStack Query 5](https://tanstack.com/query/latest) para el estado de servidor en el cliente
 - Tailwind CSS 4
-- [Prisma 8](https://www.prisma.io) (PostgreSQL ≥ 15) como ORM, con Docker Compose para la base local
-- ESLint 9 con las reglas de [SonarQube](https://github.com/SonarSource/SonarJS) y de TanStack Query
+- ESLint 9 con las reglas de [SonarQube](https://github.com/SonarSource/SonarJS)
 - [Jest 30](https://jestjs.io) + [Testing Library](https://testing-library.com) para pruebas
 
 ## Empezar
 
-Requisitos: **Node.js ≥ 22.18**. Para la base de datos, **Docker** (PostgreSQL 16).
+Requisitos: **Node.js ≥ 22.18**.
 
 ```bash
 npm install
-cp .env.example .env   # DATABASE_URL y NEXT_PUBLIC_SITE_URL
-docker compose up -d --wait db    # PostgreSQL en localhost:5432
-npm run db:migrate                # crea las tablas
-npm run db:seed                   # datos de ejemplo: 18 equipos con su juego
 npm run dev            # http://localhost:3000
 ```
-
-Para levantar PostgreSQL en Docker usa `docker compose up -d --wait db` o `npm run docker:up`. Los
-detalles están en [`docs/data-sources.md`](./docs/data-sources.md).
 
 El build de producción exige `NEXT_PUBLIC_SITE_URL` (URL absoluta `http(s)` sin `/` final,
 por ejemplo `https://ejemplo.com`): si falta o es inválida, `npm run build` falla con un
@@ -51,56 +34,34 @@ mensaje que explica el problema. En desarrollo y pruebas se usa `http://localhos
 | Script | Qué hace |
 | --- | --- |
 | `npm run dev` | Servidor de desarrollo. |
-| `npm run build` | Emite el contrato de Prisma y compila para producción. |
+| `npm run build` | Compila para producción. |
 | `npm start` | Sirve el build de producción. |
-| `npm run lint` | ESLint: fronteras entre features, SonarQube y TanStack Query. |
+| `npm run lint` | ESLint: fronteras entre features y SonarQube. |
 | `npm run typecheck` | Genera los tipos de rutas y ejecuta `tsc`. |
 | `npm test` | Pruebas con Jest y Testing Library. |
 | `npm run test:watch` | Pruebas en modo observador. |
 | `npm run test:coverage` | Pruebas con reporte de cobertura (`coverage/`). |
-| `npm run db:emit` | Regenera `contract.json` y `contract.d.ts` tras editar `contract.prisma`. |
-| `npm run db:init` | Crea el esquema en una base de datos vacía. |
-| `npm run db:update` | Aplica cambios del contrato a tu base **local** (sin migraciones). |
-| `npm run db:migration:plan` | Genera una migración formal en `migrations/app/`. |
-| `npm run db:migrate` | Aplica las migraciones pendientes. |
-| `npm run db:seed` | Carga los datos de ejemplo (se puede correr varias veces). |
-| `npm run db:verify` | Comprueba que la base coincide con el contrato. |
-| `npm run docker:up` | Levanta PostgreSQL en Docker (espera a que esté lista). |
-| `npm run docker:down` | Detiene los contenedores (los datos se conservan en el volumen). |
 
 ## Estructura (screaming architecture)
 
 ```
 src/
 ├── app/                  # Sólo rutas: cada archivo renderiza una page de una feature
-├── features/             # Dominios: "gritan" de qué trata la app
-│   ├── event/            # Fecha, sede, programa, reel, ubicación
-│   ├── floor-plan/       # Croquis interactivo
-│   ├── games/            # Catálogo, detalle, carruseles y API
-│   ├── landing/          # Portada en tema claro (compone las demás features)
-│   ├── offline/          # Sin conexión: service worker, avisos y página /offline
-│   ├── site/             # Navegación, pie, 404 y página de error
-│   ├── teams/            # Equipos e integrantes (CRUD del panel)
-│   ├── visitors/         # Pasaporte con QR, check-ins, sorteo y afluencia
-│   └── example/          # Scaffold mínimo para crear features nuevas
-└── shared/               # Código transversal sin reglas de negocio (tema, botones, hooks)
+├── features/
+│   └── landing/          # Portada estática en tema claro
+└── shared/               # Código transversal sin reglas de negocio (tema, metadata, hooks)
 ```
 
-Cada feature se organiza en `lib/` (y `lib/server/` para el código de servidor), `hooks/`, `components/` y `pages/` (crea cada carpeta cuando la necesites), más `__tests__/` para sus pruebas. ESLint valida qué capa y qué feature puede importar a cuál. Las reglas completas están en
-[`AGENTS.md`](./AGENTS.md).
+Cada feature se organiza en `lib/`, `hooks/`, `components/` y `pages/` (crea cada carpeta cuando la
+necesites), más `__tests__/` para sus pruebas. ESLint valida qué capa y qué feature puede importar a
+cuál. Las reglas completas están en [`AGENTS.md`](./AGENTS.md).
 
 ## Documentación
 
 | Documento | Para qué |
 | --- | --- |
-| [`docs/where-to-edit.md`](./docs/where-to-edit.md) | Dónde cambiar textos, fechas, juegos, colores, el croquis o el reel. |
-| [`docs/architecture.md`](./docs/architecture.md) | Cómo está construido: capas, flujo de datos, patrones y principios SOLID. |
-| [`docs/data-sources.md`](./docs/data-sources.md) | Base de datos local con Docker, fuentes de datos y acciones de administración. |
-| [`docs/data-model.md`](./docs/data-model.md) | Modelo de datos (diagrama ER): juegos, equipos, stands, check-ins y rifa. |
 | [`docs/design-system.md`](./docs/design-system.md) | Tema UTG sobre HeroUI: colores, tipografía, botones y efectos. |
 | [`docs/versioning.md`](./docs/versioning.md) | Versiones, CHANGELOG y cómo publicar un release. |
-| [`docs/pwa.md`](./docs/pwa.md) | Sitio sin conexión: service worker, cómo probarlo y lista para el día del evento. |
-| [`docs/audit.md`](./docs/audit.md) | Auditoría técnica: capacidad, PWA, mantenibilidad y plan de acción. |
 | [`AGENTS.md`](./AGENTS.md) | Reglas del proyecto (también las leen los agentes de IA). |
 | [`CONTRIBUTING.md`](./CONTRIBUTING.md) | Flujo de trabajo, commits y Pull Requests. |
 

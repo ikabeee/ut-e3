@@ -33,7 +33,7 @@ const config = {
   moduleNameMapper: aliasesFromTsconfig(),
   // Las pruebas viven en `__tests__/`; ahí, lo que no termina en `.test` es un helper de prueba.
   testMatch: ["<rootDir>/src/**/*.test.{ts,tsx}"],
-  collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.d.ts", "!src/**/__tests__/**", "!src/shared/lib/prisma/**"],
+  collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.d.ts", "!src/**/__tests__/**"],
   coverageReporters: ["text-summary", "lcov"],
 };
 

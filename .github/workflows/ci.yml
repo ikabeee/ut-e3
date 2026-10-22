@@ -19,24 +19,7 @@ jobs:
   quality:
     runs-on: ubuntu-latest
 
-    # PostgreSQL para comprobar que las migraciones y los seeds se aplican sobre una base vacía.
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: utg
-          POSTGRES_PASSWORD: utg
-          POSTGRES_DB: ut_game_showcase
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U utg -d ut_game_showcase"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-
     env:
-      DATABASE_URL: postgresql://utg:utg@localhost:5432/ut_game_showcase
       DO_NOT_TRACK: 1
 
     steps:
@@ -52,9 +35,6 @@ jobs:
       - run: npm run format:check
       - run: npm run typecheck
       - run: npm test -- --coverage
-      - run: npm run db:migrate
-      - run: npm run db:seed
-      - run: npm run db:verify
       - run: npm run build
         env:
           # Obligatoria en producción (src/shared/lib/env.ts); basta un valor de ejemplo.

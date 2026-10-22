@@ -46,15 +46,10 @@ márgenes), `section-block` (espacio entre secciones) y `scrollbar-none`.
 | Necesito... | Usa |
 | --- | --- |
 | Botón | `Button` de HeroUI: `primary` (azul), `outline` (borde blanco), `tertiary` (sin borde), `ghost` (flecha); `size="lg"` es la pestaña sin borde |
-| Botón con etiqueta animada | `ActionButton` (`@shared/components/action-button`) |
-| Enlace con forma de botón | `ActionLink` (`@shared/components/action-link`) |
-| Flechas de carrusel | `ArrowButton` (`@shared/components/arrow-button`) |
-| Tarjeta clara | `PaperCard` (Card de HeroUI con el fondo `paper`) |
 | Selección on/off (géneros, filtros, pausa) | `ToggleButton` de HeroUI con su variante (ver abajo) |
 | Buscador | `SearchField` de HeroUI |
 | Barra de controles | `Toolbar` de HeroUI |
 | Insignia | `Chip` de HeroUI |
-| Estado vacío / carga | `EmptyState` (`@shared/components/empty-state`, centrado con iconos de Gravity UI) y `Skeleton` de HeroUI |
 
 ## Variantes
 
@@ -63,8 +58,8 @@ suma a la variante de HeroUI. Cambiar el aspecto de un control se hace ahí, en 
 
 | Componente | Clase | Dónde se usa |
 | --- | --- | --- |
-| `Button` / `ArrowButton tone="plate"` | `button--plate` | Flechas del exhibidor 3D: placa negra que se rellena de blanco. |
-| `Button` / `ArrowButton tone="overlay"` | `button--overlay` | Flechas sobre una imagen (galería del detalle): negro translúcido, sin barrido. |
+| `Button` | `button--plate` | Flechas del exhibidor 3D: placa negra que se rellena de blanco. |
+| `Button` | `button--overlay` | Flechas sobre una imagen (galería del detalle): negro translúcido, sin barrido. |
 | `Button` | `button--segment` | Celdas de una barra de controles (zoom del croquis): el fondo cambia de golpe a azul. |
 | `ToggleButton` | `toggle-button--tile` | Tarjeta seleccionable (géneros del catálogo). |
 | `ToggleButton` | `toggle-button--filter` | Filtro que se atenúa al apagarse (categorías del croquis). |
@@ -74,7 +69,7 @@ Todos los `ToggleButton` son cuadrados y no se escalan al presionar (regla de `.
 
 **Regla práctica: si una cadena de utilidades supera dos renglones o se repite, es una variante.**
 En `className` quedan sólo los ajustes de layout del contexto (posición, tamaño, márgenes), por
-ejemplo `<ArrowButton tone="overlay" className="absolute top-1/2 left-3" />`. No sobrescribas las
+ejemplo `<Button className="button--overlay absolute top-1/2 left-3" />`. No sobrescribas las
 variables del botón (`--btn-base`, `--btn-edge`, `--btn-fill`) desde TSX ni exportes cadenas de
 clases para que otro componente las reutilice: crea la variante o una utilidad.
 
@@ -111,7 +106,7 @@ Todo elemento interactivo mide al menos 44x44 px en pantallas táctiles (ver "M�
 `AGENTS.md`):
 
 - `touch-target` (`components.css`): pseudo-elemento invisible que amplía el área sin cambiar el
-  tamaño visual. El elemento debe ser `relative` o `absolute`. `ArrowButton` ya lo incluye.
+  tamaño visual. El elemento debe ser `relative` o `absolute`.
 - `pointer-coarse:min-h-11`: agranda el elemento sólo con dedo (filtros y directorio del croquis).
 - Croquis (SVG): `touch-target` no funciona dentro de un SVG y el dibujo se achica con el ancho
   del teléfono. Cada stand y zona lleva junto a su grupo un rectángulo transparente que calcula
