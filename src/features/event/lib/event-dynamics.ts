@@ -18,10 +18,15 @@ export const EVENT_DYNAMICS: readonly EventDynamic[] = [
     players: 64,
     prize: "Premio al campeón",
     backgroundImage: image("kof-bg.webp"),
+    cardClassName: "aspect-[606/408] rounded-[34.5px]",
     layers: [
       { src: image("kof-logo.webp"), className: "left-[24.4%] top-[6.1%] h-[24.3%] w-[51.2%]" },
       { src: image("kof-fighter-left.webp"), className: "left-[4%] top-[21.6%] h-[78.4%] w-[46.2%] -scale-x-100" },
-      { src: image("kof-fighter-right.webp"), className: "left-[37.3%] top-[27.7%] h-[71.3%] w-[52.8%]" },
+      {
+        src: image("kof-fighter-right.webp"),
+        className: "left-[37.3%] top-[27.7%] h-[71.3%] w-[52.8%]",
+        imageClassName: "object-[36%_0%]",
+      },
     ],
   },
   {

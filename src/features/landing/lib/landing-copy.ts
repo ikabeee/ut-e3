@@ -8,6 +8,10 @@ export const LANDING_COPY = {
     // Nombre accesible del logotipo VIDE [+] JUEG [o] S, que se dibuja con piezas decorativas.
     label: "Videojuegos",
   },
+  header: {
+    // Marca del encabezado claro (Figma 1:37).
+    brand: "UTGAMES",
+  },
   hero: {
     kicker: "Showcase",
     division: "División de Ingeniería",

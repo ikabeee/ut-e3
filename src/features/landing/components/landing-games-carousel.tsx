@@ -19,14 +19,14 @@ export function LandingGamesCarousel({ games, total }: Readonly<LandingGamesCaro
   const { trackRef, index, onScroll, previous, next } = useCarousel(games.length);
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-[49px]">
       <div
         ref={trackRef}
         onScroll={onScroll}
         role="region"
         aria-label={COPY.carouselLabel}
         tabIndex={0}
-        className="scrollbar-none flex snap-x snap-mandatory gap-6 overflow-x-auto pt-40"
+        className="scrollbar-none flex snap-x snap-mandatory gap-[25px] overflow-x-auto pt-40"
       >
         {games.map((game) => (
           <div key={game.id} className="w-[min(471px,85vw)] shrink-0 snap-start">
@@ -34,14 +34,14 @@ export function LandingGamesCarousel({ games, total }: Readonly<LandingGamesCaro
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-[18px]">
         <button type="button" aria-label={COPY.previous} onClick={previous} className="touch-target relative">
           <LandingIcon name="carousel-previous" className="size-[67px]" />
         </button>
         <button type="button" aria-label={COPY.next} onClick={next} className="touch-target relative">
           <LandingIcon name="carousel-next" className="size-[67px]" />
         </button>
-        <span className="ml-3" aria-live="polite">
+        <span className="ml-4 text-xl" aria-live="polite">
           {COPY.counter(index + 1, total)}
         </span>
       </div>

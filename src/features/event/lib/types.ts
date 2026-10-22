@@ -105,6 +105,8 @@ export interface ScheduleHighlights {
 export interface EventDynamicLayer {
   src: string;
   className: string;
+  /** Posición del recorte de la imagen dentro de su caja (por defecto, alineada arriba). */
+  imageClassName?: string;
 }
 
 /** Torneo o sorteo de la portada. Los horarios salen de `EVENT_SCHEDULE`, no de aquí. */
@@ -119,6 +121,8 @@ export interface EventDynamic {
   prize: string;
   /** Sin fondo, la tarjeta usa el color de superficie del tema (el sorteo). */
   backgroundImage?: string;
+  /** Proporción y radio propios de la tarjeta (clases de Tailwind); sin esto, 606/416 y radio 25,6 px. */
+  cardClassName?: string;
   layers?: readonly EventDynamicLayer[];
 }
 

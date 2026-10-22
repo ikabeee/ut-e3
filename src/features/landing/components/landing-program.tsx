@@ -19,47 +19,48 @@ interface LandingProgramProps {
 
 const { title, subtitle, scheduleHeading, brand, scheduleTimeLabel } = LANDING_COPY.program;
 
-const DASHED_FRAME = "pointer-events-none absolute hidden border-4 border-dashed border-foreground/10 lg:block";
+const DASHED_FRAME =
+  "pointer-events-none absolute hidden h-[367px] w-[457px] border-4 border-dashed border-border xl:block";
 
 /** Sección "Programa" (`#program`): título, enlace al calendario, horario del día y cuenta regresiva. */
 export function LandingProgram({ schedule, dateLabel, calendarUrl, startsAt }: Readonly<LandingProgramProps>) {
   return (
     <section id="program" aria-labelledby="program-title" className="relative overflow-hidden bg-background">
-      <div aria-hidden="true" className={cn(DASHED_FRAME, "top-16 -left-8 h-72 w-56 rounded-[1.6rem]")} />
-      <div aria-hidden="true" className={cn(DASHED_FRAME, "right-0 bottom-16 h-72 w-56 rounded-[1.6rem]")} />
-      <div className="relative page-wrap grid gap-10 py-16 lg:grid-cols-[1fr_minmax(0,40rem)] lg:items-start lg:gap-16">
-        <div className="flex flex-col items-start gap-6">
+      <div aria-hidden="true" className={cn(DASHED_FRAME, "top-[22px] -left-[228px] rounded-br-[30px]")} />
+      <div aria-hidden="true" className={cn(DASHED_FRAME, "top-[805px] -right-[151px] rounded-tl-[30px]")} />
+      <div className="relative mx-auto grid max-w-[1512px] gap-10 px-4 py-16 xl:grid-cols-[minmax(0,1fr)_629px] xl:items-start xl:gap-0 xl:pt-[156px] xl:pr-[210px] xl:pb-[53px] xl:pl-[83px]">
+        <div className="flex flex-col items-start xl:pt-[321px]">
           <h2
             id="program-title"
-            className="text-4xl leading-tight font-bold text-foreground uppercase sm:text-5xl lg:text-6xl"
+            className="max-w-[475px] text-4xl leading-tight font-bold text-wrap text-foreground uppercase sm:text-5xl xl:text-[46px] xl:leading-[60px]"
           >
             {title}
           </h2>
-          <p className="text-xl text-foreground/73">{subtitle}</p>
+          <p className="mt-[23px] text-[22px] leading-7 text-foreground/73 capitalize">{subtitle}</p>
           <a
             href={calendarUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="relative inline-flex min-h-11 items-center gap-4 rounded-full border border-foreground px-8 py-3 text-lg text-foreground"
+            className="mt-[51px] inline-flex h-[63px] w-[260px] items-center justify-center gap-5 rounded-full border border-foreground text-lg text-foreground"
           >
             <span className="capitalize">{LANDING_COPY.hero.addToCalendar}</span>
             <LandingIcon name="calendar" className="size-6" />
           </a>
         </div>
-        <div className="relative flex flex-col gap-8 bg-[url('/landing/program/schedule-card-shape.svg')] bg-[length:100%_100%] bg-no-repeat px-5 pt-24 pb-8 sm:px-10">
+        <div className="relative w-full max-w-[629px] justify-self-end bg-[url('/landing/program/schedule-card-shape.svg')] bg-[length:100%_100%] bg-no-repeat px-5 pt-28 pb-[50px] md:px-[38px] xl:pt-[145px]">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute top-24 right-0 h-60 w-44 bg-[url('/landing/program/constellation.svg')] bg-contain bg-no-repeat opacity-35"
+            className="pointer-events-none absolute -top-8 right-0 h-[249px] w-[180px] bg-[url('/landing/program/constellation.svg')] bg-contain bg-no-repeat opacity-35"
           />
-          <div className="absolute top-6 right-6 left-6 flex items-center justify-end gap-3 sm:right-10">
-            <Image src="/landing/program/utgames-mark.svg" alt="" width={58} height={67} unoptimized />
-            <span className="text-3xl font-bold text-foreground">{brand}</span>
+          <div className="absolute top-7 right-[89px] flex items-center gap-[18px]">
+            <Image src="/landing/program/utgames-mark.svg" alt="" width={65} height={70} unoptimized />
+            <span className="text-[38px] leading-none font-bold text-foreground">{brand}</span>
           </div>
-          <div className="relative flex flex-col gap-1">
-            <p className="text-xl text-foreground/73">{dateLabel}</p>
-            <h3 className="text-4xl font-bold text-foreground uppercase sm:text-5xl">{scheduleHeading}</h3>
-          </div>
-          <ol className="relative flex flex-col gap-4">
+          <p className="relative text-xl leading-7 text-foreground/73">{dateLabel}</p>
+          <h3 className="relative mt-2 text-5xl leading-none font-bold text-foreground uppercase md:text-[46px] md:leading-[60px]">
+            {scheduleHeading}
+          </h3>
+          <ol className="relative mt-[62px] flex flex-col gap-6">
             {schedule.map((entry) => {
               const { time, period } = splitClockTime(entry.time);
 
@@ -67,9 +68,9 @@ export function LandingProgram({ schedule, dateLabel, calendarUrl, startsAt }: R
                 <li
                   key={`${entry.time}-${entry.title}`}
                   aria-label={scheduleTimeLabel(entry.title, entry.time, entry.zoneTitle)}
-                  className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:flex-nowrap sm:justify-between"
+                  className="grid min-h-8 grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 md:grid-cols-[224px_15px_minmax(0,1fr)_82px] md:gap-x-[41px]"
                 >
-                  <span className="basis-full text-lg font-black text-foreground uppercase sm:basis-56 sm:text-2xl">
+                  <span className="col-span-2 text-lg leading-6 font-black text-foreground uppercase md:col-span-1 md:text-xl">
                     {entry.title}
                   </span>
                   <Image
@@ -78,13 +79,13 @@ export function LandingProgram({ schedule, dateLabel, calendarUrl, startsAt }: R
                     width={15}
                     height={6}
                     unoptimized
-                    className="hidden sm:block"
+                    className="hidden md:block"
                   />
-                  <span className="flex items-baseline gap-2 text-foreground">
-                    <span className="text-3xl font-black tabular-nums">{time}</span>
-                    <span className="text-xl font-bold">{period}</span>
+                  <span className="flex items-baseline gap-1 text-foreground md:pl-2">
+                    <span className="text-[28px] leading-none font-extrabold tabular-nums">{time}</span>
+                    <span className="text-[22px] leading-none font-bold">{period}</span>
                   </span>
-                  <span className="rounded bg-landing-coral px-3 py-1 text-sm font-black text-background">
+                  <span className="flex min-h-8 w-[82px] items-center justify-center justify-self-end rounded-[3px] bg-landing-coral px-1 text-center text-sm leading-4 font-bold text-background">
                     {entry.zoneTitle}
                   </span>
                 </li>

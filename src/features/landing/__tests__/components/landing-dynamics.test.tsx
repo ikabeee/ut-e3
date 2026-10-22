@@ -27,10 +27,17 @@ describe("LandingDynamics", () => {
     expect(screen.getByText("Premio para 30 personas")).toBeInTheDocument();
   });
 
-  it("links only the cards that have an href", () => {
+  it("links the arrow only on the cards that have an href", () => {
     render(<LandingDynamics dynamics={EVENT_DYNAMICS} gamesCount={18} hrefs={{ raffle: "/passport" }} />);
 
     expect(screen.getByRole("link", { name: "Ver Gran rifa" })).toHaveAttribute("href", "/passport");
     expect(screen.getAllByRole("link")).toHaveLength(1);
+  });
+
+  it("renders a decorative arrow on every card without a link", () => {
+    const { container } = render(<LandingDynamics dynamics={EVENT_DYNAMICS} gamesCount={18} />);
+
+    expect(screen.queryAllByRole("link")).toHaveLength(0);
+    expect(container.querySelectorAll("span[aria-hidden='true'].rounded-full")).toHaveLength(3);
   });
 });

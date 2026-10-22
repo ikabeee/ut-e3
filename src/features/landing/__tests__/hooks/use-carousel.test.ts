@@ -3,7 +3,7 @@ import { useCarousel } from "@features/landing/hooks/use-carousel";
 
 const TOTAL = 4;
 
-/** Pista con 4 tarjetas de 100 px y una ventana de 150 px. */
+/** Pista con 4 tarjetas de 100 px y una ventana de 150 px: de entrada se ven la primera y media segunda. */
 function makeTrack(scrollLeft = 0) {
   const track = document.createElement("div");
   Object.defineProperties(track, {
@@ -31,12 +31,14 @@ describe("useCarousel", () => {
     expect(result.current.index).toBe(0);
   });
 
-  it("follows the scroll position", () => {
+  it("reports the last card that starts inside the view, even if it is cut", () => {
     const { result, track } = setup();
 
-    track.scrollLeft = 200;
     act(() => result.current.onScroll());
+    expect(result.current.index).toBe(1);
 
+    track.scrollLeft = 100;
+    act(() => result.current.onScroll());
     expect(result.current.index).toBe(2);
   });
 

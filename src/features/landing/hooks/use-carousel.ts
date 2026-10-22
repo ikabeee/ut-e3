@@ -1,7 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "@shared/hooks/use-prefers-reduced-motion";
 
-/** Pasa de tarjeta en tarjeta una pista con `scroll-snap`; el scroll nativo sigue siendo la fuente de verdad. */
+/**
+ * Pasa de tarjeta en tarjeta una pista con `scroll-snap`; el scroll nativo sigue siendo la fuente de verdad.
+ * `index` es la última tarjeta que empieza dentro de la vista (como el "3/18" del Figma, con la tercera cortada).
+ */
 export function useCarousel(total: number) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -11,11 +14,13 @@ export function useCarousel(total: number) {
 
   const onScroll = () => {
     const track = trackRef.current;
-    if (!track) return;
+    if (!track?.scrollWidth) return;
 
-    const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
-    setIndex(atEnd ? total - 1 : Math.round(track.scrollLeft / getStep(track)));
+    const lastVisible = Math.ceil((track.scrollLeft + track.clientWidth) / getStep(track)) - 1;
+    setIndex(Math.min(Math.max(lastVisible, 0), total - 1));
   };
+
+  useEffect(onScroll);
 
   const scrollByCards = (cards: number) => {
     const track = trackRef.current;

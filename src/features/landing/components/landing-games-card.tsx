@@ -24,11 +24,11 @@ export function LandingGamesCard({ game }: Readonly<{ game: LandingGame }>) {
       />
       <div className="absolute top-[54.9%] left-[8.3%] w-[56.9%]">
         <Image src="/landing/icons/card-name-pill.svg" alt="" width={268} height={40} unoptimized className="w-full" />
-        <h3 className="absolute inset-0 grid place-items-center text-[5.1cqw] font-bold text-foreground uppercase">
+        <h3 className="absolute inset-0 grid place-items-center text-[4.7cqw] font-bold text-foreground uppercase">
           {name}
         </h3>
       </div>
-      <span className="absolute top-[67%] left-[8.3%] rounded-[2.5cqw] bg-landing-band px-[3cqw] py-[0.9cqw] text-[3cqw] text-background">
+      <span className="absolute top-[67%] left-[8.3%] grid h-[6.4cqw] place-items-center rounded-[2.5cqw] bg-landing-band px-[4.9cqw] text-[3.2cqw] text-background">
         {genre}
       </span>
       <p className="absolute top-[77.1%] left-[8.5%] w-[72.6%] text-[3.8cqw] leading-[1.2] capitalize">{description}</p>

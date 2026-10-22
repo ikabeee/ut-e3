@@ -29,7 +29,7 @@ describe("LandingGamesCarousel", () => {
     expect(screen.getByRole("link", { name: COPY.viewGame(first.name) })).toHaveAttribute("href", "/games");
   });
 
-  it("starts the counter on 1 over the team total", () => {
+  it("starts the counter on 1 over the team total when the track has no layout", () => {
     renderCarousel();
 
     expect(screen.getByText(COPY.counter(1, LANDING_TEAM_COUNT))).toBeInTheDocument();
@@ -40,10 +40,10 @@ describe("LandingGamesCarousel", () => {
     const track = screen.getByRole("region", { name: COPY.carouselLabel });
     mockTrack(track);
 
-    track.scrollLeft = 200;
+    track.scrollLeft = 100;
     fireEvent.scroll(track);
 
-    expect(screen.getByText(COPY.counter(3, LANDING_TEAM_COUNT))).toBeInTheDocument();
+    expect(screen.getByText(COPY.counter(2, LANDING_TEAM_COUNT))).toBeInTheDocument();
   });
 
   it("scrolls the track from the next and previous buttons", () => {

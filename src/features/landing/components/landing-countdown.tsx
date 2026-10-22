@@ -18,20 +18,23 @@ export function LandingCountdown({ startsAt }: Readonly<LandingCountdownProps>) 
   const parts = useCountdown(startsAt);
 
   return (
-    <section aria-label={countdownLabel} className="flex flex-col gap-3">
-      <div className="grid grid-cols-4 divide-x divide-slate-200 border border-slate-200 bg-background/95">
+    <section aria-label={countdownLabel} className="relative mt-8 -mr-1.5 -ml-3 flex flex-col gap-[23px]">
+      <div className="grid h-[119px] grid-cols-4 divide-x divide-slate-200 border border-slate-200 bg-background">
         {UNIT_KEYS.map((unit) => (
-          <div key={unit} className="flex flex-col items-center gap-1 px-1 py-4 sm:py-6">
-            <span aria-hidden="true" className="text-3xl font-extrabold text-landing-coral tabular-nums sm:text-5xl">
+          <div key={unit} className="flex flex-col items-center justify-center gap-1">
+            <span
+              aria-hidden="true"
+              className="text-4xl leading-none font-extrabold text-landing-coral tabular-nums sm:text-[45px]"
+            >
               {parts ? padCountdownValue(parts[unit]) : "--"}
             </span>
-            <span className="text-[0.6875rem] font-semibold tracking-wider text-slate-500 uppercase">
+            <span className="text-[11px] leading-none font-medium tracking-wider text-slate-500 uppercase">
               {units[unit]}
             </span>
           </div>
         ))}
       </div>
-      <p className="text-xl text-foreground/73 capitalize">{countdownLabel}</p>
+      <p className="pl-[5px] text-xl leading-7 text-foreground/73 capitalize">{countdownLabel}</p>
       {/* Los números cambian cada segundo y quedan ocultos; el resumen sólo cambia cada minuto. */}
       <p role="status" className="sr-only">
         {parts ? countdownSummary(parts.days, parts.hours, parts.minutes) : null}
