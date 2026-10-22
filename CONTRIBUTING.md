@@ -51,7 +51,7 @@ feat(games): agregar filtro por género
 fix(teams): corregir avatar roto en la tarjeta de equipo
 docs: actualizar guía de contribución
 refactor(shared): extraer componente Button
-chore(deps): actualizar prisma
+chore(deps): actualizar next
 ```
 
 El *scope* entre paréntesis es la feature afectada.
@@ -64,13 +64,10 @@ Si tu cambio se nota en el sitio, agrega una línea en la sección `[Sin publica
 
 ## 4. Entorno local
 
-Requisitos: **Node.js ≥ 22.18** y **PostgreSQL ≥ 15**.
+Requisitos: **Node.js ≥ 22.18**.
 
 ```bash
 npm install
-cp .env.example .env        # configura DATABASE_URL
-npm run db:emit             # genera contract.json y contract.d.ts
-npm run db:init             # crea las tablas en tu base local
 npm run dev                 # http://localhost:3000
 ```
 
@@ -94,7 +91,7 @@ npm test
 El CI de GitHub Actions corre estos mismos pasos (y `npm run build`) en cada Pull Request. En lugar de
 `npm run format`, el CI corre `npm run format:check`, que falla si algún archivo no tiene el formato.
 Las pruebas viven en la carpeta `__tests__/` de su feature (o de `src/shared/` y `src/app/`), con las
-mismas subcarpetas que el código: `games/lib/game-filters.ts` -> `games/__tests__/lib/game-filters.test.ts`.
+mismas subcarpetas que el código: `landing/lib/countdown.ts` -> `landing/__tests__/lib/countdown.test.ts`.
 
 ### Formato del código
 
@@ -110,7 +107,7 @@ comillas dobles, punto y coma y comas finales. No discutas espacios en las revis
   `cn(...)`). Sólo reordena dentro de una misma cadena: el orden de los argumentos de `cn()` sí importa
   para tailwind-merge, que descarta la clase que choca con una posterior (por ejemplo, `text-sm` después
   de `leading-*` borra el interlineado). Pon el tamaño del texto en un argumento anterior al interlineado.
-- No se formatean los archivos generados (`contract.json`, `contract.d.ts`, `package-lock.json`), las
+- No se formatean los archivos generados (`package-lock.json`), las
   salidas de compilación, `public/` ni el Markdown, porque Prettier alinea las tablas con espacios y
   editar una celda reescribiría la tabla completa (ver `.prettierignore`).
 - `.nvmrc` fija Node 22: con [nvm](https://github.com/nvm-sh/nvm), `nvm use` selecciona esa versión.
@@ -119,11 +116,10 @@ comillas dobles, punto y coma y comas finales. No discutas espacios en las revis
 
 El código está organizado con **screaming architecture**: las carpetas gritan *de qué trata* la aplicación
 (cada dominio es una carpeta en `src/features/`), no *con qué está hecha*.
-Como punto de partida existe la feature `example` (no se monta en ninguna ruta; cópiala y renómbrala).
+Hoy sólo existe la feature `landing` (la portada estática).
 
-- Cada feature en `src/features/<feature>/` se organiza en `lib/` (con `lib/server/` para el código de
-  servidor), `hooks/`, `components/` y `pages/`, más `api/` si expone datos por HTTP y `__tests__/` para
-  sus pruebas. Crea cada carpeta cuando la necesites; el linter valida las que existen. No dejes
+- Cada feature en `src/features/<feature>/` se organiza en `lib/`, `hooks/`, `components/` y `pages/`,
+  más `__tests__/` para sus pruebas. Crea cada carpeta cuando la necesites; el linter valida las que existen. No dejes
   carpetas vacías ni `.gitkeep`.
 - `npm run lint` valida qué capa puede importar a cuál y qué features pueden depender de otras
   (`FEATURE_DEPENDENCIES` en `eslint.config.mjs`). Si te bloquea, el mensaje dice qué hacer.
@@ -133,11 +129,7 @@ Como punto de partida existe la feature `example` (no se monta en ninguna ruta; 
 
 Las reglas completas están en [`AGENTS.md`](./AGENTS.md). Para orientarte rápido:
 
-- [`docs/where-to-edit.md`](./docs/where-to-edit.md): dónde cambiar textos, juegos, colores o el croquis.
-- [`docs/architecture.md`](./docs/architecture.md): capas, flujo de datos y principios SOLID.
 - [`docs/design-system.md`](./docs/design-system.md): cómo usar HeroUI con el tema UTG.
-- [`docs/data-sources.md`](./docs/data-sources.md): base de datos local, seeds y de dónde lee el sitio.
-- [`docs/data-model.md`](./docs/data-model.md): diagrama ER de la base de datos.
 
 ## 6. Código de conducta
 

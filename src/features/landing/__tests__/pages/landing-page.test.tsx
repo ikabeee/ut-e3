@@ -21,7 +21,7 @@ describe("LandingPage", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: "Videojuegos" })).toBeInTheDocument();
     expect(screen.getByText("IDYGS 101")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Ver juegos/i })).toHaveAttribute("href", "/games");
+    expect(screen.getByRole("link", { name: /Ver juegos/i })).toHaveAttribute("href", "/#games");
     expect(screen.getByText("20 Nov 2026 • UT Cancún | Entrada libre")).toBeInTheDocument();
     expect(screen.getByText("Noviembre 20, 2026")).toBeInTheDocument();
     expect(screen.getAllByRole("article")).toHaveLength(3);

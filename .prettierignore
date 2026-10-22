@@ -9,10 +9,6 @@ public
 # Archivos generados: no se editan a mano
 package-lock.json
 next-env.d.ts
-src/shared/lib/prisma/contract.json
-src/shared/lib/prisma/contract.d.ts
-src/shared/lib/prisma/ops.json
-src/shared/lib/prisma/migration.json
 # Migraciones: las genera `npm run db:migration:plan` (se revisan, no se reformatean)
 migrations
 # Plugin de Oxlint copiado de anti-slop: conserva el formato de upstream para comparar actualizaciones

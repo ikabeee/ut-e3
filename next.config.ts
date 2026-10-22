@@ -1,53 +1,22 @@
 import type { NextConfig } from "next";
-import { parseImageHosts } from "./src/shared/lib/image-hosts";
 
-// Archivos de public/ que cambian poco (reel e imágenes): caché de un día y revalidación en
+// Archivos de public/ que cambian poco (imágenes de la portada): caché de un día y revalidación en
 // segundo plano. No llevan hash en el nombre, por eso no se marcan como inmutables.
 const MEDIA_CACHE_CONTROL = "public, max-age=86400, stale-while-revalidate=604800";
 
 const nextConfig: NextConfig = {
-  // Servidor mínimo para la imagen de Docker (ver Dockerfile).
-  output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
-  experimental: {
-    // Reintenta navegaciones y Server Actions al volver la conexión y habilita `useOffline()`.
-    useOffline: true,
-  },
   images: {
     // AVIF primero (más ligero) y WebP como respaldo.
     formats: ["image/avif", "image/webp"],
-    // Dominios permitidos para las fotos de los juegos por URL (IMAGE_REMOTE_HOSTS en .env).
-    remotePatterns: parseImageHosts(process.env.IMAGE_REMOTE_HOSTS).map((hostname) => ({
-      protocol: "https" as const,
-      hostname,
-    })),
-  },
-  async rewrites() {
-    return [
-      {
-        source: "/mock/games/:path*",
-        destination: "/games/:path*",
-      },
-    ];
   },
   async headers() {
-    const media = ["/media/:path*", "/games/:path*", "/mock/:path*"].map((source) => ({
+    return ["/media/:path*", "/landing/:path*"].map((source) => ({
       source,
       headers: [{ key: "Cache-Control", value: MEDIA_CACHE_CONTROL }],
     }));
-
-    // El service worker nunca se guarda en caché HTTP: así el navegador detecta cada versión nueva.
-    const serviceWorker = {
-      source: "/sw.js",
-      headers: [
-        { key: "Content-Type", value: "application/javascript; charset=utf-8" },
-        { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
-      ],
-    };
-
-    return [...media, serviceWorker];
   },
   turbopack: {
     rules: {

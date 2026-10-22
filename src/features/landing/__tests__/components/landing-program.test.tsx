@@ -3,8 +3,8 @@ import { LandingProgram } from "@features/landing/components/landing-program";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 
 const SCHEDULE = [
-  { time: "10:00", title: "Apertura", zoneId: "entry", zoneTitle: "Entrada" },
-  { time: "13:30", title: "Rondas de torneos", zoneId: "arena", zoneTitle: "Arena de torneos" },
+  { time: "10:00", title: "Apertura", place: "Entrada" },
+  { time: "13:30", title: "Rondas de torneos", place: "Arena de torneos" },
 ];
 
 function renderProgram() {

@@ -6,6 +6,14 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Eliminado
+
+- El sitio queda sólo con la portada estática (`/`). Se quitan el catálogo y el detalle de juegos, el
+  croquis, el pasaporte con QR, el panel de administración, el portal de equipos, el registro y el
+  inicio de sesión, el modo sin conexión, la base de datos (Prisma y PostgreSQL) y TanStack Query. La
+  versión anterior se conserva en la rama `archive/develop-v1`. En la portada, "Ver juegos" y la
+  navegación llevan a las secciones de la misma página, y la tarjeta de la rifa ya no enlaza al pasaporte.
+
 ### Agregado
 
 - Nueva portada estática en tema claro, fiel al diseño "Nueva propuesta": hero, grupos, introducción,

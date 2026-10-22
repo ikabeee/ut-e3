@@ -1,7 +1,7 @@
 /**
  * Textos de la landing por sección, con las mayúsculas del Figma aplicadas por CSS (`uppercase` o
  * `capitalize`) donde el diseño las transforma. La fecha, la sede, la entrada y los horarios no se
- * escriben aquí: salen de `EVENT_INFO`, `EVENT_VENUE` y `EVENT_SCHEDULE` (feature `event`).
+ * escriben aquí: salen de `EVENT_INFO`, `EVENT_VENUE` y `EVENT_SCHEDULE` (`lib/event-content.ts`).
  */
 export const LANDING_COPY = {
   wordmark: {
@@ -9,8 +9,11 @@ export const LANDING_COPY = {
     label: "Videojuegos",
   },
   header: {
+    navigationLabel: "Principal",
+    homeLinkLabel: "UTG, inicio",
     // Marca del encabezado claro (Figma 1:37).
     brand: "UTGAMES",
+    links: { home: "Inicio", games: "Juegos", dynamics: "Dinámicas", program: "Programa" },
   },
   hero: {
     kicker: "Showcase",

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { LocatedScheduleEntry } from "@features/event/lib/types";
+import type { ScheduleEntry } from "@features/landing/lib/types";
 import { LandingCountdown } from "@features/landing/components/landing-countdown";
 import { LandingIcon } from "@features/landing/components/landing-icon";
 import { splitClockTime } from "@features/landing/lib/countdown";
@@ -7,9 +7,9 @@ import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { cn } from "@heroui/react";
 
 interface LandingProgramProps {
-  /** Programa del día; `zoneTitle` es la zona del croquis donde ocurre cada renglón. */
-  schedule: readonly LocatedScheduleEntry[];
-  /** Fecha del evento ya formateada (`EVENT_INFO.dateLabel`). */
+  /** Programa del día; `place` es la zona de la sede donde ocurre cada renglón. */
+  schedule: readonly ScheduleEntry[];
+  /** Fecha del evento ya formateada (`formatMonthDayYearLabel`). */
   dateLabel: string;
   /** Enlace a Google Calendar (`EVENT_INFO.calendarUrl`). */
   calendarUrl: string;
@@ -67,7 +67,7 @@ export function LandingProgram({ schedule, dateLabel, calendarUrl, startsAt }: R
               return (
                 <li
                   key={`${entry.time}-${entry.title}`}
-                  aria-label={scheduleTimeLabel(entry.title, entry.time, entry.zoneTitle)}
+                  aria-label={scheduleTimeLabel(entry.title, entry.time, entry.place)}
                   className="grid min-h-8 grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 md:grid-cols-[224px_15px_minmax(0,1fr)_82px] md:gap-x-[41px]"
                 >
                   <span className="col-span-2 text-lg leading-6 font-black text-foreground uppercase md:col-span-1 md:text-xl">
@@ -86,7 +86,7 @@ export function LandingProgram({ schedule, dateLabel, calendarUrl, startsAt }: R
                     <span className="text-[22px] leading-none font-bold">{period}</span>
                   </span>
                   <span className="flex min-h-8 w-[82px] items-center justify-center justify-self-end rounded-[3px] bg-landing-coral px-1 text-center text-sm leading-4 font-bold text-background">
-                    {entry.zoneTitle}
+                    {entry.place}
                   </span>
                 </li>
               );
