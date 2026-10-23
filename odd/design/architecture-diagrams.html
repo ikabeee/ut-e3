@@ -139,6 +139,27 @@
         font-size: 0.95rem;
       }
 
+      .tree {
+        background: var(--panel);
+        border: 1px solid var(--mid);
+        padding: 20px;
+        overflow-x: auto;
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        line-height: 1.6;
+        color: var(--white);
+      }
+      .tree .c {
+        color: var(--grey);
+      }
+      .tree .d {
+        color: var(--blue-1);
+      }
+      .tree .x {
+        color: var(--acid);
+      }
+
       section {
         display: grid;
         gap: 18px;
@@ -281,7 +302,7 @@
         </p>
         <div class="status-row">
           <span class="pill">Grupo A &middot; estructura</span>
-          <span class="pill">4 diagramas</span>
+          <span class="pill">4 diagramas + árbol del proyecto</span>
           <span class="pill">Secuencias y estados: pendientes</span>
         </div>
       </header>
@@ -291,6 +312,7 @@
         <a href="#containers"><span class="lvl">C4 nivel 2</span><span class="nm">Contenedores</span></a>
         <a href="#deployment"><span class="lvl">Infraestructura</span><span class="nm">Despliegue</span></a>
         <a href="#layers"><span class="lvl">C4 nivel 3</span><span class="nm">Capas de una feature</span></a>
+        <a href="#tree"><span class="lvl">Código</span><span class="nm">Árbol del proyecto</span></a>
       </nav>
 
       <div class="key">
@@ -660,6 +682,137 @@ flowchart TB
           Las reglas vienen de <code>AGENTS.md</code> y las valida ESLint (<code>no-restricted-imports</code> e
           <code>import/no-cycle</code>).
         </p>
+      </section>
+
+      <section id="tree">
+        <div class="section-head">
+          <span class="eyebrow">Código &middot; Árbol esperado</span>
+          <h2>Árbol del proyecto</h2>
+          <p class="question">¿Dónde vive cada pieza de los diagramas dentro del repositorio?</p>
+          <p class="muted">
+            Es la estructura propuesta: los nombres de rutas y archivos se pueden ajustar al implementar, pero las
+            carpetas y sus reglas siguen <code>AGENTS.md</code>. <span style="color: var(--blue-1)">Azul</span>:
+            carpetas; <span style="color: var(--acid)">acento</span>: lo que ya existe hoy.
+          </p>
+        </div>
+        <pre class="tree">ut-e3/
+├── <span class="d">.github/workflows/</span>
+│   ├── ci.yml                    <span class="c"># lint, format:check, typecheck, test, build, e2e</span>
+│   └── deploy.yml                <span class="c"># imagen linux/amd64 → GHCR → compose pull en el VPS</span>
+├── compose.yaml                  <span class="c"># servicios web y proxy; volúmenes data y uploads</span>
+├── compose.dev.yaml              <span class="c"># límites de CPU y memoria del VPS-1; SMTP de prueba (Mailpit)</span>
+├── Dockerfile                    <span class="c"># build multi-stage, output standalone, better-sqlite3 compilado</span>
+├── Caddyfile                     <span class="c"># TLS automático; /uploads con caché immutable</span>
+├── prisma7.config.ts             <span class="c"># DATABASE_URL="file:..." (nombre de Prisma 7.10+)</span>
+├── <span class="d">prisma/</span>
+│   ├── schema.prisma             <span class="c"># modelos camelCase con @@map / @map a snake_case plural</span>
+│   ├── <span class="d">migrations/</span>               <span class="c"># SQL generado + CHECK, índices parciales y triggers a mano</span>
+│   └── seed.ts                   <span class="c"># sysadmin, event_settings y géneros iniciales</span>
+├── <span class="d">generated/prisma/</span>             <span class="c"># cliente generado; fuera de git, ESLint y Prettier</span>
+├── <span class="d">e2e/</span>                          <span class="c"># fuera de src/: Jest no lo corre</span>
+│   ├── <span class="d">fixtures/</span>                 <span class="c"># BD temporal, seed de prueba, lector del SMTP de prueba</span>
+│   └── *.spec.ts                 <span class="c"># E2E-01 a E2E-15</span>
+├── playwright.config.ts          <span class="c"># iPhone WebKit 390, Android 360, escritorio 1440</span>
+├── <span class="d">odd/</span>                          <span class="c"># requisitos, diseño y tareas (este documento)</span>
+└── <span class="d">src/</span>
+    ├── instrumentation.ts        <span class="c"># register(): intervalo de la bandeja de salida, solo runtime nodejs</span>
+    ├── proxy.ts                  <span class="c"># filtro optimista por rol en los paneles</span>
+    ├── <span class="d">app/</span>                      <span class="c"># SOLO rutas: re-exportan pages y handlers de las features</span>
+    │   ├── <span class="x">layout.tsx</span>
+    │   ├── <span class="x">page.tsx</span>              <span class="c"># /  → landing</span>
+    │   ├── games/page.tsx        <span class="c"># /games</span>
+    │   ├── games/[slug]/page.tsx <span class="c"># /games/[slug]</span>
+    │   ├── floor-plan/page.tsx
+    │   ├── sponsors/page.tsx
+    │   ├── winners/page.tsx      <span class="c"># ganadores confirmados de la rifa</span>
+    │   ├── tournament/page.tsx   <span class="c"># bracket público en vivo</span>
+    │   ├── passport/page.tsx
+    │   ├── recover/page.tsx      <span class="c"># pedir enlace por correo</span>
+    │   ├── recover/[token]/route.ts <span class="c"># abre el pasaporte y redirige (303, no-store)</span>
+    │   ├── login/page.tsx
+    │   ├── activate/[token]/page.tsx <span class="c"># invitaciones del staff</span>
+    │   ├── stand/page.tsx        <span class="c"># escáner y panel del stand</span>
+    │   ├── kof/page.tsx          <span class="c"># staff y administrador de KOF</span>
+    │   ├── raffle/live/page.tsx  <span class="c"># pantalla del escenario</span>
+    │   ├── raffle/admin/page.tsx <span class="c"># animador y premios</span>
+    │   ├── help-desk/page.tsx    <span class="c"># mesa de atención</span>
+    │   ├── <span class="d">admin/</span>                <span class="c"># stands, cuentas, géneros, cronograma, patrocinadores,</span>
+    │   │                         <span class="c"># horarios, moderación y estado del servidor</span>
+    │   └── <span class="d">api/</span>
+    │       ├── check-ins/route.ts          <span class="c"># lotes del escáner</span>
+    │       ├── tournament/bracket/route.ts <span class="c"># bracket cacheado tras cada señal</span>
+    │       ├── tournament/stream/route.ts  <span class="c"># SSE del bracket</span>
+    │       └── raffle/stream/route.ts      <span class="c"># SSE de la tómbola</span>
+    ├── <span class="d">features/</span>
+    │   ├── <span class="x">landing/</span>              <span class="c"># ya existe: portada, actividades, invitadas</span>
+    │   ├── <span class="d">games/</span>                <span class="c"># catálogo, ficha, géneros, enlace a itch.io</span>
+    │   ├── <span class="d">floor-plan/</span>           <span class="c"># croquis interactivo</span>
+    │   ├── <span class="d">schedule/</span>             <span class="c"># cronograma</span>
+    │   ├── <span class="d">sponsors/</span>             <span class="c"># tarjetas y alta de patrocinadores</span>
+    │   ├── <span class="d">visitors/</span>             <span class="c"># registro, pasaporte, QR, recuperación</span>
+    │   ├── <span class="d">check-ins/</span>            <span class="c"># ejemplo completo de las capas:</span>
+    │   │   ├── <span class="d">__tests__/</span>        <span class="c"># mismas subcarpetas que el código</span>
+    │   │   ├── <span class="d">api/</span>
+    │   │   │   ├── check-ins-route.ts      <span class="c"># Route Handler (server-only)</span>
+    │   │   │   └── check-ins-api-client.ts <span class="c"># fetch del navegador</span>
+    │   │   ├── <span class="d">lib/</span>
+    │   │   │   ├── types.ts
+    │   │   │   ├── check-ins-copy.ts       <span class="c"># textos de la UI</span>
+    │   │   │   ├── check-in-rules.ts       <span class="c"># cortes, ajuste de hora, hitos (puras)</span>
+    │   │   │   ├── check-ins-actions.ts    <span class="c"># Server Actions</span>
+    │   │   │   └── <span class="d">server/</span>
+    │   │   │       └── check-in-queries.ts <span class="c"># transacciones con Prisma</span>
+    │   │   ├── <span class="d">hooks/</span>
+    │   │   │   └── use-offline-queue.ts    <span class="c"># IndexedDB, lotes y backoff</span>
+    │   │   ├── <span class="d">components/</span>
+    │   │   │   ├── scanner.tsx
+    │   │   │   ├── kiosk-survey.tsx
+    │   │   │   └── queue-status.tsx
+    │   │   └── <span class="d">pages/</span>
+    │   │       └── scanner-page.tsx        <span class="c"># contenedor + metadata</span>
+    │   ├── <span class="d">raffle/</span>               <span class="c"># tómbola, ganadores y premios</span>
+    │   ├── <span class="d">tournament/</span>           <span class="c"># inscripción, bracket, tableros, descalificaciones</span>
+    │   ├── <span class="d">accounts/</span>             <span class="c"># login, invitaciones, roles, sesiones, lista negra</span>
+    │   ├── <span class="d">admin/</span>                <span class="c"># panel del sysadmin, alertas, estado del servidor</span>
+    │   └── <span class="d">event-settings/</span>       <span class="c"># horarios y umbrales configurables</span>
+    └── <span class="d">shared/</span>                   <span class="c"># sin reglas de negocio; nunca importa features/</span>
+        ├── <span class="x">components/</span>           <span class="c"># JsonLd</span>
+        ├── <span class="x">hooks/</span>                <span class="c"># movimiento reducido</span>
+        ├── <span class="x">styles/</span>               <span class="c"># tema UTG</span>
+        └── <span class="x">lib/</span>                  <span class="c"># env, fonts, metadata, site-config + date-time.ts (America/Cancun)</span>
+            └── <span class="d">server/</span>           <span class="c"># nuevo:</span>
+                ├── prisma.ts        <span class="c"># cliente con adapter better-sqlite3, WAL y busy_timeout</span>
+                ├── hash-token.ts    <span class="c"># único lugar que escribe y compara columnas *_sha256</span>
+                ├── password.ts      <span class="c"># scrypt</span>
+                ├── session.ts       <span class="c"># sesiones del staff en la BD</span>
+                ├── outbox.ts        <span class="c"># bandeja de salida y envío SMTP</span>
+                ├── audit-log.ts     <span class="c"># bitácora</span>
+                ├── event-bus.ts     <span class="c"># bus en memoria</span>
+                ├── sse.ts           <span class="c"># stream, heartbeat, tope de conexiones</span>
+                └── rate-limit.ts    <span class="c"># límite de solicitudes</span></pre>
+        <div class="reading">
+          <div class="read">
+            <h3>Las rutas no tienen lógica</h3>
+            <p>
+              Cada archivo de <code>src/app/</code> solo re-exporta la page o el handler de su feature, como ya hace la
+              landing.
+            </p>
+          </div>
+          <div class="read">
+            <h3>Infraestructura en la raíz</h3>
+            <p>
+              Docker, Caddy, Prisma y Playwright quedan fuera de <code>src/</code>: no son código de la app y no deben
+              entrar en las reglas de ESLint de las features.
+            </p>
+          </div>
+          <div class="read">
+            <h3>Lo que no se versiona</h3>
+            <p>
+              <code>generated/prisma/</code>, el archivo de SQLite, el volumen de imágenes y el <code>.env</code> quedan
+              fuera de git.
+            </p>
+          </div>
+        </div>
       </section>
 
       <footer>
