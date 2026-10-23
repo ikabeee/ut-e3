@@ -1,0 +1,1446 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Modelo ER UT Showcase</title>
+    <meta name="claude:viewport-fit-sides" content="cover" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Syncopate:wght@700&display=swap"
+    />
+    <style>
+      /* Layout: single dark UTG field; one relationship map, then square table cards grouped by domain, mono for schema detail */
+      :root {
+        color-scheme: dark;
+        --black: #000000;
+        --panel: #1c1c1c;
+        --mid: #3a3a3a;
+        --grey: #8a8a8a;
+        --white: #ffffff;
+        --acid: #178fdd;
+        --blue-1: #68b5e6;
+        --warn: #fcf94e;
+        --font-display: "Syncopate", "Arial Black", sans-serif;
+        --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+        --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--black);
+        color: var(--white);
+        font-family: var(--font-body);
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding-block: 40px 72px;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+        display: grid;
+        gap: 56px;
+      }
+      h1,
+      h2 {
+        font-family: var(--font-display);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        text-wrap: balance;
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(1.6rem, 4.6vw, 3rem);
+        line-height: 1.1;
+      }
+      h2 {
+        font-size: clamp(1rem, 2.2vw, 1.35rem);
+        line-height: 1.2;
+      }
+      p {
+        margin: 0;
+        max-width: 72ch;
+      }
+      code {
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--acid);
+      }
+      .muted {
+        color: var(--grey);
+      }
+      header {
+        display: grid;
+        gap: 16px;
+      }
+      .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .pill {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border: 1px solid var(--mid);
+      }
+      .pill.draft {
+        border-color: var(--warn);
+        color: var(--warn);
+      }
+      section {
+        display: grid;
+        gap: 20px;
+      }
+      .section-head {
+        display: grid;
+        gap: 8px;
+        border-top: 1px solid var(--mid);
+        padding-top: 20px;
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        font-size: 0.85rem;
+        color: var(--grey);
+      }
+      .legend span {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .diagram {
+        background: var(--panel);
+        border: 1px solid var(--mid);
+        padding: 16px;
+        overflow-x: auto;
+      }
+      .diagram pre.mermaid {
+        margin: 0;
+        min-width: 760px;
+        background: transparent;
+        color: var(--white);
+      }
+
+      .domain {
+        display: grid;
+        gap: 14px;
+      }
+      .domain-title {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 12px;
+      }
+      .domain-title h3 {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--acid);
+      }
+      .tables {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+        gap: 12px;
+      }
+      .table {
+        border: 1px solid var(--mid);
+        display: grid;
+        align-content: start;
+        min-width: 0;
+      }
+      .table-head {
+        background: var(--panel);
+        padding: 10px 14px;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        align-items: baseline;
+        border-bottom: 1px solid var(--mid);
+      }
+      .table-head .name {
+        font-family: var(--font-mono);
+        font-weight: 700;
+      }
+      .table-head .role {
+        font-size: 0.78rem;
+        color: var(--grey);
+        text-align: right;
+      }
+      .cols {
+        list-style: none;
+        margin: 0;
+        padding: 6px 0;
+        display: grid;
+      }
+      .cols li {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        padding: 4px 14px;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        align-items: baseline;
+      }
+      .cols li .type {
+        color: var(--grey);
+      }
+      .cols li .keys {
+        display: inline-flex;
+        gap: 4px;
+        margin-left: 6px;
+      }
+      .k {
+        font-size: 0.64rem;
+        padding: 0 5px;
+        line-height: 1.5;
+        border: 1px solid var(--mid);
+        color: var(--grey);
+        vertical-align: 1px;
+      }
+      .k.pk {
+        background: var(--acid);
+        border-color: var(--acid);
+        color: var(--black);
+      }
+      .k.fk {
+        border-color: var(--blue-1);
+        color: var(--blue-1);
+      }
+      .k.uk {
+        background: var(--white);
+        border-color: var(--white);
+        color: var(--black);
+      }
+      .k.opt {
+        border-style: dashed;
+      }
+      .rules {
+        border-top: 1px solid var(--mid);
+        padding: 10px 14px 12px;
+        display: grid;
+        gap: 6px;
+        font-size: 0.82rem;
+      }
+      .rules div {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 8px;
+        align-items: baseline;
+      }
+      .tag {
+        font-family: var(--font-mono);
+        font-size: 0.64rem;
+        padding: 0 5px;
+        line-height: 1.6;
+        white-space: nowrap;
+      }
+      .tag.prisma {
+        border: 1px solid var(--grey);
+        color: var(--grey);
+      }
+      .tag.sql {
+        background: var(--warn);
+        color: var(--black);
+      }
+
+      .notes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 12px;
+      }
+      .note {
+        background: var(--panel);
+        border: 1px solid var(--mid);
+        padding: 16px;
+        display: grid;
+        gap: 8px;
+        align-content: start;
+        min-width: 0;
+      }
+      .note h3 {
+        margin: 0;
+        font-size: 0.95rem;
+      }
+      .note p {
+        font-size: 0.88rem;
+        color: var(--grey);
+      }
+
+      .open {
+        border: 1px solid var(--warn);
+        padding: 16px;
+        display: grid;
+        gap: 8px;
+      }
+      .open .state {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        color: var(--warn);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      footer {
+        border-top: 1px solid var(--mid);
+        padding-top: 20px;
+        color: var(--grey);
+        font-size: 0.85rem;
+        display: grid;
+        gap: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <span class="eyebrow">UT Game Showcase &middot; SQLite + Prisma 7</span>
+        <h1>Modelo ER</h1>
+        <p class="muted">
+          Borrador v0 del modelo de datos a partir de <code>odd/requirements/srs-v2.md</code> y las decisiones de
+          arquitectura. Las restricciones viven en la base de datos; lo que Prisma no puede declarar se escribe en el
+          SQL de la migración.
+        </p>
+        <div class="status-row">
+          <span class="pill">Versión 1</span>
+          <span class="pill">21 tablas</span>
+          <span class="pill">Decisiones cerradas</span>
+        </div>
+      </header>
+
+      <section>
+        <div class="section-head">
+          <span class="eyebrow">Relaciones</span>
+          <h2>Mapa general</h2>
+          <p class="muted">
+            Solo entidades y cardinalidades. Las columnas y restricciones están en las tarjetas por dominio.
+          </p>
+        </div>
+        <div class="diagram">
+          <pre class="mermaid">
+%%{init: {"theme": "base", "themeVariables": {"background": "#1c1c1c", "primaryColor": "#000000", "primaryTextColor": "#ffffff", "primaryBorderColor": "#178fdd", "lineColor": "#68b5e6", "secondaryColor": "#1c1c1c", "tertiaryColor": "#1c1c1c", "fontFamily": "JetBrains Mono, monospace", "fontSize": "14px"}}}%%
+erDiagram
+  Stand ||--o| Game : "exhibe"
+  Genre ||--o{ Game : "clasifica"
+  Game ||--o{ GameImage : "muestra"
+  Stand ||--o{ TeamMember : "integra"
+  Stand |o--o{ Account : "asigna"
+  Account ||--o{ Invitation : "recibe"
+  Account ||--o{ Session : "abre"
+  Visitor ||--o{ RecoveryToken : "recupera"
+  Account |o--o{ RecoveryToken : "emite"
+  Visitor ||--o{ CheckIn : "visita"
+  Stand ||--o{ CheckIn : "recibe"
+  Account ||--o{ CheckIn : "escanea"
+  Visitor ||--o{ RaffleTicket : "gana"
+  RaffleTicket ||--o| RaffleDraw : "sale en"
+  Account ||--o{ RaffleDraw : "gira"
+  Visitor ||--o| TournamentEntry : "se inscribe"
+  TournamentEntry |o--o{ Match : "juega"
+  Match |o--o{ Match : "avanza a"
+  Account |o--o{ Match : "captura"
+  Account |o--o{ AuditLog : "registra"
+</pre>
+        </div>
+        <div class="legend">
+          <span><span class="k pk">PK</span> llave primaria</span>
+          <span><span class="k fk">FK</span> llave foránea</span>
+          <span><span class="k uk">UQ</span> único</span>
+          <span><span class="k opt">?</span> opcional</span>
+          <span><span class="tag prisma">prisma</span> declarable en <code>schema.prisma</code></span>
+          <span><span class="tag sql">sql</span> escrita a mano en la migración</span>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <span class="eyebrow">Dominios</span>
+          <h2>Tablas y restricciones</h2>
+          <p class="muted">
+            IDs <code>TEXT</code> (UUID). Fechas en ISO 8601 UTC, mostradas en <code>America/Cancun</code>. Estados como
+            <code>TEXT</code> con <code>CHECK</code>, porque SQLite no valida enums. Propiedades en
+            <code>camelCase</code> en Prisma; tablas en plural y columnas en <code>snake_case</code> con
+            <code>@@map</code> y <code>@map</code>. Los tokens y contraseñas nunca se guardan: la columna guarda su hash
+            y lo documenta un comentario <code>///</code>.
+          </p>
+        </div>
+
+        <div class="domain">
+          <div class="domain-title">
+            <h3>Cuentas y acceso</h3>
+            <span class="muted">Staff, administradores y lista negra</span>
+          </div>
+          <div class="tables">
+            <div class="table">
+              <div class="table-head">
+                <span class="name">Account</span><span class="role">Staff y administradores</span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >email <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>name</span><span class="type">String</span></li>
+                <li><span>role</span><span class="type">String</span></li>
+                <li>
+                  <span
+                    >group <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >studio <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">Int</span>
+                </li>
+                <li>
+                  <span
+                    >password <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>status</span><span class="type">String</span></li>
+                <li>
+                  <span
+                    >standId <span class="keys"><span class="k fk">FK</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >kofBoard <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">Int</span>
+                </li>
+                <li>
+                  <span
+                    >createdById
+                    <span class="keys"><span class="k fk">FK</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span
+                    ><code
+                      >role IN (sysadmin, stand_admin, stand_staff, raffle_admin, kof_admin, kof_staff, help_desk)</code
+                    ></span
+                  >
+                </div>
+                <div>
+                  <span class="tag sql">sql</span><span><code>status IN (invited, active, disabled)</code></span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span><code>standId</code> obligatorio si y solo si el rol es de stand</span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span><code>kofBoard IN (1..4)</code> solo para <code>kof_staff</code></span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span
+                    >Único parcial: un <code>stand_admin</code> por stand; un <code>kof_staff</code> activo por
+                    tablero</span
+                  >
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span>Trigger: máximo 3 <code>stand_staff</code> activos por stand</span>
+                </div>
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span
+                    ><code>password</code> &rarr; columna <code>password_scrypt</code>: hash <code>scrypt</code> con
+                    sal</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head">
+                <span class="name">Invitation</span><span class="role">Activación por correo</span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >accountId <span class="keys"><span class="k fk">FK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >token <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>expiresAt</span><span class="type">DateTime</span></li>
+                <li>
+                  <span
+                    >usedAt <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">DateTime</span>
+                </li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span>Expira a las 72 h; reenviar crea una nueva e invalida la anterior</span>
+                </div>
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span
+                    ><code>token</code> &rarr; columna <code>token_sha256</code>; el token solo viaja en el enlace del
+                    correo</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head"><span class="name">Session</span><span class="role">Sesión del staff</span></div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >accountId <span class="keys"><span class="k fk">FK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >token <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>expiresAt</span><span class="type">DateTime</span></li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span>Desactivar la cuenta o cambiarle el rol borra sus sesiones en la misma transacción</span>
+                </div>
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span
+                    ><code>token</code> &rarr; columna <code>token_sha256</code>; el token solo vive en la cookie</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head">
+                <span class="name">TeamMember</span><span class="role">Integrantes de cada equipo</span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >standId <span class="keys"><span class="k fk">FK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>fullName</span><span class="type">String</span></li>
+                <li>
+                  <span
+                    >email <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span>Con <code>Account.email</code> forma la lista negra del registro de visitantes</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="domain">
+          <div class="domain-title">
+            <h3>Stands y juegos</h3>
+            <span class="muted">18 stands, un juego cada uno</span>
+          </div>
+          <div class="tables">
+            <div class="table">
+              <div class="table-head">
+                <span class="name">Stand</span><span class="role">Código <code>zA-s3-e5-103</code></span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>zone</span><span class="type">String</span></li>
+                <li><span>number</span><span class="type">Int</span></li>
+                <li><span>studio</span><span class="type">Int</span></li>
+                <li><span>groupCode</span><span class="type">String</span></li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span><span><code>@@unique([zone, number])</code></span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span><code>zone GLOB '[A-Z]'</code>, <code>number &gt; 0</code></span>
+                </div>
+                <div><span class="tag sql">sql</span><span>Trigger: máximo 18 stands</span></div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head"><span class="name">Game</span><span class="role">Ficha del juego</span></div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >standId <span class="keys"><span class="k fk">FK</span><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>name</span><span class="type">String</span></li>
+                <li>
+                  <span
+                    >slug <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>synopsis</span><span class="type">String</span></li>
+                <li>
+                  <span
+                    >genreId <span class="keys"><span class="k fk">FK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >itchUrl <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span><span><code>standId</code> único: un juego por stand</span>
+                </div>
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span><code>genreId</code> obligatorio, un solo género, <code>onDelete: Restrict</code></span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span><span><code>itchUrl LIKE 'https://%'</code></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head"><span class="name">Genre</span><span class="role">Catálogo de géneros</span></div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >name <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >slug <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span>Lo gestiona el sysadmin; no se borra si tiene juegos asignados</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head">
+                <span class="name">GameImage</span><span class="role">Hasta 5 por juego</span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >gameId <span class="keys"><span class="k fk">FK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>path</span><span class="type">String</span></li>
+                <li><span>alt</span><span class="type">String</span></li>
+                <li><span>position</span><span class="type">Int</span></li>
+                <li><span>isCover</span><span class="type">Boolean</span></li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span><span><code>@@unique([gameId, position])</code></span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span><code>position BETWEEN 1 AND 5</code>: junto con el único, la BD impone el máximo de 5</span>
+                </div>
+                <div><span class="tag sql">sql</span><span>Único parcial: una sola portada por juego</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="domain">
+          <div class="domain-title">
+            <h3>Visitantes, check-ins y boletos</h3>
+            <span class="muted">Pasaporte con QR fijo, sin PIN</span>
+          </div>
+          <div class="tables">
+            <div class="table">
+              <div class="table-head"><span class="name">Visitor</span><span class="role">Pasaporte</span></div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>fullName</span><span class="type">String</span></li>
+                <li>
+                  <span
+                    >gamertag <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >email <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >qrToken <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >deviceToken
+                    <span class="keys"><span class="k uk">UQ</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >excludedAt <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">DateTime</span>
+                </li>
+                <li>
+                  <span
+                    >excludedReason <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >anonymizedAt <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">DateTime</span>
+                </li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span><code>deviceToken</code> único: un solo dispositivo activo</span>
+                </div>
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span
+                    ><code>qrToken</code> &rarr; <code>qr_token_sha256</code> y <code>deviceToken</code> &rarr;
+                    <code>device_token_sha256</code>; los tokens solo viven en el QR y en la cookie</span
+                  >
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span><code>excludedReason</code> obligatorio si hay <code>excludedAt</code></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head">
+                <span class="name">RecoveryToken</span><span class="role">Correo o mesa de atención</span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >visitorId <span class="keys"><span class="k fk">FK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >token <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>channel</span><span class="type">String</span></li>
+                <li>
+                  <span
+                    >issuedById <span class="keys"><span class="k fk">FK</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>expiresAt</span><span class="type">DateTime</span></li>
+                <li>
+                  <span
+                    >usedAt <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">DateTime</span>
+                </li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag sql">sql</span><span><code>channel IN (email, help_desk)</code></span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span><code>issuedById</code> obligatorio si el canal es <code>help_desk</code></span>
+                </div>
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span
+                    ><code>token</code> &rarr; columna <code>token_sha256</code>; un solo uso, expira a los 30 min</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head">
+                <span class="name">CheckIn</span><span class="role">Visita y voto juntos</span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >visitorId <span class="keys"><span class="k fk">FK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >standId <span class="keys"><span class="k fk">FK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >scannedById <span class="keys"><span class="k fk">FK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>scannedAt</span><span class="type">DateTime</span></li>
+                <li><span>receivedAt</span><span class="type">DateTime</span></li>
+                <li><span>gameScore</span><span class="type">Int</span></li>
+                <li><span>standScore</span><span class="type">Int</span></li>
+                <li>
+                  <span
+                    >annulledAt <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">DateTime</span>
+                </li>
+                <li>
+                  <span
+                    >annulledReason <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >annulledById
+                    <span class="keys"><span class="k fk">FK</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span
+                    ><code>@@unique([visitorId, standId])</code>; el <code>id</code> lo genera el escáner
+                    (idempotencia)</span
+                  >
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span
+                    ><code>gameScore</code> y <code>standScore BETWEEN 1 AND 5</code>, <code>NOT NULL</code>: sin voto
+                    no hay check-in</span
+                  >
+                </div>
+                <div>
+                  <span class="tag sql">sql</span><span>Anulación completa o nula: los tres campos juntos</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head">
+                <span class="name">RaffleTicket</span><span class="role">A las 9 y 18 visitas</span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >number <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">Int</span>
+                </li>
+                <li>
+                  <span
+                    >visitorId <span class="keys"><span class="k fk">FK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>milestone</span><span class="type">Int</span></li>
+                <li><span>status</span><span class="type">String</span></li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span><span><code>@@unique([visitorId, milestone])</code></span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span><code>milestone IN (9, 18)</code>: máximo 2 boletos por visitante</span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span><span><code>status IN (active, drawn, voided)</code></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="domain">
+          <div class="domain-title">
+            <h3>Rifa</h3>
+            <span class="muted">Un giro a la vez</span>
+          </div>
+          <div class="tables">
+            <div class="table">
+              <div class="table-head">
+                <span class="name">RaffleDraw</span><span class="role">Cada giro de la tómbola</span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >ticketId <span class="keys"><span class="k fk">FK</span><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >requestId <span class="keys"><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >drawnById <span class="keys"><span class="k fk">FK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>outcome</span><span class="type">String</span></li>
+                <li>
+                  <span
+                    >decidedAt <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">DateTime</span>
+                </li>
+                <li>
+                  <span
+                    >prizeName <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >prizeById <span class="keys"><span class="k fk">FK</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span
+                    ><code>ticketId</code> único (un boleto sale una vez); <code>requestId</code> único (idempotencia de
+                    "Girar")</span
+                  >
+                </div>
+                <div>
+                  <span class="tag sql">sql</span><span><code>outcome IN (pending, winner, discarded)</code></span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span
+                    >Único parcial sobre <code>outcome</code> donde es <code>pending</code>: la BD impide girar con un
+                    boleto sin decidir</span
+                  >
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span><code>prizeName</code> solo si <code>outcome = winner</code></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="domain">
+          <div class="domain-title">
+            <h3>Torneo KOF</h3>
+            <span class="muted">64 lugares, 63 combates</span>
+          </div>
+          <div class="tables">
+            <div class="table">
+              <div class="table-head">
+                <span class="name">TournamentEntry</span><span class="role">Inscripción</span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >visitorId <span class="keys"><span class="k fk">FK</span><span class="k uk">UQ</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>channel</span><span class="type">String</span></li>
+                <li>
+                  <span
+                    >registeredById
+                    <span class="keys"><span class="k fk">FK</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >slot <span class="keys"><span class="k uk">UQ</span><span class="k opt">?</span></span></span
+                  ><span class="type">Int</span>
+                </li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span
+                    ><code>channel IN (pre, onsite)</code>; <code>slot BETWEEN 1 AND 64</code> (se asigna al
+                    barajear)</span
+                  >
+                </div>
+                <div><span class="tag sql">sql</span><span>Trigger: máximo 64 inscripciones</span></div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head"><span class="name">Match</span><span class="role">Combate del bracket</span></div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>round</span><span class="type">Int</span></li>
+                <li><span>position</span><span class="type">Int</span></li>
+                <li><span>board</span><span class="type">String</span></li>
+                <li>
+                  <span
+                    >playerAId <span class="keys"><span class="k fk">FK</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >playerBId <span class="keys"><span class="k fk">FK</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >winnerId <span class="keys"><span class="k fk">FK</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>status</span><span class="type">String</span></li>
+                <li>
+                  <span
+                    >outcome <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >nextMatchId
+                    <span class="keys"><span class="k fk">FK</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >nextSlot <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >assignedStaffId
+                    <span class="keys"><span class="k fk">FK</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>version</span><span class="type">Int</span></li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span
+                  ><span><code>@@unique([round, position])</code>; <code>version</code> para optimistic locking</span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span
+                    ><code>round BETWEEN 1 AND 6</code>; <code>board IN ('1','2','3','4','final')</code>;
+                    <code>nextSlot IN ('A','B')</code></span
+                  >
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span><code>status IN (pending, ready, active, finished, frozen)</code></span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span><code>outcome IN (played, no_show, disqualified, bye, double_out)</code></span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span><code>winnerId</code> es <code>playerAId</code> o <code>playerBId</code></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="domain">
+          <div class="domain-title">
+            <h3>Configuración, contenido e infraestructura</h3>
+            <span class="muted">Sin relaciones con el resto, salvo la bitácora</span>
+          </div>
+          <div class="tables">
+            <div class="table">
+              <div class="table-head">
+                <span class="name">EventSettings</span><span class="role">Una sola fila</span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">Int</span>
+                </li>
+                <li><span>eventStartsAt</span><span class="type">DateTime</span></li>
+                <li><span>eventEndsAt</span><span class="type">DateTime</span></li>
+                <li><span>registrationOpensAt</span><span class="type">DateTime</span></li>
+                <li><span>kofRegistrationOpensAt</span><span class="type">DateTime</span></li>
+                <li><span>kofRegistrationClosesAt</span><span class="type">DateTime</span></li>
+                <li><span>marketplaceClosesAt</span><span class="type">DateTime</span></li>
+                <li>
+                  <span
+                    >marketplaceFormUrl <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>itchOpensAt</span><span class="type">DateTime</span></li>
+                <li><span>checkInCutoffAt</span><span class="type">DateTime</span></li>
+                <li><span>raffleStartsAt</span><span class="type">DateTime</span></li>
+                <li>
+                  <span
+                    >raffleClosedAt <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">DateTime</span>
+                </li>
+                <li>
+                  <span
+                    >bracketGeneratedAt <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">DateTime</span>
+                </li>
+                <li><span>publicBracketEnabled</span><span class="type">Boolean</span></li>
+                <li><span>fraudTopScoreCount</span><span class="type">Int</span></li>
+                <li><span>fraudWindowMinutes</span><span class="type">Int</span></li>
+                <li><span>fraudSingleVisitMax</span><span class="type">Int</span></li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span><code>CHECK (id = 1)</code>; columnas con tipo en lugar de clave-valor</span>
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span
+                    ><code>checkInCutoffAt &lt; raffleStartsAt</code>; <code>eventStartsAt &lt; eventEndsAt</code></span
+                  >
+                </div>
+                <div>
+                  <span class="tag sql">sql</span><span>Umbrales de fraude mayores que 0 (iniciales: 12, 10 y 1)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head"><span class="name">ScheduleItem</span><span class="role">Cronograma</span></div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>title</span><span class="type">String</span></li>
+                <li><span>description</span><span class="type">String</span></li>
+                <li><span>startsAt</span><span class="type">DateTime</span></li>
+                <li><span>endsAt</span><span class="type">DateTime</span></li>
+                <li>
+                  <span
+                    >zone <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag sql">sql</span><span><code>endsAt &gt; startsAt</code></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head"><span class="name">Sponsor</span><span class="role">Tarjetas públicas</span></div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>name</span><span class="type">String</span></li>
+                <li><span>logoPath</span><span class="type">String</span></li>
+                <li><span>websiteUrl</span><span class="type">String</span></li>
+                <li><span>phone</span><span class="type">String</span></li>
+                <li><span>services</span><span class="type">String</span></li>
+                <li><span>position</span><span class="type">Int</span></li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag sql">sql</span><span><code>phone GLOB '+[0-9]*'</code> (E.164)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head">
+                <span class="name">OutboxEmail</span><span class="role">Bandeja de salida</span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>kind</span><span class="type">String</span></li>
+                <li><span>to</span><span class="type">String</span></li>
+                <li><span>subject</span><span class="type">String</span></li>
+                <li><span>html</span><span class="type">String</span></li>
+                <li><span>status</span><span class="type">String</span></li>
+                <li><span>attempts</span><span class="type">Int</span></li>
+                <li><span>nextAttemptAt</span><span class="type">DateTime</span></li>
+                <li>
+                  <span
+                    >leaseUntil <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">DateTime</span>
+                </li>
+                <li>
+                  <span
+                    >lastError <span class="keys"><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span
+                    ><code>status IN (pending, sending, sent, failed)</code>;
+                    <code>attempts BETWEEN 0 AND 5</code></span
+                  >
+                </div>
+                <div>
+                  <span class="tag sql">sql</span><span>Se reclama con <code>UPDATE ... RETURNING</code></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head"><span class="name">AuditLog</span><span class="role">Bitácora</span></div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >id <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >actorId <span class="keys"><span class="k fk">FK</span><span class="k opt">?</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li><span>action</span><span class="type">String</span></li>
+                <li><span>entityType</span><span class="type">String</span></li>
+                <li><span>entityId</span><span class="type">String</span></li>
+                <li><span>detail</span><span class="type">Json</span></li>
+                <li><span>createdAt</span><span class="type">DateTime</span></li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span
+                    >Triggers <code>BEFORE UPDATE</code> y <code>BEFORE DELETE</code> con <code>RAISE(ABORT)</code>:
+                    solo inserción, impuesto por la BD</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="table">
+              <div class="table-head">
+                <span class="name">RateLimit</span><span class="role">Límite de solicitudes</span>
+              </div>
+              <ul class="cols">
+                <li>
+                  <span
+                    >key <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">String</span>
+                </li>
+                <li>
+                  <span
+                    >windowStart <span class="keys"><span class="k pk">PK</span></span></span
+                  ><span class="type">DateTime</span>
+                </li>
+                <li><span>count</span><span class="type">Int</span></li>
+              </ul>
+              <div class="rules">
+                <div>
+                  <span class="tag prisma">prisma</span><span><code>@@id([key, windowStart])</code></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <span class="eyebrow">SQLite</span>
+          <h2>Ajustes frente a PostgreSQL</h2>
+        </div>
+        <div class="notes">
+          <div class="note">
+            <h3>Escrituras en fila</h3>
+            <p>
+              SQLite ejecuta una escritura a la vez, así que una transacción ya excluye a las demás. No hacen falta
+              <code>FOR UPDATE</code> ni <code>SKIP LOCKED</code>.
+            </p>
+          </div>
+          <div class="note">
+            <h3>WAL y espera</h3>
+            <p>
+              <code>PRAGMA journal_mode = WAL</code> para leer mientras se escribe y
+              <code>busy_timeout = 5000</code> para que una escritura espere a otra en vez de fallar.
+            </p>
+          </div>
+          <div class="note">
+            <h3>Límites de varias filas</h3>
+            <p>
+              Máximo 18 stands, 3 staff por stand y 64 inscritos van como triggers, para que la regla viva en la BD y no
+              solo en el código.
+            </p>
+          </div>
+          <div class="note">
+            <h3>Pendiente de verificar</h3>
+            <p>
+              Transacciones interactivas con el adapter <code>better-sqlite3</code> y la versión de SQLite que trae
+              (<code>RETURNING</code> desde 3.35). Va una prueba de concurrencia temprana.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <span class="eyebrow">Decidido</span>
+          <h2>Decisiones del modelo</h2>
+        </div>
+        <div class="notes">
+          <div class="note">
+            <h3>Voto dentro de CheckIn</h3>
+            <p>Nacen juntos y son 1 a 1; el <code>NOT NULL</code> impone "sin voto no hay check-in".</p>
+          </div>
+          <div class="note">
+            <h3>Tokens mapeados</h3>
+            <p>
+              La propiedad se llama <code>token</code>; la columna <code>token_sha256</code> y un comentario
+              <code>///</code> dicen qué guarda. Solo <code>shared/lib/server</code> escribe y compara esas columnas.
+            </p>
+          </div>
+          <div class="note">
+            <h3>Un solo torneo</h3>
+            <p>Solo existe KOF, sin tabla <code>Tournament</code>.</p>
+          </div>
+          <div class="note">
+            <h3>Género en tabla aparte</h3>
+            <p>Un género por juego, gestionado por el sysadmin.</p>
+          </div>
+          <div class="note">
+            <h3>Sesiones en la BD</h3>
+            <p>Se cierran al instante al desactivar una cuenta o cambiarle el rol.</p>
+          </div>
+          <div class="note">
+            <h3>Boleto global</h3>
+            <p>Número autoincremental: #1, #2, #3.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <span
+          >Versión 1.1 &middot; 23 de octubre de 2026 &middot; horario del evento y umbrales de fraude
+          configurables</span
+        >
+        <span>Siguiente: casos de uso para pruebas unitarias y flujos e2e.</span>
+      </footer>
+    </div>
+  </body>
+</html>

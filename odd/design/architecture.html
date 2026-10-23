@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Arquitectura UT Game Showcase</title>
+    <meta name="claude:viewport-fit-sides" content="cover" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Syncopate:wght@700&display=swap"
+    />
+    <style>
+      /* Layout: single dark UTG field, square blocks, wide uppercase display headings, mono for technical detail */
+      :root {
+        color-scheme: dark;
+        --black: #000000;
+        --panel: #1c1c1c;
+        --mid: #3a3a3a;
+        --grey: #8a8a8a;
+        --white: #ffffff;
+        --acid: #178fdd;
+        --blue-1: #68b5e6;
+        --warn: #fcf94e;
+        --font-display: "Syncopate", "Arial Black", sans-serif;
+        --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+        --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--black);
+        color: var(--white);
+        font-family: var(--font-body);
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      .wrap {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding-block: 40px 72px;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+        display: grid;
+        gap: 64px;
+      }
+      h1,
+      h2 {
+        font-family: var(--font-display);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        text-wrap: balance;
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(1.6rem, 4.6vw, 3rem);
+        line-height: 1.1;
+      }
+      h2 {
+        font-size: clamp(1rem, 2.2vw, 1.35rem);
+        line-height: 1.2;
+      }
+      h3 {
+        font-size: 1rem;
+        margin: 0;
+        font-weight: 700;
+      }
+      p {
+        margin: 0;
+        max-width: 68ch;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--acid);
+      }
+      .muted {
+        color: var(--grey);
+      }
+      code {
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+      }
+      section {
+        display: grid;
+        gap: 20px;
+      }
+      .section-head {
+        display: grid;
+        gap: 8px;
+        border-top: 1px solid var(--mid);
+        padding-top: 20px;
+      }
+      header {
+        display: grid;
+        gap: 16px;
+      }
+      .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .pill {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border: 1px solid var(--mid);
+      }
+      .pill.done {
+        border-color: var(--acid);
+        color: var(--blue-1);
+      }
+
+      /* Rendering categories: fill, outline, dashed and inverted encode the category in form, not only hue */
+      .legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 12px;
+      }
+      .cat {
+        padding: 16px;
+        display: grid;
+        gap: 8px;
+        align-content: start;
+        min-width: 0;
+      }
+      .cat-static {
+        background: var(--panel);
+        border: 1px solid var(--mid);
+      }
+      .cat-cached {
+        background: var(--acid);
+        color: var(--black);
+        border: 1px solid var(--acid);
+      }
+      .cat-stream {
+        border: 1px dashed var(--blue-1);
+      }
+      .cat-client {
+        background: var(--white);
+        color: var(--black);
+        border: 1px solid var(--white);
+      }
+      .cat .tag {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .cat p {
+        font-size: 0.92rem;
+      }
+
+      .chip {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        padding: 2px 8px;
+        white-space: nowrap;
+      }
+      .chip.static {
+        background: var(--panel);
+        border: 1px solid var(--mid);
+        color: var(--white);
+      }
+      .chip.cached {
+        background: var(--acid);
+        color: var(--black);
+      }
+      .chip.stream {
+        border: 1px dashed var(--blue-1);
+        color: var(--blue-1);
+      }
+      .chip.client {
+        background: var(--white);
+        color: var(--black);
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      /* Topology: one VPS box with its services, external pieces beside it */
+      .vps {
+        border: 1px solid var(--acid);
+        display: grid;
+        gap: 0;
+      }
+      .vps-head {
+        background: var(--acid);
+        color: var(--black);
+        padding: 10px 16px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 8px;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+      }
+      .vps-body {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        padding: 16px;
+      }
+      .tier {
+        background: var(--panel);
+        border: 1px solid var(--mid);
+        padding: 16px;
+        display: grid;
+        gap: 12px;
+        align-content: start;
+        min-width: 0;
+      }
+      .tier h3 {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--acid);
+      }
+      .tier.volume {
+        border-style: dashed;
+      }
+      .tier ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 8px;
+      }
+      .tier li {
+        font-size: 0.9rem;
+        border-left: 2px solid var(--mid);
+        padding-left: 10px;
+      }
+      .tier li strong {
+        display: block;
+        font-weight: 500;
+      }
+      .tier li span {
+        color: var(--grey);
+        font-size: 0.82rem;
+      }
+      .outside {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+      }
+      .flow {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--grey);
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--mid);
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 760px;
+        font-size: 0.9rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--mid);
+        vertical-align: top;
+      }
+      th {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--grey);
+        background: var(--panel);
+        font-weight: 500;
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      td.route,
+      td.id {
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        white-space: nowrap;
+        color: var(--blue-1);
+      }
+
+      .tree {
+        background: var(--panel);
+        border: 1px solid var(--mid);
+        padding: 20px;
+        overflow-x: auto;
+      }
+      .tree ol {
+        list-style: none;
+        margin: 0;
+        padding-left: 20px;
+        border-left: 1px solid var(--mid);
+        display: grid;
+        gap: 10px;
+      }
+      .tree > ol {
+        padding-left: 0;
+        border-left: 0;
+      }
+      .tree li {
+        display: grid;
+        gap: 8px;
+      }
+      .node {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+      }
+      .node .note {
+        font-family: var(--font-body);
+        color: var(--grey);
+        font-size: 0.85rem;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+      }
+      .feature {
+        border: 1px solid var(--mid);
+        padding: 14px;
+        display: grid;
+        gap: 6px;
+        align-content: start;
+        min-width: 0;
+      }
+      .feature .name {
+        font-family: var(--font-mono);
+        color: var(--acid);
+        font-size: 0.9rem;
+      }
+      .feature p {
+        font-size: 0.85rem;
+        color: var(--grey);
+      }
+      .feature.exists {
+        border-color: var(--acid);
+      }
+      .feature.exists .name::after {
+        content: "existe";
+        margin-left: 8px;
+        font-size: 0.68rem;
+        color: var(--black);
+        background: var(--acid);
+        padding: 1px 6px;
+      }
+      .feature.shared {
+        border-style: dashed;
+      }
+
+      .risks {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 12px;
+      }
+      .risk {
+        border: 1px solid var(--warn);
+        padding: 14px;
+        display: grid;
+        gap: 6px;
+        align-content: start;
+        min-width: 0;
+      }
+      .risk h3 {
+        font-size: 0.92rem;
+      }
+      .risk p {
+        font-size: 0.85rem;
+        color: var(--grey);
+      }
+
+      footer {
+        border-top: 1px solid var(--mid);
+        padding-top: 20px;
+        color: var(--grey);
+        font-size: 0.85rem;
+        display: grid;
+        gap: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <span class="eyebrow">UT Game Showcase &middot; Edificio E3 &middot; 20 nov 2026</span>
+        <h1>Arquitectura</h1>
+        <p class="muted">
+          Arquitectura cerrada con el equipo a partir de <code>odd/requirements/srs-v2.md</code>. Next.js 16.4 con Cache
+          Components, autoalojado en un VPS de OVHcloud con SQLite, Caddy y Docker Compose. Correo con Google Workspace.
+        </p>
+        <div class="status-row">
+          <span class="pill done">Decisiones cerradas</span>
+          <span class="pill">1 VPS &middot; 1 instancia</span>
+          <span class="pill">12 features</span>
+          <span class="pill">Sin servicios externos de datos</span>
+        </div>
+      </header>
+
+      <section>
+        <div class="section-head">
+          <span class="eyebrow">Concepto</span>
+          <h2>Cómo se renderiza cada parte</h2>
+          <p class="muted">
+            Con Cache Components una ruta no es "SSR" o "estática" completa: cada parte del árbol cae en una categoría.
+            Fuente: <code>node_modules/next/dist/docs/01-app/01-getting-started/08-caching.md</code>.
+          </p>
+        </div>
+        <div class="legend">
+          <div class="cat cat-static">
+            <span class="tag">Estática</span>
+            <h3>Static shell</h3>
+            <p>Va en el HTML inicial: layout, navegación y textos del copy.</p>
+          </div>
+          <div class="cat cat-cached">
+            <span class="tag">Cacheada</span>
+            <h3><code>"use cache"</code> + <code>cacheTag</code></h3>
+            <p>
+              Se calcula una vez y se comparte hasta que una mutación llama <code>updateTag</code>. Vive en la memoria y
+              el disco de la única instancia.
+            </p>
+          </div>
+          <div class="cat cat-stream">
+            <span class="tag">Streaming</span>
+            <h3><code>&lt;Suspense&gt;</code> en cada request</h3>
+            <p>
+              Lee <code>cookies()</code> o llama <code>connection()</code>: sesión del usuario u hora actual del
+              servidor.
+            </p>
+          </div>
+          <div class="cat cat-client">
+            <span class="tag">Isla cliente</span>
+            <h3><code>"use client"</code></h3>
+            <p>Escáner, encuesta kiosco, cola sin conexión, bracket y tómbola en vivo por SSE.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <span class="eyebrow">Topología</span>
+          <h2>Todo en un VPS</h2>
+          <p class="flow">Navegador &rarr; Caddy (TLS) &rarr; Next.js &rarr; SQLite</p>
+        </div>
+        <div class="vps">
+          <div class="vps-head">
+            <span>OVHcloud VPS-1 &middot; Docker Compose</span
+            ><span>2 vCores &middot; 4 GB &middot; 40 GB NVMe &middot; 500 Mbps</span>
+          </div>
+          <div class="vps-body">
+            <div class="tier">
+              <h3>proxy &middot; Caddy</h3>
+              <ul>
+                <li><strong>TLS automático</strong><span>Let's Encrypt con renovación incluida</span></li>
+                <li>
+                  <strong>SSE sin buffering</strong><span><code>text/event-stream</code> se envía al instante</span>
+                </li>
+                <li>
+                  <strong>Imágenes</strong
+                  ><span>Sirve el volumen <code>uploads</code> con caché <code>immutable</code></span>
+                </li>
+              </ul>
+            </div>
+            <div class="tier">
+              <h3>web &middot; Next.js 16.4</h3>
+              <ul>
+                <li>
+                  <strong><code>proxy.ts</code></strong
+                  ><span>Filtro optimista por rol</span>
+                </li>
+                <li><strong>Server Actions</strong><span>Revalidan sesión, rol y alcance en cada mutación</span></li>
+                <li><strong>Route Handlers</strong><span>Lotes del escáner y streams SSE</span></li>
+                <li><strong>Bus de eventos</strong><span>En memoria; avisa al SSE tras cada transacción</span></li>
+                <li>
+                  <strong><code>instrumentation.ts</code></strong
+                  ><span>Intervalo que reintenta la bandeja de salida</span>
+                </li>
+              </ul>
+            </div>
+            <div class="tier volume">
+              <h3>volumen data &middot; SQLite</h3>
+              <ul>
+                <li>
+                  <strong>Prisma 7</strong><span><code>@prisma/adapter-better-sqlite3</code></span>
+                </li>
+                <li><strong>WAL y busy_timeout</strong><span>Lecturas concurrentes, escrituras en fila</span></li>
+                <li>
+                  <strong>Respaldo</strong><span><code>VACUUM INTO</code> cada hora el día del evento</span>
+                </li>
+              </ul>
+            </div>
+            <div class="tier volume">
+              <h3>volumen uploads</h3>
+              <ul>
+                <li><strong>Imágenes en WebP</strong><span>Convertidas al subirlas, máximo 1200 px</span></li>
+                <li><strong>Nombre con hash</strong><span>Un cambio genera una URL nueva</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="outside">
+          <div class="tier">
+            <h3>GitHub Actions</h3>
+            <ul>
+              <li>
+                <strong>Build fuera del VPS</strong
+                ><span>Imagen <code>standalone</code> con <code>better-sqlite3</code> compilado</span>
+              </li>
+              <li>
+                <strong>Despliegue</strong
+                ><span><code>compose pull</code> + <code>up -d</code>; la imagen anterior queda para revertir</span>
+              </li>
+            </ul>
+          </div>
+          <div class="tier">
+            <h3>Google Workspace</h3>
+            <ul>
+              <li>
+                <strong><code>smtp.gmail.com</code></strong
+                ><span>2,000 mensajes al día; <code>4.7.28</code> se reintenta</span>
+              </li>
+              <li><strong>SPF, DKIM y DMARC</strong><span>En el DNS del dominio</span></li>
+            </ul>
+          </div>
+          <div class="tier">
+            <h3>OVHcloud</h3>
+            <ul>
+              <li>
+                <strong>Respaldo diario</strong><span>Incluido, rotación de 7 días, fuera del disco del VPS</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <span class="eyebrow">Rutas</span>
+          <h2>Estrategia de render por ruta</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ruta</th>
+                <th>Partes</th>
+                <th>Por qué</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="route">/</td>
+                <td>
+                  <div class="chips">
+                    <span class="chip static">shell</span><span class="chip cached">cronograma</span
+                    ><span class="chip cached">patrocinadores</span><span class="chip cached">juegos</span>
+                  </div>
+                </td>
+                <td>Pública. Cada bloque tiene su <code>cacheTag</code> y el sysadmin lo invalida al editar.</td>
+              </tr>
+              <tr>
+                <td class="route">/games, /games/[slug]</td>
+                <td>
+                  <div class="chips">
+                    <span class="chip cached">catálogo</span><span class="chip cached">ficha</span
+                    ><span class="chip stream">enlace itch.io</span>
+                  </div>
+                </td>
+                <td>El enlace depende de la hora del servidor (16:30); dentro de la caché quedaría congelado.</td>
+              </tr>
+              <tr>
+                <td class="route">/floor-plan</td>
+                <td>
+                  <div class="chips">
+                    <span class="chip cached">stands</span><span class="chip client">zoom y tooltips</span>
+                  </div>
+                </td>
+                <td>Datos públicos; la interacción del plano es cliente.</td>
+              </tr>
+              <tr>
+                <td class="route">/sponsors, ganadores</td>
+                <td>
+                  <div class="chips"><span class="chip cached">tarjetas</span></div>
+                </td>
+                <td>Públicas. Ganadores se invalida al confirmar cada uno.</td>
+              </tr>
+              <tr>
+                <td class="route">/passport</td>
+                <td>
+                  <div class="chips">
+                    <span class="chip static">shell</span><span class="chip stream">sesión del visitante</span
+                    ><span class="chip client">QR fijo</span>
+                  </div>
+                </td>
+                <td>Por usuario: cookie del dispositivo dentro de <code>&lt;Suspense&gt;</code>.</td>
+              </tr>
+              <tr>
+                <td class="route">/tournament</td>
+                <td>
+                  <div class="chips">
+                    <span class="chip static">shell</span><span class="chip cached">bracket</span
+                    ><span class="chip client">SSE en vivo</span>
+                  </div>
+                </td>
+                <td>El evento SSE es una señal; el cliente vuelve a pedir el bracket cacheado.</td>
+              </tr>
+              <tr>
+                <td class="route">/raffle/live</td>
+                <td>
+                  <div class="chips">
+                    <span class="chip static">shell</span><span class="chip client">tómbola por SSE</span>
+                  </div>
+                </td>
+                <td>Pantalla del escenario, solo visualización.</td>
+              </tr>
+              <tr>
+                <td class="route">/stand</td>
+                <td>
+                  <div class="chips">
+                    <span class="chip stream">sesión y stand</span><span class="chip client">escáner</span
+                    ><span class="chip client">encuesta kiosco</span><span class="chip client">cola IndexedDB</span>
+                  </div>
+                </td>
+                <td>Administrador y staff de stand. Check-in y voto en un solo envío.</td>
+              </tr>
+              <tr>
+                <td class="route">/admin, /raffle/admin, /kof, /help-desk</td>
+                <td>
+                  <div class="chips">
+                    <span class="chip stream">sesión y rol</span><span class="chip client">controles</span>
+                  </div>
+                </td>
+                <td><code>proxy.ts</code> filtra; cada Server Action vuelve a validar en el servidor.</td>
+              </tr>
+              <tr>
+                <td class="route">/api/check-ins</td>
+                <td>
+                  <div class="chips"><span class="chip stream">Route Handler</span></div>
+                </td>
+                <td>Lotes idempotentes del escáner; una transacción por check-in.</td>
+              </tr>
+              <tr>
+                <td class="route">/api/tournament/stream</td>
+                <td>
+                  <div class="chips"><span class="chip stream">SSE</span></div>
+                </td>
+                <td>Heartbeat cada 20 s, <code>retry</code> con jitter, tope de unas 1,500 conexiones.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <span class="eyebrow">Ejemplo</span>
+          <h2>Árbol de <code>/games/[slug]</code></h2>
+          <p class="muted">
+            La page es el contenedor y los componentes son presentacionales; solo la parte que depende de la hora se
+            calcula en cada request.
+          </p>
+        </div>
+        <div class="tree">
+          <ol>
+            <li>
+              <div class="node">
+                <span>GameDetailPage</span><span class="chip cached">use cache &middot; tag game-[slug]</span
+                ><span class="note">Contenedor: pide el juego a <code>lib/server/</code></span>
+              </div>
+              <ol>
+                <li>
+                  <div class="node">
+                    <span>GameGallery</span><span class="chip client">swipe</span
+                    ><span class="note">Recibe las imágenes por props</span>
+                  </div>
+                </li>
+                <li>
+                  <div class="node">
+                    <span>GameInfo</span><span class="chip static">presentacional</span
+                    ><span class="note">Nombre, sinopsis, género, stand <code>zA-s3</code></span>
+                  </div>
+                </li>
+                <li>
+                  <div class="node"><span>&lt;Suspense&gt;</span><span class="chip stream">streaming</span></div>
+                  <ol>
+                    <li>
+                      <div class="node">
+                        <span>ItchLink</span><span class="chip stream">connection()</span
+                        ><span class="note">Compara la hora del servidor con <code>event_settings</code></span>
+                      </div>
+                    </li>
+                  </ol>
+                </li>
+              </ol>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <span class="eyebrow">Decisiones</span>
+          <h2>Decisiones cerradas</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Decisión</th>
+                <th>Motivo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="id">D1</td>
+                <td>
+                  Prisma 7 + SQLite (<code>better-sqlite3</code>, WAL, <code>busy_timeout</code>,
+                  <code>CHECK</code> para estados)
+                </td>
+                <td>Una instancia en un servidor; Prisma 8 es RC y su SQLite es una prueba de concepto.</td>
+              </tr>
+              <tr>
+                <td class="id">D1b</td>
+                <td>
+                  Autenticación propia: <code>scrypt</code> y sesiones en la BD para el staff; token por dispositivo
+                  para visitantes
+                </td>
+                <td>Cerrar sesiones al instante al desactivar una cuenta.</td>
+              </tr>
+              <tr>
+                <td class="id">D2</td>
+                <td>SSE propio con bus en memoria, tope de unas 1,500 conexiones; la operación siempre entra</td>
+                <td>Todos los visitantes ven el bracket en vivo sin límites de terceros.</td>
+              </tr>
+              <tr>
+                <td class="id">D3</td>
+                <td>Bandeja de salida: <code>after()</code> + intervalo en <code>instrumentation.ts</code></td>
+                <td>Envío inmediato y reintentos con backoff, sin cron externo.</td>
+              </tr>
+              <tr>
+                <td class="id">D4</td>
+                <td>Cola sin conexión del escáner en IndexedDB, sin PIN, QR fijo</td>
+                <td>El escáner sigue trabajando sin señal; la cola no guarda secretos.</td>
+              </tr>
+              <tr>
+                <td class="id">D5</td>
+                <td>Docker Compose; imagen construida en GitHub Actions</td>
+                <td>Despliegue reproducible y reversión en segundos.</td>
+              </tr>
+              <tr>
+                <td class="id">D6</td>
+                <td>Caddy como reverse proxy</td>
+                <td>TLS automático y SSE sin buffering.</td>
+              </tr>
+              <tr>
+                <td class="id">D7</td>
+                <td>Imágenes en un volumen del VPS</td>
+                <td>Tráfico ilimitado en el VPS-1; sin servicios externos.</td>
+              </tr>
+              <tr>
+                <td class="id">Ops</td>
+                <td>
+                  Monitoreo mínimo en el panel del sysadmin; paro automático del bracket público al 50% de CPU o memoria
+                </td>
+                <td>Proteger la operación del torneo.</td>
+              </tr>
+              <tr>
+                <td class="id">Env</td>
+                <td>Local con límites de Docker y producción; prueba de carga en el VPS antes del 13 de noviembre</td>
+                <td>El VPS no aguanta un staging aparte.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <span class="eyebrow">Screaming architecture</span>
+          <h2>Mapa de features</h2>
+        </div>
+        <div class="features">
+          <div class="feature exists">
+            <span class="name">landing</span>
+            <p>Portada, actividades e invitadas.</p>
+          </div>
+          <div class="feature">
+            <span class="name">games</span>
+            <p>Catálogo, ficha, géneros y enlace a itch.io.</p>
+          </div>
+          <div class="feature">
+            <span class="name">floor-plan</span>
+            <p>Croquis interactivo de stands y zonas.</p>
+          </div>
+          <div class="feature">
+            <span class="name">schedule</span>
+            <p>Cronograma gestionado por el sysadmin.</p>
+          </div>
+          <div class="feature">
+            <span class="name">sponsors</span>
+            <p>Tarjetas públicas y alta de patrocinadores.</p>
+          </div>
+          <div class="feature">
+            <span class="name">visitors</span>
+            <p>Registro, pasaporte, QR y recuperación.</p>
+          </div>
+          <div class="feature">
+            <span class="name">check-ins</span>
+            <p>Escáner, encuesta kiosco, cola sin conexión y boletos.</p>
+          </div>
+          <div class="feature">
+            <span class="name">raffle</span>
+            <p>Tómbola, confirmación de ganadores y premios.</p>
+          </div>
+          <div class="feature">
+            <span class="name">tournament</span>
+            <p>Inscripción a KOF, bracket, tableros y descalificaciones.</p>
+          </div>
+          <div class="feature">
+            <span class="name">accounts</span>
+            <p>Login, invitaciones, roles, sesiones y lista negra.</p>
+          </div>
+          <div class="feature">
+            <span class="name">admin</span>
+            <p>Panel del sysadmin, estado del servidor y alertas.</p>
+          </div>
+          <div class="feature">
+            <span class="name">event-settings</span>
+            <p>Horarios configurables del evento.</p>
+          </div>
+          <div class="feature shared">
+            <span class="name">shared/lib/server</span>
+            <p>Prisma, bandeja de salida, bitácora, bus de eventos y hashing de tokens.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <span class="eyebrow">Riesgos aceptados</span>
+          <h2>Lo que el equipo aceptó</h2>
+        </div>
+        <div class="risks">
+          <div class="risk">
+            <h3>QR fijo copiado</h3>
+            <p>
+              Un staff con una captura del QR puede registrar una visita y un voto para su stand. Mitigado con un voto
+              por stand, promedio bayesiano y anulación.
+            </p>
+          </div>
+          <div class="risk">
+            <h3>Un solo servidor</h3>
+            <p>Si el VPS se cae, se caen la web y la BD. Mitigado con reinicio automático y respaldos.</p>
+          </div>
+          <div class="risk">
+            <h3>Sin chequeo externo</h3>
+            <p>
+              Una caída fuera del horario del evento se descubre cuando alguien entra. Revisión manual mañana y noche
+              del 13 al 19 de noviembre.
+            </p>
+          </div>
+          <div class="risk">
+            <h3>Consultas síncronas</h3>
+            <p>
+              <code>better-sqlite3</code> bloquea el hilo mientras consulta. Mitigado con índices en todas las búsquedas
+              calientes y la prueba de carga.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <span>Versión final de la arquitectura &middot; 23 de octubre de 2026</span>
+        <span
+          >Modelo de datos: artifact "Modelo ER UT Showcase". Siguiente: casos de uso para pruebas unitarias y flujos
+          e2e.</span
+        >
+      </footer>
+    </div>
+  </body>
+</html>
