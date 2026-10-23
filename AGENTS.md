@@ -50,16 +50,16 @@ Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm
 ## Arquitectura: screaming architecture
 
 La estructura de carpetas "grita" el dominio, no el framework.
-Cada dominio es una **feature** dentro de `src/features/`. Hoy sólo existe `landing`, la portada
-estática: no usa base de datos y su contenido vive en `lib/`. La versión anterior del proyecto
-(catálogo, croquis, pasaporte, panel, Prisma y TanStack Query) se conserva en la rama
-`archive/develop-v1`.
+Cada dominio es una **feature** dentro de `src/features/`. Hoy sólo existe `landing`, una portada
+provisional mientras se construye la versión 2. La portada estática anterior se conserva en la rama
+`archive/landing-v1`, y la versión previa del proyecto (catálogo, croquis, pasaporte, panel, Prisma y
+TanStack Query) en `archive/develop-v1`.
 
 ```
 src/
 ├── app/                      # SOLO rutas de Next.js: renderizan una page de una feature
 ├── features/
-│   └── landing/              # Portada (/) en tema claro: navegación, hero, grupos, juegos, dinámicas y programa
+│   └── landing/              # Portada (/) provisional
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
     ├── components/           # Primitivos: JsonLd
@@ -115,8 +115,8 @@ código: `lib/countdown.ts` -> `__tests__/lib/countdown.test.ts`. Lo mismo aplic
 Una page de feature sólo orquesta: pide datos, maneja estados de carga/no encontrado y
 compone componentes. Toda la UI vive en `components/`.
 
-La referencia es `src/features/landing/pages/landing-page.tsx`: lee el contenido de `lib/` y lo pasa
-por props a los componentes. Cada ruta de `src/app/` sólo exporta la page y su metadata:
+La referencia es `src/features/landing/pages/landing-page.tsx`: lee los datos de `@shared/lib/` y los
+pasa por props a los componentes. Cada ruta de `src/app/` sólo exporta la page y su metadata:
 
 ```tsx
 // src/app/page.tsx
@@ -160,8 +160,8 @@ mediante los path aliases de `tsconfig.json`:
 | `@app/*` | `src/app/*` (sólo en las pruebas de `src/app/__tests__/`) |
 
 ```ts
-import { LandingHero } from "@features/landing/components/landing-hero";
-import type { ScheduleEntry } from "@features/landing/lib/types";
+import { LandingPlaceholder } from "@features/landing/components/landing-placeholder";
+import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { siteConfig } from "@shared/lib/site-config";
 ```
 

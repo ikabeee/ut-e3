@@ -116,7 +116,7 @@ comillas dobles, punto y coma y comas finales. No discutas espacios en las revis
 
 El código está organizado con **screaming architecture**: las carpetas gritan *de qué trata* la aplicación
 (cada dominio es una carpeta en `src/features/`), no *con qué está hecha*.
-Hoy sólo existe la feature `landing` (la portada estática).
+Hoy sólo existe la feature `landing` (una portada provisional mientras se construye la versión 2).
 
 - Cada feature en `src/features/<feature>/` se organiza en `lib/`, `hooks/`, `components/` y `pages/`,
   más `__tests__/` para sus pruebas. Crea cada carpeta cuando la necesites; el linter valida las que existen. No dejes

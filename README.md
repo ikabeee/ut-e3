@@ -48,7 +48,7 @@ mensaje que explica el problema. En desarrollo y pruebas se usa `http://localhos
 src/
 ├── app/                  # Sólo rutas: cada archivo renderiza una page de una feature
 ├── features/
-│   └── landing/          # Portada estática en tema claro
+│   └── landing/          # Portada provisional (la anterior está en archive/landing-v1)
 └── shared/               # Código transversal sin reglas de negocio (tema, metadata, hooks)
 ```
 

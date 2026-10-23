@@ -8,6 +8,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Eliminado
 
+- La portada estática (hero, grupos, introducción, videojuegos, dinámicas y programa con cuenta
+  regresiva) se reemplaza por una portada provisional mientras se construye la versión 2. La versión
+  anterior se conserva en la rama `archive/landing-v1`.
 - El sitio queda sólo con la portada estática (`/`). Se quitan el catálogo y el detalle de juegos, el
   croquis, el pasaporte con QR, el panel de administración, el portal de equipos, el registro y el
   inicio de sesión, el modo sin conexión, la base de datos (Prisma y PostgreSQL) y TanStack Query. La
@@ -112,6 +115,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Eliminado
 
+- La portada estática (hero, grupos, introducción, videojuegos, dinámicas y programa con cuenta
+  regresiva) se reemplaza por una portada provisional mientras se construye la versión 2. La versión
+  anterior se conserva en la rama `archive/landing-v1`.
 - Mocks de la aplicación: se eliminaron los datos mock en memoria (`src/features/games/lib/mock/`),
   la selección de fuentes de datos (`DATA_SOURCE`) y la carpeta `public/mock/`, conectando la
   aplicación de forma 100% dinámica a PostgreSQL mediante Prisma 8. Las imágenes de portada se
