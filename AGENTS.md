@@ -36,7 +36,7 @@ Todo el naming (directorios, archivos y código) va en **inglés**.
 ```bash
 npm run dev                # servidor de desarrollo
 npm run lint               # ESLint (incluye reglas de fronteras entre features)
-npm run lint:oxlint        # Oxlint con las reglas anti-slop (tools/oxlint/anti-slop; aún fuera del CI)
+npm run lint:oxlint        # Oxlint con las reglas anti-slop (tools/oxlint/anti-slop)
 npm run format             # aplica el formato con Prettier (npm run format:check sólo revisa)
 npm run typecheck          # next typegen + tsc --noEmit (y tsc -p tools/oxlint para el plugin)
 npm test                   # pruebas con Jest (npm run test:coverage para cobertura)
@@ -44,7 +44,7 @@ npm run build              # compila para producción (exige NEXT_PUBLIC_SITE_UR
 ```
 
 Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm run lint`,
-`npm run typecheck` y `npm test` pasen. El workflow `.github/workflows/ci.yml` ejecuta lo mismo (con
+`npm run lint:oxlint`, `npm run typecheck` y `npm test` pasen. El workflow `.github/workflows/ci.yml` ejecuta lo mismo (con
 `npm run format:check` en lugar de `format`, más `npm run build`) en cada PR.
 
 ## Arquitectura: screaming architecture

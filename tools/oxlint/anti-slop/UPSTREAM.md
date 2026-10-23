@@ -37,7 +37,7 @@ la revisión base de abajo en lugar de sobrescribir los cambios locales.
   `tsconfig.json` raíz.
 - `eslint.config.mjs` y `.prettierignore` ignoran esta carpeta para conservar el código de upstream tal cual.
 - Dependencias: `oxlint` y `@oxlint/plugins` en `1.88.0`, fijadas sin rango para actualizarlas juntas.
-- Script: `npm run lint:oxlint`. Todavía no forma parte de `npm run lint` ni del CI.
+- Script: `npm run lint:oxlint`. No forma parte de `npm run lint`; el CI lo corre como paso propio.
 
 ## Cambios intencionales respecto a upstream
 
