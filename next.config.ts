@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  experimental: {
+    agentUpgrade: "security",
+  },
   images: {
     // AVIF primero (más ligero) y WebP como respaldo.
     formats: ["image/avif", "image/webp"],
