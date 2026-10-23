@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Diagramas UT Showcase</title>
+    <meta name="claude:viewport-fit-sides" content="cover" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Syncopate:wght@700&display=swap"
+    />
+    <style>
+      /* Layout: single dark UTG field; four C4-style diagrams stacked from widest zoom to closest, each with what it answers and how to read it */
+      :root {
+        color-scheme: dark;
+        --black: #000000;
+        --panel: #1c1c1c;
+        --mid: #3a3a3a;
+        --grey: #8a8a8a;
+        --white: #ffffff;
+        --acid: #178fdd;
+        --blue-1: #68b5e6;
+        --warn: #fcf94e;
+        --font-display: "Syncopate", "Arial Black", sans-serif;
+        --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+        --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--black);
+        color: var(--white);
+        font-family: var(--font-body);
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding-block: 40px 72px;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+        display: grid;
+        gap: 64px;
+      }
+      h1,
+      h2 {
+        font-family: var(--font-display);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        text-wrap: balance;
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(1.6rem, 4.6vw, 3rem);
+        line-height: 1.1;
+      }
+      h2 {
+        font-size: clamp(1rem, 2.2vw, 1.35rem);
+        line-height: 1.2;
+      }
+      h3 {
+        margin: 0;
+        font-size: 0.95rem;
+      }
+      p {
+        margin: 0;
+        max-width: 72ch;
+      }
+      code {
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--acid);
+      }
+      .muted {
+        color: var(--grey);
+      }
+      header {
+        display: grid;
+        gap: 16px;
+      }
+      .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .pill {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border: 1px solid var(--mid);
+      }
+
+      .zoom {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+        border: 1px solid var(--mid);
+      }
+      .zoom a {
+        flex: 1 1 180px;
+        padding: 12px 14px;
+        color: var(--white);
+        text-decoration: none;
+        border-right: 1px solid var(--mid);
+        display: grid;
+        gap: 2px;
+        min-width: 0;
+      }
+      .zoom a:last-child {
+        border-right: 0;
+      }
+      .zoom a:hover,
+      .zoom a:focus-visible {
+        background: var(--panel);
+        outline: none;
+      }
+      .zoom a:focus-visible {
+        box-shadow: inset 0 0 0 2px var(--acid);
+      }
+      .zoom .lvl {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--acid);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .zoom .nm {
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+
+      section {
+        display: grid;
+        gap: 18px;
+        scroll-margin-top: 16px;
+      }
+      .section-head {
+        display: grid;
+        gap: 8px;
+        border-top: 1px solid var(--mid);
+        padding-top: 20px;
+      }
+      .question {
+        font-size: 1.05rem;
+      }
+      .diagram {
+        background: var(--panel);
+        border: 1px solid var(--mid);
+        padding: 20px;
+        overflow-x: auto;
+      }
+      .diagram pre.mermaid {
+        margin: 0;
+        min-width: 820px;
+        background: transparent;
+        color: var(--white);
+      }
+      .reading {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+      }
+      .read {
+        border: 1px solid var(--mid);
+        padding: 14px;
+        display: grid;
+        gap: 6px;
+        align-content: start;
+        min-width: 0;
+      }
+      .read p {
+        font-size: 0.88rem;
+        color: var(--grey);
+      }
+
+      .key {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        font-size: 0.82rem;
+        color: var(--grey);
+      }
+      .key span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .sw {
+        width: 14px;
+        height: 14px;
+        display: inline-block;
+        border: 1px solid var(--mid);
+      }
+      .sw.system {
+        background: var(--acid);
+        border-color: var(--acid);
+      }
+      .sw.actor {
+        background: var(--black);
+        border-color: var(--white);
+      }
+      .sw.ext {
+        background: var(--black);
+        border: 1px dashed var(--grey);
+      }
+      .sw.store {
+        background: var(--black);
+        border-color: var(--blue-1);
+        border-radius: 50% / 30%;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--mid);
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 640px;
+        font-size: 0.88rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--mid);
+        vertical-align: top;
+      }
+      th {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--grey);
+        background: var(--panel);
+        font-weight: 500;
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      td.layer {
+        font-family: var(--font-mono);
+        color: var(--blue-1);
+        white-space: nowrap;
+      }
+      td.no {
+        color: var(--warn);
+      }
+
+      footer {
+        border-top: 1px solid var(--mid);
+        padding-top: 20px;
+        color: var(--grey);
+        font-size: 0.85rem;
+        display: grid;
+        gap: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <span class="eyebrow">UT Game Showcase &middot; Modelo C4</span>
+        <h1>Diagramas de arquitectura</h1>
+        <p class="muted">
+          Cuatro vistas de la estructura del sistema, de la más lejana a la más cercana, siguiendo el modelo C4 (<a
+            href="https://c4model.com"
+            style="color: var(--blue-1)"
+            >c4model.com</a
+          >). Las decisiones detrás de cada pieza están en el artifact de arquitectura.
+        </p>
+        <div class="status-row">
+          <span class="pill">Grupo A &middot; estructura</span>
+          <span class="pill">4 diagramas</span>
+          <span class="pill">Secuencias y estados: pendientes</span>
+        </div>
+      </header>
+
+      <nav class="zoom" aria-label="Niveles de zoom">
+        <a href="#context"><span class="lvl">C4 nivel 1</span><span class="nm">Contexto</span></a>
+        <a href="#containers"><span class="lvl">C4 nivel 2</span><span class="nm">Contenedores</span></a>
+        <a href="#deployment"><span class="lvl">Infraestructura</span><span class="nm">Despliegue</span></a>
+        <a href="#layers"><span class="lvl">C4 nivel 3</span><span class="nm">Capas de una feature</span></a>
+      </nav>
+
+      <div class="key">
+        <span><span class="sw system"></span> Sistema o pieza propia</span>
+        <span><span class="sw actor"></span> Persona o rol</span>
+        <span><span class="sw ext"></span> Servicio externo</span>
+        <span><span class="sw store"></span> Almacenamiento</span>
+      </div>
+
+      <section id="context">
+        <div class="section-head">
+          <span class="eyebrow">C4 nivel 1 &middot; Contexto</span>
+          <h2>Quién usa el sistema</h2>
+          <p class="question">¿Quién usa el sistema y con qué servicios externos habla?</p>
+        </div>
+        <div class="diagram">
+          <pre class="mermaid">
+%%{init: {"theme": "base", "themeVariables": {"background": "#1c1c1c", "primaryColor": "#000000", "primaryTextColor": "#ffffff", "primaryBorderColor": "#ffffff", "lineColor": "#68b5e6", "edgeLabelBackground": "#1c1c1c", "clusterBkg": "#1c1c1c", "clusterBorder": "#3a3a3a", "fontFamily": "JetBrains Mono, monospace", "fontSize": "14px"}}}%%
+flowchart LR
+  public["Público<br/>landing, catálogo, croquis,<br/>bracket y ganadores"]
+  visitor["Visitante<br/>pasaporte con QR,<br/>inscripción a KOF"]
+  standTeam["Administrador y staff de stand<br/>juego del stand y escáner"]
+  raffle["Animador<br/>tómbola y premios"]
+  kof["Administrador y staff de KOF<br/>bracket y resultados"]
+  desk["Atención<br/>recuperación de pasaportes"]
+  sysadmin["Sysadmin<br/>stands, cuentas, horarios,<br/>moderación"]
+
+  system["UT Game Showcase<br/>PWA del evento"]
+
+  mail["Google Workspace<br/>correo saliente"]
+  itch["itch.io<br/>páginas de los juegos"]
+  forms["Google Forms<br/>registro del Marketplace"]
+  ovh["OVHcloud<br/>respaldo diario del VPS"]
+
+  public -->|"consulta"| system
+  visitor -->|"se registra y muestra su QR"| system
+  standTeam -->|"registra visitas y votos"| system
+  raffle -->|"gira y confirma ganadores"| system
+  kof -->|"captura combates"| system
+  desk -->|"genera enlaces de recuperación"| system
+  sysadmin -->|"configura y modera"| system
+
+  system -->|"SMTP: copias, invitaciones,<br/>recuperación, ganadores"| mail
+  mail -.->|"correo"| visitor
+  system -.->|"enlaza desde las 16:30"| itch
+  system -.->|"enlaza hasta el 10 de nov"| forms
+  ovh -.->|"respalda"| system
+
+  classDef sys fill:#178fdd,stroke:#178fdd,color:#000000,font-weight:bold
+  classDef actor fill:#000000,stroke:#ffffff,color:#ffffff
+  classDef ext fill:#000000,stroke:#8a8a8a,color:#ffffff,stroke-dasharray:5 4
+  class system sys
+  class public,visitor,standTeam,raffle,kof,desk,sysadmin actor
+  class mail,itch,forms,ovh ext
+</pre>
+        </div>
+        <div class="reading">
+          <div class="read">
+            <h3>Un solo sistema</h3>
+            <p>
+              Todo lo que construimos es una caja: la PWA y su servidor. Los roles entran por la misma aplicación con
+              permisos distintos.
+            </p>
+          </div>
+          <div class="read">
+            <h3>Dependencias externas mínimas</h3>
+            <p>
+              Solo el correo es una dependencia en tiempo real. itch.io y Google Forms son enlaces; el sistema no los
+              consulta.
+            </p>
+          </div>
+          <div class="read">
+            <h3>Sin mensajería</h3>
+            <p>No hay WhatsApp ni SMS: la recuperación es por correo o en la mesa de atención.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="containers">
+        <div class="section-head">
+          <span class="eyebrow">C4 nivel 2 &middot; Contenedores</span>
+          <h2>En qué piezas se divide</h2>
+          <p class="question">¿En qué piezas se divide el sistema y cómo se comunican?</p>
+        </div>
+        <div class="diagram">
+          <pre class="mermaid">
+%%{init: {"theme": "base", "themeVariables": {"background": "#1c1c1c", "primaryColor": "#000000", "primaryTextColor": "#ffffff", "primaryBorderColor": "#178fdd", "lineColor": "#68b5e6", "edgeLabelBackground": "#1c1c1c", "clusterBkg": "#111111", "clusterBorder": "#3a3a3a", "titleColor": "#68b5e6", "fontFamily": "JetBrains Mono, monospace", "fontSize": "14px"}}}%%
+flowchart LR
+  subgraph browser["Navegador del usuario (PWA)"]
+    ui["Páginas e islas cliente<br/>escáner, encuesta kiosco,<br/>bracket y tómbola en vivo"]
+    sw["Service worker<br/>precarga catálogo y croquis"]
+    idb[("IndexedDB<br/>cola del escáner")]
+  end
+
+  caddy["Caddy<br/>TLS y reverse proxy"]
+
+  subgraph next["Next.js 16.4 &middot; una instancia"]
+    rsc["Server Components<br/>pages contenedoras"]
+    actions["Server Actions<br/>mutaciones validadas"]
+    handlers["Route Handlers<br/>/api/check-ins"]
+    sse["Streams SSE<br/>bracket y tómbola"]
+    bus["Bus de eventos<br/>en memoria"]
+    outbox["Procesador de salida<br/>after() + instrumentation.ts"]
+  end
+
+  db[("SQLite<br/>Prisma 7 + WAL")]
+  uploads[("Imágenes WebP<br/>volumen uploads")]
+  mail["Google Workspace<br/>smtp.gmail.com"]
+
+  ui -->|"HTTPS"| caddy
+  idb -.->|"lotes de check-ins"| ui
+  sw -.->|"responde sin conexión"| ui
+  caddy -->|"páginas"| rsc
+  caddy -->|"formularios y acciones"| actions
+  caddy -->|"lotes JSON"| handlers
+  sse -->|"text/event-stream"| caddy
+  caddy -->|"archivos estáticos"| uploads
+
+  rsc -->|"lee con use cache"| db
+  actions -->|"transacción"| db
+  handlers -->|"una transacción por check-in"| db
+  actions -->|"publica tras confirmar"| bus
+  handlers -->|"publica tras confirmar"| bus
+  bus -->|"señal"| sse
+  outbox -->|"reclama correos"| db
+  outbox -->|"SMTP"| mail
+
+  classDef own fill:#000000,stroke:#178fdd,color:#ffffff
+  classDef proxy fill:#178fdd,stroke:#178fdd,color:#000000,font-weight:bold
+  classDef store fill:#000000,stroke:#68b5e6,color:#ffffff
+  classDef ext fill:#000000,stroke:#8a8a8a,color:#ffffff,stroke-dasharray:5 4
+  class ui,sw,rsc,actions,handlers,sse,bus,outbox own
+  class caddy proxy
+  class idb,db,uploads store
+  class mail ext
+</pre>
+        </div>
+        <div class="reading">
+          <div class="read">
+            <h3>El evento es una señal</h3>
+            <p>
+              Una mutación confirma su transacción y publica en el bus. El stream SSE solo avisa "cambió"; el cliente
+              vuelve a pedir el estado, que sale de la caché.
+            </p>
+          </div>
+          <div class="read">
+            <h3>Dos entradas de escritura</h3>
+            <p>
+              Las Server Actions cubren formularios y paneles. El Route Handler <code>/api/check-ins</code> recibe los
+              lotes del escáner, que pueden llegar tarde desde la cola sin conexión.
+            </p>
+          </div>
+          <div class="read">
+            <h3>El correo nunca bloquea</h3>
+            <p>
+              La acción guarda el correo en la BD y responde. <code>after()</code> lo envía después, y el intervalo de
+              <code>instrumentation.ts</code> reintenta lo pendiente.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="deployment">
+        <div class="section-head">
+          <span class="eyebrow">Infraestructura &middot; Despliegue</span>
+          <h2>Dónde corre cada pieza</h2>
+          <p class="question">¿Dónde corre cada pieza y cómo llega el código ahí?</p>
+        </div>
+        <div class="diagram">
+          <pre class="mermaid">
+%%{init: {"theme": "base", "themeVariables": {"background": "#1c1c1c", "primaryColor": "#000000", "primaryTextColor": "#ffffff", "primaryBorderColor": "#178fdd", "lineColor": "#68b5e6", "edgeLabelBackground": "#1c1c1c", "clusterBkg": "#111111", "clusterBorder": "#178fdd", "titleColor": "#68b5e6", "fontFamily": "JetBrains Mono, monospace", "fontSize": "14px"}}}%%
+flowchart LR
+  subgraph ci["GitHub"]
+    actionsCi["GitHub Actions<br/>lint, typecheck, test, build"]
+    registry["GitHub Container Registry<br/>imagen por versión"]
+  end
+
+  users["Visitantes y staff<br/>teléfonos y laptops"]
+
+  subgraph vps["OVHcloud VPS-1 &middot; 2 vCores, 4 GB, 40 GB &middot; Docker Compose"]
+    proxy["proxy &middot; Caddy<br/>puertos 80 y 443"]
+    web["web &middot; Next.js standalone<br/>usuario sin privilegios,<br/>límite de memoria"]
+    data[("volumen data<br/>SQLite y WAL")]
+    uploadsVol[("volumen uploads<br/>imágenes WebP")]
+    env["archivo .env<br/>secretos, permisos 600"]
+  end
+
+  mail["Google Workspace<br/>SMTP"]
+  backupOvh["Respaldo diario OVHcloud<br/>rotación de 7 días"]
+  backupOff["Copia externa<br/>VACUUM INTO cada hora<br/>el día del evento"]
+
+  actionsCi -->|"imagen linux/amd64"| registry
+  registry -->|"compose pull + up -d"| web
+  users -->|"HTTPS 443"| proxy
+  proxy -->|"HTTP interno"| web
+  proxy -->|"lee"| uploadsVol
+  web -->|"lee y escribe"| data
+  web -->|"guarda al subir"| uploadsVol
+  env -.->|"variables"| web
+  web -->|"SMTP"| mail
+  data -.->|"copia consistente"| backupOff
+  vps -.->|"snapshot diario"| backupOvh
+
+  classDef own fill:#000000,stroke:#178fdd,color:#ffffff
+  classDef proxyCls fill:#178fdd,stroke:#178fdd,color:#000000,font-weight:bold
+  classDef store fill:#000000,stroke:#68b5e6,color:#ffffff
+  classDef ext fill:#000000,stroke:#8a8a8a,color:#ffffff,stroke-dasharray:5 4
+  classDef people fill:#000000,stroke:#ffffff,color:#ffffff
+  class web,env own
+  class proxy proxyCls
+  class data,uploadsVol store
+  class actionsCi,registry,mail,backupOvh,backupOff ext
+  class users people
+</pre>
+        </div>
+        <div class="reading">
+          <div class="read">
+            <h3>El VPS no compila</h3>
+            <p>
+              La imagen se construye en GitHub Actions con <code>better-sqlite3</code> ya compilado. El VPS solo
+              descarga y reinicia, y la imagen anterior queda para revertir.
+            </p>
+          </div>
+          <div class="read">
+            <h3>Solo Caddy da a internet</h3>
+            <p>
+              Next.js escucha en la red interna de Docker. No hay base de datos expuesta, porque SQLite es un archivo en
+              el volumen <code>data</code>.
+            </p>
+          </div>
+          <div class="read">
+            <h3>Dos capas de respaldo</h3>
+            <p>
+              El respaldo diario de OVHcloud cubre la pérdida del VPS; la copia horaria de SQLite cubre los datos del
+              día del evento.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="layers">
+        <div class="section-head">
+          <span class="eyebrow">C4 nivel 3 &middot; Capas de una feature</span>
+          <h2>Qué importa a qué</h2>
+          <p class="question">
+            Dentro del código, ¿qué puede importar a qué? Ejemplo real: la feature <code>check-ins</code>.
+          </p>
+        </div>
+        <div class="diagram">
+          <pre class="mermaid">
+%%{init: {"theme": "base", "themeVariables": {"background": "#1c1c1c", "primaryColor": "#000000", "primaryTextColor": "#ffffff", "primaryBorderColor": "#178fdd", "lineColor": "#68b5e6", "edgeLabelBackground": "#1c1c1c", "clusterBkg": "#111111", "clusterBorder": "#3a3a3a", "titleColor": "#68b5e6", "fontFamily": "JetBrains Mono, monospace", "fontSize": "14px"}}}%%
+flowchart TB
+  route["src/app/stand/page.tsx<br/>solo re-exporta la page"]
+  apiRoute["src/app/api/check-ins/route.ts<br/>solo re-exporta el handler"]
+
+  subgraph feature["src/features/check-ins"]
+    page["pages/scanner-page.tsx<br/>contenedor: datos, Suspense, composición"]
+    components["components/<br/>scanner, kiosk-survey, queue-status"]
+    hooks["hooks/<br/>use-offline-queue.ts"]
+    lib["lib/<br/>types, check-ins-copy, reglas puras"]
+    actionsFile["lib/check-ins-actions.ts<br/>Server Actions"]
+    apiClient["api/check-ins-api-client.ts<br/>fetch del navegador"]
+    handler["api/check-ins-route.ts<br/>Route Handler"]
+    server["lib/server/<br/>check-in-queries.ts"]
+  end
+
+  shared["src/shared/lib/server/<br/>prisma, outbox, audit, event-bus, hash-token"]
+
+  route --> page
+  apiRoute --> handler
+  page --> components
+  page --> server
+  components --> hooks
+  components --> lib
+  components -->|"invoca"| actionsFile
+  hooks --> lib
+  hooks --> apiClient
+  actionsFile --> server
+  handler --> server
+  server --> lib
+  server --> shared
+
+  classDef entry fill:#178fdd,stroke:#178fdd,color:#000000,font-weight:bold
+  classDef client fill:#ffffff,stroke:#ffffff,color:#000000
+  classDef serverCls fill:#000000,stroke:#178fdd,color:#ffffff
+  classDef pure fill:#000000,stroke:#8a8a8a,color:#ffffff
+  class route,apiRoute entry
+  class components,hooks,apiClient client
+  class page,actionsFile,handler,server,shared serverCls
+  class lib pure
+</pre>
+        </div>
+        <div class="key">
+          <span><span class="sw system"></span> Entrada desde <code>src/app/</code></span>
+          <span
+            ><span class="sw" style="background: var(--white); border-color: var(--white)"></span> Puede llegar al
+            navegador</span
+          >
+          <span><span class="sw actor" style="border-color: var(--acid)"></span> Solo servidor</span>
+          <span><span class="sw actor" style="border-color: var(--grey)"></span> Puro: lo usan ambos lados</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Capa</th>
+                <th>Responsabilidad</th>
+                <th>No puede importar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="layer">src/app/</td>
+                <td>Solo re-exporta pages y handlers de las features.</td>
+                <td class="no">UI, lógica, <code>@shared/components</code></td>
+              </tr>
+              <tr>
+                <td class="layer">pages/</td>
+                <td>
+                  Contenedor: pide datos a <code>lib/server/</code>, define <code>Suspense</code> y compone componentes.
+                  Único lugar donde se combinan features.
+                </td>
+                <td class="no"><code>hooks/</code>, <code>api/</code></td>
+              </tr>
+              <tr>
+                <td class="layer">components/</td>
+                <td>Presentación; reciben datos por props. <code>"use client"</code> solo si usan hooks o eventos.</td>
+                <td class="no"><code>pages/</code>, código de servidor</td>
+              </tr>
+              <tr>
+                <td class="layer">hooks/</td>
+                <td>Estado del cliente: la cola sin conexión, el modo kiosco.</td>
+                <td class="no"><code>components/</code>, <code>pages/</code>, código de servidor</td>
+              </tr>
+              <tr>
+                <td class="layer">lib/</td>
+                <td>Tipos, copy y reglas puras (cortes de horario, boletos, códigos de stand).</td>
+                <td class="no">
+                  <code>hooks/</code>, <code>components/</code>, <code>pages/</code>, código de servidor
+                </td>
+              </tr>
+              <tr>
+                <td class="layer">lib/server/</td>
+                <td>Consultas y transacciones con Prisma; lleva <code>import "server-only"</code>.</td>
+                <td class="no"><code>hooks/</code>, <code>components/</code>, <code>pages/</code></td>
+              </tr>
+              <tr>
+                <td class="layer">api/</td>
+                <td>Route Handler (<code>server-only</code>) y cliente HTTP del navegador.</td>
+                <td class="no">
+                  <code>hooks/</code>, <code>components/</code>, <code>pages/</code>; el cliente tampoco importa
+                  servidor
+                </td>
+              </tr>
+              <tr>
+                <td class="layer">shared/</td>
+                <td>
+                  Infraestructura sin reglas de negocio: Prisma, bandeja de salida, bitácora, bus de eventos, hash de
+                  tokens.
+                </td>
+                <td class="no"><code>features/</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted">
+          Las reglas vienen de <code>AGENTS.md</code> y las valida ESLint (<code>no-restricted-imports</code> e
+          <code>import/no-cycle</code>).
+        </p>
+      </section>
+
+      <footer>
+        <span>Grupo A &middot; 23 de octubre de 2026</span>
+        <span>Pendiente: grupo B (5 diagramas de secuencia y 4 máquinas de estado).</span>
+      </footer>
+    </div>
+  </body>
+</html>
