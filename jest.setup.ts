@@ -109,5 +109,7 @@ if (typeof window !== "undefined") {
 
   Object.defineProperty(window, "ResizeObserver", { writable: true, value: ResizeObserverMock });
 
+  Element.prototype.scrollIntoView = () => undefined;
+
   Object.defineProperty(document, "fonts", { configurable: true, value: { ready: Promise.resolve() } });
 }

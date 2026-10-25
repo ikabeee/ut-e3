@@ -1,0 +1,30 @@
+import { FLOOR_PLAN_SECTION_ID, floorPlanItemHref, getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
+
+describe("floor plan links", () => {
+  it("names the section that the croquis renders", () => {
+    expect(FLOOR_PLAN_SECTION_ID).toBe("floor-plan");
+  });
+
+  it("builds the hash of a stand or a zone", () => {
+    expect(floorPlanItemHref("zA-s3")).toBe("#floor-plan-zA-s3");
+    expect(floorPlanItemHref("marketplace")).toBe("#floor-plan-marketplace");
+  });
+
+  it.each([
+    ["stage", "Escenario principal"],
+    ["kof", "Arena KOF"],
+    ["mario-kart", "Mario Kart"],
+    ["marketplace", "Marketplace"],
+    ["help-desk", "Atención"],
+    ["restrooms", "Baños"],
+    ["rest-area", "Descanso"],
+    ["entrance", "Entrada"],
+  ])("links the %s zone to its place in the croquis", (zoneId, title) => {
+    expect(getZoneLink(zoneId)).toEqual({ href: `#floor-plan-${zoneId}`, label: title });
+  });
+
+  it("returns null for a zone that does not exist", () => {
+    expect(getZoneLink("arena")).toBeNull();
+    expect(getZoneLink("")).toBeNull();
+  });
+});
