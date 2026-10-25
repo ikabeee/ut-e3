@@ -42,7 +42,7 @@ function Coverflow({ games }: Readonly<GameCatalogProps>) {
         onKeyDown={keyboard.onKeyDown}
         className={cn(
           RACK_VARIABLES,
-          "coverflow-rack relative mt-[clamp(8px,2vw,24px)] h-[calc(var(--top)+var(--ch)*1.13+56px+var(--rack-pad))] touch-pan-y overflow-hidden perspective-[calc(var(--cw)*var(--persp-f))] perspective-origin-[50%_calc(var(--top)+var(--ch)/2)]",
+          "relative mt-[clamp(8px,2vw,24px)] h-[calc(var(--top)+var(--ch)*1.13+56px+var(--rack-pad))] touch-pan-y overflow-hidden coverflow-rack perspective-[calc(var(--cw)*var(--persp-f))] perspective-origin-[50%_calc(var(--top)+var(--ch)/2)]",
         )}
         {...coverflow.swipeHandlers}
       >

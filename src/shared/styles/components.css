@@ -280,16 +280,6 @@
     var(--utg-rack-bottom) 55%,
     var(--utg-black) 100%
   );
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset-inline: 0;
-    top: calc(var(--top) + var(--ch) + 2px);
-    height: 1px;
-    pointer-events: none;
-    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--utg-white) 45%, transparent), transparent);
-  }
 }
 
 @utility coverflow-edge {
@@ -304,7 +294,7 @@
 }
 
 @utility coverflow-reflection {
-  mask-image: linear-gradient(to top, color-mix(in srgb, var(--utg-black) 38%, transparent), transparent 46%);
+  mask-image: linear-gradient(to top, color-mix(in srgb, var(--utg-black) 22%, transparent), transparent 32%);
 }
 
 @utility arrow-glyph {
