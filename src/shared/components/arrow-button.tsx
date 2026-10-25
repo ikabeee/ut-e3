@@ -22,11 +22,7 @@ export function ArrowButton({
       isIconOnly
       variant={variant}
       aria-label={label}
-      className={cn(
-        "touch-target font-[family-name:Arial,Helvetica,sans-serif] font-normal",
-        TONE_CLASSES[tone],
-        className,
-      )}
+      className={cn("touch-target font-[Arial,Helvetica,sans-serif] font-normal", TONE_CLASSES[tone], className)}
       {...buttonProps}
     >
       <ArrowGlyph direction={direction === "previous" ? "w" : "e"} />

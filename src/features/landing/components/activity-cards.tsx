@@ -78,9 +78,7 @@ function ActivityCard({ kicker, title, body, facts, children }: Readonly<Activit
     <article className="flex min-w-0 flex-col">
       <PaperCard className="flex-1 gap-3 px-[22px] pt-[22px] pb-7">
         <span className="type-tiny">{kicker}</span>
-        <h3 className="font-wide text-[clamp(24px,2.6vw,34px)] leading-[.95] font-bold tracking-[-.03em] uppercase">
-          {title}
-        </h3>
+        <h3 className="type-wide text-[clamp(24px,2.6vw,34px)] leading-[.95] tracking-[-.03em]">{title}</h3>
         <p className="m-0 max-w-[40ch] text-lg leading-[1.2]">{body}</p>
         <FactList facts={facts} />
         {children}

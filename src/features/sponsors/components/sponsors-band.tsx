@@ -18,7 +18,7 @@ export function SponsorsBand({ sponsors }: Readonly<SponsorsBandProps>) {
         <h2 className="type-tiny text-accent">{SPONSORS_COPY.heading}</h2>
       </div>
       <div className="group mt-4 overflow-hidden border-t border-border motion-reduce:overflow-x-auto">
-        <div className="flex w-max animate-marquee group-focus-within:[animation-play-state:paused] group-hover:[animation-play-state:paused] motion-reduce:w-auto motion-reduce:animate-none">
+        <div className="flex w-max animate-marquee group-focus-within:paused group-hover:paused motion-reduce:w-auto motion-reduce:animate-none">
           <SponsorGroup sponsors={sponsors} isDuplicate={false} />
           <SponsorGroup sponsors={sponsors} isDuplicate />
         </div>

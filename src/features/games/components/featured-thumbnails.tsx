@@ -47,7 +47,7 @@ function FeaturedThumbnail({ game, isCurrent, onSelect, progressBarRef }: Readon
       aria-current={isCurrent}
       onClick={onSelect}
       className={cn(
-        "group relative aspect-[16/10] h-full flex-none cursor-pointer snap-start overflow-hidden border bg-surface p-0 text-left text-foreground",
+        "group relative aspect-16/10 h-full flex-none cursor-pointer snap-start overflow-hidden border bg-surface p-0 text-left text-foreground",
         isCurrent ? "border-accent" : "border-border",
       )}
     >
@@ -66,7 +66,7 @@ function FeaturedThumbnail({ game, isCurrent, onSelect, progressBarRef }: Readon
       <i
         ref={isCurrent ? progressBarRef : undefined}
         aria-hidden="true"
-        className="absolute top-0 left-0 z-[1] h-[3px] bg-accent"
+        className="absolute top-0 left-0 z-1 h-[3px] bg-accent"
         style={isCurrent ? undefined : { width: 0 }}
       />
     </button>
@@ -83,7 +83,7 @@ function ThumbnailName({ name, isCurrent }: Readonly<ThumbnailNameProps>) {
     <span
       aria-hidden="true"
       className={cn(
-        "absolute right-[10px] bottom-[10px] left-[10px] z-[1] font-wide text-[clamp(10px,.95vw,13px)] leading-[1.1] font-bold tracking-[-.02em] uppercase",
+        "absolute inset-x-[10px] bottom-[10px] z-1 type-wide text-[clamp(10px,.95vw,13px)] leading-[1.1] tracking-[-.02em]",
         isCurrent && "text-accent",
       )}
     >
