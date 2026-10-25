@@ -11,7 +11,6 @@ export const landingPageMetadata: Metadata = {
   openGraph: buildOpenGraph(),
 };
 
-/** Portada (`/`) provisional mientras se construye la versión 2 del sitio. */
 export function LandingPage() {
   return <LandingPlaceholder organizationLabel={siteConfig.organizationLabel} />;
 }

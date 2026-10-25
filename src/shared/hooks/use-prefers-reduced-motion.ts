@@ -2,7 +2,6 @@ import { useSyncExternalStore } from "react";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
-/** `true` si la persona pidió reducir las animaciones en su sistema operativo. */
 export function usePrefersReducedMotion() {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
@@ -18,7 +17,6 @@ function getSnapshot() {
   return window.matchMedia(REDUCED_MOTION_QUERY).matches;
 }
 
-// En el servidor no hay preferencia: se asume movimiento y el cliente corrige al hidratar.
 function getServerSnapshot() {
   return false;
 }

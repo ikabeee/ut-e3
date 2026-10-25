@@ -4,22 +4,6 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import sonarjs from "eslint-plugin-sonarjs";
 
-// Reglas de la screaming architecture (ver AGENTS.md, "Reglas de dependencias", y
-// docs/architecture.md). Todo import usa los path aliases `@features/*` y `@shared/*`
-// (tsconfig.json); no hay archivos barril. `@app/*` sólo existe para que las pruebas de
-// `src/app/__tests__/` importen los archivos de ruta.
-
-// ---------------------------------------------------------------------------------------
-// Grafo de features
-// ---------------------------------------------------------------------------------------
-
-/**
- * Features que puede importar cada feature fuera de `pages/`. Debe ser acíclico: se valida al
- * cargar esta configuración. Las `pages/` pueden componer cualquier feature, porque sólo
- * `src/app` las importa y por eso nunca cierran un ciclo.
- *
- * Una feature nueva empieza sin dependencias; si necesita otra, agrégala aquí.
- */
 const FEATURE_DEPENDENCIES = {
   landing: [],
 };
@@ -28,7 +12,6 @@ const FEATURES = readdirSync(new URL("./src/features", import.meta.url), { withF
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name);
 
-/** Detiene ESLint si el grafo nombra features que no existen o tiene un ciclo. */
 function assertValidFeatureGraph(graph) {
   for (const [feature, dependencies] of Object.entries(graph)) {
     for (const name of [feature, ...dependencies]) {
@@ -53,10 +36,6 @@ function assertValidFeatureGraph(graph) {
 
 assertValidFeatureGraph(FEATURE_DEPENDENCIES);
 
-// ---------------------------------------------------------------------------------------
-// Patrones de imports prohibidos
-// ---------------------------------------------------------------------------------------
-
 const relativeParentImports = {
   group: ["../*", "../**"],
   message: "Usa los path aliases (`@features/...`, `@shared/...`) en lugar de rutas relativas `../`.",
@@ -73,8 +52,6 @@ const barrelImports = {
   message: "No hay archivos barril: importa el archivo concreto, por ejemplo `@features/games/components/game-card`.",
 };
 
-// El código de servidor se reconoce por su ubicación, no por su nombre: `lib/server/` de cada
-// feature, `@shared/lib/server/` y el cliente de Prisma.
 const serverCode = {
   group: ["@features/*/lib/server/**", "@shared/lib/server/**", "@shared/lib/prisma/**"],
   message:
@@ -133,9 +110,6 @@ const nonPageImports = {
     "`src/app` sólo renderiza pages: importa desde `@features/<feature>/pages/<name>-page` (la navegación, el pie, el 404 y el error viven en la feature `site`).",
 };
 
-// El layout raíz es la única excepción: monta el marco del sitio (cabecera y pie de `site`), los
-// avisos de conexión y el registro del service worker (`OfflineNotices` de `offline`) y el
-// `QueryProvider` de `shared`. Nada más de `components/` ni de `shared/components`.
 const rootLayoutImports = {
   regex:
     "^@features/(?!site/components/|offline/components/offline-notices$)[^/]+/(lib|hooks|components|api)/|^@shared/components/(?!query-provider$)",
@@ -143,21 +117,17 @@ const rootLayoutImports = {
     "El layout sólo monta `@features/site/components/*`, `OfflineNotices`, `QueryProvider` y estilos globales; el resto va en una page.",
 };
 
-// Los archivos de metadata (`sitemap.ts`, `robots.ts`, `manifest.ts`) no renderizan una page:
-// delegan en `lib/` de la feature, pero nunca en componentes, hooks ni pages.
 const metadataFileImports = {
   group: ["@features/*/hooks/**", "@features/*/components/**", "@features/*/pages/**", "@features/*/api/**"],
   message: "Los archivos de metadata sólo delegan en `@features/<feature>/lib/*`.",
 };
 
-// Un Route Handler de `src/app` sólo enlaza la ruta con el de la feature, como las pages.
 const routeHandlerImports = {
   regex: "^@shared/|^@features/(?![^/]+/api/[^/]+-route$)",
   message:
     'Un `route.ts` sólo re-exporta el handler de la feature: `export { GET } from "@features/<feature>/api/<feature>-route";`.',
 };
 
-/** Features que `feature` no puede importar según `FEATURE_DEPENDENCIES`. */
 function forbiddenFeatures(feature) {
   const allowed = new Set([feature, ...(FEATURE_DEPENDENCIES[feature] ?? [])]);
 
@@ -167,7 +137,6 @@ function forbiddenFeatures(feature) {
   }));
 }
 
-// `server-only` marca un archivo como de servidor: sólo puede vivir en las ubicaciones de servidor.
 const serverOnlyPackage = {
   name: "server-only",
   message:
@@ -184,23 +153,10 @@ const restrict = (patterns, { allowServerOnly = false } = {}) => ({
   ],
 });
 
-// ---------------------------------------------------------------------------------------
-// Capas de una feature
-// ---------------------------------------------------------------------------------------
-
 const SOURCE = "{ts,tsx}";
 
-/**
- * `globs` dentro de `dir` y en su `__tests__/`, que repite las subcarpetas del código: una prueba
- * sigue las reglas de la carpeta que prueba (`__tests__/lib/` las de `lib/`).
- */
 const withTests = (dir, ...globs) => globs.flatMap((glob) => [`${dir}/${glob}`, `${dir}/__tests__/${glob}`]);
 
-/**
- * Lo que cada carpeta de una feature no puede importar. En ESLint gana el último bloque que
- * coincide con un archivo, por eso `lib/server/` va después de `lib/` y `api/*-route.ts`
- * después de `api/`.
- */
 const FEATURE_LAYERS = [
   { glob: `lib/**/*.${SOURCE}`, patterns: [hooksLayer, componentsLayer, pagesLayer, apiRoutes, serverCode] },
   {
@@ -208,7 +164,6 @@ const FEATURE_LAYERS = [
     patterns: [hooksLayer, componentsLayer, pagesLayer, apiLayer],
     allowServerOnly: true,
   },
-  // Server Actions ("use server"): los componentes cliente las importan y ellas llaman a `lib/server/`.
   { glob: "lib/*-actions.ts", patterns: [hooksLayer, componentsLayer, pagesLayer, apiLayer, prismaClient] },
   { glob: `hooks/**/*.${SOURCE}`, patterns: [componentsLayer, pagesLayer, apiRoutes, serverCode] },
   { glob: `components/**/*.${SOURCE}`, patterns: [pagesLayer, apiRoutes, serverCode] },
@@ -235,14 +190,9 @@ const metadataFiles = ["src/app/sitemap.ts", "src/app/robots.ts", "src/app/manif
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Lineamientos de SonarQube (los mismos que reporta SonarLint/SonarCloud).
   sonarjs.configs.recommended,
-  // Código comentado que quedó olvidado. `recommended` no la activa y en Oxlint no se dispara.
   { rules: { "sonarjs/no-commented-code": "error" } },
-  // Buenas prácticas de TanStack Query (query keys, queryFn estables, etc.).
   { files: [`src/**/*.${SOURCE}`, "src/**/*.mts"], rules: restrict([]) },
-  // Ciclos entre archivos (también dentro de una misma feature). No se analizan los paquetes de
-  // node_modules: no pueden importar código del proyecto y recorrerlos multiplica el tiempo de lint.
   {
     files: [`src/**/*.${SOURCE}`],
     settings: { "import/ignore": ["node_modules"] },
@@ -270,25 +220,19 @@ const eslintConfig = defineConfig([
     rules: restrict([featureImports], { allowServerOnly: true }),
   },
   ...featureLayerConfigs,
-  // Las pruebas pueden importar `@app/*` y los helpers de `__tests__/`; el resto del código no. Es una
-  // regla aparte de `no-restricted-imports` para que las pruebas la apaguen sin perder las de su capa.
   {
     files: [`src/**/*.${SOURCE}`, "src/**/*.mts"],
     rules: { "@typescript-eslint/no-restricted-imports": ["error", { patterns: [testOnlyImports] }] },
   },
   { files: [`src/**/__tests__/**/*.${SOURCE}`], rules: { "@typescript-eslint/no-restricted-imports": "off" } },
-  // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
     "coverage/**",
-    // Artefactos generados por Prisma 8:
     "src/shared/lib/prisma/contract.d.ts",
     "migrations/**",
-    // Plugin de Oxlint copiado de anti-slop (ver tools/oxlint/anti-slop/UPSTREAM.md):
     "tools/oxlint/anti-slop/**",
   ]),
 ]);

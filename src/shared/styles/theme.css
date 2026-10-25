@@ -1,21 +1,9 @@
-/*
- * Tema UTG para HeroUI v3.
- *
- * El diseño del showcase usa un solo tema oscuro: campo negro, bloques en azul "acid",
- * tipografía ancha en mayúsculas para títulos y monoespaciada para el cuerpo.
- * Aquí se traducen esos valores a las variables semánticas de HeroUI, así los componentes
- * (Button, Card, SearchField, ToggleButton...) toman el estilo del diseño sin colores fijos.
- *
- * Para cambiar un color del sitio, edita la paleta `--utg-*` de este archivo.
- */
-
 @layer base {
   :root,
   .dark,
   [data-theme="dark"] {
     color-scheme: dark;
 
-    /* Paleta del diseño */
     --utg-black: #000000;
     --utg-panel: #1c1c1c;
     --utg-mid: #3a3a3a;
@@ -28,14 +16,12 @@
     --utg-blue-4: #0582d4;
     --utg-blue-5: #04598f;
 
-    /* Exhibidor 3D: caras y cantos de las cajas y fondo del rack */
     --utg-case-border: #d6d6d6;
     --utg-case-face: #0b0b0d;
     --utg-case-edge: #bdbdbd;
     --utg-rack-top: #1e1e20;
     --utg-rack-bottom: #0c0c0d;
 
-    /* Variables semánticas de HeroUI */
     --radius: 0rem;
     --field-radius: 0rem;
     --border-width: 1px;
@@ -70,15 +56,10 @@
     --field-shadow: none;
     --overlay-shadow: none;
 
-    /* Medidas del diseño */
     --gutter: clamp(16px, 2.4vw, 32px);
     --nav-height: 56px;
   }
 
-  /*
-   * Tema claro de la landing. Se aplica a un contenedor (`<div class="light" data-theme="light">`),
-   * no a <html>: el resto del sitio sigue oscuro. Valores exactos del Figma "NUEVA PROPUESTA".
-   */
   .light,
   [data-theme="light"] {
     color-scheme: light;
@@ -90,7 +71,6 @@
     --utg-light-muted: #737373;
     --utg-yellow: #fcf94e;
 
-    /* Colores de la landing sin equivalente semántico en HeroUI */
     --utg-light-band: #0d0d0d;
     --utg-light-charcoal: #171717;
     --utg-light-coral: #ef6762;
@@ -124,11 +104,6 @@
     --field-placeholder: var(--utg-light-muted);
     --field-border: var(--utg-light-rule);
 
-    /*
-     * Una sola tipografía. Las utilidades de Tailwind (`font-sans`, `font-wide`...) leen las variables de
-     * `next/font`; los estilos base (`h1`, `.type-mono`...) leen `--font-sans`, `--font-wide`, etc., que
-     * se resuelven en :root. Hay que reemplazar los dos grupos.
-     */
     --font-archivo: var(--font-line-seed-jp);
     --font-jetbrains-mono: var(--font-line-seed-jp);
     --font-martian-mono: var(--font-line-seed-jp);
@@ -142,23 +117,19 @@
 }
 
 @theme inline {
-  /* Colores del diseño que no tienen equivalente semántico en HeroUI */
   --color-paper: var(--utg-light);
   --color-paper-foreground: var(--utg-black);
   --color-paper-rule: #cfcfcf;
   --color-accent-hi: var(--utg-blue-1);
   --color-accent-strong: var(--utg-blue-4);
   --color-accent-deep: var(--utg-blue-5);
-  /* Grises de texto secundario sobre negro */
   --color-copy: #d8d8d8;
   --color-copy-strong: #e4e4e4;
   --color-copy-warm: #c9c8c1;
   --color-copy-dim: #bdbdbd;
-  /* Cajas del exhibidor 3D */
   --color-case-border: var(--utg-case-border);
   --color-case-face: var(--utg-case-face);
 
-  /* Tema claro de la landing (valores en `.light`) */
   --color-landing-band: var(--utg-light-band);
   --color-landing-charcoal: var(--utg-light-charcoal);
   --color-landing-coral: var(--utg-light-coral);
@@ -167,7 +138,6 @@
   --color-landing-pill: var(--utg-light-pill);
   --color-landing-orange: var(--utg-light-orange);
 
-  /* Sombra de una portada sobre otras (géneros del catálogo) */
   --shadow-cover: 0 10px 30px color-mix(in srgb, var(--utg-black) 70%, transparent);
 
   --font-sans: var(--font-archivo), Helvetica, Arial, sans-serif;

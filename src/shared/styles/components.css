@@ -1,30 +1,3 @@
-/*
- * Ajustes de los componentes de HeroUI al diseño UTG y efectos de movimiento compartidos.
- *
- * HeroUI usa clases BEM (`.button`, `.button--primary`...). Aquí sólo se cambian sus variables
- * y medidas; la accesibilidad y los estados (hover, pressed, focus) siguen siendo de HeroUI.
- *
- * Variantes de Button según el diseño:
- *   primary   -> `.btn.solid`  bloque azul, se rellena de blanco al pasar el mouse.
- *   outline   -> `.btn`        negro con borde blanco, se rellena de azul.
- *   tertiary  -> `.btn.tab`    negro sin borde, se rellena de azul.
- *   ghost     -> `.arrow`      flechas con borde gris.
- *   size="lg" -> pestaña (`.tab`): sin borde y con más relleno.
- *
- * Variantes propias (clase extra junto a la variante de HeroUI):
- *   button--plate    -> flechas del exhibidor 3D: placa negra que se rellena de blanco.
- *   button--overlay  -> flechas sobre una imagen: fondo negro translúcido, sin barrido.
- *   button--segment  -> celda de una barra de controles (zoom del croquis).
- *
- * Variantes de ToggleButton (todas cuadradas y sin escalar al presionar):
- *   toggle-button--tile     -> tarjeta seleccionable (géneros del catálogo).
- *   toggle-button--filter   -> filtro que se atenúa al apagarse (categorías del croquis).
- *   toggle-button--overlay  -> botón de ícono sobre un video (pausa del reel).
- *
- * Regla práctica: si una cadena de utilidades de un componente supera dos renglones o se repite,
- * es una variante y va aquí. En `className` quedan sólo los ajustes de layout del contexto.
- */
-
 @layer components {
   .button {
     --btn-base: var(--utg-black);
@@ -137,7 +110,6 @@
     transition: none;
   }
 
-  /* Sin barrido: el fondo cambia de golpe a azul, como en el diseño. */
   .button--segment {
     --btn-edge: var(--border);
     --btn-ink-hover: var(--background);
@@ -163,7 +135,6 @@
     }
   }
 
-  /* ToggleButton del diseño: cuadrado y sin escalar al presionar. */
   .toggle-button {
     border-radius: 0;
 
@@ -256,14 +227,12 @@
     border-style: solid;
   }
 
-  /* Campos de búsqueda: cuadrados, sin sombra y con el acento al enfocar. */
   .search-field__group {
     border-radius: 0;
     box-shadow: none;
   }
 }
 
-/* Degradados sobre imágenes y video para leer el texto encima (colores del tema, no fijos). */
 @utility shade-reel {
   background:
     linear-gradient(
@@ -273,11 +242,9 @@
       color-mix(in srgb, var(--utg-black) 15%, transparent) 70%,
       color-mix(in srgb, var(--utg-black) 45%, transparent) 100%
     ),
-    /* Líneas de escaneo */
-      repeating-linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 18%, transparent) 0 1px, transparent 1px 3px);
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 18%, transparent) 0 1px, transparent 1px 3px);
 }
 
-/* Destacados en escritorio: oscurece a la izquierda (texto) y abajo (miniaturas). */
 @utility shade-featured {
   background:
     linear-gradient(
@@ -289,7 +256,6 @@
     linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 90%, transparent) 0%, transparent 50%);
 }
 
-/* Destacados en móvil: sólo abajo. */
 @utility shade-featured-mobile {
   background: linear-gradient(
     0deg,
@@ -299,17 +265,14 @@
   );
 }
 
-/* Miniaturas con el nombre del juego abajo. */
 @utility shade-thumb {
   background: linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 75%, transparent), transparent 60%);
 }
 
-/* Portada de una caja del exhibidor con el nombre del juego abajo. */
 @utility shade-cover {
   background: linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 92%, transparent), transparent);
 }
 
-/* Exhibidor 3D: fondo del rack y línea del piso donde se apoyan las cajas. */
 @utility coverflow-rack {
   background: radial-gradient(
     70% 60% at 50% 38%,
@@ -329,12 +292,10 @@
   }
 }
 
-/* Cantos laterales de una caja del exhibidor. */
 @utility coverflow-edge {
   background: linear-gradient(90deg, var(--utg-case-edge), var(--utg-white) 50%, var(--utg-case-edge));
 }
 
-/* Brillo de la caja que está al frente. */
 @utility coverflow-glow {
   box-shadow:
     0 0 0 1px var(--utg-white),
@@ -342,12 +303,10 @@
     0 30px 70px -20px color-mix(in srgb, var(--utg-white) 25%, transparent);
 }
 
-/* Reflejo de una caja: se desvanece hacia abajo. */
 @utility coverflow-reflection {
   mask-image: linear-gradient(to top, color-mix(in srgb, var(--utg-black) 38%, transparent), transparent 46%);
 }
 
-/* Flechas de los botones: se desplazan hacia su dirección al pasar el mouse (sólo con mouse). */
 @utility arrow-glyph {
   display: inline-block;
   transition: transform 0.32s cubic-bezier(0.3, 1.6, 0.5, 1);
@@ -371,7 +330,6 @@
   }
 }
 
-/* Subrayado que se dibuja de izquierda a derecha (navegación y enlaces del programa). */
 @utility link-wipe {
   padding-bottom: 3px;
   background: linear-gradient(var(--accent), var(--accent)) no-repeat left bottom / 0% 1px;
@@ -387,7 +345,6 @@
   }
 }
 
-/* Botón con relleno de izquierda a derecha para elementos que no son Button de HeroUI. */
 @utility fill-wipe {
   background: var(--wipe-base, var(--utg-black))
     linear-gradient(var(--wipe-fill, var(--accent)), var(--wipe-fill, var(--accent))) no-repeat left center / 0% 100%;
@@ -408,11 +365,6 @@
   }
 }
 
-/*
- * Área táctil mínima de 44x44 px sin cambiar el tamaño visual: un pseudo-elemento invisible
- * crece hacia afuera lo que le falte al elemento. El elemento debe estar posicionado
- * (`relative` o `absolute`) y ningún contenedor cercano debe recortar su desborde.
- */
 @utility touch-target {
   &::before {
     content: "";
@@ -422,7 +374,6 @@
   }
 }
 
-/* Icono con interferencia (CTA principal): una capa que tiembla y dos cortes desplazados. */
 @utility glitch-layer-base {
   animation: glitch-jitter 2.8s steps(1) infinite;
 }
@@ -520,7 +471,6 @@
   }
 }
 
-/* Entrada de los títulos (palabra por palabra). */
 @keyframes rise {
   from {
     transform: translateY(0.25em);
@@ -528,7 +478,6 @@
   }
 }
 
-/* Parpadeo de un stand seleccionado desde el directorio del croquis. */
 @keyframes flash {
   50% {
     fill: var(--utg-white);
