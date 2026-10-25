@@ -377,8 +377,8 @@ erDiagram
             <code>TEXT</code> con <code>CHECK</code>, porque SQLite no valida enums. Propiedades en
             <code>camelCase</code> en Prisma; tablas en plural y columnas en <code>snake_case</code> con
             <code>@@map</code> y <code>@map</code>. Los tokens y contraseñas nunca se guardan: la columna guarda su hash
-            y lo documenta un comentario <code>///</code>. El PIN del visitante queda fuera de esa regla: cómo se guarda es un
-            tema abierto (<code>srs-v2.md</code>, sección 9).
+            y lo documenta un comentario <code>///</code>. El PIN del visitante queda fuera de esa regla: cómo se guarda
+            es un tema abierto (<code>srs-v2.md</code>, sección 9).
           </p>
         </div>
 
@@ -799,9 +799,7 @@ erDiagram
                 </div>
                 <div>
                   <span class="tag sql">sql</span
-                  ><span
-                    ><code>pin GLOB '[0-9][0-9][0-9][0-9][0-9]'</code>: exactamente 5 dígitos</span
-                  >
+                  ><span><code>pin GLOB '[0-9][0-9][0-9][0-9][0-9]'</code>: exactamente 5 dígitos</span>
                 </div>
                 <div>
                   <span class="tag sql">sql</span
@@ -1111,14 +1109,16 @@ erDiagram
                 </div>
                 <div>
                   <span class="tag sql">sql</span
-                  ><span><code>status IN (registered, checked_in, no_show)</code>; <code>no_show</code> = "No se presentó"</span>
+                  ><span
+                    ><code>status IN (registered, checked_in, no_show)</code>; <code>no_show</code> = "No se
+                    presentó"</span
+                  >
                 </div>
                 <div>
                   <span class="tag sql">sql</span
                   ><span
-                    ><code>checkedInAt</code> obligatorio si y solo si <code>status = checked_in</code>; una
-                    inscripción <code>onsite</code> nace <code>checked_in</code> (el check-in se hace al
-                    inscribirse)</span
+                    ><code>checkedInAt</code> obligatorio si y solo si <code>status = checked_in</code>; una inscripción
+                    <code>onsite</code> nace <code>checked_in</code> (el check-in se hace al inscribirse)</span
                   >
                 </div>
                 <div>
@@ -1135,8 +1135,8 @@ erDiagram
                 <div>
                   <span class="tag sql">sql</span
                   ><span
-                    >Trigger: máximo 64 inscripciones que no son <code>no_show</code> (un <code>no_show</code> libera
-                    su lugar) y máximo 50 con <code>channel = pre</code></span
+                    >Trigger: máximo 64 inscripciones que no son <code>no_show</code> (un <code>no_show</code> libera su
+                    lugar) y máximo 50 con <code>channel = pre</code></span
                   >
                 </div>
               </div>
@@ -1472,8 +1472,8 @@ erDiagram
           <div class="note">
             <h3>Límites de varias filas</h3>
             <p>
-              Máximo 18 stands, 3 staff por stand y 64 inscritos (50 en la lista previa) van como triggers, para que la regla viva en la BD y no
-              solo en el código.
+              Máximo 18 stands, 3 staff por stand y 64 inscritos (50 en la lista previa) van como triggers, para que la
+              regla viva en la BD y no solo en el código.
             </p>
           </div>
           <div class="note">
@@ -1542,8 +1542,8 @@ erDiagram
 
       <footer>
         <span
-          >Versión 1.2 &middot; 25 de octubre de 2026 &middot; PIN del visitante, encuesta del stand y check-in de
-          KOF (SRS v2.2)</span
+          >Versión 1.2 &middot; 25 de octubre de 2026 &middot; PIN del visitante, encuesta del stand y check-in de KOF
+          (SRS v2.2)</span
         >
         <span>Siguiente: casos de uso para pruebas unitarias y flujos e2e.</span>
       </footer>
