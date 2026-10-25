@@ -1,11 +1,16 @@
 export const LANDING_COPY = {
-  title: "Showcase de videojuegos",
-  lead: "Estamos preparando la nueva versión del sitio.",
+  slogan: "Showcase de videojuegos",
   nav: {
     label: "Principal",
     homeLabel: "UTG, inicio",
+    links: {
+      home: "Inicio",
+      games: "Juegos",
+      floorPlan: "Croquis",
+    },
   },
   hero: {
+    kicker: (dateLabel: string, venueShortName: string) => `${dateLabel} · ${venueShortName} · Entrada libre`,
     label: "UTG Showcase",
     logoLabel: "UTG",
     description: (division: string) =>
@@ -51,7 +56,7 @@ export const LANDING_COPY = {
     marioKart: {
       kicker: "Zona de juego",
       title: "Mario Kart",
-      body: "Actividad solo informativa. Consulta el cronograma para conocer su horario.",
+      body: "Partidas abiertas al público durante el evento. Actividad solo informativa: no requiere registro.",
       kind: "Tipo",
       kindValue: "Informativo",
     },
@@ -82,5 +87,9 @@ export const LANDING_COPY = {
   closing: {
     firstLine: "Entrada",
     secondLine: "libre",
+  },
+  calendar: {
+    title: "UTG · Showcase de videojuegos",
+    details: (division: string) => `Showcase de videojuegos de la ${division}. Entrada libre.`,
   },
 } as const;
