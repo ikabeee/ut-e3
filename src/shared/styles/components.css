@@ -233,18 +233,6 @@
   }
 }
 
-@utility shade-reel {
-  background:
-    linear-gradient(
-      0deg,
-      color-mix(in srgb, var(--utg-black) 92%, transparent) 0%,
-      color-mix(in srgb, var(--utg-black) 55%, transparent) 38%,
-      color-mix(in srgb, var(--utg-black) 15%, transparent) 70%,
-      color-mix(in srgb, var(--utg-black) 45%, transparent) 100%
-    ),
-    repeating-linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 18%, transparent) 0 1px, transparent 1px 3px);
-}
-
 @utility shade-featured {
   background:
     linear-gradient(

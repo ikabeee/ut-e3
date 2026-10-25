@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useState, type RefObject } from "react";
-import { useReelAutoplay } from "@features/landing/hooks/use-reel-autoplay";
+import { useLoopAutoplay } from "@features/landing/hooks/use-loop-autoplay";
 
 type VideoRef = RefObject<HTMLVideoElement | null>;
-
-const FRAMES_PER_SECOND = 30;
 
 export function useVideoPlayback(videoRef: VideoRef) {
   const [hasSource, setHasSource] = useState(false);
   const [playRequest, setPlayRequest] = useState(0);
-  const canAutoplay = useReelAutoplay();
-  const { isPlaying, timecode, markStopped } = useVideoState(videoRef);
+  const canAutoplay = useLoopAutoplay();
+  const { isPlaying, markStopped } = useVideoState(videoRef);
 
   const requestPlay = useCallback(() => {
     setHasSource(true);
@@ -36,12 +34,11 @@ export function useVideoPlayback(videoRef: VideoRef) {
     }
   }, [requestPlay, videoRef]);
 
-  return { isPlaying, hasSource, timecode, togglePlayback };
+  return { isPlaying, hasSource, togglePlayback };
 }
 
 function useVideoState(videoRef: VideoRef) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [timecode, setTimecode] = useState(formatTimecode(0));
   const markStopped = useCallback(() => setIsPlaying(false), []);
 
   useEffect(() => {
@@ -53,19 +50,16 @@ function useVideoState(videoRef: VideoRef) {
 
     const markPlaying = () => setIsPlaying(true);
     const markPaused = () => setIsPlaying(false);
-    const syncTimecode = () => setTimecode(formatTimecode(video.currentTime));
     video.addEventListener("play", markPlaying);
     video.addEventListener("pause", markPaused);
-    video.addEventListener("timeupdate", syncTimecode);
 
     return () => {
       video.removeEventListener("play", markPlaying);
       video.removeEventListener("pause", markPaused);
-      video.removeEventListener("timeupdate", syncTimecode);
     };
   }, [videoRef]);
 
-  return { isPlaying, timecode, markStopped };
+  return { isPlaying, markStopped };
 }
 
 function useAutoplayWhenVisible(videoRef: VideoRef, canAutoplay: boolean, requestPlay: () => void) {
@@ -93,16 +87,4 @@ function useAutoplayWhenVisible(videoRef: VideoRef, canAutoplay: boolean, reques
 
     return () => observer.disconnect();
   }, [canAutoplay, requestPlay, videoRef]);
-}
-
-function formatTimecode(seconds: number) {
-  const minutes = padTwoDigits(seconds / 60);
-  const wholeSeconds = padTwoDigits(seconds % 60);
-  const frames = padTwoDigits((seconds % 1) * FRAMES_PER_SECOND);
-
-  return `${minutes}:${wholeSeconds}:${frames}`;
-}
-
-function padTwoDigits(value: number) {
-  return String(Math.floor(value)).padStart(2, "0");
 }
