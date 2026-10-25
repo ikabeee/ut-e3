@@ -7,3 +7,6 @@
 
 # style: aplicar el espaciado legible de anti-slop (#71)
 d378feb9aeda6236ee1bc68aceff725d8b9f8540
+
+# style(odd): aplicar Prettier a los diagramas de arquitectura y ER (#91)
+12a69ca29765558cd824b101d5b11a2f889e38bb

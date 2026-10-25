@@ -4,7 +4,7 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 
 | Campo | Valor |
 | --- | --- |
-| Fuentes | `odd/requirements/srs-v2.md`, artifacts de arquitectura y modelo ER (23 de octubre de 2026) |
+| Fuentes | `odd/requirements/srs-v2.md` (versión 2.2), artifacts de arquitectura y modelo ER (25 de octubre de 2026) |
 | Runner | Jest 30 + Testing Library (`next/jest`) |
 | Ubicación | `src/features/<feature>/__tests__/` con las mismas subcarpetas que el código (ver `AGENTS.md`) |
 
@@ -17,7 +17,12 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 - **Reloj inyectado:** toda regla con horario recibe `now` como parámetro. Las horas del ejemplo son de `America/Cancun`
   el 20 de noviembre de 2026, salvo que se indique otra fecha.
 - **Req:** ID de `srs-v2.md` (RF, RN, RNF, EC) o la decisión de arquitectura (D1-D7). Los requisitos que cambiaron
-  después de la SRS (sin PIN, sin Supabase) se citan por la decisión.
+  después de la SRS (sin Supabase) se citan por la decisión.
+- **Casos eliminados:** conservan su ID con la marca **(eliminado)** y el motivo; los casos nuevos de la v2.2 usan el
+  siguiente número libre de su feature.
+- **Horarios de KOF:** el check-in (de 11:00 a 12:00), la inscripción presencial (de 12:00 a 12:45) y la generación del
+  bracket (13:00) son valores de `event_settings` (sección 1.1 de la SRS); las pruebas los fijan en la BD de prueba y no
+  los escriben en el código.
 
 ---
 
@@ -49,6 +54,8 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 | UT-ES-01 | server | los horarios iniciales | se intenta poner el corte de check-ins (`checkInCutoffAt`) después del inicio de la rifa | se rechaza con un mensaje en español y la fila no cambia | RN-04 |
 | UT-ES-02 | server | un cambio válido de la hora de la rifa | el sysadmin lo guarda | se actualiza la fila única, se invalida la caché `event-settings` y queda en la bitácora | RF-43 |
 | UT-ES-03 | server | la tabla `event_settings` con su fila | se intenta insertar una segunda fila | la BD lo rechaza (`CHECK (id = 1)`) | ER |
+| UT-ES-04 | server | los horarios iniciales de KOF | el sysadmin pone el fin del check-in (`kofCheckInEndsAt`) antes o igual que su inicio (`kofCheckInStartsAt`), o el fin de la inscripción presencial (`kofOnsiteSignupEndsAt`) antes o igual que su inicio (`kofOnsiteSignupStartsAt`) | se rechaza con un mensaje en español y la fila no cambia | RF-43, RF-75, RF-77 |
+| UT-ES-05 | server | los horarios iniciales | se lee la fila de `event_settings` | trae el check-in de KOF de 11:00 a 12:00, la inscripción presencial de 12:00 a 12:45 y el bracket a las 13:00 (`kofBracketGeneratesAt`) del día del evento, y ya no existe un cierre de la inscripción previa (`kofRegistrationClosesAt`) | 1.1 |
 
 ## games
 
@@ -106,13 +113,13 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 | ID | Capa | Dado | Cuando | Entonces | Req |
 | --- | --- | --- | --- | --- | --- |
 | UT-VI-01 | server | `now` = 12 de noviembre, 23:59 | un visitante se registra | se rechaza: el registro abre el 13 de noviembre | RF-13 |
-| UT-VI-02 | server | `now` = 13 de noviembre, 00:00 | un visitante se registra con datos válidos | se crea el pasaporte, se guarda la cookie del dispositivo y se encola el correo con la copia del pasaporte | RF-12, RF-16 |
+| UT-VI-02 | server | `now` = 13 de noviembre, 00:00 | un visitante se registra con datos válidos | se crea el pasaporte con su PIN de 5 dígitos, se guarda la cookie del dispositivo y se encola el correo con la copia del pasaporte | RF-12, RF-14, RF-16 |
 | UT-VI-03 | server | un correo que pertenece a un integrante (`TeamMember`) o a una cuenta | se intenta registrar | se rechaza con "No se pudo registrar este correo", sin revelar el motivo | RF-15 |
 | UT-VI-04 | lib | `Ana@Mail.com ` | se normaliza el correo | devuelve `ana@mail.com` | RF-15 |
 | UT-VI-05 | server | un visitante con el correo `ana@mail.com` | otro se registra con `ANA@mail.com` | se rechaza por correo duplicado | RF-12 |
 | UT-VI-06 | server | un gamertag ya usado | otro visitante lo usa | se rechaza por gamertag duplicado | RF-12 |
 | UT-VI-07 | lib | gamertags `ab`, `luna dev` y `luna_dev` | se validan con `^[a-z0-9_.-]{3,24}$` (supuesto de la V1) | los dos primeros son inválidos y el tercero es válido | RF-12 |
-| UT-VI-08 | server | un registro exitoso | se lee el correo encolado | contiene QR, gamertag y enlace a `/passport`; no contiene el enlace de recuperación | RF-16 |
+| UT-VI-08 | server | un registro exitoso | se lee el correo encolado | contiene el PIN, el gamertag y el enlace a `/passport`; no contiene el enlace de recuperación | RF-16 |
 | UT-VI-09 | server | un correo registrado y otro no registrado | se pide recuperación con cada uno | la respuesta es idéntica en los dos casos; solo el registrado encola un correo | RF-68 |
 | UT-VI-10 | server | 3 solicitudes de recuperación del mismo correo en una hora | llega la cuarta | se rechaza por límite, con la misma respuesta genérica | RF-68 |
 | UT-VI-11 | server | un enlace de recuperación de hace 29 min sin usar | se abre en otro dispositivo | se acepta: el dispositivo nuevo queda activo y la cookie del anterior deja de servir | RF-68, RF-70 |
@@ -120,25 +127,30 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 | UT-VI-13 | server | un agente de atención | genera una recuperación | el token queda con `channel = help_desk`, `issuedById` del agente y registro en la bitácora | RF-69, RF-70 |
 | UT-VI-14 | server | una recuperación con canal `help_desk` sin agente | se guarda | la BD la rechaza | ER |
 | UT-VI-15 | server | el correo de recuperación encolado | se lee su contenido | contiene el enlace de un solo uso | RF-71 |
+| UT-VI-16 | lib | un generador aleatorio inyectado | se genera el PIN de un visitante | es un texto de exactamente 5 dígitos | RF-14 |
+| UT-VI-17 | server | un visitante con el PIN `12345` y un generador inyectado que devuelve primero `12345` y después `67890` | otro visitante se registra | su PIN es `67890`; nunca hay dos visitantes con el mismo PIN | RF-14 |
+| UT-VI-18 | server | un visitante con el PIN `12345` | se intenta guardar a otro con el mismo PIN | la BD lo rechaza (`UNIQUE`) | RF-14, ER |
+| UT-VI-19 | server | un visitante con el PIN `12345` y un enlace de recuperación válido | abre el enlace en otro dispositivo | el PIN sigue siendo `12345` (fijo); no se genera otro | RF-14, RF-70 |
+| UT-VI-20 | ui | un visitante con gamertag `luna_dev` y PIN `12345` | se renderiza su pasaporte | muestra el PIN y el gamertag, y ningún código QR | RF-19 |
 
-## check-ins (escáner, encuesta y boletos)
+## check-ins (kiosco, encuesta y boletos)
 
 | ID | Capa | Dado | Cuando | Entonces | Req |
 | --- | --- | --- | --- | --- | --- |
-| UT-CI-01 | server | un staff del stand A y un visitante válido, `now` = 15:00 | se envía check-in con calificaciones 4 y 5 | se crean check-in y voto juntos y se registra `scannedById` | RF-26, RF-28, RF-36 |
-| UT-CI-02 | server | un check-in sin calificación de juego o de stand | se guarda | la BD lo rechaza (`NOT NULL` y `BETWEEN 1 AND 5`) | RF-28 |
-| UT-CI-03 | server | una calificación de 0 o de 6 | se guarda | se rechaza | RF-26 |
+| UT-CI-01 | server | un staff del stand A y el PIN de un visitante válido, `now` = 15:00 | se envía el check-in con calificaciones de 4 al juego, 5 al stand y 3 al arte | se crean check-in y voto juntos y se registra `scannedById` | RF-26, RF-28, RF-36 |
+| UT-CI-02 | server | un check-in sin calificación de juego, de stand o de arte | se guarda | la BD lo rechaza (`NOT NULL` y `BETWEEN 1 AND 5`): sin encuesta no hay check-in | RF-26, RF-28 |
+| UT-CI-03 | server | una calificación de 0 o de 6 al juego, al stand o al arte | se guarda | se rechaza | RF-26 |
 | UT-CI-04 | server | un check-in ya registrado (mismo `id`) | llega otra vez en un lote | responde `duplicate` y no crea otro registro | EC-03 |
-| UT-CI-05 | server | un visitante con check-in en el stand A | llega otro check-in del mismo visitante en el stand A con otro `id` | responde `duplicate`; queda uno solo (`UNIQUE (visitorId, standId)`) | RF-30 |
+| UT-CI-05 | server | un visitante con check-in en el stand A | se teclea otra vez su PIN en el stand A y llega otro check-in con otro `id` y otras calificaciones | responde `duplicate` con el check-in existente; queda uno solo (`UNIQUE (visitorId, standId)`) y no se guarda otra encuesta | RF-30, EC-03 |
 | UT-CI-06 | server | un staff del stand A | intenta registrar un check-in en el stand B | se rechaza | RF-33 |
-| UT-CI-07 | server | un stand sin juego registrado | su staff envía un check-in | se rechaza con "Registra tu juego para empezar a escanear" | RF-34 |
+| UT-CI-07 | server | un stand sin juego registrado | su staff envía un check-in | se rechaza con "Registra tu juego para empezar a recibir visitas" | RF-34 |
 | UT-CI-08 | server | `scannedAt` = 16:59 y recepción a las 17:40 | se procesa | se acepta | RN-04 |
 | UT-CI-09 | server | `scannedAt` = 17:01 | se procesa | responde `late` | RN-04 |
 | UT-CI-10 | server | `scannedAt` = 16:59 y recepción a las 18:00 (inicio de la rifa) | se procesa | responde `late` | EC-02 |
 | UT-CI-11 | lib | `scannedAt` posterior a la hora de recepción | se ajusta la hora | queda igual a la hora de recepción | EC-01 |
 | UT-CI-24 | lib | `scannedAt` = 09:00, antes de la apertura del evento (12:00) | se ajusta la hora | queda igual a la hora de apertura (`eventStartsAt`), como en la V1 | EC-01 |
 | UT-CI-12 | server | `scannedAt` = 16:58 recibido a las 17:30 (reloj atrasado) | se procesa | se acepta y queda `scannedById` (riesgo aceptado) | EC-01 |
-| UT-CI-13 | server | un token de QR desconocido | se procesa | responde `unknown_visitor` | D4 |
+| UT-CI-13 | server | un PIN que no es de ningún visitante (por ejemplo, mal tecleado) | se procesa | responde `unknown_visitor`; no se crea check-in ni voto y el rechazo solo aparece en la lista de rechazadas del kiosco | RF-24, RF-35, D4 |
 | UT-CI-14 | server | un lote con uno válido, uno `late` y uno `unknown_visitor` | se procesa | cada uno recibe su propio resultado; el válido se guarda aunque los otros fallen | D4 |
 | UT-CI-15 | server | un lote de 51 check-ins | se envía | se rechaza por exceder el máximo de 50 | D4 |
 | UT-CI-16 | server | un visitante con 8 check-ins | se registra el noveno | se crea el boleto del hito 9 en la misma transacción | RN-01 |
@@ -147,8 +159,12 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 | UT-CI-19 | server | un visitante excluido | se envía un check-in suyo | se rechaza | RF-46 |
 | UT-CI-20 | lib | una cola local con 3 check-ins pendientes | el servidor responde `ok`, `duplicate` y `late` | los dos primeros salen de la cola como enviados; el tercero pasa a la lista de rechazados con su motivo | D4 |
 | UT-CI-21 | lib | 60 check-ins en la cola | se preparan los envíos | se arman lotes de máximo 50, en orden de escaneo | D4 |
-| UT-CI-22 | ui | 3 check-ins pendientes sin conexión | se renderiza la barra del escáner | muestra "Sin conexión · 3 visitas por enviar" y nunca muestra calificaciones | D4, RF-29 |
-| UT-CI-23 | ui | un rechazo `unknown_visitor` | se abre el detalle | muestra el gamertag o el aviso y la instrucción "Que revise su pasaporte o vaya a Atención" | D4 |
+| UT-CI-22 | ui | 3 check-ins pendientes sin conexión | se renderiza la barra del kiosco | muestra "Sin conexión · 3 visitas por enviar" y nunca muestra calificaciones | D4, RF-29 |
+| UT-CI-23 | ui | un rechazo `unknown_visitor` | se abre el detalle | muestra el motivo y la instrucción "Que revise su pasaporte o vaya a Atención"; no muestra gamertag, porque un PIN no reconocido no identifica a nadie | RF-24, D4 |
+| UT-CI-25 | server | el PIN de Ana, tecleado por otra persona en el stand A | se procesa el check-in | se acepta y la visita queda en el pasaporte de Ana (riesgo aceptado); queda `scannedById` | EC-04 |
+| UT-CI-26 | lib | los textos `1234`, `123456` y `12a45` | el kiosco los valida como PIN | ninguno es válido; `12345` sí | RF-14, RF-26 |
+| UT-CI-27 | ui | el PIN de un visitante ya aceptado en el kiosco | se renderiza la encuesta | muestra tres escalas de 1 a 5 (juego, stand y arte) y no permite enviarla con alguna sin contestar | RF-26, RF-28 |
+| UT-CI-28 | ui | una encuesta enviada | termina el envío | muestra "Gracias", no muestra ninguna calificación y vuelve sola a la pantalla del PIN | RF-29 |
 
 ## raffle
 
@@ -171,12 +187,12 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 
 | ID | Capa | Dado | Cuando | Entonces | Req |
 | --- | --- | --- | --- | --- | --- |
-| UT-TO-01 | server | `now` = 12 de noviembre | un visitante se inscribe desde su pasaporte | se rechaza: la inscripción abre el 13 | RF-58 |
-| UT-TO-02 | server | 63 inscritos | dos visitantes se inscriben a la vez | entra solo uno; el otro recibe "Torneo lleno" | EC-05 |
-| UT-TO-03 | server | un visitante inscrito | se inscribe otra vez | se rechaza (`visitorId` único) | RF-58 |
-| UT-TO-04 | server | `now` = 13:00 del día del evento | se intenta inscribir a alguien | se rechaza: la inscripción cerró | RF-59 |
-| UT-TO-05 | lib | 64 inscritos y un generador aleatorio con semilla fija | se baraja | el resultado es una permutación de los 64 y es reproducible con la misma semilla | RF-59 |
-| UT-TO-06 | lib | 40 inscritos | se genera el bracket | hay 24 byes, 6 por tablero, y ningún combate de la ronda 1 es bye contra bye | RF-60 |
+| UT-TO-01 | (eliminado) | — | — | Sustituido por UT-TO-25 y UT-TO-26: desde la v2.2 el visitante ya no se inscribe desde su pasaporte, el administrador de KOF arma la lista previa. Cómo pide entrar el visitante sigue abierto (sección 9 de la SRS). | RF-58 |
+| UT-TO-02 | server | 63 inscripciones vigentes (sin contar las de "No se presentó") y `now` dentro de la inscripción presencial | dos visitantes se inscriben a la vez | entra solo uno; el otro recibe "Torneo lleno" | EC-05, RF-58, RF-77 |
+| UT-TO-03 | server | un visitante inscrito | el administrador de KOF lo agrega otra vez | se rechaza (`visitorId` único) | RF-58 |
+| UT-TO-04 | (eliminado) | — | — | Sustituido por UT-TO-39: a las 13:00 se genera el bracket (RF-59) y la inscripción presencial cierra a las 12:45 (RF-77), no con la hora del bracket. | RF-59, RF-77 |
+| UT-TO-05 | lib | 64 jugadores con check-in y un generador aleatorio con semilla fija | se baraja | el resultado es una permutación de los 64 y es reproducible con la misma semilla | RF-59 |
+| UT-TO-06 | lib | 40 jugadores con check-in | se genera el bracket | hay 24 byes, 6 por tablero, y ningún combate de la ronda 1 es bye contra bye | RF-60 |
 | UT-TO-07 | lib | el bracket generado | se revisa la estructura | hay 63 combates: 15 por tablero en las rondas 1 a 4, 2 semifinales y 1 final, y cada combate apunta a su siguiente | RF-57 |
 | UT-TO-08 | lib | el bracket generado | se revisa la asignación de captura | cada combate del tablero N es del staff N; semifinal 1 y final del staff 1; semifinal 2 del staff 2 | RF-62 |
 | UT-TO-09 | server | un bracket ya generado | se intenta generar otra vez | se rechaza con "El bracket ya se generó" | EC-06 |
@@ -195,6 +211,25 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 | UT-TO-22 | server | una doble descalificación en la semifinal 1 | se resuelve | el ganador de la semifinal 2 es campeón sin jugar la final | RF-65 |
 | UT-TO-23 | server | una doble descalificación en la final | se resuelve | el torneo queda sin campeón | RF-65 |
 | UT-TO-24 | lib | un ganador que no es ninguno de los dos jugadores | se valida el resultado | se rechaza; la BD también lo impide | ER |
+| UT-TO-25 | server | `now` = 12 de noviembre, 23:59 y un visitante registrado | el administrador de KOF lo agrega a la lista previa | se rechaza: la inscripción previa abre el 13 de noviembre | RF-58, 1.1 |
+| UT-TO-26 | server | `now` = 13 de noviembre, 00:00 y un visitante con pasaporte | el administrador de KOF lo agrega a la lista previa | se crea la inscripción con `channel = pre`, `status = registered`, sin hora de check-in y con `registeredById` del administrador | RF-58 |
+| UT-TO-27 | server | un `kof_staff` (o un administrador de stand) | intenta agregar a la lista previa o hacer un check-in | se rechaza; solo lo hace el administrador de KOF | RF-58, RF-75, Roles |
+| UT-TO-28 | server | 50 jugadores en la lista previa | el administrador de KOF agrega al 51 por la lista previa | se rechaza: el cupo previo es de 50, para dejar al menos 14 lugares al día del evento | RF-58 |
+| UT-TO-29 | server | una inscripción previa y `now` = 10:59 del día del evento | el administrador de KOF teclea el PIN del jugador | se rechaza: el check-in abre a las 11:00 | RF-75, 1.1 |
+| UT-TO-30 | server | una inscripción previa y `now` = 11:30 | el administrador de KOF teclea el PIN del jugador | queda `checked_in` con `checkedInAt` = `now`; el jugador entra al bracket | RF-75 |
+| UT-TO-31 | server | `now` = 11:30 y el PIN de un visitante que no está en la lista previa, o un PIN que no es de nadie | el administrador de KOF lo teclea en el check-in | se rechaza y no se crea ninguna inscripción | RF-75 |
+| UT-TO-32 | server | una inscripción previa sin check-in y `now` = 12:05 | el jugador hace su check-in con su PIN | se rechaza; la inscripción sigue en "No se presentó" y su lugar sigue libre | EC-15, RF-76 |
+| UT-TO-33 | server | 45 inscripciones previas, 40 con check-in, y `now` = 12:00 (fin del check-in) | corre el cierre del check-in | las 5 sin check-in pasan a `no_show`; las 40 no cambian y el cierre queda en la bitácora | RF-76 |
+| UT-TO-34 | server | una inscripción en `no_show` | se intenta pasarla a `checked_in` o a `registered` | la BD lo rechaza (trigger): "No se presentó" ya no cambia | RF-76 |
+| UT-TO-35 | server | el fin del check-in (`kofCheckInEndsAt`) movido a las 12:30 | corre el cierre con `now` = 12:00 y otra vez con `now` = 12:30 | a las 12:00 no cambia nada; a las 12:30 las inscripciones sin check-in pasan a `no_show` | RF-76, 1.1 |
+| UT-TO-36 | server | `now` = 11:59 | un visitante con pasaporte se inscribe de forma presencial | se rechaza: la inscripción presencial abre a las 12:00 | RF-77, 1.1 |
+| UT-TO-37 | server | `now` = 12:00 y un visitante con pasaporte que no está en la lista previa | el administrador de KOF lo agrega | se crea la inscripción con `channel = onsite`, `status = checked_in` y `checkedInAt` = `now`: el check-in queda hecho al inscribirse | RF-77 |
+| UT-TO-38 | server | `now` = 12:10 y un visitante sin pasaporte | el administrador de KOF lo registra (M3) y lo agrega | se crean el pasaporte con su PIN y la inscripción presencial con check-in | RF-77, RF-12, RF-14 |
+| UT-TO-39 | server | `now` = 12:46 (la inscripción presencial cerró a las 12:45) | se intenta inscribir a alguien de forma presencial | se rechaza: la inscripción presencial cerró | RF-77, 1.1 |
+| UT-TO-40 | server | 64 inscripciones, una en `no_show`, y `now` = 12:10 | llegan dos visitantes a inscribirse de forma presencial, uno tras otro | el primero entra (el lugar de "No se presentó" quedó libre); el segundo recibe "Torneo lleno" | RF-76, RF-77, RF-58 |
+| UT-TO-41 | server | `now` = 12:59 y un bracket sin generar | se intenta generar | se rechaza: el bracket se genera a la hora configurada (13:00) | RF-59, 1.1 |
+| UT-TO-42 | server | 45 inscripciones: 40 con check-in y 5 en `no_show`, y `now` = 13:00 | se genera el bracket | solo los 40 con check-in entran, cada uno con su `slot`; los de `no_show` no tienen `slot`; hay 24 byes | RF-59, RF-60 |
+| UT-TO-43 | ui | un jugador inscrito en la lista previa, sin check-in | se renderiza su pasaporte | indica que está en el torneo y avisa que el 20 de noviembre, de 11:00 a 12:00, debe hacer su check-in en el stand de KOF del edificio B; las horas llegan por props desde `event_settings` | RF-75, 1.1 |
 
 ## admin (moderación, alertas y paro de emergencia)
 
@@ -222,5 +257,22 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 - Anular un check-in anula el boleto del hito que dependía de él; si el visitante vuelve a llegar al hito, el mismo
   boleto se reactiva. Con la rifa iniciada, los boletos no cambian.
 - El horario del evento (de 12:00 a 19:00 por ahora) vive en `event_settings` (`eventStartsAt`, `eventEndsAt`).
+- Desde la v2.2 el PIN sustituye al QR en todos los casos de visitantes, check-ins y KOF. Los nombres `scannedAt` y
+  `scannedById` se conservan (RF-36): son la hora y la cuenta del staff que tenía abierto el kiosco.
+- Solo el administrador de KOF agrega a la lista previa y hace el check-in (Roles, RF-58 y RF-75); el staff de KOF
+  captura combates.
+- El cupo total de 64 cuenta las inscripciones que no están en "No se presentó": ese estado libera el lugar (RF-76).
+- El bracket no se genera antes de la hora configurada (UT-TO-41): es una lectura de "se genera una sola vez a la hora
+  configurada" (RF-59).
 - Los umbrales de las alertas de fraude son configurables por el sysadmin en `event_settings`
   (valores iniciales: 12 calificaciones de 5 en 10 minutos; visitantes con 1 solo check-in).
+
+## Temas que la SRS deja abiertos
+
+Sin casos hasta que el equipo decida (sección 9 de `srs-v2.md`):
+
+- **Cómo se guarda el PIN:** UT-VI-16 a UT-VI-19 no suponen hash ni cifrado; se prueban el formato, la unicidad y que
+  sea fijo.
+- **PIN mal tecleado sin conexión que coincide con el de otro visitante:** UT-CI-25 fija el comportamiento actual de la
+  SRS (la visita queda en el pasaporte de quien tiene ese PIN); un caso de detección espera la decisión.
+- **Cómo pide el visitante entrar a la lista previa de KOF:** sin casos de autoservicio (UT-TO-01 eliminado).

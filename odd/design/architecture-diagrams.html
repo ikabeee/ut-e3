@@ -333,8 +333,8 @@
 %%{init: {"theme": "base", "themeVariables": {"background": "#1c1c1c", "primaryColor": "#000000", "primaryTextColor": "#ffffff", "primaryBorderColor": "#ffffff", "lineColor": "#68b5e6", "edgeLabelBackground": "#1c1c1c", "clusterBkg": "#1c1c1c", "clusterBorder": "#3a3a3a", "fontFamily": "JetBrains Mono, monospace", "fontSize": "14px"}}}%%
 flowchart LR
   public["Público<br/>landing, catálogo, croquis,<br/>bracket y ganadores"]
-  visitor["Visitante<br/>pasaporte con QR,<br/>inscripción a KOF"]
-  standTeam["Administrador y staff de stand<br/>juego del stand y escáner"]
+  visitor["Visitante<br/>pasaporte con PIN,<br/>inscripción a KOF"]
+  standTeam["Administrador y staff de stand<br/>juego del stand y kiosco"]
   raffle["Animador<br/>tómbola y premios"]
   kof["Administrador y staff de KOF<br/>bracket y resultados"]
   desk["Atención<br/>recuperación de pasaportes"]
@@ -348,7 +348,7 @@ flowchart LR
   ovh["OVHcloud<br/>respaldo diario del VPS"]
 
   public -->|"consulta"| system
-  visitor -->|"se registra y muestra su QR"| system
+  visitor -->|"se registra y teclea su PIN en el stand"| system
   standTeam -->|"registra visitas y votos"| system
   raffle -->|"gira y confirma ganadores"| system
   kof -->|"captura combates"| system
@@ -402,9 +402,9 @@ flowchart LR
 %%{init: {"theme": "base", "themeVariables": {"background": "#1c1c1c", "primaryColor": "#000000", "primaryTextColor": "#ffffff", "primaryBorderColor": "#178fdd", "lineColor": "#68b5e6", "edgeLabelBackground": "#1c1c1c", "clusterBkg": "#111111", "clusterBorder": "#3a3a3a", "titleColor": "#68b5e6", "fontFamily": "JetBrains Mono, monospace", "fontSize": "14px"}}}%%
 flowchart LR
   subgraph browser["Navegador del usuario (PWA)"]
-    ui["Páginas e islas cliente<br/>escáner, encuesta kiosco,<br/>bracket y tómbola en vivo"]
+    ui["Páginas e islas cliente<br/>kiosco con PIN, encuesta,<br/>bracket y tómbola en vivo"]
     sw["Service worker<br/>precarga catálogo y croquis"]
-    idb[("IndexedDB<br/>cola del escáner")]
+    idb[("IndexedDB<br/>cola del kiosco")]
   end
 
   caddy["Caddy<br/>TLS y reverse proxy"]
@@ -462,7 +462,7 @@ flowchart LR
             <h3>Dos entradas de escritura</h3>
             <p>
               Las Server Actions cubren formularios y paneles. El Route Handler <code>/api/check-ins</code> recibe los
-              lotes del escáner, que pueden llegar tarde desde la cola sin conexión.
+              lotes del kiosco, que pueden llegar tarde desde la cola sin conexión.
             </p>
           </div>
           <div class="read">
@@ -569,8 +569,8 @@ flowchart TB
   apiRoute["src/app/api/check-ins/route.ts<br/>solo re-exporta el handler"]
 
   subgraph feature["src/features/check-ins"]
-    page["pages/scanner-page.tsx<br/>contenedor: datos, Suspense, composición"]
-    components["components/<br/>scanner, kiosk-survey, queue-status"]
+    page["pages/kiosk-page.tsx<br/>contenedor: datos, Suspense, composición"]
+    components["components/<br/>kiosk, kiosk-survey, queue-status"]
     hooks["hooks/<br/>use-offline-queue.ts"]
     lib["lib/<br/>types, check-ins-copy, reglas puras"]
     actionsFile["lib/check-ins-actions.ts<br/>Server Actions"]
@@ -731,7 +731,7 @@ flowchart TB
     │   ├── recover/[token]/route.ts <span class="c"># abre el pasaporte y redirige (303, no-store)</span>
     │   ├── login/page.tsx
     │   ├── activate/[token]/page.tsx <span class="c"># invitaciones del staff</span>
-    │   ├── stand/page.tsx        <span class="c"># escáner y panel del stand</span>
+    │   ├── stand/page.tsx        <span class="c"># kiosco y panel del stand</span>
     │   ├── kof/page.tsx          <span class="c"># staff y administrador de KOF</span>
     │   ├── raffle/live/page.tsx  <span class="c"># pantalla del escenario</span>
     │   ├── raffle/admin/page.tsx <span class="c"># animador y premios</span>
@@ -739,7 +739,7 @@ flowchart TB
     │   ├── <span class="d">admin/</span>                <span class="c"># stands, cuentas, géneros, cronograma, patrocinadores,</span>
     │   │                         <span class="c"># horarios, moderación y estado del servidor</span>
     │   └── <span class="d">api/</span>
-    │       ├── check-ins/route.ts          <span class="c"># lotes del escáner</span>
+    │       ├── check-ins/route.ts          <span class="c"># lotes del kiosco</span>
     │       ├── tournament/bracket/route.ts <span class="c"># bracket cacheado tras cada señal</span>
     │       ├── tournament/stream/route.ts  <span class="c"># SSE del bracket</span>
     │       └── raffle/stream/route.ts      <span class="c"># SSE de la tómbola</span>
@@ -749,7 +749,7 @@ flowchart TB
     │   ├── <span class="d">floor-plan/</span>           <span class="c"># croquis interactivo</span>
     │   ├── <span class="d">schedule/</span>             <span class="c"># cronograma</span>
     │   ├── <span class="d">sponsors/</span>             <span class="c"># tarjetas y alta de patrocinadores</span>
-    │   ├── <span class="d">visitors/</span>             <span class="c"># registro, pasaporte, QR, recuperación</span>
+    │   ├── <span class="d">visitors/</span>             <span class="c"># registro, pasaporte, PIN, recuperación</span>
     │   ├── <span class="d">check-ins/</span>            <span class="c"># ejemplo completo de las capas:</span>
     │   │   ├── <span class="d">__tests__/</span>        <span class="c"># mismas subcarpetas que el código</span>
     │   │   ├── <span class="d">api/</span>
@@ -765,11 +765,11 @@ flowchart TB
     │   │   ├── <span class="d">hooks/</span>
     │   │   │   └── use-offline-queue.ts    <span class="c"># IndexedDB, lotes y backoff</span>
     │   │   ├── <span class="d">components/</span>
-    │   │   │   ├── scanner.tsx
+    │   │   │   ├── kiosk.tsx
     │   │   │   ├── kiosk-survey.tsx
     │   │   │   └── queue-status.tsx
     │   │   └── <span class="d">pages/</span>
-    │   │       └── scanner-page.tsx        <span class="c"># contenedor + metadata</span>
+    │   │       └── kiosk-page.tsx           <span class="c"># contenedor + metadata</span>
     │   ├── <span class="d">raffle/</span>               <span class="c"># tómbola, ganadores y premios</span>
     │   ├── <span class="d">tournament/</span>           <span class="c"># inscripción, bracket, tableros, descalificaciones</span>
     │   ├── <span class="d">accounts/</span>             <span class="c"># login, invitaciones, roles, sesiones, lista negra</span>

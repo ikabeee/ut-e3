@@ -450,7 +450,7 @@
           <div class="cat cat-client">
             <span class="tag">Isla cliente</span>
             <h3><code>"use client"</code></h3>
-            <p>Escáner, encuesta kiosco, cola sin conexión, bracket y tómbola en vivo por SSE.</p>
+            <p>Kiosco con PIN, encuesta, cola sin conexión, bracket y tómbola en vivo por SSE.</p>
           </div>
         </div>
       </section>
@@ -488,7 +488,7 @@
                   ><span>Filtro optimista por rol</span>
                 </li>
                 <li><strong>Server Actions</strong><span>Revalidan sesión, rol y alcance en cada mutación</span></li>
-                <li><strong>Route Handlers</strong><span>Lotes del escáner y streams SSE</span></li>
+                <li><strong>Route Handlers</strong><span>Lotes del kiosco y streams SSE</span></li>
                 <li><strong>Bus de eventos</strong><span>En memoria; avisa al SSE tras cada transacción</span></li>
                 <li>
                   <strong><code>instrumentation.ts</code></strong
@@ -608,7 +608,7 @@
                 <td>
                   <div class="chips">
                     <span class="chip static">shell</span><span class="chip stream">sesión del visitante</span
-                    ><span class="chip client">QR fijo</span>
+                    ><span class="chip client">PIN fijo</span>
                   </div>
                 </td>
                 <td>Por usuario: cookie del dispositivo dentro de <code>&lt;Suspense&gt;</code>.</td>
@@ -636,7 +636,7 @@
                 <td class="route">/stand</td>
                 <td>
                   <div class="chips">
-                    <span class="chip stream">sesión y stand</span><span class="chip client">escáner</span
+                    <span class="chip stream">sesión y stand</span><span class="chip client">kiosco</span
                     ><span class="chip client">encuesta kiosco</span><span class="chip client">cola IndexedDB</span>
                   </div>
                 </td>
@@ -656,7 +656,7 @@
                 <td>
                   <div class="chips"><span class="chip stream">Route Handler</span></div>
                 </td>
-                <td>Lotes idempotentes del escáner; una transacción por check-in.</td>
+                <td>Lotes idempotentes del kiosco; una transacción por check-in.</td>
               </tr>
               <tr>
                 <td class="route">/api/tournament/stream</td>
@@ -759,8 +759,11 @@
               </tr>
               <tr>
                 <td class="id">D4</td>
-                <td>Cola sin conexión del escáner en IndexedDB, sin PIN, QR fijo</td>
-                <td>El escáner sigue trabajando sin señal; la cola no guarda secretos.</td>
+                <td>Cola sin conexión del kiosco en IndexedDB; el PIN se valida al llegar al servidor</td>
+                <td>
+                  El kiosco sigue trabajando sin señal (RF-35); un PIN mal tecleado no se detecta hasta que la visita
+                  llega al servidor (sección 9 de la SRS).
+                </td>
               </tr>
               <tr>
                 <td class="id">D5</td>
@@ -822,11 +825,11 @@
           </div>
           <div class="feature">
             <span class="name">visitors</span>
-            <p>Registro, pasaporte, QR y recuperación.</p>
+            <p>Registro, pasaporte, PIN y recuperación.</p>
           </div>
           <div class="feature">
             <span class="name">check-ins</span>
-            <p>Escáner, encuesta kiosco, cola sin conexión y boletos.</p>
+            <p>Kiosco con PIN, encuesta, cola sin conexión y boletos.</p>
           </div>
           <div class="feature">
             <span class="name">raffle</span>
@@ -862,10 +865,10 @@
         </div>
         <div class="risks">
           <div class="risk">
-            <h3>QR fijo copiado</h3>
+            <h3>PIN compartido o visto</h3>
             <p>
-              Un staff con una captura del QR puede registrar una visita y un voto para su stand. Mitigado con un voto
-              por stand, promedio bayesiano y anulación.
+              Alguien registra una visita y un voto con el PIN de otra persona. Mitigado con un voto por stand, alertas
+              de fraude y anulación de la visita cuando el visitante la reporta.
             </p>
           </div>
           <div class="risk">
