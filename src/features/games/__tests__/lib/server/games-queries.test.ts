@@ -4,6 +4,7 @@
 import type * as NextCache from "next/cache";
 import { GAMES_CACHE_TAG, getGames } from "@features/games/lib/server/games-queries";
 import { INITIAL_GAMES, seedGames } from "@features/games/lib/server/games-seed";
+import type { StandLocation } from "@features/games/lib/stand-code";
 import type { Game } from "@features/games/lib/types";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
@@ -64,6 +65,16 @@ describe("getGames", () => {
     expect(await getGames()).toEqual([]);
   });
 
+  it("orders the games by stand even when they are stored out of order", async () => {
+    const genre = await getPrisma().genre.create({ data: { name: "Acción", slug: "accion" } });
+
+    await createGameAt(genre.id, { zone: "T", number: 6 }, "sexto");
+    await createGameAt(genre.id, { zone: "A", number: 2 }, "segundo");
+    await createGameAt(genre.id, { zone: "A", number: 1 }, "primero");
+
+    expect((await getGames()).map((game) => game.slug)).toEqual(["primero", "segundo", "sexto"]);
+  });
+
   it("caches the catalog for hours under the games tag", async () => {
     await getGames();
 
@@ -78,4 +89,12 @@ function withUuids(game: Game) {
     id: expect.stringMatching(UUID),
     genre: { ...game.genre, id: expect.stringMatching(UUID) },
   };
+}
+
+async function createGameAt(genreId: string, location: StandLocation, slug: string) {
+  const stand = await getPrisma().stand.create({ data: { ...location, studio: 4, groupCode: "103" } });
+
+  await getPrisma().game.create({
+    data: { slug, name: slug, synopsis: "Juego de prueba.", genreId, standId: stand.id },
+  });
 }

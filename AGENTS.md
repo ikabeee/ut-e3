@@ -47,7 +47,7 @@ npm run build              # compila para producción (exige NEXT_PUBLIC_SITE_UR
 npm run db:generate        # genera el cliente de Prisma en generated/prisma (también corre en postinstall)
 npm run db:migrate         # crea y aplica una migración en la BD de DATABASE_URL (prisma migrate dev)
 npm run db:deploy          # aplica las migraciones pendientes sin crear nuevas (prisma migrate deploy)
-npm run db:seed            # carga el contenido inicial sin sobrescribir filas existentes (prisma/seed.ts)
+npm run db:seed            # carga el contenido inicial en las tablas vacías; no toca las que ya tienen datos (prisma/seed.ts)
 ```
 
 Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm run lint`,

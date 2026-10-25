@@ -2,7 +2,7 @@ import "server-only";
 import type { EventSettings } from "@features/event-settings/lib/types";
 import type { PrismaClient } from "@generated/prisma/client";
 
-const EVENT_SETTINGS_ID = 1;
+export const EVENT_SETTINGS_ID = 1;
 
 export const INITIAL_EVENT_SETTINGS: EventSettings = {
   eventStartsAt: "2026-11-20T17:00:00.000Z",

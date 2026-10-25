@@ -101,6 +101,37 @@ describe("seedGames", () => {
       name: "Ceniza Protocol DX",
     });
   });
+
+  it("leaves the catalog as it is once it has games, even after a slug or a cover changes", async () => {
+    await seedGames(getPrisma());
+
+    const game = await getPrisma().game.update({
+      where: { slug: "ceniza-protocol" },
+      data: { slug: "ceniza-protocol-final" },
+    });
+
+    await getPrisma().gameImage.updateMany({ where: { gameId: game.id }, data: { position: 2 } });
+
+    const editedCatalog = await readCatalog();
+
+    await seedGames(getPrisma());
+
+    expect(await readCatalog()).toEqual(editedCatalog);
+  });
+
+  it("does not bring back a game deleted after the first run", async () => {
+    await seedGames(getPrisma());
+
+    const game = await getPrisma().game.findUniqueOrThrow({ where: { slug: "ceniza-protocol" } });
+
+    await getPrisma().gameImage.deleteMany({ where: { gameId: game.id } });
+    await getPrisma().game.delete({ where: { id: game.id } });
+
+    await seedGames(getPrisma());
+
+    expect(await getPrisma().game.count()).toBe(INITIAL_GAMES.length - 1);
+    expect(await getPrisma().game.findUnique({ where: { slug: "ceniza-protocol" } })).toBeNull();
+  });
 });
 
 async function readCatalog() {

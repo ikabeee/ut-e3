@@ -162,8 +162,11 @@ function buildGame(fields: GameFields): Game {
   };
 }
 
-// Writes each genre, stand, game and image only when it is missing, so a row edited later survives a new seed.
+// Fills the catalog only while it has no games: once the sysadmin edits or deletes a game, a new seed leaves the
+// catalog as it is instead of failing on a changed slug or cover, or bringing back a deleted game.
 export async function seedGames(prisma: PrismaClient): Promise<void> {
+  if ((await prisma.game.count()) > 0) return;
+
   for (const game of INITIAL_GAMES) await seedGame(prisma, game);
 }
 

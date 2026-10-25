@@ -37,6 +37,16 @@ describe("getEventSettings", () => {
     expect(settings).toMatchObject({ eventStartsAt: "2026-11-20T17:00:00.000Z", marketplaceFormUrl: null });
   });
 
+  it("returns the values stored in the database, not the initial ones", async () => {
+    await seedEventSettings(getPrisma());
+    await getPrisma().eventSettings.update({
+      where: { id: 1 },
+      data: { itchOpensAt: new Date("2026-11-20T21:00:00.000Z") },
+    });
+
+    expect(await getEventSettings()).toMatchObject({ itchOpensAt: "2026-11-20T21:00:00.000Z" });
+  });
+
   it("asks to run the seed when the settings row is missing", async () => {
     const reading = getEventSettings();
 

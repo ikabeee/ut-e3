@@ -1,12 +1,11 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
+import { EVENT_SETTINGS_ID } from "@features/event-settings/lib/server/event-settings-seed";
 import type { EventSettings } from "@features/event-settings/lib/types";
 import type { Prisma } from "@generated/prisma/client";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 export const EVENT_SETTINGS_CACHE_TAG = "event-settings";
-
-const EVENT_SETTINGS_ID = 1;
 
 const MISSING_ROW_MESSAGE =
   "Falta la fila de event_settings (id 1) en la base de datos. Corre `npm run db:seed` para cargar los horarios iniciales.";
