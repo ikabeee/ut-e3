@@ -81,8 +81,8 @@ subagent on Opus, tests first and locked).
 
 | ID | Specs | Route | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| T1 | S1-S5, S8 (generated client), S9, S10 (seams 1-2), S11 (T1 parts) | delegated: Opus coder subagent (swarm-workflow, plan `max-20x`; Risk items 1 and 5) | in-progress: native review pending | RED L7, GREEN L8, verified L9; `c28cbf7`, `7044121` |
-| T2 | S6, S7, S8 (build database), S10 (seams 3-4), S11 | delegated: the T1 coder, continued (depends on T1's schema and client) | pending | |
+| T1 | S1-S5, S8 (generated client), S9, S10 (seams 1-2), S11 (T1 parts) | delegated: Opus coder subagent (swarm-workflow, plan `max-20x`; Risk items 1 and 5) | done | RED L7, GREEN L8, verified L9, reviewed L10; `fc88990`, `7bea0cc`, `124b050`, `2811216` |
+| T2 | S6, S7, S8 (build database and `.env.example`), S10 (seams 3-4), S11 | delegated: the T1 coder, continued (depends on T1's schema and client) | in-progress | branch `feature/sqlite-public-content` |
 | T3 | S1-S11 | delegated: independent verifier, then the seam check (`npm run format` and the five gates) | pending | |
 
 ## Log
@@ -158,3 +158,22 @@ subagent on Opus, tests first and locked).
     `SQLITE_BUSY_SNAPSHOT` (P1008), so later write transactions should start with an immediate lock; `npm audit` has
     one high-severity issue (zod via `eslint-plugin-react-hooks`) already on the baseline; `tsx` is installed in T1 but
     first used in T2.
+- L10 (2026-10-25, native review, RDD on): the whole T1 range did not fit the reviewers' context
+  (`lens_context_budget_exceeded`, mostly the 2,600-line lockfile). User: "Partir en candidatos (Recomendado)". The
+  three unpushed commits were rebuilt with the same final tree as four: `fc88990` (dependencies and lockfile), `7bea0cc`
+  (schema, migration, constraint tests, tooling; was `c28cbf7`), `124b050` (client; was `7044121`) and `2811216`
+  (B1 fix; was `a2fc964`). Three candidates, each granted by the user ("Revisar este cambio") and approved, then
+  acknowledged (authority burned):
+  - `ca1f8a4..fc88990`, lens risk: advisories on `prebuild-install` 7.1.3 (deprecated, downloads binaries at install)
+    and on keeping the dev tree out of production with `npm ci --omit=dev`.
+  - `fc88990..7bea0cc`, lenses risk and reliability: advisories that mostly come from reviewing the slice alone (client
+    and dependencies in the neighbouring commits), plus `node:sqlite` being experimental in the test helper and the
+    literal ER phone and URL rules.
+  - `7bea0cc..2811216`, lenses risk, resilience and reliability: advisories that the `DATABASE_URL` error echoes the
+    whole value (a non-file URL with credentials would reach the logs), that the ESLint boundary has no automated
+    check, and that no test shows a failed `getPrisma()` caches nothing.
+  - The stop hook kept proposing a selectorless START against `852966b` (the merge-base with `main`, release 0.2.0),
+    which would review everything `develop` gained since; it was not run.
+  - PR 1 (`feature/sqlite-foundation` to `develop`) is ready; push and PR are the user's decision. Size: about 1,000
+    authored lines (about 480 of tests, 130 of SQL, 110 of this document) after one honest split, so it carries a
+    `size:exception` recommendation.
