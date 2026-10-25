@@ -1,0 +1,77 @@
+import "server-only";
+import type { ScheduleItem } from "@features/schedule/lib/types";
+
+export const INITIAL_SCHEDULE_ITEMS: ScheduleItem[] = [
+  {
+    id: "opening",
+    title: "Apertura",
+    description: "Se abren las puertas del edificio E3 y comienza el recorrido.",
+    startsAt: "2026-11-20T17:00:00.000Z",
+    endsAt: "2026-11-20T17:30:00.000Z",
+    zone: "entrance",
+  },
+  {
+    id: "teams-presentation",
+    title: "Presentación de los equipos",
+    description: "Los equipos presentan los videojuegos que desarrollaron.",
+    startsAt: "2026-11-20T17:30:00.000Z",
+    endsAt: "2026-11-20T18:00:00.000Z",
+    zone: "stage",
+  },
+  {
+    id: "kof-registration-close",
+    title: "Cierre de la inscripción al torneo de KOF",
+    description: "Último momento para registrarte en el torneo de KOF.",
+    startsAt: "2026-11-20T18:00:00.000Z",
+    endsAt: "2026-11-20T18:30:00.000Z",
+    zone: "kof",
+  },
+  {
+    id: "kof-rounds",
+    title: "Rondas del torneo de KOF",
+    description: "Comienzan los combates del torneo de KOF.",
+    startsAt: "2026-11-20T18:30:00.000Z",
+    endsAt: "2026-11-20T19:00:00.000Z",
+    zone: "kof",
+  },
+  {
+    id: "first-guest-talk",
+    title: "Plática de la primera invitada especial",
+    description: "Una ingeniera invitada comparte su experiencia en la industria.",
+    startsAt: "2026-11-20T19:00:00.000Z",
+    endsAt: "2026-11-20T20:00:00.000Z",
+    zone: "stage",
+  },
+  {
+    id: "second-guest-talk",
+    title: "Plática de la segunda invitada especial",
+    description: "Una segunda ingeniera invitada comparte su experiencia en la industria.",
+    startsAt: "2026-11-20T20:00:00.000Z",
+    endsAt: "2026-11-20T21:00:00.000Z",
+    zone: "stage",
+  },
+  {
+    id: "raffle-visits-cutoff",
+    title: "Corte de visitas para la rifa",
+    description: "Se cuentan las visitas válidas que cuentan para los boletos de la rifa.",
+    startsAt: "2026-11-20T22:00:00.000Z",
+    endsAt: "2026-11-20T23:00:00.000Z",
+    zone: null,
+  },
+  {
+    id: "raffle",
+    title: "Rifa",
+    description: "Se sortean los premios entre los boletos obtenidos.",
+    startsAt: "2026-11-20T23:00:00.000Z",
+    endsAt: "2026-11-21T00:00:00.000Z",
+    zone: "stage",
+  },
+  {
+    id: "closing",
+    title: "Cierre",
+    description: "Termina el evento y se despide a los asistentes.",
+    startsAt: "2026-11-21T00:00:00.000Z",
+    endsAt: "2026-11-21T00:00:00.000Z",
+    zone: "entrance",
+  },
+];
