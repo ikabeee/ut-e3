@@ -1,5 +1,7 @@
 import "server-only";
-import type { Game, Genre } from "@features/games/lib/types";
+import type { StandLocation } from "@features/games/lib/stand-code";
+import type { Game, GameImage, Genre } from "@features/games/lib/types";
+import type { PrismaClient } from "@generated/prisma/client";
 
 const GENRES = {
   accion: { id: "accion", name: "Acción", slug: "accion" },
@@ -18,6 +20,9 @@ const GENRES = {
 } satisfies Record<string, Genre>;
 
 type GameFields = Pick<Game, "slug" | "name" | "genre" | "synopsis" | "stand">;
+
+// Sample studio and group, like the sample games, until the sysadmin registers the real stands (RF-39).
+const SAMPLE_STAND_GROUP = { studio: 0, groupCode: "000" };
 
 export const INITIAL_GAMES: Game[] = [
   buildGame({
@@ -152,7 +157,55 @@ function buildGame(fields: GameFields): Game {
   return {
     ...fields,
     id: fields.slug,
-    images: [{ path: `/games/${fields.slug}.jpg`, alt: `Portada de ${fields.name}`, position: 0, isCover: true }],
+    images: [{ path: `/games/${fields.slug}.jpg`, alt: `Portada de ${fields.name}`, position: 1, isCover: true }],
     itchUrl: null,
   };
+}
+
+// Writes each genre, stand, game and image only when it is missing, so a row edited later survives a new seed.
+export async function seedGames(prisma: PrismaClient): Promise<void> {
+  for (const game of INITIAL_GAMES) await seedGame(prisma, game);
+}
+
+async function seedGame(prisma: PrismaClient, game: Game): Promise<void> {
+  const genreId = await findOrCreateGenre(prisma, game.genre);
+  const standId = await findOrCreateStand(prisma, game.stand);
+  const gameId = await findOrCreateGame(prisma, game, { genreId, standId });
+
+  for (const image of game.images) await findOrCreateImage(prisma, gameId, image);
+}
+
+async function findOrCreateGenre(prisma: PrismaClient, { name, slug }: Genre): Promise<string> {
+  const genre =
+    (await prisma.genre.findUnique({ where: { slug } })) ?? (await prisma.genre.create({ data: { name, slug } }));
+
+  return genre.id;
+}
+
+async function findOrCreateStand(prisma: PrismaClient, location: StandLocation): Promise<string> {
+  const stand =
+    (await prisma.stand.findUnique({ where: { zone_number: location } })) ??
+    (await prisma.stand.create({ data: { ...location, ...SAMPLE_STAND_GROUP } }));
+
+  return stand.id;
+}
+
+async function findOrCreateGame(
+  prisma: PrismaClient,
+  { slug, name, synopsis, itchUrl }: Game,
+  links: { genreId: string; standId: string },
+): Promise<string> {
+  const game =
+    (await prisma.game.findUnique({ where: { slug } })) ??
+    (await prisma.game.create({ data: { slug, name, synopsis, itchUrl, ...links } }));
+
+  return game.id;
+}
+
+async function findOrCreateImage(prisma: PrismaClient, gameId: string, image: GameImage): Promise<void> {
+  const existing = await prisma.gameImage.findUnique({
+    where: { gameId_position: { gameId, position: image.position } },
+  });
+
+  if (!existing) await prisma.gameImage.create({ data: { ...image, gameId } });
 }

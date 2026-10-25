@@ -1,5 +1,8 @@
 import "server-only";
 import type { EventSettings } from "@features/event-settings/lib/types";
+import type { PrismaClient } from "@generated/prisma/client";
+
+const EVENT_SETTINGS_ID = 1;
 
 export const INITIAL_EVENT_SETTINGS: EventSettings = {
   eventStartsAt: "2026-11-20T17:00:00.000Z",
@@ -18,3 +21,13 @@ export const INITIAL_EVENT_SETTINGS: EventSettings = {
   raffleStartsAt: "2026-11-20T23:00:00.000Z",
   publicBracketEnabled: true,
 };
+
+// Creates row 1 only when it is missing, so a setting edited later survives a new seed. Prisma takes the ISO strings
+// as DateTime values, and the fraud thresholds come from the column defaults.
+export async function seedEventSettings(prisma: PrismaClient): Promise<void> {
+  await prisma.eventSettings.upsert({
+    where: { id: EVENT_SETTINGS_ID },
+    update: {},
+    create: { id: EVENT_SETTINGS_ID, ...INITIAL_EVENT_SETTINGS },
+  });
+}
