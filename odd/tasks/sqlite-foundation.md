@@ -189,3 +189,35 @@ subagent on Opus, tests first and locked).
   12 suites, 25 failed (missing seed exports, queries still returning the constants, no rejection), 40 passed
   (constant tests, the cache calls, the empty sponsors). Parent re-ran it (same numbers) and locked the tests (hashes of
   15 server test files in the scratchpad).
+- L12 (2026-10-25, T2 GREEN, verification and correction):
+  - GREEN (`1166e49` seeds, `a4a9957` queries, CI and AGENTS.md): locked hashes unchanged; Jest 55 suites, 270 tests;
+    the five gates 0. `npm run db:seed` twice gives 1 / 21 / 18 / 13 / 18 / 18 / 0 rows (settings, schedule, stands,
+    genres, games, images, sponsors); `npm run build` with that database keeps `/` as Partial Prerender; without
+    `DATABASE_URL`, or with an unseeded database, the build fails with the Spanish messages. Stands use the sample
+    `studio: 0`, `groupCode: "000"` (S7 assumption).
+  - Incident: the coder found a `next-server` 16.4.2 of another ut-e3 checkout on port 4317, took it for its own and
+    killed it (pids 91310 and 91290). Reported to the user; the port rule in the file memory now says to prove a port
+    is free with `lsof` and never to stop a process one did not start.
+  - Independent verification of `10be75f..a4a9957`: no blockers. The visible text of `/` is byte-identical between the
+    constants build and the seeded build (4,795 characters; only ids, key order and the cover position differ in the
+    RSC payload); the CI steps run in order on a real `npm ci`; RF-03's "Cronograma por anunciar" shows with an empty
+    table; a raw edit stays hidden until `cacheLife("hours")` expires, as designed.
+  - Correction (parent, inline, tests first): the games seed matched rows by natural key, so after a slug or cover
+    change it failed on `stand_id` or the one-cover index, and a deleted game came back. `seedGames` now fills the
+    catalog only while it has no games, like the schedule and sponsors seeds. New tests: an edited catalog is left as it
+    is and a deleted game stays deleted (RED: 2 failed), plus two regression pins the verifier's mutants survived
+    (`getGames` orders by stand when rows are stored out of order; `getEventSettings` returns the stored value).
+    `EVENT_SETTINGS_ID` lives in the seed file only, and `AGENTS.md` says `db:seed` fills empty tables only. GREEN:
+    Jest 55 suites, 274 tests; the five gates 0 (`6380c44`).
+  - Advisories left open: a `DATABASE_URL` that points to a missing file creates an empty database and the build fails
+    with Prisma's English "table does not exist"; the build leaves `-wal`/`-shm` files (ignored); two schedule items
+    with the same start and end have no defined order (none today); `prisma/seed.ts` is covered only by the CLI run; CI
+    runs Node 22 while local checks used Node 24 (`node:sqlite`, `tsx --conditions`).
+- L13 (2026-10-25, native review of `10be75f..6380c44`, lenses risk, resilience and reliability): user "Revisar este
+  cambio"; approved and acknowledged (authority burned). Two lenses raised the same non-blocking warning: `seedGames`
+  wrote game by game without a transaction, so a run that failed partway left a partial catalog that the
+  `game.count() > 0` guard then kept forever. Follow-up (parent, tests first): a genre named "Pelea" with another slug
+  makes the run fail at the 16th game; RED kept 15 games, and `seedGames` now writes the catalog in one interactive
+  transaction, so the failed run leaves 0 games and the next run fills all 18. GREEN: Jest 55 suites, 275 tests; the
+  five gates 0; `npm run db:seed` twice through the CLI still gives 18 games, 18 images, 18 stands, 13 genres, 21
+  schedule items and 1 settings row.
