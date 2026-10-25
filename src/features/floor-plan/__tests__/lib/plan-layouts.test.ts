@@ -19,7 +19,7 @@ describe("plan layouts", () => {
   it.each(ORIENTATIONS)("numbers each block row by row from s1 in the %s layout", (orientation) => {
     const [blockCodes] = PLAN_LAYOUTS[orientation].standBlocks
       .map((block) => getStandCells(block).map((cell) => cell.code))
-      .filter((codes) => codes.includes("zA-s1"));
+      .filter((codes) => codes.includes("ZA-S1"));
 
     expect(blockCodes).toEqual(numberedCodes("A", 9));
   });
@@ -32,10 +32,10 @@ describe("plan layouts", () => {
   });
 
   it("returns null for an id that is not in the plan", () => {
-    expect(findItemRect(PLAN_LAYOUTS.wide, "zD-s1")).toBeNull();
+    expect(findItemRect(PLAN_LAYOUTS.wide, "ZD-S1")).toBeNull();
   });
 });
 
 function numberedCodes(zone: string, count: number) {
-  return Array.from({ length: count }, (_, index) => `z${zone}-s${index + 1}`);
+  return Array.from({ length: count }, (_, index) => `Z${zone}-S${index + 1}`);
 }

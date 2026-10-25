@@ -138,11 +138,11 @@ describe("LandingView", () => {
     expect(screen.getByRole("contentinfo")).toHaveTextContent("PIXEL & CODE · Showcase de videojuegos");
   });
 
-  it("places each game in the croquis at its zA-s stand code", () => {
+  it("places each game in the croquis at its ZA-S stand code", () => {
     renderLanding();
 
-    expect(screen.getByRole("button", { name: "Stand zA-s1, Juego 01" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Stand zA-s9, Juego 09" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Stand ZA-S1, Juego 01" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Stand ZA-S9, Juego 09" })).toBeInTheDocument();
   });
 
   it("renders the marketplace slot inside the event section", () => {

@@ -4,5 +4,5 @@ export interface StandLocation {
 }
 
 export function formatStandCode(location: StandLocation): string {
-  return `z${location.zone}-s${location.number}`;
+  return `Z${location.zone}-S${location.number}`;
 }

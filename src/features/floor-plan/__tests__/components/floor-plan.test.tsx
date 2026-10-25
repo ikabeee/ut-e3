@@ -57,39 +57,39 @@ describe("FloorPlan buttons", () => {
 });
 
 describe("FloorPlan selection", () => {
-  it("selects zA-s1 by default", () => {
+  it("selects ZA-S1 by default", () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    expect(screen.getByRole("button", { name: "Stand zA-s1, Ceniza Protocol" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" })).toHaveAttribute(
       "aria-current",
       "true",
     );
-    expect(screen.getByRole("button", { name: "Stand zA-s3, Hormigón" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("button", { name: "Stand ZA-S3, Hormigón" })).not.toHaveAttribute("aria-current");
     expect(getPanel().getByRole("heading", { name: "Ceniza Protocol" })).toBeInTheDocument();
   });
 
   it("shows the name, genre, synopsis, code and cover of a clicked stand", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    await userEvent.setup().click(screen.getByRole("button", { name: "Stand zB-s2, Kaiju Mercado" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "Stand ZB-S2, Kaiju Mercado" }));
 
     const panel = getPanel();
     expect(panel.getByRole("heading", { name: "Kaiju Mercado" })).toBeInTheDocument();
-    expect(panel.getByText("Stand zB-s2 · Simulación")).toBeInTheDocument();
+    expect(panel.getByText("Stand ZB-S2 · Simulación")).toBeInTheDocument();
     expect(panel.getByText("Administra un tianguis donde los clientes miden treinta metros.")).toBeInTheDocument();
     expect(panel.getByRole("img", { name: "Portada de Kaiju Mercado" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Stand zB-s2, Kaiju Mercado" })).toHaveAttribute("aria-current", "true");
-    expect(screen.getByRole("button", { name: "Stand zA-s1, Ceniza Protocol" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("button", { name: "Stand ZB-S2, Kaiju Mercado" })).toHaveAttribute("aria-current", "true");
+    expect(screen.getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" })).not.toHaveAttribute("aria-current");
   });
 
   it("shows an info booth as informative without a cover", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    await userEvent.setup().click(screen.getByRole("button", { name: "Stand zC-s2, Inscripción al torneo de KOF" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "Stand ZC-S2, Inscripción al torneo de KOF" }));
 
     const panel = getPanel();
     expect(panel.getByRole("heading", { name: "Inscripción al torneo de KOF" })).toBeInTheDocument();
-    expect(panel.getByText("Stand zC-s2 · Informativo")).toBeInTheDocument();
+    expect(panel.getByText("Stand ZC-S2 · Informativo")).toBeInTheDocument();
     expect(panel.queryByRole("img")).not.toBeInTheDocument();
   });
 
@@ -105,11 +105,11 @@ describe("FloorPlan selection", () => {
   it("shows Stand por asignar for a team position without a stand", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    await userEvent.setup().click(screen.getByRole("button", { name: "Stand zA-s9" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "Stand ZA-S9" }));
 
     const panel = getPanel();
     expect(panel.getByText("Stand por asignar")).toBeInTheDocument();
-    expect(panel.getByText(/zA-s9/)).toBeInTheDocument();
+    expect(panel.getByText(/ZA-S9/)).toBeInTheDocument();
     expect(panel.queryByRole("img")).not.toBeInTheDocument();
   });
 });
@@ -128,7 +128,7 @@ describe("FloorPlan keyboard", () => {
   it("selects a focused stand with Space", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    screen.getByRole("button", { name: "Stand zA-s3, Hormigón" }).focus();
+    screen.getByRole("button", { name: "Stand ZA-S3, Hormigón" }).focus();
     await userEvent.setup().keyboard(" ");
 
     expect(getPanel().getByRole("heading", { name: "Hormigón" })).toBeInTheDocument();
@@ -165,10 +165,10 @@ describe("FloorPlan URL hash", () => {
   it("selects the stand named by a hashchange", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    changeHash("#floor-plan-zA-s3");
+    changeHash("#floor-plan-ZA-S3");
 
     await waitFor(() => expect(getPanel().getByRole("heading", { name: "Hormigón" })).toBeInTheDocument());
-    expect(screen.getByRole("button", { name: "Stand zA-s3, Hormigón" })).toHaveAttribute("aria-current", "true");
+    expect(screen.getByRole("button", { name: "Stand ZA-S3, Hormigón" })).toHaveAttribute("aria-current", "true");
   });
 
   it("keeps the selection when the hash names an unknown item or another section", async () => {
@@ -178,7 +178,7 @@ describe("FloorPlan URL hash", () => {
     changeHash("#games");
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Stand zA-s1, Ceniza Protocol" })).toHaveAttribute(
+      expect(screen.getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" })).toHaveAttribute(
         "aria-current",
         "true",
       ),
@@ -220,14 +220,14 @@ describe("FloorPlan scrolling", () => {
 function expectedButtonNames() {
   const teamNames = ["A", "B"].flatMap((zone) =>
     Array.from({ length: 9 }, (_, index) => {
-      const code = `z${zone}-s${index + 1}`;
+      const code = `Z${zone}-S${index + 1}`;
       const stand = STAND_FIXTURES.find((candidate) => candidate.code === code);
 
       return stand ? `Stand ${code}, ${stand.name}` : `Stand ${code}`;
     }),
   );
 
-  const boothNames = INFO_BOOTH_TITLES.map((title, index) => `Stand zC-s${index + 1}, ${title}`);
+  const boothNames = INFO_BOOTH_TITLES.map((title, index) => `Stand ZC-S${index + 1}, ${title}`);
 
   return [...teamNames, ...boothNames, ...ZONE_TITLES];
 }
@@ -252,7 +252,7 @@ function getMapViewBox(width: number) {
   const { unmount } = render(<FloorPlan stands={STAND_FIXTURES} />);
 
   const viewBox = screen
-    .getByRole("button", { name: "Stand zA-s1, Ceniza Protocol" })
+    .getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" })
     .closest("svg")
     ?.getAttribute("viewBox");
 

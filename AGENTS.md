@@ -64,7 +64,7 @@ src/
 ├── features/
 │   ├── landing/              # Portada (/): hero, actividades, invitadas, ubicación y la page
 │   ├── games/                # Juegos: carrusel de destacados y catálogo en coverflow
-│   ├── floor-plan/           # Croquis interactivo con los stands (zA-s3) y las zonas
+│   ├── floor-plan/           # Croquis interactivo con los stands (ZA-S3) y las zonas
 │   ├── schedule/             # Cronograma de actividades
 │   ├── sponsors/             # Banda de patrocinadores
 │   └── event-settings/       # Horarios y valores configurables del evento

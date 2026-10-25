@@ -6,7 +6,7 @@ describe("floor plan links", () => {
   });
 
   it("builds the hash of a stand or a zone", () => {
-    expect(floorPlanItemHref("zA-s3")).toBe("#floor-plan-zA-s3");
+    expect(floorPlanItemHref("ZA-S3")).toBe("#floor-plan-ZA-S3");
     expect(floorPlanItemHref("marketplace")).toBe("#floor-plan-marketplace");
   });
 
