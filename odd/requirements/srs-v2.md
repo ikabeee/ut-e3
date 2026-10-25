@@ -21,6 +21,8 @@ marca **(eliminado)** para no romper la trazabilidad.
   lugares liberados a las 12:00 e inscripción presencial a partir de las 12:00 (RF-58 y RF-75 a RF-77).
 - Nombre y slogan del evento decididos el 25 de octubre de 2026: "PIXEL & CODE" y "JUEGA. CALIFICA. GANA." (coincide con
   el teaser; RF-01).
+- Encuesta del stand decidida el 25 de octubre de 2026: tres calificaciones (juego, stand y arte), sin cuarta pregunta
+  (RF-26).
 - Actualizados con estos cambios: `unit-test-cases.md`, `e2e-flows.md`, `odd/design/er-model.html`,
   `odd/design/architecture.html` y `odd/design/architecture-diagrams.html`.
 
@@ -142,7 +144,7 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 
 | ID | Requisito |
 | --- | --- |
-| RF-26 | Al terminar de jugar, el visitante teclea su PIN en la computadora del staff del stand (vista tipo kiosco) y contesta la encuesta de satisfacción: calificación de 1 a 5 del juego, del stand y del arte, y una cuarta pregunta por definir (sección 9). Al enviarla se registra su visita. |
+| RF-26 | Al terminar de jugar, el visitante teclea su PIN en la computadora del staff del stand (vista tipo kiosco) y contesta la encuesta de satisfacción: calificación de 1 a 5 del juego, del stand y del arte. Al enviarla se registra su visita. |
 | RF-27 | (eliminado) Confirmación con PIN además del QR. Desde la v2.2 el PIN sustituye al QR (RF-14 y RF-26). |
 | RF-28 | El check-in y el voto se crean juntos en una sola transacción: sin encuesta no hay check-in. |
 | RF-29 | El staff nunca ve las calificaciones. Tras enviar, la pantalla muestra "Gracias" y vuelve sola a la pantalla del PIN. |
@@ -311,6 +313,7 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 | Votación | En el teléfono del visitante (con QR inverso del stand) | Dos escaneos, estado pendiente y dependencia de la señal del visitante. |
 | PIN del visitante | Confirmación con PIN además del QR, prevalidación parcial o PIN dentro del QR | Un PIN de 4 dígitos no se puede validar sin conexión sin exponerlo. En la v2.2 el PIN sustituye al QR (RF-14). |
 | Longitud del PIN | 4 dígitos | Con unos 1,000 visitantes, un PIN tecleado al azar coincide con el de un visitante real 1 de cada 10 veces; con 5 dígitos, 1 de cada 100. |
+| Encuesta del stand | Cuarta pregunta | Decidido el 25 de octubre de 2026: la encuesta se queda con tres calificaciones (juego, stand y arte; RF-26). |
 | Identificación del visitante | QR fijo y QR dinámico (código que cambia cada 60 s) | En la v2.2 el equipo eligió que el visitante teclee su PIN en la computadora del stand. |
 | Mensajería | WhatsApp (WUZAPI, WAHA, Twilio) y SMS (Supabase/Twilio) | Riesgo de baneo, resolución de LID sin confirmar o costo por mensaje. |
 | Correo | Tres cuentas de Gmail personales | Riesgo de bloqueo por Google y entrega en spam. |
@@ -332,5 +335,4 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
   necesita mostrar el PIN también en un dispositivo recuperado.
 - PIN mal tecleado en el kiosco sin conexión: no se valida hasta que la visita llega al servidor, y si coincide con el
   PIN de otro visitante, la visita y el voto se le registran a él.
-- Cuarta pregunta de la encuesta del stand (el equipo habló de 3 o 4 preguntas: juego, stand y arte).
 - Cómo pide el visitante entrar a la lista previa de KOF: el equipo solo indicó que el administrador de KOF lo agrega.

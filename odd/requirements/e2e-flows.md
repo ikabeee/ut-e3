@@ -81,7 +81,7 @@ Flujos de punta a punta con Playwright. Cada flujo es un archivo `*.spec.ts` y c
 **Actores:** kiosco de `zA-s3` (escritorio, sesión del staff), visitante (iPhone). **Req:** RF-26 a RF-30, RF-36, EC-03.
 
 1. Al terminar de jugar, el visitante teclea su PIN en la pantalla del PIN del kiosco.
-2. Verifica la vista kiosco: "zA-s3 · Nombre del juego" y tres escalas de 1 a 5 (juego, stand y arte), sin datos del staff. La cuarta pregunta sigue por definir (sección 9 de la SRS) y no se verifica.
+2. Verifica la vista kiosco: "zA-s3 · Nombre del juego" y tres escalas de 1 a 5 (juego, stand y arte), sin datos del staff.
 3. Verifica que no se puede enviar con alguna escala sin contestar. El visitante califica y envía. Verifica "Gracias" y el regreso solo a la pantalla del PIN.
 4. Verifica que el panel del staff muestra "Visita registrada" y nunca las calificaciones.
 5. En el pasaporte del visitante verifica `zA-s3` como visitado y el avance.
@@ -211,6 +211,5 @@ Flujos de punta a punta con Playwright. Cada flujo es un archivo `*.spec.ts` y c
 - Hora del servidor: horarios relativos a la hora real en `event_settings`; sin reloj falso en producción.
 - PIN en lugar de QR (v2.2): los flujos de visita teclean el PIN en el kiosco del stand; la computadora del kiosco es de
   escritorio (RF-26).
-- Temas abiertos que los flujos no asumen (sección 9 de la SRS): la cuarta pregunta de la encuesta, cómo se guarda el
-  PIN, qué pasa con un PIN mal tecleado sin conexión que coincide con el de otro visitante y cómo pide el visitante
-  entrar a la lista previa de KOF.
+- Temas abiertos que los flujos no asumen (sección 9 de la SRS): cómo se guarda el PIN, qué pasa con un PIN mal
+  tecleado sin conexión que coincide con el de otro visitante y cómo pide el visitante entrar a la lista previa de KOF.

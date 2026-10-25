@@ -271,8 +271,6 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 
 Sin casos hasta que el equipo decida (sección 9 de `srs-v2.md`):
 
-- **Cuarta pregunta de la encuesta:** los casos UT-CI-01, UT-CI-02, UT-CI-03 y UT-CI-27 cubren las tres calificaciones
-  (juego, stand y arte). Falta el caso de la cuarta cuando se defina (`fourthAnswer` es opcional en el modelo ER).
 - **Cómo se guarda el PIN:** UT-VI-16 a UT-VI-19 no suponen hash ni cifrado; se prueban el formato, la unicidad y que
   sea fijo.
 - **PIN mal tecleado sin conexión que coincide con el de otro visitante:** UT-CI-25 fija el comportamiento actual de la
