@@ -1,7 +1,7 @@
 name: CI
 
-# Puerta de calidad: todo PR hacia develop o main debe pasar lint (incluye las reglas
-# de SonarQube), formato (Prettier), typecheck, pruebas, migraciones de la base y build.
+# Puerta de calidad: todo PR hacia develop o main debe pasar lint (ESLint con las reglas
+# de SonarQube y Oxlint con las reglas anti-slop y readable-code), código duplicado (jscpd), formato (Prettier), typecheck, pruebas, migraciones de la base y build.
 on:
   pull_request:
     branches: [develop, main]
@@ -32,6 +32,8 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+      - run: npm run lint:oxlint
+      - run: npm run lint:duplication
       - run: npm run format:check
       - run: npm run typecheck
       - run: npm test -- --coverage

@@ -1,0 +1,8 @@
+{
+  "path": ["src"],
+  "format": ["typescript", "tsx"],
+  "ignore": ["**/__tests__/**"],
+  "minTokens": 50,
+  "reporters": ["console"],
+  "exitCode": 1
+}

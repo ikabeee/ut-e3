@@ -30,14 +30,16 @@ la revisión base de abajo en lugar de sobrescribir los cambios locales.
   `allowInTypeGuards: true`: sin librería de esquemas, la validación de datos externos vive en type guards
   (`value is T`), que `no-unknown-parameters` ya acepta. Ignora las carpetas de agentes, esta carpeta y
   los mismos artefactos generados que ignora ESLint (`next-env.d.ts`, `contract.d.ts`, `migrations/`).
+  También extiende el preset de `eslint-plugin-readable-code`, que agrega sus propias reglas.
 - `tools/oxlint/package.json` (`"type": "module"`): Node carga el plugin como ES module sin el aviso
   `MODULE_TYPELESS_PACKAGE_JSON` y sin cambiar el tipo de módulo del resto del proyecto.
 - `tools/oxlint/tsconfig.json`: el plugin importa con extensión `.ts` (type stripping de Node), así que
   se revisa con su propio tsconfig (`npm run typecheck` corre `tsc -p tools/oxlint`) y se excluye del
   `tsconfig.json` raíz.
 - `eslint.config.mjs` y `.prettierignore` ignoran esta carpeta para conservar el código de upstream tal cual.
-- Dependencias: `oxlint` y `@oxlint/plugins` en `1.88.0`, fijadas sin rango para actualizarlas juntas.
-- Script: `npm run lint:oxlint`. Todavía no forma parte de `npm run lint` ni del CI.
+- Dependencias: `oxlint` y `@oxlint/plugins` en `1.89.0`, fijadas sin rango para actualizarlas juntas
+  (es la versión que `eslint-plugin-readable-code` exige como peer).
+- Script: `npm run lint:oxlint`. No forma parte de `npm run lint`; el CI lo corre como paso propio.
 
 ## Cambios intencionales respecto a upstream
 
