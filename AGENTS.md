@@ -28,6 +28,7 @@ Todo el naming (directorios, archivos y código) va en **inglés**.
 | Tailwind CSS | `4` | Configurado vía `@tailwindcss/turbopack`. |
 | HeroUI | `3.x` (`@heroui/react`, `@heroui/styles`) | Librería de componentes (React Aria + Tailwind 4). |
 | ESLint | `9.x` + `eslint-plugin-sonarjs` | Reglas de SonarQube. ESLint 10 aún no es compatible con `eslint-config-next`. |
+| Oxlint | `1.89.0` + `eslint-plugin-readable-code` | Reglas anti-slop (copiadas en `tools/oxlint/anti-slop`) y de lectura de arriba abajo ([readable-code](https://github.com/ikabeee/eslint-plugin-readable-code)). |
 | Jest | `30.x` + Testing Library | Pruebas unitarias y de componentes (`next/jest`). |
 | Prettier | `3.x` + `prettier-plugin-tailwindcss` | Formato del código y orden de las clases de Tailwind. |
 
@@ -36,7 +37,7 @@ Todo el naming (directorios, archivos y código) va en **inglés**.
 ```bash
 npm run dev                # servidor de desarrollo
 npm run lint               # ESLint (incluye reglas de fronteras entre features)
-npm run lint:oxlint        # Oxlint con las reglas anti-slop (tools/oxlint/anti-slop)
+npm run lint:oxlint        # Oxlint con las reglas anti-slop (tools/oxlint/anti-slop) y readable-code
 npm run format             # aplica el formato con Prettier (npm run format:check sólo revisa)
 npm run typecheck          # next typegen + tsc --noEmit (y tsc -p tools/oxlint para el plugin)
 npm test                   # pruebas con Jest (npm run test:coverage para cobertura)
@@ -312,6 +313,10 @@ cumple estos criterios (revísalos a 360 y 390 px, en horizontal y en escritorio
 - **Nada de emojis.** Prohibidos en código, UI, comentarios, logs, documentación, issues,
   PRs y mensajes de commit.
 - Sin `export default`, excepto en los archivos de ruta de `src/app/`.
+- **El código se lee de arriba abajo.** La función exportada va primero y cada función que llama queda
+  debajo, en el orden en que la llama; decláralas con `function` para que el hoisting las haga seguras.
+  Oxlint lo revisa (`readable-code/stepdown-order`) junto con funciones de hasta 40 líneas, 3 niveles de
+  anidación, 3 parámetros y JSX de hasta 6 niveles.
 - Estilos con componentes de HeroUI y clases de Tailwind con los tokens del tema; soporta modo oscuro (`dark:`).
 - Accesibilidad: HTML semántico, `alt` en imágenes, enlaces externos con `rel="noopener noreferrer"`.
 - Sin dependencias nuevas sin justificarlo en el PR.

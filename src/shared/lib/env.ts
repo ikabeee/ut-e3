@@ -29,6 +29,13 @@ export const DEVELOPMENT_SITE_URL = "http://localhost:3000";
 
 const SITE_URL_EXAMPLE = 'NEXT_PUBLIC_SITE_URL="https://ejemplo.com"';
 
+/** Valida todas las variables a partir de sus valores crudos. */
+export function parseEnv(source: EnvSource): Env {
+  return {
+    siteUrl: parseSiteUrl(source.NEXT_PUBLIC_SITE_URL, source.NODE_ENV),
+  };
+}
+
 /** Valida la URL pública. En producción es obligatoria; fuera de ella usa localhost. */
 export function parseSiteUrl(value: string | undefined, nodeEnv: string | undefined): string {
   const siteUrl = value?.trim();
@@ -54,13 +61,6 @@ export function parseSiteUrl(value: string | undefined, nodeEnv: string | undefi
   }
 
   return siteUrl;
-}
-
-/** Valida todas las variables a partir de sus valores crudos. */
-export function parseEnv(source: EnvSource): Env {
-  return {
-    siteUrl: parseSiteUrl(source.NEXT_PUBLIC_SITE_URL, source.NODE_ENV),
-  };
 }
 
 function readProcessEnv(): EnvSource {

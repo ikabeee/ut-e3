@@ -1,5 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["./node_modules/eslint-plugin-readable-code/oxlintrc.json"],
   "ignorePatterns": [
     ".agent/**",
     ".agents/**",
