@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
 import type { EventSettings } from "@features/event-settings/lib/types";
@@ -26,7 +25,7 @@ import { buildCalendarUrl } from "@features/landing/lib/calendar-link";
 import { buildEventStructuredData } from "@features/landing/lib/event-structured-data";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { HOME_PATH, TOP_SECTION_ID } from "@features/landing/lib/landing-links";
-import { getMarketplaceRegistration } from "@features/landing/lib/marketplace-registration";
+import { getCurrentMarketplaceRegistration } from "@features/landing/lib/server/marketplace-queries";
 import { SPECIAL_GUESTS } from "@features/landing/lib/special-guests";
 import { EVENT_VENUE, formatCopyableAddress } from "@features/landing/lib/venue";
 import { EventSchedule } from "@features/schedule/components/event-schedule";
@@ -118,12 +117,10 @@ export function LandingView({ settings, games, scheduleItems, sponsors, marketpl
 }
 
 async function MarketplaceRegistration({ settings }: Readonly<{ settings: EventSettings }>) {
-  await connection();
-
-  const registration = getMarketplaceRegistration(
-    { formUrl: settings.marketplaceFormUrl, closesAt: settings.marketplaceClosesAt },
-    new Date(),
-  );
+  const registration = await getCurrentMarketplaceRegistration({
+    formUrl: settings.marketplaceFormUrl,
+    closesAt: settings.marketplaceClosesAt,
+  });
 
   return <MarketplaceCard registration={registration} />;
 }
