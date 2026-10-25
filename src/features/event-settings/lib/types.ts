@@ -3,7 +3,11 @@ export interface EventSettings {
   eventEndsAt: string;
   registrationOpensAt: string;
   kofRegistrationOpensAt: string;
-  kofRegistrationClosesAt: string;
+  kofCheckInStartsAt: string;
+  kofCheckInEndsAt: string;
+  kofOnsiteSignupStartsAt: string;
+  kofOnsiteSignupEndsAt: string;
+  kofBracketGeneratesAt: string;
   marketplaceClosesAt: string;
   marketplaceFormUrl: string | null;
   itchOpensAt: string;

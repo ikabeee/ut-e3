@@ -7,9 +7,9 @@ const organization = {
 } as const;
 
 export const siteConfig = {
-  name: "UTG",
-  title: "UTG · Showcase de videojuegos",
-  description: `Showcase de videojuegos de la ${organization.division} de la ${organization.universityShortName}. Prueba los juegos, compite en los torneos y participa en la rifa.`,
+  name: "PIXEL & CODE",
+  title: "PIXEL & CODE · Showcase de videojuegos",
+  description: `Showcase PIXEL & CODE de videojuegos de la ${organization.division} de la ${organization.universityShortName}. Juega, califica y gana.`,
   url: env.siteUrl,
   locale: "es_MX",
   organization,

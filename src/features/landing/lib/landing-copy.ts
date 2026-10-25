@@ -1,5 +1,4 @@
 export const LANDING_COPY = {
-  slogan: "Showcase de videojuegos",
   nav: {
     label: "Principal",
     homeLabel: "UTG, inicio",
@@ -10,54 +9,47 @@ export const LANDING_COPY = {
     },
   },
   hero: {
-    label: "UTG Showcase",
-    logoLabel: "UTG",
+    label: "PIXEL & CODE",
+    wordmark: "PIXEL & CODE",
+    slogan: { lead: "JUEGA. CALIFICA.", accent: "GANA." },
     description: (division: string) =>
       `Juegos creados por la ${division}. Pruébalos, compite en los torneos y participa en la rifa.`,
     callToAction: "Quiero participar",
     playVideo: "Reproducir video",
   },
-  event: {
-    firstLine: "Juegos hechos",
-    secondLine: (universityShortName: string) => `en la ${universityShortName}`,
-    lead: (division: string) =>
-      `Los equipos de la ${division} presentan los videojuegos que desarrollaron. Cada equipo tiene un stand con su juego listo para jugar.`,
-    details:
-      "Recorre los stands, prueba las demos y platica con quienes los hicieron. Durante el día hay torneos, rifa y mercado local. La entrada es libre.",
-  },
-  activities: {
-    raffle: {
-      kicker: "Main stage",
-      title: "Rifa",
-      body: (cutoffLabel: string) =>
-        `Gana un boleto al llegar a 9 visitas válidas a los stands y otro al llegar a 18. Las visitas cuentan hasta las ${cutoffLabel}.`,
-      startsAt: "Inicia",
-      maximum: "Máximo",
-      maximumValue: "2 boletos",
+  acts: {
+    heading: "Cómo participar",
+    play: {
+      word: "JUEGA",
+      line: (gamesCount: number, division: string) => `${gamesCount} juegos hechos por estudiantes de la ${division}`,
+    },
+    rate: {
+      word: "CALIFICA",
+      line: (cutoffLabel: string) =>
+        `Teclea tu PIN en cada stand y califica el juego, el stand y el arte. Con 9 visitas válidas ganas un boleto y con 18, otro. Las visitas cuentan hasta las ${cutoffLabel}.`,
+      visits: (count: number) => `${count} visitas`,
+      ticketGain: "+1 boleto",
+    },
+    win: {
+      word: "GANA",
+      kof: {
+        title: "Torneo de KOF",
+        line: (checkInLabel: string, onsiteSignupLabel: string) =>
+          `64 jugadores · check-in ${checkInLabel} · inscripción presencial ${onsiteSignupLabel}`,
+      },
+      marioKart: { title: "Mario Kart", line: "Súbete cuando quieras" },
+      raffle: {
+        title: "Rifa",
+        line: (startsAtLabel: string) => `${startsAtLabel} · con tus boletos`,
+      },
     },
     marketplace: {
-      kicker: "Mercado local",
       title: "Marketplace",
-      body: "Productos de la comunidad a la venta durante el evento. Solicita un lugar si quieres vender.",
-      kind: "Tipo",
-      kindValue: "Informativo",
+      line: "Productos de la comunidad durante el evento.",
     },
-    kof: {
-      kicker: "Arena de torneos",
-      title: "Torneo de KOF",
-      body: "Torneo de 64 jugadores con eliminación directa. Regístrate con tu pasaporte o, el día del evento, escaneando tu QR.",
-      format: "Formato",
-      formatValue: "Eliminación directa",
-      opensAt: "Abre registro",
-      closesAt: "Cierra registro",
-    },
-    marioKart: {
-      kicker: "Zona de juego",
-      title: "Mario Kart",
-      body: "Partidas abiertas al público durante el evento. Actividad solo informativa: no requiere registro.",
-      kind: "Tipo",
-      kindValue: "Informativo",
-    },
+    timeRange: (startLabel: string, endLabel: string) => `${startLabel} a ${endLabel}`,
+  },
+  activities: {
     requestSpot: "Solicitar un lugar",
     marketplaceClosed: "Registro de vendedores cerrado",
   },
@@ -92,7 +84,6 @@ export const LANDING_COPY = {
     creditUrl: "https://algorixinsights.com/",
   },
   calendar: {
-    title: "UTG · Showcase de videojuegos",
     details: (division: string) => `Showcase de videojuegos de la ${division}. Entrada libre.`,
   },
 } as const;

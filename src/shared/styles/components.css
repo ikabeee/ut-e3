@@ -425,6 +425,73 @@
   }
 }
 
+@utility beat {
+  --beat: 0.46875s;
+  transform-box: var(--box, fill-box);
+  transform-origin: var(--origin, center);
+  animation-duration: calc(var(--span, 1) * var(--beat));
+  animation-delay: calc(var(--at, 0) * var(--beat));
+  animation-timing-function: var(--ease-snap);
+  animation-fill-mode: both;
+  animation-play-state: paused;
+
+  :where([data-motion="played"]) & {
+    animation-play-state: running;
+  }
+}
+
+@utility beat-from {
+  animation-name: beat-from;
+}
+
+@utility beat-unlit {
+  animation-name: beat-unlit;
+}
+
+@utility beat-blink-in {
+  animation-name: beat-blink-in;
+}
+
+@utility beat-blink-pass {
+  animation-name: beat-blink-pass;
+}
+
+@keyframes beat-from {
+  from {
+    transform: var(--from, none);
+    opacity: var(--from-opacity, 1);
+  }
+}
+
+@keyframes beat-unlit {
+  from {
+    fill: transparent;
+    stroke: var(--muted);
+    transform: scale(1.4);
+  }
+}
+
+@keyframes beat-blink-in {
+  0% {
+    opacity: 0;
+    animation-timing-function: step-start;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes beat-blink-pass {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  1%,
+  99% {
+    opacity: 1;
+  }
+}
+
 @keyframes rise {
   from {
     transform: translateY(0.25em);
