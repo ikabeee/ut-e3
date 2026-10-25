@@ -82,8 +82,8 @@ subagent on Opus, tests first and locked).
 | ID | Specs | Route | Status | Evidence |
 | --- | --- | --- | --- | --- |
 | T1 | S1-S5, S8 (generated client), S9, S10 (seams 1-2), S11 (T1 parts) | delegated: Opus coder subagent (swarm-workflow, plan `max-20x`; Risk items 1 and 5) | done | RED L7, GREEN L8, verified L9, reviewed L10; `fc88990`, `7bea0cc`, `124b050`, `2811216` |
-| T2 | S6, S7, S8 (build database and `.env.example`), S10 (seams 3-4), S11 | delegated: the T1 coder, continued (depends on T1's schema and client) | in-progress | branch `feature/sqlite-public-content` |
-| T3 | S1-S11 | delegated: independent verifier, then the seam check (`npm run format` and the five gates) | pending | |
+| T2 | S6, S7, S8 (build database and `.env.example`), S10 (seams 3-4), S11 | delegated: the T1 coder, continued (depends on T1's schema and client) | done except `.env.example` (pending with the user) | RED L11, GREEN and verification L12, review L13; `1166e49`, `a4a9957`, `6380c44`, `ed482c2` on `feature/sqlite-public-content` |
+| T3 | S1-S11 | delegated: independent verifier per task (L9, L12), then the seam check | done | seam check on `ed482c2`: `npm run format`, the five gates 0, Jest 55 suites and 275 tests |
 
 ## Log
 
@@ -220,4 +220,5 @@ subagent on Opus, tests first and locked).
   makes the run fail at the 16th game; RED kept 15 games, and `seedGames` now writes the catalog in one interactive
   transaction, so the failed run leaves 0 games and the next run fills all 18. GREEN: Jest 55 suites, 275 tests; the
   five gates 0; `npm run db:seed` twice through the CLI still gives 18 games, 18 images, 18 stands, 13 genres, 21
-  schedule items and 1 settings row.
+  schedule items and 1 settings row. The assessment of `6380c44..dde4412` says `under_budget` (62 lines), so that slice
+  stays pending until a later commit reaches the review budget.
