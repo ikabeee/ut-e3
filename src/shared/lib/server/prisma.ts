@@ -10,12 +10,14 @@ const BUSY_TIMEOUT_MS = 5000;
 const processGlobal: typeof globalThis & { prisma?: PrismaClient } = globalThis;
 
 export function getPrisma(): PrismaClient {
-  processGlobal.prisma ??= createPrismaClient(parseDatabaseUrl(process.env.DATABASE_URL));
+  processGlobal.prisma ??= createPrismaClient();
 
   return processGlobal.prisma;
 }
 
-function createPrismaClient(url: string): PrismaClient {
+function createPrismaClient(): PrismaClient {
+  const url = parseDatabaseUrl(process.env.DATABASE_URL);
+
   return new PrismaClient({ adapter: new WalBetterSqlite3({ url, timeout: BUSY_TIMEOUT_MS }) });
 }
 

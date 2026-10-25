@@ -81,7 +81,7 @@ subagent on Opus, tests first and locked).
 
 | ID | Specs | Route | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| T1 | S1-S5, S8 (generated client), S9, S10 (seams 1-2), S11 (T1 parts) | delegated: Opus coder subagent (swarm-workflow, plan `max-20x`; Risk items 1 and 5) | in-progress: verifier pending | RED L7, GREEN L8 |
+| T1 | S1-S5, S8 (generated client), S9, S10 (seams 1-2), S11 (T1 parts) | delegated: Opus coder subagent (swarm-workflow, plan `max-20x`; Risk items 1 and 5) | in-progress: native review pending | RED L7, GREEN L8, verified L9; `c28cbf7`, `7044121` |
 | T2 | S6, S7, S8 (build database), S10 (seams 3-4), S11 | delegated: the T1 coder, continued (depends on T1's schema and client) | pending | |
 | T3 | S1-S11 | delegated: independent verifier, then the seam check (`npm run format` and the five gates) | pending | |
 
@@ -135,3 +135,26 @@ subagent on Opus, tests first and locked).
   empty migration (no drift). Parent fix after review: the env test's `afterEach` stored the string `"undefined"` when
   the variable was unset; lock lifted, `restoreDatabaseUrl()` added, lock restored. Pending: `.env.example` lacks
   `DATABASE_URL`, because reading `.env*` files is denied by this session's permissions.
+- L9 (2026-10-25, T1 independent verification of `c28cbf7` and `7044121` against `ca1f8a4`): S1, S2, S3, S4, S5,
+  S8 (first bullet), S10 (seams 1-2) and S11 pass; S9 failed with one blocker.
+  - Evidence: 65 of 70 raw-SQL probes behave as specified (the other 5 are advisories), including mixed `Z` and
+    `+00:00` instants, UPDATE paths, a 19-row `INSERT ... SELECT` and a second cover by UPDATE. WAL, `busy_timeout` 5000
+    and `foreign_keys` hold on a fresh file and when the first call is a `$transaction`; a writer waits for a 2 s lock
+    and fails after about 5.4 s against an 8 s one. Each commit passes its gates alone; a real `npm ci` without
+    `DATABASE_URL` generates the client and `npm run build` passes. No drift; lint, Oxlint and Prettier give the same
+    results as the baseline for existing files; the landing and floor-plan suites keep 22 suites and 117 tests.
+  - Blocker B1: `src/app/**/route.ts` could import `@generated/prisma/client` (`eslint.config.mjs` restricted route
+    handlers only with `routeHandlerImports`). Correction (parent, inline): route handlers also get `prismaClient`, and
+    `prismaClient` and `serverCode` now cover `@prisma/client` and `@prisma/adapter-better-sqlite3` too (advisory A6).
+    Recheck: the probe import exits 1 from `src/app/api/probe/route.ts` and from a component, 0 from `lib/server/`.
+    No Jest regression test: the flat config is ESM and loading it from Jest needs `--experimental-vm-modules`.
+  - Also corrected: `getPrisma()` reads in stepdown order (`createPrismaClient` parses the URL), and
+    `unit-test-cases.md` UT-SC-01 and the ER now state the S4 assumption `endsAt >= startsAt`.
+  - Carried to T2: `server-only` is not an installed package (Next and `next/jest` provide it), so a `tsx` seed that
+    imports a `lib/server` module fails; the seed must write `event_settings` with `id: 1` (the column is
+    `AUTOINCREMENT`).
+  - Advisories left open: `julianday` CHECKs accept non-date text (NULL passes a CHECK); `LIKE 'https://%'` ignores
+    case; `GLOB '+[0-9]*'` accepts `+52abc`; deferred interactive transactions across processes fail at once with
+    `SQLITE_BUSY_SNAPSHOT` (P1008), so later write transactions should start with an immediate lock; `npm audit` has
+    one high-severity issue (zod via `eslint-plugin-react-hooks`) already on the baseline; `tsx` is installed in T1 but
+    first used in T2.
