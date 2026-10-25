@@ -28,7 +28,7 @@ Todo el naming (directorios, archivos y código) va en **inglés**.
 | Tailwind CSS | `4` | Configurado vía `@tailwindcss/turbopack`. |
 | HeroUI | `3.x` (`@heroui/react`, `@heroui/styles`) | Librería de componentes (React Aria + Tailwind 4). |
 | ESLint | `9.x` + `eslint-plugin-sonarjs` | Reglas de SonarQube. ESLint 10 aún no es compatible con `eslint-config-next`. |
-| Oxlint | `1.89.0` + `eslint-plugin-readable-code` | Reglas anti-slop (copiadas en `tools/oxlint/anti-slop`) y de lectura de arriba abajo ([readable-code](https://github.com/ikabeee/eslint-plugin-readable-code)). |
+| Oxlint | `1.89.0` + `eslint-plugin-readable-code` + `eslint-plugin-better-tailwindcss` | Reglas anti-slop (copiadas en `tools/oxlint/anti-slop`), de lectura de arriba abajo ([readable-code](https://github.com/ikabeee/eslint-plugin-readable-code)) y de clases canónicas de Tailwind ([better-tailwindcss](https://github.com/schoero/eslint-plugin-better-tailwindcss)). |
 | Jest | `30.x` + Testing Library | Pruebas unitarias y de componentes (`next/jest`). |
 | Prettier | `3.x` + `prettier-plugin-tailwindcss` | Formato del código y orden de las clases de Tailwind. |
 
@@ -333,6 +333,11 @@ cumple estos criterios (revísalos a 360 y 390 px, en horizontal y en escritorio
 - `prettier-plugin-tailwindcss` ordena las clases dentro de cada cadena, también en `cn(...)`, pero no
   mueve clases entre argumentos. Con tailwind-merge el orden de los argumentos importa: el tamaño del
   texto (`text-*`) va en un argumento anterior al interlineado (`leading-*`), por ejemplo `cn("text-sm", "leading-6")`.
+- **Clases canónicas de Tailwind.** No uses `[propiedad:valor]` ni un valor arbitrario si ya existe una
+  utilidad: `group-hover:paused`, no `group-hover:[animation-play-state:paused]`; `type-wide`, no
+  `font-wide font-bold uppercase`. Además de las de Tailwind, cuentan las `@utility` del tema y las de
+  `tw-animate-css`, que importa `@heroui/styles`. Oxlint lo revisa
+  (`better-tailwindcss/enforce-canonical-classes`) y `npx oxlint --fix` lo corrige.
 - No se formatean los artefactos generados, `public/` ni el Markdown (ver `.prettierignore`). Si un
   commit sólo cambia el formato, agrega su hash a `.git-blame-ignore-revs`.
 

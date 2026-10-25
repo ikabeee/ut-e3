@@ -33,7 +33,7 @@ function HomeLink() {
     >
       <UtgLogo
         variant="extruded"
-        className="block h-[34px] w-auto transition-transform duration-[250ms] group-hover:translate-x-[-1px] group-hover:translate-y-[-2px]"
+        className="block h-[34px] w-auto transition-transform duration-250 group-hover:-translate-x-px group-hover:translate-y-[-2px]"
       />
     </Link>
   );

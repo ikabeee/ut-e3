@@ -75,7 +75,7 @@ function HeroContent({ kicker, calendarUrl }: Readonly<VideoHeroProps>) {
       <p className="m-0 font-mono text-xs font-medium tracking-[.08em] text-copy-strong uppercase">{kicker}</p>
       <h1 className="m-0 flex flex-col gap-[clamp(8px,1vw,14px)]">
         <UtgLogo variant="flat" label={hero.logoLabel} className="block h-auto w-[clamp(220px,34vw,520px)]" />
-        <span className="font-wide text-[clamp(18px,2.6vw,38px)] leading-none font-bold tracking-[-.03em] uppercase">
+        <span className="type-wide text-[clamp(18px,2.6vw,38px)] leading-none tracking-[-.03em]">
           {LANDING_COPY.slogan}
         </span>
       </h1>
@@ -112,11 +112,11 @@ function GlitchArrow() {
       aria-hidden="true"
       className="relative grid w-[52px] place-items-center bg-accent text-background transition-colors duration-200 group-hover:bg-background group-hover:text-accent"
     >
-      <span className={`${GLYPH_CLASS} glitch-layer-base group-hover:[animation-duration:.5s]`}>{ARROW_GLYPH}</span>
-      <span className={`${SLICE_CLASS} glitch-layer-a text-accent-deep group-hover:[animation-duration:.5s]`}>
+      <span className={`${GLYPH_CLASS} glitch-layer-base group-hover:animation-duration-[.5s]`}>{ARROW_GLYPH}</span>
+      <span className={`${SLICE_CLASS} glitch-layer-a text-accent-deep group-hover:animation-duration-[.5s]`}>
         {ARROW_GLYPH}
       </span>
-      <span className={`${SLICE_CLASS} glitch-layer-b text-accent-hi group-hover:[animation-duration:.5s]`}>
+      <span className={`${SLICE_CLASS} glitch-layer-b text-accent-hi group-hover:animation-duration-[.5s]`}>
         {ARROW_GLYPH}
       </span>
     </span>
@@ -164,7 +164,7 @@ function PlaybackIcon({ isPlaying }: Readonly<{ isPlaying: boolean }>) {
   return (
     <span
       aria-hidden="true"
-      className="block size-0 border-y-[7px] border-l-[11px] border-y-transparent border-l-foreground group-hover:border-l-background"
+      className="block size-0 border-y-[7px] border-l-11 border-y-transparent border-l-foreground group-hover:border-l-background"
     />
   );
 }

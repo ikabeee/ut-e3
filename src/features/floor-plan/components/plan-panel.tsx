@@ -18,8 +18,8 @@ export function PlanPanel({ item }: Readonly<PlanPanelProps>) {
       ) : null}
       <PaperCard className="gap-[10px] px-[22px] pt-[22px] pb-7">
         <span className="type-tiny">{item.kicker}</span>
-        <h3 className="font-wide text-[26px] leading-[.95] font-bold tracking-[-.03em] uppercase">{item.title}</h3>
-        <p className="m-0 text-base leading-[1.25]">{item.description}</p>
+        <h3 className="type-wide text-[26px] leading-[.95] tracking-[-.03em]">{item.title}</h3>
+        <p className="m-0 text-base/tight">{item.description}</p>
       </PaperCard>
     </div>
   );

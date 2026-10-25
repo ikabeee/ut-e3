@@ -22,7 +22,7 @@ export function CoverflowPlate({
   onNext,
 }: Readonly<CoverflowPlateProps>) {
   return (
-    <div className="absolute top-[calc(var(--top)+var(--ch)*1.13)] left-1/2 z-[300] flex -translate-x-1/2 gap-3">
+    <div className="absolute top-[calc(var(--top)+var(--ch)*1.13)] left-1/2 z-300 flex -translate-x-1/2 gap-3">
       <ArrowButton
         direction="previous"
         label={GAMES_COPY.carousel.previous}
