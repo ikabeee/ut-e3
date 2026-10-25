@@ -132,6 +132,19 @@ describe("seedGames", () => {
     expect(await getPrisma().game.count()).toBe(INITIAL_GAMES.length - 1);
     expect(await getPrisma().game.findUnique({ where: { slug: "ceniza-protocol" } })).toBeNull();
   });
+
+  it("writes no game when a run fails partway, so the next run fills the whole catalog", async () => {
+    // "Pelea" is first used by the 16th sample game, so this genre name makes the run fail after 15 games.
+    const conflictingGenre = await getPrisma().genre.create({ data: { name: "Pelea", slug: "pelea-antigua" } });
+
+    await expect(seedGames(getPrisma())).rejects.toThrow();
+    expect(await getPrisma().game.count()).toBe(0);
+
+    await getPrisma().genre.delete({ where: { id: conflictingGenre.id } });
+    await seedGames(getPrisma());
+
+    expect(await getPrisma().game.count()).toBe(INITIAL_GAMES.length);
+  });
 });
 
 async function readCatalog() {
