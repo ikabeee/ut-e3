@@ -237,6 +237,8 @@ const eslintConfig = defineConfig([
   ...nextTs,
   // Lineamientos de SonarQube (los mismos que reporta SonarLint/SonarCloud).
   sonarjs.configs.recommended,
+  // Código comentado que quedó olvidado. `recommended` no la activa y en Oxlint no se dispara.
+  { rules: { "sonarjs/no-commented-code": "error" } },
   // Buenas prácticas de TanStack Query (query keys, queryFn estables, etc.).
   { files: [`src/**/*.${SOURCE}`, "src/**/*.mts"], rules: restrict([]) },
   // Ciclos entre archivos (también dentro de una misma feature). No se analizan los paquetes de
