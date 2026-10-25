@@ -1,10 +1,8 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { makeGames } from "@features/games/__tests__/components/game-test-data";
-import { FeaturedGames } from "@features/games/components/featured-games";
+import { SPONSORS } from "@features/sponsors/__tests__/components/sponsor-test-data";
+import { SponsorsCarousel } from "@features/sponsors/components/sponsors-carousel";
 
 const AUTOPLAY_MS = 6500;
-
-const games = makeGames(4);
 
 class TestPointerEvent extends MouseEvent {
   readonly pointerType: string;
@@ -15,7 +13,7 @@ class TestPointerEvent extends MouseEvent {
   }
 }
 
-function currentTitle() {
+function currentName() {
   return screen.getByRole("heading", { level: 2 });
 }
 
@@ -25,7 +23,7 @@ function advance(milliseconds: number) {
   });
 }
 
-describe("FeaturedGames autoplay pause", () => {
+describe("SponsorsCarousel autoplay pause", () => {
   beforeAll(() => {
     // SAFETY: TestPointerEvent implements the PointerEvent constructor used by the jsdom tests.
     globalThis.PointerEvent ??= TestPointerEvent as typeof PointerEvent;
@@ -33,7 +31,6 @@ describe("FeaturedGames autoplay pause", () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
-    Element.prototype.scrollTo = jest.fn();
   });
 
   afterEach(() => {
@@ -41,44 +38,44 @@ describe("FeaturedGames autoplay pause", () => {
   });
 
   it("pauses while the mouse is over the carousel and resumes when it leaves", () => {
-    render(<FeaturedGames games={games} />);
+    render(<SponsorsCarousel sponsors={SPONSORS} />);
     const carousel = screen.getByRole("region");
 
     fireEvent.pointerOver(carousel, { pointerType: "mouse" });
     advance(AUTOPLAY_MS * 2);
-    expect(currentTitle()).toHaveTextContent("Juego 01");
+    expect(currentName()).toHaveTextContent("Pixel Forge");
 
     fireEvent.pointerOut(carousel, { pointerType: "mouse" });
     advance(AUTOPLAY_MS + 100);
-    expect(currentTitle()).toHaveTextContent("Juego 02");
+    expect(currentName()).toHaveTextContent("North Byte");
   });
 
   it("pauses while the focus is inside the carousel", () => {
-    render(<FeaturedGames games={games} />);
+    render(<SponsorsCarousel sponsors={SPONSORS} />);
 
-    fireEvent.focusIn(screen.getByRole("button", { name: "Juego 03" }));
+    fireEvent.focusIn(screen.getByRole("button", { name: "Code Lab" }));
     advance(AUTOPLAY_MS * 2);
 
-    expect(currentTitle()).toHaveTextContent("Juego 01");
+    expect(currentName()).toHaveTextContent("Pixel Forge");
   });
 
-  it("changes game when a touch swipe is longer than 60 px", () => {
-    render(<FeaturedGames games={games} />);
+  it("changes sponsor when a touch swipe is longer than 60 px", () => {
+    render(<SponsorsCarousel sponsors={SPONSORS} />);
     const slide = screen.getAllByRole("group", { hidden: true })[0];
 
     fireEvent.touchStart(slide, { touches: [{ clientX: 200 }] });
     fireEvent.touchEnd(slide, { changedTouches: [{ clientX: 130 }] });
 
-    expect(currentTitle()).toHaveTextContent("Juego 02");
+    expect(currentName()).toHaveTextContent("North Byte");
   });
 
   it("ignores a touch swipe of 60 px or less", () => {
-    render(<FeaturedGames games={games} />);
+    render(<SponsorsCarousel sponsors={SPONSORS} />);
     const slide = screen.getAllByRole("group", { hidden: true })[0];
 
     fireEvent.touchStart(slide, { touches: [{ clientX: 200 }] });
     fireEvent.touchEnd(slide, { changedTouches: [{ clientX: 140 }] });
 
-    expect(currentTitle()).toHaveTextContent("Juego 01");
+    expect(currentName()).toHaveTextContent("Pixel Forge");
   });
 });

@@ -5,7 +5,6 @@ import type { EventSettings } from "@features/event-settings/lib/types";
 import { FloorPlan } from "@features/floor-plan/components/floor-plan";
 import { FLOOR_PLAN_SECTION_ID, getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
 import type { FloorPlanStand } from "@features/floor-plan/lib/types";
-import { FeaturedGames } from "@features/games/components/featured-games";
 import { GameCatalog } from "@features/games/components/game-catalog";
 import { getCoverImage } from "@features/games/lib/game-cover";
 import { GAMES_SECTION_ID } from "@features/games/lib/games-links";
@@ -31,7 +30,7 @@ import { EVENT_VENUE, formatCopyableAddress } from "@features/landing/lib/venue"
 import { EventSchedule } from "@features/schedule/components/event-schedule";
 import { getScheduleItems } from "@features/schedule/lib/server/schedule-queries";
 import type { ScheduleItem } from "@features/schedule/lib/types";
-import { SponsorsBand } from "@features/sponsors/components/sponsors-band";
+import { SponsorsCarousel } from "@features/sponsors/components/sponsors-carousel";
 import { getSponsors } from "@features/sponsors/lib/server/sponsors-queries";
 import type { Sponsor } from "@features/sponsors/lib/types";
 import { JsonLd } from "@shared/components/json-ld";
@@ -91,8 +90,7 @@ export function LandingView({ settings, games, scheduleItems, sponsors, marketpl
       <SiteNav links={NAV_LINKS} />
       <main>
         <VideoHero calendarUrl={buildEventCalendarUrl(settings)} />
-        <SponsorsBand sponsors={sponsors} />
-        <FeaturedGames games={games} />
+        <SponsorsCarousel sponsors={sponsors} />
         <EventIntro>
           <ActivityCards raffle={raffleLabels(settings)} kof={kofLabels(settings)} marketplace={marketplace} />
         </EventIntro>

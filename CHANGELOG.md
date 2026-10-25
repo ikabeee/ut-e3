@@ -8,8 +8,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
-- Portada de la versión 2 (`/`) con el diseño UTG y los requisitos de la SRS v2: video del reel,
-  patrocinadores, juegos destacados, tarjetas de Rifa, Marketplace, torneo de KOF y Mario Kart,
+- Portada de la versión 2 (`/`) con el diseño UTG y los requisitos de la SRS v2: loop animado en el hero,
+  carrusel de patrocinadores (aparece cuando haya patrocinadores), tarjetas de Rifa, Marketplace, torneo de KOF y Mario Kart,
   invitadas especiales, catálogo en coverflow, cronograma, croquis interactivo con códigos de stand
   `zA-s3`, ubicación y cierre. El evento es el 20 de noviembre de 2026 de 12:00 a 19:00 (hora de Cancún).
 

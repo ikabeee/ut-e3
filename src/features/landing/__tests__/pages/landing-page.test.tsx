@@ -29,7 +29,7 @@ const SCHEDULE: ScheduleItem[] = [
   },
 ];
 
-const SECTION_ORDER = ["top", "featured-games", "event", "guests", "games", "schedule", "floor-plan", "venue"];
+const SECTION_ORDER = ["top", "event", "guests", "games", "schedule", "floor-plan", "venue"];
 
 const games = makeGames(18);
 

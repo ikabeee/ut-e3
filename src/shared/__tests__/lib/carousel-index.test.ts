@@ -1,4 +1,4 @@
-import { clampIndex, wrapIndex } from "@features/games/lib/carousel-index";
+import { clampIndex, wrapIndex } from "@shared/lib/carousel-index";
 
 describe("wrapIndex", () => {
   it("goes from the last item to the first and from the first to the last", () => {
