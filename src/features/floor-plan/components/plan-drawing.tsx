@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { PlanEntry } from "@features/floor-plan/components/plan-entry";
 import { PlanFloor } from "@features/floor-plan/components/plan-floor";
 import { PlanStandBlock } from "@features/floor-plan/components/plan-stand-block";
 import { PlanZones } from "@features/floor-plan/components/plan-zones";
@@ -18,7 +17,6 @@ export function PlanDrawing({ layout, selection }: Readonly<PlanDrawingProps>) {
     <>
       <PlanFloor layout={layout} />
       <PlanZones zones={layout.zones} selection={selection} touchRects={touchRects} />
-      <PlanEntry layout={layout} selection={selection} touchRect={touchRects.get("entrance")} />
       {layout.standBlocks.map((block) => (
         <PlanStandBlock
           key={block.zone}

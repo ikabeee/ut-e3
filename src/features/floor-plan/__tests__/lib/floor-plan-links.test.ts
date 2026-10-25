@@ -6,7 +6,7 @@ describe("floor plan links", () => {
   });
 
   it("builds the hash of a stand or a zone", () => {
-    expect(floorPlanItemHref("zA-s3")).toBe("#floor-plan-zA-s3");
+    expect(floorPlanItemHref("ZA-S3")).toBe("#floor-plan-ZA-S3");
     expect(floorPlanItemHref("marketplace")).toBe("#floor-plan-marketplace");
   });
 
@@ -14,11 +14,11 @@ describe("floor plan links", () => {
     ["stage", "Escenario principal"],
     ["kof", "Arena KOF"],
     ["mario-kart", "Mario Kart"],
-    ["marketplace", "Marketplace"],
-    ["help-desk", "Atención"],
     ["restrooms", "Baños"],
-    ["rest-area", "Descanso"],
-    ["entrance", "Entrada"],
+    ["rear-marketplace", "Marketplace trasero"],
+    ["marketplace", "Marketplace central"],
+    ["cafeteria", "Cafetería externa"],
+    ["help-center-1", "Centro de atención 1"],
   ])("links the %s zone to its place in the croquis", (zoneId, title) => {
     expect(getZoneLink(zoneId)).toEqual({ href: `#floor-plan-${zoneId}`, label: title });
   });
@@ -26,5 +26,11 @@ describe("floor plan links", () => {
   it("returns null for a zone that does not exist", () => {
     expect(getZoneLink("arena")).toBeNull();
     expect(getZoneLink("")).toBeNull();
+  });
+
+  it("returns null for the zones that are not in the Edificio B croquis", () => {
+    expect(getZoneLink("entrance")).toBeNull();
+    expect(getZoneLink("rest-area")).toBeNull();
+    expect(getZoneLink("help-desk")).toBeNull();
   });
 });

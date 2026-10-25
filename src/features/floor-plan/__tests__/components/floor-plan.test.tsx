@@ -7,19 +7,17 @@ const ZONE_TITLES = [
   "Escenario principal",
   "Arena KOF",
   "Mario Kart",
-  "Marketplace",
-  "Atención",
   "Baños",
-  "Descanso",
-  "Entrada",
+  "Marketplace trasero",
+  "Marketplace central",
+  "Cafetería externa",
+  "Centro de atención 1",
+  "Centro de atención 2",
+  "Centro de atención 3",
+  "Centro de atención 4",
 ];
 
-const INFO_BOOTH_TITLES = [
-  "Ingeniería y Tecnologías",
-  "Inscripción al torneo de KOF",
-  "Oferta educativa",
-  "Patrocinadores",
-];
+const STAND_COUNTS = { A: 3, B: 3, C: 3, D: 3, T: 6 };
 
 const originalResizeObserver = window.ResizeObserver;
 
@@ -57,39 +55,39 @@ describe("FloorPlan buttons", () => {
 });
 
 describe("FloorPlan selection", () => {
-  it("selects zA-s1 by default", () => {
+  it("selects ZA-S1 by default", () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    expect(screen.getByRole("button", { name: "Stand zA-s1, Ceniza Protocol" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" })).toHaveAttribute(
       "aria-current",
       "true",
     );
-    expect(screen.getByRole("button", { name: "Stand zA-s3, Hormigón" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("button", { name: "Stand ZA-S3, Hormigón" })).not.toHaveAttribute("aria-current");
     expect(getPanel().getByRole("heading", { name: "Ceniza Protocol" })).toBeInTheDocument();
   });
 
   it("shows the name, genre, synopsis, code and cover of a clicked stand", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    await userEvent.setup().click(screen.getByRole("button", { name: "Stand zB-s2, Kaiju Mercado" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "Stand ZB-S2, Kaiju Mercado" }));
 
     const panel = getPanel();
     expect(panel.getByRole("heading", { name: "Kaiju Mercado" })).toBeInTheDocument();
-    expect(panel.getByText("Stand zB-s2 · Simulación")).toBeInTheDocument();
+    expect(panel.getByText("Stand ZB-S2 · Simulación")).toBeInTheDocument();
     expect(panel.getByText("Administra un tianguis donde los clientes miden treinta metros.")).toBeInTheDocument();
     expect(panel.getByRole("img", { name: "Portada de Kaiju Mercado" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Stand zB-s2, Kaiju Mercado" })).toHaveAttribute("aria-current", "true");
-    expect(screen.getByRole("button", { name: "Stand zA-s1, Ceniza Protocol" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("button", { name: "Stand ZB-S2, Kaiju Mercado" })).toHaveAttribute("aria-current", "true");
+    expect(screen.getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" })).not.toHaveAttribute("aria-current");
   });
 
-  it("shows an info booth as informative without a cover", async () => {
+  it("shows a help center with what it attends and no cover", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    await userEvent.setup().click(screen.getByRole("button", { name: "Stand zC-s2, Inscripción al torneo de KOF" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "Centro de atención 2" }));
 
     const panel = getPanel();
-    expect(panel.getByRole("heading", { name: "Inscripción al torneo de KOF" })).toBeInTheDocument();
-    expect(panel.getByText("Stand zC-s2 · Informativo")).toBeInTheDocument();
+    expect(panel.getByRole("heading", { name: "Centro de atención 2" })).toBeInTheDocument();
+    expect(panel.getByText("Dudas, uso de la PWA, rifa y orientación.")).toBeInTheDocument();
     expect(panel.queryByRole("img")).not.toBeInTheDocument();
   });
 
@@ -105,11 +103,11 @@ describe("FloorPlan selection", () => {
   it("shows Stand por asignar for a team position without a stand", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    await userEvent.setup().click(screen.getByRole("button", { name: "Stand zA-s9" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "Stand ZT-S6" }));
 
     const panel = getPanel();
     expect(panel.getByText("Stand por asignar")).toBeInTheDocument();
-    expect(panel.getByText(/zA-s9/)).toBeInTheDocument();
+    expect(panel.getByText(/ZT-S6/)).toBeInTheDocument();
     expect(panel.queryByRole("img")).not.toBeInTheDocument();
   });
 });
@@ -128,7 +126,7 @@ describe("FloorPlan keyboard", () => {
   it("selects a focused stand with Space", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    screen.getByRole("button", { name: "Stand zA-s3, Hormigón" }).focus();
+    screen.getByRole("button", { name: "Stand ZA-S3, Hormigón" }).focus();
     await userEvent.setup().keyboard(" ");
 
     expect(getPanel().getByRole("heading", { name: "Hormigón" })).toBeInTheDocument();
@@ -147,7 +145,7 @@ describe("FloorPlan legend", () => {
       within(legend)
         .getAllByRole("listitem")
         .map((item) => item.textContent),
-    ).toEqual(["Stand de equipo", "Stand informativo", "Escenario y actividades", "Servicios"]);
+    ).toEqual(["Stand de equipo", "Centro de atención", "Escenario y actividades", "Servicios"]);
   });
 });
 
@@ -157,18 +155,18 @@ describe("FloorPlan URL hash", () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Marketplace" })).toHaveAttribute("aria-current", "true"),
+      expect(screen.getByRole("button", { name: "Marketplace central" })).toHaveAttribute("aria-current", "true"),
     );
-    expect(getPanel().getByRole("heading", { name: "Marketplace" })).toBeInTheDocument();
+    expect(getPanel().getByRole("heading", { name: "Marketplace central" })).toBeInTheDocument();
   });
 
   it("selects the stand named by a hashchange", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    changeHash("#floor-plan-zA-s3");
+    changeHash("#floor-plan-ZA-S3");
 
     await waitFor(() => expect(getPanel().getByRole("heading", { name: "Hormigón" })).toBeInTheDocument());
-    expect(screen.getByRole("button", { name: "Stand zA-s3, Hormigón" })).toHaveAttribute("aria-current", "true");
+    expect(screen.getByRole("button", { name: "Stand ZA-S3, Hormigón" })).toHaveAttribute("aria-current", "true");
   });
 
   it("keeps the selection when the hash names an unknown item or another section", async () => {
@@ -178,7 +176,7 @@ describe("FloorPlan URL hash", () => {
     changeHash("#games");
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Stand zA-s1, Ceniza Protocol" })).toHaveAttribute(
+      expect(screen.getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" })).toHaveAttribute(
         "aria-current",
         "true",
       ),
@@ -211,25 +209,23 @@ describe("FloorPlan scrolling", () => {
     const scrollIntoView = stubScrollIntoView();
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    await userEvent.setup().click(screen.getByRole("button", { name: "Descanso" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "Baños" }));
 
     expect(scrollIntoView).not.toHaveBeenCalled();
   });
 });
 
 function expectedButtonNames() {
-  const teamNames = ["A", "B"].flatMap((zone) =>
-    Array.from({ length: 9 }, (_, index) => {
-      const code = `z${zone}-s${index + 1}`;
+  const standNames = Object.entries(STAND_COUNTS).flatMap(([zone, count]) =>
+    Array.from({ length: count }, (_, index) => {
+      const code = `Z${zone}-S${index + 1}`;
       const stand = STAND_FIXTURES.find((candidate) => candidate.code === code);
 
       return stand ? `Stand ${code}, ${stand.name}` : `Stand ${code}`;
     }),
   );
 
-  const boothNames = INFO_BOOTH_TITLES.map((title, index) => `Stand zC-s${index + 1}, ${title}`);
-
-  return [...teamNames, ...boothNames, ...ZONE_TITLES];
+  return [...standNames, ...ZONE_TITLES];
 }
 
 function getPanel() {
@@ -252,7 +248,7 @@ function getMapViewBox(width: number) {
   const { unmount } = render(<FloorPlan stands={STAND_FIXTURES} />);
 
   const viewBox = screen
-    .getByRole("button", { name: "Stand zA-s1, Ceniza Protocol" })
+    .getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" })
     .closest("svg")
     ?.getAttribute("viewBox");
 

@@ -1,5 +1,5 @@
 import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
-import { getStandCells, INFO_BOOTH_ZONE, PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
+import { getStandCells, PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 import {
   ZONE_IDS,
   type FloorPlanStand,
@@ -13,23 +13,20 @@ const ZONE_CATEGORIES: Record<ZoneId, PlanCategory> = {
   stage: "act",
   kof: "act",
   "mario-kart": "act",
-  marketplace: "srv",
-  "help-desk": "srv",
   restrooms: "srv",
-  "rest-area": "srv",
-  entrance: "act",
+  "rear-marketplace": "srv",
+  marketplace: "srv",
+  cafeteria: "srv",
+  "help-center-1": "info",
+  "help-center-2": "info",
+  "help-center-3": "info",
+  "help-center-4": "info",
 };
 
 export function buildPlanItems(stands: readonly FloorPlanStand[]): PlanItem[] {
   const standsByCode = new Map(stands.map((stand) => [stand.code, stand]));
-
-  const cells = PLAN_LAYOUTS.wide.standBlocks.flatMap((block) =>
-    getStandCells(block).map((cell) => ({ ...cell, zone: block.zone })),
-  );
-
-  const standItems = cells.map((cell) =>
-    cell.zone === INFO_BOOTH_ZONE ? buildInfoBoothItem(cell) : buildTeamItem(cell, standsByCode.get(cell.code)),
-  );
+  const cells = PLAN_LAYOUTS.wide.standBlocks.flatMap(getStandCells);
+  const standItems = cells.map((cell) => buildTeamItem(cell, standsByCode.get(cell.code)));
 
   return [...standItems, ...ZONE_IDS.map(buildZoneItem)];
 }
@@ -66,22 +63,6 @@ function buildTeamItem({ code }: StandCell, stand: FloorPlanStand | undefined): 
     code,
     drawingName: stand.name,
     cover: { src: stand.coverSrc, alt: stand.coverAlt },
-  };
-}
-
-function buildInfoBoothItem({ code, number }: StandCell): PlanItem {
-  const booth = FLOOR_PLAN_COPY.infoBooths[number - 1];
-
-  return {
-    id: code,
-    category: "info",
-    label: FLOOR_PLAN_COPY.drawing.standLabel(code, booth.title),
-    kicker: FLOOR_PLAN_COPY.standKicker(code, FLOOR_PLAN_COPY.infoStandKind),
-    title: booth.title,
-    description: booth.description,
-    code,
-    drawingName: booth.title,
-    cover: null,
   };
 }
 

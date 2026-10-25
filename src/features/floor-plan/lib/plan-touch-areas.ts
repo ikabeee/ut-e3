@@ -15,13 +15,12 @@ type Interval = readonly [number, number];
 export function getTouchRects(layout: PlanLayout): ReadonlyMap<string, PlanRect> {
   const targets: [string, PlanRect][] = [
     ...Object.entries(layout.zones).map(([id, zone]): [string, PlanRect] => [id, zone.rect]),
-    ["entrance", layout.entry],
     ...layout.standBlocks.flatMap((block) =>
       getStandCells(block).map(({ code, rect }): [string, PlanRect] => [code, rect]),
     ),
   ];
 
-  const obstacles = [...targets.map(([, rect]) => rect), layout.publicArea];
+  const obstacles = targets.map(([, rect]) => rect);
   const bounds: PlanRect = [0, 0, layout.width, layout.height];
 
   return new Map(

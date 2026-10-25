@@ -2,7 +2,7 @@ import type { FloorPlanStand } from "@features/floor-plan/lib/types";
 
 export const STAND_FIXTURES: readonly FloorPlanStand[] = [
   {
-    code: "zA-s1",
+    code: "ZA-S1",
     name: "Ceniza Protocol",
     genre: "Acción",
     synopsis: "Shooter de extracción en una ciudad sepultada por ceniza volcánica.",
@@ -10,7 +10,7 @@ export const STAND_FIXTURES: readonly FloorPlanStand[] = [
     coverAlt: "Portada de Ceniza Protocol",
   },
   {
-    code: "zA-s3",
+    code: "ZA-S3",
     name: "Hormigón",
     genre: "Puzle",
     synopsis: "Vierte, fragua y apila concreto para construir torres imposibles.",
@@ -18,7 +18,7 @@ export const STAND_FIXTURES: readonly FloorPlanStand[] = [
     coverAlt: "Portada de Hormigón",
   },
   {
-    code: "zB-s2",
+    code: "ZB-S2",
     name: "Kaiju Mercado",
     genre: "Simulación",
     synopsis: "Administra un tianguis donde los clientes miden treinta metros.",

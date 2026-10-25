@@ -22,7 +22,7 @@ export function PlanStandBlock({ block, nameSize, selection, touchRects }: Reado
         fill="var(--muted)"
         className="pointer-events-none font-mono uppercase"
       >
-        {FLOOR_PLAN_COPY.drawing.aisleNames[block.zone]}
+        {FLOOR_PLAN_COPY.drawing.blockLabels[block.zone]}
       </text>
       {getStandCells(block).map(({ code, rect }) => {
         const item = selection.itemsById.get(code);

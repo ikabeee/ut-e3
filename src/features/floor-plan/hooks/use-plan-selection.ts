@@ -3,7 +3,7 @@ import { getItemIdFromHash } from "@features/floor-plan/lib/floor-plan-links";
 import type { PlanItem } from "@features/floor-plan/lib/types";
 import { usePrefersReducedMotion } from "@shared/hooks/use-prefers-reduced-motion";
 
-export const DEFAULT_SELECTED_ID = "zA-s1";
+export const DEFAULT_SELECTED_ID = "ZA-S1";
 
 export function usePlanSelection(items: readonly PlanItem[], sectionRef: RefObject<HTMLElement | null>) {
   const [selectedId, setSelectedId] = useState(DEFAULT_SELECTED_ID);

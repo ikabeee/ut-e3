@@ -2,21 +2,27 @@ import { PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
 import { getTouchRects } from "@features/floor-plan/lib/plan-touch-areas";
 import type { PlanRect } from "@features/floor-plan/lib/types";
 
-describe("touch areas", () => {
-  it.each(["wide", "tall"] as const)(
-    "gives every item in the %s layout an area that contains its drawing",
-    (orientation) => {
-      const touchRects = [...getTouchRects(PLAN_LAYOUTS[orientation]).values()];
+const ORIENTATIONS = ["wide", "tall"] as const;
 
-      expect(touchRects).toHaveLength(30);
-      touchRects.forEach(([, , width, height]) => {
-        expect(width).toBeGreaterThan(0);
-        expect(height).toBeGreaterThan(0);
-      });
+const MIN_TOUCH_SIDE = 56;
+
+describe("touch areas", () => {
+  it.each(ORIENTATIONS)("gives each of the 18 stands and 11 zones in the %s layout a touch area", (orientation) => {
+    expect(getTouchRects(PLAN_LAYOUTS[orientation]).size).toBe(29);
+  });
+
+  it.each(ORIENTATIONS)(
+    "makes every touch area in the %s layout at least 56 units wide and tall, 44 px on a 360 px screen",
+    (orientation) => {
+      const tooSmall = [...getTouchRects(PLAN_LAYOUTS[orientation])].flatMap(([id, [, , width, height]]) =>
+        Math.min(width, height) < MIN_TOUCH_SIDE ? [id] : [],
+      );
+
+      expect(tooSmall).toEqual([]);
     },
   );
 
-  it.each(["wide", "tall"] as const)("never overlaps two touch areas in the %s layout", (orientation) => {
+  it.each(ORIENTATIONS)("never overlaps two touch areas in the %s layout", (orientation) => {
     const touchRects = [...getTouchRects(PLAN_LAYOUTS[orientation]).values()];
 
     touchRects.forEach((rect, index) => {
@@ -24,10 +30,10 @@ describe("touch areas", () => {
     });
   });
 
-  it("grows a small zone by up to 10 units on each free side", () => {
-    const helpDesk = getTouchRects(PLAN_LAYOUTS.tall).get("help-desk");
+  it("grows a help center by up to 10 units on each free side", () => {
+    const helpCenter = getTouchRects(PLAN_LAYOUTS.tall).get("help-center-1");
 
-    expect(helpDesk?.[3]).toBeGreaterThan(46);
+    expect(helpCenter?.[3]).toBeGreaterThan(60);
   });
 });
 

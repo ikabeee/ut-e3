@@ -12,12 +12,19 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   carrusel de patrocinadores (aparece cuando haya patrocinadores), actos JUEGA, CALIFICA y GANA con
   pictogramas animados (Rifa, torneo de KOF y Mario Kart) y la franja del Marketplace,
   invitadas especiales, catálogo en coverflow, cronograma, croquis interactivo con códigos de stand
-  `zA-s3`, ubicación y cierre. El evento es el 20 de noviembre de 2026 de 12:00 a 19:00 (hora de Cancún).
+  `ZA-S3`, ubicación y cierre. El evento es el 20 de noviembre de 2026 de 12:00 a 18:30 (hora de Cancún)
+  en el Edificio B.
+- Cronograma inicial con el programa del público del orden del día oficial (SRS v2.3): inauguración, rondas
+  de KOF, Mario Kart, actividades del escenario, presentación de ganadores, rifa y cierre.
+- Croquis según el plano del Edificio B: bloques A, B, C y D (3 stands cada uno) y la zona de terror T
+  (6 stands), Arena KOF y escenario, Mario Kart junto a los baños, cuatro centros de atención, los dos
+  marketplaces y la cafetería externa. En pantallas anchas el plano gira 90 grados. Se quitan la entrada,
+  la zona de descanso y los stands informativos del croquis anterior.
 
 - Marca PIXEL & CODE ("JUEGA. CALIFICA. GANA."): letrero de LEDs en el hero, título del sitio, evento del
   calendario y pie de página. El logo de la UTG se queda en la navegación y el pie.
-- Torneo de KOF según la SRS v2.2: check-in de 11:00 a 12:00, inscripción presencial de 12:00 a 12:45 y
-  bracket a las 13:00 (se quita el cierre de la inscripción).
+- Torneo de KOF según la SRS v2.3: check-in de la lista previa e inscripción presencial de 12:00 a 12:45 y
+  bracket a las 12:55 (se quita el cierre de la inscripción). El corte de visitas para la rifa es a las 16:50.
 
 ### Eliminado
 

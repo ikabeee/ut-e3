@@ -1,51 +1,57 @@
 import { INITIAL_SCHEDULE_ITEMS } from "@features/schedule/lib/server/schedule-seed";
 
-const KOF_TITLE = /KOF/;
-
-function findItem(title: string) {
-  return INITIAL_SCHEDULE_ITEMS.find((item) => item.title === title);
-}
+const PUBLIC_PROGRAM = [
+  ["2026-11-20T17:00:00.000Z", "2026-11-20T17:30:00.000Z", "Inauguración en el escenario principal"],
+  [
+    "2026-11-20T17:00:00.000Z",
+    "2026-11-20T17:45:00.000Z",
+    "Check-in de la lista previa e inscripción presencial a KOF",
+  ],
+  [
+    "2026-11-20T17:00:00.000Z",
+    "2026-11-20T21:50:00.000Z",
+    "Exhibición en los stands de los bloques A a D y en la zona de terror",
+  ],
+  ["2026-11-20T17:45:00.000Z", "2026-11-20T17:55:00.000Z", "Confirmación de participantes de KOF"],
+  ["2026-11-20T17:55:00.000Z", "2026-11-20T17:55:00.000Z", "Publicación del bracket de KOF"],
+  ["2026-11-20T18:00:00.000Z", "2026-11-20T19:00:00.000Z", "KOF: ronda de 64"],
+  ["2026-11-20T18:30:00.000Z", "2026-11-20T20:30:00.000Z", "Mario Kart abierto"],
+  ["2026-11-20T19:00:00.000Z", "2026-11-20T19:30:00.000Z", "KOF: ronda de 32"],
+  ["2026-11-20T19:30:00.000Z", "2026-11-20T20:00:00.000Z", "KOF: octavos de final"],
+  ["2026-11-20T20:00:00.000Z", "2026-11-20T20:30:00.000Z", "KOF: cuartos de final"],
+  ["2026-11-20T20:30:00.000Z", "2026-11-20T21:00:00.000Z", "Actividad en el escenario 1"],
+  ["2026-11-20T21:00:00.000Z", "2026-11-20T21:10:00.000Z", "KOF: semifinales"],
+  ["2026-11-20T21:00:00.000Z", "2026-11-20T21:50:00.000Z", "Mario Kart abierto"],
+  ["2026-11-20T21:10:00.000Z", "2026-11-20T21:40:00.000Z", "Actividad en el escenario 2"],
+  ["2026-11-20T21:40:00.000Z", "2026-11-20T21:50:00.000Z", "KOF: partido por el tercer lugar, en el escenario"],
+  ["2026-11-20T21:50:00.000Z", "2026-11-20T21:50:00.000Z", "Cierran los stands, Mario Kart y la zona de terror"],
+  ["2026-11-20T21:55:00.000Z", "2026-11-20T22:05:00.000Z", "Presentación de los finalistas de KOF"],
+  ["2026-11-20T22:05:00.000Z", "2026-11-20T22:15:00.000Z", "Gran final de KOF"],
+  ["2026-11-20T22:30:00.000Z", "2026-11-20T23:00:00.000Z", "Presentación de ganadores"],
+  ["2026-11-20T23:00:00.000Z", "2026-11-20T23:30:00.000Z", "Rifa final de premios"],
+  ["2026-11-20T23:30:00.000Z", "2026-11-21T00:00:00.000Z", "Agradecimientos y cierre"],
+];
 
 describe("INITIAL_SCHEDULE_ITEMS", () => {
-  it("has exactly three KOF items", () => {
-    const kofTitles = INITIAL_SCHEDULE_ITEMS.filter((item) => KOF_TITLE.test(item.title)).map((item) => item.title);
+  it("follows the public program of the run sheet, row by row", () => {
+    const program = INITIAL_SCHEDULE_ITEMS.map((item) => [item.startsAt, item.endsAt, item.title]);
 
-    expect(kofTitles).toEqual([
-      "Check-in del torneo de KOF",
-      "Inscripción presencial al torneo de KOF",
-      "Rondas del torneo de KOF",
-    ]);
+    expect(program).toEqual(PUBLIC_PROGRAM);
   });
 
-  it("starts the KOF check-in at 11:00 Cancun at the KOF stand, where the pre-list confirms with the PIN", () => {
-    const item = findItem("Check-in del torneo de KOF");
+  it("gives every item a description and a unique id", () => {
+    const ids = INITIAL_SCHEDULE_ITEMS.map((item) => item.id);
 
-    expect(item).toMatchObject({ startsAt: "2026-11-20T16:00:00.000Z", zone: "kof" });
-    expect(item?.description).toMatch(/PIN/);
+    expect(new Set(ids).size).toBe(ids.length);
+    INITIAL_SCHEDULE_ITEMS.forEach((item) => expect(item.description).not.toBe(""));
   });
 
-  it("starts the on-site KOF signup at 12:00 Cancun at the help desk, until the 64 places fill", () => {
-    const item = findItem("Inscripción presencial al torneo de KOF");
-
-    expect(item).toMatchObject({ startsAt: "2026-11-20T17:00:00.000Z", zone: "help-desk" });
-    expect(item?.description).toMatch(/\b64\b/);
+  it("points the KOF rounds to the KOF arena and the final to the main stage", () => {
+    expect(INITIAL_SCHEDULE_ITEMS.find((item) => item.title === "KOF: ronda de 64")?.zone).toBe("kof");
+    expect(INITIAL_SCHEDULE_ITEMS.find((item) => item.title === "Gran final de KOF")?.zone).toBe("stage");
   });
 
-  it("starts the KOF rounds at 13:00 Cancun at the KOF stand", () => {
-    expect(findItem("Rondas del torneo de KOF")).toMatchObject({ startsAt: "2026-11-20T18:00:00.000Z", zone: "kof" });
-  });
-
-  it("keeps the other items", () => {
-    const otherIds = INITIAL_SCHEDULE_ITEMS.filter((item) => !KOF_TITLE.test(item.title)).map((item) => item.id);
-
-    expect(otherIds).toEqual([
-      "opening",
-      "teams-presentation",
-      "first-guest-talk",
-      "second-guest-talk",
-      "raffle-visits-cutoff",
-      "raffle",
-      "closing",
-    ]);
+  it("does not name the old building", () => {
+    INITIAL_SCHEDULE_ITEMS.forEach((item) => expect(item.description).not.toMatch(/E3/));
   });
 });
