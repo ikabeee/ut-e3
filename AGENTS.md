@@ -52,22 +52,28 @@ Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm
 ## Arquitectura: screaming architecture
 
 La estructura de carpetas "grita" el dominio, no el framework.
-Cada dominio es una **feature** dentro de `src/features/`. Hoy sólo existe `landing`, una portada
-provisional mientras se construye la versión 2. La portada estática anterior se conserva en la rama
-`archive/landing-v1`, y la versión previa del proyecto (catálogo, croquis, pasaporte, panel, Prisma y
-TanStack Query) en `archive/develop-v1`.
+Cada dominio es una **feature** dentro de `src/features/`. Hoy la portada (`/`) de la versión 2 compone
+seis: `landing`, `games`, `floor-plan`, `schedule`, `sponsors` y `event-settings`. Sus datos viven en
+código detrás de las consultas de `lib/server/` hasta que exista la base de datos. La portada estática
+anterior se conserva en la rama `archive/landing-v1`, y la versión previa del proyecto (catálogo,
+croquis, pasaporte, panel, Prisma y TanStack Query) en `archive/develop-v1`.
 
 ```
 src/
 ├── app/                      # SOLO rutas de Next.js: renderizan una page de una feature
 ├── features/
-│   └── landing/              # Portada (/) provisional
+│   ├── landing/              # Portada (/): hero, actividades, invitadas, ubicación y la page
+│   ├── games/                # Juegos: carrusel de destacados y catálogo en coverflow
+│   ├── floor-plan/           # Croquis interactivo con los stands (zA-s3) y las zonas
+│   ├── schedule/             # Cronograma de actividades
+│   ├── sponsors/             # Banda de patrocinadores
+│   └── event-settings/       # Horarios y valores configurables del evento
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
-    ├── components/           # Primitivos: JsonLd
-    ├── hooks/                # Hooks genéricos (movimiento reducido)
+    ├── components/           # Primitivos: JsonLd, UtgLogo, ActionLink, ArrowButton, PaperCard...
+    ├── hooks/                # Hooks genéricos (movimiento reducido, ajuste de títulos)
     ├── styles/               # Tema UTG de HeroUI, tipografía y efectos
-    └── lib/                  # env, fuentes, metadata y siteConfig
+    └── lib/                  # env, fuentes, metadata, siteConfig y fechas en America/Cancun
 ```
 
 ### Anatomía de una feature

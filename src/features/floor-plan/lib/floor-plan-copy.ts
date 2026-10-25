@@ -78,8 +78,8 @@ const ZONE_DRAWING_LABELS: Record<ZoneId, string> = {
   kof: "Arena KOF",
   "mario-kart": "Mario Kart",
   marketplace: "Marketplace",
-  "help-desk": "Info",
-  restrooms: "WC",
+  "help-desk": "Atención",
+  restrooms: "Baños",
   "rest-area": "Descanso",
   entrance: "Entrada",
 };

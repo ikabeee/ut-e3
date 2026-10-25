@@ -9,7 +9,7 @@ const organization = {
 export const siteConfig = {
   name: "UTG",
   title: "UTG · Showcase de videojuegos",
-  description: `Showcase de videojuegos de la ${organization.division} de la ${organization.universityShortName}. Prueba los juegos, compite en los torneos y participa en los sorteos.`,
+  description: `Showcase de videojuegos de la ${organization.division} de la ${organization.universityShortName}. Prueba los juegos, compite en los torneos y participa en la rifa.`,
   url: env.siteUrl,
   locale: "es_MX",
   organization,

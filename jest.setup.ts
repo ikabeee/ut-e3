@@ -111,5 +111,7 @@ if (typeof window !== "undefined") {
 
   Element.prototype.scrollIntoView = () => undefined;
 
+  Element.prototype.scrollTo = () => undefined;
+
   Object.defineProperty(document, "fonts", { configurable: true, value: { ready: Promise.resolve() } });
 }

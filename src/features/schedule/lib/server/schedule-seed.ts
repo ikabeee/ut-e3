@@ -53,7 +53,7 @@ export const INITIAL_SCHEDULE_ITEMS: ScheduleItem[] = [
   {
     id: "raffle-visits-cutoff",
     title: "Corte de visitas para la rifa",
-    description: "Se cuentan las visitas válidas que cuentan para los boletos de la rifa.",
+    description: "Último momento para que una visita cuente para los boletos de la rifa.",
     startsAt: "2026-11-20T22:00:00.000Z",
     endsAt: "2026-11-20T23:00:00.000Z",
     zone: null,

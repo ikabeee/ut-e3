@@ -76,7 +76,7 @@ function HeroContent({ kicker, calendarUrl }: Readonly<VideoHeroProps>) {
       <h1 className="m-0 flex flex-col gap-[clamp(8px,1vw,14px)]">
         <UtgLogo variant="flat" label={hero.logoLabel} className="block h-auto w-[clamp(220px,34vw,520px)]" />
         <span className="font-wide text-[clamp(18px,2.6vw,38px)] leading-none font-bold tracking-[-.03em] uppercase">
-          {LANDING_COPY.title}
+          {LANDING_COPY.slogan}
         </span>
       </h1>
       <p className="m-0 max-w-[52ch] text-[clamp(15px,1.3vw,18px)] leading-[1.45] text-copy">
