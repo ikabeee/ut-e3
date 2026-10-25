@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
-import { useSwipe } from "@features/games/hooks/use-swipe";
-import { clampIndex } from "@features/games/lib/carousel-index";
 import { getInitialCoverflowIndex } from "@features/games/lib/coverflow-layout";
+import { useSwipe } from "@shared/hooks/use-swipe";
+import { clampIndex } from "@shared/lib/carousel-index";
 
 const SWIPE_THRESHOLD = 40;
 

@@ -1,14 +1,14 @@
 import { useCallback, useState, type PointerEvent } from "react";
-import { useAutoplayProgress } from "@features/games/hooks/use-autoplay-progress";
-import { useSwipe } from "@features/games/hooks/use-swipe";
-import { wrapIndex } from "@features/games/lib/carousel-index";
+import { useAutoplayProgress } from "@features/sponsors/hooks/use-autoplay-progress";
 import { usePrefersReducedMotion } from "@shared/hooks/use-prefers-reduced-motion";
+import { useSwipe } from "@shared/hooks/use-swipe";
+import { wrapIndex } from "@shared/lib/carousel-index";
 
-export const FEATURED_SLIDE_DURATION = 6500;
+export const SPONSOR_SLIDE_DURATION = 6500;
 
 const SWIPE_THRESHOLD = 60;
 
-export function useFeaturedCarousel(count: number) {
+export function useSponsorsCarousel(count: number) {
   const [current, setCurrent] = useState(0);
   const pause = useAutoplayPause();
 
@@ -18,7 +18,7 @@ export function useFeaturedCarousel(count: number) {
   const goPrevious = useCallback(() => goBy(-1), [goBy]);
 
   const progressBarRef = useAutoplayProgress({
-    duration: FEATURED_SLIDE_DURATION,
+    duration: SPONSOR_SLIDE_DURATION,
     isPaused: pause.isPaused,
     stepKey: current,
     onComplete: goNext,

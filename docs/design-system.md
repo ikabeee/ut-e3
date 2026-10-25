@@ -79,11 +79,8 @@ Utilidades de `components.css` para leer texto sobre imágenes y para el exhibid
 
 | Utilidad | Uso |
 | --- | --- |
-| `shade-reel` | Degradado y líneas de escaneo sobre el reel de la portada. |
-| `shade-featured`, `shade-featured-mobile` | Carrusel de destacados: izquierda y abajo en escritorio, sólo abajo en móvil. |
-| `shade-thumb` | Miniaturas con el nombre abajo. |
 | `shade-cover` | Portada de una caja del exhibidor. |
-| `coverflow-rack`, `coverflow-edge`, `coverflow-glow`, `coverflow-reflection` | Fondo y piso del rack, cantos, brillo de la caja al frente y reflejo. |
+| `coverflow-rack`, `coverflow-edge`, `coverflow-glow`, `coverflow-reflection` | Fondo del rack, cantos, brillo de la caja al frente y reflejo tenue. |
 
 ## Efectos
 
