@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { VideoHero } from "@features/landing/components/video-hero";
 
@@ -44,11 +44,32 @@ afterEach(() => {
 });
 
 describe("VideoHero", () => {
-  it("shows the slogan as the page title", () => {
+  it("names the page title after the event with the PIXEL & CODE wordmark", () => {
     simulateBrowser({});
     renderHero();
 
-    expect(screen.getByRole("heading", { level: 1, name: /Showcase de videojuegos/ })).toBeInTheDocument();
+    const title = screen.getByRole("heading", { level: 1, name: "PIXEL & CODE" });
+
+    expect(within(title).getByRole("img", { name: "PIXEL & CODE" }).tagName.toLowerCase()).toBe("svg");
+  });
+
+  it("shows the slogan JUEGA. CALIFICA. GANA. with GANA. in the accent colour", () => {
+    simulateBrowser({});
+    renderHero();
+
+    const winWord = screen.getByText("GANA.");
+
+    expect(winWord).toHaveClass("text-accent");
+    expect(winWord.parentElement).toHaveTextContent("JUEGA. CALIFICA. GANA.");
+    expect(winWord).toBeVisible();
+  });
+
+  it("no longer shows the UTG logo or the old showcase slogan in the hero", () => {
+    simulateBrowser({});
+    const { container } = renderHero();
+
+    expect(screen.queryByRole("img", { name: "UTG" })).not.toBeInTheDocument();
+    expect(container).not.toHaveTextContent("Showcase de videojuegos");
   });
 
   it("shows neither an event kicker nor a reel badge", () => {

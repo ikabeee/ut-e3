@@ -9,9 +9,15 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 ### Agregado
 
 - Portada de la versión 2 (`/`) con el diseño UTG y los requisitos de la SRS v2: loop animado en el hero,
-  carrusel de patrocinadores (aparece cuando haya patrocinadores), tarjetas de Rifa, Marketplace, torneo de KOF y Mario Kart,
+  carrusel de patrocinadores (aparece cuando haya patrocinadores), actos JUEGA, CALIFICA y GANA con
+  pictogramas animados (Rifa, torneo de KOF y Mario Kart) y la franja del Marketplace,
   invitadas especiales, catálogo en coverflow, cronograma, croquis interactivo con códigos de stand
   `zA-s3`, ubicación y cierre. El evento es el 20 de noviembre de 2026 de 12:00 a 19:00 (hora de Cancún).
+
+- Marca PIXEL & CODE ("JUEGA. CALIFICA. GANA."): letrero de LEDs en el hero, título del sitio, evento del
+  calendario y pie de página. El logo de la UTG se queda en la navegación y el pie.
+- Torneo de KOF según la SRS v2.2: check-in de 11:00 a 12:00, inscripción presencial de 12:00 a 12:45 y
+  bracket a las 13:00 (se quita el cierre de la inscripción).
 
 ### Eliminado
 

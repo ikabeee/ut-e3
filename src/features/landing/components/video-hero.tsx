@@ -2,11 +2,11 @@
 
 import { useRef, type ReactNode, type RefObject } from "react";
 import { ToggleButton } from "@heroui/react";
+import { LedWordmark } from "@features/landing/components/led-wordmark";
 import { useVideoPlayback } from "@features/landing/hooks/use-video-playback";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { TOP_SECTION_ID } from "@features/landing/lib/landing-links";
 import { ScrambleText } from "@shared/components/scramble-text";
-import { UtgLogo } from "@shared/components/utg-logo";
 import { siteConfig } from "@shared/lib/site-config";
 
 const LOOP_POSTER = "/media/hero-loop-poster.jpg";
@@ -77,12 +77,16 @@ function HeroContent({ calendarUrl }: Readonly<VideoHeroProps>) {
 
   return (
     <div className="flex flex-col items-start gap-[clamp(14px,1.8vw,22px)]">
-      <h1 className="m-0 flex flex-col gap-[clamp(8px,1vw,14px)]">
-        <UtgLogo variant="flat" label={hero.logoLabel} className="block h-auto w-[clamp(220px,34vw,520px)]" />
-        <span className="type-wide text-[clamp(18px,2.6vw,38px)] leading-none tracking-[-.03em]">
-          {LANDING_COPY.slogan}
-        </span>
+      <h1 className="m-0">
+        <LedWordmark
+          text={hero.wordmark}
+          label={hero.wordmark}
+          className="block h-auto w-[clamp(260px,40vw,600px)] fill-accent"
+        />
       </h1>
+      <p className="m-0 type-wide text-[clamp(18px,2.6vw,38px)] leading-none tracking-[-.03em]">
+        {hero.slogan.lead} <span className="text-accent">{hero.slogan.accent}</span>
+      </p>
       <p className="m-0 max-w-[52ch] text-[clamp(15px,1.3vw,18px)] leading-[1.45] text-copy">
         {hero.description(siteConfig.organization.division)}
       </p>

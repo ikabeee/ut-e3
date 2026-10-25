@@ -9,7 +9,11 @@ const SETTINGS: EventSettings = {
   eventEndsAt: "2026-11-21T00:00:00.000Z",
   registrationOpensAt: "2026-11-13T05:00:00.000Z",
   kofRegistrationOpensAt: "2026-11-13T05:00:00.000Z",
-  kofRegistrationClosesAt: "2026-11-20T18:00:00.000Z",
+  kofCheckInStartsAt: "2026-11-20T16:00:00.000Z",
+  kofCheckInEndsAt: "2026-11-20T17:00:00.000Z",
+  kofOnsiteSignupStartsAt: "2026-11-20T17:00:00.000Z",
+  kofOnsiteSignupEndsAt: "2026-11-20T17:45:00.000Z",
+  kofBracketGeneratesAt: "2026-11-20T18:00:00.000Z",
   marketplaceClosesAt: "2026-11-11T04:59:00.000Z",
   marketplaceFormUrl: null,
   itchOpensAt: "2026-11-20T21:30:00.000Z",
@@ -52,6 +56,11 @@ function isBefore(first: Element, second: Element) {
 describe("landingPageMetadata", () => {
   it("publishes the home metadata with the root canonical", () => {
     expect(landingPageMetadata.alternates).toEqual({ canonical: "/" });
+  });
+
+  it("uses the PIXEL & CODE title and description", () => {
+    expect(landingPageMetadata.title).toEqual({ absolute: "PIXEL & CODE · Showcase de videojuegos" });
+    expect(landingPageMetadata.description).toContain("PIXEL & CODE");
   });
 });
 
@@ -103,12 +112,30 @@ describe("LandingView", () => {
     expect(screen.getByRole("heading", { name: "20.11.26" })).toBeInTheDocument();
   });
 
-  it("shows the raffle and KOF times from the event settings", () => {
+  it("shows the KOF check-in and on-site signup ranges and the raffle times from the event settings", () => {
     renderLanding();
 
-    expect(screen.getAllByText(/18:00/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/17:00/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/13:00/).length).toBeGreaterThan(0);
+    expect(document.body).toHaveTextContent("11:00 a 12:00");
+    expect(document.body).toHaveTextContent("12:00 a 12:45");
+    expect(document.body).toHaveTextContent("18:00");
+    expect(document.body).toHaveTextContent("17:00");
+  });
+
+  it("counts the games of the catalog in the JUEGA act", () => {
+    renderLanding();
+
+    expect(document.body).toHaveTextContent("18 juegos hechos por estudiantes");
+  });
+
+  it("names the page PIXEL & CODE in the title, the calendar event and the footer", () => {
+    renderLanding();
+
+    const callToAction = screen.getByRole("link", { name: /Quiero participar/ });
+    const calendarUrl = new URL(callToAction.getAttribute("href") ?? "");
+
+    expect(screen.getByRole("heading", { level: 1, name: "PIXEL & CODE" })).toBeInTheDocument();
+    expect(calendarUrl.searchParams.get("text")).toBe("PIXEL & CODE · Showcase de videojuegos");
+    expect(screen.getByRole("contentinfo")).toHaveTextContent("PIXEL & CODE · Showcase de videojuegos");
   });
 
   it("places each game in the croquis at its zA-s stand code", () => {
@@ -118,11 +145,11 @@ describe("LandingView", () => {
     expect(screen.getByRole("button", { name: "Stand zA-s9, Juego 09" })).toBeInTheDocument();
   });
 
-  it("renders the marketplace slot inside the Marketplace card", () => {
+  it("renders the marketplace slot inside the event section", () => {
     renderLanding();
 
-    const marketplaceHeading = screen.getByRole("heading", { name: "Marketplace" });
+    const eventSection = document.getElementById("event");
 
-    expect(marketplaceHeading.closest("article")).toHaveTextContent("Registro de vendedores cerrado");
+    expect(eventSection).toHaveTextContent("Registro de vendedores cerrado");
   });
 });

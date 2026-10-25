@@ -11,9 +11,8 @@ import { GAMES_SECTION_ID } from "@features/games/lib/games-links";
 import { getGames } from "@features/games/lib/server/games-queries";
 import { formatStandCode } from "@features/games/lib/stand-code";
 import type { Game } from "@features/games/lib/types";
-import { ActivityCards } from "@features/landing/components/activity-cards";
 import { ClosingBand } from "@features/landing/components/closing-band";
-import { EventIntro } from "@features/landing/components/event-intro";
+import { EventActs } from "@features/landing/components/event-acts";
 import { MarketplaceCard } from "@features/landing/components/marketplace-card";
 import { SiteFooter } from "@features/landing/components/site-footer";
 import { SiteNav } from "@features/landing/components/site-nav";
@@ -91,9 +90,12 @@ export function LandingView({ settings, games, scheduleItems, sponsors, marketpl
       <main>
         <VideoHero calendarUrl={buildEventCalendarUrl(settings)} />
         <SponsorsCarousel sponsors={sponsors} />
-        <EventIntro>
-          <ActivityCards raffle={raffleLabels(settings)} kof={kofLabels(settings)} marketplace={marketplace} />
-        </EventIntro>
+        <EventActs
+          gamesCount={games.length}
+          raffle={raffleLabels(settings)}
+          kof={kofLabels(settings)}
+          marketplace={marketplace}
+        />
         <SpecialGuests guests={SPECIAL_GUESTS} />
         <GameCatalog games={games} />
         <EventSchedule
@@ -122,7 +124,7 @@ async function MarketplaceRegistration({ settings }: Readonly<{ settings: EventS
 
 function buildEventCalendarUrl(settings: EventSettings) {
   return buildCalendarUrl({
-    title: LANDING_COPY.calendar.title,
+    title: siteConfig.title,
     details: LANDING_COPY.calendar.details(siteConfig.organization.division),
     location: formatCopyableAddress(EVENT_VENUE),
     startsAt: settings.eventStartsAt,
@@ -139,9 +141,13 @@ function raffleLabels(settings: EventSettings) {
 
 function kofLabels(settings: EventSettings) {
   return {
-    opensAtLabel: formatEventDate(settings.kofRegistrationOpensAt, "numeric"),
-    closesAtLabel: formatTimeOfDay(settings.kofRegistrationClosesAt),
+    checkInLabel: formatTimeRange(settings.kofCheckInStartsAt, settings.kofCheckInEndsAt),
+    onsiteSignupLabel: formatTimeRange(settings.kofOnsiteSignupStartsAt, settings.kofOnsiteSignupEndsAt),
   };
+}
+
+function formatTimeRange(startsAt: string, endsAt: string) {
+  return LANDING_COPY.acts.timeRange(formatTimeOfDay(startsAt), formatTimeOfDay(endsAt));
 }
 
 function toFloorPlanStand(game: Game): FloorPlanStand {

@@ -3,6 +3,22 @@ import type { ScheduleItem } from "@features/schedule/lib/types";
 
 export const INITIAL_SCHEDULE_ITEMS: ScheduleItem[] = [
   {
+    id: "kof-check-in",
+    title: "Check-in del torneo de KOF",
+    description: "Los inscritos de la lista previa confirman su lugar con su PIN en el stand de KOF.",
+    startsAt: "2026-11-20T16:00:00.000Z",
+    endsAt: "2026-11-20T17:00:00.000Z",
+    zone: "kof",
+  },
+  {
+    id: "kof-onsite-signup",
+    title: "Inscripción presencial al torneo de KOF",
+    description: "Inscríbete con el equipo de KOF hasta que se llenen los 64 lugares.",
+    startsAt: "2026-11-20T17:00:00.000Z",
+    endsAt: "2026-11-20T17:45:00.000Z",
+    zone: "help-desk",
+  },
+  {
     id: "opening",
     title: "Apertura",
     description: "Se abren las puertas del edificio E3 y comienza el recorrido.",
@@ -19,18 +35,10 @@ export const INITIAL_SCHEDULE_ITEMS: ScheduleItem[] = [
     zone: "stage",
   },
   {
-    id: "kof-registration-close",
-    title: "Cierre de la inscripción al torneo de KOF",
-    description: "Último momento para registrarte en el torneo de KOF.",
-    startsAt: "2026-11-20T18:00:00.000Z",
-    endsAt: "2026-11-20T18:30:00.000Z",
-    zone: "kof",
-  },
-  {
     id: "kof-rounds",
     title: "Rondas del torneo de KOF",
-    description: "Comienzan los combates del torneo de KOF.",
-    startsAt: "2026-11-20T18:30:00.000Z",
+    description: "Se genera el bracket con los jugadores que hicieron check-in y comienzan los combates.",
+    startsAt: "2026-11-20T18:00:00.000Z",
     endsAt: "2026-11-20T19:00:00.000Z",
     zone: "kof",
   },
