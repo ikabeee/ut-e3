@@ -90,10 +90,7 @@ export function LandingView({ settings, games, scheduleItems, sponsors, marketpl
     <>
       <SiteNav links={NAV_LINKS} />
       <main>
-        <VideoHero
-          kicker={LANDING_COPY.hero.kicker(eventDate, siteConfig.organization.universityShortName)}
-          calendarUrl={buildEventCalendarUrl(settings)}
-        />
+        <VideoHero calendarUrl={buildEventCalendarUrl(settings)} />
         <SponsorsBand sponsors={sponsors} />
         <FeaturedGames games={games} />
         <EventIntro>

@@ -23,11 +23,10 @@ const GLYPH_CLASS = "grid size-5 place-items-center font-mono text-lg leading-no
 const SLICE_CLASS = `${GLYPH_CLASS} pointer-events-none absolute top-1/2 left-1/2 -mt-2.5 -ml-2.5 opacity-0`;
 
 interface VideoHeroProps {
-  kicker: string;
   calendarUrl: string;
 }
 
-export function VideoHero({ kicker, calendarUrl }: Readonly<VideoHeroProps>) {
+export function VideoHero({ calendarUrl }: Readonly<VideoHeroProps>) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { isPlaying, hasSource, timecode, togglePlayback } = useVideoPlayback(videoRef);
 
@@ -39,7 +38,7 @@ export function VideoHero({ kicker, calendarUrl }: Readonly<VideoHeroProps>) {
     >
       <ReelVideo videoRef={videoRef} hasSource={hasSource} />
       <div aria-hidden="true" className="absolute inset-0 -z-1 shade-reel" />
-      <HeroContent kicker={kicker} calendarUrl={calendarUrl} />
+      <HeroContent calendarUrl={calendarUrl} />
       <ReelControls isPlaying={isPlaying} timecode={timecode} onToggle={togglePlayback} />
     </header>
   );
@@ -67,12 +66,11 @@ function ReelVideo({ videoRef, hasSource }: Readonly<ReelVideoProps>) {
   );
 }
 
-function HeroContent({ kicker, calendarUrl }: Readonly<VideoHeroProps>) {
+function HeroContent({ calendarUrl }: Readonly<VideoHeroProps>) {
   const { hero } = LANDING_COPY;
 
   return (
     <div className="page-wrap flex w-full flex-col items-start gap-[clamp(14px,1.8vw,22px)] pb-[clamp(72px,9vw,120px)]">
-      <p className="m-0 font-mono text-xs font-medium tracking-[.08em] text-copy-strong uppercase">{kicker}</p>
       <h1 className="m-0 flex flex-col gap-[clamp(8px,1vw,14px)]">
         <UtgLogo variant="flat" label={hero.logoLabel} className="block h-auto w-[clamp(220px,34vw,520px)]" />
         <span className="type-wide text-[clamp(18px,2.6vw,38px)] leading-none tracking-[-.03em]">
@@ -134,9 +132,8 @@ function ReelControls({ isPlaying, timecode, onToggle }: Readonly<ReelControlsPr
     <>
       <div
         aria-hidden="true"
-        className="absolute right-[calc(max(var(--gutter),env(safe-area-inset-right,0px))+56px)] bottom-[22px] left-[max(var(--gutter),env(safe-area-inset-left,0px))] flex justify-between gap-3 font-mono text-[11px] tracking-[.08em] text-copy-dim uppercase tabular-nums"
+        className="absolute right-[calc(max(var(--gutter),env(safe-area-inset-right,0px))+56px)] bottom-[22px] left-[max(var(--gutter),env(safe-area-inset-left,0px))] flex justify-end gap-3 font-mono text-[11px] tracking-[.08em] text-copy-dim uppercase tabular-nums"
       >
-        <span className="text-foreground max-[640px]:hidden">{LANDING_COPY.hero.reelBadge}</span>
         <span>{timecode}</span>
       </div>
       <ToggleButton

@@ -54,11 +54,12 @@ describe("VideoHero", () => {
     expect(screen.getByRole("heading", { level: 1, name: /Showcase de videojuegos/ })).toBeInTheDocument();
   });
 
-  it("shows the kicker it receives", () => {
+  it("shows neither an event kicker nor a reel badge", () => {
     simulateBrowser({});
     renderHero();
 
-    expect(screen.getByText("20.11.2026 · UT Cancún")).toBeInTheDocument();
+    expect(screen.queryByText(/Entrada libre/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Reel/)).not.toBeInTheDocument();
   });
 
   it("opens the calendar in a new tab from the call to action", () => {
@@ -142,7 +143,7 @@ describe("VideoHero", () => {
 });
 
 function renderHero() {
-  return render(<VideoHero kicker="20.11.2026 · UT Cancún" calendarUrl={CALENDAR_URL} />);
+  return render(<VideoHero calendarUrl={CALENDAR_URL} />);
 }
 
 function simulateBrowser({

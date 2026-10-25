@@ -10,13 +10,11 @@ export const LANDING_COPY = {
     },
   },
   hero: {
-    kicker: (dateLabel: string, venueShortName: string) => `${dateLabel} · ${venueShortName} · Entrada libre`,
     label: "UTG Showcase",
     logoLabel: "UTG",
     description: (division: string) =>
       `Juegos creados por la ${division}. Pruébalos, compite en los torneos y participa en la rifa.`,
     callToAction: "Quiero participar",
-    reelBadge: "● Reel",
     playVideo: "Reproducir video",
   },
   event: {
@@ -87,6 +85,11 @@ export const LANDING_COPY = {
   closing: {
     firstLine: "Entrada",
     secondLine: "libre",
+  },
+  footer: {
+    credit: "Desarrollado y diseñado por",
+    creditName: "Algorix Insights",
+    creditUrl: "https://algorixinsights.com/",
   },
   calendar: {
     title: "UTG · Showcase de videojuegos",

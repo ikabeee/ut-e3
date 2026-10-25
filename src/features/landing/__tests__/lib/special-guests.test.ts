@@ -6,7 +6,13 @@ describe("SPECIAL_GUESTS", () => {
     expect(new Set(SPECIAL_GUESTS.map((guest) => guest.id)).size).toBe(2);
 
     for (const guest of SPECIAL_GUESTS) {
-      expect(guest).toMatchObject({ name: "Por anunciar", role: "Ingeniera invitada", talk: "Plática por anunciar" });
+      expect(guest).toMatchObject({ name: "Por anunciar", talk: "Plática por anunciar" });
+    }
+  });
+
+  it("leaves the role empty until the real guests are announced", () => {
+    for (const guest of SPECIAL_GUESTS) {
+      expect(guest.role).toBeUndefined();
     }
   });
 });
