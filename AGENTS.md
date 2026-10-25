@@ -36,7 +36,7 @@ Todo el naming (directorios, archivos y código) va en **inglés**.
 ```bash
 npm run dev                # servidor de desarrollo
 npm run lint               # ESLint (incluye reglas de fronteras entre features)
-npm run lint:oxlint        # Oxlint con las reglas anti-slop (tools/oxlint/anti-slop; aún fuera del CI)
+npm run lint:oxlint        # Oxlint con las reglas anti-slop (tools/oxlint/anti-slop) y readable-code (eslint-plugin-readable-code); aún fuera del CI
 npm run format             # aplica el formato con Prettier (npm run format:check sólo revisa)
 npm run typecheck          # next typegen + tsc --noEmit (y tsc -p tools/oxlint para el plugin)
 npm test                   # pruebas con Jest (npm run test:coverage para cobertura)
