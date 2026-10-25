@@ -595,7 +595,7 @@ erDiagram
           <div class="tables">
             <div class="table">
               <div class="table-head">
-                <span class="name">Stand</span><span class="role">Código <code>zA-s3-e5-103</code></span>
+                <span class="name">Stand</span><span class="role">Código <code>ZA-S3-E4-103</code></span>
               </div>
               <ul class="cols">
                 <li>
@@ -614,7 +614,7 @@ erDiagram
                 </div>
                 <div>
                   <span class="tag sql">sql</span
-                  ><span><code>zone GLOB '[A-Z]'</code>, <code>number &gt; 0</code></span>
+                  ><span><code>zone IN ('A','B','C','D','T')</code>, <code>number &gt; 0</code></span>
                 </div>
                 <div><span class="tag sql">sql</span><span>Trigger: máximo 18 stands</span></div>
               </div>
@@ -1280,9 +1280,9 @@ erDiagram
                 <div>
                   <span class="tag prisma">prisma</span
                   ><span
-                    >Valores iniciales de KOF el día del evento: check-in de 11:00 a 12:00 (a las 12:00 los inscritos
+                    >Valores iniciales de KOF el día del evento: check-in de 12:00 a 12:45 (a las 12:45 los inscritos
                     sin check-in pasan a <code>no_show</code>), inscripción presencial de 12:00 a 12:45 y bracket a las
-                    13:00</span
+                    12:55</span
                   >
                 </div>
                 <div>
@@ -1499,7 +1499,7 @@ erDiagram
             <h3>Check-in de KOF</h3>
             <p>
               La inscripción lleva su estado (<code>registered</code>, <code>checked_in</code>, <code>no_show</code>).
-              Solo las que tienen check-in entran al bracket de las 13:00; la presencial nace con check-in.
+              Solo las que tienen check-in entran al bracket de las 12:55; la presencial nace con check-in.
             </p>
           </div>
           <div class="note">

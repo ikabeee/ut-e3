@@ -24,8 +24,10 @@ Flujos de punta a punta con Playwright. Cada flujo es un archivo `*.spec.ts` y c
   alrededor de la hora actual (por ejemplo, el corte de check-ins dentro de 5 s y la rifa dentro de 10 s) y espera a
   que pasen. Lo mismo vale para KOF: el check-in, la inscripción presencial y la generación del bracket se fijan unos
   segundos después de la hora real. No hay reloj falso ni endpoints de prueba en el build de producción. En los flujos,
-  "a las 17:00" significa "después del corte configurado para la prueba", y "a las 12:00" (fin del check-in de KOF) o
-  "a las 13:00" (bracket), lo mismo con su valor de `event_settings`.
+  "a las 16:50" significa "después del corte configurado para la prueba", y "a las 12:45" (fin del check-in y de la
+  inscripción presencial de KOF) o "a las 12:55" (bracket), lo mismo con su valor de `event_settings`.
+- **Filtro de PIN:** el seed fija la sal del filtro (RNF-19), así que los flujos usan un PIN no registrado que no pasa el
+  filtro y otro que sí pasa (falso positivo), ambos calculados con esa sal.
 - **Dispositivos (proyectos de Playwright):** iPhone con WebKit a 390 px, Android con Chromium a 360 px y escritorio a
   1440 px. Los flujos de staff corren en el tamaño del dispositivo que usarán.
 - **Varios actores:** cada actor es un `browserContext` propio (cookies y almacenamiento separados), para simular, por
@@ -72,19 +74,19 @@ Flujos de punta a punta con Playwright. Cada flujo es un archivo `*.spec.ts` y c
 ### E2E-05. Alta de un stand y su equipo
 **Actores:** sysadmin, administrador de stand, staff. **Req:** RF-31, RF-32, RF-39, RF-40.
 
-1. El sysadmin crea el stand `zA-s3-e5-103` con su administrador. Verifica el correo de invitación.
+1. El sysadmin crea el stand `ZA-S3-E4-103` con su administrador. Verifica el correo de invitación.
 2. El administrador abre la invitación, define su contraseña y registra su juego con imágenes.
 3. Crea 3 cuentas de staff. Verifica que la cuarta se rechaza.
-4. Un staff activa su cuenta e inicia sesión. Verifica que solo ve el kiosco de visitas de `zA-s3`.
+4. Un staff activa su cuenta e inicia sesión. Verifica que solo ve el kiosco de visitas de `ZA-S3`.
 
 ### E2E-06. Visita con PIN y encuesta en línea
-**Actores:** kiosco de `zA-s3` (escritorio, sesión del staff), visitante (iPhone). **Req:** RF-26 a RF-30, RF-36, EC-03.
+**Actores:** kiosco de `ZA-S3` (escritorio, sesión del staff), visitante (iPhone). **Req:** RF-26 a RF-30, RF-36, EC-03.
 
 1. Al terminar de jugar, el visitante teclea su PIN en la pantalla del PIN del kiosco.
-2. Verifica la vista kiosco: "zA-s3 · Nombre del juego" y tres escalas de 1 a 5 (juego, stand y arte), sin datos del staff.
+2. Verifica la vista kiosco: "ZA-S3 · Nombre del juego" y tres escalas de 1 a 5 (juego, stand y arte), sin datos del staff.
 3. Verifica que no se puede enviar con alguna escala sin contestar. El visitante califica y envía. Verifica "Gracias" y el regreso solo a la pantalla del PIN.
 4. Verifica que el panel del staff muestra "Visita registrada" y nunca las calificaciones.
-5. En el pasaporte del visitante verifica `zA-s3` como visitado y el avance.
+5. En el pasaporte del visitante verifica `ZA-S3` como visitado y el avance.
 6. Se teclea otra vez el mismo PIN en el kiosco. Verifica que no se duplica la visita ni se guarda otra encuesta.
 
 ### E2E-07. Visita sin conexión
@@ -94,7 +96,7 @@ Flujos de punta a punta con Playwright. Cada flujo es un archivo `*.spec.ts` y c
 2. Verifica "Sin conexión · 3 visitas por enviar".
 3. Recupera la conexión. Verifica "Enviando..." y después "Todo enviado".
 4. Verifica las 3 visitas en los pasaportes.
-5. Registra una visita sin conexión a las 16:59 y reconecta después de las 18:00. Verifica que aparece en "No registradas" con el motivo y que el pasaporte del visitante muestra el aviso.
+5. Registra una visita sin conexión a las 16:49 y reconecta después de las 18:00. Verifica que aparece en "No registradas" con el motivo y que el pasaporte del visitante muestra el aviso.
 
 ### E2E-08. Boletos por hitos
 **Actores:** kioscos de varios stands, visitante. **Req:** RN-01, RF-21, RF-22.
@@ -104,11 +106,12 @@ Flujos de punta a punta con Playwright. Cada flujo es un archivo `*.spec.ts` y c
 3. Con 17 visitas, registra la decimoctava. Verifica el segundo boleto.
 
 ### E2E-18. PIN no reconocido en el kiosco
-**Actores:** kiosco de `zA-s3` (escritorio, sesión del staff), visitante. **Req:** RF-24, RF-35, EC-04.
+**Actores:** kiosco de `ZA-S3` (escritorio, sesión del staff), visitante. **Req:** RF-24, RF-35, RF-78, EC-04, EC-16.
 
-1. El visitante teclea un PIN que no es de nadie (mal tecleado) y contesta la encuesta. Cuando la visita llega al servidor, verifica que aparece en la lista de rechazadas del kiosco con su motivo y que no identifica a ningún visitante.
-2. Verifica que no se creó ningún check-in ni voto y que ningún pasaporte cambió.
-3. Teclea el PIN de otro visitante real como si fuera el suyo. Verifica que se acepta (riesgo aceptado) y que la visita aparece en el pasaporte de ese visitante, que puede reportarla en Atención.
+1. Pone el kiosco sin conexión y teclea un PIN no registrado que no pasa el filtro. Verifica "PIN no reconocido, revísalo", que no se abre la encuesta y que la cola no cambia.
+2. Recupera la conexión. El visitante teclea un PIN que no es de nadie pero pasa el filtro (falso positivo) y contesta la encuesta. Cuando la visita llega al servidor, verifica que aparece en la lista de rechazadas del kiosco con su motivo y que no identifica a ningún visitante.
+3. Verifica que no se creó ningún check-in ni voto y que ningún pasaporte cambió.
+4. Teclea el PIN de otro visitante real como si fuera el suyo. Verifica que se acepta (riesgo aceptado) y que la visita aparece en el pasaporte de ese visitante, que puede reportarla en Atención.
 
 ---
 
@@ -135,19 +138,19 @@ Flujos de punta a punta con Playwright. Cada flujo es un archivo `*.spec.ts` y c
 1. Con la apertura de la inscripción previa unos segundos adelante, el administrador intenta agregar a un visitante con pasaporte. Verifica el rechazo. Cuando la apertura pasa, agrega a tres visitantes con pasaporte. Verifica que aparecen en la lista previa sin check-in.
 2. Un staff de KOF abre la lista. Verifica que no puede agregar jugadores ni hacer el check-in.
 3. Con la lista previa en 50 jugadores (seed), el administrador intenta agregar al 51. Verifica el rechazo por el cupo de 50.
-4. En el pasaporte de un inscrito verifica que indica que está en el torneo y el aviso de check-in con las horas de `event_settings` (el 20 de noviembre, de 11:00 a 12:00, en el stand de KOF del edificio B).
+4. En el pasaporte de un inscrito verifica que indica que está en el torneo y el aviso de check-in con las horas de `event_settings` (el 20 de noviembre, de 12:00 a 12:45, en el área de KOF del edificio B).
 5. Antes de que abra el check-in, el administrador teclea el PIN de un inscrito. Verifica el rechazo.
 6. Dentro de la ventana de check-in, teclea el PIN de dos inscritos. Verifica que cada uno queda con check-in. Teclea un PIN que no está en la lista previa y otro que no es de nadie. Verifica el rechazo de los dos y que no se creó ninguna inscripción.
 
 ### E2E-16. "No se presentó" e inscripción presencial de KOF
 **Actores:** administrador de KOF (escritorio), visitantes (iPhone), visitante sin pasaporte. **Req:** RF-76, RF-77, RF-58, EC-05, EC-15.
 
-1. Con la lista previa del flujo E2E-10 (dos con check-in y uno sin él), espera a que pase el fin del check-in configurado. Verifica que el inscrito sin check-in queda en "No se presentó" y que los otros dos siguen con check-in.
-2. El administrador teclea el PIN del inscrito en "No se presentó" (EC-15). Verifica el rechazo y que su estado no cambia.
-3. Dentro de la inscripción presencial, el administrador agrega a un visitante con pasaporte. Verifica que queda inscrito con el check-in ya hecho.
-4. Un visitante sin pasaporte se registra (E2E-01) y el administrador lo agrega. Verifica su PIN en el pasaporte y su check-in hecho.
-5. Con el seed ajustado para que, con los pasos 3 y 4, queden 63 inscripciones vigentes más la de "No se presentó", dos visitantes intentan inscribirse uno tras otro. Verifica que el primero entra (el lugar liberado se ocupa) y que el segundo ve "Torneo lleno".
-6. Cuando cierra la inscripción presencial, el administrador intenta inscribir a alguien. Verifica el rechazo.
+1. Con la lista previa del flujo E2E-10 (dos con check-in y uno sin él) y dentro de la inscripción presencial, el administrador agrega a un visitante con pasaporte. Verifica que queda inscrito con el check-in ya hecho.
+2. Un visitante sin pasaporte se registra (E2E-01) y el administrador lo agrega. Verifica su PIN en el pasaporte y su check-in hecho.
+3. Con el seed ajustado para que, con los pasos 1 y 2, queden 64 inscripciones contando al inscrito sin check-in, otro visitante intenta inscribirse. Verifica "Torneo lleno": el lugar de la lista previa sigue reservado.
+4. Espera a que pase el fin del check-in y de la inscripción presencial. Verifica que el inscrito sin check-in queda en "No se presentó" y que los demás siguen con check-in.
+5. El administrador teclea el PIN del inscrito en "No se presentó" (EC-15). Verifica el rechazo y que su estado no cambia.
+6. El administrador intenta inscribir a alguien de forma presencial. Verifica el rechazo: el lugar que dejó "No se presentó" queda vacío.
 
 ### E2E-17. Generación del bracket de KOF
 **Actores:** administrador de KOF (escritorio), staff de KOF. **Req:** RF-59, RF-60, RF-57, EC-06.
@@ -211,5 +214,6 @@ Flujos de punta a punta con Playwright. Cada flujo es un archivo `*.spec.ts` y c
 - Hora del servidor: horarios relativos a la hora real en `event_settings`; sin reloj falso en producción.
 - PIN en lugar de QR (v2.2): los flujos de visita teclean el PIN en el kiosco del stand; la computadora del kiosco es de
   escritorio (RF-26).
-- Temas abiertos que los flujos no asumen (sección 9 de la SRS): cómo se guarda el PIN, qué pasa con un PIN mal
-  tecleado sin conexión que coincide con el de otro visitante y cómo pide el visitante entrar a la lista previa de KOF.
+- Temas abiertos que los flujos no asumen (sección 9 de la SRS): cómo guarda el servidor el PIN, qué pasa con un PIN
+  mal tecleado que coincide con el de otro visitante, cómo pide el visitante entrar a la lista previa de KOF y si hay
+  lista de espera para los lugares de "No se presentó".
