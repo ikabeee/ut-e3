@@ -11,11 +11,14 @@ export const ZONE_IDS = [
   "stage",
   "kof",
   "mario-kart",
-  "marketplace",
-  "help-desk",
   "restrooms",
-  "rest-area",
-  "entrance",
+  "rear-marketplace",
+  "marketplace",
+  "cafeteria",
+  "help-center-1",
+  "help-center-2",
+  "help-center-3",
+  "help-center-4",
 ] as const;
 
 export type ZoneId = (typeof ZONE_IDS)[number];
@@ -31,9 +34,10 @@ export type PlanRect = readonly [number, number, number, number];
 export interface ZoneGeometry {
   rect: PlanRect;
   fontSize?: number;
+  isLabelVertical?: boolean;
 }
 
-export type StandZone = "A" | "B" | "C";
+export type StandZone = "A" | "B" | "C" | "D" | "T";
 
 export interface StandBlock {
   zone: StandZone;
@@ -43,6 +47,7 @@ export interface StandBlock {
   columns: number;
   rows: number;
   labelAt: readonly [number, number];
+  standNumbers?: readonly number[];
 }
 
 export interface PlanLayout {
@@ -50,10 +55,7 @@ export interface PlanLayout {
   height: number;
   wall: string;
   dots: readonly [number, number, number, number];
-  zones: Partial<Record<Exclude<ZoneId, "entrance">, ZoneGeometry>>;
-  publicArea: PlanRect;
-  entry: PlanRect;
-  entryLabelAt: readonly [number, number] | null;
+  zones: Partial<Record<ZoneId, ZoneGeometry>>;
   standBlocks: readonly StandBlock[];
   standNameSize: number;
 }

@@ -110,9 +110,10 @@ Todo elemento interactivo mide al menos 44x44 px en pantallas táctiles (ver "M�
   `getTouchRects` (`floor-plan/lib/plan-touch-areas.ts`): crece hasta `TOUCH_MARGIN` unidades
   por lado sin pasar de la mitad del espacio hasta su vecino, así que nunca invade otra zona. Sólo
   existe con dedo (`hidden pointer-coarse:block`), de modo que con mouse el hover, el clic y el
-  anillo de foco siguen el dibujo. Los textos decorativos del croquis (pasillos, "ENTRADA",
-  "PÚBLICO") llevan `pointer-events-none` para no tapar esas áreas. La prueba
-  `__tests__/lib/plan-touch-areas.test.ts` verifica 44 px a 360 px y que no haya solapes.
+  anillo de foco siguen el dibujo. Los textos decorativos del croquis (nombres de los bloques y de
+  las zonas) llevan `pointer-events-none` para no tapar esas áreas. La prueba
+  `__tests__/lib/plan-touch-areas.test.ts` verifica 44 px a 360 px (56 unidades del SVG) y que no
+  haya solapes.
 - Campos de texto: `text-base` (16 px) y, si el diseño pide 14 px, `pointer-fine:text-sm`.
 
 ## Notas de implementación

@@ -16,6 +16,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   en el Edificio B.
 - Cronograma inicial con el programa del público del orden del día oficial (SRS v2.3): inauguración, rondas
   de KOF, Mario Kart, actividades del escenario, presentación de ganadores, rifa y cierre.
+- Croquis según el plano del Edificio B: bloques A, B, C y D (3 stands cada uno) y la zona de terror T
+  (6 stands), Arena KOF y escenario, Mario Kart junto a los baños, cuatro centros de atención, los dos
+  marketplaces y la cafetería externa. En pantallas anchas el plano gira 90 grados. Se quitan la entrada,
+  la zona de descanso y los stands informativos del croquis anterior.
 
 - Marca PIXEL & CODE ("JUEGA. CALIFICA. GANA."): letrero de LEDs en el hero, título del sitio, evento del
   calendario y pie de página. El logo de la UTG se queda en la navegación y el pie.

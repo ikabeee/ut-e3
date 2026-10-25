@@ -142,7 +142,7 @@ describe("LandingView", () => {
     renderLanding();
 
     expect(screen.getByRole("button", { name: "Stand ZA-S1, Juego 01" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Stand ZA-S9, Juego 09" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Stand ZA-S3, Juego 03" })).toBeInTheDocument();
   });
 
   it("renders the marketplace slot inside the event section", () => {

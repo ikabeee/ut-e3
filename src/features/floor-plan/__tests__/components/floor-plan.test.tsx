@@ -7,19 +7,17 @@ const ZONE_TITLES = [
   "Escenario principal",
   "Arena KOF",
   "Mario Kart",
-  "Marketplace",
-  "Atención",
   "Baños",
-  "Descanso",
-  "Entrada",
+  "Marketplace trasero",
+  "Marketplace central",
+  "Cafetería externa",
+  "Centro de atención 1",
+  "Centro de atención 2",
+  "Centro de atención 3",
+  "Centro de atención 4",
 ];
 
-const INFO_BOOTH_TITLES = [
-  "Ingeniería y Tecnologías",
-  "Inscripción al torneo de KOF",
-  "Oferta educativa",
-  "Patrocinadores",
-];
+const STAND_COUNTS = { A: 3, B: 3, C: 3, D: 3, T: 6 };
 
 const originalResizeObserver = window.ResizeObserver;
 
@@ -82,14 +80,14 @@ describe("FloorPlan selection", () => {
     expect(screen.getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" })).not.toHaveAttribute("aria-current");
   });
 
-  it("shows an info booth as informative without a cover", async () => {
+  it("shows a help center with what it attends and no cover", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    await userEvent.setup().click(screen.getByRole("button", { name: "Stand ZC-S2, Inscripción al torneo de KOF" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "Centro de atención 2" }));
 
     const panel = getPanel();
-    expect(panel.getByRole("heading", { name: "Inscripción al torneo de KOF" })).toBeInTheDocument();
-    expect(panel.getByText("Stand ZC-S2 · Informativo")).toBeInTheDocument();
+    expect(panel.getByRole("heading", { name: "Centro de atención 2" })).toBeInTheDocument();
+    expect(panel.getByText("Dudas, uso de la PWA, rifa y orientación.")).toBeInTheDocument();
     expect(panel.queryByRole("img")).not.toBeInTheDocument();
   });
 
@@ -105,11 +103,11 @@ describe("FloorPlan selection", () => {
   it("shows Stand por asignar for a team position without a stand", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    await userEvent.setup().click(screen.getByRole("button", { name: "Stand ZA-S9" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "Stand ZT-S6" }));
 
     const panel = getPanel();
     expect(panel.getByText("Stand por asignar")).toBeInTheDocument();
-    expect(panel.getByText(/ZA-S9/)).toBeInTheDocument();
+    expect(panel.getByText(/ZT-S6/)).toBeInTheDocument();
     expect(panel.queryByRole("img")).not.toBeInTheDocument();
   });
 });
@@ -147,7 +145,7 @@ describe("FloorPlan legend", () => {
       within(legend)
         .getAllByRole("listitem")
         .map((item) => item.textContent),
-    ).toEqual(["Stand de equipo", "Stand informativo", "Escenario y actividades", "Servicios"]);
+    ).toEqual(["Stand de equipo", "Centro de atención", "Escenario y actividades", "Servicios"]);
   });
 });
 
@@ -157,9 +155,9 @@ describe("FloorPlan URL hash", () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Marketplace" })).toHaveAttribute("aria-current", "true"),
+      expect(screen.getByRole("button", { name: "Marketplace central" })).toHaveAttribute("aria-current", "true"),
     );
-    expect(getPanel().getByRole("heading", { name: "Marketplace" })).toBeInTheDocument();
+    expect(getPanel().getByRole("heading", { name: "Marketplace central" })).toBeInTheDocument();
   });
 
   it("selects the stand named by a hashchange", async () => {
@@ -211,15 +209,15 @@ describe("FloorPlan scrolling", () => {
     const scrollIntoView = stubScrollIntoView();
     render(<FloorPlan stands={STAND_FIXTURES} />);
 
-    await userEvent.setup().click(screen.getByRole("button", { name: "Descanso" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "Baños" }));
 
     expect(scrollIntoView).not.toHaveBeenCalled();
   });
 });
 
 function expectedButtonNames() {
-  const teamNames = ["A", "B"].flatMap((zone) =>
-    Array.from({ length: 9 }, (_, index) => {
+  const standNames = Object.entries(STAND_COUNTS).flatMap(([zone, count]) =>
+    Array.from({ length: count }, (_, index) => {
       const code = `Z${zone}-S${index + 1}`;
       const stand = STAND_FIXTURES.find((candidate) => candidate.code === code);
 
@@ -227,9 +225,7 @@ function expectedButtonNames() {
     }),
   );
 
-  const boothNames = INFO_BOOTH_TITLES.map((title, index) => `Stand ZC-S${index + 1}, ${title}`);
-
-  return [...teamNames, ...boothNames, ...ZONE_TITLES];
+  return [...standNames, ...ZONE_TITLES];
 }
 
 function getPanel() {

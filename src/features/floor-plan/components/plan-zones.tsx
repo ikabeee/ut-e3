@@ -8,6 +8,13 @@ interface PlanZonesProps {
   touchRects: ReadonlyMap<string, PlanRect>;
 }
 
+interface LabelPlacement {
+  x: number;
+  y: number;
+  maxWidth: number;
+  transform?: string;
+}
+
 const DEFAULT_ZONE_FONT_SIZE = 18;
 
 export function PlanZones({ zones, selection, touchRects }: Readonly<PlanZonesProps>) {
@@ -19,15 +26,16 @@ export function PlanZones({ zones, selection, touchRects }: Readonly<PlanZonesPr
     }
 
     const isActivity = item.category === "act";
-    const [x, y, width] = zone.rect;
     const fontSize = zone.fontSize ?? DEFAULT_ZONE_FONT_SIZE;
+
+    const label = zone.isLabelVertical
+      ? placeVerticalLabel(zone.rect, fontSize)
+      : placeHorizontalLabel(zone.rect, fontSize);
 
     return (
       <PlanItemGraphic key={id} item={item} rect={zone.rect} selection={selection} touchRect={touchRects.get(id)}>
         <FitSvgText
-          maxWidth={width - 18}
-          x={x + 10}
-          y={y + fontSize + 6}
+          {...label}
           fontSize={fontSize}
           fontWeight={800}
           fill={isActivity ? "var(--accent)" : "var(--foreground)"}
@@ -38,4 +46,15 @@ export function PlanZones({ zones, selection, touchRects }: Readonly<PlanZonesPr
       </PlanItemGraphic>
     );
   });
+}
+
+function placeVerticalLabel([x, y, , height]: PlanRect, fontSize: number): LabelPlacement {
+  const baselineX = x + fontSize + 6;
+  const startY = y + height - 10;
+
+  return { x: baselineX, y: startY, maxWidth: height - 18, transform: `rotate(-90 ${baselineX} ${startY})` };
+}
+
+function placeHorizontalLabel([x, y, width]: PlanRect, fontSize: number): LabelPlacement {
+  return { x: x + 10, y: y + fontSize + 6, maxWidth: width - 18 };
 }
