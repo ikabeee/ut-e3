@@ -177,3 +177,15 @@ subagent on Opus, tests first and locked).
   - PR 1 (`feature/sqlite-foundation` to `develop`) is ready; push and PR are the user's decision. Size: about 1,000
     authored lines (about 480 of tests, 130 of SQL, 110 of this document) after one honest split, so it carries a
     `size:exception` recommendation.
+- L11 (2026-10-25, T2 RED, branch `feature/sqlite-public-content`): the parent installed `server-only@0.0.1` (exports
+  `react-server` -> `empty.js`; installing it is optional for Next,
+  `node_modules/next/dist/docs/01-app/01-getting-started/05-server-and-client-components.md:584`), so the `tsx` seed can
+  import `lib/server` modules. The coder wrote seam 3 (`<feature>-queries.test.ts` for the four features) and seam 4
+  (`describe("seed...")` in the three existing seed tests plus `sponsors-seed.test.ts`). The interfaces are
+  `seedEventSettings`, `seedScheduleItems`, `seedGames` and `seedSponsors(prisma)` in each feature's
+  `lib/server/<feature>-seed.ts`, with `prisma/seed.ts` composing them. `next/cache` is stubbed with
+  `jest.spyOn(jest.requireActual("next/cache"), ...)`, because Oxlint's `anti-slop/no-module-mocking` rejects `jest.mock`.
+  A missing settings row must reject with a message naming `event_settings` and `npm run db:seed`. RED: 65 tests in
+  12 suites, 25 failed (missing seed exports, queries still returning the constants, no rejection), 40 passed
+  (constant tests, the cache calls, the empty sponsors). Parent re-ran it (same numbers) and locked the tests (hashes of
+  15 server test files in the scratchpad).

@@ -37,7 +37,14 @@ jobs:
       - run: npm run format:check
       - run: npm run typecheck
       - run: npm test -- --coverage
+      # Las consultas con "use cache" leen la base durante el build: se migra y se carga una SQLite temporal.
+      - run: |
+          npm run db:deploy
+          npm run db:seed
+        env:
+          DATABASE_URL: file:${{ runner.temp }}/ci.db
       - run: npm run build
         env:
           # Obligatoria en producción (src/shared/lib/env.ts); basta un valor de ejemplo.
           NEXT_PUBLIC_SITE_URL: https://example.com
+          DATABASE_URL: file:${{ runner.temp }}/ci.db

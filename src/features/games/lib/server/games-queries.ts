@@ -1,16 +1,31 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
-import { INITIAL_GAMES } from "@features/games/lib/server/games-seed";
 import type { Game } from "@features/games/lib/types";
+import type { Prisma } from "@generated/prisma/client";
+import { getPrisma } from "@shared/lib/server/prisma";
 
 export const GAMES_CACHE_TAG = "games";
+
+// Selects exactly the fields of the Game domain type, so a row needs no mapping.
+const GAME_FIELDS = {
+  id: true,
+  slug: true,
+  name: true,
+  synopsis: true,
+  itchUrl: true,
+  genre: { select: { id: true, name: true, slug: true } },
+  stand: { select: { zone: true, number: true } },
+  images: { select: { path: true, alt: true, position: true, isCover: true }, orderBy: { position: "asc" } },
+} satisfies Prisma.GameSelect;
 
 export async function getGames(): Promise<Game[]> {
   "use cache";
   cacheLife("hours");
   cacheTag(GAMES_CACHE_TAG);
 
-  return INITIAL_GAMES.toSorted(compareByStand);
+  const games = await getPrisma().game.findMany({ select: GAME_FIELDS });
+
+  return games.toSorted(compareByStand);
 }
 
 function compareByStand(first: Game, second: Game): number {
