@@ -1,7 +1,7 @@
 export type MarketplaceRegistration =
   { status: "open"; formUrl: string } | { status: "unannounced" } | { status: "closed" };
 
-interface MarketplaceSettings {
+export interface MarketplaceSettings {
   formUrl: string | null;
   closesAt: string;
 }

@@ -13,7 +13,7 @@ export interface EventVenue {
 export interface SpecialGuest {
   id: string;
   name: string;
-  role: string;
+  role?: string;
   talk: string;
 }
 

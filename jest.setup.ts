@@ -109,6 +109,18 @@ if (typeof window !== "undefined") {
 
   Object.defineProperty(window, "ResizeObserver", { writable: true, value: ResizeObserverMock });
 
+  class IntersectionObserverMock {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+
+  Object.defineProperty(window, "IntersectionObserver", {
+    configurable: true,
+    writable: true,
+    value: IntersectionObserverMock,
+  });
+
   Element.prototype.scrollIntoView = () => undefined;
 
   Element.prototype.scrollTo = () => undefined;

@@ -96,7 +96,7 @@ describe("LandingView", () => {
     expect(url.searchParams.get("dates")).toBe("20261120T170000Z/20261121T000000Z");
   });
 
-  it("shows the event date in the hero and in the schedule heading", () => {
+  it("shows the event date in the closing band and in the schedule heading", () => {
     renderLanding();
 
     expect(screen.getAllByText(/20\.11\.2026/).length).toBeGreaterThan(0);

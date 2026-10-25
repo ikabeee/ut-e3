@@ -1,31 +1,15 @@
 import { useSyncExternalStore } from "react";
 import { usePrefersReducedMotion } from "@shared/hooks/use-prefers-reduced-motion";
 
-const REEL_AUTOPLAY_MIN_WIDTH = 1024;
-
-const WIDE_SCREEN_QUERY = `(min-width: ${REEL_AUTOPLAY_MIN_WIDTH}px)`;
-
 interface NetworkConnection extends EventTarget {
   saveData?: boolean;
 }
 
-export function useReelAutoplay() {
-  const isWideScreen = useSyncExternalStore(subscribeToWideScreen, getWideScreenSnapshot, getServerSnapshot);
+export function useLoopAutoplay() {
   const prefersSaveData = useSyncExternalStore(subscribeToSaveData, getSaveDataSnapshot, getServerSnapshot);
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  return isWideScreen && !prefersSaveData && !prefersReducedMotion;
-}
-
-function subscribeToWideScreen(onChange: () => void) {
-  const mediaQuery = window.matchMedia(WIDE_SCREEN_QUERY);
-  mediaQuery.addEventListener("change", onChange);
-
-  return () => mediaQuery.removeEventListener("change", onChange);
-}
-
-function getWideScreenSnapshot() {
-  return window.matchMedia(WIDE_SCREEN_QUERY).matches;
+  return !prefersSaveData && !prefersReducedMotion;
 }
 
 function subscribeToSaveData(onChange: () => void) {

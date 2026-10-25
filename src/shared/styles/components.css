@@ -233,18 +233,6 @@
   }
 }
 
-@utility shade-reel {
-  background:
-    linear-gradient(
-      0deg,
-      color-mix(in srgb, var(--utg-black) 92%, transparent) 0%,
-      color-mix(in srgb, var(--utg-black) 55%, transparent) 38%,
-      color-mix(in srgb, var(--utg-black) 15%, transparent) 70%,
-      color-mix(in srgb, var(--utg-black) 45%, transparent) 100%
-    ),
-    repeating-linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 18%, transparent) 0 1px, transparent 1px 3px);
-}
-
 @utility shade-featured {
   background:
     linear-gradient(
@@ -280,16 +268,6 @@
     var(--utg-rack-bottom) 55%,
     var(--utg-black) 100%
   );
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset-inline: 0;
-    top: calc(var(--top) + var(--ch) + 2px);
-    height: 1px;
-    pointer-events: none;
-    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--utg-white) 45%, transparent), transparent);
-  }
 }
 
 @utility coverflow-edge {
@@ -304,7 +282,7 @@
 }
 
 @utility coverflow-reflection {
-  mask-image: linear-gradient(to top, color-mix(in srgb, var(--utg-black) 38%, transparent), transparent 46%);
+  mask-image: linear-gradient(to top, color-mix(in srgb, var(--utg-black) 22%, transparent), transparent 32%);
 }
 
 @utility arrow-glyph {

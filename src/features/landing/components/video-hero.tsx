@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type RefObject } from "react";
+import { useRef, type ReactNode, type RefObject } from "react";
 import { ToggleButton } from "@heroui/react";
 import { useVideoPlayback } from "@features/landing/hooks/use-video-playback";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
@@ -9,11 +9,11 @@ import { ScrambleText } from "@shared/components/scramble-text";
 import { UtgLogo } from "@shared/components/utg-logo";
 import { siteConfig } from "@shared/lib/site-config";
 
-const REEL_POSTER = "/media/reel.jpg";
+const LOOP_POSTER = "/media/hero-loop-poster.jpg";
 
-const REEL_SOURCES = [
-  { src: "/media/reel.webm", type: "video/webm" },
-  { src: "/media/reel.mp4", type: "video/mp4" },
+const LOOP_SOURCES = [
+  { src: "/media/hero-loop.webm", type: "video/webm" },
+  { src: "/media/hero-loop.mp4", type: "video/mp4" },
 ] as const;
 
 const ARROW_GLYPH = "↗";
@@ -23,56 +23,60 @@ const GLYPH_CLASS = "grid size-5 place-items-center font-mono text-lg leading-no
 const SLICE_CLASS = `${GLYPH_CLASS} pointer-events-none absolute top-1/2 left-1/2 -mt-2.5 -ml-2.5 opacity-0`;
 
 interface VideoHeroProps {
-  kicker: string;
   calendarUrl: string;
 }
 
-export function VideoHero({ kicker, calendarUrl }: Readonly<VideoHeroProps>) {
+export function VideoHero({ calendarUrl }: Readonly<VideoHeroProps>) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { isPlaying, hasSource, timecode, togglePlayback } = useVideoPlayback(videoRef);
+  const { isPlaying, hasSource, togglePlayback } = useVideoPlayback(videoRef);
 
   return (
     <header
       id={TOP_SECTION_ID}
       aria-label={LANDING_COPY.hero.label}
-      className="relative isolate flex h-[clamp(560px,calc(100svh-var(--nav-height)),1000px)] items-end overflow-hidden border-b border-border bg-background"
+      className="flex min-h-[clamp(560px,calc(100svh-var(--nav-height)),1000px)] items-center border-b border-border bg-background py-[clamp(24px,4vw,64px)]"
     >
-      <ReelVideo videoRef={videoRef} hasSource={hasSource} />
-      <div aria-hidden="true" className="absolute inset-0 -z-1 shade-reel" />
-      <HeroContent kicker={kicker} calendarUrl={calendarUrl} />
-      <ReelControls isPlaying={isPlaying} timecode={timecode} onToggle={togglePlayback} />
+      <div className="page-wrap grid w-full items-center gap-[clamp(24px,4vw,56px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+        <HeroContent calendarUrl={calendarUrl} />
+        <LoopPanel videoRef={videoRef} hasSource={hasSource}>
+          <PlaybackToggle isPlaying={isPlaying} onToggle={togglePlayback} />
+        </LoopPanel>
+      </div>
     </header>
   );
 }
 
-interface ReelVideoProps {
+interface LoopPanelProps {
   videoRef: RefObject<HTMLVideoElement | null>;
   hasSource: boolean;
+  children: ReactNode;
 }
 
-function ReelVideo({ videoRef, hasSource }: Readonly<ReelVideoProps>) {
+function LoopPanel({ videoRef, hasSource, children }: Readonly<LoopPanelProps>) {
   return (
-    <video
-      ref={videoRef}
-      muted
-      loop
-      playsInline
-      preload="none"
-      poster={REEL_POSTER}
-      aria-hidden="true"
-      className="absolute inset-0 -z-2 size-full object-cover contrast-[1.05] saturate-[.85]"
-    >
-      {hasSource && REEL_SOURCES.map((source) => <source key={source.src} src={source.src} type={source.type} />)}
-    </video>
+    <div className="relative order-first aspect-968/648 w-full lg:order-0">
+      <video
+        ref={videoRef}
+        muted
+        loop
+        playsInline
+        preload="none"
+        poster={LOOP_POSTER}
+        aria-hidden="true"
+        className="absolute inset-0 size-full object-cover"
+      >
+        {hasSource && LOOP_SOURCES.map((source) => <source key={source.src} src={source.src} type={source.type} />)}
+      </video>
+      {children}
+    </div>
   );
 }
 
-function HeroContent({ kicker, calendarUrl }: Readonly<VideoHeroProps>) {
+function HeroContent({ calendarUrl }: Readonly<VideoHeroProps>) {
   const { hero } = LANDING_COPY;
 
   return (
-    <div className="page-wrap flex w-full flex-col items-start gap-[clamp(14px,1.8vw,22px)] pb-[clamp(72px,9vw,120px)]">
-      <p className="m-0 font-mono text-xs font-medium tracking-[.08em] text-copy-strong uppercase">{kicker}</p>
+    <div className="flex flex-col items-start gap-[clamp(14px,1.8vw,22px)]">
       <h1 className="m-0 flex flex-col gap-[clamp(8px,1vw,14px)]">
         <UtgLogo variant="flat" label={hero.logoLabel} className="block h-auto w-[clamp(220px,34vw,520px)]" />
         <span className="type-wide text-[clamp(18px,2.6vw,38px)] leading-none tracking-[-.03em]">
@@ -123,31 +127,21 @@ function GlitchArrow() {
   );
 }
 
-interface ReelControlsProps {
+interface PlaybackToggleProps {
   isPlaying: boolean;
-  timecode: string;
   onToggle: () => void;
 }
 
-function ReelControls({ isPlaying, timecode, onToggle }: Readonly<ReelControlsProps>) {
+function PlaybackToggle({ isPlaying, onToggle }: Readonly<PlaybackToggleProps>) {
   return (
-    <>
-      <div
-        aria-hidden="true"
-        className="absolute right-[calc(max(var(--gutter),env(safe-area-inset-right,0px))+56px)] bottom-[22px] left-[max(var(--gutter),env(safe-area-inset-left,0px))] flex justify-between gap-3 font-mono text-[11px] tracking-[.08em] text-copy-dim uppercase tabular-nums"
-      >
-        <span className="text-foreground max-[640px]:hidden">{LANDING_COPY.hero.reelBadge}</span>
-        <span>{timecode}</span>
-      </div>
-      <ToggleButton
-        isSelected={isPlaying}
-        onChange={onToggle}
-        aria-label={LANDING_COPY.hero.playVideo}
-        className="toggle-button--overlay group absolute right-[max(var(--gutter),env(safe-area-inset-right,0px))] bottom-3 size-11"
-      >
-        <PlaybackIcon isPlaying={isPlaying} />
-      </ToggleButton>
-    </>
+    <ToggleButton
+      isSelected={isPlaying}
+      onChange={onToggle}
+      aria-label={LANDING_COPY.hero.playVideo}
+      className="toggle-button--overlay group absolute right-4 bottom-4 size-11"
+    >
+      <PlaybackIcon isPlaying={isPlaying} />
+    </ToggleButton>
   );
 }
 
