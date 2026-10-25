@@ -43,6 +43,12 @@ next-env.d.ts
 
 # prisma
 .prisma/
+/generated/
+
+# sqlite
+*.db
+*.db-wal
+*.db-shm
 
 
 graphify-out/

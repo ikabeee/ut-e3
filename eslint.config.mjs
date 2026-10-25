@@ -54,14 +54,15 @@ const barrelImports = {
 };
 
 const serverCode = {
-  group: ["@features/*/lib/server/**", "@shared/lib/server/**", "@shared/lib/prisma/**"],
+  group: ["@features/*/lib/server/**", "@shared/lib/server/**", "@generated/prisma/**"],
   message:
     "Este archivo puede llegar al navegador: no importes código de servidor (`lib/server/`, `@shared/lib/server/` ni Prisma).",
 };
 
 const prismaClient = {
-  group: ["@shared/lib/prisma/*"],
-  message: "Sólo `lib/server/` de una feature consulta la base de datos: usa sus funciones en lugar de `db`.",
+  group: ["@generated/prisma/**"],
+  message:
+    "Sólo `lib/server/` de una feature y `@shared/lib/server/` usan el cliente de Prisma (`@generated/prisma/*`): llama a sus funciones.",
 };
 
 const hooksLayer = {
@@ -214,10 +215,6 @@ const eslintConfig = defineConfig([
   },
   {
     files: withTests("src/shared", `lib/server/**/*.${SOURCE}`),
-    rules: restrict([featureImports, prismaClient], { allowServerOnly: true }),
-  },
-  {
-    files: withTests("src/shared", `lib/prisma/**/*.${SOURCE}`),
     rules: restrict([featureImports], { allowServerOnly: true }),
   },
   ...featureLayerConfigs,
@@ -232,8 +229,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "coverage/**",
-    "src/shared/lib/prisma/contract.d.ts",
-    "migrations/**",
+    "generated/**",
     "tools/oxlint/anti-slop/**",
   ]),
 ]);

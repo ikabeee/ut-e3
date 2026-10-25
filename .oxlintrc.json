@@ -15,8 +15,7 @@
     ".windsurf/**",
     "tools/oxlint/anti-slop/**",
     "next-env.d.ts",
-    "src/shared/lib/prisma/contract.d.ts",
-    "migrations/**"
+    "generated/**"
   ],
   "jsPlugins": [
     { "name": "anti-slop", "specifier": "./tools/oxlint/anti-slop/index.ts" },
