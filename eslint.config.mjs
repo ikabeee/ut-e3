@@ -6,6 +6,7 @@ import sonarjs from "eslint-plugin-sonarjs";
 
 const FEATURE_DEPENDENCIES = {
   landing: [],
+  "floor-plan": ["games"],
 };
 
 const FEATURES = readdirSync(new URL("./src/features", import.meta.url), { withFileTypes: true })
