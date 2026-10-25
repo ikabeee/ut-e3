@@ -4,14 +4,31 @@
 
 | Campo | Valor |
 | --- | --- |
-| Versión del documento | 2.2 |
+| Versión del documento | 2.3 |
 | Reemplaza a | `odd/requirements/srs.md` (v1, basada en `archive/develop-v1`) |
-| Fuente | Lista de módulos del equipo, iteración de huecos con el equipo (22 y 23 de octubre de 2026) y audios del equipo (23 de octubre de 2026) |
+| Fuente | Lista de módulos del equipo, iteración de huecos con el equipo (22 y 23 de octubre de 2026), audios del equipo (23 de octubre de 2026) y orden del día oficial del evento (25 de octubre de 2026) |
 | Documentos relacionados | `odd/requirements/unit-test-cases.md`, `odd/requirements/e2e-flows.md`, artifacts de arquitectura y modelo ER |
 
 Los requisitos se numeran de nuevo en esta versión; no coinciden con los de la v1. Lo marcado como
 **Supuesto** fue propuesto en la iteración y aceptado por el equipo. Un requisito eliminado conserva su número con la
 marca **(eliminado)** para no romper la trazabilidad.
+
+### Cambios de la versión 2.3
+
+- Horarios, sede y stands tomados del orden del día oficial: horario público de 12:00 a 18:30 en el Edificio B (lobby y
+  áreas externas), programa del público (sección 1.2) y corte de check-ins a las 16:50, cuando cierran los stands
+  (sección 1.1 y RN-04).
+- Torneo de KOF: el check-in de la lista previa pasa a ser de 12:00 a 12:45, al mismo tiempo que la inscripción
+  presencial; de 12:45 a 12:55 el administrador de KOF confirma a los participantes y a las 12:55 se publica el bracket
+  (RF-59 y RF-75 a RF-77).
+- Código del stand como en el orden del día: el visitante ve `ZA-S1` (zona y stand) y los administradores el completo,
+  `ZA-S1-E6-101` (zona, stand, estudio y grupo). Bloques A, B, C y D, con 3 stands cada uno, y T (zona de terror), con 6
+  (sección 1 y RF-11).
+- El kiosco detecta los PIN mal tecleados sin conexión con un filtro que tiene falsos positivos a propósito, así que el
+  staff no puede sacar de él la lista de PIN (RF-78 y RNF-19).
+- El orden del día todavía dice "registro de visitas por QR"; la SRS mantiene el PIN de la v2.2.
+- Actualizados con estos cambios: `unit-test-cases.md`, `e2e-flows.md`, `odd/design/er-model.html` y
+  `odd/design/architecture.html`.
 
 ### Cambios de la versión 2.2
 
@@ -40,10 +57,12 @@ marca **(eliminado)** para no romper la trazabilidad.
 
 | Aspecto | Valor |
 | --- | --- |
-| Fecha | 20 de noviembre de 2026 |
-| Horario | De 12:00 a 19:00 (provisional y configurable) |
+| Nombre oficial | PIXEL & CODE: The Last Savepoint |
+| Fecha | Viernes 20 de noviembre de 2026 |
+| Sede | Edificio B de la Universidad Tecnológica de Cancún (lobby y áreas externas) |
+| Horario | Público de 12:00 a 18:30 (configurable); operación interna de 9:00 a 21:00 |
 | Zona horaria | `America/Cancun` (UTC-5 todo el año, sin horario de verano) |
-| Stands | Exactamente 18 |
+| Stands | Exactamente 18: bloques A, B, C y D (3 stands cada uno) y T, zona de terror (6 stands) |
 | Asistencia estimada | Alrededor de 1,000 visitantes |
 | Dispositivo principal | Teléfono móvil; conectividad no garantizada en la sede |
 | Infraestructura | Next.js autoalojado en un VPS de OVHcloud (VPS-1: 2 vCores, 4 GB, 40 GB NVMe) con SQLite |
@@ -55,20 +74,48 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 
 | Valor | Inicial |
 | --- | --- |
-| Apertura y cierre del evento | Día del evento, 12:00 y 19:00 |
+| Apertura y cierre del evento | Día del evento, 12:00 y 18:30 |
 | Apertura del registro de visitantes | 13 de noviembre de 2026, 00:00 |
 | Apertura de la inscripción previa a KOF | 13 de noviembre de 2026, 00:00 |
 | Cierre del formulario del Marketplace | 10 de noviembre de 2026, 23:59 |
-| Check-in de los inscritos a KOF | Día del evento, de 11:00 a 12:00 |
+| Check-in de los inscritos a KOF | Día del evento, de 12:00 a 12:45 |
 | Inscripción presencial a KOF | Día del evento, de 12:00 a 12:45 |
-| Generación del bracket de KOF | Día del evento, 13:00 |
+| Generación del bracket de KOF | Día del evento, 12:55 |
 | Activación de los enlaces a itch.io | Día del evento, 16:30 |
-| Corte de check-ins | Día del evento, 17:00 |
+| Corte de check-ins | Día del evento, 16:50 |
 | Inicio de la rifa (y fin de la tolerancia de check-ins) | Día del evento, 18:00 |
 | URL del formulario del Marketplace | Por definir |
 | Alerta de calificaciones infladas | 12 calificaciones de 5 en 10 minutos en un stand |
 | Alerta de visitantes de un solo stand | 1 check-in |
 | Bracket público abierto | Sí |
+
+### 1.2 Programa del público
+
+Tomado del orden del día oficial. Es el contenido inicial del cronograma (RF-03 y RF-42); el sysadmin lo edita en la BD.
+
+| Hora | Actividad |
+| --- | --- |
+| 12:00 a 12:30 | Inauguración en el escenario principal |
+| 12:00 a 12:45 | Check-in de la lista previa e inscripción presencial a KOF |
+| 12:00 a 16:50 | Exhibición en los stands de los bloques A a D y en la zona de terror |
+| 12:45 a 12:55 | Confirmación de participantes de KOF |
+| 12:55 | Publicación del bracket de KOF |
+| 13:00 a 14:00 | KOF: ronda de 64 |
+| 13:30 a 15:30 | Mario Kart abierto |
+| 14:00 a 14:30 | KOF: ronda de 32 |
+| 14:30 a 15:00 | KOF: octavos de final |
+| 15:00 a 15:30 | KOF: cuartos de final |
+| 15:30 a 16:00 | Actividad en el escenario 1 |
+| 16:00 a 16:10 | KOF: semifinales |
+| 16:00 a 16:50 | Mario Kart abierto |
+| 16:10 a 16:40 | Actividad en el escenario 2 |
+| 16:40 a 16:50 | KOF: partido por el tercer lugar, en el escenario |
+| 16:50 | Cierran los stands, Mario Kart y la zona de terror |
+| 16:55 a 17:05 | Presentación de los finalistas de KOF |
+| 17:05 a 17:15 | Gran final de KOF |
+| 17:30 a 18:00 | Presentación de ganadores |
+| 18:00 a 18:30 | Rifa final de premios |
+| 18:30 a 19:00 | Agradecimientos y cierre |
 
 ---
 
@@ -105,7 +152,7 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 | RF-04 | Catálogo simple de juegos: título e imagen. |
 | RF-05 | Tarjetas de actividades: Rifa, Marketplace, torneo de KOF y Mario Kart. Mario Kart y Marketplace son solo informativos. |
 | RF-06 | El Marketplace (mercado local) enlaza a un formulario de Google Forms para solicitar vender, abierto en pestaña nueva con `rel="noopener noreferrer"`. Después de su cierre, muestra "Registro de vendedores cerrado". |
-| RF-07 | Croquis interactivo como en la V1, con la información de cada stand y las zonas de las actividades. |
+| RF-07 | Croquis interactivo como en la V1, según el croquis del Edificio B del orden del día, con la información de cada stand (bloques A a D y T) y las zonas de las actividades. |
 | RF-08 | Invitadas especiales: dos ingenieras que darán pláticas (contenido en el código; el horario de cada plática es una actividad del cronograma). |
 
 ### M2. Catálogo y detalle de juegos (público)
@@ -114,7 +161,7 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 | --- | --- |
 | RF-09 | Un juego tiene nombre, sinopsis, un género del catálogo, imágenes (máximo 5, una de portada), enlace a itch.io y stand. |
 | RF-10 | El enlace a itch.io se muestra a partir de la hora configurada (16:30). Antes, la ficha indica la hora de activación sin enlace. La validación usa la hora del servidor. |
-| RF-11 | El visitante ve el código corto del stand (`zA-s3`); los administradores ven el completo (`zA-s3-e5-103`). |
+| RF-11 | El visitante ve el código corto del stand (`ZA-S1`); los administradores ven el completo (`ZA-S1-E6-101`: zona, stand, estudio y grupo). |
 
 ### M3. Registro del visitante
 
@@ -137,7 +184,7 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 | RF-21 | Barra de progreso hacia el siguiente boleto. |
 | RF-22 | Al llegar a 9 visitas válidas se otorga un boleto y al llegar a 18 otro. Máximo 2 por visitante. Cada boleto es un número global autoincremental. |
 | RF-23 | Un check-in por visitante y stand. |
-| RF-24 | Si un check-in en cola se rechaza por llegar fuera de horario, el pasaporte muestra "Tu visita a zA-s3 no se registró" con el motivo. Un PIN no reconocido no identifica a nadie: solo aparece en la lista de rechazadas del kiosco (RF-35). |
+| RF-24 | Si un check-in en cola se rechaza por llegar fuera de horario, el pasaporte muestra "Tu visita a ZA-S3 no se registró" con el motivo. Un PIN no reconocido no identifica a nadie: solo aparece en la lista de rechazadas del kiosco (RF-35). |
 | RF-25 | Si el visitante gana la rifa, el pasaporte muestra "Ganaste" y, cuando se registra, el premio. |
 
 ### M5. Votación en el stand
@@ -149,6 +196,7 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 | RF-28 | El check-in y el voto se crean juntos en una sola transacción: sin encuesta no hay check-in. |
 | RF-29 | El staff nunca ve las calificaciones. Tras enviar, la pantalla muestra "Gracias" y vuelve sola a la pantalla del PIN. |
 | RF-30 | Un voto por visitante y stand; no se modifica. |
+| RF-78 | El kiosco detecta un PIN mal tecleado aun sin conexión, sin que el staff conozca los PIN: con conexión descarga un filtro de los PIN registrados con falsos positivos a propósito (RNF-19). Un PIN que no pasa el filtro muestra "PIN no reconocido, revísalo" y no abre la encuesta. Uno que pasa el filtro sin ser de nadie se rechaza al llegar al servidor (RF-24). |
 
 ### M6. Panel del stand (administrador y staff)
 
@@ -205,10 +253,10 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 | --- | --- |
 | RF-57 | 64 jugadores, eliminación directa: 63 combates. Tableros 1 a 4 con un cuarto del bracket cada uno (16 jugadores, 15 combates); semifinales y final en un tablero aparte. |
 | RF-58 | Para jugar, el visitante necesita pasaporte (M3: gamertag, nombre completo y correo). Inscripción previa: el administrador de KOF agrega a la lista a los visitantes registrados que quieren jugar, con un cupo de 50 para dejar al menos 14 lugares al día del evento. Una inscripción por visitante; cupo total de 64 ("Torneo lleno"). |
-| RF-75 | El pasaporte del inscrito indica que está en el torneo y le avisa que el 20 de noviembre, de 11:00 a 12:00, debe hacer su check-in en el stand de KOF del edificio B. El administrador de KOF hace el check-in tecleando el PIN del jugador; con el check-in, el jugador entra al bracket. |
-| RF-76 | A las 12:00, la inscripción previa sin check-in se marca como "No se presentó" y ya no cambia; su lugar queda disponible para la inscripción presencial. |
-| RF-77 | En el horario configurado de inscripción presencial (de 12:00 a 12:45), los visitantes que llegan al evento se inscriben con el equipo de KOF en el centro informativo: si no tienen pasaporte, se registran (M3) y el administrador de KOF los agrega. Su check-in queda hecho al inscribirse. Entran hasta llenar el cupo de 64. |
-| RF-59 | El bracket se genera una sola vez a la hora configurada (13:00), solo con los jugadores con check-in, con barajeo Fisher-Yates y `crypto.randomInt`; el resultado queda en la bitácora. |
+| RF-75 | El pasaporte del inscrito indica que está en el torneo y le avisa que el 20 de noviembre, de 12:00 a 12:45, debe hacer su check-in en el área de KOF del edificio B. El administrador de KOF hace el check-in tecleando el PIN del jugador; con el check-in, el jugador entra al bracket. |
+| RF-76 | A las 12:45, al cerrar el check-in, la inscripción previa sin check-in se marca como "No se presentó" y ya no cambia. Hasta entonces su lugar sigue reservado. El lugar que deja queda vacío y es un bye en el bracket (RF-60; ver sección 9). |
+| RF-77 | En el horario configurado de inscripción presencial (de 12:00 a 12:45), los visitantes que llegan al evento se inscriben con el equipo de KOF en el área de KOF: si no tienen pasaporte, se registran (M3) y el administrador de KOF los agrega. Su check-in queda hecho al inscribirse. Entran hasta llenar el cupo de 64, contando los lugares reservados de la lista previa. De 12:45 a 12:55 el administrador de KOF confirma a los participantes antes del bracket. |
+| RF-59 | El bracket se genera una sola vez a la hora configurada (12:55), solo con los jugadores con check-in, con barajeo Fisher-Yates y `crypto.randomInt`; el resultado queda en la bitácora. |
 | RF-60 | Con menos de 64 jugadores con check-in, los lugares vacíos son byes, repartidos parejo entre los 4 tableros; un bye nunca se enfrenta a otro. |
 | RF-61 | Cada staff ve en tiempo real su cuarto del bracket, marca al perdedor y activa el siguiente combate. |
 | RF-62 | Permisos de captura: tablero N lo captura el staff N; semifinal 1 el staff 1; semifinal 2 el staff 2; final el staff 1. El administrador de KOF puede capturar cualquier combate. |
@@ -236,7 +284,7 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 | RN-01 | El evento tiene exactamente 18 stands; los boletos se otorgan a las 9 y a las 18 visitas válidas. |
 | RN-02 | Un integrante de un equipo (o cualquier staff o administrador) no puede tener pasaporte. |
 | RN-03 | Un check-in cuenta solo con su voto y mientras no esté anulado. |
-| RN-04 | Un check-in cuenta si se registró antes del corte (17:00) y llega antes del inicio de la rifa (18:00). Un registro con hora anterior a la apertura del evento se ajusta a la apertura. Al empezar la rifa, los boletos se congelan. |
+| RN-04 | Un check-in cuenta si se registró antes del corte (16:50) y llega antes del inicio de la rifa (18:00). Un registro con hora anterior a la apertura del evento se ajusta a la apertura. Al empezar la rifa, los boletos se congelan. |
 | RN-05 | Un visitante con un boleto sorteado queda fuera del resto de la rifa, gane o no. |
 | RN-06 | Votos, check-ins y boletos no se editan ni se borran: se anulan o se excluyen con motivo y registro en la bitácora. |
 | RN-07 | El código del stand lo asigna el sysadmin y no se repite. |
@@ -266,6 +314,7 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 | RNF-16 | Respaldos: el diario de OVHcloud y `VACUUM INTO` de SQLite cada hora el día del evento, copiado fuera del VPS. |
 | RNF-17 | Monitoreo mínimo en el panel del sysadmin (RF-73) y reinicio automático del contenedor; sin chequeo externo. |
 | RNF-18 | Desarrollo local con Docker Compose limitado a los recursos del VPS; prueba de carga en el VPS antes del 13 de noviembre. |
+| RNF-19 | Filtro de PIN del kiosco (RF-78): el servidor resume cada PIN registrado con PBKDF2-SHA-256 de Web Crypto y una sal del evento, y reduce el resumen a un espacio 50 veces mayor que el número de PIN registrados; el filtro es el conjunto de esos valores. Así, alrededor del 2 % de los PIN no registrados pasan el filtro: con 1,000 visitantes, quien lo enumere obtiene unos 3,000 candidatos y solo 1,000 son reales. El filtro nunca lleva los PIN en claro, solo lo descarga una sesión de staff de stand y se invalida con `updateTag` cuando se registra un visitante. |
 
 ---
 
@@ -273,7 +322,7 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 
 | # | Caso | Comportamiento esperado |
 | --- | --- | --- |
-| EC-01 | El kiosco con reloj atrasado envía a las 17:30 una visita con hora 16:58 | Se acepta (riesgo aceptado); queda registrada la cuenta que tenía abierto el kiosco. Un `scannedAt` futuro se ajusta a la hora de recepción y uno anterior a la apertura, a la apertura. |
+| EC-01 | El kiosco con reloj atrasado envía a las 17:20 una visita con hora 16:48 | Se acepta (riesgo aceptado); queda registrada la cuenta que tenía abierto el kiosco. Un `scannedAt` futuro se ajusta a la hora de recepción y uno anterior a la apertura, a la apertura. |
 | EC-02 | Un check-in en cola llega después del inicio de la rifa | Se rechaza y el pasaporte avisa al visitante. |
 | EC-03 | Se teclea dos veces el mismo PIN en un stand | El segundo intento devuelve el check-in existente; no se guarda otra encuesta. |
 | EC-04 | Alguien registra una visita con el PIN de otra persona | Se acepta (riesgo aceptado). El visitante la ve en su pasaporte, la reporta en Atención y el sysadmin la anula. |
@@ -287,7 +336,8 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 | EC-12 | Se agota la cuota diaria de correo | El correo queda en la bandeja de salida y se reintenta. |
 | EC-13 | Se anula el check-in que le dio a un visitante su boleto del hito 9 | El boleto se anula; si vuelve a llegar a 9, el mismo boleto se reactiva. |
 | EC-14 | La CPU o la memoria superan el 50% durante 2 minutos | Se cierra el bracket público; la operación del torneo sigue conectada. |
-| EC-15 | Un jugador de la lista previa de KOF llega a hacer su check-in a las 12:05 | Su inscripción ya quedó como "No se presentó" y su lugar se liberó (RF-76). |
+| EC-15 | Un jugador de la lista previa de KOF llega a hacer su check-in a las 12:50 | Su inscripción ya quedó como "No se presentó" (RF-76). |
+| EC-16 | Un PIN mal tecleado pasa el filtro del kiosco (falso positivo) | El kiosco abre la encuesta; al llegar al servidor la visita se rechaza y aparece en la lista de rechazadas (RF-24 y RF-35). |
 
 ---
 
@@ -297,6 +347,7 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 | --- | --- |
 | Un integrante se registra con un correo que no está en la lista negra | Registro presencial de visitas, promedio bayesiano, alertas de fraude, anulación y exclusión por el sysadmin. |
 | PIN compartido o visto por otra persona: alguien registra una visita y un voto con el PIN de otra persona | Un voto por stand, alertas de fraude y anulación de la visita cuando el visitante la reporta. |
+| Alguien con acceso a la computadora del stand enumera el filtro de PIN | Falsos positivos a propósito: la mayoría de los candidatos no son PIN reales y el servidor rechaza las visitas con PIN que no son de nadie. |
 | Kiosco sin conexión con el reloj atrasado | La mayoría de las visitas llegan en línea; queda registrada la cuenta que tenía abierto el kiosco. |
 | Recuperación en la mesa de atención con nombre y gamertag de otra persona | Queda en la bitácora con el agente que la hizo. |
 | El visitante puede sentirse presionado al votar frente al staff | Vista tipo kiosco y calificaciones ocultas al staff. |
@@ -315,6 +366,8 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 | Longitud del PIN | 4 dígitos | Con unos 1,000 visitantes, un PIN tecleado al azar coincide con el de un visitante real 1 de cada 10 veces; con 5 dígitos, 1 de cada 100. |
 | Encuesta del stand | Cuarta pregunta | Decidido el 25 de octubre de 2026: la encuesta se queda con tres calificaciones (juego, stand y arte; RF-26). |
 | Identificación del visitante | QR fijo y QR dinámico (código que cambia cada 60 s) | En la v2.2 el equipo eligió que el visitante teclee su PIN en la computadora del stand. |
+| Filtro de PIN del kiosco | Lista exacta de resúmenes de los PIN, o lista cifrada | La lista exacta detecta un poco más de errores, pero quien la enumere obtiene todos los PIN reales; una lista cifrada necesita la llave en el kiosco. Decidido el 25 de octubre de 2026. |
+| Check-in de la lista previa de KOF | De 11:00 a 12:00 | El público entra a las 12:00, según el orden del día. |
 | Mensajería | WhatsApp (WUZAPI, WAHA, Twilio) y SMS (Supabase/Twilio) | Riesgo de baneo, resolución de LID sin confirmar o costo por mensaje. |
 | Correo | Tres cuentas de Gmail personales | Riesgo de bloqueo por Google y entrega en spam. |
 | Hosting | Vercel Hobby | Cuota de requests, cron una vez al día y uso no comercial. |
@@ -330,9 +383,12 @@ Todos viven en la BD, los edita el sysadmin y cada cambio queda en la bitácora.
 
 - URL del formulario del Marketplace.
 - Contenido de las invitadas (fotos, nombres y cargos) y texto del aviso de privacidad.
-- Horario definitivo del evento (de 12:00 a 19:00 por ahora).
-- Cómo se guarda el PIN: un hash SHA-256 de 5 dígitos se revierte probando las 100,000 combinaciones, y el pasaporte
-  necesita mostrar el PIN también en un dispositivo recuperado.
-- PIN mal tecleado en el kiosco sin conexión: no se valida hasta que la visita llega al servidor, y si coincide con el
-  PIN de otro visitante, la visita y el voto se le registran a él.
+- Cómo guarda el servidor el PIN: un hash SHA-256 de 5 dígitos se revierte probando las 100,000 combinaciones, y el
+  pasaporte necesita mostrar el PIN también en un dispositivo recuperado. El filtro del kiosco ya está decidido (RF-78).
+- PIN mal tecleado que coincide con el de otro visitante: ni el filtro del kiosco ni el servidor lo distinguen, y la
+  visita y el voto se le registran a él.
 - Cómo pide el visitante entrar a la lista previa de KOF: el equipo solo indicó que el administrador de KOF lo agrega.
+- Lugares de KOF que deja un "No se presentó" a las 12:45: por ahora quedan como byes (RF-76); falta decidir si se
+  llenan con una lista de espera durante la confirmación (de 12:45 a 12:55).
+- Pendientes del orden del día: contenido de las dos actividades del escenario, categorías de la presentación de
+  ganadores y si el público se queda después de las 18:30.
