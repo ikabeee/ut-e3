@@ -1,0 +1,60 @@
+---
+status: in-progress
+---
+
+# Landing v2
+
+Objective: implement the landing (`/`) from the UTG artifact, compliant with `odd/requirements/srs-v2.md`, with its data in code behind query functions that the database will replace.
+Branch: `feature/landing-v2` from `develop` (`0fe182f`). Delivery: `ask-on-risk`, forecast about 2,500 authored lines; chain strategy `stacked-to-main` (one PR per unit into `develop`, in task order). Test runner: Jest 30 + Testing Library (`npm test`); visual checks at 360, 390 and 1440 px.
+
+## Specs
+
+- S1. User (2026-10-25): "Necesito implementar este artifact https://claude.ai/artifact/BAu2KQqivnFDSshBsQmfeB para landing page, SOLO IMPLEMENTARAS LA LANDING y tiene que cumplir con el SRS-V2". The artifact's `index.html` is the design source: sections, styles and interactions. Only `/` is built; `juegos.html`, `croquis.html` and `juego.html` are out of scope, so the nav and the cards link to sections of the landing, never to missing routes.
+- S2. Data source, user decision (2026-10-25): "Código, lista para la BD". Each feature exposes `lib/server/<feature>-queries.ts` with `"use cache"` + `cacheLife(...)` + `cacheTag(...)` (RNF-02: "Los horarios, el cronograma, el catálogo y el bracket se leen con `"use cache"` + `cacheTag`") that returns typed data from code modules. The types mirror the ER model (`odd/design/er-model.html`: `EventSettings`, `ScheduleItem`, `Stand`, `Game`, `Genre`, `GameImage`, `Sponsor`) so the database only replaces the function bodies. Pending until the database exists: RF-03 "leído de la BD" and E2E "la landing la muestra sin deploy".
+- S3. Where the artifact and the SRS disagree, the SRS wins:
+  - Date "20 de noviembre de 2026" and hours "De 12:00 a 19:00 (provisional y configurable)" (artifact: 27.11.2026, 10:00 to 20:00).
+  - Raffle per RF-22 ("Al llegar a 9 visitas válidas se otorga un boleto y al llegar a 18 otro. Máximo 2 por visitante") starting at `raffleStartsAt` 18:00 (artifact: three draws at 13:00, 16:00 and 19:00 with tickets from the info desk).
+  - Activity cards per RF-05 (artifact: Torneos and Sorteos).
+  - Stand codes per RF-11 "El visitante ve el código corto del stand (`zA-s3`)" (artifact: A1).
+- S4. RF-01 "Portada del evento con slogan (por definir; vive en el código)." The slogan is provisional copy in `landing-copy.ts`.
+- S5. RF-02 "Carrusel de patrocinadores en lugar del divider de los grupos." It sits right after the hero (where V1 had `LandingGroupsStrip`), with sponsor data per RF-41 ("nombre, logo, sitio web, teléfono de contacto y servicios"). Assumption: with no sponsors, the band is not rendered.
+- S6. RF-03 "Cronograma de actividades leído de la BD (ver M7). Sin actividades, muestra "Cronograma por anunciar"." Items sorted by start time (UT-SC-02 "quedan ordenadas por hora de inicio"); times shown with `Intl.DateTimeFormat` and `timeZone: "America/Cancun"` (RNF-01). An item with a croquis zone links to that zone in the croquis.
+- S7. RF-04 "Catálogo simple de juegos: título e imagen." Implemented with the artifact's featured carousel and coverflow, over the 18 games with their covers (`archive/develop-v1:public/games/*.jpg`).
+- S8. RF-05 "Tarjetas de actividades: Rifa, Marketplace, torneo de KOF y Mario Kart. Mario Kart y Marketplace son solo informativos." RF-06 "El Marketplace (mercado local) enlaza a un formulario de Google Forms para solicitar vender, abierto en pestaña nueva con `rel="noopener noreferrer"`. Después de su cierre, muestra "Registro de vendedores cerrado"." The close check uses the server time. Assumption: while `marketplaceFormUrl` is undefined, the card shows no link.
+- S9. RF-07 "Croquis interactivo como en la V1, con la información de cada stand y las zonas de las actividades." Port `archive/develop-v1:src/features/floor-plan/` (wide and tall layouts, accessible SVG items, 44 px touch areas) to the artifact's no-zoom version with a side panel and legend, using `zA-s3` codes and the SRS activity zones.
+- S10. RF-08 "Invitadas especiales: dos ingenieras que darán pláticas (contenido en el código; el horario de cada plática es una actividad del cronograma)." Names, photos and roles are an open topic (SRS section 9), so the content is provisional.
+- S11. RNF-12 "Móvil primero y accesibilidad según `AGENTS.md`": no horizontal scroll at 360 and 390 px, touch areas of at least 44x44 px, nothing hover-only, `svh`/`dvh` heights, `prefers-reduced-motion` respected, and nothing heavy preloaded on phones. The reel video autoplays only at 1024 px or wider, without `Save-Data` or reduced motion (V1 rule); phones get the poster.
+- S12. The artifact's remaining sections stay: venue location with "Copiar dirección" and Google Maps, the "Entrada libre" closing band and the footer. Every visible text lives in its feature's `*-copy.ts` (AGENTS.md "Textos de la interfaz").
+
+## Seams under test (confirmed by the user, L4)
+
+| Seam | Catches | Misses |
+| --- | --- | --- |
+| `schedule` lib: sort by start (UT-SC-02) | Items out of order | Rendering |
+| `ScheduleList` component: empty state (UT-SC-03), Cancun times, zone link | Missing "Cronograma por anunciar", UTC times shown, broken croquis link | Visual layout |
+| Marketplace card: open, without URL and closed (RF-06) | Wrong `target`/`rel`, link after closing | Real server clock |
+| `floor-plan` lib and component: `zA-s3` codes for 18 stands, selection by click, keyboard and hash shows the panel | Wrong codes, inaccessible items, empty panel | Drawing details |
+| `games` carousel and coverflow: each game shows title and image, previous and next, no autoplay with reduced motion | Missing games, dead controls | Animations |
+| `sponsors` band: name, logo, link with `rel`, hidden when empty | Unsafe external links | Marquee motion |
+| `LandingPage`: sections in order, calendar link for 20 Nov 2026 12:00-19:00 Cancun | Wrong event date in the CTA | Styles |
+
+## Tasks
+
+| ID | Specs | Unit | Route | Status | Commit |
+| --- | --- | --- | --- | --- | --- |
+| T0 | S2, S3 | Foundation: `event-settings` feature (types, settings, query), `shared/lib/date-time.ts`, shared primitives ported from V1, `games/lib/stand-code.ts`, assets from V1 | inline (shared base every unit imports) | done (RED: 5 suites missing modules; GREEN: 27 tests) | see Log L5 |
+| T1 | S7, S11 | `games`: data, query, featured carousel, coverflow | delegated, Sonnet coder (parallel with T2-T4) | pending | |
+| T2 | S9, S11 | `floor-plan`: layouts, items, overview with panel and legend, hash selection | delegated, Sonnet coder (parallel) | pending | |
+| T3 | S5, S6, S11 | `schedule` and `sponsors`: data, queries, list, band | delegated, Sonnet coder (parallel) | pending | |
+| T4 | S4, S8, S10, S11, S12 | `landing`: nav, video hero, intro, activity cards, guests, location, closing, footer | delegated, Sonnet coder (parallel) | pending | |
+| T5 | S1-S12 | Compose `LandingPage`, seam check, visual check at 360/390/1440, docs and CHANGELOG | inline | pending | |
+
+Writer trigger for T1-T4: four independent units of behavior with disjoint edit surfaces, each several hundred lines, launched together.
+
+## Log
+
+- L1 (2026-10-25, user): "Necesito implementar este artifact https://claude.ai/artifact/BAu2KQqivnFDSshBsQmfeB para landing page, SOLO IMPLEMENTARAS LA LANDING y tiene que cumplir con el SRS-V2"
+- L2 (2026-10-25, user decision): data source "Código, lista para la BD" (S2).
+- L3 (2026-10-25, exploration): the artifact (753 lines, 11 files) is a prototype of V1: its games, covers, reel and croquis match `archive/develop-v1` (`public/games/*.jpg`, `public/media/reel.*`, `src/features/floor-plan/`, `src/features/games/`). `develop` already has every CSS utility the artifact uses (`src/shared/styles/*.css`). V1 conflicts with the SRS in hours (10:00 to 20:00) and stand codes (`^[AB][1-9]$`). Next 16.4 docs read: `08-caching.md` ("Static, cached, and streaming"; "Random values and timestamps": `await connection()` inside `<Suspense>` for time comparisons) and `cacheTag.md`.
+- L4 (2026-10-25, user): plan approved with "Aprobar, PRs apilados (Recomendado)": one PR per unit into `develop`, in order T0 to T5; seams table confirmed.
+- L5 (2026-10-25, T0): RED: the ported V1 tests (`scramble`, `scramble-text`, `use-fit-text`) and the new `date-time` and `stand-code` tests failed on missing modules. GREEN: `src/shared/lib/{date-time,scramble}.ts`, `src/shared/hooks/use-fit-text.ts` (helpers moved below the hook), `src/shared/components/{action-link,arrow-button,arrow-glyph,paper-card,scramble-text,utg-logo}.tsx` ported from `archive/develop-v1` without comments, `src/features/event-settings/` (ER fields, SRS 1.1 values as UTC instants, `getEventSettings` with `"use cache"`, `cacheLife("hours")`, `cacheTag("event-settings")`), `src/features/games/lib/stand-code.ts` (`formatStandCode({ zone, number })` gives `zA-s3`; it is the contract between T1 and T2), and `public/games/*.jpg` plus `public/media/reel.{mp4,webm}` restored from `archive/develop-v1`. `server-only` is not installed; Next.js resolves it and installing it is optional (`05-server-and-client-components.md`, line 584), and `tsc` accepts it. Checks: Jest 27/27 in `src/shared` and `src/features/games`, `typecheck` 0, `lint` 0, `lint:oxlint` 0, `lint:duplication` 0, `format:check` 0. The `floor-plan -> games` entry in `FEATURE_DEPENDENCIES` waits until T2 creates its folder, because ESLint throws on a missing feature.
