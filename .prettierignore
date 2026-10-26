@@ -9,8 +9,10 @@ public
 # Archivos generados: no se editan a mano
 package-lock.json
 next-env.d.ts
-# Migraciones: las genera `npm run db:migration:plan` (se revisan, no se reformatean)
-migrations
+# Cliente de Prisma: lo genera `npm run db:generate` (y `postinstall`)
+generated
+# Migraciones: las genera `npm run db:migrate` y se revisan a mano (no se reformatean)
+prisma/migrations
 # Plugin de Oxlint copiado de anti-slop: conserva el formato de upstream para comparar actualizaciones
 tools/oxlint/anti-slop
 

@@ -1,0 +1,111 @@
+// Data model (odd/design/er-model.html). The ER `sql` rules (CHECKs, partial indexes and triggers) are
+// hand-written in the migrations, because Prisma does not declare them.
+
+// moduleFormat cjs: Jest runs CommonJS, and the ESM client imports the query compiler as .mjs, which Jest cannot load.
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model EventSettings {
+  id                      Int       @id @default(1)
+  eventStartsAt           DateTime  @map("event_starts_at")
+  eventEndsAt             DateTime  @map("event_ends_at")
+  registrationOpensAt     DateTime  @map("registration_opens_at")
+  kofRegistrationOpensAt  DateTime  @map("kof_registration_opens_at")
+  kofCheckInStartsAt      DateTime  @map("kof_check_in_starts_at")
+  kofCheckInEndsAt        DateTime  @map("kof_check_in_ends_at")
+  kofOnsiteSignupStartsAt DateTime  @map("kof_onsite_signup_starts_at")
+  kofOnsiteSignupEndsAt   DateTime  @map("kof_onsite_signup_ends_at")
+  kofBracketGeneratesAt   DateTime  @map("kof_bracket_generates_at")
+  marketplaceClosesAt     DateTime  @map("marketplace_closes_at")
+  marketplaceFormUrl      String?   @map("marketplace_form_url")
+  itchOpensAt             DateTime  @map("itch_opens_at")
+  checkInCutoffAt         DateTime  @map("check_in_cutoff_at")
+  raffleStartsAt          DateTime  @map("raffle_starts_at")
+  raffleClosedAt          DateTime? @map("raffle_closed_at")
+  bracketGeneratedAt      DateTime? @map("bracket_generated_at")
+  publicBracketEnabled    Boolean   @map("public_bracket_enabled")
+  fraudTopScoreCount      Int       @default(12) @map("fraud_top_score_count")
+  fraudWindowMinutes      Int       @default(10) @map("fraud_window_minutes")
+  fraudSingleVisitMax     Int       @default(1) @map("fraud_single_visit_max")
+
+  @@map("event_settings")
+}
+
+model ScheduleItem {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  startsAt    DateTime @map("starts_at")
+  endsAt      DateTime @map("ends_at")
+  zone        String?
+
+  @@map("schedule_items")
+}
+
+model Stand {
+  id        String @id @default(uuid())
+  zone      String
+  number    Int
+  studio    Int
+  groupCode String @map("group_code")
+  game      Game?
+
+  @@unique([zone, number])
+  @@map("stands")
+}
+
+model Genre {
+  id    String @id @default(uuid())
+  name  String @unique
+  slug  String @unique
+  games Game[]
+
+  @@map("genres")
+}
+
+model Game {
+  id       String      @id @default(uuid())
+  standId  String      @unique @map("stand_id")
+  stand    Stand       @relation(fields: [standId], references: [id])
+  name     String
+  slug     String      @unique
+  synopsis String
+  genreId  String      @map("genre_id")
+  genre    Genre       @relation(fields: [genreId], references: [id], onDelete: Restrict)
+  itchUrl  String?     @map("itch_url")
+  images   GameImage[]
+
+  @@map("games")
+}
+
+model GameImage {
+  id       String  @id @default(uuid())
+  gameId   String  @map("game_id")
+  game     Game    @relation(fields: [gameId], references: [id])
+  path     String
+  alt      String
+  position Int
+  isCover  Boolean @map("is_cover")
+
+  @@unique([gameId, position])
+  @@map("game_images")
+}
+
+model Sponsor {
+  id         String @id @default(uuid())
+  name       String
+  logoPath   String @map("logo_path")
+  websiteUrl String @map("website_url")
+  phone      String
+  services   String
+  position   Int
+
+  @@map("sponsors")
+}

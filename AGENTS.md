@@ -25,6 +25,7 @@ Todo el naming (directorios, archivos y código) va en **inglés**.
 | Next.js | `16.4.0` | App Router, `cacheComponents` y `partialPrefetching` activados. |
 | React | `19.3` | Server Components por defecto. |
 | TypeScript | `6.x` | `strict`, `module: preserve`, `moduleResolution: bundler`. |
+| Prisma | `7.10.1` + `@prisma/adapter-better-sqlite3` | Base de datos SQLite en modo WAL (`busy_timeout` de 5000 ms). Cliente generado en `generated/prisma/` (fuera de git; lo crea `postinstall`). Esquema en `prisma/schema.prisma` y configuración en `prisma7.config.ts`. |
 | Tailwind CSS | `4` | Configurado vía `@tailwindcss/turbopack`. |
 | HeroUI | `3.x` (`@heroui/react`, `@heroui/styles`) | Librería de componentes (React Aria + Tailwind 4). |
 | ESLint | `9.x` + `eslint-plugin-sonarjs` | Reglas de SonarQube. ESLint 10 aún no es compatible con `eslint-config-next`. |
@@ -43,6 +44,9 @@ npm run format             # aplica el formato con Prettier (npm run format:chec
 npm run typecheck          # next typegen + tsc --noEmit (y tsc -p tools/oxlint para el plugin)
 npm test                   # pruebas con Jest (npm run test:coverage para cobertura)
 npm run build              # compila para producción (exige NEXT_PUBLIC_SITE_URL)
+npm run db:generate        # genera el cliente de Prisma en generated/prisma (también corre en postinstall)
+npm run db:migrate         # crea y aplica una migración en la BD de DATABASE_URL (prisma migrate dev)
+npm run db:deploy          # aplica las migraciones pendientes sin crear nuevas (prisma migrate deploy)
 ```
 
 Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm run lint`,
@@ -140,7 +144,9 @@ Si una consulta no se cachea (usa `await connection()`), envuelve la parte que e
    `@shared/components/*`. `layout.tsx` sólo importa de `@shared/lib/` (fuentes, metadata y siteConfig).
 2. Sólo `lib/server/`, `@shared/lib/server/` y los Route Handlers
    (`api/*-route.ts`) importan `server-only`, y nada que pueda llegar al navegador (`lib/`, `hooks/`,
-   `components/`, `api/*-api-client.ts`) importa esas carpetas ni los Route Handlers.
+   `components/`, `api/*-api-client.ts`) importa esas carpetas ni los Route Handlers. El cliente de Prisma
+   generado (`@generated/prisma/*`) también es sólo de servidor: lo importan únicamente `lib/server/` y
+   `@shared/lib/server/` (la consulta pasa por `getPrisma()` de `@shared/lib/server/prisma`).
 3. Dentro de una feature, las capas siguen la tabla de arriba: `lib/` no importa `hooks/`,
    `components/` ni `pages/`; `hooks/` no importa `components/` ni `pages/`; `pages/` no importa `hooks/`.
 4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx`, `globals.css`, archivos de ruta que delegan
@@ -166,6 +172,7 @@ mediante los path aliases de `tsconfig.json`:
 | `@features/*` | `src/features/*` |
 | `@shared/*` | `src/shared/*` |
 | `@app/*` | `src/app/*` (sólo en las pruebas de `src/app/__tests__/`) |
+| `@generated/*` | `generated/*` (cliente de Prisma generado; sólo en `lib/server/` y `@shared/lib/server/`) |
 
 ```ts
 import { LandingPlaceholder } from "@features/landing/components/landing-placeholder";

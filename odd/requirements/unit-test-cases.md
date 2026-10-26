@@ -76,7 +76,7 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 
 | ID | Capa | Dado | Cuando | Entonces | Req |
 | --- | --- | --- | --- | --- | --- |
-| UT-SC-01 | server | una actividad con fin antes del inicio | el sysadmin la guarda | se rechaza (`endsAt > startsAt`) | RF-42 |
+| UT-SC-01 | server | una actividad con fin antes del inicio | el sysadmin la guarda | se rechaza (`endsAt >= startsAt`; un instante, como la publicación del bracket, tiene fin igual al inicio) | RF-42 |
 | UT-SC-02 | lib | actividades capturadas en desorden | se preparan para la landing | quedan ordenadas por hora de inicio | RF-03 |
 | UT-SC-03 | ui | ninguna actividad | se renderiza el cronograma | muestra "Cronograma por anunciar" | RF-03 |
 
