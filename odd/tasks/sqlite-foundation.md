@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 ---
 
 # SQLite foundation and public content
@@ -222,3 +222,11 @@ subagent on Opus, tests first and locked).
   five gates 0; `npm run db:seed` twice through the CLI still gives 18 games, 18 images, 18 stands, 13 genres, 21
   schedule items and 1 settings row. The assessment of `6380c44..dde4412` says `under_budget` (62 lines), so that slice
   stays pending until a later commit reaches the review budget.
+- L14 (2026-10-26, close): outcome: S1-S11 delivered except the `.env.example` bullet of S8. PR 1
+  (ikabeee/ut-e3#95, `size:exception`) merged into `develop` as `35f0434`; PR 2 (ikabeee/ut-e3#96, `size:exception`)
+  merged as `9b1727d`. Pending checks: `DATABASE_URL` in `.env.example` (reading `.env*` files is denied in this
+  session; the user has not answered); the `ed482c2` slice, `under_budget` for native review; the advisories in L9,
+  L10, L12 and L13 (Node 22 in CI, `prebuild-install` deprecated, the `DATABASE_URL` error echoing its value, no
+  automated ESLint boundary check, a missing database file giving Prisma's English error). Next step: SRS v2.3 module
+  M3, visitor registration, in `odd/tasks/visitor-registration.md` on branch `feature/visitor-registration` from
+  `9b1727d`.
