@@ -43,10 +43,11 @@ npm run lint:duplication   # jscpd: código copiado entre archivos de src/ (.jsc
 npm run format             # aplica el formato con Prettier (npm run format:check sólo revisa)
 npm run typecheck          # next typegen + tsc --noEmit (y tsc -p tools/oxlint para el plugin)
 npm test                   # pruebas con Jest (npm run test:coverage para cobertura)
-npm run build              # compila para producción (exige NEXT_PUBLIC_SITE_URL)
+npm run build              # compila para producción (exige NEXT_PUBLIC_SITE_URL y una BD migrada y con seed en DATABASE_URL)
 npm run db:generate        # genera el cliente de Prisma en generated/prisma (también corre en postinstall)
 npm run db:migrate         # crea y aplica una migración en la BD de DATABASE_URL (prisma migrate dev)
 npm run db:deploy          # aplica las migraciones pendientes sin crear nuevas (prisma migrate deploy)
+npm run db:seed            # carga el contenido inicial en las tablas vacías; no toca las que ya tienen datos (prisma/seed.ts)
 ```
 
 Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm run lint`,
@@ -58,7 +59,8 @@ Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm
 La estructura de carpetas "grita" el dominio, no el framework.
 Cada dominio es una **feature** dentro de `src/features/`. Hoy la portada (`/`) de la versión 2 compone
 seis: `landing`, `games`, `floor-plan`, `schedule`, `sponsors` y `event-settings`. Sus datos viven en
-código detrás de las consultas de `lib/server/` hasta que exista la base de datos. La portada estática
+SQLite y se leen con Prisma desde las consultas de `lib/server/`; `npm run db:seed` carga el contenido inicial
+desde las constantes `INITIAL_*` de cada `lib/server/<feature>-seed.ts`. La portada estática
 anterior se conserva en la rama `archive/landing-v1`, y la versión previa del proyecto (catálogo,
 croquis, pasaporte, panel, Prisma y TanStack Query) en `archive/develop-v1`.
 

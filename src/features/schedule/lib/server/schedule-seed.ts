@@ -1,5 +1,6 @@
 import "server-only";
 import type { ScheduleItem } from "@features/schedule/lib/types";
+import type { PrismaClient } from "@generated/prisma/client";
 
 export const INITIAL_SCHEDULE_ITEMS: ScheduleItem[] = [
   {
@@ -171,3 +172,14 @@ export const INITIAL_SCHEDULE_ITEMS: ScheduleItem[] = [
     zone: "stage",
   },
 ];
+
+// Schedule items have no natural key, so the seed only fills an empty table; the database assigns UUID ids.
+export async function seedScheduleItems(prisma: PrismaClient): Promise<void> {
+  if ((await prisma.scheduleItem.count()) > 0) return;
+
+  await prisma.scheduleItem.createMany({ data: INITIAL_SCHEDULE_ITEMS.map(toScheduleItemRow) });
+}
+
+function toScheduleItemRow({ title, description, startsAt, endsAt, zone }: ScheduleItem) {
+  return { title, description, startsAt, endsAt, zone };
+}

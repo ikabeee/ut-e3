@@ -1,4 +1,18 @@
-import { INITIAL_SCHEDULE_ITEMS } from "@features/schedule/lib/server/schedule-seed";
+/**
+ * @jest-environment node
+ */
+import { INITIAL_SCHEDULE_ITEMS, seedScheduleItems } from "@features/schedule/lib/server/schedule-seed";
+import { getPrisma } from "@shared/lib/server/prisma";
+import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
+
+const database = createTestDatabase();
+
+process.env.DATABASE_URL = database.url;
+
+afterAll(async () => {
+  await getPrisma().$disconnect();
+  database.remove();
+});
 
 const PUBLIC_PROGRAM = [
   ["2026-11-20T17:00:00.000Z", "2026-11-20T17:30:00.000Z", "Inauguración en el escenario principal"],
@@ -55,3 +69,48 @@ describe("INITIAL_SCHEDULE_ITEMS", () => {
     INITIAL_SCHEDULE_ITEMS.forEach((item) => expect(item.description).not.toMatch(/E3/));
   });
 });
+
+describe("seedScheduleItems", () => {
+  beforeEach(async () => {
+    await getPrisma().scheduleItem.deleteMany();
+  });
+
+  it("writes every activity of the public program", async () => {
+    await seedScheduleItems(getPrisma());
+
+    expect((await readProgram()).toSorted()).toEqual(PUBLIC_PROGRAM.toSorted());
+  });
+
+  it("leaves the same rows when it runs twice", async () => {
+    await seedScheduleItems(getPrisma());
+    const firstRun = await readRows();
+
+    await seedScheduleItems(getPrisma());
+
+    expect(await readRows()).toEqual(firstRun);
+  });
+
+  it("keeps an activity title edited after the first run and adds no duplicate", async () => {
+    await seedScheduleItems(getPrisma());
+    await getPrisma().scheduleItem.updateMany({
+      where: { title: "Gran final de KOF" },
+      data: { title: "Gran final de KOF en vivo" },
+    });
+
+    await seedScheduleItems(getPrisma());
+
+    expect(await getPrisma().scheduleItem.count()).toBe(PUBLIC_PROGRAM.length);
+    expect(await getPrisma().scheduleItem.count({ where: { title: "Gran final de KOF en vivo" } })).toBe(1);
+    expect(await getPrisma().scheduleItem.count({ where: { title: "Gran final de KOF" } })).toBe(0);
+  });
+});
+
+async function readProgram(): Promise<string[][]> {
+  const items = await getPrisma().scheduleItem.findMany();
+
+  return items.map((item) => [item.startsAt.toISOString(), item.endsAt.toISOString(), item.title]);
+}
+
+function readRows() {
+  return getPrisma().scheduleItem.findMany({ orderBy: { id: "asc" } });
+}
