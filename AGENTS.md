@@ -60,7 +60,8 @@ La estructura de carpetas "grita" el dominio, no el framework.
 Cada dominio es una **feature** dentro de `src/features/`. Hoy la portada (`/`) de la versión 2 compone
 seis: `landing`, `games`, `floor-plan`, `schedule`, `sponsors` y `event-settings`. Sus datos viven en
 SQLite y se leen con Prisma desde las consultas de `lib/server/`; `npm run db:seed` carga el contenido inicial
-desde las constantes `INITIAL_*` de cada `lib/server/<feature>-seed.ts`. La portada estática
+desde las constantes `INITIAL_*` de cada `lib/server/<feature>-seed.ts`. Además, `accounts` da el inicio de
+sesión (`/login`) y `admin` el panel del sysadmin (`/admin`), donde se edita el cronograma. La portada estática
 anterior se conserva en la rama `archive/landing-v1`, y la versión previa del proyecto (catálogo,
 croquis, pasaporte, panel, Prisma y TanStack Query) en `archive/develop-v1`.
 
@@ -71,9 +72,11 @@ src/
 │   ├── landing/              # Portada (/): hero, actividades, invitadas, ubicación y la page
 │   ├── games/                # Juegos: carrusel de destacados y catálogo en coverflow
 │   ├── floor-plan/           # Croquis interactivo con los stands (ZA-S3) y las zonas
-│   ├── schedule/             # Cronograma de actividades
+│   ├── schedule/             # Cronograma de actividades (portada y edición en el panel)
 │   ├── sponsors/             # Banda de patrocinadores
-│   └── event-settings/       # Horarios y valores configurables del evento
+│   ├── event-settings/       # Horarios y valores configurables del evento
+│   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
+│   └── admin/                # Panel del sysadmin (/admin): compone las secciones que se administran
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
     ├── components/           # Primitivos: JsonLd, UtgLogo, ActionLink, ArrowButton, PaperCard...
@@ -212,6 +215,31 @@ import { siteConfig } from "@shared/lib/site-config";
 3. Crea los componentes en `components/` y el contenedor en `pages/<name>-page.tsx`.
 4. Crea la ruta en `src/app/<ruta>/page.tsx` que sólo exporta la page y su metadata (ver el ejemplo
    de arriba) y agrega `alternates.canonical` a su metadata.
+
+## Cuentas, sesiones y panel
+
+Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 de la SRS v2):
+
+| Qué cambia | Dónde |
+| --- | --- |
+| Textos del login | `src/features/accounts/lib/accounts-copy.ts` |
+| Reglas del login (límite de intentos, mensaje genérico) | `src/features/accounts/lib/accounts-actions.ts` |
+| Quién puede entrar al panel | `requireSysadmin()` en `src/features/accounts/lib/server/current-account.ts` |
+| Rutas protegidas por cookie | `matcher` de `src/proxy.ts` (sólo revisa que haya cookie; la page y cada Server Action validan la sesión en la BD) |
+| Duración y cookie de la sesión | `src/shared/lib/server/session.ts` |
+| Hash de contraseñas (scrypt) | `src/shared/lib/server/password.ts` |
+| Ventanas del límite de solicitudes | `src/shared/lib/server/rate-limit.ts` |
+| Campos y validación del cronograma | `src/features/schedule/lib/schedule-item-input.ts` |
+| Bitácora de auditoría | `recordAudit()` en `src/shared/lib/server/audit-log.ts`, dentro de la transacción del cambio |
+
+- Toda Server Action del panel empieza con `await requireSysadmin()` y, tras escribir, llama `updateTag` con el
+  tag de la consulta que cambió para que la portada lo muestre.
+- Los CHECKs de `accounts` y los triggers que hacen la bitácora de sólo inserción viven en el SQL de la migración
+  (`prisma/migrations/*_staff_auth`). Para cambiarlos se crea una migración nueva; nunca se edita una aplicada.
+- La cuenta del sysadmin sale de `SYSADMIN_EMAIL`, `SYSADMIN_NAME` y `SYSADMIN_PASSWORD` al correr `npm run db:seed`.
+- Pruebas: `jest.mock` está prohibido, así que las de Server Actions espían `cookies()` con
+  `stubCookies(createCookieJar())` de `src/shared/__tests__/lib/server/cookie-jar.ts` y revisan un `redirect()` por
+  el `digest` del error (`";/login;"`).
 
 ## Documentación del proyecto
 

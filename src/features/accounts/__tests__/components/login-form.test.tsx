@@ -11,7 +11,8 @@ describe("LoginForm", () => {
     expect(screen.getByLabelText("Correo")).toHaveAttribute("autocomplete", "username");
     expect(screen.getByLabelText("Contraseña")).toHaveAttribute("type", "password");
     expect(screen.getByLabelText("Contraseña")).toHaveAttribute("autocomplete", "current-password");
-    expect(screen.getByLabelText("Correo")).toHaveClass("text-base");
+    expect(screen.getByLabelText("Correo")).toHaveClass("text-base", "min-h-11");
+    expect(screen.getByLabelText("Contraseña")).toHaveClass("text-base", "min-h-11");
     expect(screen.getByRole("button", { name: "Entrar" })).toBeInTheDocument();
   });
 
@@ -30,6 +31,7 @@ describe("LoginForm", () => {
     await userEvent.click(screen.getByRole("button", { name: "Entrar" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Correo o contraseña incorrectos");
+    expect(screen.getByLabelText("Correo")).toHaveValue("admin@ut.mx");
     expect(received.map((form) => [form.get("email"), form.get("password")])).toEqual([["admin@ut.mx", "secreta"]]);
   });
 });

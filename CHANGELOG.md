@@ -8,6 +8,12 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Inicio de sesión del staff en `/login` y panel del sysadmin en `/admin`, donde se agregan, editan y eliminan
+  las actividades del cronograma (hora de Cancún, zona opcional del croquis). Los cambios aparecen en la portada
+  al instante y quedan en la bitácora. La cuenta del sysadmin se crea con `npm run db:seed` a partir de
+  `SYSADMIN_EMAIL`, `SYSADMIN_NAME` y `SYSADMIN_PASSWORD`; tras 3 intentos fallidos en una hora, el login se
+  bloquea para ese correo hasta la siguiente hora.
+
 - Portada de la versión 2 (`/`) con el diseño UTG y los requisitos de la SRS v2: loop animado en el hero,
   carrusel de patrocinadores (aparece cuando haya patrocinadores), actos JUEGA, CALIFICA y GANA con
   pictogramas animados (Rifa, torneo de KOF y Mario Kart) y la franja del Marketplace,
