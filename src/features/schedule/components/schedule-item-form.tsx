@@ -43,6 +43,7 @@ export function ScheduleItemForm({ item, zones, action }: Readonly<ScheduleItemF
   return (
     <Form
       ref={formRef}
+      action={formAction}
       onSubmit={handleSubmit}
       validationErrors={state?.status === "invalid" ? state.errors : undefined}
       className="grid gap-5"

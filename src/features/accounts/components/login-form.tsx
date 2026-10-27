@@ -17,7 +17,7 @@ export function LoginForm({ action }: Readonly<LoginFormProps>) {
   const handleSubmit = useSubmitKeepingValues(formAction);
 
   return (
-    <Form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-5">
+    <Form action={formAction} onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-5">
       <TextField name="email" type="email" autoComplete="username" isRequired>
         <Label>{COPY.emailLabel}</Label>
         <Input className="text-base" />
