@@ -26,6 +26,9 @@ describe("ScheduleItemForm", () => {
     expect(screen.getByLabelText("Descripción")).toHaveValue("");
     expect(screen.getByLabelText("Inicio")).toHaveAttribute("type", "datetime-local");
     expect(screen.getByLabelText("Fin")).toHaveAttribute("type", "datetime-local");
+    ["Título", "Inicio", "Fin"].forEach((label) =>
+      expect(screen.getByLabelText(label)).toHaveClass("text-base", "min-h-11"),
+    );
     expect(screen.getByRole("button", { name: /Zona/ })).toHaveTextContent("Sin zona");
     expect(screen.getByRole("button", { name: "Agregar actividad" })).toBeInTheDocument();
   });

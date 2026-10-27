@@ -51,7 +51,7 @@ export function ScheduleItemForm({ item, zones, action }: Readonly<ScheduleItemF
       {item && <input type="hidden" name="id" value={item.id} />}
       <TextField name="title" defaultValue={item?.title} maxLength={TITLE_MAX_LENGTH} isRequired>
         <Label>{COPY.fields.title}</Label>
-        <Input className="text-base" />
+        <Input className="min-h-11 text-base" />
         <FieldError />
       </TextField>
       <TextField name="description" defaultValue={item?.description} maxLength={DESCRIPTION_MAX_LENGTH} isRequired>
@@ -81,7 +81,7 @@ function DateTimeField({ name, label, instant }: Readonly<{ name: string; label:
       isRequired
     >
       <Label>{label}</Label>
-      <Input className="text-base" />
+      <Input className="min-h-11 text-base" />
       <Description>{COPY.timeZoneHint}</Description>
       <FieldError />
     </TextField>

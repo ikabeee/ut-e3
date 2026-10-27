@@ -11,7 +11,8 @@ describe("LoginForm", () => {
     expect(screen.getByLabelText("Correo")).toHaveAttribute("autocomplete", "username");
     expect(screen.getByLabelText("Contraseña")).toHaveAttribute("type", "password");
     expect(screen.getByLabelText("Contraseña")).toHaveAttribute("autocomplete", "current-password");
-    expect(screen.getByLabelText("Correo")).toHaveClass("text-base");
+    expect(screen.getByLabelText("Correo")).toHaveClass("text-base", "min-h-11");
+    expect(screen.getByLabelText("Contraseña")).toHaveClass("text-base", "min-h-11");
     expect(screen.getByRole("button", { name: "Entrar" })).toBeInTheDocument();
   });
 

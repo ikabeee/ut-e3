@@ -20,12 +20,12 @@ export function LoginForm({ action }: Readonly<LoginFormProps>) {
     <Form action={formAction} onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-5">
       <TextField name="email" type="email" autoComplete="username" isRequired>
         <Label>{COPY.emailLabel}</Label>
-        <Input className="text-base" />
+        <Input className="min-h-11 text-base" />
         <FieldError />
       </TextField>
       <TextField name="password" type="password" autoComplete="current-password" isRequired>
         <Label>{COPY.credentialLabel}</Label>
-        <Input className="text-base" />
+        <Input className="min-h-11 text-base" />
         <FieldError />
       </TextField>
       {state?.error ? (
