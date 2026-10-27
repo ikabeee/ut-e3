@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 ---
 
 # Visitor registration (M3)
@@ -116,3 +116,11 @@ Route evidence: the user asked to delegate implementation to `agy` because Claud
 - L9 (2026-10-27): R1-001 resolved by deployment, user answer "Servidor propio con nginx": README "Despliegue"
   documents `proxy_set_header X-Forwarded-For $remote_addr;` and the new environment variables. `.env.example`
   still needs `PIN_ENCRYPTION_KEY` and `SMTP_*`; this session cannot write `.env*`.
+- L10 (2026-10-27, close): S1-S10 delivered in `6af593f`, `e3e4c96`, `e63a8c1`, `551f4c8`, `76c61f2`, `981c74e`
+  (plus doc commits). Native reviews: T1+T2 and T3 approved and acknowledged; the hardening and T4 commits after
+  `8e5b7ba` are not reviewed yet. Pending checks: end-to-end browser run of `/register` -> `/passport` and a real
+  SMTP send, both blocked on `PIN_ENCRYPTION_KEY` and `SMTP_*` in `.env` (user); `.env.example` needs the same keys
+  without values. Delivery: `stacked-to-main` against `develop` is about 3,000 authored lines; PR slices: PR 1 =
+  T1+T2 (`6af593f`..`cea45b3`), PR 2 = T3 (`e63a8c1`, `8e5b7ba`), PR 3 = hardening, T4 and docs
+  (`551f4c8`..HEAD). Push and PRs are the user's call. Next specific objective: M4 passport and check-in
+  (`odd/tasks/visitor-passport.md`, not created).
