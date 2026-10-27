@@ -22,8 +22,15 @@ Requisitos: **Node.js ≥ 22.18**.
 
 ```bash
 npm install
+echo 'DATABASE_URL="file:./dev.db"' >> .env
+npm run db:deploy      # crea la base SQLite y aplica las migraciones
+npm run db:seed        # carga el contenido inicial y la cuenta del sysadmin
 npm run dev            # http://localhost:3000
 ```
+
+La cuenta del sysadmin sale de `SYSADMIN_EMAIL`, `SYSADMIN_NAME` y `SYSADMIN_PASSWORD` (en el entorno o en `.env`,
+nunca en el repositorio). El seed la crea sólo si todavía no hay un sysadmin; si falta alguna variable, avisa y sigue
+con el resto del contenido.
 
 El build de producción exige `NEXT_PUBLIC_SITE_URL` (URL absoluta `http(s)` sin `/` final,
 por ejemplo `https://ejemplo.com`): si falta o es inválida, `npm run build` falla con un
