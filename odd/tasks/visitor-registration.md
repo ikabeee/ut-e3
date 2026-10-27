@@ -51,7 +51,7 @@ Opus specifies, reviews and commits.
 | T1 | S3, S4, S7 (data) | delegated: agy | done | `6af593f` |
 | T2 | S5 | delegated: agy | done | `e3e4c96` |
 | T3 | S1, S2, S4, S6, S7, S8, S10 | delegated: agy | done | `e63a8c1` |
-| T4 | S9 | delegated: agy | pending | |
+| T4 | S9 | delegated: agy | done | `76c61f2` |
 
 - T1: migration `visitor_registration` (`visitors`, `visitor_devices`, `email_blocklist`, `email_outbox`) and
   `pin-cipher.ts`. Risk: items 1 (migration) and 2 (secret key).
@@ -101,3 +101,15 @@ Route evidence: the user asked to delegate implementation to `agy` because Claud
   browser: it needs `PIN_ENCRYPTION_KEY` in `.env`, which this session cannot write; the Server Action tests cover
   it. Jest 83 suites, 409 tests; typecheck, eslint, oxlint, jscpd, prettier 0. Commit `e63a8c1`. Risk: item 2
   (rate limit keyed by the spoofable `x-forwarded-for`, same trust as the host proxy gives).
+- L7 (2026-10-27): T2 hardening (L5 advisories) `551f4c8` and T4 `/passport` `76c61f2`, run by two agy workers in
+  parallel on disjoint surfaces. Seam check: Jest 86 suites, 434 tests; typecheck, eslint, oxlint, jscpd, prettier 0.
+  Native review of T3 (`cea45b3..8e5b7ba`, escalated item 2, lenses risk and reliability): user granted, approved,
+  acknowledged (authority burned). Advisories: R1-001 the rate limit trusts a client-set `x-forwarded-for`; R1-002 no
+  email ownership check, so a third party can take a victim's address (RF-16 activates the passport without waiting
+  for the email, so this is by design until the SRS says otherwise); R3-001 a concurrent duplicate escapes as a
+  `P2002`; R3-002 the quota is spent while closed; R3-003/R3-004 weak assertions; R3-005 unbounded PIN loop.
+  R3-001, R3-002, R3-003 and R3-005 sent to an agy cleaner; R1-001 and R1-002 need a user decision.
+- L8 (2026-10-27): agy cleaner fixed R3-001 (P2002 mapped to `gamertagTaken`/`blocked`, PIN collision retried),
+  R3-002 (open check before the rate limit), R3-003 (exact closed message) and R3-005 (20 PIN attempts), with new
+  regression suites. Jest 88 suites, 444 tests; eslint, oxlint 0. The user chose to accept R1-002 ("Aceptar el
+  riesgo"): added to section 7 of `odd/requirements/srs-v2.md`. R1-001 (`x-forwarded-for`) pending a user decision.

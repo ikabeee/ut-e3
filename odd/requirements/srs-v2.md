@@ -349,6 +349,7 @@ Tomado del orden del día oficial. Es el contenido inicial del cronograma (RF-03
 | PIN compartido o visto por otra persona: alguien registra una visita y un voto con el PIN de otra persona | Un voto por stand, alertas de fraude y anulación de la visita cuando el visitante la reporta. |
 | Alguien con acceso a la computadora del stand enumera el filtro de PIN | Falsos positivos a propósito: la mayoría de los candidatos no son PIN reales y el servidor rechaza las visitas con PIN que no son de nadie. |
 | Kiosco sin conexión con el reloj atrasado | La mayoría de las visitas llegan en línea; queda registrada la cuenta que tenía abierto el kiosco. |
+| Alguien registra el correo de otra persona: el pasaporte se activa sin confirmar el correo (RF-16) y el dueño real recibe el rechazo genérico | El dueño acude a la mesa de atención (RF-69); el sysadmin excluye el pasaporte falso con motivo (RF-46) y queda en la bitácora. |
 | Recuperación en la mesa de atención con nombre y gamertag de otra persona | Queda en la bitácora con el agente que la hizo. |
 | El visitante puede sentirse presionado al votar frente al staff | Vista tipo kiosco y calificaciones ocultas al staff. |
 | Un solo servidor: si el VPS se cae, se caen la web y la BD | Reinicio automático y respaldos. |

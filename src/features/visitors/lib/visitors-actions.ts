@@ -39,6 +39,12 @@ export async function registerVisitor(_previous: RegistrationState | null, form:
     };
   }
 
+  const closedError = await checkRegistrationClosed();
+
+  if (closedError) {
+    return { values: parsed.value, error: closedError };
+  }
+
   const clientIp = await resolveClientIp();
   const allowed = await consumeAttempt(`register:${clientIp}`, REGISTRATION_RATE_LIMIT);
 
@@ -46,13 +52,29 @@ export async function registerVisitor(_previous: RegistrationState | null, form:
     return { values: parsed.value, error: VISITORS_COPY.rateLimited };
   }
 
-  const closedError = await checkRegistrationClosed();
+  return executeRegistration(parsed.value);
+}
 
-  if (closedError) {
-    return { values: parsed.value, error: closedError };
+async function checkRegistrationClosed(): Promise<string | null> {
+  const now = new Date();
+  const opensAt = await getRegistrationOpensAt();
+
+  if (!opensAt || now < opensAt) {
+    return VISITORS_COPY.errors.closed;
   }
 
-  return executeRegistration(parsed.value);
+  return null;
+}
+
+async function resolveClientIp(): Promise<string> {
+  const headersList = await headers();
+  const forwarded = headersList.get("x-forwarded-for");
+
+  if (!forwarded) {
+    return "unknown";
+  }
+
+  return forwarded.split(",")[0].trim() || "unknown";
 }
 
 async function executeRegistration(input: {
@@ -80,28 +102,6 @@ async function executeRegistration(input: {
   });
 
   redirect(PASSPORT_PATH);
-}
-
-async function checkRegistrationClosed(): Promise<string | null> {
-  const now = new Date();
-  const opensAt = await getRegistrationOpensAt();
-
-  if (!opensAt || now < opensAt) {
-    return VISITORS_COPY.errors.closed;
-  }
-
-  return null;
-}
-
-async function resolveClientIp(): Promise<string> {
-  const headersList = await headers();
-  const forwarded = headersList.get("x-forwarded-for");
-
-  if (!forwarded) {
-    return "unknown";
-  }
-
-  return forwarded.split(",")[0].trim() || "unknown";
 }
 
 async function deliverPassportEmailSafely(emailId: string): Promise<void> {

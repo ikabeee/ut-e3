@@ -4,7 +4,7 @@ import { randomInt } from "node:crypto";
 import type { ValidRegistrationInput } from "@features/visitors/lib/registration-input";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 import { PASSPORT_PATH } from "@features/visitors/lib/visitors-links";
-import type { Prisma } from "@generated/prisma/client";
+import { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { enqueueEmail } from "@shared/lib/server/email-outbox";
 import { encryptPin, hashPinForLookup } from "@shared/lib/server/pin-cipher";
@@ -12,10 +12,19 @@ import { getPrisma } from "@shared/lib/server/prisma";
 import { createVisitorDevice } from "@shared/lib/server/visitor-device";
 import { siteConfig } from "@shared/lib/site-config";
 
+export const MAX_PIN_ATTEMPTS = 20;
+
+export type RandomPinSource = () => number | string;
+
 export type RegistrationResult =
   | { status: "blocked" }
   | { status: "gamertagTaken" }
   | { status: "created"; visitorId: string; deviceToken: string; emailId: string };
+
+export type UniqueViolationTarget = string[] | string | null | undefined;
+
+export type UniqueViolationResolution =
+  { status: "gamertagTaken" } | { status: "blocked" } | { status: "retryPin" } | null;
 
 interface GeneratedPin {
   pin: string;
@@ -23,21 +32,39 @@ interface GeneratedPin {
   encryptedPin: string;
 }
 
+interface PrismaUniqueError extends Prisma.PrismaClientKnownRequestError {
+  meta?: { target?: UniqueViolationTarget };
+}
+
+type InsertAttemptOutcome = { kind: "completed"; result: RegistrationResult } | { kind: "retry" };
+
 export async function registerVisitorRecord(
   input: ValidRegistrationInput,
   now: Date = new Date(),
 ): Promise<RegistrationResult> {
-  return getPrisma().$transaction(async (tx) => {
-    if (await isEmailBlocked(tx, input.email)) {
-      return { status: "blocked" };
+  try {
+    return await getPrisma().$transaction(async (tx) => {
+      if (await isEmailBlocked(tx, input.email)) {
+        return { status: "blocked" };
+      }
+
+      if (await isGamertagTaken(tx, input.gamertag)) {
+        return { status: "gamertagTaken" };
+      }
+
+      return insertVisitorRegistration(tx, input, now);
+    });
+  } catch (cause) {
+    if (isPrismaUniqueViolation(cause)) {
+      const resolution = mapUniqueViolation(cause.meta?.target);
+
+      if (resolution && resolution.status !== "retryPin") {
+        return resolution;
+      }
     }
 
-    if (await isGamertagTaken(tx, input.gamertag)) {
-      return { status: "gamertagTaken" };
-    }
-
-    return insertVisitorRegistration(tx, input, now);
-  });
+    throw cause;
+  }
 }
 
 export async function getRegistrationOpensAt(): Promise<Date | null> {
@@ -71,41 +98,52 @@ async function insertVisitorRegistration(
   input: ValidRegistrationInput,
   now: Date,
 ): Promise<RegistrationResult> {
-  const { pin, pinLookup, encryptedPin } = await generateUniquePin(tx);
+  for (let attempt = 1; attempt <= MAX_PIN_ATTEMPTS; attempt++) {
+    const outcome = await attemptVisitorInsert(tx, input, now);
 
-  const visitor = await tx.visitor.create({
-    data: {
-      fullName: input.fullName,
-      gamertag: input.gamertag,
-      email: input.email,
-      pin: encryptedPin,
-      pinLookup,
-      createdAt: now,
-    },
-  });
+    if (outcome.kind === "retry") {
+      continue;
+    }
 
-  const deviceToken = await createVisitorDevice(tx, visitor.id);
-  const passportUrl = `${siteConfig.url}${PASSPORT_PATH}`;
+    return outcome.result;
+  }
 
-  const emailId = await enqueueEmail(tx, {
-    to: input.email,
-    subject: VISITORS_COPY.email.subject(input.gamertag),
-    text: VISITORS_COPY.email.body(pin, input.gamertag, passportUrl),
-  });
-
-  await recordVisitorAudit(tx, visitor.id, input.gamertag);
-
-  return {
-    status: "created",
-    visitorId: visitor.id,
-    deviceToken,
-    emailId,
-  };
+  throw new Error("Unable to generate a unique PIN after 20 attempts.");
 }
 
-async function generateUniquePin(tx: Prisma.TransactionClient): Promise<GeneratedPin> {
-  while (true) {
-    const rawPin = String(randomInt(0, 100_000)).padStart(5, "0");
+async function attemptVisitorInsert(
+  tx: Prisma.TransactionClient,
+  input: ValidRegistrationInput,
+  now: Date,
+): Promise<InsertAttemptOutcome> {
+  const { pin, pinLookup, encryptedPin } = await generateUniquePin(tx);
+
+  try {
+    const visitor = await tx.visitor.create({
+      data: {
+        fullName: input.fullName,
+        gamertag: input.gamertag,
+        email: input.email,
+        pin: encryptedPin,
+        pinLookup,
+        createdAt: now,
+      },
+    });
+
+    const result = await finalizeVisitorRegistration(tx, { id: visitor.id, pin }, input);
+
+    return { kind: "completed", result };
+  } catch (cause) {
+    return handleInsertError(cause);
+  }
+}
+
+export async function generateUniquePin(
+  tx: Prisma.TransactionClient,
+  randomSource: RandomPinSource = defaultRandomPinSource,
+): Promise<GeneratedPin> {
+  for (let attempt = 1; attempt <= MAX_PIN_ATTEMPTS; attempt++) {
+    const rawPin = sampleRandomPin(randomSource);
     const pinLookup = hashPinForLookup(rawPin);
 
     const collision = await tx.visitor.findUnique({
@@ -119,6 +157,92 @@ async function generateUniquePin(tx: Prisma.TransactionClient): Promise<Generate
       return { pin: rawPin, pinLookup, encryptedPin };
     }
   }
+
+  throw new Error("Unable to generate a unique PIN after 20 attempts.");
+}
+
+function sampleRandomPin(source: RandomPinSource): string {
+  return String(source()).padStart(5, "0");
+}
+
+function defaultRandomPinSource(): number {
+  return randomInt(0, 100_000);
+}
+
+async function finalizeVisitorRegistration(
+  tx: Prisma.TransactionClient,
+  visitor: { id: string; pin: string },
+  input: ValidRegistrationInput,
+): Promise<RegistrationResult> {
+  const deviceToken = await createVisitorDevice(tx, visitor.id);
+  const passportUrl = `${siteConfig.url}${PASSPORT_PATH}`;
+
+  const emailId = await enqueueEmail(tx, {
+    to: input.email,
+    subject: VISITORS_COPY.email.subject(input.gamertag),
+    text: VISITORS_COPY.email.body(visitor.pin, input.gamertag, passportUrl),
+  });
+
+  await recordVisitorAudit(tx, visitor.id, input.gamertag);
+
+  return {
+    status: "created",
+    visitorId: visitor.id,
+    deviceToken,
+    emailId,
+  };
+}
+
+function handleInsertError(cause: unknown): InsertAttemptOutcome {
+  if (!isPrismaUniqueViolation(cause)) {
+    throw cause;
+  }
+
+  const resolution = mapUniqueViolation(cause.meta?.target);
+
+  if (resolution?.status === "retryPin") {
+    return { kind: "retry" };
+  }
+
+  if (resolution) {
+    return { kind: "completed", result: resolution };
+  }
+
+  throw cause;
+}
+
+export function mapUniqueViolation(target: UniqueViolationTarget): UniqueViolationResolution {
+  const targets = normalizeTargets(target);
+
+  if (targets.some((item) => item.includes("gamertag"))) {
+    return { status: "gamertagTaken" };
+  }
+
+  if (targets.some((item) => item.includes("email"))) {
+    return { status: "blocked" };
+  }
+
+  if (targets.some((item) => item.includes("pin_hmac") || item.includes("pinlookup"))) {
+    return { status: "retryPin" };
+  }
+
+  return null;
+}
+
+function normalizeTargets(target: UniqueViolationTarget): string[] {
+  if (target === null || target === undefined) {
+    return [];
+  }
+
+  if (Array.isArray(target)) {
+    return target.map((item) => item.toLowerCase());
+  }
+
+  return [target.toLowerCase()];
+}
+
+function isPrismaUniqueViolation(cause: unknown): cause is PrismaUniqueError {
+  return cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === "P2002";
 }
 
 async function recordVisitorAudit(tx: Prisma.TransactionClient, visitorId: string, gamertag: string): Promise<void> {
