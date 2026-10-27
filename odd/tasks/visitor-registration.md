@@ -124,3 +124,15 @@ Route evidence: the user asked to delegate implementation to `agy` because Claud
   T1+T2 (`6af593f`..`cea45b3`), PR 2 = T3 (`e63a8c1`, `8e5b7ba`), PR 3 = hardening, T4 and docs
   (`551f4c8`..HEAD). Push and PRs are the user's call. Next specific objective: M4 passport and check-in
   (`odd/tasks/visitor-passport.md`, not created).
+- L11 (2026-10-27, e2e requested by the user: "realiza los tests y las pruebasss e2e me traes los outputs de las
+  pruebas"): Jest 88 suites, 444 tests; typecheck, eslint, oxlint, jscpd, format:check 0. Browser e2e with
+  `playwright-core@1.64.0` installed in the session scratchpad (not in the repo), the cached chrome-headless-shell,
+  `next dev` on :3456 against a scratch SQLite (`db:deploy` + `db:seed`, registration opened and one blocklist email
+  inserted only there), `PIN_ENCRYPTION_KEY` passed as a process variable and SMTP pointed at a closed local port:
+  12/12 steps pass (360 px layout, register -> `/passport` with PIN and gamertag, encrypted PIN and lowercased
+  email in the DB, one device, audit without PIN or email, outbox retry after `ECONNREFUSED`, case-insensitive
+  gamertag error, generic message for blocklist, staff and repeated emails, 4th attempt per IP rejected,
+  `/passport` without cookie -> `/register`, `/privacy` 200, closed window rejected by the action). The first runs
+  failed on script mistakes (screenshot during streaming, CSS uppercase in `innerText`, a rerun without reset), not
+  on the app. A hydration warning seen once came from Playwright's screenshot caret style: the server HTML has no
+  `caret-color` and a plain load logs 0 hydration warnings. Still pending: a real SMTP send.
