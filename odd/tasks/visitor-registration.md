@@ -48,7 +48,7 @@ Opus specifies, reviews and commits.
 
 | ID | Specs | Route | Status | Commit |
 | --- | --- | --- | --- | --- |
-| T1 | S3, S4, S7 (data) | delegated: agy | pending | |
+| T1 | S3, S4, S7 (data) | delegated: agy | done | `6af593f` |
 | T2 | S5 | delegated: agy | pending | |
 | T3 | S1, S2, S4, S6, S7, S8, S10 | delegated: agy | pending | |
 | T4 | S9 | delegated: agy | pending | |
@@ -70,3 +70,9 @@ Route evidence: the user asked to delegate implementation to `agy` because Claud
   cuota de tokens por lo tanto empezaras a delegar tareas al arnes de agy"
 - L2 (2026-10-27): the user chose real SMTP delivery ("Listo, se entrega por SMTP") and AES-GCM for the PIN.
   `.env.example` needs `PIN_ENCRYPTION_KEY` and `SMTP_*`; this session cannot edit `.env*`, the user applies it.
+- L3 (2026-10-27, T1): agy RED (2 suites fail: missing module and models), tests reviewed and locked; agy edited
+  `.env.example` outside its surface, reverted with `git restore` unread. GREEN: 73 suites, 359 tests; typecheck,
+  `eslint src prisma`, oxlint and jscpd 0. Parent fix: `Visitor.device` is 1:1 (`VisitorDevice?`); `prisma migrate
+  diff` against the schema is empty. `npm run lint` at the root also walks `.claude/worktrees/` (another session's
+  worktree), not caused by this change. `--mode auto` is not available on this agy account (default mode used).
+  Commit `6af593f`.
