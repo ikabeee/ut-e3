@@ -63,6 +63,20 @@ Cada feature se organiza en `lib/`, `hooks/`, `components/` y `pages/` (crea cad
 necesites), más `__tests__/` para sus pruebas. ESLint valida qué capa y qué feature puede importar a
 cuál. Las reglas completas están en [`AGENTS.md`](./AGENTS.md).
 
+## Despliegue
+
+El sitio corre en un servidor propio detrás de nginx. El límite de 3 registros por hora por IP (`/register`) lee el
+primer valor de `X-Forwarded-For`, así que nginx debe **sobrescribir** ese encabezado con la IP real del cliente en
+lugar de concatenarlo; si no, un cliente puede falsificarlo y saltarse el límite:
+
+```nginx
+proxy_set_header X-Forwarded-For $remote_addr;
+```
+
+Variables de entorno del registro de visitantes: `PIN_ENCRYPTION_KEY` (32 bytes en base64, se genera con
+`openssl rand -base64 32`; si cambia, los PIN guardados ya no se pueden descifrar) y `SMTP_HOST`, `SMTP_PORT`,
+`SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` para el correo del pasaporte.
+
 ## Documentación
 
 | Documento | Para qué |

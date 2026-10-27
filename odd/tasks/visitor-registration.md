@@ -113,3 +113,6 @@ Route evidence: the user asked to delegate implementation to `agy` because Claud
   R3-002 (open check before the rate limit), R3-003 (exact closed message) and R3-005 (20 PIN attempts), with new
   regression suites. Jest 88 suites, 444 tests; eslint, oxlint 0. The user chose to accept R1-002 ("Aceptar el
   riesgo"): added to section 7 of `odd/requirements/srs-v2.md`. R1-001 (`x-forwarded-for`) pending a user decision.
+- L9 (2026-10-27): R1-001 resolved by deployment, user answer "Servidor propio con nginx": README "Despliegue"
+  documents `proxy_set_header X-Forwarded-For $remote_addr;` and the new environment variables. `.env.example`
+  still needs `PIN_ENCRYPTION_KEY` and `SMTP_*`; this session cannot write `.env*`.
