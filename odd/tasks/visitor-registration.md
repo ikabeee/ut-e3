@@ -50,7 +50,7 @@ Opus specifies, reviews and commits.
 | --- | --- | --- | --- | --- |
 | T1 | S3, S4, S7 (data) | delegated: agy | done | `6af593f` |
 | T2 | S5 | delegated: agy | done | `e3e4c96` |
-| T3 | S1, S2, S4, S6, S7, S8, S10 | delegated: agy | pending | |
+| T3 | S1, S2, S4, S6, S7, S8, S10 | delegated: agy | done | `e63a8c1` |
 | T4 | S9 | delegated: agy | pending | |
 
 - T1: migration `visitor_registration` (`visitors`, `visitor_devices`, `email_blocklist`, `email_outbox`) and
@@ -90,3 +90,14 @@ Route evidence: the user asked to delegate implementation to `agy` because Claud
   a slow send (R4, R3); 535 auth errors abandon every email after one try (R4); no `requireTLS` on 587 (R1);
   `SMTP_PORT` not validated (R3). Fixed by the parent: the tamper test in `pin-cipher.test.ts` was
   nondeterministic (R3); it now changes the first auth-tag character.
+- L6 (2026-10-27, T3): agy RED (4 suites), then GREEN plus UI; it stopped and reported, instead of editing, that
+  the locked tests broke two DB rules (`auditLog.deleteMany()` against the append-only trigger, and an event window
+  violating the CHECKs). Parent fixed the tests (seed-like dates, active account with a password, `stubAfter()` in
+  `beforeEach`, audit lookups already filtered by `entityId`) and one implementation bug (account emails compared
+  lowercased). Parent also: the `after()` log keeps only the error message (a nodemailer error can carry the
+  address), and `/register` reads the time inside `<Suspense>` after `await connection()` (dev server reported
+  `Date.now()` during prerender). Dev server on :3456: `/register` and `/privacy` 200, closed text
+  "El registro se abre el 13.11.2026." with the seeded date, no console errors. The full form flow was not run in a
+  browser: it needs `PIN_ENCRYPTION_KEY` in `.env`, which this session cannot write; the Server Action tests cover
+  it. Jest 83 suites, 409 tests; typecheck, eslint, oxlint, jscpd, prettier 0. Commit `e63a8c1`. Risk: item 2
+  (rate limit keyed by the spoofable `x-forwarded-for`, same trust as the host proxy gives).
