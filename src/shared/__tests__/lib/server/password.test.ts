@@ -23,4 +23,11 @@ describe("hashPassword and verifyPassword", () => {
   it("rejects a stored value that is not a scrypt hash", async () => {
     expect(await verifyPassword("anything", "plain-text")).toBe(false);
   });
+
+  it("rejects, without throwing, a stored hash whose parameters differ from the ones it writes", async () => {
+    const [, , , , salt, key] = (await hashPassword("anything")).split("$");
+
+    expect(await verifyPassword("anything", ["scrypt", 0, 8, 1, salt, key].join("$"))).toBe(false);
+    expect(await verifyPassword("anything", ["scrypt", 2 ** 30, 8, 1, salt, key].join("$"))).toBe(false);
+  });
 });

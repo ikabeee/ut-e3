@@ -12,6 +12,8 @@ const ACTIVE: AccountStatus = "active";
 const MISSING_VARIABLES =
   "Seed: no se creó la cuenta del sysadmin porque faltan SYSADMIN_EMAIL, SYSADMIN_NAME o SYSADMIN_PASSWORD.";
 
+const EMAIL_TAKEN = "Seed: no se creó la cuenta del sysadmin porque SYSADMIN_EMAIL ya pertenece a otra cuenta.";
+
 // The credentials come from the environment so they never reach the repository; an existing sysadmin is never touched.
 export async function seedSysadmin(prisma: PrismaClient, env: SysadminEnv): Promise<void> {
   if ((await prisma.account.count({ where: { role: SYSADMIN_ROLE } })) > 0) return;
@@ -22,6 +24,12 @@ export async function seedSysadmin(prisma: PrismaClient, env: SysadminEnv): Prom
 
   if (!email || !name || !password?.trim()) {
     console.log(MISSING_VARIABLES);
+
+    return;
+  }
+
+  if ((await prisma.account.count({ where: { email } })) > 0) {
+    console.log(EMAIL_TAKEN);
 
     return;
   }

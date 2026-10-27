@@ -48,6 +48,19 @@ describe("seedSysadmin", () => {
     expect(await prisma.account.findMany()).toEqual([before]);
   });
 
+  it("skips the account and says why when the email already belongs to another account", async () => {
+    await prisma.account.create({
+      data: { email: "admin@ut.mx", name: "Atención", role: "help_desk", status: "invited" },
+    });
+
+    await seedSysadmin(prisma, SYSADMIN_ENV);
+
+    expect(await prisma.account.findMany({ select: { role: true } })).toEqual([{ role: "help_desk" }]);
+    expect(log).toHaveBeenCalledWith(
+      "Seed: no se creó la cuenta del sysadmin porque SYSADMIN_EMAIL ya pertenece a otra cuenta.",
+    );
+  });
+
   it.each(["SYSADMIN_EMAIL", "SYSADMIN_NAME", "SYSADMIN_PASSWORD"])(
     "skips the account and says why when %s is missing",
     async (name) => {
