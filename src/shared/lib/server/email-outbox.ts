@@ -30,7 +30,8 @@ const BASE_RETRY_DELAY_MS = 30_000;
 
 const MAX_RETRY_DELAY_MS = 15 * 60_000;
 
-const LEASE_DURATION_MS = 2 * 60_000;
+// 10-minute lease gives slow SMTP deliveries enough headroom so concurrent workers do not claim in-flight sends.
+const LEASE_DURATION_MS = 10 * 60_000;
 
 export async function enqueueEmail(transaction: Prisma.TransactionClient, email: OutgoingEmail): Promise<string> {
   const row = await transaction.emailOutbox.create({
@@ -89,26 +90,35 @@ async function deliverEmailWithResult(id: string, send: SendEmail, now: Date): P
 
   try {
     await send({ to: row.to, subject: row.subject, text: row.text });
+  } catch (cause) {
+    await handleDeliveryFailure({ id, attempts: row.attempts }, cause, now);
 
+    return false;
+  }
+
+  try {
     await getPrisma().emailOutbox.update({
       where: { id },
       data: {
         sentAt: now,
+        text: "",
         lastError: null,
       },
     });
 
     return true;
   } catch (cause) {
-    await handleDeliveryFailure({ id, attempts: row.attempts }, cause, now);
+    const message = formatErrorMessage(cause);
 
-    return false;
+    console.error(`Email outbox sentAt update failed: ${message}`);
+    throw cause;
   }
 }
 
 // Atomically claim the pending row by leasing nextAttemptAt forward so concurrent workers skip it.
 async function claimPendingRow(id: string, now: Date): Promise<boolean> {
-  const leasedUntil = new Date(now.getTime() + LEASE_DURATION_MS);
+  const claimTime = new Date();
+  const leasedUntil = new Date(claimTime.getTime() + LEASE_DURATION_MS);
 
   const claimResult = await getPrisma().emailOutbox.updateMany({
     where: {
@@ -129,28 +139,43 @@ async function handleDeliveryFailure(claim: PendingOutboxClaim, cause: unknown, 
   const errorMessage = formatErrorMessage(cause);
   const temporary = isTemporaryEmailError(cause);
 
-  if (temporary) {
-    const nextAttempts = claim.attempts + 1;
-    const delayMs = getRetryDelayMs(nextAttempts);
-    const nextAttemptAt = new Date(now.getTime() + delayMs);
-
+  if (!temporary) {
     await getPrisma().emailOutbox.update({
       where: { id: claim.id },
       data: {
-        attempts: nextAttempts,
+        attempts: MAX_ATTEMPTS,
         lastError: errorMessage,
-        nextAttemptAt,
+        text: "",
       },
     });
 
     return;
   }
 
+  const nextAttempts = claim.attempts + 1;
+
+  if (nextAttempts >= MAX_ATTEMPTS) {
+    await getPrisma().emailOutbox.update({
+      where: { id: claim.id },
+      data: {
+        attempts: nextAttempts,
+        lastError: errorMessage,
+        text: "",
+      },
+    });
+
+    return;
+  }
+
+  const delayMs = getRetryDelayMs(nextAttempts);
+  const nextAttemptAt = new Date(now.getTime() + delayMs);
+
   await getPrisma().emailOutbox.update({
     where: { id: claim.id },
     data: {
-      attempts: MAX_ATTEMPTS,
+      attempts: nextAttempts,
       lastError: errorMessage,
+      nextAttemptAt,
     },
   });
 }
@@ -169,10 +194,18 @@ export function isTemporaryEmailError(cause: unknown): boolean {
   }
 
   if (hasSmtpResponseCode(cause)) {
+    if (isSmtpAuthFailure(cause.responseCode)) {
+      return true;
+    }
+
     return cause.responseCode >= 400 && cause.responseCode < 500;
   }
 
   return true;
+}
+
+function isSmtpAuthFailure(responseCode: number): boolean {
+  return responseCode === 530 || responseCode === 535;
 }
 
 function hasRateLimitResponse(cause: unknown): cause is SmtpRateLimitPayload {
