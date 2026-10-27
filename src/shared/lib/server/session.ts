@@ -1,8 +1,9 @@
 import "server-only";
-import { createHash, randomBytes } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE } from "@shared/lib/session-cookie";
 import { getPrisma } from "@shared/lib/server/prisma";
+import { hashToken } from "@shared/lib/server/token-hash";
 
 export interface SessionAccount {
   id: string;
@@ -64,8 +65,4 @@ export async function deleteSession(): Promise<void> {
 
 async function readSessionToken(): Promise<string | undefined> {
   return (await cookies()).get(SESSION_COOKIE)?.value || undefined;
-}
-
-function hashToken(token: string): string {
-  return createHash("sha256").update(token).digest("hex");
 }

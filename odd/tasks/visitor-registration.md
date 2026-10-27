@@ -83,3 +83,10 @@ Route evidence: the user asked to delegate implementation to `agy` because Claud
   SMTP transport). Outbox claims a row with a conditional `updateMany` lease so `after()` and the interval never
   send twice. Jest 75 suites, 378 tests; typecheck, `eslint src`, oxlint, jscpd 0. Commit `e3e4c96` (with the
   doc update). Risk: items 4 (concurrency) and 5 (dependency).
+- L5 (2026-10-27, native review of `3fe08d7..cea45b3`, T1+T2): user granted; lenses risk, resilience, reliability;
+  approved and acknowledged (`review-1c1f63b152365e0a`, authority burned). No blockers. Advisories to fix in a T2
+  hardening pass: outbox keeps the PIN email body in plain text after sending (R1); `sentAt` update inside the send
+  `try`, so a DB error after SMTP accepted re-sends (R4, R3); one `now` per batch and a 2-minute lease shorter than
+  a slow send (R4, R3); 535 auth errors abandon every email after one try (R4); no `requireTLS` on 587 (R1);
+  `SMTP_PORT` not validated (R3). Fixed by the parent: the tamper test in `pin-cipher.test.ts` was
+  nondeterministic (R3); it now changes the first auth-tag character.

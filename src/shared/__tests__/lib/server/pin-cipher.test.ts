@@ -57,7 +57,10 @@ describe("pin-cipher", () => {
 
   it("throws when decrypting a tampered ciphertext or malformed payload", () => {
     const valid = encryptPin("04217");
-    const tampered = valid.slice(0, -2) + (valid.endsWith("A") ? "B" : "A") + valid.slice(-1);
+    const [iv, authTag, ciphertext] = valid.split(".");
+    // The first base64url character holds six whole bits, so replacing it always changes the auth tag.
+    const tamperedTag = (authTag.startsWith("A") ? "B" : "A") + authTag.slice(1);
+    const tampered = [iv, tamperedTag, ciphertext].join(".");
 
     expect(() => decryptPin(tampered)).toThrow();
     expect(() => decryptPin("malformed-payload")).toThrow();
