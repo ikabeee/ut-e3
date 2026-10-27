@@ -36,4 +36,11 @@ export const VISITORS_COPY = {
     body: (pin: string, gamertag: string, passportUrl: string) =>
       `¡Hola, ${gamertag}!\n\nTu registro en UT Game Showcase ha sido exitoso.\nTu PIN de identidad es: ${pin}\n\nPuedes consultar tu pasaporte digital en el siguiente enlace:\n${passportUrl}\n\n¡Te esperamos en el evento!`,
   },
+  passport: {
+    title: "Pasaporte digital",
+    subtitle: "Tu identificación para el evento",
+    pinLabel: "PIN de identidad",
+    gamertagLabel: "Gamertag",
+    description: "Presenta tu PIN en cada stand para registrar tus visitas.",
+  },
 } as const;
