@@ -1,5 +1,5 @@
 import "server-only";
-import { randomBytes, scrypt, timingSafeEqual, type ScryptOptions } from "node:crypto";
+import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 
 // OWASP minimum for scrypt: N = 2^17, r = 8, p = 1 (Password Storage Cheat Sheet). It needs 128 MiB, above Node's 32 MiB default maxmem.
 const COST = 131_072;
@@ -18,7 +18,7 @@ const PREFIX = "scrypt";
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(SALT_LENGTH);
-  const key = await deriveKey(password, salt, { N: COST, r: BLOCK_SIZE, p: PARALLELISM });
+  const key = await deriveKey(password, salt);
 
   return [PREFIX, COST, BLOCK_SIZE, PARALLELISM, salt.toString("base64url"), key.toString("base64url")].join("$");
 }
@@ -30,26 +30,29 @@ export async function verifyPassword(password: string, stored: string): Promise<
     return false;
   }
 
-  const key = await deriveKey(password, parsed.salt, parsed.options);
+  const key = await deriveKey(password, parsed.salt);
 
   return key.length === parsed.key.length && timingSafeEqual(key, parsed.key);
 }
 
-function deriveKey(password: string, salt: Buffer, options: ScryptOptions): Promise<Buffer> {
+function deriveKey(password: string, salt: Buffer): Promise<Buffer> {
+  const options = { N: COST, r: BLOCK_SIZE, p: PARALLELISM, maxmem: MAX_MEMORY };
+
   return new Promise((resolve, reject) => {
-    scrypt(password.normalize("NFKC"), salt, KEY_LENGTH, { ...options, maxmem: MAX_MEMORY }, (error, key) =>
+    scrypt(password.normalize("NFKC"), salt, KEY_LENGTH, options, (error, key) =>
       error ? reject(error) : resolve(key),
     );
   });
 }
 
+// Only the parameters hashPassword writes are accepted, so a corrupted value fails closed instead of making scrypt throw.
 function parseStoredHash(stored: string) {
   const [prefix, cost, blockSize, parallelism, salt, key] = stored.split("$");
-  const options = { N: Number(cost), r: Number(blockSize), p: Number(parallelism) };
+  const expected = [PREFIX, COST, BLOCK_SIZE, PARALLELISM].join("$");
 
-  if (prefix !== PREFIX || !salt || !key || !Object.values(options).every(Number.isInteger)) {
+  if ([prefix, cost, blockSize, parallelism].join("$") !== expected || !salt || !key) {
     return null;
   }
 
-  return { options, salt: Buffer.from(salt, "base64url"), key: Buffer.from(key, "base64url") };
+  return { salt: Buffer.from(salt, "base64url"), key: Buffer.from(key, "base64url") };
 }
