@@ -136,3 +136,10 @@ Route evidence: the user asked to delegate implementation to `agy` because Claud
   failed on script mistakes (screenshot during streaming, CSS uppercase in `innerText`, a rerun without reset), not
   on the app. A hydration warning seen once came from Playwright's screenshot caret style: the server HTML has no
   `caret-color` and a plain load logs 0 hydration warnings. Still pending: a real SMTP send.
+- L12 (2026-10-27, native review of `8e5b7ba..9afed90`, escalated item 4, lenses resilience and reliability): user
+  granted; approved and acknowledged. Every commit of the feature is now reviewed. Advisories for a follow-up:
+  after 5 failed sends the body is wiped, so a long SMTP credential outage loses the passport email (the PIN stays
+  on `/passport`) (R4-001); `requireTLS` breaks plaintext dev relays on 25/1025 (R4-002, R3-004); `/passport`
+  answers 500 if `PIN_ENCRYPTION_KEY` changes (R4-003, R3-005); the P2002 tests never hit a real concurrent
+  violation (R3-001); the claim lease ignores the injected clock (R3-002); a failed `sentAt` update now aborts the
+  interval batch (R3-003).
