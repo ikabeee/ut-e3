@@ -49,7 +49,7 @@ Opus specifies, reviews and commits.
 | ID | Specs | Route | Status | Commit |
 | --- | --- | --- | --- | --- |
 | T1 | S3, S4, S7 (data) | delegated: agy | done | `6af593f` |
-| T2 | S5 | delegated: agy | pending | |
+| T2 | S5 | delegated: agy | done | `e3e4c96` |
 | T3 | S1, S2, S4, S6, S7, S8, S10 | delegated: agy | pending | |
 | T4 | S9 | delegated: agy | pending | |
 
@@ -76,3 +76,10 @@ Route evidence: the user asked to delegate implementation to `agy` because Claud
   diff` against the schema is empty. `npm run lint` at the root also walks `.claude/worktrees/` (another session's
   worktree), not caused by this change. `--mode auto` is not available on this agy account (default mode used).
   Commit `6af593f`.
+- L4 (2026-10-27, T2): parent installed `nodemailer@10.1.0` pinned (newest release older than two weeks; ships its
+  own types). agy RED then GREEN; agy reported, instead of editing, that the locked `mailer.test.ts` failed
+  typecheck (`NodeJS.ProcessEnv` requires `NODE_ENV` under Next's types): the parent fixed the test (unlocked,
+  edited, relocked) without widening the type. Parent simplified `src/instrumentation.ts` (type-only import, one
+  SMTP transport). Outbox claims a row with a conditional `updateMany` lease so `after()` and the interval never
+  send twice. Jest 75 suites, 378 tests; typecheck, `eslint src`, oxlint, jscpd 0. Commit `e3e4c96` (with the
+  doc update). Risk: items 4 (concurrency) and 5 (dependency).
