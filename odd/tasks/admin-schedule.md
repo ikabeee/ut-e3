@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 ---
 
 # Admin schedule editing (sysadmin only)
@@ -60,7 +60,7 @@ Objective: the sysadmin signs in and edits the event schedule (RF-42) from `/adm
 | T1 | S2, S3 (columns) | inline; Risk items 1 (migration) and 2 (credentials) | done | RED and GREEN L5, review L6; `7136bcd` |
 | T2 | S3, S4, S5, S6 | inline; Risk item 2 (auth, sessions, guards) | done | RED and GREEN L7, review L8; `4ffd629`, `7738433` |
 | T3 | S7, S8, S9, S10, S11 | inline; Risk item 2 (every action checks the session) | done | RED and GREEN L9, review L10; `821134b`, `37d0977` |
-| T4 | S1-S11 | independent verifier for the named high-risk items, then the seam check | done except `.env.example` (pending with the user) | verifier L11; `1837c91` |
+| T4 | S1-S11 | independent verifier for the named high-risk items, then the seam check | done | verifier L11; `1837c91`; `.env.example` `8bf2820` (L12) |
 
 Route evidence: no Writer trigger holds. T1 to T3 depend on each other (T2 needs T1's tables, T3 needs T2's guard), so
 they are not parallel units, and the parent writes them inline in order. T4 is the Verification trigger (item 2).
@@ -141,3 +141,11 @@ they are not parallel units, and the parent writes them inline in order. T4 is t
   Next step: the user adds `SYSADMIN_*` to `.env.example`; then PRs `stacked-to-main` against `develop`
   (T1 `7136bcd`; T2 `4ffd629`, `7738433`; T3 and T4 `821134b`, `37d0977`, `1837c91`), the first one also carrying
   `c287f72`.
+- L12 (2026-10-27, close): the user applied the `.env.example` rewrite this session proposed (it cannot read `.env*`):
+  SQLite `DATABASE_URL`, `SYSADMIN_EMAIL`, `SYSADMIN_NAME`, `SYSADMIN_PASSWORD`; removed the unused `ADMIN_USER`,
+  `ADMIN_PASSWORD`, `IMAGE_REMOTE_HOSTS` and `POSTGRES_*`; the SMTP block stays for M3. Commit `8bf2820`; this also
+  closes the `.env.example` bullet of `sqlite-foundation` S8. Outcome: S1-S11 delivered. Pending checks: none
+  failing; the review slice `37d0977..8bf2820` is under budget. Open advisories: L8 and L11. Delivery:
+  `stacked-to-main`, PR 1 = `c287f72` + `7136bcd` (data and seed), PR 2 = `4ffd629` + `7738433` (login), PR 3 =
+  `821134b`..HEAD (panel, fixes and docs). Next specific objective: M3 visitor registration
+  (`odd/tasks/visitor-registration.md`, not created yet).
