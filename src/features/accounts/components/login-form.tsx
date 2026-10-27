@@ -4,6 +4,7 @@ import { Button, FieldError, Form, Input, Label, TextField } from "@heroui/react
 import { useActionState } from "react";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import type { SignInState } from "@features/accounts/lib/accounts-actions";
+import { useSubmitKeepingValues } from "@shared/hooks/use-submit-keeping-values";
 
 interface LoginFormProps {
   action: (previous: SignInState | null, form: FormData) => Promise<SignInState>;
@@ -13,9 +14,10 @@ const COPY = ACCOUNTS_COPY.signIn;
 
 export function LoginForm({ action }: Readonly<LoginFormProps>) {
   const [state, formAction, isPending] = useActionState(action, null);
+  const handleSubmit = useSubmitKeepingValues(formAction);
 
   return (
-    <Form action={formAction} className="flex w-full max-w-sm flex-col gap-5">
+    <Form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-5">
       <TextField name="email" type="email" autoComplete="username" isRequired>
         <Label>{COPY.emailLabel}</Label>
         <Input className="text-base" />

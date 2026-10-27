@@ -6,3 +6,8 @@ export interface ScheduleItem {
   endsAt: string;
   zone: string | null;
 }
+
+export interface ZoneOption {
+  id: string;
+  label: string;
+}

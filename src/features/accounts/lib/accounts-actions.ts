@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import { LOGIN_PATH, SYSADMIN_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { findSignInAccount } from "@features/accounts/lib/server/account-queries";
+import { readFormText } from "@shared/lib/form-data";
 import { hashPassword, verifyPassword } from "@shared/lib/server/password";
 import { clearAttempts, consumeAttempt } from "@shared/lib/server/rate-limit";
 import { createSession, deleteSession } from "@shared/lib/server/session";
@@ -18,8 +19,8 @@ const { errors } = ACCOUNTS_COPY.signIn;
 
 // Server Actions are public endpoints: the form fields are untrusted until checked here.
 export async function signIn(_previous: SignInState | null, form: FormData): Promise<SignInState> {
-  const email = readField(form, "email").trim().toLowerCase();
-  const password = readField(form, "password");
+  const email = readFormText(form, "email").trim().toLowerCase();
+  const password = readFormText(form, "password");
 
   if (!email || !password) return { error: errors.missingFields };
 
@@ -39,12 +40,6 @@ export async function signIn(_previous: SignInState | null, form: FormData): Pro
 export async function signOut(): Promise<void> {
   await deleteSession();
   redirect(LOGIN_PATH);
-}
-
-function readField(form: FormData, name: string): string {
-  const value = form.get(name);
-
-  return value instanceof File ? "" : (value ?? "");
 }
 
 // An unknown email still pays for one scrypt run, so the response time does not reveal which accounts exist.

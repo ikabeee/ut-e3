@@ -30,6 +30,7 @@ describe("LoginForm", () => {
     await userEvent.click(screen.getByRole("button", { name: "Entrar" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Correo o contraseña incorrectos");
+    expect(screen.getByLabelText("Correo")).toHaveValue("admin@ut.mx");
     expect(received.map((form) => [form.get("email"), form.get("password")])).toEqual([["admin@ut.mx", "secreta"]]);
   });
 });
