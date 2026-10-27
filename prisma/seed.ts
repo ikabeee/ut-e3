@@ -1,3 +1,4 @@
+import { seedSysadmin } from "@features/accounts/lib/server/sysadmin-seed";
 import { seedEventSettings } from "@features/event-settings/lib/server/event-settings-seed";
 import { seedGames } from "@features/games/lib/server/games-seed";
 import { seedScheduleItems } from "@features/schedule/lib/server/schedule-seed";
@@ -15,6 +16,7 @@ async function seedDatabase(): Promise<void> {
     await seedScheduleItems(prisma);
     await seedGames(prisma);
     await seedSponsors(prisma);
+    await seedSysadmin(prisma, process.env);
   } finally {
     await prisma.$disconnect();
   }

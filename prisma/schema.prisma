@@ -38,6 +38,61 @@ model EventSettings {
   @@map("event_settings")
 }
 
+model Account {
+  id          String     @id @default(uuid())
+  email       String     @unique
+  name        String
+  role        String
+  group       String?
+  studio      Int?
+  /// scrypt hash with its parameters and salt (shared/lib/server/password.ts); null until the account is activated.
+  password    String?    @map("password_scrypt")
+  status      String
+  standId     String?    @map("stand_id")
+  stand       Stand?     @relation(fields: [standId], references: [id], onDelete: Restrict)
+  kofBoard    Int?       @map("kof_board")
+  createdById String?    @map("created_by_id")
+  createdBy   Account?   @relation("CreatedAccounts", fields: [createdById], references: [id], onDelete: Restrict)
+  created     Account[]  @relation("CreatedAccounts")
+  sessions    Session[]
+  auditLogs   AuditLog[]
+
+  @@map("accounts")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  accountId String   @map("account_id")
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  /// SHA-256 of the cookie token (shared/lib/server/session.ts); the token itself only lives in the cookie.
+  token     String   @unique @map("token_sha256")
+  expiresAt DateTime @map("expires_at")
+
+  @@map("sessions")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?  @map("actor_id")
+  actor      Account? @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  detail     Json
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
+
+model RateLimit {
+  key         String
+  windowStart DateTime @map("window_start")
+  count       Int
+
+  @@id([key, windowStart])
+  @@map("rate_limits")
+}
+
 model ScheduleItem {
   id          String   @id @default(uuid())
   title       String
@@ -56,6 +111,7 @@ model Stand {
   studio    Int
   groupCode String @map("group_code")
   game      Game?
+  accounts  Account[]
 
   @@unique([zone, number])
   @@map("stands")
