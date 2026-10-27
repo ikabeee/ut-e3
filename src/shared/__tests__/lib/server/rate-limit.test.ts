@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { isRateLimited, recordAttempt } from "@shared/lib/server/rate-limit";
+import { clearAttempts, consumeAttempt } from "@shared/lib/server/rate-limit";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
@@ -26,35 +26,54 @@ beforeEach(async () => {
   await getPrisma().rateLimit.deleteMany();
 });
 
-describe("isRateLimited and recordAttempt", () => {
-  it("limits a key after three attempts in the same window", async () => {
-    await recordAttempt("login:admin@ut.mx", LIMIT, TEN_AM);
-    await recordAttempt("login:admin@ut.mx", LIMIT, TEN_AM);
+describe("consumeAttempt", () => {
+  it("allows three attempts in a window and refuses the fourth", async () => {
+    const results = [];
 
-    expect(await isRateLimited("login:admin@ut.mx", LIMIT, TEN_FIFTY_NINE)).toBe(false);
+    for (const now of [TEN_AM, TEN_AM, TEN_FIFTY_NINE, TEN_FIFTY_NINE]) {
+      results.push(await consumeAttempt("login:admin@ut.mx", LIMIT, now));
+    }
 
-    await recordAttempt("login:admin@ut.mx", LIMIT, TEN_FIFTY_NINE);
+    expect(results).toEqual([true, true, true, false]);
+  });
 
-    expect(await isRateLimited("login:admin@ut.mx", LIMIT, TEN_FIFTY_NINE)).toBe(true);
+  it("allows only three of a concurrent burst, because each attempt is counted before it is answered", async () => {
+    const results = await Promise.all(
+      Array.from({ length: 6 }, () => consumeAttempt("login:admin@ut.mx", LIMIT, TEN_AM)),
+    );
+
+    expect(results.filter(Boolean)).toHaveLength(3);
   });
 
   it("counts each key on its own", async () => {
-    await Promise.all([1, 2, 3].map(() => recordAttempt("login:admin@ut.mx", LIMIT, TEN_AM)));
+    await Promise.all([1, 2, 3].map(() => consumeAttempt("login:admin@ut.mx", LIMIT, TEN_AM)));
 
-    expect(await isRateLimited("login:otro@ut.mx", LIMIT, TEN_AM)).toBe(false);
+    expect(await consumeAttempt("login:otro@ut.mx", LIMIT, TEN_AM)).toBe(true);
   });
 
   it("starts a new count when the next window begins", async () => {
-    await Promise.all([1, 2, 3].map(() => recordAttempt("login:admin@ut.mx", LIMIT, TEN_AM)));
+    await Promise.all([1, 2, 3, 4].map(() => consumeAttempt("login:admin@ut.mx", LIMIT, TEN_AM)));
 
-    expect(await isRateLimited("login:admin@ut.mx", LIMIT, ELEVEN_AM)).toBe(false);
+    expect(await consumeAttempt("login:admin@ut.mx", LIMIT, ELEVEN_AM)).toBe(true);
   });
 
   it("keeps one row per key and window with the running count", async () => {
-    await Promise.all([1, 2, 3].map(() => recordAttempt("login:admin@ut.mx", LIMIT, TEN_AM)));
+    await Promise.all([1, 2, 3].map(() => consumeAttempt("login:admin@ut.mx", LIMIT, TEN_AM)));
 
     expect(await getPrisma().rateLimit.findMany()).toEqual([
       { key: "login:admin@ut.mx", windowStart: TEN_AM, count: 3 },
     ]);
+  });
+});
+
+describe("clearAttempts", () => {
+  it("forgets every window of a key and leaves other keys alone", async () => {
+    await consumeAttempt("login:admin@ut.mx", LIMIT, TEN_AM);
+    await consumeAttempt("login:admin@ut.mx", LIMIT, ELEVEN_AM);
+    await consumeAttempt("login:otro@ut.mx", LIMIT, TEN_AM);
+
+    await clearAttempts("login:admin@ut.mx");
+
+    expect(await getPrisma().rateLimit.findMany({ select: { key: true } })).toEqual([{ key: "login:otro@ut.mx" }]);
   });
 });

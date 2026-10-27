@@ -81,6 +81,25 @@ describe("signIn", () => {
     });
     expect(await getPrisma().session.count()).toBe(0);
   });
+
+  it("answers at most three of a concurrent burst of wrong passwords and blocks the rest", async () => {
+    const results = await Promise.all(
+      [1, 2, 3, 4, 5].map((attempt) => signIn(null, credentials("admin@ut.mx", `wrong-${attempt}`))),
+    );
+
+    expect(results.filter((result) => result.error === INVALID_CREDENTIALS.error)).toHaveLength(3);
+    expect(
+      results.filter((result) => result.error === "Demasiados intentos. Intenta de nuevo más tarde."),
+    ).toHaveLength(2);
+  });
+
+  it("forgets the failed attempts after a successful sign-in", async () => {
+    await signIn(null, credentials("admin@ut.mx", "wrong-1"));
+    await signIn(null, credentials("admin@ut.mx", "wrong-2"));
+    await signIn(null, credentials("admin@ut.mx", PASSWORD)).catch(() => undefined);
+
+    expect(await getPrisma().rateLimit.count()).toBe(0);
+  });
 });
 
 describe("signOut", () => {

@@ -5,7 +5,7 @@ import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import { LOGIN_PATH, SYSADMIN_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { findSignInAccount } from "@features/accounts/lib/server/account-queries";
 import { hashPassword, verifyPassword } from "@shared/lib/server/password";
-import { isRateLimited, recordAttempt } from "@shared/lib/server/rate-limit";
+import { clearAttempts, consumeAttempt } from "@shared/lib/server/rate-limit";
 import { createSession, deleteSession } from "@shared/lib/server/session";
 
 export interface SignInState {
@@ -25,16 +25,13 @@ export async function signIn(_previous: SignInState | null, form: FormData): Pro
 
   const attemptKey = `login:${email}`;
 
-  if (await isRateLimited(attemptKey, SIGN_IN_LIMIT)) return { error: errors.tooManyAttempts };
+  if (!(await consumeAttempt(attemptKey, SIGN_IN_LIMIT))) return { error: errors.tooManyAttempts };
 
   const accountId = await authenticate(email, password);
 
-  if (!accountId) {
-    await recordAttempt(attemptKey, SIGN_IN_LIMIT);
+  if (!accountId) return { error: errors.invalidCredentials };
 
-    return { error: errors.invalidCredentials };
-  }
-
+  await clearAttempts(attemptKey);
   await createSession(accountId);
   redirect(SYSADMIN_HOME_PATH);
 }
@@ -60,8 +57,16 @@ async function authenticate(email: string, password: string): Promise<string | n
 
 let decoyHash: Promise<string> | undefined;
 
+// A failed first run is forgotten, so one transient scrypt error does not break every later sign-in.
 function getDecoyHash(): Promise<string> {
-  decoyHash ??= hashPassword("decoy password for unknown accounts");
+  if (!decoyHash) {
+    decoyHash = hashPassword("decoy password for unknown accounts");
+    decoyHash.catch(forgetDecoyHash);
+  }
 
   return decoyHash;
+}
+
+function forgetDecoyHash(): void {
+  decoyHash = undefined;
 }
