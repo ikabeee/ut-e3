@@ -53,3 +53,5 @@ next-env.d.ts
 
 graphify-out/
 .claude/tests.lock
+# Capturas de `npm run test:e2e`: son evidencia local, no código
+e2e/screenshots/
