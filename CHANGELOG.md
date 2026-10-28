@@ -12,6 +12,12 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   semifinales y la final) con byes, generado una sola vez a la hora configurada. El staff de cada mesa inicia los
   combates, marca al perdedor o "No se presentó"; el administrador de KOF ve todo el bracket, congela, descalifica y
   revierte. La pantalla se actualiza cada 3 segundos y cada cambio queda en la bitácora. Ver `docs/tournament.md`.
+- Inscripciones del torneo de KOF en `/admin/kof` para el administrador: lista previa de hasta 50, inscripción
+  presencial de 12:00 a 12:45 con el check-in ya hecho, check-in por PIN, cierre automático de "No se presentó" a las
+  12:45, cupo de 64 y botón que genera el bracket con los jugadores que hicieron check-in. Los horarios salen de la
+  configuración del evento.
+- El pasaporte de quien está en el torneo avisa cuándo y dónde hacer el check-in, y después confirma que ya está en el
+  bracket.
 - `npm run db:seed:kof` (solo desarrollo): crea las cuentas de KOF de prueba y un bracket de 40 jugadores en tu base
   local.
 - Las cuentas de KOF entran por `/login` y llegan a `/admin/kof`. El staff de KOF pasa a ser de 2 mesas (cada una con

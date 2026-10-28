@@ -33,6 +33,30 @@ siguiente combate es bye para su rival. Una doble descalificación en una semifi
 la final deja el torneo sin campeón (RF-65). El administrador revierte un resultado de "No se presentó" o de
 descalificación mientras el siguiente combate no haya empezado; un combate jugado no se revierte.
 
+## Inscripciones y check-in
+
+El administrador de KOF arma la lista en el panel `Inscripciones` de `/admin/kof` (RF-58, RF-75 a RF-77). Las horas salen
+de `event_settings`; ninguna está escrita en el código.
+
+| Momento | Qué pasa al agregar un gamertag |
+| --- | --- |
+| Antes de `kofRegistrationOpensAt` (13 de noviembre) | Se rechaza |
+| Hasta `kofOnsiteSignupStartsAt` (12:00 del evento) | Lista previa: inscrito, sin check-in. Máximo 50 |
+| De 12:00 a 12:45 | Inscripción presencial: nace con el check-in hecho |
+| Desde las 12:45 | Se rechaza |
+
+- El check-in se hace tecleando el PIN del jugador, solo dentro de `kofCheckInStartsAt` a `kofCheckInEndsAt`. Un PIN que
+  no es de nadie, o de alguien que no está en la lista, da el mismo mensaje y no crea nada.
+- Al llegar `kofCheckInEndsAt` los inscritos sin check-in pasan a "No se presentó" y ya no cambian. El cierre es
+  idempotente y corre cuando el administrador abre el panel, agrega, hace check-in o genera; no hay temporizador.
+- El cupo es de 64 inscripciones que no sean "No se presentó". Los lugares de la lista previa sin check-in siguen
+  reservados hasta las 12:45. La base lo exige con triggers, por si dos solicitudes llegan a la vez.
+- "Generar bracket" cierra el check-in si ya toca y usa solo a los jugadores con check-in. Se rechaza antes de las 12:55,
+  una segunda vez y con menos de 32 o más de 64 jugadores.
+- El pasaporte del inscrito (`/passport`) avisa que está en el torneo y cuándo hacer el check-in; después confirma que
+  ya está en el bracket.
+- Solo el administrador de KOF hace todo esto; el staff de las mesas y el sysadmin reciben un rechazo.
+
 ## Cómo está construido
 
 ```
@@ -46,7 +70,9 @@ lib/tournament-rules.ts       Constantes, mesa de cada combate y permisos (canRu
 lib/tournament-view.ts        Selectores para la pantalla (secciones, jugadores, contadores)
 lib/tournament-command-parser.ts  Lee el formulario de la Server Action
 lib/tournament-actions.ts     Server Action submitTournamentCommand
-lib/server/                   Consultas, mutaciones con versión y bitácora, y el seed de desarrollo
+lib/entries-rules.ts          Qué significa agregar a alguien según la hora (lista previa, presencial, cerrado)
+lib/entries-actions.ts        Server Actions del administrador: agregar, check-in y generar
+lib/server/                   Consultas, mutaciones con versión y bitácora, inscripciones y el seed de desarrollo
 api/                          GET /api/tournament (solo cuentas de KOF) y su cliente
 hooks/use-tournament.ts       Polling cada 3 segundos
 components/                   Panel, secciones, tarjetas de combate y botones con confirmación
@@ -69,12 +95,14 @@ npm run dev             # http://localhost:3000/login
 
 `npm run db:seed:kof` crea `kof-admin@ejemplo.com`, `kof-mesa1@ejemplo.com` y `kof-mesa2@ejemplo.com`. La contraseña de
 ejemplo está en `src/features/tournament/lib/server/tournament-dev-seed.ts` y se cambia con `KOF_DEV_PASSWORD`. El script
-adelanta `kofBracketGeneratesAt` a la hora actual solo en tu base local, se niega a correr con `NODE_ENV=production` y
+adelanta `kofBracketGeneratesAt` a la hora actual solo en tu base local (el bracket sale ya generado, con jugadores de
+prueba; sin él, las inscripciones son las reales), se niega a correr con `NODE_ENV=production` y
 puede repetirse: solo agrega lo que falta.
 
 ## Pendiente
 
-- La lista de inscritos y el check-in por PIN (RF-58, RF-75 a RF-77) dependen de M4. Mientras tanto
-  `generateTournament` recibe los jugadores como parámetro y solo el seed de desarrollo lo llama.
+- Registrar en el momento a un visitante que no tiene pasaporte (UT-TO-38): el registro liga un dispositivo al pasaporte,
+  así que el visitante se registra en su teléfono y el administrador lo agrega por gamertag.
+- Una lista de espera para los lugares de "No se presentó" (UT-TO-44): quedan vacíos y son byes.
 - El bracket público, el cierre al público y el tiempo real por SSE (RF-67, RF-74).
 - El alta de las cuentas de staff por el administrador de KOF y la asignación de su mesa.

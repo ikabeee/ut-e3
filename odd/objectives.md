@@ -6,3 +6,4 @@
 2. [Visitor registration (M3)](tasks/visitor-registration.md) — done
 3. [Visitor passport and check-in (M4)](tasks/visitor-passport.md) — unknown
 4. [KOF tournament (M10)](tasks/kof-tournament.md) — done
+5. [KOF entries and check-in (M10)](tasks/kof-entries.md) — done
