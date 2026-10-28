@@ -233,6 +233,9 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | Hash de contraseñas (scrypt) | `src/shared/lib/server/password.ts` |
 | Ventanas del límite de solicitudes | `src/shared/lib/server/rate-limit.ts` |
 | Campos y validación del cronograma | `src/features/schedule/lib/schedule-item-input.ts` |
+| Quién invita a quién (sysadmin: administradores; administrador de KOF: su staff) | `getManagedRoles()` en `src/features/accounts/lib/invitation-rules.ts` |
+| Invitar, reenviar, desactivar y activar cuentas (enlace por correo, 72 horas) | `src/features/accounts/lib/server/invitations.ts` |
+| Política de contraseña nueva (12 caracteres) | `validateNewPassword()` en `invitation-rules.ts` |
 | Bitácora de auditoría | `recordAudit()` en `src/shared/lib/server/audit-log.ts`, dentro de la transacción del cambio |
 
 - Toda Server Action del panel empieza con `await requireSysadmin()` y, tras escribir, llama `updateTag` con el

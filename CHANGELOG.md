@@ -8,6 +8,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Invitaciones de cuentas: el sysadmin invita a los administradores de KOF, de rifa y de atención desde `/admin`, y el
+  administrador de KOF invita a su staff de las mesas 1 y 2 desde `/admin/kof`. Cada persona recibe un enlace por
+  correo (`/activate/<token>`, válido 72 horas, reenviable) para elegir su contraseña; solo se guarda el hash del enlace.
+  Se puede desactivar una cuenta, lo que cierra sus sesiones y libera la mesa. Una mesa tiene un solo staff invitado o
+  activo, y un correo con pasaporte de visitante no puede ser staff.
 - Torneo de KOF en `/admin/kof`: bracket de eliminación directa para 64 jugadores (63 combates, 4 tableros, 2
   semifinales y la final) con byes, generado una sola vez a la hora configurada. El staff de cada mesa inicia los
   combates, marca al perdedor o "No se presentó"; el administrador de KOF ve todo el bracket, congela, descalifica y
