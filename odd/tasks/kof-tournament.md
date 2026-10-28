@@ -79,7 +79,7 @@ SSE (RF-67, RF-74), and the participant view of `UTE3`. They need M4 and a decis
 | T1 | S9 | parent (Sonnet 5.5) | done, commit pending | |
 | T2 | S1, S3, S5 | parent (Sonnet 5.5) | done, commit pending | |
 | T3 | S2, S6 | parent (Sonnet 5.5) | done, commit pending | |
-| T4 | S4, S8 | unrouted | pending | |
+| T4 | S4, S8 | parent (Sonnet 5.5) | done, commit pending | |
 | T5 | S7 | unrouted | pending | |
 
 - T1: SRS edits (version 2.4) and migration `20261028160000_kof_desk`; update the schema, `accounts-table.test.ts`,
@@ -94,7 +94,9 @@ SSE (RF-67, RF-74), and the participant view of `UTE3`. They need M4 and a decis
   `20261028180000_kof_tournament` (singleton table `kof_tournament`: `state` JSON, `version`, CHECKs `id = 1` and
   `version >= 0`); `lib/server/tournament-queries.ts` (`getTournament`) and `lib/server/tournament-mutations.ts`
   (`generateTournament`, `runTournamentCommand`, `saveTournament`). Risk: item 1 (migration).
-- T4: role guard, `proxy.ts` matcher, Server Actions with the desk check.
+- T4: role guard, `proxy.ts` matcher, Server Actions with the desk check. `requireKofAccount()` in `accounts`,
+  `canRunCommand` in `tournament-rules.ts`, `tournament-command-parser.ts` (form fields `type`, `matchId`, `slot`) and
+  `submitTournamentCommand` in `tournament-actions.ts`; `tournament: ["accounts"]` in `FEATURE_DEPENDENCIES`.
 - T5: `/admin/kof` page with the polling Route Handler and the ported components; copy in
   `lib/tournament-copy.ts`; `docs/tournament.md`, `CHANGELOG.md` and `FEATURE_DEPENDENCIES` in `eslint.config.mjs`.
 
@@ -134,4 +136,15 @@ SSE (RF-67, RF-74), and the participant view of `UTE3`. They need M4 and a decis
   The tests write the `event_settings` row themselves because `tournament` does not depend on `event-settings`
   (FEATURE_DEPENDENCIES). The players still have no source: the list of entrants arrives as a parameter until M4 exists
   (D4). 508 tests pass; `lint`, `lint:oxlint`, `lint:duplication`, `typecheck` and `build` have no errors;
+  `visitors-actions-hardening` still fails only on Windows (EPERM).
+- L6 (2026-10-28, T4): RED: 15 tests failed (the guard, the sign-in redirect, `canRunCommand`, the parser and the action).
+  GREEN: `requireKofAccount` accepts only `kof_admin` and `kof_staff` with an active session and reads `kofDesk` from the
+  database on each call; the sysadmin has no tournament commands (assumption, to confirm). The Server Action checks, in
+  order: session and role, form, bracket exists, match exists, `canRunCommand` (administrator: everything; staff: its desk
+  and never freeze, unfreeze, disqualify or revert; a staff member without a desk: nothing). Breaking `canRunCommand` on
+  purpose made 6 tests fail, so the desk tests do depend on it. Two things beyond the spec: (a) `signIn` now sends a KOF
+  account to `/admin/kof` (`KOF_HOME_PATH`, `getHomePath`), because `/admin` is for the sysadmin and a KOF account would have
+  bounced to `/login`; (b) the `matcher` of `proxy.ts` already covers `/admin/:path*`, so `/admin/kof` needs no change. The
+  page that `/admin/kof` serves is T5, and there is still no way to generate the bracket from the interface (entrants
+  come with M4, D4). 554 tests pass; `lint`, `lint:oxlint`, `lint:duplication`, `typecheck` and `build` have no errors;
   `visitors-actions-hardening` still fails only on Windows (EPERM).
