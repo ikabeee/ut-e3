@@ -105,11 +105,11 @@ model ScheduleItem {
 }
 
 model Stand {
-  id        String @id @default(uuid())
+  id        String    @id @default(uuid())
   zone      String
   number    Int
   studio    Int
-  groupCode String @map("group_code")
+  groupCode String    @map("group_code")
   game      Game?
   accounts  Account[]
 
@@ -164,4 +164,49 @@ model Sponsor {
   position   Int
 
   @@map("sponsors")
+}
+
+model Visitor {
+  id        String         @id @default(uuid())
+  fullName  String         @map("full_name")
+  gamertag  String         @unique
+  email     String         @unique
+  pin       String         @map("pin_aes_gcm")
+  pinLookup String         @unique @map("pin_hmac")
+  createdAt DateTime       @default(now()) @map("created_at")
+  device    VisitorDevice?
+
+  @@map("visitors")
+}
+
+model VisitorDevice {
+  id        String   @id @default(uuid())
+  visitorId String   @unique @map("visitor_id")
+  visitor   Visitor  @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  /// SHA-256 of the device token cookie; the token itself only lives in the cookie.
+  token     String   @unique @map("token_sha256")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("visitor_devices")
+}
+
+model EmailBlocklist {
+  email     String   @id
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("email_blocklist")
+}
+
+model EmailOutbox {
+  id            String    @id @default(uuid())
+  to            String    @map("to_address")
+  subject       String
+  text          String
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime  @default(now()) @map("next_attempt_at")
+  sentAt        DateTime? @map("sent_at")
+  lastError     String?   @map("last_error")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@map("email_outbox")
 }
