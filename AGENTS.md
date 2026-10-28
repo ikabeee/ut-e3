@@ -48,6 +48,7 @@ npm run db:generate        # genera el cliente de Prisma en generated/prisma (ta
 npm run db:migrate         # crea y aplica una migración en la BD de DATABASE_URL (prisma migrate dev)
 npm run db:deploy          # aplica las migraciones pendientes sin crear nuevas (prisma migrate deploy)
 npm run db:seed            # carga el contenido inicial en las tablas vacías; no toca las que ya tienen datos (prisma/seed.ts)
+npm run db:seed:kof       # solo desarrollo: cuentas de KOF de prueba y un bracket de 40 jugadores (prisma/seed-kof.ts)
 ```
 
 Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm run lint`,
@@ -61,7 +62,8 @@ Cada dominio es una **feature** dentro de `src/features/`. Hoy la portada (`/`) 
 seis: `landing`, `games`, `floor-plan`, `schedule`, `sponsors` y `event-settings`. Sus datos viven en
 SQLite y se leen con Prisma desde las consultas de `lib/server/`; `npm run db:seed` carga el contenido inicial
 desde las constantes `INITIAL_*` de cada `lib/server/<feature>-seed.ts`. Además, `accounts` da el inicio de
-sesión (`/login`) y `admin` el panel del sysadmin (`/admin`), donde se edita el cronograma. La portada estática
+sesión (`/login`) y `admin` el panel del sysadmin (`/admin`), donde se edita el cronograma; `tournament` lleva el
+torneo de KOF en `/admin/kof` (ver `docs/tournament.md`). La portada estática
 anterior se conserva en la rama `archive/landing-v1`, y la versión previa del proyecto (catálogo,
 croquis, pasaporte, panel, Prisma y TanStack Query) en `archive/develop-v1`.
 
@@ -76,7 +78,8 @@ src/
 │   ├── sponsors/             # Banda de patrocinadores
 │   ├── event-settings/       # Horarios y valores configurables del evento
 │   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
-│   └── admin/                # Panel del sysadmin (/admin): compone las secciones que se administran
+│   ├── admin/                # Panel del sysadmin (/admin): compone las secciones que se administran
+│   └── tournament/           # Torneo de KOF (/admin/kof): bracket, permisos por mesa y bitácora
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
     ├── components/           # Primitivos: JsonLd, UtgLogo, ActionLink, ArrowButton, PaperCard...
@@ -244,6 +247,7 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 ## Documentación del proyecto
 
 - `docs/design-system.md`: tema UTG sobre HeroUI.
+- `docs/tournament.md`: torneo de KOF (formato, permisos por mesa, estados y cómo probarlo en local).
 - `docs/versioning.md` y `CHANGELOG.md`: versionado semántico y releases con git flow.
 
 Si cambias algo visible, agrega una línea en `[Sin publicar]` de `CHANGELOG.md`.

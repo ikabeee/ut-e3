@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 ---
 
 # KOF tournament (M10)
@@ -80,7 +80,7 @@ SSE (RF-67, RF-74), and the participant view of `UTE3`. They need M4 and a decis
 | T2 | S1, S3, S5 | parent (Sonnet 5.5) | done, commit pending | |
 | T3 | S2, S6 | parent (Sonnet 5.5) | done, commit pending | |
 | T4 | S4, S8 | parent (Sonnet 5.5) | done, commit pending | |
-| T5 | S7 | unrouted | pending | |
+| T5 | S7 | parent (Sonnet 5.5) | done, commit pending | |
 
 - T1: SRS edits (version 2.4) and migration `20261028160000_kof_desk`; update the schema, `accounts-table.test.ts`,
   `er-model.html`, `unit-test-cases.md` and `e2e-flows.md`. `accounts/lib/types.ts` needed no change (it has roles, not
@@ -97,8 +97,9 @@ SSE (RF-67, RF-74), and the participant view of `UTE3`. They need M4 and a decis
 - T4: role guard, `proxy.ts` matcher, Server Actions with the desk check. `requireKofAccount()` in `accounts`,
   `canRunCommand` in `tournament-rules.ts`, `tournament-command-parser.ts` (form fields `type`, `matchId`, `slot`) and
   `submitTournamentCommand` in `tournament-actions.ts`; `tournament: ["accounts"]` in `FEATURE_DEPENDENCIES`.
-- T5: `/admin/kof` page with the polling Route Handler and the ported components; copy in
-  `lib/tournament-copy.ts`; `docs/tournament.md`, `CHANGELOG.md` and `FEATURE_DEPENDENCIES` in `eslint.config.mjs`.
+- T5: `/admin/kof` page with the polling Route Handler and the components; copy in `lib/tournament-copy.ts`;
+  `docs/tournament.md`, `CHANGELOG.md` and `FEATURE_DEPENDENCIES` in `eslint.config.mjs`. Also `npm run db:seed:kof`
+  (development only), the answer to D4.
 
 ## Log
 
@@ -148,3 +149,17 @@ SSE (RF-67, RF-74), and the participant view of `UTE3`. They need M4 and a decis
   page that `/admin/kof` serves is T5, and there is still no way to generate the bracket from the interface (entrants
   come with M4, D4). 554 tests pass; `lint`, `lint:oxlint`, `lint:duplication`, `typecheck` and `build` have no errors;
   `visitors-actions-hardening` still fails only on Windows (EPERM).
+- L7 (2026-10-28, T5): the user agreed to a development seed so the tournament can be tried before M4 (D4):
+  `npm run db:seed:kof` creates three KOF accounts, moves `kofBracketGeneratesAt` to now in the local database and
+  generates a bracket of 40 fake players; it refuses `NODE_ENV=production` and can run again. RED/GREEN in four blocks:
+  view selectors and `getKofAccount` (the Route Handler answers 401, not a redirect), API and polling hook, components
+  and page, seed. The polling hook ignores answers older than what it shows (version) and skips a request while another
+  is in flight. Destructive commands (loser, absence, disqualification, revert) ask once before they are sent. The
+  components do not import the Server Action: the page passes it, as `schedule` does. Breaking the desk filter on
+  purpose made 6 UI tests fail. Tried in Chrome on the production build with the seed: the mesa 1 login lands on
+  `/admin/kof`, sees only boards 1 and 2, semifinal 1 and the final; starting match #4 and marking its loser updated
+  the screen at once, moved the winner to match #10 and wrote the log; the administrator sees the 7 areas and the log.
+  At 360 and 390 px (iframe of the same page) there is no horizontal scroll and every visible button is at least 44 px
+  high. Not done: the screen was not looked at (screenshots timed out), so spacing and colors are unreviewed; the
+  administrator's freeze, disqualification and revert were covered by tests but not clicked; no public bracket, no
+  SSE, no staff management and no entrants list (M4). Objective closed: the user opens the PR.

@@ -8,6 +8,14 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Torneo de KOF en `/admin/kof`: bracket de eliminación directa para 64 jugadores (63 combates, 4 tableros, 2
+  semifinales y la final) con byes, generado una sola vez a la hora configurada. El staff de cada mesa inicia los
+  combates, marca al perdedor o "No se presentó"; el administrador de KOF ve todo el bracket, congela, descalifica y
+  revierte. La pantalla se actualiza cada 3 segundos y cada cambio queda en la bitácora. Ver `docs/tournament.md`.
+- `npm run db:seed:kof` (solo desarrollo): crea las cuentas de KOF de prueba y un bracket de 40 jugadores en tu base
+  local.
+- Las cuentas de KOF entran por `/login` y llegan a `/admin/kof`. El staff de KOF pasa a ser de 2 mesas (cada una con
+  dos tableros) en lugar de 4 staffs, y `accounts.kof_board` es ahora `kof_desk` (SRS 2.4).
 - Consulta de pasaporte en `/passport` con gamertag y PIN descifrado asociado a la cookie del dispositivo.
 
 - Registro público de visitantes en `/register` con validación de nombre, gamertag único y correo, generación de PIN cifrado, cookie de dispositivo y enlace al aviso de privacidad en `/privacy`.
