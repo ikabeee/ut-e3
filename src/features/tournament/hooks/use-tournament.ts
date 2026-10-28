@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 import { fetchTournament, type TournamentSnapshot } from "@features/tournament/api/tournament-api-client";
 import type { Tournament } from "@features/tournament/lib/types";
+import { usePolledValue } from "@shared/hooks/use-polled-value";
 
 export const POLL_INTERVAL_MS = 3000;
 
@@ -17,34 +18,15 @@ export interface TournamentPolling {
 
 /** Keeps the bracket fresh every 3 seconds, starting from what the server rendered (RF-61). */
 export function useTournament(initial: Tournament | null, load: SnapshotLoader = fetchTournament): TournamentPolling {
-  const [tournament, setTournament] = useState(initial);
-  const [hasConnectionError, setHasConnectionError] = useState(false);
-  const isLoading = useRef(false);
+  const loadTournament = useCallback(async () => (await load()).tournament, [load]);
 
-  const refresh = useCallback(async () => {
-    if (isLoading.current) return;
+  const { value, hasConnectionError, refresh } = usePolledValue<Tournament | null>(initial, {
+    load: loadTournament,
+    merge: pickNewer,
+    intervalMs: POLL_INTERVAL_MS,
+  });
 
-    isLoading.current = true;
-
-    try {
-      const snapshot = await load();
-
-      setTournament((current) => pickNewer(current, snapshot.tournament));
-      setHasConnectionError(false);
-    } catch {
-      setHasConnectionError(true);
-    } finally {
-      isLoading.current = false;
-    }
-  }, [load]);
-
-  useEffect(() => {
-    const timer = setInterval(() => void refresh(), POLL_INTERVAL_MS);
-
-    return () => clearInterval(timer);
-  }, [refresh]);
-
-  return { tournament, hasConnectionError, refresh };
+  return { tournament: value, hasConnectionError, refresh };
 }
 
 // Answers can arrive out of order; the version tells which copy is newer.
