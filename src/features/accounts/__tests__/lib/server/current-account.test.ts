@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { requireKofAccount, requireSysadmin } from "@features/accounts/lib/server/current-account";
+import { getKofAccount, requireKofAccount, requireSysadmin } from "@features/accounts/lib/server/current-account";
 import { createSession } from "@shared/lib/server/session";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
@@ -46,6 +46,26 @@ describe("requireSysadmin", () => {
     await createSession(account.id);
 
     await expect(requireSysadmin()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+});
+
+describe("getKofAccount", () => {
+  it("answers null instead of redirecting when there is no KOF session", async () => {
+    expect(await getKofAccount()).toBeNull();
+
+    const sysadmin = await createAccount("sysadmin");
+
+    await createSession(sysadmin.id);
+
+    expect(await getKofAccount()).toBeNull();
+  });
+
+  it("returns the KOF staff member with its desk", async () => {
+    const account = await createAccount("kof_staff", 2);
+
+    await createSession(account.id);
+
+    expect(await getKofAccount()).toMatchObject({ id: account.id, role: "kof_staff", kofDesk: 2 });
   });
 });
 

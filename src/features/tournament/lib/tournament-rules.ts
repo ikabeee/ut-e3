@@ -1,6 +1,17 @@
-import type { BoardNumber, Desk, Match, TournamentCommandType } from "@features/tournament/lib/types";
+import type { BoardNumber, Desk, Match, MatchArea, TournamentCommandType } from "@features/tournament/lib/types";
 
 export const BOARD_NUMBERS: readonly BoardNumber[] = [1, 2, 3, 4];
+
+/** In bracket order: the four boards, then the semifinals and the final. */
+export const MATCH_AREAS: readonly MatchArea[] = [
+  "board_1",
+  "board_2",
+  "board_3",
+  "board_4",
+  "semifinal_1",
+  "semifinal_2",
+  "final",
+];
 
 /** 16 players and 15 matches per board (RF-57). */
 export const PLAYERS_PER_BOARD = 16;

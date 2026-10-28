@@ -1,4 +1,4 @@
-import type { MatchStatus } from "@features/tournament/lib/types";
+import type { MatchArea, MatchOutcome, MatchStatus } from "@features/tournament/lib/types";
 
 const STATUS_LABELS: Record<MatchStatus, string> = {
   pending: "Pendiente",
@@ -8,10 +8,68 @@ const STATUS_LABELS: Record<MatchStatus, string> = {
   frozen: "Congelado",
 };
 
+const AREA_LABELS: Record<MatchArea, string> = {
+  board_1: "Tablero 1",
+  board_2: "Tablero 2",
+  board_3: "Tablero 3",
+  board_4: "Tablero 4",
+  semifinal_1: "Semifinal 1",
+  semifinal_2: "Semifinal 2",
+  final: "Final",
+};
+
+const OUTCOME_LABELS: Record<MatchOutcome, string> = {
+  played: "Jugado",
+  no_show: "No se presentó",
+  disqualified: "Descalificación",
+  bye: "Bye",
+  empty: "Sin jugadores",
+};
+
 export const TOURNAMENT_COPY = {
   bye: "BYE",
   tbd: "Por definir",
   status: STATUS_LABELS,
+  areas: AREA_LABELS,
+  outcomes: OUTCOME_LABELS,
+  ui: {
+    title: "Torneo de KOF",
+    description: "Captura y seguimiento del bracket del torneo de KOF.",
+    loading: "Cargando el torneo...",
+    signedInAs: (name: string, role: string) => `Sesión de ${name} · ${role}`,
+    roles: {
+      kof_admin: "Administrador de KOF",
+      kof_staff: (desk: number | null) => (desk === null ? "Staff de KOF" : `Staff de KOF · Mesa ${desk}`),
+    },
+    notGenerated: "El bracket todavía no se genera. Se genera a la hora configurada del evento.",
+    noDesk: "Tu cuenta todavía no tiene una mesa asignada. Pide al administrador de KOF que te la asigne.",
+    connectionLost: "Sin conexión. Se muestra el último estado recibido.",
+    summaryLabel: "Resumen",
+    summary: { ready: "Listos", active: "En juego", frozen: "Congelados", finished: "Terminados" },
+    champion: (tag: string) => `Campeón: ${tag}`,
+    noChampion: "El torneo terminó sin campeón.",
+    match: {
+      heading: (number: number) => `Combate #${number}`,
+      round: (round: number) => `Ronda ${round}`,
+      winner: "Ganó",
+      frozenNotice: "Congelado: solo el administrador de KOF lo resuelve.",
+    },
+    actions: {
+      start: "Iniciar combate",
+      loses: (tag: string) => `Pierde ${tag}`,
+      noShow: (tag: string) => `No se presentó: ${tag}`,
+      freeze: "Congelar",
+      unfreeze: "Descongelar",
+      disqualify: (tag: string) => `Descalificar a ${tag}`,
+      disqualifyBoth: "Descalificar a los dos",
+      revert: "Revertir resultado",
+      confirm: "Confirmar",
+      cancel: "Cancelar",
+      confirmQuestion: "¿Seguro? Esta acción queda en la bitácora.",
+      sending: "Enviando...",
+    },
+    log: { heading: "Bitácora", empty: "Todavía no hay movimientos." },
+  },
   errors: {
     matchNotFound: "No se encontró el combate.",
     wrongStatus: (status: string) => `El combate está en estado "${status}" y no admite esta operación.`,

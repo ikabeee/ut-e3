@@ -1,4 +1,5 @@
 import "server-only";
+import { isTournament } from "@features/tournament/lib/tournament-guards";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import type { Tournament } from "@features/tournament/lib/types";
 import { getPrisma } from "@shared/lib/server/prisma";
@@ -24,19 +25,4 @@ export async function getBracketGeneratesAt(): Promise<Date | null> {
   });
 
   return settings?.kofBracketGeneratesAt ?? null;
-}
-
-// Only this server writes the column, so a light check is enough to catch a row that was edited by hand.
-function isTournament(value: unknown): value is Tournament {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "phase" in value &&
-    "players" in value &&
-    Array.isArray(value.players) &&
-    "matches" in value &&
-    Array.isArray(value.matches) &&
-    "version" in value &&
-    typeof value.version === "number"
-  );
 }

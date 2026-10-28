@@ -26,12 +26,21 @@ export interface KofAccount extends SessionAccount {
 
 // Every KOF page and Server Action calls this; the sysadmin has no tournament commands, only the KOF accounts do.
 export async function requireKofAccount(): Promise<KofAccount> {
+  const account = await getKofAccount();
+
+  if (!account) {
+    redirect(LOGIN_PATH);
+  }
+
+  return account;
+}
+
+// For Route Handlers, which answer 401 instead of redirecting.
+export async function getKofAccount(): Promise<KofAccount | null> {
   const account = await getSessionAccount();
   const role = account ? toKofRole(account.role) : null;
 
-  if (!account || !role) {
-    redirect(LOGIN_PATH);
-  }
+  if (!account || !role) return null;
 
   const row = await getPrisma().account.findUnique({ where: { id: account.id }, select: { kofDesk: true } });
 
