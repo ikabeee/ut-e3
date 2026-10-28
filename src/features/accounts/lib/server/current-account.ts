@@ -1,6 +1,7 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { LOGIN_PATH } from "@features/accounts/lib/accounts-links";
+import { getManagedRoles } from "@features/accounts/lib/invitation-rules";
 import type { AccountRole, KofDesk } from "@features/accounts/lib/types";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { getSessionAccount, type SessionAccount } from "@shared/lib/server/session";
@@ -53,4 +54,16 @@ function toKofRole(role: string): KofAccount["role"] | null {
 
 function toKofDesk(value: number | null): KofDesk | null {
   return value === 1 || value === 2 ? value : null;
+}
+
+// Whoever invites, resends or disables accounts: the sysadmin and the KOF administrator. What each one may manage is
+// decided again for the target account by the functions of `invitations.ts`.
+export async function requireAccountManager(): Promise<SessionAccount> {
+  const account = await getSessionAccount();
+
+  if (!account || getManagedRoles(account.role).length === 0) {
+    redirect(LOGIN_PATH);
+  }
+
+  return account;
 }

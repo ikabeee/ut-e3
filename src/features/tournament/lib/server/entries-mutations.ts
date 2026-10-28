@@ -4,8 +4,9 @@ import { getEntrySchedule } from "@features/tournament/lib/server/entries-querie
 import { generateTournament, type GenerateResult } from "@features/tournament/lib/server/tournament-mutations";
 import { MAX_ENTRANTS, PRE_LIST_LIMIT } from "@features/tournament/lib/tournament-rules";
 import type { EntryChannel, Player } from "@features/tournament/lib/types";
-import { Prisma } from "@generated/prisma/client";
+import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
+import { isUniqueViolation, readDatabaseMessage } from "@shared/lib/server/database-errors";
 import { hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 
@@ -181,48 +182,15 @@ async function findRefusal(transaction: Prisma.TransactionClient, entry: NewEntr
 
 // Two requests can pass the counts together; the triggers of the table stop the second and this names the reason.
 export function explainInsertFailure(cause: unknown): Refusal {
-  const message = readFailureMessage(cause);
+  const message = readDatabaseMessage(cause);
 
   if (message.includes("Torneo lleno")) return { status: "tournamentFull" };
 
   if (message.includes("Lista previa llena")) return { status: "preListFull" };
 
-  if (cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === "P2002") {
-    return { status: "alreadyEntered" };
-  }
+  if (isUniqueViolation(cause)) return { status: "alreadyEntered" };
 
   throw cause;
-}
-
-// Prisma reports a trigger that aborts as a foreign key error (P2003); the message of the trigger travels in the meta.
-function readFailureMessage(cause: unknown): string {
-  if (cause instanceof Prisma.PrismaClientKnownRequestError) {
-    return readAdapterMessage(cause) || cause.message;
-  }
-
-  return cause instanceof Error ? cause.message : "";
-}
-
-function readAdapterMessage(error: Prisma.PrismaClientKnownRequestError): string {
-  const adapterError = error.meta?.driverAdapterError;
-
-  return isAdapterFailure(adapterError) ? adapterError.cause.originalMessage : "";
-}
-
-interface AdapterFailure {
-  cause: { originalMessage: string };
-}
-
-function isAdapterFailure(value: unknown): value is AdapterFailure {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "cause" in value &&
-    typeof value.cause === "object" &&
-    value.cause !== null &&
-    "originalMessage" in value.cause &&
-    typeof value.cause.originalMessage === "string"
-  );
 }
 
 async function findEntryByPin(pin: string) {

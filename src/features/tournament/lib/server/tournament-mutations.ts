@@ -11,8 +11,9 @@ import {
   getTournament,
   TOURNAMENT_ROW_ID,
 } from "@features/tournament/lib/server/tournament-queries";
-import { Prisma } from "@generated/prisma/client";
+import type { Prisma } from "@generated/prisma/client";
 import { recordAudit, type AuditEntry } from "@shared/lib/server/audit-log";
+import { isUniqueViolation } from "@shared/lib/server/database-errors";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 const ENTITY_TYPE = "kof_tournament";
@@ -129,8 +130,4 @@ function applyAgain(current: Tournament, command: TournamentCommand, now: Date):
 function toJson(tournament: Tournament): Prisma.InputJsonObject {
   // SAFETY: `Tournament` only holds plain JSON, so the round trip keeps its shape and drops the interface typing.
   return JSON.parse(JSON.stringify(tournament)) as Prisma.InputJsonObject;
-}
-
-function isUniqueViolation(cause: unknown): boolean {
-  return cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === "P2002";
 }

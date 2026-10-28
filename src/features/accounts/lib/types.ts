@@ -14,3 +14,13 @@ export type AccountRole = (typeof ACCOUNT_ROLES)[number];
 export type KofDesk = 1 | 2;
 
 export type AccountStatus = "invited" | "active" | "disabled";
+
+/** An account as the panels of the sysadmin and of the KOF administrator list it. */
+export interface ManagedAccount {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: AccountStatus;
+  kofDesk: KofDesk | null;
+}
