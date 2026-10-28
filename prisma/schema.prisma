@@ -39,24 +39,25 @@ model EventSettings {
 }
 
 model Account {
-  id                String            @id @default(uuid())
-  email             String            @unique
+  id                String              @id @default(uuid())
+  email             String              @unique
   name              String
   role              String
   group             String?
   studio            Int?
   /// scrypt hash with its parameters and salt (shared/lib/server/password.ts); null until the account is activated.
-  password          String?           @map("password_scrypt")
+  password          String?             @map("password_scrypt")
   status            String
-  standId           String?           @map("stand_id")
-  stand             Stand?            @relation(fields: [standId], references: [id], onDelete: Restrict)
-  kofDesk           Int?              @map("kof_desk")
-  createdById       String?           @map("created_by_id")
-  createdBy         Account?          @relation("CreatedAccounts", fields: [createdById], references: [id], onDelete: Restrict)
-  created           Account[]         @relation("CreatedAccounts")
+  standId           String?             @map("stand_id")
+  stand             Stand?              @relation(fields: [standId], references: [id], onDelete: Restrict)
+  kofDesk           Int?                @map("kof_desk")
+  createdById       String?             @map("created_by_id")
+  createdBy         Account?            @relation("CreatedAccounts", fields: [createdById], references: [id], onDelete: Restrict)
+  created           Account[]           @relation("CreatedAccounts")
   sessions          Session[]
   auditLogs         AuditLog[]
   registeredEntries TournamentEntry[]
+  invitations       AccountInvitation[]
 
   @@map("accounts")
 }
@@ -238,4 +239,17 @@ model TournamentEntry {
   createdAt      DateTime  @default(now()) @map("created_at")
 
   @@map("tournament_entries")
+}
+
+model AccountInvitation {
+  id        String    @id @default(uuid())
+  accountId String    @map("account_id")
+  account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  /// SHA-256 of the token in the activation link (shared/lib/server/token-hash.ts); the token itself only travels by email.
+  token     String    @unique @map("token_sha256")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("account_invitations")
 }
