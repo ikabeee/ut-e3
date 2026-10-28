@@ -10,6 +10,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 - Consulta de pasaporte en `/passport` con gamertag y PIN descifrado asociado a la cookie del dispositivo.
 
+- Pasaporte con los stands visitados y los que faltan (códigos `ZA-S1`), barra de progreso hacia el siguiente boleto y
+  boletos al llegar a 9 y 18 visitas, con número global. Cada visitante tiene un check-in por stand.
+
 - Registro público de visitantes en `/register` con validación de nombre, gamertag único y correo, generación de PIN cifrado, cookie de dispositivo y enlace al aviso de privacidad en `/privacy`.
 
 - Inicio de sesión del staff en `/login` y panel del sysadmin en `/admin`, donde se agregan, editan y eliminan
