@@ -20,6 +20,21 @@ export const ADMIN_ONLY_COMMANDS: readonly TournamentCommandType[] = [
   "revert_result",
 ];
 
+export interface KofActor {
+  role: "kof_admin" | "kof_staff";
+  /** The desk of a staff member; the administrator has none and captures everything. */
+  desk: Desk | null;
+}
+
+/** The administrator runs any command; a staff member captures only the matches of its own desk (RF-62). */
+export function canRunCommand(actor: KofActor, type: TournamentCommandType, match: Pick<Match, "area">): boolean {
+  if (actor.role === "kof_admin") return true;
+
+  if (ADMIN_ONLY_COMMANDS.includes(type)) return false;
+
+  return actor.desk !== null && actor.desk === getMatchDesk(match);
+}
+
 /** Desk 1: boards 1 and 2, semifinal 1 and the final. Desk 2: boards 3 and 4 and semifinal 2 (RF-62). */
 export function getMatchDesk(match: Pick<Match, "area">): Desk {
   switch (match.area) {

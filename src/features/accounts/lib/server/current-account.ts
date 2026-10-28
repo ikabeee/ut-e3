@@ -1,7 +1,8 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { LOGIN_PATH } from "@features/accounts/lib/accounts-links";
-import type { AccountRole } from "@features/accounts/lib/types";
+import type { AccountRole, KofDesk } from "@features/accounts/lib/types";
+import { getPrisma } from "@shared/lib/server/prisma";
 import { getSessionAccount, type SessionAccount } from "@shared/lib/server/session";
 
 const SYSADMIN_ROLE: AccountRole = "sysadmin";
@@ -15,4 +16,32 @@ export async function requireSysadmin(): Promise<SessionAccount> {
   }
 
   return account;
+}
+
+export interface KofAccount extends SessionAccount {
+  role: "kof_admin" | "kof_staff";
+  /** Only a staff member has a desk, and one that was not assigned yet captures nothing. */
+  kofDesk: KofDesk | null;
+}
+
+// Every KOF page and Server Action calls this; the sysadmin has no tournament commands, only the KOF accounts do.
+export async function requireKofAccount(): Promise<KofAccount> {
+  const account = await getSessionAccount();
+  const role = account ? toKofRole(account.role) : null;
+
+  if (!account || !role) {
+    redirect(LOGIN_PATH);
+  }
+
+  const row = await getPrisma().account.findUnique({ where: { id: account.id }, select: { kofDesk: true } });
+
+  return { ...account, role, kofDesk: toKofDesk(row?.kofDesk ?? null) };
+}
+
+function toKofRole(role: string): KofAccount["role"] | null {
+  return role === "kof_admin" || role === "kof_staff" ? role : null;
+}
+
+function toKofDesk(value: number | null): KofDesk | null {
+  return value === 1 || value === 2 ? value : null;
 }

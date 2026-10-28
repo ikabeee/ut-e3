@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { requireSysadmin } from "@features/accounts/lib/server/current-account";
+import { requireKofAccount, requireSysadmin } from "@features/accounts/lib/server/current-account";
 import { createSession } from "@shared/lib/server/session";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
@@ -49,8 +49,61 @@ describe("requireSysadmin", () => {
   });
 });
 
-function createAccount(role: string) {
+describe("requireKofAccount", () => {
+  it("returns a KOF administrator, who has no desk", async () => {
+    const account = await createAccount("kof_admin");
+
+    await createSession(account.id);
+
+    expect(await requireKofAccount()).toEqual({
+      id: account.id,
+      email: "cuenta@ut.mx",
+      name: "Cuenta",
+      role: "kof_admin",
+      kofDesk: null,
+    });
+  });
+
+  it.each([1, 2] as const)("returns a KOF staff member with the desk %i", async (desk) => {
+    const account = await createAccount("kof_staff", desk);
+
+    await createSession(account.id);
+
+    expect(await requireKofAccount()).toMatchObject({ id: account.id, role: "kof_staff", kofDesk: desk });
+  });
+
+  it("returns a KOF staff member that has no desk yet with kofDesk null", async () => {
+    const account = await createAccount("kof_staff");
+
+    await createSession(account.id);
+
+    expect(await requireKofAccount()).toMatchObject({ role: "kof_staff", kofDesk: null });
+  });
+
+  it.each(["sysadmin", "help_desk", "raffle_admin"])("sends a %s to /login", async (role) => {
+    const account = await createAccount(role);
+
+    await createSession(account.id);
+
+    await expect(requireKofAccount()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+
+  it("sends a visitor without a session to /login", async () => {
+    await expect(requireKofAccount()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+
+  it("sends a disabled KOF account to /login", async () => {
+    const account = await createAccount("kof_admin");
+
+    await createSession(account.id);
+    await getPrisma().account.update({ where: { id: account.id }, data: { status: "disabled" } });
+
+    await expect(requireKofAccount()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+});
+
+function createAccount(role: string, kofDesk?: number) {
   return getPrisma().account.create({
-    data: { email: "cuenta@ut.mx", name: "Cuenta", role, status: "active", password: "scrypt$1$1$1$a$b" },
+    data: { email: "cuenta@ut.mx", name: "Cuenta", role, status: "active", password: "scrypt$1$1$1$a$b", kofDesk },
   });
 }

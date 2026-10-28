@@ -1,5 +1,6 @@
 import { buildBracket } from "@features/tournament/lib/bracket-layout";
-import { ADMIN_ONLY_COMMANDS, getMatchDesk } from "@features/tournament/lib/tournament-rules";
+import { ADMIN_ONLY_COMMANDS, canRunCommand, getMatchDesk } from "@features/tournament/lib/tournament-rules";
+import type { TournamentCommandType } from "@features/tournament/lib/types";
 import { range } from "@features/tournament/__tests__/tournament-test-utils";
 
 describe("getMatchDesk", () => {
@@ -26,5 +27,48 @@ describe("ADMIN_ONLY_COMMANDS", () => {
       "revert_result",
       "unfreeze_match",
     ]);
+  });
+});
+
+describe("canRunCommand", () => {
+  const matches = buildBracket();
+  const byNumber = (number: number) => matches[number - 1];
+  const staffCommands: TournamentCommandType[] = ["start_match", "finish_match", "mark_no_show"];
+  const adminCommands: TournamentCommandType[] = ["freeze_match", "unfreeze_match", "disqualify", "revert_result"];
+
+  it("lets the KOF administrator run any command on any match (UT-TO-15)", () => {
+    [...staffCommands, ...adminCommands].forEach((type) => {
+      matches.forEach((match) => {
+        expect(canRunCommand({ role: "kof_admin", desk: null }, type, match)).toBe(true);
+      });
+    });
+  });
+
+  it("lets a staff member capture only the matches of its own desk (UT-TO-14)", () => {
+    staffCommands.forEach((type) => {
+      expect(canRunCommand({ role: "kof_staff", desk: 1 }, type, byNumber(1))).toBe(true);
+      expect(canRunCommand({ role: "kof_staff", desk: 1 }, type, byNumber(61))).toBe(true);
+      expect(canRunCommand({ role: "kof_staff", desk: 1 }, type, byNumber(63))).toBe(true);
+      expect(canRunCommand({ role: "kof_staff", desk: 1 }, type, byNumber(31))).toBe(false);
+      expect(canRunCommand({ role: "kof_staff", desk: 2 }, type, byNumber(31))).toBe(true);
+      expect(canRunCommand({ role: "kof_staff", desk: 2 }, type, byNumber(62))).toBe(true);
+      expect(canRunCommand({ role: "kof_staff", desk: 2 }, type, byNumber(1))).toBe(false);
+      expect(canRunCommand({ role: "kof_staff", desk: 2 }, type, byNumber(63))).toBe(false);
+    });
+  });
+
+  it("never lets a staff member freeze, disqualify or revert, even on its own desk", () => {
+    adminCommands.forEach((type) => {
+      expect(canRunCommand({ role: "kof_staff", desk: 1 }, type, byNumber(1))).toBe(false);
+      expect(canRunCommand({ role: "kof_staff", desk: 2 }, type, byNumber(31))).toBe(false);
+    });
+  });
+
+  it("lets a staff member without a desk capture nothing", () => {
+    staffCommands.forEach((type) => {
+      matches.forEach((match) => {
+        expect(canRunCommand({ role: "kof_staff", desk: null }, type, match)).toBe(false);
+      });
+    });
   });
 });
