@@ -8,7 +8,7 @@ const FEATURE_DEPENDENCIES = {
   landing: [],
   "floor-plan": ["games"],
   schedule: ["accounts", "floor-plan"],
-  visitors: [],
+  visitors: ["games"],
 };
 
 const FEATURES = readdirSync(new URL("./src/features", import.meta.url), { withFileTypes: true })
