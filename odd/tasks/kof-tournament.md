@@ -77,7 +77,7 @@ SSE (RF-67, RF-74), and the participant view of `UTE3`. They need M4 and a decis
 | ID | Specs | Route | Status | Commit |
 | --- | --- | --- | --- | --- |
 | T1 | S9 | parent (Sonnet 5.5) | done, commit pending | |
-| T2 | S1, S3, S5 | unrouted | pending | |
+| T2 | S1, S3, S5 | parent (Sonnet 5.5) | done, commit pending | |
 | T3 | S2, S6 | unrouted | pending | |
 | T4 | S4, S8 | unrouted | pending | |
 | T5 | S7 | unrouted | pending | |
@@ -85,8 +85,11 @@ SSE (RF-67, RF-74), and the participant view of `UTE3`. They need M4 and a decis
 - T1: SRS edits (version 2.4) and migration `20261028160000_kof_desk`; update the schema, `accounts-table.test.ts`,
   `er-model.html`, `unit-test-cases.md` and `e2e-flows.md`. `accounts/lib/types.ts` needed no change (it has roles, not
   boards). Risk: item 1 (migration).
-- T2: port and adapt the pure engine and its tests to single elimination, byes and the new states; a full 64-player
-  simulation (63 matches) and a 40-player one with byes.
+- T2: pure engine for single elimination, byes and the new states; a full 64-player simulation (63 matches) and a
+  40-player one with byes. Files in `src/features/tournament/lib/`: `types`, `tournament-rules` (desk of each match,
+  admin-only commands), `bracket-layout`, `bracket-generation` (Fisher-Yates with an injected `randomInt`),
+  `match-resolution`, `result-revert`, `tournament-engine` (`applyCommand`), `tournament-copy` (errors and log only) and
+  `tournament-rule-error`.
 - T3: persistence (S6), bracket generation at `kofBracketGeneratesAt` with `crypto.randomInt`, audit.
 - T4: role guard, `proxy.ts` matcher, Server Actions with the desk check.
 - T5: `/admin/kof` page with the polling Route Handler and the ported components; copy in
@@ -107,3 +110,14 @@ SSE (RF-67, RF-74), and the participant view of `UTE3`. They need M4 and a decis
   to desk 1 and 3 and 4 to desk 2; checked on a database with accounts and a session: no foreign key violations, the
   session cascade still works. `prisma migrate diff` against the schema: no difference. 445 tests pass, `lint`,
   `lint:oxlint` and `typecheck` have no errors; `visitors-actions-hardening` still fails only on Windows (EPERM).
+- L4 (2026-10-28, T2): the engine of `UTE3` was reused as a pattern (pure `applyCommand`, JSON state cloned on each
+  command, winner propagation, automatic byes) but rewritten: its stations, pools, double elimination, dispute, judge and
+  countdown flows do not exist in the SRS v2, so there was almost nothing to copy line by line. RED: 4 suites failed on
+  missing modules. GREEN: 45 tests (UT-TO-05 to UT-TO-08, UT-TO-10 to UT-TO-13, UT-TO-17 to UT-TO-23, a full 64-player
+  tournament and a 40-player one with 24 byes). Decisions to confirm: (a) the bracket needs 32 to 64 players, because
+  with fewer a first round match would be a bye against a bye, which RF-60 forbids; (b) `version` is per tournament, not per
+  match as UT-TO-16 says: the server (T3) re-applies the command on the fresh state when the version moved and only
+  answers "El combate cambió, recarga" if the command no longer fits; (c) reverting returns the match to `active` and
+  also takes back the byes it caused, but only while the next match has not started. The command parser, the view
+  selectors and the UI of `UTE3` are left for T4 and T5. 490 tests pass; `lint`, `lint:oxlint`, `lint:duplication` and
+  `typecheck` have no errors; `visitors-actions-hardening` still fails only on Windows (EPERM).
