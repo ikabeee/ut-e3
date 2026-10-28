@@ -8,12 +8,15 @@ import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
 import { requireKofAccount, type KofAccount } from "@features/accounts/lib/server/current-account";
 import { listManagedAccounts } from "@features/accounts/lib/server/invitations";
 import { EntriesPanel } from "@features/tournament/components/entries-panel";
+import { PublicBracketSwitch } from "@features/tournament/components/public-bracket-switch";
 import { TournamentDashboard } from "@features/tournament/components/tournament-dashboard";
 import { addEntryAction, checkInEntryAction, generateBracketAction } from "@features/tournament/lib/entries-actions";
+import { setPublicBracketAction } from "@features/tournament/lib/public-bracket-actions";
 import { submitTournamentCommand } from "@features/tournament/lib/tournament-actions";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import { closeCheckInIfDue } from "@features/tournament/lib/server/entries-mutations";
 import { getEntries } from "@features/tournament/lib/server/entries-queries";
+import { getPublicBracketEnabled } from "@features/tournament/lib/server/public-bracket-queries";
 import { getTournament } from "@features/tournament/lib/server/tournament-queries";
 
 const COPY = TOURNAMENT_COPY.ui;
@@ -50,6 +53,7 @@ async function KofPanel() {
         <SignOutButton action={signOut} />
       </header>
       {account.role === "kof_admin" && <AdminEntries adminId={account.id} hasBracket={tournament !== null} />}
+      {account.role === "kof_admin" && <PublicBracketPanel />}
       {account.role === "kof_admin" && <StaffAccounts role={account.role} />}
       <TournamentDashboard
         initial={tournament}
@@ -88,4 +92,9 @@ async function StaffAccounts({ role }: Readonly<{ role: string }>) {
       actions={ACCOUNT_ACTIONS}
     />
   );
+}
+
+// Closing the public bracket never touches the operation of the tournament: the desks keep their access (RF-74).
+async function PublicBracketPanel() {
+  return <PublicBracketSwitch isEnabled={await getPublicBracketEnabled()} action={setPublicBracketAction} />;
 }
