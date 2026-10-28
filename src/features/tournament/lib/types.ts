@@ -77,3 +77,18 @@ export type TournamentCommand =
   | { type: "revert_result"; matchId: string };
 
 export type TournamentCommandType = TournamentCommand["type"];
+
+/** pre: the list that the KOF administrator builds; onsite: the sign-up at the KOF area on the event day. */
+export type EntryChannel = "pre" | "onsite";
+
+export type EntryStatus = "registered" | "checked_in" | "no_show";
+
+export interface EntryView {
+  id: string;
+  visitorId: string;
+  gamertag: string;
+  channel: EntryChannel;
+  status: EntryStatus;
+  /** ISO instant, only when the status is `checked_in`. */
+  checkedInAt: string | null;
+}

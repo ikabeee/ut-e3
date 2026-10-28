@@ -1,3 +1,4 @@
+import { encryptPin, hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 // kofBracketGeneratesAt of the seed: 12:55 in Cancun.
@@ -22,6 +23,29 @@ export async function createEventSettings() {
       checkInCutoffAt: new Date("2026-11-20T21:50:00.000Z"),
       raffleStartsAt: new Date("2026-11-20T23:00:00.000Z"),
       publicBracketEnabled: true,
+    },
+  });
+}
+
+// Fake passports for the entries tests: the table is shared, but this feature does not import visitors.
+export async function createVisitors(count: number) {
+  const visitors = [];
+
+  for (let index = 1; index <= count; index += 1) {
+    visitors.push(await createVisitor(`Jugador${index}`, String(index).padStart(5, "0")));
+  }
+
+  return visitors;
+}
+
+export async function createVisitor(gamertag: string, pin = "12345") {
+  return getPrisma().visitor.create({
+    data: {
+      fullName: `Nombre ${gamertag}`,
+      gamertag,
+      email: `${gamertag.toLowerCase()}@example.com`,
+      pin: encryptPin(pin),
+      pinLookup: hashPinForLookup(pin),
     },
   });
 }

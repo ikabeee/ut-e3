@@ -20,6 +20,9 @@ export const MATCHES_PER_BOARD = 15;
 
 export const MAX_ENTRANTS = BOARD_NUMBERS.length * PLAYERS_PER_BOARD;
 
+/** The pre-registration list leaves at least 14 of the 64 places for the event day (RF-58). */
+export const PRE_LIST_LIMIT = 50;
+
 /** Below this a first round match would be a bye against a bye, which RF-60 forbids. */
 export const MIN_ENTRANTS = MAX_ENTRANTS / 2;
 
