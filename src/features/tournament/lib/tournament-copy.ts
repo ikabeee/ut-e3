@@ -18,6 +18,9 @@ export const TOURNAMENT_COPY = {
     invalidSlots: "Indica uno o los dos jugadores, sin repetirlos.",
     notRevertible: "Solo se revierte un resultado por No se presentó o descalificación.",
     nextMatchStarted: (number: number) => `No se puede revertir: el combate #${number} ya empezó o terminó.`,
+    matchChanged: "El combate cambió, recarga.",
+    damagedState: "El estado guardado del torneo está dañado.",
+    missingSettings: "Faltan los horarios del evento para generar el bracket.",
     invalidEntrantCount: (minimum: number, maximum: number) =>
       `El bracket necesita entre ${minimum} y ${maximum} jugadores con check-in.`,
   },
