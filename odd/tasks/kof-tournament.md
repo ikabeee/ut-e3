@@ -78,7 +78,7 @@ SSE (RF-67, RF-74), and the participant view of `UTE3`. They need M4 and a decis
 | --- | --- | --- | --- | --- |
 | T1 | S9 | parent (Sonnet 5.5) | done, commit pending | |
 | T2 | S1, S3, S5 | parent (Sonnet 5.5) | done, commit pending | |
-| T3 | S2, S6 | unrouted | pending | |
+| T3 | S2, S6 | parent (Sonnet 5.5) | done, commit pending | |
 | T4 | S4, S8 | unrouted | pending | |
 | T5 | S7 | unrouted | pending | |
 
@@ -90,7 +90,10 @@ SSE (RF-67, RF-74), and the participant view of `UTE3`. They need M4 and a decis
   admin-only commands), `bracket-layout`, `bracket-generation` (Fisher-Yates with an injected `randomInt`),
   `match-resolution`, `result-revert`, `tournament-engine` (`applyCommand`), `tournament-copy` (errors and log only) and
   `tournament-rule-error`.
-- T3: persistence (S6), bracket generation at `kofBracketGeneratesAt` with `crypto.randomInt`, audit.
+- T3: persistence (S6), bracket generation at `kofBracketGeneratesAt` with `crypto.randomInt`, audit. Migration
+  `20261028180000_kof_tournament` (singleton table `kof_tournament`: `state` JSON, `version`, CHECKs `id = 1` and
+  `version >= 0`); `lib/server/tournament-queries.ts` (`getTournament`) and `lib/server/tournament-mutations.ts`
+  (`generateTournament`, `runTournamentCommand`, `saveTournament`). Risk: item 1 (migration).
 - T4: role guard, `proxy.ts` matcher, Server Actions with the desk check.
 - T5: `/admin/kof` page with the polling Route Handler and the ported components; copy in
   `lib/tournament-copy.ts`; `docs/tournament.md`, `CHANGELOG.md` and `FEATURE_DEPENDENCIES` in `eslint.config.mjs`.
@@ -121,3 +124,14 @@ SSE (RF-67, RF-74), and the participant view of `UTE3`. They need M4 and a decis
   also takes back the byes it caused, but only while the next match has not started. The command parser, the view
   selectors and the UI of `UTE3` are left for T4 and T5. 490 tests pass; `lint`, `lint:oxlint`, `lint:duplication` and
   `typecheck` have no errors; `visitors-actions-hardening` still fails only on Windows (EPERM).
+- L5 (2026-10-28, T3): D1 is now built as proposed: one JSON state plus an integer version. RED: the two new suites
+  failed on the missing model and modules. GREEN: 18 tests. `saveTournament` is a conditional `updateMany` on the version
+  that was read; `runTournamentCommand` re-reads and re-applies up to 3 times and, when the command no longer fits,
+  answers "El combate cambió, recarga." (UT-TO-16). A temporary trace confirmed that both concurrency tests go through
+  the retry path. Generation is rejected before 12:55 (UT-TO-41), twice (UT-TO-09, also when two requests arrive
+  together: the unique violation of the singleton row is mapped to `alreadyGenerated`) and with fewer than 32 or more
+  than 64 players. The shuffle result and the number of byes go to the audit log in the same transaction (RF-59).
+  The tests write the `event_settings` row themselves because `tournament` does not depend on `event-settings`
+  (FEATURE_DEPENDENCIES). The players still have no source: the list of entrants arrives as a parameter until M4 exists
+  (D4). 508 tests pass; `lint`, `lint:oxlint`, `lint:duplication`, `typecheck` and `build` have no errors;
+  `visitors-actions-hardening` still fails only on Windows (EPERM).
