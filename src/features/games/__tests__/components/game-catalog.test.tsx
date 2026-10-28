@@ -107,9 +107,22 @@ describe("GameCatalog", () => {
     expect(liveRegion()).toHaveTextContent("Juego 12");
   });
 
-  it("does not link the cases to a game page", () => {
+  // The coverflow opens on the middle game: Juego 09 of 18.
+  it("links only the current game to its page", () => {
     render(<GameCatalog games={games} />);
 
-    expect(screen.queryAllByRole("link")).toHaveLength(0);
+    const links = screen.getAllByRole("link");
+
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAccessibleName("Ver ficha de Juego 09");
+    expect(links[0]).toHaveAttribute("href", "/games/juego-09");
+  });
+
+  it("points the link to the game that moves to the center", async () => {
+    render(<GameCatalog games={games} />);
+
+    await press("Juego siguiente", 1);
+
+    expect(screen.getByRole("link", { name: "Ver ficha de Juego 10" })).toHaveAttribute("href", "/games/juego-10");
   });
 });

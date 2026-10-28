@@ -28,6 +28,14 @@ export async function getGames(): Promise<Game[]> {
   return games.toSorted(compareByStand);
 }
 
+export async function getGameBySlug(slug: string): Promise<Game | null> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(GAMES_CACHE_TAG);
+
+  return getPrisma().game.findUnique({ where: { slug }, select: GAME_FIELDS });
+}
+
 function compareByStand(first: Game, second: Game): number {
   return first.stand.zone.localeCompare(second.stand.zone) || first.stand.number - second.stand.number;
 }
