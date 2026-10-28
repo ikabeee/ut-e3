@@ -68,6 +68,7 @@ export const TOURNAMENT_COPY = {
       confirmQuestion: "¿Seguro? Esta acción queda en la bitácora.",
       sending: "Enviando...",
     },
+    staffHeading: "Staff de las mesas",
     log: { heading: "Bitácora", empty: "Todavía no hay movimientos." },
     entries: {
       heading: "Inscripciones",

@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { AccountsPanel } from "@features/accounts/components/accounts-panel";
 import { SignOutButton } from "@features/accounts/components/sign-out-button";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { SYSADMIN_HOME_PATH } from "@features/accounts/lib/accounts-links";
+import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
 import { requireSysadmin } from "@features/accounts/lib/server/current-account";
+import { listManagedAccounts } from "@features/accounts/lib/server/invitations";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import { getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
 import { ZONE_IDS } from "@features/floor-plan/lib/types";
@@ -44,6 +47,12 @@ async function SysadminPanel() {
         </div>
         <SignOutButton action={signOut} />
       </header>
+      <AccountsPanel
+        heading={ADMIN_COPY.accountsHeading}
+        actorRole={account.role}
+        accounts={await listManagedAccounts(account.role)}
+        actions={ACCOUNT_ACTIONS}
+      />
       <ScheduleAdmin
         items={items}
         zones={ZONE_OPTIONS}

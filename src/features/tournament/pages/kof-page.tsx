@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { AccountsPanel } from "@features/accounts/components/accounts-panel";
 import { SignOutButton } from "@features/accounts/components/sign-out-button";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { KOF_HOME_PATH } from "@features/accounts/lib/accounts-links";
+import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
 import { requireKofAccount, type KofAccount } from "@features/accounts/lib/server/current-account";
+import { listManagedAccounts } from "@features/accounts/lib/server/invitations";
 import { EntriesPanel } from "@features/tournament/components/entries-panel";
 import { TournamentDashboard } from "@features/tournament/components/tournament-dashboard";
 import { addEntryAction, checkInEntryAction, generateBracketAction } from "@features/tournament/lib/entries-actions";
@@ -47,6 +50,7 @@ async function KofPanel() {
         <SignOutButton action={signOut} />
       </header>
       {account.role === "kof_admin" && <AdminEntries adminId={account.id} hasBracket={tournament !== null} />}
+      {account.role === "kof_admin" && <StaffAccounts role={account.role} />}
       <TournamentDashboard
         initial={tournament}
         viewer={{ role: account.role, desk: account.kofDesk }}
@@ -72,4 +76,16 @@ async function loadEntries(adminId: string) {
   await closeCheckInIfDue(adminId, new Date());
 
   return getEntries();
+}
+
+// The administrator invites, resends and disables the staff of the two desks (the roles table of the SRS).
+async function StaffAccounts({ role }: Readonly<{ role: string }>) {
+  return (
+    <AccountsPanel
+      heading={COPY.staffHeading}
+      actorRole={role}
+      accounts={await listManagedAccounts(role)}
+      actions={ACCOUNT_ACTIONS}
+    />
+  );
 }

@@ -1,13 +1,14 @@
 "use client";
 
 import { Button, FieldError, Form, Input, Label, TextField } from "@heroui/react";
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState } from "react";
 import type { EntriesActionState } from "@features/tournament/lib/entries-actions";
 import { getEntryCounts, type EntryCounts } from "@features/tournament/lib/entries-view";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import { MAX_ENTRANTS, PRE_LIST_LIMIT } from "@features/tournament/lib/tournament-rules";
 import type { EntryView } from "@features/tournament/lib/types";
-import { useSubmitKeepingValues } from "@shared/hooks/use-submit-keeping-values";
+import { FormFeedback } from "@shared/components/form-feedback";
+import { useActionForm } from "@shared/hooks/use-action-form";
 
 export type EntriesAction = (previous: EntriesActionState | null, form: FormData) => Promise<EntriesActionState>;
 
@@ -82,14 +83,7 @@ function CountItem({ value, label }: Readonly<{ value: number; label: string }>)
 }
 
 function EntryForm({ field, action }: Readonly<{ field: EntryField; action: EntriesAction }>) {
-  const [state, formAction, isPending] = useActionState(action, null);
-  const handleSubmit = useSubmitKeepingValues(formAction);
-  const formRef = useRef<HTMLFormElement>(null);
-
-  // What was typed stays when the server refuses; it is cleared once the server accepted it.
-  useEffect(() => {
-    if (state?.status === "done") formRef.current?.reset();
-  }, [state]);
+  const { state, formAction, isPending, formRef, handleSubmit } = useActionForm(action);
 
   return (
     <Form ref={formRef} action={formAction} onSubmit={handleSubmit} className="grid content-start gap-3">
@@ -103,7 +97,7 @@ function EntryForm({ field, action }: Readonly<{ field: EntryField; action: Entr
         />
         <FieldError />
       </TextField>
-      <ActionFeedback state={state} />
+      <FormFeedback state={state} />
       <Button type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isPending}>
         {isPending ? field.sending : field.submit}
       </Button>
@@ -118,32 +112,12 @@ function GenerateForm({ action }: Readonly<{ action: EntriesAction }>) {
     <form action={formAction} className="grid content-start gap-3 border border-border p-4">
       <h3 className="type-mono font-bold">{COPY.generate.heading}</h3>
       <p className="text-sm text-muted">{COPY.generate.hint}</p>
-      <ActionFeedback state={state} />
+      <FormFeedback state={state} />
       <Button type="submit" variant="outline" className="min-h-11 justify-self-start" isPending={isPending}>
         {isPending ? COPY.generate.sending : COPY.generate.submit}
       </Button>
     </form>
   );
-}
-
-function ActionFeedback({ state }: Readonly<{ state: EntriesActionState | null }>) {
-  if (state?.status === "done") {
-    return (
-      <p role="status" className="text-sm text-success">
-        {state.message}
-      </p>
-    );
-  }
-
-  if (state?.status === "error") {
-    return (
-      <p role="alert" className="text-sm text-danger">
-        {state.message}
-      </p>
-    );
-  }
-
-  return null;
 }
 
 function EntryList({ entries }: Readonly<{ entries: readonly EntryView[] }>) {
