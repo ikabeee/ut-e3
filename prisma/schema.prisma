@@ -50,7 +50,7 @@ model Account {
   status      String
   standId     String?    @map("stand_id")
   stand       Stand?     @relation(fields: [standId], references: [id], onDelete: Restrict)
-  kofBoard    Int?       @map("kof_board")
+  kofDesk     Int?       @map("kof_desk")
   createdById String?    @map("created_by_id")
   createdBy   Account?   @relation("CreatedAccounts", fields: [createdById], references: [id], onDelete: Restrict)
   created     Account[]  @relation("CreatedAccounts")

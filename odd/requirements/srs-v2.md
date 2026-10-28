@@ -4,7 +4,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Versión del documento | 2.3 |
+| Versión del documento | 2.4 |
 | Reemplaza a | `odd/requirements/srs.md` (v1, basada en `archive/develop-v1`) |
 | Fuente | Lista de módulos del equipo, iteración de huecos con el equipo (22 y 23 de octubre de 2026), audios del equipo (23 de octubre de 2026) y orden del día oficial del evento (25 de octubre de 2026) |
 | Documentos relacionados | `odd/requirements/unit-test-cases.md`, `odd/requirements/e2e-flows.md`, artifacts de arquitectura y modelo ER |
@@ -12,6 +12,12 @@
 Los requisitos se numeran de nuevo en esta versión; no coinciden con los de la v1. Lo marcado como
 **Supuesto** fue propuesto en la iteración y aceptado por el equipo. Un requisito eliminado conserva su número con la
 marca **(eliminado)** para no romper la trazabilidad.
+
+### Cambios de la versión 2.4
+
+- Staff de KOF: el equipo opera con 2 staffs para los 4 tableros, uno por cada dos (28 de octubre de 2026). La mesa 1
+  captura los tableros 1 y 2, la semifinal 1 y la final; la mesa 2, los tableros 3 y 4 y la semifinal 2 (rol, RF-61 y
+  RF-62). La cuenta guarda `kofDesk` (1 o 2) en lugar de `kofBoard`.
 
 ### Cambios de la versión 2.3
 
@@ -128,7 +134,7 @@ Tomado del orden del día oficial. Es el contenido inicial del cronograma (RF-03
 | Staff de stand (2 staffs y 1 técnico) | Administrador de stand | Solo abrir el kiosco de visitas de su stand |
 | Administrador de rifa (animador) | Sysadmin | Tómbola, confirmar o descartar, registrar premios |
 | Administrador de KOF | Sysadmin | Lista de jugadores, check-in, bracket completo, congelar y descalificar, alta del staff de KOF |
-| Staff de KOF (4, uno por tablero) | Administrador de KOF | Combates de su tablero; los staffs 1 y 2 también capturan semifinales y final |
+| Staff de KOF (2, uno por cada dos tableros) | Administrador de KOF | Combates de sus dos tableros; la mesa 1 también captura la semifinal 1 y la final, y la mesa 2 la semifinal 2 |
 | Atención | Sysadmin | Recuperar pasaportes en la mesa de atención |
 | Visitante | Autorregistro | Pasaporte y PIN |
 | Público | — | Landing, catálogo, patrocinadores, ganadores, bracket y tómbola en vivo |
@@ -258,8 +264,8 @@ Tomado del orden del día oficial. Es el contenido inicial del cronograma (RF-03
 | RF-77 | En el horario configurado de inscripción presencial (de 12:00 a 12:45), los visitantes que llegan al evento se inscriben con el equipo de KOF en el área de KOF: si no tienen pasaporte, se registran (M3) y el administrador de KOF los agrega. Su check-in queda hecho al inscribirse. Entran hasta llenar el cupo de 64, contando los lugares reservados de la lista previa. De 12:45 a 12:55 el administrador de KOF confirma a los participantes antes del bracket. |
 | RF-59 | El bracket se genera una sola vez a la hora configurada (12:55), solo con los jugadores con check-in, con barajeo Fisher-Yates y `crypto.randomInt`; el resultado queda en la bitácora. |
 | RF-60 | Con menos de 64 jugadores con check-in, los lugares vacíos son byes, repartidos parejo entre los 4 tableros; un bye nunca se enfrenta a otro. |
-| RF-61 | Cada staff ve en tiempo real su cuarto del bracket, marca al perdedor y activa el siguiente combate. |
-| RF-62 | Permisos de captura: tablero N lo captura el staff N; semifinal 1 el staff 1; semifinal 2 el staff 2; final el staff 1. El administrador de KOF puede capturar cualquier combate. |
+| RF-61 | Cada staff ve en tiempo real su mitad del bracket (dos tableros), marca al perdedor y activa el siguiente combate. |
+| RF-62 | Permisos de captura: la mesa 1 captura los tableros 1 y 2, la semifinal 1 y la final; la mesa 2 captura los tableros 3 y 4 y la semifinal 2. El administrador de KOF puede capturar cualquier combate. |
 | RF-63 | El staff puede marcar "No se presentó" a uno o los dos jugadores, con el mismo efecto que una descalificación. El administrador puede revertirlo mientras el siguiente combate no haya empezado. |
 | RF-64 | El administrador de KOF ve el bracket completo en tiempo real y puede congelar un combate para descalificar a uno o a los dos jugadores. |
 | RF-65 | Si se descalifica a los dos, el siguiente combate es bye. En una semifinal, el otro finalista es campeón sin jugar; en la final, el torneo queda sin campeón. |

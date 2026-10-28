@@ -106,7 +106,7 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 | UT-AC-11 | server | una cuenta con dos sesiones abiertas | el sysadmin la desactiva o le cambia el rol | las dos sesiones se borran en la misma transacción | D1b |
 | UT-AC-12 | server | una sesión expirada | llega un request con esa cookie | se trata como no autenticado | D1b |
 | UT-AC-13 | server | 5 intentos de login fallidos de la misma IP en la ventana | llega el sexto | se rechaza por límite de solicitudes | RNF-10 |
-| UT-AC-14 | server | un `kof_staff` activo en el tablero 2 | se crea otro `kof_staff` para el tablero 2 | se rechaza (único parcial) | RF-62 |
+| UT-AC-14 | server | un `kof_staff` activo en la mesa 2 | se crea otro `kof_staff` para la mesa 2 | se rechaza (único parcial) | RF-62 |
 
 ## visitors
 
@@ -200,13 +200,13 @@ Casos por feature en formato Dado / Cuando / Entonces. Cada caso se traduce en u
 | UT-TO-05 | lib | 64 jugadores con check-in y un generador aleatorio con semilla fija | se baraja | el resultado es una permutación de los 64 y es reproducible con la misma semilla | RF-59 |
 | UT-TO-06 | lib | 40 jugadores con check-in | se genera el bracket | hay 24 byes, 6 por tablero, y ningún combate de la ronda 1 es bye contra bye | RF-60 |
 | UT-TO-07 | lib | el bracket generado | se revisa la estructura | hay 63 combates: 15 por tablero en las rondas 1 a 4, 2 semifinales y 1 final, y cada combate apunta a su siguiente | RF-57 |
-| UT-TO-08 | lib | el bracket generado | se revisa la asignación de captura | cada combate del tablero N es del staff N; semifinal 1 y final del staff 1; semifinal 2 del staff 2 | RF-62 |
+| UT-TO-08 | lib | el bracket generado | se revisa la asignación de captura | los combates de los tableros 1 y 2, la semifinal 1 y la final son de la mesa 1; los de los tableros 3 y 4 y la semifinal 2, de la mesa 2 | RF-62 |
 | UT-TO-09 | server | un bracket ya generado | se intenta generar otra vez | se rechaza con "El bracket ya se generó" | EC-06 |
 | UT-TO-10 | lib | un combate con un bye | se genera el bracket | el jugador avanza solo y el combate queda `finished` con `outcome = bye` | RF-60 |
 | UT-TO-11 | server | un combate `ready` | su staff lo activa | queda `active` | RF-66 |
 | UT-TO-12 | server | un combate `pending` (falta un jugador) | su staff intenta activarlo | se rechaza | RF-66 |
 | UT-TO-13 | server | un combate `active` | su staff marca al perdedor | queda `finished`, el ganador pasa al siguiente combate en su lado y se publica el evento del bracket | RF-61 |
-| UT-TO-14 | server | un combate del tablero 1 | el staff del tablero 2 intenta capturarlo | se rechaza | RF-62 |
+| UT-TO-14 | server | un combate del tablero 1 | el staff de la mesa 2 intenta capturarlo | se rechaza | RF-62 |
 | UT-TO-15 | server | un combate del tablero 3 | el administrador de KOF lo captura | se acepta | RF-62 |
 | UT-TO-16 | server | un combate con `version = 3` | el staff y el admin guardan a la vez con la versión 3 | gana el primero; el segundo recibe "El combate cambió, recarga" | EC-07 |
 | UT-TO-17 | server | un combate `active` | el staff marca "No se presentó" a un jugador | el otro avanza y queda en la bitácora | RF-63 |
