@@ -57,6 +57,21 @@ de `event_settings`; ninguna está escrita en el código.
   ya está en el bracket.
 - Solo el administrador de KOF hace todo esto; el staff de las mesas y el sysadmin reciben un rechazo.
 
+## Bracket público
+
+Cualquiera puede seguir el bracket en `/tournament` (RF-67), sin sesión. La página y `GET /api/tournament/public` entregan
+solo los gamertags y los resultados: ningún id, correo ni PIN. La consulta es cada 3 segundos, igual que el panel.
+
+| Estado | Qué ve el público |
+| --- | --- |
+| `open` | El bracket: los combates en juego arriba, luego los 4 tableros, las semifinales y la final |
+| `pending` | "El bracket todavía no está listo." |
+| `closed` | "El bracket está disponible en la pantalla del torneo." La API no devuelve el bracket |
+
+El administrador de KOF cierra y reabre la vista pública con el botón "Cerrar al público" de `/admin/kof` (RF-74). El valor es
+`event_settings.publicBracketEnabled`; cambiarlo deja una fila en la bitácora y no afecta al staff de las mesas. Sin
+configuración del evento la vista cuenta como cerrada. Las páginas abiertas se enteran solas en el siguiente ciclo.
+
 ## Cómo está construido
 
 ```
@@ -104,5 +119,6 @@ puede repetirse: solo agrega lo que falta.
 - Registrar en el momento a un visitante que no tiene pasaporte (UT-TO-38): el registro liga un dispositivo al pasaporte,
   así que el visitante se registra en su teléfono y el administrador lo agrega por gamertag.
 - Una lista de espera para los lugares de "No se presentó" (UT-TO-44): quedan vacíos y son byes.
-- El bracket público, el cierre al público y el tiempo real por SSE (RF-67, RF-74).
+- El cierre automático del bracket público cuando la CPU o la memoria pasan del 50% durante 2 minutos (necesita monitoreo del
+  servidor), el tope de conexiones y el tiempo real por SSE: se usa consulta cada 3 segundos.
 - El alta de las cuentas de staff por el administrador de KOF y la asignación de su mesa.

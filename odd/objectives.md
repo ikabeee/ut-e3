@@ -8,3 +8,4 @@
 4. [KOF tournament (M10)](tasks/kof-tournament.md) — done
 5. [KOF entries and check-in (M10)](tasks/kof-entries.md) — done
 6. [Account invitations and staff management](tasks/account-invitations.md) — done
+7. [KOF public bracket](tasks/kof-public-bracket.md) — done
