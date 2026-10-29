@@ -3,11 +3,11 @@
 import { SponsorCaption } from "@features/sponsors/components/sponsor-caption";
 import { SponsorSlides } from "@features/sponsors/components/sponsor-slides";
 import { SponsorThumbnails } from "@features/sponsors/components/sponsor-thumbnails";
-import { useSponsorsCarousel } from "@features/sponsors/hooks/use-sponsors-carousel";
 import { SPONSORS_SECTION_ID } from "@features/sponsors/lib/sponsors-links";
 import { SPONSORS_COPY } from "@features/sponsors/lib/sponsors-copy";
 import type { Sponsor } from "@features/sponsors/lib/types";
 import { ArrowButton } from "@shared/components/arrow-button";
+import { useAutoplayCarousel } from "@shared/hooks/use-autoplay-carousel";
 
 interface SponsorsCarouselProps {
   sponsors: Sponsor[];
@@ -22,7 +22,7 @@ export function SponsorsCarousel({ sponsors }: Readonly<SponsorsCarouselProps>) 
 }
 
 function Carousel({ sponsors }: Readonly<SponsorsCarouselProps>) {
-  const carousel = useSponsorsCarousel(sponsors.length);
+  const carousel = useAutoplayCarousel(sponsors.length);
 
   return (
     <section

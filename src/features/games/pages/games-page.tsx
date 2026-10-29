@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { FeaturedGamesCarousel } from "@features/games/components/featured-games-carousel";
 import { UrlGamesBrowser } from "@features/games/components/url-games-browser";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { GAMES_PATH } from "@features/games/lib/games-links";
@@ -31,9 +32,12 @@ export function GamesView({ games }: Readonly<{ games: Game[] }>) {
   return (
     <>
       <SiteNav homeHref={HOME_PATH} links={HOME_NAV_LINKS} />
-      <main className="page-wrap pt-[clamp(32px,5vw,64px)] pb-[clamp(56px,8vw,112px)]">
+      <main>
         <h1 className="sr-only">{pageTitle}</h1>
-        <UrlGamesBrowser games={games} />
+        <FeaturedGamesCarousel games={games} />
+        <div className="page-wrap pt-[clamp(40px,6vw,72px)] pb-[clamp(56px,8vw,112px)]">
+          <UrlGamesBrowser games={games} />
+        </div>
       </main>
     </>
   );

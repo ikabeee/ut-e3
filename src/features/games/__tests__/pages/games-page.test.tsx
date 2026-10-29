@@ -28,6 +28,14 @@ describe("GamesView", () => {
     expect(gridNames()).toHaveLength(6);
   });
 
+  it("opens with the featured games carousel on the first game", () => {
+    renderView();
+
+    const featured = within(screen.getByRole("region", { name: "Juegos del showcase" }));
+
+    expect(featured.getByRole("heading", { level: 2 })).toHaveTextContent("Juego 01");
+  });
+
   it("shows the site navbar with Inicio and Juegos", () => {
     renderView();
 

@@ -8,7 +8,13 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
-- Página 404 con el tema del sitio (fondo negro, tipografía UTG y navbar con "Inicio"), en lugar de la página blanca
+- Catálogo de juegos en `/games` al estilo de la tienda de Epic Games: carrusel de destacados con avance automático,
+  miniaturas, flechas y deslizamiento; carrusel de géneros que filtra (el género queda en la URL, `?genre=<slug>`, para
+  compartirlo); buscador por nombre, género, stand o sinopsis, y cuadrícula de portadas que lleva a la ficha de cada
+  juego. "Juegos" del navbar abre el catálogo, igual que "Todos los juegos" y "Ver todos" de la ficha, y la etiqueta de
+  género de la ficha abre el catálogo filtrado por ese género.
+
+- Página 404 con el tema del sitio (fondo negro, tipografía UTG y navbar con "Inicio" y "Juegos"), en lugar de la página blanca
   por defecto de Next.js; la usan las rutas que no existen y las fichas de juegos que no existen.
 
 - Ficha de cada juego en `/games/[slug]` al estilo de la tienda de Epic Games: visor de la galería con flechas y
@@ -16,8 +22,7 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   fecha y horario del evento), columna lateral con la portada, itch.io, "Ver en el croquis", "Quiero asistir" y la
   ficha, y "Más juegos" (primero los del mismo género). Muestra sólo el código corto del stand.
   El enlace a itch.io aparece a la hora configurada en `event_settings` (16:30), según la hora del servidor; antes,
-  la ficha indica a qué hora se activa. Al tocar el juego del centro del coverflow se abre su ficha; la ficha lleva el
-  navbar solo con "Inicio" mientras no exista el catálogo de juegos. Un juego que no existe muestra la página de "no
+  la ficha indica a qué hora se activa. Al tocar el juego del centro del coverflow se abre su ficha. Un juego que no existe muestra la página de "no
   encontrado" con `noindex`. Las pruebas e2e de la ficha corren con `npm run test:e2e:games`.
 
 - Consulta de pasaporte en `/passport` con gamertag y PIN descifrado asociado a la cookie del dispositivo.
