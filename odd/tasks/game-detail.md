@@ -167,3 +167,8 @@ Route evidence: T1-T3 inline (one dependent chain). T4 delegated as a parallel u
   tag is plain text until the catalog has a filter; `buildEventCalendarUrl` moved to `landing/lib/calendar-link.ts`.
   Outcome: feature closed. Pending: push and the PR to `develop`. Next: the Epic-style `/games` catalog with "Juegos"
   in the navbar.
+- L20 (2026-10-29): native review of `2094341..a87e181` (lenses risk, readability and reliability, consent granted by
+  the user): approved and acknowledged (lineage `review-826be21308778602`, authority burned). Non-blocking follow-ups:
+  `R3-gallery-empty-images` (WARNING: the gallery assumes at least one image; every game has a cover today, enforced
+  by `getCoverImage`), `R3-home-end-keys-untested`, `R3-swipe-untested`, `R2-breakpoint-980-repeated`,
+  `R2-duplicated-detail-copy`, `R2-hours-label-borrows-acts-copy`.
