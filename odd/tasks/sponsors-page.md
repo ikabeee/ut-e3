@@ -19,6 +19,10 @@ changed lines). Test runner: Jest (`npm test`).
   (AGENTS.md, "Agregar una feature nueva"). Assumption: the route is declared in `lib/sponsors-links.ts`.
 - S5 (example seed): "Agrega un seed en lo que nos confirman los sponsors" (L5). Assumption: six fictitious
   sponsors with `example.com` sites, `+52 998 000 000N` phones and "LOGO DE EJEMPLO" SVGs in `public/sponsors/`.
+- S6 (e2e): "Aplica el e2e con los screenshots" (L7). `npm run test:e2e:sponsors` (`e2e/sponsors.e2e.mjs`, same
+  harness as `e2e/games.e2e.mjs`): SP-01 cards in position order, canonical URL; SP-02 logos load; SP-03 website in a
+  new tab with `noopener noreferrer`; SP-04 `tel:` link with a readable phone; SP-05 landing carousel; SP-06 no
+  horizontal scroll and 44 px targets at 360/390/844/1440 px. Screenshots in `e2e/screenshots/sponsors/` (ignored).
 - S4 (style): "Like the carousel" (L3): logo on `bg-surface`, `type-wide` name, services in `text-copy`, the
   "Visitar sitio" `ActionLink` and the `tel:` link in `type-mono` (shared with the carousel through
   `SponsorContactLinks`).
@@ -30,6 +34,7 @@ changed lines). Test runner: Jest (`npm test`).
 | T1 | S1, S2 | inline | done | RED (module missing) then GREEN, `47567ae` |
 | T2 | S3 | inline | done | `47567ae` |
 | T4 | S5 | inline | done | RED (no example sponsors) then GREEN, `f64f922` |
+| T5 | S6 | inline | done | 28/28 checks, see L8 |
 | T3 | S4 | inline | done | screenshots at 360/390/844/1440, `47567ae` |
 
 ## Log
@@ -53,3 +58,7 @@ changed lines). Test runner: Jest (`npm test`).
   matches `id` with `expect.any(String)`. Seeded a scratchpad copy of `dev.db`: 6 cards on `/sponsors` without
   overflow at 360/390/844/1440 px, and the landing carousel shows them. Replacing them with the real sponsors needs an
   edit to `INITIAL_SPONSORS` plus emptying the `sponsors` table, because the seed only fills an empty table.
+- L7 (2026-10-29, user): "Aplica el e2e con los screenshots"
+- L8 (2026-10-29): `npm run test:e2e:sponsors` passes 28/28 checks twice (port 3471, own temp database seeded with
+  the example sponsors; expectations read from that database). Screenshots: `01-cards`, `02-links`,
+  `03-landing-carousel`, `04-viewports` (360, 390, 844 landscape, 1440) plus `http.log`.
