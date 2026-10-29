@@ -1,5 +1,5 @@
 ---
-status: done
+status: in-progress
 ---
 
 # Game detail page (M2)
@@ -20,17 +20,16 @@ Objective: a public page per game at `/games/[slug]` (RF-09, RF-10, RF-11; issue
   without a link shows nothing at 18:00. The time is `event_settings.itchOpensAt`.
 - S3 (RF-11): "El visitante ve el código corto del stand (`ZA-S1`)". The page never shows the full code. The admin
   view of the full code is out of scope: there is no admin game view until M6/M7.
-- S4 (route, L2, L7 and L10): "Va en su misma ruta." `/games/[slug]`; an unknown slug shows the not-found page with
-  `noindex` (L7: "Aceptar 200 + noindex"): its first visit answers 200, later ones 404. L10: "No debe ir un boton de ver
-  ficha, directamente el usuario puede clickear y lo redirige al detalle del juego a traves de un modal." Tapping the
-  game at the center of the coverflow opens its page in a modal (intercepted route; the URL becomes `/games/<slug>`);
-  closing the modal goes back to the landing. A side game is first brought to the center (assumption, as in
-  `archive/develop-v1` `game-coverflow.tsx:63-69`). Loading `/games/<slug>` directly shows the full page.
+- S4 (route, L2, L7, L10 and L14): "Va en su misma ruta." `/games/[slug]`; an unknown slug shows the not-found page
+  with `noindex` (L7: "Aceptar 200 + noindex"): its first visit answers 200, later ones 404. L10: "No debe ir un boton
+  de ver ficha, directamente el usuario puede clickear y lo redirige al detalle del juego". L14: "Hay que quitar el
+  modal (esta horrible)". Tapping the game at the center of the coverflow navigates to its full page; a side game is
+  first brought to the center (assumption, as in `archive/develop-v1` `game-coverflow.tsx:63-69`).
 - S5 (e2e, L1 and L2): "Cuales son los casos de uso que implementaremos en la aplicacion y los flujos e2e para probar
   con playwright" and "Al finalizar el desarrollo me mostraras el output de los request http y los screenshots del
   flujo e2e". Flows G-01 to G-08 as proposed in L1: catalog to page, gallery, itch before and after the time, game
-  without link, 404, short code only, mobile widths 360, 390 and 1440 px.
-
+  without link, 404, short code only, mobile widths 360, 390 and 1440 px. L14: "en los screenshotss hay que dejarlos ordenados, hay unos
+  sueltos": screenshots go in one numbered folder per flow, in the order the run takes them.
 - S6 (navbar, L10): "Y en el navbar de be aparecer (por el momento), inicio porque aun no desarrollamos el catalogo de
   juegos como epic". The full game page shows the site navbar with a single link, "Inicio", to `/`; its logo also goes
   to `/`. The "Volver al catálogo" link is removed (assumption: the navbar replaces it).
@@ -42,15 +41,17 @@ Objective: a public page per game at `/games/[slug]` (RF-09, RF-10, RF-11; issue
 | T1 | S2 | inline | done | RED (module missing) -> GREEN 4/4 `itch-link.test.ts`; commit `a9f44b0` |
 | T2 | S1, S3, S4 | inline | done | RED -> GREEN `games-queries`, `game-cover`, `game-detail`, `game-itch-link` tests; commit `a9f44b0` |
 | T3 | S4 | inline | done | L10: RED 3 failing -> GREEN `game-catalog.test.tsx` 12/12 (cases are links); commit `13c7e7b` |
-| T4 | S5 | delegated (parallel writer), L10 update inline | done | `npm run test:e2e:games` 53/53; commits `4e99d31`, `13c7e7b` |
-| T5 | S4 | inline | done | RED module missing -> GREEN `game-detail-modal.test.tsx` 3/3; commit `13c7e7b` |
+| T4 | S5 | delegated (parallel writer), L10 and L14 updates inline | done | `npm run test:e2e:games` 43/43, screenshots in numbered flow folders; commits `4e99d31`, `13c7e7b`, `fe0dc82` |
+| T5 | S4 | inline | reverted (L14) | RED module missing -> GREEN `game-detail-modal.test.tsx` 3/3; commit `13c7e7b` |
+| T7 | S4 | inline | done | catalog tests stay GREEN (cases link to the page); e2e G-01 follows the case to the full page; commit `fe0dc82` |
 | T6 | S6 | inline | done | RED `site-nav.test.tsx` 1 failing -> GREEN; landing logo regression test; commit `13c7e7b` |
 
 - T1: `lib/itch-link.ts`, the itch.io link rule (RED UT-GA-01 to 03).
 - T2: `getGameBySlug`, `game-detail-page.tsx`, `src/app/games/[slug]/page.tsx`, metadata and 404.
 - T3: the coverflow links to the page of the current game.
 - T4: `e2e/games.e2e.mjs` with `playwright-core` and its screenshots.
-- T5: `@modal` slot in the root layout, `@modal/(.)games/[slug]` with a HeroUI `Modal`, and the coverflow opening it.
+- T5: (reverted by L14) `@modal` slot, `@modal/(.)games/[slug]` with a HeroUI `Modal`. T7: remove the modal; the
+  coverflow navigates to the full page.
 - T6: the full game page with `SiteNav` ("Inicio").
 
 Route evidence: T1-T3 inline (one dependent chain). T4 delegated as a parallel unit with a disjoint surface
@@ -127,3 +128,13 @@ Route evidence: T1-T3 inline (one dependent chain). T4 delegated as a parallel u
   `R3-center-click-test-proves-little` and `R3-noop-test-vacuous` (two tests that assert little).
   Outcome: feature closed again. Pending: push and the PR to `develop` (user's decision). Next objective: the
   Epic-style games catalog at `/games` (then the navbar gains its link), M11 passport recovery, or M8 sponsors page.
+- L14 (2026-10-29, user): "Hay que quitar el modal (esta horrible), en los screenshotss hay que dejarlos ordenados, hay
+  unos sueltos. Como es que se muesstra  la galeria eso no lo termino de entender [Image #1], osea cual es el flujo".
+  S4 and S5 rewritten; T5 reverted by T7; T4 reopened. The gallery question is answered in chat (no spec change).
+- L15 (2026-10-29): L14 delivered in `fe0dc82`: `@modal` slot, intercepted route, modal components, focus hook and
+  their tests removed; `src/app/layout.tsx` is back to `069a382`; the coverflow center case navigates to the full page.
+  Screenshots: `e2e/screenshots/games/<NN-flow>/<NN-step>.png`, full-page captures taken from the top (the sticky navbar
+  was painted mid-image after scrolling to the gallery). Stale `.next/dev/types` from the dev server still pointed at
+  `@modal` and broke `tsc`; it is generated output and was removed. Checks: `npm test` 95 suites / 485 tests,
+  typecheck, ESLint, Oxlint, jscpd 0 clones, `npm run test:e2e:games` 43/43. Open question to the user: keep the
+  gallery as a plain list or bring the archive's main image plus thumbnails.
