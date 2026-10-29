@@ -6,3 +6,4 @@
 2. [Visitor registration (M3)](tasks/visitor-registration.md) — done
 3. [Visitor passport and check-in (M4)](tasks/visitor-passport.md) — unknown
 4. [Game detail page (M2)](tasks/game-detail.md) — done
+5. [Games catalog (M2)](tasks/games-catalog.md) — done
