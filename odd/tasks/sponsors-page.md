@@ -38,7 +38,7 @@ changed lines). Test runner: Jest (`npm test`).
 | T2 | S3 | inline | done | `47567ae` |
 | T4 | S5 | inline | done | RED (no example sponsors) then GREEN, `f64f922` |
 | T5 | S6 | inline | done | 28/28 checks, `80f7842` |
-| T6 | S7 | inline | done | RED (2 tests) then GREEN, see L10 |
+| T6 | S7 | inline | done | RED (2 tests) then GREEN, `453a990` |
 | T3 | S4 | inline | done | screenshots at 360/390/844/1440, `47567ae` |
 
 ## Log
