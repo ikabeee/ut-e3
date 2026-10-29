@@ -76,7 +76,8 @@ src/
 │   ├── sponsors/             # Banda de patrocinadores
 │   ├── event-settings/       # Horarios y valores configurables del evento
 │   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
-│   └── admin/                # Panel del sysadmin (/admin): compone las secciones que se administran
+│   ├── admin/                # Panel del sysadmin (/admin): compone las secciones que se administran
+│   └── site/                 # Páginas del sitio que no son de un dominio: la 404 (src/app/not-found.tsx)
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
     ├── components/           # Primitivos: JsonLd, UtgLogo, ActionLink, ArrowButton, PaperCard...
