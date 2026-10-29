@@ -111,3 +111,11 @@ Route evidence: T1-T3 inline (one dependent chain). T4 delegated as a parallel u
   Production probe (`next build` + `next start` in a scratch copy): click opens the modal at `/games/marea-roja`,
   "Cerrar" returns to `/`, forward reopens it, reload shows the full page with the navbar "Inicio", no console errors.
   Risk: item 3 (shared code: the root layout gains the `modal` slot for every route; `SiteNav` gains `homeHref`).
+- L12 (2026-10-29): independent verifier (item 3) on `069a382..3a60c59`, production builds of candidate and baseline:
+  routes, navbars and S4 PASS; blocker B1: after "Cerrar" or Escape the focus fell to BODY (Next hides the closed
+  route in an `<Activity>`, so React Aria never restores it); advisory A1: no `@modal/[...catchAll]`, so a soft
+  navigation with the modal open kept it visible. One correction batch: `useRestoreFocusOnHide` (focus back to the
+  opener one frame after the Activity cleanup, once the FocusScope releases it) and `src/app/@modal/[...catchAll]`.
+  Recheck limited to B1 and A1 on a production build: focus returns to `A:/games/marea-roja` after Escape and
+  "Cerrar"; `/register` with the modal open shows no dialog; forward still reopens it. `npm test` 97 suites / 490
+  tests; `npm run test:e2e:games` 54/54 (new focus check).
