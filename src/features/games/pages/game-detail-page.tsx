@@ -1,18 +1,24 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
+import type { EventSettings } from "@features/event-settings/lib/types";
+import { floorPlanItemHref } from "@features/floor-plan/lib/floor-plan-links";
 import { GameDetail } from "@features/games/components/game-detail";
 import { GameItchLink } from "@features/games/components/game-itch-link";
 import { getCoverImage } from "@features/games/lib/game-cover";
-import { getGamePath } from "@features/games/lib/games-links";
+import { GAMES_SECTION_ID, getGamePath } from "@features/games/lib/games-links";
 import { resolveItchLink, type ItchLink } from "@features/games/lib/itch-link";
+import { getRelatedGames } from "@features/games/lib/related-games";
 import { getGameBySlug, getGames } from "@features/games/lib/server/games-queries";
-import type { Game } from "@features/games/lib/types";
+import { formatStandCode } from "@features/games/lib/stand-code";
+import type { Game, GameDetailLinks, GameEventLabels } from "@features/games/lib/types";
 import { SiteNav } from "@features/landing/components/site-nav";
+import { buildEventCalendarUrl } from "@features/landing/lib/calendar-link";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { HOME_PATH } from "@features/landing/lib/landing-links";
+import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
 
@@ -58,12 +64,21 @@ export function GameDetailPage({ params }: PageProps<"/games/[slug]">) {
   );
 }
 
+interface GameDetailViewProps {
+  game: Game;
+  games: Game[];
+  settings: EventSettings;
+  itchLink: ReactNode;
+}
+
 async function GameDetailContent({ params }: Readonly<{ params: GameParams }>) {
-  const game = await findGame(params);
+  const [game, games, settings] = await Promise.all([findGame(params), getGames(), getEventSettings()]);
 
   return (
-    <GameDetail
+    <GameDetailView
       game={game}
+      games={games}
+      settings={settings}
       itchLink={
         <Suspense fallback={null}>
           <GameItchLinkGate itchUrl={game.itchUrl} />
@@ -71,6 +86,37 @@ async function GameDetailContent({ params }: Readonly<{ params: GameParams }>) {
       }
     />
   );
+}
+
+export function GameDetailView({ game, games, settings, itchLink }: Readonly<GameDetailViewProps>) {
+  return (
+    <GameDetail
+      game={game}
+      itchLink={itchLink}
+      event={buildEventLabels(settings)}
+      links={buildDetailLinks(game, settings)}
+      relatedGames={getRelatedGames(games, game)}
+    />
+  );
+}
+
+function buildEventLabels(settings: EventSettings): GameEventLabels {
+  return {
+    dateLabel: formatEventDate(settings.eventStartsAt, "numeric"),
+    hoursLabel: LANDING_COPY.acts.timeRange(
+      formatTimeOfDay(settings.eventStartsAt),
+      formatTimeOfDay(settings.eventEndsAt),
+    ),
+  };
+}
+
+// The catalog and the floor plan are sections of the landing until they get their own pages (S7).
+function buildDetailLinks(game: Game, settings: EventSettings): GameDetailLinks {
+  return {
+    catalog: `${HOME_PATH}#${GAMES_SECTION_ID}`,
+    floorPlan: `${HOME_PATH}${floorPlanItemHref(formatStandCode(game.stand))}`,
+    calendar: buildEventCalendarUrl({ startsAt: settings.eventStartsAt, endsAt: settings.eventEndsAt }),
+  };
 }
 
 async function findGame(params: GameParams): Promise<Game> {

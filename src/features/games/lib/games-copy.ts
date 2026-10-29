@@ -19,11 +19,39 @@ export const GAMES_COPY = {
     position: (current: number, count: number) => `${padTwoDigits(current + 1)} de ${padTwoDigits(count)}`,
   },
   detail: {
+    backToCatalog: "Todos los juegos",
+    meta: (game: Pick<Game, "genre" | "stand">) => `${game.genre.name} · ${formatStandCode(game.stand)}`,
     genre: "Género",
     stand: "Stand",
     gallery: "Galería",
+    galleryImages: "Imágenes del juego",
+    image: (number: number) => `Imagen ${number}`,
+    previousImage: "Imagen anterior",
+    nextImage: "Imagen siguiente",
+    tags: "Etiquetas",
     itchPending: (time: string) => `El enlace a itch.io se activa a las ${time}.`,
     itchOpen: "Jugar en itch.io",
+  },
+  playLocation: {
+    heading: "Dónde jugarlo",
+    stand: "Stand",
+    zone: "Zona",
+    date: "Fecha",
+    hours: "Horario",
+  },
+  sidebar: {
+    label: (name: string) => `Ficha de ${name}`,
+    viewOnMap: "Ver en el croquis",
+    attend: "Quiero asistir",
+  },
+  facts: {
+    genre: "Género",
+    stand: "Stand",
+    event: "Evento",
+  },
+  related: {
+    heading: "Más juegos",
+    seeAll: "Ver todos",
   },
 };
 

@@ -8,7 +8,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
-- Ficha de cada juego en `/games/[slug]` con sinopsis, género, código corto del stand y galería (portada primero).
+- Ficha de cada juego en `/games/[slug]` al estilo de la tienda de Epic Games: visor de la galería con flechas y
+  miniaturas (portada primero; también con teclado y deslizando), sinopsis, género, "Dónde jugarlo" (stand, zona,
+  fecha y horario del evento), columna lateral con la portada, itch.io, "Ver en el croquis", "Quiero asistir" y la
+  ficha, y "Más juegos" (primero los del mismo género). Muestra sólo el código corto del stand.
   El enlace a itch.io aparece a la hora configurada en `event_settings` (16:30), según la hora del servidor; antes,
   la ficha indica a qué hora se activa. Al tocar el juego del centro del coverflow se abre su ficha; la ficha lleva el
   navbar solo con "Inicio" mientras no exista el catálogo de juegos. Un juego que no existe muestra la página de "no

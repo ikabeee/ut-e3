@@ -15,7 +15,7 @@ export function GameItchLink({ link }: Readonly<GameItchLinkProps>) {
   }
 
   return (
-    <ActionLink href={link.url} variant="primary" arrow="ne" isExternal>
+    <ActionLink href={link.url} variant="primary" arrow="ne" isExternal fullWidth>
       {GAMES_COPY.detail.itchOpen}
     </ActionLink>
   );

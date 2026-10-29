@@ -23,3 +23,14 @@ export interface Game {
   images: GameImage[];
   itchUrl: string | null;
 }
+
+export interface GameEventLabels {
+  dateLabel: string;
+  hoursLabel: string;
+}
+
+export interface GameDetailLinks {
+  catalog: string;
+  floorPlan: string;
+  calendar: string;
+}

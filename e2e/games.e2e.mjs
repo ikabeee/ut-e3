@@ -396,27 +396,54 @@ async function checkGameData(page, game) {
 }
 
 async function definitionFor(page, term) {
-  const definition = page.locator("dl dt", { hasText: term }).locator("xpath=following-sibling::dd[1]");
+  // The first match is the main column; the sidebar facts repeat the genre and the stand.
+  const definition = page.locator("dl dt", { hasText: term }).first().locator("xpath=following-sibling::dd[1]");
 
   return (await definition.textContent())?.trim();
 }
 
-// G-02: the gallery lists the cover first and then the images by position, all with alt text.
+// G-02: the gallery opens on the cover in its main viewer, with one thumbnail tab per image (cover first, then by
+// position); selecting a thumbnail shows its image in the viewer.
 async function checkGallery(session) {
   const { page, fixture } = session;
-  const gallery = page.getByRole("list", { name: "Galería" });
-  const alts = await gallery.locator("img").evaluateAll((images) => images.map((image) => image.alt));
+  const viewer = page.getByRole("region", { name: "Galería" });
+  const thumbnails = page.getByRole("tablist", { name: "Imágenes del juego" }).getByRole("tab");
+  const count = await thumbnails.count();
 
-  check("G-02 gallery has 5 images", alts.length === 5, `count=${alts.length}`);
-  check("G-02 cover first", alts[0] === fixture.featured.coverAlt, `"${alts[0]}"`);
+  check("G-02 gallery has 5 images", count === 5, `count=${count}`);
+  check("G-02 cover first", (await viewerAlt(viewer)) === fixture.featured.coverAlt, `"${await viewerAlt(viewer)}"`);
+  check("G-02 cover thumbnail selected", (await thumbnails.first().getAttribute("aria-selected")) === "true");
+
+  await viewer.scrollIntoViewIfNeeded();
+  await screenshot(session, "03-gallery/01-game-page");
+
+  await thumbnails.nth(2).click();
+  const thirdAlt = await viewerAlt(viewer);
+  check("G-02 clicking a thumbnail changes the main image", thirdAlt === fixture.featured.alts[2], `"${thirdAlt}"`);
+  check("G-02 clicked thumbnail selected", (await thumbnails.nth(2).getAttribute("aria-selected")) === "true");
+  await screenshot(session, "03-gallery/02-third-image");
+
+  const alts = await viewerAltsByThumbnail(viewer, thumbnails, count);
   check("G-02 cover then by position", alts.join("|") === fixture.featured.alts.join("|"), alts.join(" | "));
   check(
     "G-02 every image has alt text",
     alts.every((alt) => alt.trim().length > 0),
   );
+}
 
-  await gallery.scrollIntoViewIfNeeded();
-  await screenshot(session, "03-gallery/01-game-page");
+async function viewerAlt(viewer) {
+  return viewer.locator("img").first().getAttribute("alt");
+}
+
+async function viewerAltsByThumbnail(viewer, thumbnails, count) {
+  const alts = [];
+
+  for (let index = 0; index < count; index += 1) {
+    await thumbnails.nth(index).click();
+    alts.push((await viewerAlt(viewer)) ?? "");
+  }
+
+  return alts;
 }
 
 // G-06: an unknown slug shows the not-found page with noindex. With Cache Components the first visit gets the App

@@ -16,38 +16,106 @@ const game = makeGame({
   images: [pits, cover],
 });
 
-function renderDetail() {
-  render(<GameDetail game={game} itchLink={<p>itch slot</p>} />);
+const relatedGames = [makeGame({ id: "cenote", name: "Cenote" }), makeGame({ id: "eco-nulo", name: "Eco Nulo" })];
+
+const LINKS = {
+  catalog: "/#games",
+  floorPlan: "/#floor-plan-ZA-S3",
+  calendar: "https://calendar.google.com/calendar/render?action=TEMPLATE",
+};
+
+function renderDetail(related = relatedGames) {
+  render(
+    <GameDetail
+      game={game}
+      itchLink={<p>itch slot</p>}
+      event={{ dateLabel: "20.11.2026", hoursLabel: "12:00 a 19:00" }}
+      links={LINKS}
+      relatedGames={related}
+    />,
+  );
+}
+
+function definitionOf(container: HTMLElement, term: string) {
+  return within(container).getByText(term, { selector: "dt" }).nextElementSibling?.textContent;
 }
 
 describe("GameDetail", () => {
-  it("shows the name, synopsis and genre of the game", () => {
+  it("heads the page with the name, the genre and the short stand code", () => {
     renderDetail();
 
     expect(screen.getByRole("heading", { level: 1, name: "Ruta 9" })).toBeInTheDocument();
+    expect(screen.getByText("Carreras · ZA-S3")).toBeInTheDocument();
+  });
+
+  it("links back to every game", () => {
+    renderDetail();
+
+    expect(screen.getByRole("link", { name: "Todos los juegos" })).toHaveAttribute("href", "/#games");
+  });
+
+  it("shows the synopsis as the lead and the genre as a tag", () => {
+    renderDetail();
+
     expect(screen.getByText("Carreras arcade por la costa de Quintana Roo.")).toBeInTheDocument();
-    expect(screen.getByText("Carreras")).toBeInTheDocument();
+    expect(definitionOf(screen.getByLabelText("Etiquetas"), "Género")).toBe("Carreras");
+  });
+
+  it("opens the gallery on the cover", () => {
+    renderDetail();
+
+    const gallery = screen.getByRole("region", { name: "Galería" });
+
+    expect(within(gallery).getByRole("img")).toHaveAttribute("alt", "Portada de Ruta 9");
+  });
+
+  it("says where to play it: stand, zone, event date and hours", () => {
+    renderDetail();
+
+    const where = screen.getByRole("region", { name: "Dónde jugarlo" });
+
+    expect(definitionOf(where, "Stand")).toBe("ZA-S3");
+    expect(definitionOf(where, "Zona")).toBe("A");
+    expect(definitionOf(where, "Fecha")).toBe("20.11.2026");
+    expect(definitionOf(where, "Horario")).toBe("12:00 a 19:00");
+  });
+
+  it("puts the cover, the itch.io slot, the floor plan and calendar links and the facts in the sidebar", () => {
+    renderDetail();
+
+    const sidebar = screen.getByRole("complementary", { name: "Ficha de Ruta 9" });
+    const attend = within(sidebar).getByRole("link", { name: /Quiero asistir/ });
+
+    expect(within(sidebar).getByRole("img", { name: "Portada de Ruta 9" })).toBeInTheDocument();
+    expect(within(sidebar).getByText("itch slot")).toBeInTheDocument();
+    expect(within(sidebar).getByRole("link", { name: /Ver en el croquis/ })).toHaveAttribute("href", LINKS.floorPlan);
+    expect(attend).toHaveAttribute("href", LINKS.calendar);
+    expect(attend).toHaveAttribute("target", "_blank");
+    expect(attend).toHaveAttribute("rel", "noopener noreferrer");
+    expect(definitionOf(sidebar, "Género")).toBe("Carreras");
+    expect(definitionOf(sidebar, "Stand")).toBe("ZA-S3");
+    expect(definitionOf(sidebar, "Evento")).toBe("20.11.2026");
   });
 
   it("shows only the short stand code", () => {
     renderDetail();
 
-    expect(screen.getByText("ZA-S3")).toBeInTheDocument();
-    expect(screen.queryByText(/ZA-S3-E/)).not.toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/ZA-S3-E/);
   });
 
-  it("shows the gallery with the cover first", () => {
+  it("lists more games linking to their pages, and every game", () => {
     renderDetail();
 
-    const gallery = screen.getByRole("list", { name: "Galería" });
-    const images = within(gallery).getAllByRole("img");
+    const more = screen.getByRole("region", { name: "Más juegos" });
 
-    expect(images.map((image) => image.getAttribute("alt"))).toEqual(["Portada de Ruta 9", "Ruta 9: pits"]);
+    expect(within(more).getByRole("link", { name: /Cenote/ })).toHaveAttribute("href", "/games/cenote");
+    expect(within(more).getByRole("link", { name: /Eco Nulo/ })).toHaveAttribute("href", "/games/eco-nulo");
+    expect(within(more).getByRole("link", { name: "Ver todos" })).toHaveAttribute("href", "/#games");
   });
 
-  it("renders the itch.io slot", () => {
-    renderDetail();
+  it("leaves out the more games row when there is no other game", () => {
+    renderDetail([]);
 
-    expect(screen.getByText("itch slot")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Más juegos" })).not.toBeInTheDocument();
   });
 });
