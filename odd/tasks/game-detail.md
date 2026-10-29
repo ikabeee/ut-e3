@@ -1,5 +1,5 @@
 ---
-status: done
+status: in-progress
 ---
 
 # Game detail page (M2)
@@ -20,13 +20,20 @@ Objective: a public page per game at `/games/[slug]` (RF-09, RF-10, RF-11; issue
   without a link shows nothing at 18:00. The time is `event_settings.itchOpensAt`.
 - S3 (RF-11): "El visitante ve el código corto del stand (`ZA-S1`)". The page never shows the full code. The admin
   view of the full code is out of scope: there is no admin game view until M6/M7.
-- S4 (route, L2 and L7): "Va en su misma ruta." `/games/[slug]`; an unknown slug shows the not-found page with
-  `noindex` (L7: "Aceptar 200 + noindex"): its first visit answers 200, later ones 404. The coverflow links to the
-  current game's page.
+- S4 (route, L2, L7 and L10): "Va en su misma ruta." `/games/[slug]`; an unknown slug shows the not-found page with
+  `noindex` (L7: "Aceptar 200 + noindex"): its first visit answers 200, later ones 404. L10: "No debe ir un boton de ver
+  ficha, directamente el usuario puede clickear y lo redirige al detalle del juego a traves de un modal." Tapping the
+  game at the center of the coverflow opens its page in a modal (intercepted route; the URL becomes `/games/<slug>`);
+  closing the modal goes back to the landing. A side game is first brought to the center (assumption, as in
+  `archive/develop-v1` `game-coverflow.tsx:63-69`). Loading `/games/<slug>` directly shows the full page.
 - S5 (e2e, L1 and L2): "Cuales son los casos de uso que implementaremos en la aplicacion y los flujos e2e para probar
   con playwright" and "Al finalizar el desarrollo me mostraras el output de los request http y los screenshots del
   flujo e2e". Flows G-01 to G-08 as proposed in L1: catalog to page, gallery, itch before and after the time, game
   without link, 404, short code only, mobile widths 360, 390 and 1440 px.
+
+- S6 (navbar, L10): "Y en el navbar de be aparecer (por el momento), inicio porque aun no desarrollamos el catalogo de
+  juegos como epic". The full game page shows the site navbar with a single link, "Inicio", to `/`; its logo also goes
+  to `/`. The "Volver al catálogo" link is removed (assumption: the navbar replaces it).
 
 ## Tasks
 
@@ -34,13 +41,17 @@ Objective: a public page per game at `/games/[slug]` (RF-09, RF-10, RF-11; issue
 | --- | --- | --- | --- | --- |
 | T1 | S2 | inline | done | RED (module missing) -> GREEN 4/4 `itch-link.test.ts`; commit `a9f44b0` |
 | T2 | S1, S3, S4 | inline | done | RED -> GREEN `games-queries`, `game-cover`, `game-detail`, `game-itch-link` tests; commit `a9f44b0` |
-| T3 | S4 | inline | done | RED 2 failing -> GREEN `game-catalog.test.tsx` 11/11; commit `a9f44b0` |
-| T4 | S5 | delegated (parallel writer) | done | `npm run test:e2e:games` 38/38; commit `4e99d31` |
+| T3 | S4 | inline | done | L10: RED 3 failing -> GREEN `game-catalog.test.tsx` 12/12 (cases are links); commit `13c7e7b` |
+| T4 | S5 | delegated (parallel writer), L10 update inline | done | `npm run test:e2e:games` 53/53; commits `4e99d31`, `13c7e7b` |
+| T5 | S4 | inline | done | RED module missing -> GREEN `game-detail-modal.test.tsx` 3/3; commit `13c7e7b` |
+| T6 | S6 | inline | done | RED `site-nav.test.tsx` 1 failing -> GREEN; landing logo regression test; commit `13c7e7b` |
 
 - T1: `lib/itch-link.ts`, the itch.io link rule (RED UT-GA-01 to 03).
 - T2: `getGameBySlug`, `game-detail-page.tsx`, `src/app/games/[slug]/page.tsx`, metadata and 404.
 - T3: the coverflow links to the page of the current game.
 - T4: `e2e/games.e2e.mjs` with `playwright-core` and its screenshots.
+- T5: `@modal` slot in the root layout, `@modal/(.)games/[slug]` with a HeroUI `Modal`, and the coverflow opening it.
+- T6: the full game page with `SiteNav` ("Inicio").
 
 Route evidence: T1-T3 inline (one dependent chain). T4 delegated as a parallel unit with a disjoint surface
 (`e2e/games.e2e.mjs`), launched while T2-T3 were written (L4).
@@ -88,3 +99,15 @@ Route evidence: T1-T3 inline (one dependent chain). T4 delegated as a parallel u
   `itchOpensAt` would open the link; the value comes from a `DateTime` column).
   Outcome: feature closed. Pending: push and the PR to `develop` (user's decision); `getGameBySlug` needs `updateTag`
   when games become editable (M6/M7). Next objective: M11, passport recovery, or M8, the sponsors page.
+- L10 (2026-10-28, user): "No debe ir un boton de ver ficha, directamente el usuario puede clickear y lo redirige al
+  detalle del juego a traves de un modal. Y en el navbar de be aparecer (por el momento), inicio porque aun no
+  desarrollamos el catalogo de juegos como epic". S4 rewritten, S6 added, T3 and T4 reopened, T5 and T6 added.
+  Pattern: parallel plus intercepting routes (`03-file-conventions/parallel-routes.md` "Modals",
+  `intercepting-routes.md`), HeroUI v3 `Modal` controlled with `isOpen`/`onOpenChange`, closed with `router.back()`.
+- L11 (2026-10-29): L10 delivered in `13c7e7b`. Coverflow cases are `next/link`s (a side case prevents the navigation
+  and turns to the center); `@modal` slot plus `@modal/(.)games/[slug]` render `GameDetailModalPage`; the full page
+  shows `SiteNav` with "Inicio" (new `homeHref` prop; the landing keeps `#top`, pinned by a new test). Checks:
+  `npm test` 96 suites / 487 tests, typecheck, ESLint, Oxlint, jscpd 0 clones, `npm run test:e2e:games` 53/53.
+  Production probe (`next build` + `next start` in a scratch copy): click opens the modal at `/games/marea-roja`,
+  "Cerrar" returns to `/`, forward reopens it, reload shows the full page with the navbar "Inicio", no console errors.
+  Risk: item 3 (shared code: the root layout gains the `modal` slot for every route; `SiteNav` gains `homeHref`).
