@@ -11,6 +11,20 @@ export const GAMES_COPY = {
   },
   catalog: {
     heading: "Explora el catálogo",
+    pageTitle: "Catálogo de juegos",
+    pageDescription: "Explora los videojuegos del showcase por género o por stand y entra a la ficha de cada uno.",
+    genresHeading: "Géneros",
+    previousGenres: "Géneros anteriores",
+    nextGenres: "Más géneros",
+    gameCount: (count: number) => `${count} ${count === 1 ? "juego" : "juegos"}`,
+    allGames: "Todos los juegos",
+    searchLabel: "Buscar juegos",
+    searchPlaceholder: "Busca un juego",
+    // "4 de 18 juegos" or "2 de 18 juegos · Puzle".
+    results: (visible: number, total: number, genreName: string | null) =>
+      [`${visible} de ${total} juegos`, genreName].filter(Boolean).join(" · "),
+    empty: "Ningún juego coincide con tu búsqueda.",
+    showAll: "Ver todos los juegos",
   },
   coverflow: {
     label: "Juegos en el exhibidor",

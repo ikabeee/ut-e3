@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import type { EventSettings } from "@features/event-settings/lib/types";
 import { makeGames } from "@features/games/__tests__/components/game-test-data";
 import { LandingView, landingPageMetadata } from "@features/landing/pages/landing-page";
@@ -93,6 +93,15 @@ describe("LandingView", () => {
 
       expect(document.getElementById(id)).not.toBeNull();
     });
+  });
+
+  it("sends Juegos in the navbar to the games catalog", () => {
+    renderLanding();
+
+    expect(within(screen.getByRole("navigation")).getByRole("link", { name: "Juegos" })).toHaveAttribute(
+      "href",
+      "/games",
+    );
   });
 
   it("keeps the logo linked to the top of the landing", () => {
