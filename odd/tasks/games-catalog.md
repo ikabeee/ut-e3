@@ -59,4 +59,15 @@ Route evidence: no Writer trigger (units depend on each other; fresh session, no
   Oxlint, typecheck, jscpd 0 clones, `npm test` 108 suites / 550 tests (two earlier runs hit scrypt timeouts in the
   auth suites under load average ~111; they pass alone, 37/37), `npm run test:e2e:games` 74/74, no console errors.
   Note: `npm run lint` also walks `.claude/worktrees/ut-e3-next-aa04c5` (another session's worktree) and reports its
-  errors; ESLint over `src e2e` is clean. Pending: native review of the slice, push and the PR to `develop`.
+  errors; ESLint over `src e2e` is clean.
+- L5 (2026-10-29): Risk item 3 (sponsors carousel hooks moved and renamed into `src/shared/hooks`; `HOME_NAV_LINKS`
+  changed). Independent verifier on `123bd62..53ba448`: PASS S1-S8, no blockers; the moved hooks are identical except
+  the rename lines, sponsors tests 28/28 unchanged. Advisories: `GameCoverImage` now always emits `fetchpriority="auto"`
+  (no behavior change), `landing` depends on `games`, grid `h3` without a visible `h2`. Native review of the slice
+  (lenses readability and reliability, consent granted by the user): approved and acknowledged (lineage
+  `review-97894c93a199d45f`). Non-blocking follow-ups: `R3-e2e-reload-race` (WARNING: G-10 reads the count after
+  `page.reload` without waiting for hydration), `R3-url-write-untested` (no hook-level test of the replaceState write),
+  `R2-duplicate-all-games-label` (section and list share the aria-label "Todos los juegos"), `R2-cover-order-coupling`
+  (`COVER_ORDER` and `COVER_SLOTS` share an order only by comment), `R2-dup-autoplay-constant` (test hard-codes 6500).
+  Outcome: feature closed. Pending: push and the PR to `develop` (user's decision). Next objective: M11 passport
+  recovery or M8 sponsors page.
