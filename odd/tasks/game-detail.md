@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 ---
 
 # Game detail page (M2)
@@ -119,3 +119,11 @@ Route evidence: T1-T3 inline (one dependent chain). T4 delegated as a parallel u
   Recheck limited to B1 and A1 on a production build: focus returns to `A:/games/marea-roja` after Escape and
   "Cerrar"; `/register` with the modal open shows no dialog; forward still reopens it. `npm test` 97 suites / 490
   tests; `npm run test:e2e:games` 54/54 (new focus check).
+- L13 (2026-10-29): native review of `069a382..2094341` (lenses risk and reliability, consent granted by the user):
+  approved and acknowledged (lineage `review-80490b7c6b835452`, authority burned). Non-blocking follow-ups:
+  `R3-strictmode-focus` (WARNING: in development StrictMode runs the effect cleanup once on mount, which schedules a
+  focus on the opener while the dialog is open; the FocusScope keeps the focus inside, and production is unaffected),
+  `R3-side-modifier-click` (Ctrl/Cmd-click on a side case turns it to the center instead of opening a new tab),
+  `R3-center-click-test-proves-little` and `R3-noop-test-vacuous` (two tests that assert little).
+  Outcome: feature closed again. Pending: push and the PR to `develop` (user's decision). Next objective: the
+  Epic-style games catalog at `/games` (then the navbar gains its link), M11 passport recovery, or M8 sponsors page.
