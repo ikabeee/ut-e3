@@ -20,7 +20,8 @@ Objective: a public page per game at `/games/[slug]` (RF-09, RF-10, RF-11; issue
   without a link shows nothing at 18:00. The time is `event_settings.itchOpensAt`.
 - S3 (RF-11): "El visitante ve el código corto del stand (`ZA-S1`)". The page never shows the full code. The admin
   view of the full code is out of scope: there is no admin game view until M6/M7.
-- S4 (route, L2): "Va en su misma ruta." `/games/[slug]`; an unknown slug responds 404. The coverflow links to the
+- S4 (route, L2 and L7): "Va en su misma ruta." `/games/[slug]`; an unknown slug shows the not-found page with
+  `noindex` (L7: "Aceptar 200 + noindex"): its first visit answers 200, later ones 404. The coverflow links to the
   current game's page.
 - S5 (e2e, L1 and L2): "Cuales son los casos de uso que implementaremos en la aplicacion y los flujos e2e para probar
   con playwright" and "Al finalizar el desarrollo me mostraras el output de los request http y los screenshots del
@@ -71,3 +72,11 @@ Route evidence: T1-T3 inline (one dependent chain). T4 delegated as a parallel u
   whole repo also lints another session's worktree at `.claude/worktrees/ut-e3-next-aa04c5` (12534 problems there,
   none in this branch). Risk: item 5 (adds the `playwright-core` devDependency). Next: native review of the range
   and the PR to `develop`.
+- L7 (2026-10-28, user, answering the verifier's S4 blocker): "Aceptar 200 + noindex (Recommended)". The independent
+  verifier (item 5) found that under `next start` the first visit to an unknown slug answers 200: from Next 16.3 the
+  App Shell for unlisted params is served before `notFound()` streams
+  (`02-guides/incremental-static-regeneration-cache-components.md`), and `dynamicParams` is not available with Cache
+  Components (`dynamicParams.md`). The page now reads `params` inside `<Suspense>` and `instant = false` is gone.
+  Verifier verdicts: dependency PASS, S1-S3 PASS (S2 also under `next start`), S5 PASS, invariants PASS.
+- L8 (2026-10-28): rechecked. `npm run test:e2e:games` 40/40 with no console errors; production build plus `curl`:
+  `/games/ceniza-protocol` 200, `/games/no-existe` 200 with `noindex` and then 404 (`x-nextjs-cache: HIT`).
