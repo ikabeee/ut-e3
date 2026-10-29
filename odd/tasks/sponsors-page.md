@@ -34,7 +34,7 @@ changed lines). Test runner: Jest (`npm test`).
 | T1 | S1, S2 | inline | done | RED (module missing) then GREEN, `47567ae` |
 | T2 | S3 | inline | done | `47567ae` |
 | T4 | S5 | inline | done | RED (no example sponsors) then GREEN, `f64f922` |
-| T5 | S6 | inline | done | 28/28 checks, see L8 |
+| T5 | S6 | inline | done | 28/28 checks, `80f7842` |
 | T3 | S4 | inline | done | screenshots at 360/390/844/1440, `47567ae` |
 
 ## Log
