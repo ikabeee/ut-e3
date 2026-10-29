@@ -338,7 +338,7 @@ async function checkCatalogToGamePage(session) {
   const { page, fixture } = session;
 
   await openCoverflowModal(session, fixture.coverflowGame);
-  await closeModal(session);
+  await closeModal(session, fixture.coverflowGame);
   await openGamePage(page, fixture.featured.slug);
   await checkGameData(page, fixture.featured);
   await checkNavbar(page);
@@ -366,12 +366,18 @@ async function openCoverflowModal(session, game) {
   await screenshot(session, "g01-modal");
 }
 
-async function closeModal(session) {
+async function closeModal(session, game) {
   const { page } = session;
 
   await page.getByRole("button", { name: "Cerrar" }).click();
   await page.getByRole("dialog").waitFor({ state: "detached", timeout: 30_000 });
   check("G-01 closing the modal returns to the landing", new URL(page.url()).pathname === "/", page.url());
+
+  await page
+    .waitForFunction(() => document.activeElement?.tagName === "A", undefined, { timeout: 5000 })
+    .catch(() => {});
+  const focusedHref = await page.evaluate(() => document.activeElement?.getAttribute("href"));
+  check("G-01 the focus goes back to the game case", focusedHref === `/games/${game.slug}`, focusedHref ?? "none");
   await screenshot(session, "g01-modal-closed");
 }
 
