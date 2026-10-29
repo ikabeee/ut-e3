@@ -19,7 +19,6 @@ export const GAMES_COPY = {
     position: (current: number, count: number) => `${padTwoDigits(current + 1)} de ${padTwoDigits(count)}`,
   },
   detail: {
-    close: "Cerrar",
     genre: "Género",
     stand: "Stand",
     gallery: "Galería",

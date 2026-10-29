@@ -20,7 +20,7 @@ interface CoverflowCaseProps {
 export function CoverflowCase({ ref, game, index, current, onSelect }: Readonly<CoverflowCaseProps>) {
   const placement = getCoverflowPlacement(index, current);
 
-  // The case at the center opens the game (an intercepted route shows it in a modal); a side case turns to the center.
+  // The case at the center opens the game page; a side case turns to the center first.
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (placement.isCurrent) return;
 

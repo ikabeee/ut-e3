@@ -50,8 +50,6 @@ const VIEWPORTS = [
 
 const MIN_TOUCH_TARGET_PX = 44;
 
-const MODAL_ANIMATION_CAP_MS = 3000;
-
 const results = [];
 
 const httpLog = [];
@@ -320,7 +318,7 @@ async function checkItchPending(session) {
   const body = await bodyText(page);
   check("G-03 pending text with the activation time", body.includes(expected), expected);
   check("G-03 no itch.io link", (await page.locator('a[href*="itch.io"]').count()) === 0);
-  await screenshot(session, "g03-itch-pending");
+  await screenshot(session, "01-itch-pending/01-game-page");
 }
 
 function cancunTime(date) {
@@ -332,53 +330,35 @@ function cancunTime(date) {
   }).format(date);
 }
 
-// G-01: tapping the game at the center of the landing coverflow opens its page in a modal and closing it returns to
-// the landing; loading the page directly shows the full page with the navbar ("Inicio" only, S6).
+// G-01: tapping the game at the center of the landing coverflow opens its full page, with the navbar ("Inicio" only,
+// S6); the featured game's page shows its data.
 async function checkCatalogToGamePage(session) {
   const { page, fixture } = session;
 
-  await openCoverflowModal(session, fixture.coverflowGame);
-  await closeModal(session, fixture.coverflowGame);
+  await followCoverflowCase(session, fixture.coverflowGame);
   await openGamePage(page, fixture.featured.slug);
   await checkGameData(page, fixture.featured);
-  await checkNavbar(page);
-  await screenshot(session, "g01-game-detail");
+  await screenshot(session, "02-coverflow-to-game/03-featured-game");
 }
 
-async function openCoverflowModal(session, game) {
+async function followCoverflowCase(session, game) {
   const { page } = session;
   const gamePath = `/games/${game.slug}`;
 
   await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
   const caseLink = page.locator("#games").getByRole("link", { name: new RegExp(`^${escapeRegExp(game.name)},`) });
   await caseLink.scrollIntoViewIfNeeded();
-  await screenshot(session, "g01-landing-coverflow");
+  await page.screenshot({ path: screenshotPath(session, "02-coverflow-to-game/01-landing-coverflow") });
 
   check('G-01 no "Ver ficha" button', (await page.getByText("Ver ficha").count()) === 0);
   check("G-01 the center case links to its game", (await caseLink.getAttribute("href")) === gamePath, gamePath);
 
   await caseLink.click();
-  const dialog = page.getByRole("dialog", { name: game.name });
-  await dialog.waitFor({ timeout: 30_000 });
-  check("G-01 the click opens the game in a modal", await dialog.isVisible(), game.name);
-  check("G-01 the modal URL is the game page", new URL(page.url()).pathname === gamePath, page.url());
-  await waitForModalAnimations(page);
-  await screenshot(session, "g01-modal");
-}
-
-async function closeModal(session, game) {
-  const { page } = session;
-
-  await page.getByRole("button", { name: "Cerrar" }).click();
-  await page.getByRole("dialog").waitFor({ state: "detached", timeout: 30_000 });
-  check("G-01 closing the modal returns to the landing", new URL(page.url()).pathname === "/", page.url());
-
-  await page
-    .waitForFunction(() => document.activeElement?.tagName === "A", undefined, { timeout: 5000 })
-    .catch(() => {});
-  const focusedHref = await page.evaluate(() => document.activeElement?.getAttribute("href"));
-  check("G-01 the focus goes back to the game case", focusedHref === `/games/${game.slug}`, focusedHref ?? "none");
-  await screenshot(session, "g01-modal-closed");
+  await page.waitForURL((url) => url.pathname === gamePath, { timeout: 30_000 });
+  await page.getByRole("heading", { level: 1, name: game.name }).waitFor({ timeout: 30_000 });
+  check("G-01 the click opens the full game page", (await page.getByRole("dialog").count()) === 0, page.url());
+  await checkNavbar(page);
+  await screenshot(session, "02-coverflow-to-game/02-game-page");
 }
 
 async function checkNavbar(page) {
@@ -389,24 +369,6 @@ async function checkNavbar(page) {
   check("G-01 the navbar only lists Inicio", labels.join(",") === "Inicio", labels.join(",") || "none");
   check("G-01 Inicio goes to /", (await inicio.getAttribute("href")) === "/");
   check('G-01 no "Volver al catálogo" link', (await page.getByText("Volver al catálogo").count()) === 0);
-}
-
-// The modal fades in with CSS animations; a screenshot taken before they finish shows it transparent. Only the modal's
-// own animations are awaited (the landing runs endless ones), and the wait is capped so it can never hang the run.
-async function waitForModalAnimations(page) {
-  await page.evaluate(
-    (capMs) =>
-      Promise.race([
-        Promise.all(
-          document
-            .getAnimations()
-            .filter((animation) => animation.effect?.target?.closest?.(".modal__backdrop"))
-            .map((animation) => animation.finished),
-        ),
-        new Promise((resolve) => setTimeout(resolve, capMs)),
-      ]),
-    MODAL_ANIMATION_CAP_MS,
-  );
 }
 
 function escapeRegExp(text) {
@@ -454,7 +416,7 @@ async function checkGallery(session) {
   );
 
   await gallery.scrollIntoViewIfNeeded();
-  await screenshot(session, "g02-gallery");
+  await screenshot(session, "03-gallery/01-game-page");
 }
 
 // G-06: an unknown slug shows the not-found page with noindex. With Cache Components the first visit gets the App
@@ -469,7 +431,7 @@ async function checkUnknownSlug(session) {
   check("G-06 unknown slug answers 200 or 404", status === 200 || status === 404, `status=${status}`);
   check("G-06 not-found page is shown", notFoundText > 0, `matches=${notFoundText}`);
   check("G-06 not-found page has noindex", robots?.includes("noindex") === true, `robots=${robots}`);
-  await screenshot(session, "g06-not-found");
+  await screenshot(session, "04-unknown-slug/01-not-found");
 }
 
 // G-07: the visitor sees the short stand code, never the full one.
@@ -479,7 +441,7 @@ async function checkShortCodeOnly(session) {
   await openGamePage(page, FEATURED_SLUG);
   const match = (await bodyText(page)).match(FULL_STAND_CODE);
   check("G-07 no full stand code on the page", match === null, match?.[0] ?? "none");
-  await screenshot(session, "g07-short-code");
+  await screenshot(session, "05-short-code/01-game-page");
 }
 
 // G-04: from itchOpensAt on, the page links to itch.io in a new tab.
@@ -498,7 +460,7 @@ async function checkItchOpen(session) {
   }
 
   check("G-04 pending text gone", !(await bodyText(page)).includes("El enlace a itch.io se activa"));
-  await screenshot(session, "g04-itch-open");
+  await screenshot(session, "06-itch-open/01-game-page");
 }
 
 // G-05: a game without itch_url shows neither the pending text nor the link, even after itchOpensAt.
@@ -511,15 +473,14 @@ async function checkGameWithoutLink(session) {
 
   check(`G-05 ${fixture.withoutLink.slug}: no pending text`, !body.includes("El enlace a itch.io se activa"));
   check(`G-05 ${fixture.withoutLink.slug}: no itch.io link`, links === 0, `count=${links}`);
-  await screenshot(session, "g05-without-link");
+  await screenshot(session, "07-game-without-link/01-game-page");
 }
 
-// G-08: no horizontal scroll and 44x44 px touch targets at phone, landscape and desktop widths, on the full page and
-// in the modal.
+// G-08: no horizontal scroll and 44x44 px touch targets at phone, landscape and desktop widths.
 async function checkViewports(session) {
-  const { page, fixture } = session;
+  const { page } = session;
 
-  for (const viewport of VIEWPORTS) {
+  for (const [index, viewport] of VIEWPORTS.entries()) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await openGamePage(page, FEATURED_SLUG);
     await checkNoHorizontalScroll(page, viewport.label);
@@ -529,23 +490,8 @@ async function checkViewports(session) {
       "Inicio",
     );
     await checkTouchTarget(page.getByRole("link", { name: "Jugar en itch.io" }), viewport.label, "Jugar en itch.io");
-    await screenshot(session, `g08-${viewport.label}`);
-    await checkModalViewport(session, fixture.coverflowGame, viewport.label);
+    await screenshot(session, `08-viewports/${String(index + 1).padStart(2, "0")}-${viewport.label}`);
   }
-}
-
-async function checkModalViewport(session, game, label) {
-  const { page } = session;
-
-  await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
-  const caseLink = page.locator("#games").getByRole("link", { name: new RegExp(`^${escapeRegExp(game.name)},`) });
-  await caseLink.scrollIntoViewIfNeeded();
-  await caseLink.click();
-  await page.getByRole("dialog", { name: game.name }).waitFor({ timeout: 30_000 });
-  await checkNoHorizontalScroll(page, `${label} modal`);
-  await checkTouchTarget(page.getByRole("button", { name: "Cerrar" }), `${label} modal`, "Cerrar");
-  await waitForModalAnimations(page);
-  await page.screenshot({ path: path.join(session.screenshots, `g08-${label}-modal.png`) });
 }
 
 async function checkNoHorizontalScroll(page, label) {
@@ -588,8 +534,19 @@ async function bodyText(page) {
   return (await page.locator("body").textContent()) ?? "";
 }
 
+// Full-page captures start from the top: a page scrolled down repaints its sticky navbar in the middle of the image.
 async function screenshot(session, name) {
-  await session.page.screenshot({ path: path.join(session.screenshots, `${name}.png`), fullPage: true });
+  await session.page.evaluate(() => window.scrollTo(0, 0));
+  await session.page.screenshot({ path: screenshotPath(session, name), fullPage: true });
+}
+
+// One numbered folder per flow, in the order the run visits them: 01-itch-pending/01-game-page.png, ...
+function screenshotPath(session, name) {
+  const file = path.join(session.screenshots, `${name}.png`);
+
+  mkdirSync(path.dirname(file), { recursive: true });
+
+  return file;
 }
 
 async function waitUntil(timestamp) {

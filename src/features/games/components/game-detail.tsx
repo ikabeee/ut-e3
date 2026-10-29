@@ -13,21 +13,14 @@ interface GameDetailProps {
 export function GameDetail({ game, itchLink }: Readonly<GameDetailProps>) {
   return (
     <main className="page-wrap flex min-h-svh flex-col gap-8 py-16">
-      <h1 className="type-section">{game.name}</h1>
-      <GameDetailBody game={game} itchLink={itchLink} />
-    </main>
-  );
-}
-
-// Shared by the full page and the modal, which titles the game with its own heading.
-export function GameDetailBody({ game, itchLink }: Readonly<GameDetailProps>) {
-  return (
-    <div className="flex flex-col gap-8">
-      <GameFacts game={game} />
+      <header className="flex flex-col gap-4">
+        <h1 className="type-section">{game.name}</h1>
+        <GameFacts game={game} />
+      </header>
       <p className="max-w-2xl text-lg text-copy">{game.synopsis}</p>
       {itchLink}
       <GameGallery images={getGalleryImages(game)} />
-    </div>
+    </main>
   );
 }
 

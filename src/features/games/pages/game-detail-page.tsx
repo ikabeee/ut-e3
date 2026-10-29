@@ -3,8 +3,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
-import { GameDetail, GameDetailBody } from "@features/games/components/game-detail";
-import { GameDetailRouteModal } from "@features/games/components/game-detail-route-modal";
+import { GameDetail } from "@features/games/components/game-detail";
 import { GameItchLink } from "@features/games/components/game-itch-link";
 import { getCoverImage } from "@features/games/lib/game-cover";
 import { getGamePath } from "@features/games/lib/games-links";
@@ -59,28 +58,18 @@ export function GameDetailPage({ params }: PageProps<"/games/[slug]">) {
   );
 }
 
-// The landing intercepts /games/[slug] (src/app/@modal/(.)games/[slug]) to show the same game in a modal (S4, L10).
-export function GameDetailModalPage({ params }: PageProps<"/games/[slug]">) {
-  return (
-    <Suspense fallback={null}>
-      <GameDetailModalContent params={params} />
-    </Suspense>
-  );
-}
-
 async function GameDetailContent({ params }: Readonly<{ params: GameParams }>) {
   const game = await findGame(params);
 
-  return <GameDetail game={game} itchLink={itchLinkSlot(game)} />;
-}
-
-async function GameDetailModalContent({ params }: Readonly<{ params: GameParams }>) {
-  const game = await findGame(params);
-
   return (
-    <GameDetailRouteModal title={game.name}>
-      <GameDetailBody game={game} itchLink={itchLinkSlot(game)} />
-    </GameDetailRouteModal>
+    <GameDetail
+      game={game}
+      itchLink={
+        <Suspense fallback={null}>
+          <GameItchLinkGate itchUrl={game.itchUrl} />
+        </Suspense>
+      }
+    />
   );
 }
 
@@ -91,14 +80,6 @@ async function findGame(params: GameParams): Promise<Game> {
   if (!game) notFound();
 
   return game;
-}
-
-function itchLinkSlot(game: Game) {
-  return (
-    <Suspense fallback={null}>
-      <GameItchLinkGate itchUrl={game.itchUrl} />
-    </Suspense>
-  );
 }
 
 async function GameItchLinkGate({ itchUrl }: Readonly<Pick<Game, "itchUrl">>) {
