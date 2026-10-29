@@ -17,6 +17,10 @@ function cover(name: string) {
   return screen.getByAltText(`Portada de ${name}`);
 }
 
+function caseLink(name: string) {
+  return screen.getByRole("link", { name: new RegExp(`^${name},`) });
+}
+
 async function press(label: string, times: number) {
   const user = userEvent.setup();
 
@@ -107,22 +111,27 @@ describe("GameCatalog", () => {
     expect(liveRegion()).toHaveTextContent("Juego 12");
   });
 
-  // The coverflow opens on the middle game: Juego 09 of 18.
-  it("links only the current game to its page", () => {
+  it("links every case to the page of its game", () => {
     render(<GameCatalog games={games} />);
 
-    const links = screen.getAllByRole("link");
-
-    expect(links).toHaveLength(1);
-    expect(links[0]).toHaveAccessibleName("Ver ficha de Juego 09");
-    expect(links[0]).toHaveAttribute("href", "/games/juego-09");
+    expect(screen.getAllByRole("link")).toHaveLength(18);
+    expect(caseLink("Juego 09")).toHaveAttribute("href", "/games/juego-09");
   });
 
-  it("points the link to the game that moves to the center", async () => {
+  // The coverflow opens on the middle game: Juego 09 of 18.
+  it("lets the click on the game at the center open its page", () => {
     render(<GameCatalog games={games} />);
 
-    await press("Juego siguiente", 1);
+    const isNotPrevented = fireEvent.click(caseLink("Juego 09"));
 
-    expect(screen.getByRole("link", { name: "Ver ficha de Juego 10" })).toHaveAttribute("href", "/games/juego-10");
+    expect(isNotPrevented).toBe(true);
+  });
+
+  it("brings a side game to the center instead of opening it", () => {
+    render(<GameCatalog games={games} />);
+
+    const isNotPrevented = fireEvent.click(caseLink("Juego 12"));
+
+    expect(isNotPrevented).toBe(false);
   });
 });

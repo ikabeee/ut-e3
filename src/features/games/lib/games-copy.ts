@@ -17,11 +17,9 @@ export const GAMES_COPY = {
     caseLabel: (game: Pick<Game, "name" | "genre" | "stand">) =>
       `${game.name}, ${game.genre.name}, stand ${formatStandCode(game.stand)}`,
     position: (current: number, count: number) => `${padTwoDigits(current + 1)} de ${padTwoDigits(count)}`,
-    openDetail: "Ver ficha",
-    openDetailLabel: (name: string) => `Ver ficha de ${name}`,
   },
   detail: {
-    back: "Volver al catálogo",
+    close: "Cerrar",
     genre: "Género",
     stand: "Stand",
     gallery: "Galería",

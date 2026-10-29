@@ -86,7 +86,7 @@ export function LandingView({ settings, games, scheduleItems, sponsors, marketpl
 
   return (
     <>
-      <SiteNav links={NAV_LINKS} />
+      <SiteNav homeHref={`#${TOP_SECTION_ID}`} links={NAV_LINKS} />
       <main>
         <VideoHero calendarUrl={buildEventCalendarUrl(settings)} />
         <SponsorsCarousel sponsors={sponsors} />

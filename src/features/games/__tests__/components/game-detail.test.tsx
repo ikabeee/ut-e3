@@ -17,7 +17,7 @@ const game = makeGame({
 });
 
 function renderDetail() {
-  render(<GameDetail game={game} backHref="/#games" itchLink={<p>itch slot</p>} />);
+  render(<GameDetail game={game} itchLink={<p>itch slot</p>} />);
 }
 
 describe("GameDetail", () => {
@@ -45,10 +45,9 @@ describe("GameDetail", () => {
     expect(images.map((image) => image.getAttribute("alt"))).toEqual(["Portada de Ruta 9", "Ruta 9: pits"]);
   });
 
-  it("links back to the catalog and renders the itch.io slot", () => {
+  it("renders the itch.io slot", () => {
     renderDetail();
 
-    expect(screen.getByRole("link", { name: /Volver al catálogo/ })).toHaveAttribute("href", "/#games");
     expect(screen.getByText("itch slot")).toBeInTheDocument();
   });
 });

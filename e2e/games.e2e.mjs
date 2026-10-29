@@ -50,6 +50,8 @@ const VIEWPORTS = [
 
 const MIN_TOUCH_TARGET_PX = 44;
 
+const MODAL_ANIMATION_CAP_MS = 3000;
+
 const results = [];
 
 const httpLog = [];
@@ -330,35 +332,79 @@ function cancunTime(date) {
   }).format(date);
 }
 
-// G-01: the landing coverflow links to the current game's page; the featured game's page shows its data.
+// G-01: tapping the game at the center of the landing coverflow opens its page in a modal and closing it returns to
+// the landing; loading the page directly shows the full page with the navbar ("Inicio" only, S6).
 async function checkCatalogToGamePage(session) {
   const { page, fixture } = session;
 
-  await followCoverflowLink(session, fixture.coverflowGame);
+  await openCoverflowModal(session, fixture.coverflowGame);
+  await closeModal(session);
   await openGamePage(page, fixture.featured.slug);
   await checkGameData(page, fixture.featured);
+  await checkNavbar(page);
   await screenshot(session, "g01-game-detail");
 }
 
-async function followCoverflowLink(session, game) {
+async function openCoverflowModal(session, game) {
   const { page } = session;
   const gamePath = `/games/${game.slug}`;
 
   await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
-  const link = page.locator("#games").getByRole("link", { name: /^Ver ficha de / });
-  await link.scrollIntoViewIfNeeded();
+  const caseLink = page.locator("#games").getByRole("link", { name: new RegExp(`^${escapeRegExp(game.name)},`) });
+  await caseLink.scrollIntoViewIfNeeded();
   await screenshot(session, "g01-landing-coverflow");
 
-  const name = await link.getAttribute("aria-label");
-  const href = await link.getAttribute("href");
-  check("G-01 coverflow link names the current game", name === `Ver ficha de ${game.name}`, `"${name}"`);
-  check("G-01 coverflow link href", href === gamePath, href ?? "none");
+  check('G-01 no "Ver ficha" button', (await page.getByText("Ver ficha").count()) === 0);
+  check("G-01 the center case links to its game", (await caseLink.getAttribute("href")) === gamePath, gamePath);
 
-  await link.click();
-  await page.waitForURL((url) => url.pathname === gamePath, { timeout: 30_000 });
-  await page.waitForLoadState("networkidle");
-  check("G-01 coverflow -> game page", new URL(page.url()).pathname === gamePath, page.url());
-  await screenshot(session, "g01-coverflow-target");
+  await caseLink.click();
+  const dialog = page.getByRole("dialog", { name: game.name });
+  await dialog.waitFor({ timeout: 30_000 });
+  check("G-01 the click opens the game in a modal", await dialog.isVisible(), game.name);
+  check("G-01 the modal URL is the game page", new URL(page.url()).pathname === gamePath, page.url());
+  await waitForModalAnimations(page);
+  await screenshot(session, "g01-modal");
+}
+
+async function closeModal(session) {
+  const { page } = session;
+
+  await page.getByRole("button", { name: "Cerrar" }).click();
+  await page.getByRole("dialog").waitFor({ state: "detached", timeout: 30_000 });
+  check("G-01 closing the modal returns to the landing", new URL(page.url()).pathname === "/", page.url());
+  await screenshot(session, "g01-modal-closed");
+}
+
+async function checkNavbar(page) {
+  const links = page.getByRole("navigation").getByRole("link");
+  const labels = (await links.allTextContents()).map((label) => label.trim()).filter(Boolean);
+  const inicio = page.getByRole("navigation").getByRole("link", { name: "Inicio", exact: true });
+
+  check("G-01 the navbar only lists Inicio", labels.join(",") === "Inicio", labels.join(",") || "none");
+  check("G-01 Inicio goes to /", (await inicio.getAttribute("href")) === "/");
+  check('G-01 no "Volver al catálogo" link', (await page.getByText("Volver al catálogo").count()) === 0);
+}
+
+// The modal fades in with CSS animations; a screenshot taken before they finish shows it transparent. Only the modal's
+// own animations are awaited (the landing runs endless ones), and the wait is capped so it can never hang the run.
+async function waitForModalAnimations(page) {
+  await page.evaluate(
+    (capMs) =>
+      Promise.race([
+        Promise.all(
+          document
+            .getAnimations()
+            .filter((animation) => animation.effect?.target?.closest?.(".modal__backdrop"))
+            .map((animation) => animation.finished),
+        ),
+        new Promise((resolve) => setTimeout(resolve, capMs)),
+      ]),
+    MODAL_ANIMATION_CAP_MS,
+  );
+}
+
+function escapeRegExp(text) {
+  return text.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 async function checkGameData(page, game) {
@@ -462,18 +508,38 @@ async function checkGameWithoutLink(session) {
   await screenshot(session, "g05-without-link");
 }
 
-// G-08: no horizontal scroll and 44x44 px touch targets at phone, landscape and desktop widths.
+// G-08: no horizontal scroll and 44x44 px touch targets at phone, landscape and desktop widths, on the full page and
+// in the modal.
 async function checkViewports(session) {
-  const { page } = session;
+  const { page, fixture } = session;
 
   for (const viewport of VIEWPORTS) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await openGamePage(page, FEATURED_SLUG);
     await checkNoHorizontalScroll(page, viewport.label);
-    await checkTouchTarget(page, viewport.label, "Volver al catálogo");
-    await checkTouchTarget(page, viewport.label, "Jugar en itch.io");
+    await checkTouchTarget(
+      page.getByRole("navigation").getByRole("link", { name: "Inicio", exact: true }),
+      viewport.label,
+      "Inicio",
+    );
+    await checkTouchTarget(page.getByRole("link", { name: "Jugar en itch.io" }), viewport.label, "Jugar en itch.io");
     await screenshot(session, `g08-${viewport.label}`);
+    await checkModalViewport(session, fixture.coverflowGame, viewport.label);
   }
+}
+
+async function checkModalViewport(session, game, label) {
+  const { page } = session;
+
+  await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
+  const caseLink = page.locator("#games").getByRole("link", { name: new RegExp(`^${escapeRegExp(game.name)},`) });
+  await caseLink.scrollIntoViewIfNeeded();
+  await caseLink.click();
+  await page.getByRole("dialog", { name: game.name }).waitFor({ timeout: 30_000 });
+  await checkNoHorizontalScroll(page, `${label} modal`);
+  await checkTouchTarget(page.getByRole("button", { name: "Cerrar" }), `${label} modal`, "Cerrar");
+  await waitForModalAnimations(page);
+  await page.screenshot({ path: path.join(session.screenshots, `g08-${label}-modal.png`) });
 }
 
 async function checkNoHorizontalScroll(page, label) {
@@ -489,12 +555,22 @@ async function checkNoHorizontalScroll(page, label) {
   );
 }
 
-async function checkTouchTarget(page, label, name) {
-  const box = await page.getByRole("link", { name }).first().boundingBox();
-  const size = box ? `${Math.round(box.width)}x${Math.round(box.height)}` : "not rendered";
-  const ok = Boolean(box) && box.width >= MIN_TOUCH_TARGET_PX && box.height >= MIN_TOUCH_TARGET_PX;
+// The touch-target utility grows the hit area with an absolute ::before, so the target is the larger of the two boxes.
+async function checkTouchTarget(locator, label, name) {
+  const size = await locator.first().evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    const before = getComputedStyle(element, "::before");
+    const hasHitArea = before.content !== "none" && before.position === "absolute";
 
-  check(`G-08 ${label}: "${name}" is at least 44x44 px`, ok, size);
+    return {
+      width: Math.max(box.width, hasHitArea ? Number.parseFloat(before.width) : 0),
+      height: Math.max(box.height, hasHitArea ? Number.parseFloat(before.height) : 0),
+    };
+  });
+
+  const ok = size.width >= MIN_TOUCH_TARGET_PX && size.height >= MIN_TOUCH_TARGET_PX;
+
+  check(`G-08 ${label}: "${name}" is at least 44x44 px`, ok, `${Math.round(size.width)}x${Math.round(size.height)}`);
 }
 
 async function openGamePage(page, slug) {

@@ -95,6 +95,12 @@ describe("LandingView", () => {
     });
   });
 
+  it("keeps the logo linked to the top of the landing", () => {
+    renderLanding();
+
+    expect(screen.getByRole("link", { name: "UTG, inicio" })).toHaveAttribute("href", "#top");
+  });
+
   it("points the call to action to Google Calendar for 20 Nov 2026 from 12:00 to 19:00 in Cancun", () => {
     renderLanding();
 

@@ -10,8 +10,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 - Ficha de cada juego en `/games/[slug]` con sinopsis, género, código corto del stand y galería (portada primero).
   El enlace a itch.io aparece a la hora configurada en `event_settings` (16:30), según la hora del servidor; antes,
-  la ficha indica a qué hora se activa. El coverflow de la portada enlaza a la ficha del juego actual ("Ver ficha"),
-  y un juego que no existe muestra la página de "no encontrado" con `noindex`. Las pruebas e2e de la ficha corren con `npm run test:e2e:games`.
+  la ficha indica a qué hora se activa. Al tocar el juego del centro del coverflow, la ficha se abre en un modal
+  (la URL cambia a `/games/[slug]` y "Cerrar" regresa a la portada); al abrir el enlace directo se ve la página
+  completa, con el navbar solo con "Inicio" mientras no exista el catálogo de juegos. Un juego que no existe muestra
+  la página de "no encontrado" con `noindex`. Las pruebas e2e de la ficha corren con `npm run test:e2e:games`.
 
 - Consulta de pasaporte en `/passport` con gamertag y PIN descifrado asociado a la cookie del dispositivo.
 

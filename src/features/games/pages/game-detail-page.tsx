@@ -3,18 +3,24 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
-import { GameDetail } from "@features/games/components/game-detail";
+import { GameDetail, GameDetailBody } from "@features/games/components/game-detail";
+import { GameDetailRouteModal } from "@features/games/components/game-detail-route-modal";
 import { GameItchLink } from "@features/games/components/game-itch-link";
 import { getCoverImage } from "@features/games/lib/game-cover";
-import { GAMES_SECTION_ID, getGamePath } from "@features/games/lib/games-links";
+import { getGamePath } from "@features/games/lib/games-links";
 import { resolveItchLink, type ItchLink } from "@features/games/lib/itch-link";
 import { getGameBySlug, getGames } from "@features/games/lib/server/games-queries";
 import type { Game } from "@features/games/lib/types";
+import { SiteNav } from "@features/landing/components/site-nav";
+import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
 
-const CATALOG_HREF = `${HOME_PATH}#${GAMES_SECTION_ID}`;
+type GameParams = PageProps<"/games/[slug]">["params"];
+
+// Only "Inicio" until the games catalog gets its own page (S6).
+const NAV_LINKS = [{ href: HOME_PATH, label: LANDING_COPY.nav.links.home }];
 
 // With Cache Components the build needs at least one sample slug; games added later render on their first request.
 export async function generateGameDetailStaticParams() {
@@ -44,35 +50,55 @@ export async function generateGameDetailPageMetadata({ params }: PageProps<"/gam
 // slug then streams the not-found page with noindex; its first visit answers 200, later ones 404 (S4, L7).
 export function GameDetailPage({ params }: PageProps<"/games/[slug]">) {
   return (
+    <>
+      <SiteNav homeHref={HOME_PATH} links={NAV_LINKS} />
+      <Suspense fallback={null}>
+        <GameDetailContent params={params} />
+      </Suspense>
+    </>
+  );
+}
+
+// The landing intercepts /games/[slug] (src/app/@modal/(.)games/[slug]) to show the same game in a modal (S4, L10).
+export function GameDetailModalPage({ params }: PageProps<"/games/[slug]">) {
+  return (
     <Suspense fallback={null}>
-      <GameDetailContent params={params} />
+      <GameDetailModalContent params={params} />
     </Suspense>
   );
 }
 
-async function GameDetailContent({ params }: Readonly<Pick<PageProps<"/games/[slug]">, "params">>) {
+async function GameDetailContent({ params }: Readonly<{ params: GameParams }>) {
+  const game = await findGame(params);
+
+  return <GameDetail game={game} itchLink={itchLinkSlot(game)} />;
+}
+
+async function GameDetailModalContent({ params }: Readonly<{ params: GameParams }>) {
   const game = await findGame(params);
 
   return (
-    <GameDetail
-      game={game}
-      backHref={CATALOG_HREF}
-      itchLink={
-        <Suspense fallback={null}>
-          <GameItchLinkGate itchUrl={game.itchUrl} />
-        </Suspense>
-      }
-    />
+    <GameDetailRouteModal title={game.name}>
+      <GameDetailBody game={game} itchLink={itchLinkSlot(game)} />
+    </GameDetailRouteModal>
   );
 }
 
-async function findGame(params: PageProps<"/games/[slug]">["params"]): Promise<Game> {
+async function findGame(params: GameParams): Promise<Game> {
   const { slug } = await params;
   const game = await getGameBySlug(slug);
 
   if (!game) notFound();
 
   return game;
+}
+
+function itchLinkSlot(game: Game) {
+  return (
+    <Suspense fallback={null}>
+      <GameItchLinkGate itchUrl={game.itchUrl} />
+    </Suspense>
+  );
 }
 
 async function GameItchLinkGate({ itchUrl }: Readonly<Pick<Game, "itchUrl">>) {
