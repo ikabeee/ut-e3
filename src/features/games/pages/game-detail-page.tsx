@@ -16,16 +16,14 @@ import { formatStandCode } from "@features/games/lib/stand-code";
 import type { Game, GameDetailLinks, GameEventLabels } from "@features/games/lib/types";
 import { SiteNav } from "@features/landing/components/site-nav";
 import { buildEventCalendarUrl } from "@features/landing/lib/calendar-link";
-import { LANDING_COPY } from "@features/landing/lib/landing-copy";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
+import { HOME_NAV_LINKS } from "@features/landing/lib/home-nav-links";
 import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
 
 type GameParams = PageProps<"/games/[slug]">["params"];
-
-// Only "Inicio" until the games catalog gets its own page (S6).
-const NAV_LINKS = [{ href: HOME_PATH, label: LANDING_COPY.nav.links.home }];
 
 // With Cache Components the build needs at least one sample slug; games added later render on their first request.
 export async function generateGameDetailStaticParams() {
@@ -56,7 +54,7 @@ export async function generateGameDetailPageMetadata({ params }: PageProps<"/gam
 export function GameDetailPage({ params }: PageProps<"/games/[slug]">) {
   return (
     <>
-      <SiteNav homeHref={HOME_PATH} links={NAV_LINKS} />
+      <SiteNav homeHref={HOME_PATH} links={HOME_NAV_LINKS} />
       <Suspense fallback={null}>
         <GameDetailContent params={params} />
       </Suspense>
@@ -103,7 +101,7 @@ export function GameDetailView({ game, games, settings, itchLink }: Readonly<Gam
 function buildEventLabels(settings: EventSettings): GameEventLabels {
   return {
     dateLabel: formatEventDate(settings.eventStartsAt, "numeric"),
-    hoursLabel: LANDING_COPY.acts.timeRange(
+    hoursLabel: GAMES_COPY.playLocation.hoursRange(
       formatTimeOfDay(settings.eventStartsAt),
       formatTimeOfDay(settings.eventEndsAt),
     ),

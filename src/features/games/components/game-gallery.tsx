@@ -8,8 +8,9 @@ import { useGallery } from "@features/games/hooks/use-gallery";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { GameImage } from "@features/games/lib/types";
 import { ArrowButton } from "@shared/components/arrow-button";
+import { DETAIL_COLUMNS_MEDIA } from "@features/games/lib/game-detail-layout";
 
-const VIEWER_SIZES = "(min-width: 980px) 70vw, 100vw";
+const VIEWER_SIZES = `${DETAIL_COLUMNS_MEDIA} 70vw, 100vw`;
 
 const ARROW_CLASS = "absolute top-1/2 z-2 size-[38px] -translate-y-1/2 sm:size-[46px]";
 

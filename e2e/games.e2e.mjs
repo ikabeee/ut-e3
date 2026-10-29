@@ -453,11 +453,13 @@ async function checkUnknownSlug(session) {
   const response = await page.goto(`${BASE_URL}/games/no-existe`, { waitUntil: "networkidle" });
   const status = response?.status();
   const robots = await page.locator('meta[name="robots"]').first().getAttribute("content");
-  const notFoundText = await page.getByText("This page could not be found.").count();
+  const notFoundText = await page.getByRole("heading", { level: 1, name: "Página no encontrada" }).count();
+  const background = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 
   check("G-06 unknown slug answers 200 or 404", status === 200 || status === 404, `status=${status}`);
   check("G-06 not-found page is shown", notFoundText > 0, `matches=${notFoundText}`);
   check("G-06 not-found page has noindex", robots?.includes("noindex") === true, `robots=${robots}`);
+  check("G-06 not-found page uses the black theme", background === "rgb(0, 0, 0)", background);
   await screenshot(session, "04-unknown-slug/01-not-found");
 }
 

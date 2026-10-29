@@ -19,9 +19,9 @@ export function GameSidebar({ game, itchLink, eventDateLabel, links }: Readonly<
   return (
     <aside
       aria-label={GAMES_COPY.sidebar.label(game.name)}
-      className="-order-1 flex flex-col gap-3 min-[980px]:sticky min-[980px]:top-[calc(env(safe-area-inset-top,0px)+var(--spacing-nav)+20px)] min-[980px]:order-0"
+      className="-order-1 flex flex-col gap-3 detail:sticky detail:top-[calc(env(safe-area-inset-top,0px)+var(--spacing-nav)+20px)] detail:order-0"
     >
-      <div className="relative hidden aspect-3/4 overflow-hidden border border-border bg-surface min-[980px]:block">
+      <div className="relative hidden aspect-3/4 overflow-hidden border border-border bg-surface detail:block">
         <GameCoverImage game={game} sizes={COVER_SIZES} />
       </div>
       {itchLink}
@@ -37,16 +37,16 @@ export function GameSidebar({ game, itchLink, eventDateLabel, links }: Readonly<
 }
 
 function GameFacts({ game, eventDateLabel }: Readonly<Pick<GameSidebarProps, "game" | "eventDateLabel">>) {
-  const { facts } = GAMES_COPY;
+  const { labels } = GAMES_COPY;
 
   const rows = [
-    { label: facts.genre, value: game.genre.name },
-    { label: facts.stand, value: formatStandCode(game.stand) },
-    { label: facts.event, value: eventDateLabel },
+    { label: labels.genre, value: game.genre.name },
+    { label: labels.stand, value: formatStandCode(game.stand) },
+    { label: labels.event, value: eventDateLabel },
   ];
 
   return (
-    <dl className="mt-1.5 hidden flex-col min-[980px]:flex">
+    <dl className="mt-1.5 hidden flex-col detail:flex">
       {rows.map((row) => (
         <div key={row.label} className="flex justify-between gap-3 border-b border-separator py-2.75">
           <dt className="font-mono text-xs text-muted uppercase">{row.label}</dt>

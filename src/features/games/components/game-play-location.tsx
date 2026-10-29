@@ -10,13 +10,13 @@ interface GamePlayLocationProps {
 }
 
 export function GamePlayLocation({ stand, event }: Readonly<GamePlayLocationProps>) {
-  const { playLocation } = GAMES_COPY;
+  const { playLocation, labels } = GAMES_COPY;
 
   const cells = [
-    { label: playLocation.stand, value: formatStandCode(stand) },
-    { label: playLocation.zone, value: stand.zone },
-    { label: playLocation.date, value: event.dateLabel },
-    { label: playLocation.hours, value: event.hoursLabel },
+    { label: labels.stand, value: formatStandCode(stand) },
+    { label: labels.zone, value: stand.zone },
+    { label: labels.date, value: event.dateLabel },
+    { label: labels.hours, value: event.hoursLabel },
   ];
 
   return (

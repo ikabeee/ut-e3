@@ -8,6 +8,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Página 404 con el tema del sitio (fondo negro, tipografía UTG y navbar con "Inicio"), en lugar de la página blanca
+  por defecto de Next.js; la usan las rutas que no existen y las fichas de juegos que no existen.
+
 - Ficha de cada juego en `/games/[slug]` al estilo de la tienda de Epic Games: visor de la galería con flechas y
   miniaturas (portada primero; también con teclado y deslizando), sinopsis, género, "Dónde jugarlo" (stand, zona,
   fecha y horario del evento), columna lateral con la portada, itch.io, "Ver en el croquis", "Quiero asistir" y la

@@ -21,8 +21,6 @@ export const GAMES_COPY = {
   detail: {
     backToCatalog: "Todos los juegos",
     meta: (game: Pick<Game, "genre" | "stand">) => `${game.genre.name} · ${formatStandCode(game.stand)}`,
-    genre: "Género",
-    stand: "Stand",
     gallery: "Galería",
     galleryImages: "Imágenes del juego",
     image: (number: number) => `Imagen ${number}`,
@@ -32,22 +30,22 @@ export const GAMES_COPY = {
     itchPending: (time: string) => `El enlace a itch.io se activa a las ${time}.`,
     itchOpen: "Jugar en itch.io",
   },
-  playLocation: {
-    heading: "Dónde jugarlo",
+  labels: {
+    genre: "Género",
     stand: "Stand",
     zone: "Zona",
     date: "Fecha",
     hours: "Horario",
+    event: "Evento",
+  },
+  playLocation: {
+    heading: "Dónde jugarlo",
+    hoursRange: (start: string, end: string) => `${start} a ${end}`,
   },
   sidebar: {
     label: (name: string) => `Ficha de ${name}`,
     viewOnMap: "Ver en el croquis",
     attend: "Quiero asistir",
-  },
-  facts: {
-    genre: "Género",
-    stand: "Stand",
-    event: "Evento",
   },
   related: {
     heading: "Más juegos",

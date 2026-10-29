@@ -16,12 +16,12 @@ interface GameDetailProps {
   relatedGames: Game[];
 }
 
-// Main column and a sticky sidebar from 980 px up; below that one column with the sidebar actions first.
+// Main column and a sticky sidebar from the `detail` breakpoint up; below that one column with the sidebar actions first.
 export function GameDetail({ game, itchLink, event, links, relatedGames }: Readonly<GameDetailProps>) {
   return (
     <main className="page-wrap flex min-h-svh flex-col gap-6 py-[clamp(24px,4vw,48px)]">
       <GameDetailHeader game={game} catalogHref={links.catalog} />
-      <div className="grid items-start gap-[clamp(24px,4vw,56px)] min-[980px]:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid items-start gap-[clamp(24px,4vw,56px)] detail:grid-cols-[minmax(0,1fr)_320px]">
         <GameOverview game={game} event={event} />
         <GameSidebar game={game} itchLink={itchLink} eventDateLabel={event.dateLabel} links={links} />
       </div>
@@ -44,7 +44,7 @@ function GameOverview({ game, event }: Readonly<Pick<GameDetailProps, "game" | "
 function GameTags({ genre }: Readonly<{ genre: string }>) {
   return (
     <dl aria-label={GAMES_COPY.detail.tags} className="flex flex-col gap-1.5 border-l-2 border-accent pl-4">
-      <dt className="type-tiny text-muted">{GAMES_COPY.detail.genre}</dt>
+      <dt className="type-tiny text-muted">{GAMES_COPY.labels.genre}</dt>
       <dd className="self-start border-b border-muted pb-px font-mono text-xs uppercase">{genre}</dd>
     </dl>
   );

@@ -3,10 +3,11 @@ import { GameCoverImage } from "@features/games/components/game-cover-image";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { getGamePath } from "@features/games/lib/games-links";
 import type { Game } from "@features/games/lib/types";
+import { DETAIL_COLUMNS_MEDIA } from "@features/games/lib/game-detail-layout";
 
 const HEADING_ID = "related-games-heading";
 
-const COVER_SIZES = "(min-width: 980px) 20vw, (min-width: 560px) 33vw, 50vw";
+const COVER_SIZES = `${DETAIL_COLUMNS_MEDIA} 20vw, (min-width: 560px) 33vw, 50vw`;
 
 interface RelatedGamesProps {
   games: Game[];
@@ -26,7 +27,7 @@ export function RelatedGames({ games, catalogHref }: Readonly<RelatedGamesProps>
           {GAMES_COPY.related.seeAll}
         </Link>
       </div>
-      <ul className="grid grid-cols-2 gap-4 min-[560px]:grid-cols-3 min-[980px]:grid-cols-5">
+      <ul className="grid grid-cols-2 gap-4 min-[560px]:grid-cols-3 detail:grid-cols-5">
         {games.map((game) => (
           <li key={game.slug}>
             <RelatedGameCard game={game} />
