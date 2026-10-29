@@ -17,6 +17,8 @@ changed lines). Test runner: Jest (`npm test`).
   `rel="noopener noreferrer"`."
 - S3 (route): `src/app/sponsors/page.tsx` only re-exports the page and its metadata, with `alternates.canonical`
   (AGENTS.md, "Agregar una feature nueva"). Assumption: the route is declared in `lib/sponsors-links.ts`.
+- S5 (example seed): "Agrega un seed en lo que nos confirman los sponsors" (L5). Assumption: six fictitious
+  sponsors with `example.com` sites, `+52 998 000 000N` phones and "LOGO DE EJEMPLO" SVGs in `public/sponsors/`.
 - S4 (style): "Like the carousel" (L3): logo on `bg-surface`, `type-wide` name, services in `text-copy`, the
   "Visitar sitio" `ActionLink` and the `tel:` link in `type-mono` (shared with the carousel through
   `SponsorContactLinks`).
@@ -27,6 +29,7 @@ changed lines). Test runner: Jest (`npm test`).
 | --- | --- | --- | --- | --- |
 | T1 | S1, S2 | inline | done | RED (module missing) then GREEN, `47567ae` |
 | T2 | S3 | inline | done | `47567ae` |
+| T4 | S5 | inline | done | RED (no example sponsors) then GREEN, see L6 |
 | T3 | S4 | inline | done | screenshots at 360/390/844/1440, `47567ae` |
 
 ## Log
@@ -44,3 +47,9 @@ changed lines). Test runner: Jest (`npm test`).
   `h1` uses `type-wide` with a 24 px minimum because `type-giant` (30 px minimum) overflowed at 360 px.
   Pending: `INITIAL_SPONSORS` is empty, so `/sponsors` shows only its title until real sponsors are loaded; the navbar
   has no "Patrocinadores" link yet (needs `landing -> sponsors` in `FEATURE_DEPENDENCIES`); PR to `develop` not opened.
+- L5 (2026-10-29, user): "Agrega un seed en lo que nos confirman los sponsors"
+- L6 (2026-10-29): `INITIAL_SPONSORS` now holds six example sponsors. `sponsors-queries.test.ts` compared the seeded rows
+  with `INITIAL_SPONSORS` including `id`, which only passed while the list was empty (the database assigns UUIDs); it now
+  matches `id` with `expect.any(String)`. Seeded a scratchpad copy of `dev.db`: 6 cards on `/sponsors` without
+  overflow at 360/390/844/1440 px, and the landing carousel shows them. Replacing them with the real sponsors needs an
+  edit to `INITIAL_SPONSORS` plus emptying the `sponsors` table, because the seed only fills an empty table.
