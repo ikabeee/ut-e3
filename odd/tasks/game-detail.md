@@ -190,3 +190,7 @@ Route evidence: T1-T3 inline (one dependent chain). T4 delegated as a parallel u
   (`detail:`) plus `DETAIL_COLUMNS_MEDIA` for image `sizes`, `HOME_NAV_LINKS` shared by the game page and the 404.
   Checks: `npm test` 99 suites / 510 tests, typecheck, ESLint, Oxlint, jscpd 0 clones, `npm run test:e2e:games` 47/47
   (G-06 now checks the black background). Pending: push and the PR to `develop`.
+- L23 (2026-10-29): native review of `7bac2a9..ef33004` (lenses risk and readability, consent granted by the user):
+  approved and acknowledged (lineage `review-5500aafd3cab820c`). Non-blocking follow-ups:
+  `R2-detail-breakpoint-two-sources` (the 980px width lives in the theme and in `DETAIL_COLUMNS_MEDIA`) and
+  `R2-home-nav-links-cross-feature` (`HOME_NAV_LINKS` lives in landing but the game page and the 404 use it).
