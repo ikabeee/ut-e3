@@ -18,6 +18,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e:games": "node e2e/games.e2e.mjs",
+    "test:e2e": "node e2e/passport.e2e.mjs",
     "test:coverage": "jest --coverage",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
