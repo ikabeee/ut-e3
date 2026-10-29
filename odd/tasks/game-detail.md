@@ -43,6 +43,12 @@ Objective: a public page per game at `/games/[slug]` (RF-09, RF-10, RF-11; issue
   (RF-10), "Ver en el croquis" and "Quiero asistir" (calendar), and a facts list; "Más juegos" (same genre first,
   then the others). "Todos los juegos" and "Ver todos" go to `/#games` until the catalog exists.
 
+- S8 (not-found palette, L21): "el not found no cumple con la paleta de colores se muestra directamente en blanco y
+  estamos usando negros." The 404 page uses the UTG theme (black background, site typography), with the navbar
+  ("Inicio") and a link back home, after `archive/develop-v1` `src/features/site` (`not-found-view.tsx`).
+- S9 (readability, L21): "Arregla primero igual los detalless de legibilidad": the native review findings
+  `R2-breakpoint-980-repeated`, `R2-duplicated-detail-copy` and `R2-hours-label-borrows-acts-copy` (L20).
+
 ## Tasks
 
 | ID | Specs | Route | Status | Evidence |
@@ -52,6 +58,8 @@ Objective: a public page per game at `/games/[slug]` (RF-09, RF-10, RF-11; issue
 | T3 | S4 | inline | done | L10: RED 3 failing -> GREEN `game-catalog.test.tsx` 12/12 (cases are links); commit `13c7e7b` |
 | T4 | S5 | delegated (parallel writer), L10 and L14 updates inline | done | `npm run test:e2e:games` 43/43, screenshots in numbered flow folders; commits `4e99d31`, `13c7e7b`, `fe0dc82` |
 | T5 | S4 | inline | reverted (L14) | RED module missing -> GREEN `game-detail-modal.test.tsx` 3/3; commit `13c7e7b` |
+| T9 | S8 | inline | done | RED module missing -> GREEN `not-found-page.test.tsx` 3/3; e2e G-06 black theme; commit `7f3fd7f` |
+| T10 | S9 | inline | done | refactor under green tests (99 suites / 510); commit `7f3fd7f` |
 | T8 | S7 | delegated (context backstop) | done | RED->GREEN related-games 4/4, calendar-link 5/5, game-gallery 7/7, game-detail 9/9, game-detail-page 5/5; e2e 46/46; commit `d25504e` |
 | T7 | S4 | inline | done | catalog tests stay GREEN (cases link to the page); e2e G-01 follows the case to the full page; commit `fe0dc82` |
 | T6 | S6 | inline | done | RED `site-nav.test.tsx` 1 failing -> GREEN; landing logo regression test; commit `13c7e7b` |
@@ -172,3 +180,13 @@ Route evidence: T1-T3 inline (one dependent chain). T4 delegated as a parallel u
   `R3-gallery-empty-images` (WARNING: the gallery assumes at least one image; every game has a cover today, enforced
   by `getCoverImage`), `R3-home-end-keys-untested`, `R3-swipe-untested`, `R2-breakpoint-980-repeated`,
   `R2-duplicated-detail-copy`, `R2-hours-label-borrows-acts-copy`.
+- L21 (2026-10-29, user): "Aun no, el not found no cumple con la paleta de colores se muestra directamente en blanco y
+  estamos usando negros. Arregla primero igual los detalless de legibilidad". Cause: there is no
+  `src/app/not-found.tsx`, so Next renders its default 404, whose inline styles are white unless the system prefers
+  dark. S8 and S9 added; T9 and T10 opened; push and PR wait.
+- L22 (2026-10-29): T9 and T10 in `7f3fd7f`. New feature `src/features/site` (404 after the archive: kicker "Error 404",
+  "Página no encontrada", "Volver al inicio", navbar "Inicio", `noindex`) and `src/app/not-found.tsx`; AGENTS.md lists
+  `site`. Readability: `GAMES_COPY.labels`, `GAMES_COPY.playLocation.hoursRange`, theme breakpoint `--breakpoint-detail`
+  (`detail:`) plus `DETAIL_COLUMNS_MEDIA` for image `sizes`, `HOME_NAV_LINKS` shared by the game page and the 404.
+  Checks: `npm test` 99 suites / 510 tests, typecheck, ESLint, Oxlint, jscpd 0 clones, `npm run test:e2e:games` 47/47
+  (G-06 now checks the black background). Pending: push and the PR to `develop`.
