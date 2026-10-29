@@ -506,7 +506,60 @@
   }
 }
 
+@keyframes approach {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+}
+
+@keyframes win-glow {
+  0% {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  35% {
+    transform: scale(1.14);
+    box-shadow:
+      0 0 0 3px var(--accent),
+      0 0 28px 6px var(--accent);
+  }
+
+  100% {
+    transform: scale(1.12);
+    box-shadow:
+      0 0 0 2px var(--accent),
+      0 0 12px 2px var(--accent);
+  }
+}
+
+@keyframes arrive {
+  from {
+    transform: translateX(var(--arrive-from, -1.5rem));
+    background-color: var(--accent);
+    opacity: 0;
+  }
+
+  60% {
+    background-color: var(--accent);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateX(0);
+    background-color: transparent;
+  }
+}
+
 @theme inline {
+  --animate-approach: approach 0.7s var(--ease-snap) both;
+  --animate-win-glow: win-glow 1s ease-out both;
+  --animate-arrive: arrive 0.8s var(--ease-snap) both;
   --animate-rise: rise 0.6s var(--ease-snap) both;
   --animate-flash: flash 0.45s steps(2) 6;
 }

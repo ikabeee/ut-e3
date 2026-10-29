@@ -9,8 +9,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 ### Agregado
 
 - Bracket público del torneo de KOF en `/tournament`: cualquier visitante sigue los combates y los resultados desde su
-  teléfono, sin sesión y sin datos personales. El administrador de KOF puede cerrarlo y reabrirlo con "Cerrar al público".
-- El administrador de KOF puede reiniciar el torneo desde `/admin/kof` (borra el bracket y conserva las inscripciones), y el manual de uso está en `docs/manual-torneo.md`.
+  teléfono, sin sesión y sin datos personales, dibujado como un árbol de llaves con dos mitades en espejo.
+- El administrador de KOF puede reiniciar el torneo desde `/admin/kof` (borra el bracket y conserva las inscripciones), y el manual de uso está en `docs/manual-torneo.md`. El administrador de KOF puede cerrarlo y reabrirlo con "Cerrar al público".
 - Invitaciones de cuentas: el sysadmin invita a los administradores de KOF, de rifa y de atención desde `/admin`, y el
   administrador de KOF invita a su staff de las mesas 1 y 2 desde `/admin/kof`. Cada persona recibe un enlace por
   correo (`/activate/<token>`, válido 72 horas, reenviable) para elegir su contraseña; solo se guarda el hash del enlace.

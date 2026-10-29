@@ -1,4 +1,5 @@
 import { act, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { PublicBracketView } from "@features/tournament/components/public-bracket-view";
 import { POLL_INTERVAL_MS } from "@features/tournament/hooks/use-tournament";
 import { toPublicBracket, type PublicSnapshot } from "@features/tournament/lib/public-bracket";
@@ -79,6 +80,22 @@ describe("PublicBracketView", () => {
     render(<PublicBracketView initial={openOf(playUntilFinished(createTestTournament()))} />);
 
     expect(screen.getByRole("status")).toHaveTextContent(/Campeón: Tag\d+/);
+  });
+
+  it("draws the tree and keeps the list, and a button on small screens switches between them (S7)", async () => {
+    render(<PublicBracketView initial={openOf(createTestTournament())} />);
+
+    expect(screen.getByRole("group", { name: "Bracket en forma de árbol" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Ir a un tablero" })).toBeInTheDocument();
+
+    const button = screen.getByRole("button", { name: "Ver el árbol completo" });
+
+    expect(button).toHaveAttribute("aria-pressed", "false");
+
+    await userEvent.click(button);
+
+    expect(screen.getByRole("button", { name: "Ver como lista" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("Desliza hacia los lados para ver todo el árbol.")).toBeInTheDocument();
   });
 
   it("never shows an identifier, only gamertags", () => {

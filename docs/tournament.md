@@ -67,9 +67,13 @@ solo los gamertags y los resultados: ningún id, correo ni PIN. La consulta es c
 
 | Estado | Qué ve el público |
 | --- | --- |
-| `open` | El bracket: los combates en juego arriba, luego los 4 tableros, las semifinales y la final |
+| `open` | El bracket como árbol con llaves (dos mitades en espejo que se juntan en la final), con los combates en juego arriba |
 | `pending` | "El bracket todavía no está listo." |
 | `closed` | "El bracket está disponible en la pantalla del torneo." La API no devuelve el bracket |
+
+En pantallas de 900 px o más el árbol es la vista principal. En un teléfono arranca la lista por tablero y el botón "Ver el
+árbol completo" muestra el árbol, que se desplaza hacia los lados dentro de su caja sin mover la página. Las posiciones se
+calculan de la numeración (`lib/public-bracket-tree.ts`): el combate `i` de una ronda alimenta al `i/2` de la siguiente.
 
 El administrador de KOF cierra y reabre la vista pública con el botón "Cerrar al público" de `/admin/kof` (RF-74). El valor es
 `event_settings.publicBracketEnabled`; cambiarlo deja una fila en la bitácora y no afecta al staff de las mesas. Sin

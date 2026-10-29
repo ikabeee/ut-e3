@@ -10,7 +10,12 @@ import { listManagedAccounts } from "@features/accounts/lib/server/invitations";
 import { EntriesPanel } from "@features/tournament/components/entries-panel";
 import { PublicBracketSwitch } from "@features/tournament/components/public-bracket-switch";
 import { TournamentDashboard } from "@features/tournament/components/tournament-dashboard";
-import { addEntryAction, checkInEntryAction, generateBracketAction } from "@features/tournament/lib/entries-actions";
+import {
+  addEntryAction,
+  checkInEntryAction,
+  generateBracketAction,
+  resetBracketAction,
+} from "@features/tournament/lib/entries-actions";
 import { setPublicBracketAction } from "@features/tournament/lib/public-bracket-actions";
 import { submitTournamentCommand } from "@features/tournament/lib/tournament-actions";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
@@ -68,7 +73,12 @@ function getRoleLabel(account: KofAccount): string {
   return account.role === "kof_admin" ? COPY.roles.kof_admin : COPY.roles.kof_staff(account.kofDesk);
 }
 
-const ENTRIES_ACTIONS = { add: addEntryAction, checkIn: checkInEntryAction, generate: generateBracketAction };
+const ENTRIES_ACTIONS = {
+  add: addEntryAction,
+  checkIn: checkInEntryAction,
+  generate: generateBracketAction,
+  reset: resetBracketAction,
+};
 
 // Only the administrator sees the list. Loading it first closes the check-in if its hour passed, so the list never shows
 // a pre-registered player as waiting after 12:45.
