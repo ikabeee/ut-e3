@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 ---
 
 # Game detail page (M2)
@@ -80,3 +80,11 @@ Route evidence: T1-T3 inline (one dependent chain). T4 delegated as a parallel u
   Verifier verdicts: dependency PASS, S1-S3 PASS (S2 also under `next start`), S5 PASS, invariants PASS.
 - L8 (2026-10-28): rechecked. `npm run test:e2e:games` 40/40 with no console errors; production build plus `curl`:
   `/games/ceniza-protocol` 200, `/games/no-existe` 200 with `noindex` and then 404 (`x-nextjs-cache: HIT`).
+- L9 (2026-10-28): native review of `develop..734e5ad` (lenses risk and reliability, consent granted by the user):
+  approved and acknowledged (lineage `review-5b8cca33cac035e1`, authority burned). Non-blocking follow-ups:
+  `R3-e2e-itch-lead-race` (the 90 s lead of `ITCH_LEAD_MS` can run out on a slow first compile; G-03 then fails
+  explicitly), `R3-e2e-npm-execpath` (running `node e2e/games.e2e.mjs` without npm leaves `npm_execpath` unset),
+  `R3-e2e-server-kill` (`server.kill()` may leave child processes), `R3-itch-invalid-date-opens` (an invalid
+  `itchOpensAt` would open the link; the value comes from a `DateTime` column).
+  Outcome: feature closed. Pending: push and the PR to `develop` (user's decision); `getGameBySlug` needs `updateTag`
+  when games become editable (M6/M7). Next objective: M11, passport recovery, or M8, the sponsors page.
