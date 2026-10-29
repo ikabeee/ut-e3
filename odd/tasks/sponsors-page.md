@@ -1,0 +1,46 @@
+---
+status: done
+---
+
+# Sponsors page (M8)
+
+Objective: a public `/sponsors` page with one card per sponsor (RF-47, RF-48 of `odd/requirements/srs-v2.md`), reusing
+the `Sponsor` data, `getSponsors()` and `formatPhone()` that the landing carousel already uses. Branch
+`feature/sponsors-page` from `develop` at `477ef7d`. Delivery: `single-pr` to `develop` (forecast about 300 authored
+changed lines). Test runner: Jest (`npm test`).
+
+## Specs
+
+- S1 (RF-47): "Página con tarjetas de los patrocinadores: logo, nombre, servicios, sitio web y teléfono." One card per
+  sponsor in `position` order, read with `getSponsors()`.
+- S2 (RF-48): "El teléfono es un enlace `tel:` mostrado con formato legible; el sitio abre en pestaña nueva con
+  `rel="noopener noreferrer"`."
+- S3 (route): `src/app/sponsors/page.tsx` only re-exports the page and its metadata, with `alternates.canonical`
+  (AGENTS.md, "Agregar una feature nueva"). Assumption: the route is declared in `lib/sponsors-links.ts`.
+- S4 (style): "Like the carousel" (L3): logo on `bg-surface`, `type-wide` name, services in `text-copy`, the
+  "Visitar sitio" `ActionLink` and the `tel:` link in `type-mono` (shared with the carousel through
+  `SponsorContactLinks`).
+
+## Tasks
+
+| ID | Specs | Route | Status | Evidence |
+| --- | --- | --- | --- | --- |
+| T1 | S1, S2 | inline | done | RED (module missing) then GREEN, `47567ae` |
+| T2 | S3 | inline | done | `47567ae` |
+| T3 | S4 | inline | done | screenshots at 360/390/844/1440, `47567ae` |
+
+## Log
+
+- L1 (2026-10-29, user): "M8, lo haremos en otra sesion"
+- L2 (2026-10-29): new session started from the handoff. `feature/visitor-passport`'s `odd/tasks/visitor-passport.md`
+  brought to this branch so objective 3 stops reporting `unknown`. PR #110 was already merged into `develop`
+  (`477ef7d`). No sponsors page exists in `archive/develop-v1`, so there is no design to port; asked the user for the
+  card style before writing UI.
+- L3 (2026-10-29, user): card style "Like the carousel".
+- L4 (2026-10-29): delivered in `47567ae` (docs and index in `27680ab`). Checks: format:check, ESLint on `src`
+  (the repo-wide run also lints the git-ignored `.claude/worktrees/`, which fails outside this change), oxlint, jscpd
+  (0 clones), typecheck and Jest (109 suites, 556 tests) pass. Browser check against a scratchpad copy of `dev.db`
+  with 3 preview sponsors: no horizontal scroll and every link at least 44 px tall at 360, 390, 844 and 1440 px; the
+  `h1` uses `type-wide` with a 24 px minimum because `type-giant` (30 px minimum) overflowed at 360 px.
+  Pending: `INITIAL_SPONSORS` is empty, so `/sponsors` shows only its title until real sponsors are loaded; the navbar
+  has no "Patrocinadores" link yet (needs `landing -> sponsors` in `FEATURE_DEPENDENCIES`); PR to `develop` not opened.
