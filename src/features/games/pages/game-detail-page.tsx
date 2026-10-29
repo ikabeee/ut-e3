@@ -8,7 +8,7 @@ import { floorPlanItemHref } from "@features/floor-plan/lib/floor-plan-links";
 import { GameDetail } from "@features/games/components/game-detail";
 import { GameItchLink } from "@features/games/components/game-itch-link";
 import { getCoverImage } from "@features/games/lib/game-cover";
-import { GAMES_SECTION_ID, getGamePath } from "@features/games/lib/games-links";
+import { GAMES_PATH, getGamePath } from "@features/games/lib/games-links";
 import { resolveItchLink, type ItchLink } from "@features/games/lib/itch-link";
 import { getRelatedGames } from "@features/games/lib/related-games";
 import { getGameBySlug, getGames } from "@features/games/lib/server/games-queries";
@@ -108,10 +108,10 @@ function buildEventLabels(settings: EventSettings): GameEventLabels {
   };
 }
 
-// The catalog and the floor plan are sections of the landing until they get their own pages (S7).
+// The floor plan is a section of the landing until it gets its own page.
 function buildDetailLinks(game: Game, settings: EventSettings): GameDetailLinks {
   return {
-    catalog: `${HOME_PATH}#${GAMES_SECTION_ID}`,
+    catalog: GAMES_PATH,
     floorPlan: `${HOME_PATH}${floorPlanItemHref(formatStandCode(game.stand))}`,
     calendar: buildEventCalendarUrl({ startsAt: settings.eventStartsAt, endsAt: settings.eventEndsAt }),
   };

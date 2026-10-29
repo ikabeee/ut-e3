@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { GameDetailHeader } from "@features/games/components/game-detail-header";
 import { GameGallery } from "@features/games/components/game-gallery";
@@ -6,7 +7,8 @@ import { GameSidebar } from "@features/games/components/game-sidebar";
 import { RelatedGames } from "@features/games/components/related-games";
 import { getGalleryImages } from "@features/games/lib/game-cover";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
-import type { Game, GameDetailLinks, GameEventLabels } from "@features/games/lib/types";
+import { getGenrePath } from "@features/games/lib/games-links";
+import type { Game, GameDetailLinks, GameEventLabels, Genre } from "@features/games/lib/types";
 
 interface GameDetailProps {
   game: Game;
@@ -35,17 +37,24 @@ function GameOverview({ game, event }: Readonly<Pick<GameDetailProps, "game" | "
     <div className="flex min-w-0 flex-col gap-7">
       <GameGallery images={getGalleryImages(game)} />
       <p className="max-w-[62ch] text-[clamp(17px,1.5vw,20px)] leading-[1.4] text-copy-strong">{game.synopsis}</p>
-      <GameTags genre={game.genre.name} />
+      <GameTags genre={game.genre} />
       <GamePlayLocation stand={game.stand} event={event} />
     </div>
   );
 }
 
-function GameTags({ genre }: Readonly<{ genre: string }>) {
+function GameTags({ genre }: Readonly<{ genre: Genre }>) {
   return (
     <dl aria-label={GAMES_COPY.detail.tags} className="flex flex-col gap-1.5 border-l-2 border-accent pl-4">
       <dt className="type-tiny text-muted">{GAMES_COPY.labels.genre}</dt>
-      <dd className="self-start border-b border-muted pb-px font-mono text-xs uppercase">{genre}</dd>
+      <dd className="m-0 self-start">
+        <Link
+          href={getGenrePath(genre.slug)}
+          className="touch-target relative border-b border-muted pb-px font-mono text-xs text-foreground uppercase no-underline hover:border-accent hover:text-accent"
+        >
+          {genre.name}
+        </Link>
+      </dd>
     </dl>
   );
 }

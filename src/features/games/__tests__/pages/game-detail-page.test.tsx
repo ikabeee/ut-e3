@@ -58,11 +58,11 @@ describe("GameDetailView", () => {
     expect(screen.getByRole("link", { name: /Quiero asistir/ })).toHaveAttribute("href", expected);
   });
 
-  it("sends Todos los juegos and Ver todos to the games section of the landing", () => {
+  it("sends Todos los juegos and Ver todos to the games catalog", () => {
     renderView();
 
-    expect(screen.getByRole("link", { name: "Todos los juegos" })).toHaveAttribute("href", "/#games");
-    expect(screen.getByRole("link", { name: "Ver todos" })).toHaveAttribute("href", "/#games");
+    expect(screen.getByRole("link", { name: "Todos los juegos" })).toHaveAttribute("href", "/games");
+    expect(screen.getByRole("link", { name: "Ver todos" })).toHaveAttribute("href", "/games");
   });
 
   it("suggests other games, the same genre first", () => {

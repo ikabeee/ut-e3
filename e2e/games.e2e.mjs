@@ -1,7 +1,9 @@
-// End-to-end check of the game page /games/[slug] in a real browser: npm run test:e2e:games
+// End-to-end check of the games catalog /games and the game page /games/[slug] in a real browser:
+// npm run test:e2e:games
 //
 // Creates its own SQLite database in the system temp dir, seeds it, starts `next dev` on E2E_PORT and removes
-// everything when it finishes. Flows G-01 to G-08 of odd/tasks/game-detail.md (S5).
+// everything when it finishes. Flows G-01 to G-08 of odd/tasks/game-detail.md (S5) and G-09 to G-13 of
+// odd/tasks/games-catalog.md (S8).
 //
 // getEventSettings() is cached inside the dev server, so the itch.io opening time is written before the first
 // request that reads the settings: readiness is polled on /privacy, which does not read them.
@@ -168,6 +170,7 @@ function prepareFixture(databaseFile) {
       featured: { ...featured, alts: [featured.coverAlt, ...extraAlts] },
       coverflowGame: readMiddleGame(database),
       withoutLink: readGameWithoutLink(database),
+      catalog: readCatalog(database, featured.genreSlug),
     };
   } finally {
     database.close();
@@ -203,7 +206,8 @@ function formatLike(sample, date) {
 function readGame(database, slug) {
   return database
     .prepare(
-      `SELECT g.id, g.slug, g.name, g.synopsis, ge.name AS genre, s.zone, s.number, i.alt AS coverAlt
+      `SELECT g.id, g.slug, g.name, g.synopsis, ge.name AS genre, ge.slug AS genreSlug, s.zone, s.number,
+              i.alt AS coverAlt
        FROM games g
        JOIN genres ge ON ge.id = g.genre_id
        JOIN stands s ON s.id = g.stand_id
@@ -247,6 +251,21 @@ function readGameWithoutLink(database) {
     .get();
 }
 
+// The catalog lists every game in stand order, so the featured carousel opens on the first one.
+function readCatalog(database, genreSlug) {
+  const { count } = database.prepare("SELECT COUNT(*) AS count FROM games").get();
+
+  const { genreCount } = database
+    .prepare("SELECT COUNT(*) AS genreCount FROM games g JOIN genres ge ON ge.id = g.genre_id WHERE ge.slug = ?")
+    .get(genreSlug);
+
+  const first = database
+    .prepare("SELECT g.name FROM games g JOIN stands s ON s.id = g.stand_id ORDER BY s.zone, s.number LIMIT 1")
+    .get();
+
+  return { count, genreCount, firstName: first.name };
+}
+
 async function launchBrowser() {
   try {
     return await chromium.launch({ executablePath: process.env.E2E_CHROMIUM_PATH || undefined, headless: true });
@@ -273,6 +292,11 @@ async function runScenario(browser, fixture, screenshots) {
     await checkItchOpen(session);
     await checkGameWithoutLink(session);
     await checkViewports(session);
+    await checkNavbarToCatalog(session);
+    await checkGenreFilter(session);
+    await checkSearchEmptyState(session);
+    await checkGenreTagToCatalog(session);
+    await checkCatalogViewports(session);
   } finally {
     check("no browser console errors", consoleErrors.length === 0, consoleErrors.slice(0, 5).join(" | ") || "none");
     await context.close();
@@ -366,7 +390,7 @@ async function checkNavbar(page) {
   const labels = (await links.allTextContents()).map((label) => label.trim()).filter(Boolean);
   const inicio = page.getByRole("navigation").getByRole("link", { name: "Inicio", exact: true });
 
-  check("G-01 the navbar only lists Inicio", labels.join(",") === "Inicio", labels.join(",") || "none");
+  check("G-01 the navbar lists Inicio and Juegos", labels.join(",") === "Inicio,Juegos", labels.join(",") || "none");
   check("G-01 Inicio goes to /", (await inicio.getAttribute("href")) === "/");
   check('G-01 no "Volver al catálogo" link', (await page.getByText("Volver al catálogo").count()) === 0);
 }
@@ -446,6 +470,125 @@ async function viewerAltsByThumbnail(viewer, thumbnails, count) {
   return alts;
 }
 
+// G-09: "Juegos" in the landing navbar opens /games, which starts with the featured carousel and lists every game.
+async function checkNavbarToCatalog(session) {
+  const { page, fixture } = session;
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
+  await page.getByRole("navigation").getByRole("link", { name: "Juegos", exact: true }).click();
+  await page.waitForURL((url) => url.pathname === "/games", { timeout: 30_000 });
+  await gameGrid(page).waitFor({ timeout: 30_000 });
+
+  const featured = page.getByRole("region", { name: "Juegos del showcase" });
+  const firstTitle = (await featured.getByRole("heading", { level: 2 }).textContent())?.trim();
+  const cards = await gameCards(page).count();
+  const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
+
+  check("G-09 navbar Juegos opens /games", page.url().endsWith("/games"), page.url());
+  check("G-09 featured carousel opens on the first game", firstTitle === fixture.catalog.firstName, `"${firstTitle}"`);
+  check("G-09 the grid lists every game", cards === fixture.catalog.count, `cards=${cards}`);
+  check("G-09 canonical URL", Boolean(canonical?.endsWith("/games")), canonical ?? "none");
+  await screenshot(session, "09-catalog/01-catalog");
+}
+
+// G-10: a genre tile filters the grid and writes ?genre=<slug>; a reload keeps it; pressing it again clears it.
+async function checkGenreFilter(session) {
+  const { page, fixture } = session;
+  const { genre, genreSlug } = fixture.featured;
+  const tile = page.getByRole("button", { name: new RegExp(`^${escapeRegExp(genre)}`) });
+
+  await tile.click();
+  await page.waitForURL((url) => url.searchParams.get("genre") === genreSlug, { timeout: 10_000 });
+  check("G-10 the genre filters the grid", await hasCardCount(page, fixture.catalog.genreCount));
+  await screenshot(session, "10-genre-filter/01-filtered");
+
+  await page.reload({ waitUntil: "networkidle" });
+  const pressed = await tile.getAttribute("aria-pressed");
+  check(
+    "G-10 a reload keeps the genre",
+    pressed === "true" && (await gameCards(page).count()) === fixture.catalog.genreCount,
+  );
+
+  await tile.click();
+  await page.waitForURL((url) => !url.searchParams.has("genre"), { timeout: 10_000 });
+  check("G-10 pressing the genre again clears it", await hasCardCount(page, fixture.catalog.count));
+}
+
+// G-11: a search with no match shows the empty state, whose button brings every game back.
+async function checkSearchEmptyState(session) {
+  const { page, fixture } = session;
+
+  await page.getByRole("searchbox", { name: "Buscar juegos" }).fill("zzz-sin-resultados");
+  const empty = page.getByText("Ningún juego coincide con tu búsqueda.");
+  check("G-11 no match shows the empty state", await empty.isVisible());
+  await screenshot(session, "11-search-empty/01-empty");
+
+  await page.getByRole("button", { name: "Ver todos los juegos" }).click();
+  check("G-11 Ver todos los juegos restores the grid", (await gameCards(page).count()) === fixture.catalog.count);
+}
+
+// G-12: the genre tag of a game page opens the catalog filtered by that genre, and a card opens its game page.
+async function checkGenreTagToCatalog(session) {
+  const { page, fixture } = session;
+  const { featured } = fixture;
+
+  await openGamePage(page, featured.slug);
+  await page.getByLabel("Etiquetas").getByRole("link", { name: featured.genre }).click();
+  await page.waitForURL((url) => url.searchParams.get("genre") === featured.genreSlug, { timeout: 30_000 });
+  await gameGrid(page).waitFor({ timeout: 30_000 });
+  check(
+    "G-12 the genre tag opens the filtered catalog",
+    (await gameCards(page).count()) === fixture.catalog.genreCount,
+  );
+
+  await gameCards(page).filter({ hasText: featured.name }).click();
+  await page.waitForURL((url) => url.pathname === `/games/${featured.slug}`, { timeout: 30_000 });
+  check("G-12 a card opens its game page", page.url().endsWith(`/games/${featured.slug}`), page.url());
+}
+
+// G-13: the catalog has no horizontal scroll and keeps 44x44 px touch targets at every width.
+async function checkCatalogViewports(session) {
+  const { page } = session;
+
+  for (const [index, viewport] of VIEWPORTS.entries()) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.goto(`${BASE_URL}/games`, { waitUntil: "networkidle" });
+    const label = `G-13 ${viewport.label}`;
+    await checkNoHorizontalScroll(page, label);
+    await checkTouchTarget(page.getByRole("navigation").getByRole("link", { name: "Juegos" }), label, "Juegos");
+    await checkTouchTarget(page.getByRole("button", { name: "Juego siguiente" }), label, "Juego siguiente");
+    await checkTouchTarget(page.getByRole("button", { name: "Más géneros" }), label, "Más géneros");
+    await screenshot(session, `12-catalog-viewports/${String(index + 1).padStart(2, "0")}-${viewport.label}`);
+  }
+
+  await page.setViewportSize({ width: 390, height: 844 });
+}
+
+// replaceState changes the URL first; Next.js then syncs useSearchParams in a transition, so the grid updates a moment
+// after waitForURL resolves.
+async function hasCardCount(page, expected) {
+  try {
+    await page.waitForFunction(
+      (count) => document.querySelectorAll('[aria-label="Todos los juegos"] > li').length === count,
+      expected,
+      { timeout: 10_000 },
+    );
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function gameGrid(page) {
+  return page.getByRole("list", { name: "Todos los juegos" });
+}
+
+function gameCards(page) {
+  return gameGrid(page).getByRole("link");
+}
+
 // G-06: an unknown slug shows the not-found page with noindex. With Cache Components the first visit gets the App
 // Shell before notFound() streams, so the status is 200 on that visit and 404 once cached (S4, L7 of game-detail).
 async function checkUnknownSlug(session) {
@@ -512,13 +655,14 @@ async function checkViewports(session) {
   for (const [index, viewport] of VIEWPORTS.entries()) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await openGamePage(page, FEATURED_SLUG);
-    await checkNoHorizontalScroll(page, viewport.label);
+    const label = `G-08 ${viewport.label}`;
+    await checkNoHorizontalScroll(page, label);
     await checkTouchTarget(
       page.getByRole("navigation").getByRole("link", { name: "Inicio", exact: true }),
-      viewport.label,
+      label,
       "Inicio",
     );
-    await checkTouchTarget(page.getByRole("link", { name: "Jugar en itch.io" }), viewport.label, "Jugar en itch.io");
+    await checkTouchTarget(page.getByRole("link", { name: "Jugar en itch.io" }), label, "Jugar en itch.io");
     await screenshot(session, `08-viewports/${String(index + 1).padStart(2, "0")}-${viewport.label}`);
   }
 }
@@ -530,7 +674,7 @@ async function checkNoHorizontalScroll(page, label) {
   ]);
 
   check(
-    `G-08 ${label}: no horizontal scroll`,
+    `${label}: no horizontal scroll`,
     scrollWidth <= innerWidth,
     `scrollWidth=${scrollWidth} innerWidth=${innerWidth}`,
   );
@@ -551,7 +695,7 @@ async function checkTouchTarget(locator, label, name) {
 
   const ok = size.width >= MIN_TOUCH_TARGET_PX && size.height >= MIN_TOUCH_TARGET_PX;
 
-  check(`G-08 ${label}: "${name}" is at least 44x44 px`, ok, `${Math.round(size.width)}x${Math.round(size.height)}`);
+  check(`${label}: "${name}" is at least 44x44 px`, ok, `${Math.round(size.width)}x${Math.round(size.height)}`);
 }
 
 async function openGamePage(page, slug) {

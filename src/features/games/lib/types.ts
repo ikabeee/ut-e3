@@ -34,3 +34,10 @@ export interface GameDetailLinks {
   floorPlan: string;
   calendar: string;
 }
+
+export interface GenreSummary {
+  genre: Genre;
+  gameCount: number;
+  /** Three covers: two at the back, then the one in front. */
+  covers: Game[];
+}

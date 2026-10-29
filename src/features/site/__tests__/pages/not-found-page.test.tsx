@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { NotFoundPage, notFoundPageMetadata } from "@features/site/pages/not-found-page";
 
 describe("NotFoundPage", () => {
@@ -9,13 +9,13 @@ describe("NotFoundPage", () => {
     expect(screen.getByRole("link", { name: /Volver al inicio/ })).toHaveAttribute("href", "/");
   });
 
-  it("shows the site navbar with only Inicio", () => {
+  it("shows the site navbar with Inicio and Juegos", () => {
     render(<NotFoundPage />);
 
-    const navigation = screen.getByRole("navigation");
+    const navigation = within(screen.getByRole("navigation"));
 
-    expect(navigation).toHaveTextContent("Inicio");
-    expect(screen.getAllByRole("link", { name: "Inicio" })).toHaveLength(1);
+    expect(navigation.getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
+    expect(navigation.getByRole("link", { name: "Juegos" })).toHaveAttribute("href", "/games");
   });
 
   it("is not indexed", () => {

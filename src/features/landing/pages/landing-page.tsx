@@ -7,7 +7,7 @@ import { FLOOR_PLAN_SECTION_ID, getZoneLink } from "@features/floor-plan/lib/flo
 import type { FloorPlanStand } from "@features/floor-plan/lib/types";
 import { GameCatalog } from "@features/games/components/game-catalog";
 import { getCoverImage } from "@features/games/lib/game-cover";
-import { GAMES_SECTION_ID } from "@features/games/lib/games-links";
+import { GAMES_PATH } from "@features/games/lib/games-links";
 import { getGames } from "@features/games/lib/server/games-queries";
 import { formatStandCode } from "@features/games/lib/stand-code";
 import type { Game } from "@features/games/lib/types";
@@ -46,7 +46,7 @@ export const landingPageMetadata: Metadata = {
 
 const NAV_LINKS = [
   { href: `#${TOP_SECTION_ID}`, label: LANDING_COPY.nav.links.home },
-  { href: `#${GAMES_SECTION_ID}`, label: LANDING_COPY.nav.links.games },
+  { href: GAMES_PATH, label: LANDING_COPY.nav.links.games },
   { href: `#${FLOOR_PLAN_SECTION_ID}`, label: LANDING_COPY.nav.links.floorPlan },
 ];
 

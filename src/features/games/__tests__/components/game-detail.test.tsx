@@ -61,6 +61,15 @@ describe("GameDetail", () => {
     expect(definitionOf(screen.getByLabelText("Etiquetas"), "Género")).toBe("Carreras");
   });
 
+  it("links the genre tag to the catalog filtered by that genre", () => {
+    renderDetail();
+
+    expect(within(screen.getByLabelText("Etiquetas")).getByRole("link", { name: "Carreras" })).toHaveAttribute(
+      "href",
+      "/games?genre=racing",
+    );
+  });
+
   it("opens the gallery on the cover", () => {
     renderDetail();
 

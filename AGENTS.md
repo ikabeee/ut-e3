@@ -70,7 +70,7 @@ src/
 ├── app/                      # SOLO rutas de Next.js: renderizan una page de una feature
 ├── features/
 │   ├── landing/              # Portada (/): hero, actividades, invitadas, ubicación y la page
-│   ├── games/                # Juegos: carrusel de destacados y catálogo en coverflow
+│   ├── games/                # Juegos: coverflow de la portada, catálogo (/games) y ficha (/games/[slug])
 │   ├── floor-plan/           # Croquis interactivo con los stands (ZA-S3) y las zonas
 │   ├── schedule/             # Cronograma de actividades (portada y edición en el panel)
 │   ├── sponsors/             # Banda de patrocinadores
