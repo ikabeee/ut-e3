@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 ---
 
 # Game detail page (M2)
@@ -34,6 +34,15 @@ Objective: a public page per game at `/games/[slug]` (RF-09, RF-10, RF-11; issue
   juegos como epic". The full game page shows the site navbar with a single link, "Inicio", to `/`; its logo also goes
   to `/`. The "Volver al catálogo" link is removed (assumption: the navbar replaces it).
 
+- S7 (Epic-style page, L17 and L18): "Del game detail basate del archive que teniamos, era un copia y pega de epic
+  games". L18 answer: "Solo con datos actuales (Recommended)": the archive's layout without the blocks that have no
+  data (no team, members, players, platforms, "Acerca del juego" or "Características"); no schema change. Blocks,
+  after `juego.html` of the artifact and `archive/develop-v1`: header (title, meta with genre and short stand code);
+  gallery with a main viewer, previous/next arrows and a thumbnail strip; lead (synopsis); genre tag; "Dónde
+  jugarlo" (stand, zone, event date, event hours from `event_settings`); sidebar with the cover, the itch.io block
+  (RF-10), "Ver en el croquis" and "Quiero asistir" (calendar), and a facts list; "Más juegos" (same genre first,
+  then the others). "Todos los juegos" and "Ver todos" go to `/#games` until the catalog exists.
+
 ## Tasks
 
 | ID | Specs | Route | Status | Evidence |
@@ -43,6 +52,7 @@ Objective: a public page per game at `/games/[slug]` (RF-09, RF-10, RF-11; issue
 | T3 | S4 | inline | done | L10: RED 3 failing -> GREEN `game-catalog.test.tsx` 12/12 (cases are links); commit `13c7e7b` |
 | T4 | S5 | delegated (parallel writer), L10 and L14 updates inline | done | `npm run test:e2e:games` 43/43, screenshots in numbered flow folders; commits `4e99d31`, `13c7e7b`, `fe0dc82` |
 | T5 | S4 | inline | reverted (L14) | RED module missing -> GREEN `game-detail-modal.test.tsx` 3/3; commit `13c7e7b` |
+| T8 | S7 | delegated (context backstop) | done | RED->GREEN related-games 4/4, calendar-link 5/5, game-gallery 7/7, game-detail 9/9, game-detail-page 5/5; e2e 46/46; commit `d25504e` |
 | T7 | S4 | inline | done | catalog tests stay GREEN (cases link to the page); e2e G-01 follows the case to the full page; commit `fe0dc82` |
 | T6 | S6 | inline | done | RED `site-nav.test.tsx` 1 failing -> GREEN; landing logo regression test; commit `13c7e7b` |
 
@@ -138,3 +148,22 @@ Route evidence: T1-T3 inline (one dependent chain). T4 delegated as a parallel u
   `@modal` and broke `tsc`; it is generated output and was removed. Checks: `npm test` 95 suites / 485 tests,
   typecheck, ESLint, Oxlint, jscpd 0 clones, `npm run test:e2e:games` 43/43. Open question to the user: keep the
   gallery as a plain list or bring the archive's main image plus thumbnails.
+- L16 (2026-10-29, user): "El como estaba ordenandas en el directorio games/ esstaba bien pero hay unos ss sueltos" ->
+  the six loose files in `e2e/screenshots/` came from the passport e2e (`feature/visitor-passport`,
+  `passport.e2e.mjs:48`); moved to `e2e/screenshots/passport/` (local, ignored). "Para el catalogo de juegos debe haber
+  una seccion en el nav bar de juegos y que ahi se encuentren" -> recommended as the next feature, not this cut.
+- L17 (2026-10-29, user): "Del game detail basate del archive que teniamos, era un copia y pega de epic games y varios
+  de esos ya estaban en este artifact https://claude.ai/artifact/BAu2KQqivnFDSshBsQmfeB". Reference: the artifact's
+  `juego.html` and `archive/develop-v1` (`game-detail-header`, `game-gallery`, `game-gallery-thumbnails`, `game-tags`,
+  `game-about`, `game-play-location`, `game-sidebar`, `related-games`). Open decision asked to the user: the archive's
+  team, members, players, platforms and "Acerca del juego" are not in the schema or in RF-09.
+- L18 (2026-10-29, user): "Solo con datos actuales (Recommended)". S7 added, T8 opened. Route: one bounded writer
+  (context backstop of this long session), the parent keeps git and verification.
+- L19 (2026-10-29): T8 delivered by the writer in `d25504e`, checked by the parent: diff inside the allowed surface,
+  `npx jest src/features/games src/features/landing` 32 suites / 157 tests (parent rerun), `npm test` 98 suites / 507
+  tests twice (the writer saw one transient `floor-plan.test.tsx` suite failure with no failed test; it did not repeat),
+  typecheck, ESLint, Oxlint, jscpd 0 clones, `npm run test:e2e:games` 46/46. Writer decisions: "Ver en el croquis"
+  goes to `/#floor-plan-ZA-S1` (floor-plan items use the stand code as id); "Zona" shows the block letter; the genre
+  tag is plain text until the catalog has a filter; `buildEventCalendarUrl` moved to `landing/lib/calendar-link.ts`.
+  Outcome: feature closed. Pending: push and the PR to `develop`. Next: the Epic-style `/games` catalog with "Juegos"
+  in the navbar.
