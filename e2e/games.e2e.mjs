@@ -405,12 +405,18 @@ async function checkGallery(session) {
   await screenshot(session, "g02-gallery");
 }
 
-// G-06: an unknown slug responds 404.
+// G-06: an unknown slug shows the not-found page with noindex. With Cache Components the first visit gets the App
+// Shell before notFound() streams, so the status is 200 on that visit and 404 once cached (S4, L7 of game-detail).
 async function checkUnknownSlug(session) {
   const { page } = session;
   const response = await page.goto(`${BASE_URL}/games/no-existe`, { waitUntil: "networkidle" });
+  const status = response?.status();
+  const robots = await page.locator('meta[name="robots"]').first().getAttribute("content");
+  const notFoundText = await page.getByText("This page could not be found.").count();
 
-  check("G-06 unknown slug responds 404", response?.status() === 404, `status=${response?.status()}`);
+  check("G-06 unknown slug answers 200 or 404", status === 200 || status === 404, `status=${status}`);
+  check("G-06 not-found page is shown", notFoundText > 0, `matches=${notFoundText}`);
+  check("G-06 not-found page has noindex", robots?.includes("noindex") === true, `robots=${robots}`);
   await screenshot(session, "g06-not-found");
 }
 

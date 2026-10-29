@@ -40,7 +40,17 @@ export async function generateGameDetailPageMetadata({ params }: PageProps<"/gam
   };
 }
 
-export async function GameDetailPage({ params }: PageProps<"/games/[slug]">) {
+// partialPrefetching shares one App Shell across every slug, so the params read waits behind Suspense. An unknown
+// slug then streams the not-found page with noindex; its first visit answers 200, later ones 404 (S4, L7).
+export function GameDetailPage({ params }: PageProps<"/games/[slug]">) {
+  return (
+    <Suspense fallback={null}>
+      <GameDetailContent params={params} />
+    </Suspense>
+  );
+}
+
+async function GameDetailContent({ params }: Readonly<Pick<PageProps<"/games/[slug]">, "params">>) {
   const game = await findGame(params);
 
   return (
