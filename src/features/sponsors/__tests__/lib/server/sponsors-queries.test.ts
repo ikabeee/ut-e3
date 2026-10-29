@@ -29,10 +29,11 @@ beforeEach(async () => {
 });
 
 describe("getSponsors", () => {
-  it("returns the seeded sponsors, which are none for now", async () => {
+  it("returns the seeded sponsors in position order", async () => {
     await seedSponsors(getPrisma());
 
-    expect(await getSponsors()).toEqual(INITIAL_SPONSORS);
+    // The database assigns the ids, so only they differ from the initial sponsors.
+    expect(await getSponsors()).toEqual(INITIAL_SPONSORS.map((sponsor) => ({ ...sponsor, id: expect.any(String) })));
   });
 
   it("returns an empty list when there are no sponsors", async () => {

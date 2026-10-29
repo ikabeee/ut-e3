@@ -390,7 +390,11 @@ async function checkNavbar(page) {
   const labels = (await links.allTextContents()).map((label) => label.trim()).filter(Boolean);
   const inicio = page.getByRole("navigation").getByRole("link", { name: "Inicio", exact: true });
 
-  check("G-01 the navbar lists Inicio and Juegos", labels.join(",") === "Inicio,Juegos", labels.join(",") || "none");
+  check(
+    "G-01 the navbar lists Inicio, Juegos and Patrocinadores",
+    labels.join(",") === "Inicio,Juegos,Patrocinadores",
+    labels.join(",") || "none",
+  );
   check("G-01 Inicio goes to /", (await inicio.getAttribute("href")) === "/");
   check('G-01 no "Volver al catálogo" link', (await page.getByText("Volver al catálogo").count()) === 0);
 }

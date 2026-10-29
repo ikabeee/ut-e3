@@ -6,6 +6,7 @@ export const LANDING_COPY = {
       home: "Inicio",
       games: "Juegos",
       floorPlan: "Croquis",
+      sponsors: "Patrocinadores",
     },
   },
   hero: {
