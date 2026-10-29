@@ -92,6 +92,53 @@ describe("EntriesPanel", () => {
   });
 });
 
+const OK: EntriesActionState = { status: "done", message: "ok" };
+
+describe("EntriesPanel reset", () => {
+  it("offers to reset only once the bracket exists", () => {
+    const { rerender } = render(
+      <EntriesPanel entries={ENTRIES} hasBracket={false} actions={recordingActions(OK).actions} />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Reiniciar torneo" })).not.toBeInTheDocument();
+
+    rerender(<EntriesPanel entries={ENTRIES} hasBracket actions={recordingActions(OK).actions} />);
+
+    expect(screen.getByRole("button", { name: "Reiniciar torneo" })).toBeInTheDocument();
+    expect(screen.getByText(/No se puede deshacer/)).toBeInTheDocument();
+  });
+
+  it("sends the word the administrator typed", async () => {
+    const { calls, actions } = recordingActions(OK);
+
+    renderPanel({ entries: ENTRIES, hasBracket: true, actions });
+    await userEvent.type(screen.getByLabelText("Escribe REINICIAR para confirmar"), "REINICIAR");
+    await userEvent.click(screen.getByRole("button", { name: "Reiniciar torneo" }));
+
+    await waitFor(() => expect(calls.reset).toHaveLength(1));
+    expect(calls.reset[0].get("confirmation")).toBe("REINICIAR");
+  });
+
+  it("does not send an empty confirmation", async () => {
+    const { calls, actions } = recordingActions(OK);
+
+    renderPanel({ entries: ENTRIES, hasBracket: true, actions });
+    await userEvent.click(screen.getByRole("button", { name: "Reiniciar torneo" }));
+
+    expect(calls.reset).toHaveLength(0);
+  });
+
+  it("shows why the reset was refused", async () => {
+    const { actions } = recordingActions({ status: "error", message: "Escribe REINICIAR tal cual para confirmar." });
+
+    renderPanel({ entries: ENTRIES, hasBracket: true, actions });
+    await userEvent.type(screen.getByLabelText("Escribe REINICIAR para confirmar"), "x");
+    await userEvent.click(screen.getByRole("button", { name: "Reiniciar torneo" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Escribe REINICIAR tal cual para confirmar.");
+  });
+});
+
 interface PanelOptions {
   entries: EntryView[];
   hasBracket: boolean;
@@ -107,7 +154,12 @@ function renderPanel({
 }
 
 function recordingActions(result: EntriesActionState) {
-  const calls: Record<"add" | "checkIn" | "generate", FormData[]> = { add: [], checkIn: [], generate: [] };
+  const calls: Record<"add" | "checkIn" | "generate" | "reset", FormData[]> = {
+    add: [],
+    checkIn: [],
+    generate: [],
+    reset: [],
+  };
 
   const record =
     (key: keyof typeof calls): EntriesAction =>
@@ -117,7 +169,10 @@ function recordingActions(result: EntriesActionState) {
       return result;
     };
 
-  return { calls, actions: { add: record("add"), checkIn: record("checkIn"), generate: record("generate") } };
+  return {
+    calls,
+    actions: { add: record("add"), checkIn: record("checkIn"), generate: record("generate"), reset: record("reset") },
+  };
 }
 
 function entry(index: number, channel: EntryView["channel"], status: EntryView["status"]): EntryView {

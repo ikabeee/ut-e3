@@ -6,6 +6,7 @@ import { TournamentRuleError } from "@features/tournament/lib/tournament-rule-er
 import { getTournament } from "@features/tournament/lib/server/tournament-queries";
 import {
   generateTournament,
+  resetTournament,
   runTournamentCommand,
   saveTournament,
 } from "@features/tournament/lib/server/tournament-mutations";
@@ -195,5 +196,57 @@ describe("getTournament", () => {
     await getPrisma().kofTournament.create({ data: { id: 1, state: { phase: "running" }, version: 0 } });
 
     await expect(getTournament()).rejects.toThrow(TOURNAMENT_COPY.errors.damagedState);
+  });
+});
+
+describe("resetTournament", () => {
+  it("deletes the bracket and its results, and leaves a record in the audit log", async () => {
+    await generateTournament(actorId, createPlayers(40), GENERATES_AT);
+
+    const result = await resetTournament(actorId);
+
+    const entry = await getPrisma().auditLog.findFirstOrThrow({
+      where: { action: "kof_tournament.reset" },
+      orderBy: { createdAt: "desc" },
+    });
+
+    expect(result).toEqual({ status: "reset" });
+    expect(await getTournament()).toBeNull();
+    expect(entry.actorId).toBe(actorId);
+    expect(entry.detail).toMatchObject({ players: 40, version: 0 });
+  });
+
+  it("counts the finished matches in the record, so it shows what was lost", async () => {
+    const created = await generateTournament(actorId, createPlayers(64), GENERATES_AT);
+
+    if (created.status !== "created") throw new Error("Expected a bracket");
+
+    const matchId = getMatch(created.tournament, 1).id;
+
+    await runTournamentCommand(actorId, { type: "start_match", matchId }, GENERATES_AT);
+    await runTournamentCommand(actorId, { type: "finish_match", matchId, loserSlot: 1 }, GENERATES_AT);
+    await resetTournament(actorId);
+
+    const entry = await getPrisma().auditLog.findFirstOrThrow({
+      where: { action: "kof_tournament.reset" },
+      orderBy: { createdAt: "desc" },
+    });
+
+    expect(entry.detail).toMatchObject({ finishedMatches: 1 });
+  });
+
+  it("says there is nothing to reset when no bracket was generated, and writes nothing", async () => {
+    const before = await getPrisma().auditLog.count({ where: { action: "kof_tournament.reset" } });
+
+    expect(await resetTournament(actorId)).toEqual({ status: "notGenerated" });
+    expect(await getPrisma().auditLog.count({ where: { action: "kof_tournament.reset" } })).toBe(before);
+  });
+
+  it("lets the bracket be generated again", async () => {
+    await generateTournament(actorId, createPlayers(40), GENERATES_AT);
+    await resetTournament(actorId);
+
+    expect((await generateTournament(actorId, createPlayers(48), GENERATES_AT)).status).toBe("created");
+    expect((await getTournament())?.players).toHaveLength(48);
   });
 });

@@ -16,6 +16,7 @@ export interface EntriesActions {
   add: EntriesAction;
   checkIn: EntriesAction;
   generate: EntriesAction;
+  reset: EntriesAction;
 }
 
 interface EntriesPanelProps {
@@ -56,6 +57,7 @@ export function EntriesPanel({ entries, hasBracket, actions }: Readonly<EntriesP
           <GenerateForm action={actions.generate} />
         </>
       )}
+      {hasBracket && <ResetForm action={actions.reset} />}
       <EntryList entries={entries} />
     </section>
   );
@@ -117,6 +119,31 @@ function GenerateForm({ action }: Readonly<{ action: EntriesAction }>) {
         {isPending ? COPY.generate.sending : COPY.generate.submit}
       </Button>
     </form>
+  );
+}
+
+function ResetForm({ action }: Readonly<{ action: EntriesAction }>) {
+  const { state, formAction, isPending, formRef, handleSubmit } = useActionForm(action);
+
+  return (
+    <Form
+      ref={formRef}
+      action={formAction}
+      onSubmit={handleSubmit}
+      className="grid content-start gap-3 border border-danger p-4"
+    >
+      <h3 className="type-mono font-bold text-danger">{COPY.reset.heading}</h3>
+      <p className="text-sm text-muted">{COPY.reset.hint}</p>
+      <TextField name="confirmation" isRequired>
+        <Label>{COPY.reset.label}</Label>
+        <Input className="min-h-11 text-base" autoComplete="off" />
+        <FieldError />
+      </TextField>
+      <FormFeedback state={state} />
+      <Button type="submit" variant="danger" className="min-h-11 justify-self-start" isPending={isPending}>
+        {isPending ? COPY.reset.sending : COPY.reset.submit}
+      </Button>
+    </Form>
   );
 }
 

@@ -11,7 +11,8 @@ import {
   type AddEntryResult,
   type CheckInResult,
 } from "@features/tournament/lib/server/entries-mutations";
-import type { GenerateResult } from "@features/tournament/lib/server/tournament-mutations";
+import { resetTournament, type GenerateResult } from "@features/tournament/lib/server/tournament-mutations";
+import { RESET_CONFIRMATION } from "@features/tournament/lib/tournament-rules";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
 import { readFormText } from "@shared/lib/form-data";
 
@@ -67,6 +68,23 @@ export async function generateBracketAction(): Promise<EntriesActionState> {
 
     throw cause;
   }
+}
+
+// The bracket and its results are lost for good, so the administrator has to type the word, not only press a button.
+export async function resetBracketAction(
+  _previous: EntriesActionState | null,
+  form: FormData,
+): Promise<EntriesActionState> {
+  const actor = await requireKofAccount();
+
+  if (actor.role !== "kof_admin") return failure(COPY.errors.forbidden);
+
+  if (readFormText(form, "confirmation").trim() !== RESET_CONFIRMATION)
+    return failure(COPY.errors.confirmationMismatch);
+
+  const result = await resetTournament(actor.id);
+
+  return finish(result.status === "reset" ? done(COPY.outcomes.reset) : refused(COPY.outcomes.nothingToReset));
 }
 
 function describeAdd(result: AddEntryResult): Outcome {

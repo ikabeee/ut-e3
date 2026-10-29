@@ -2,7 +2,12 @@
  * @jest-environment node
  */
 import type * as NextCache from "next/cache";
-import { addEntryAction, checkInEntryAction, generateBracketAction } from "@features/tournament/lib/entries-actions";
+import {
+  addEntryAction,
+  checkInEntryAction,
+  generateBracketAction,
+  resetBracketAction,
+} from "@features/tournament/lib/entries-actions";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import { getTournament } from "@features/tournament/lib/server/tournament-queries";
 import { createEventSettings, createVisitors } from "@features/tournament/__tests__/lib/server/tournament-server-utils";
@@ -169,6 +174,7 @@ describe("who can use them (UT-TO-27)", () => {
     expect(await addEntryAction(null, createForm({ gamertag: "Jugador41" }))).toEqual(forbidden);
     expect(await checkInEntryAction(null, createForm({ pin: "00001" }))).toEqual(forbidden);
     expect(await generateBracketAction()).toEqual(forbidden);
+    expect(await resetBracketAction(null, createForm({ confirmation: "REINICIAR" }))).toEqual(forbidden);
     expect(await getPrisma().tournamentEntry.count()).toBe(40);
     expect(await getPrisma().kofTournament.count()).toBe(0);
     expect(refresh).not.toHaveBeenCalled();
@@ -210,6 +216,66 @@ async function createAccount(key: string, role: string, kofDesk?: number) {
 
   accountIds[key] = account.id;
 }
+
+describe("resetBracketAction", () => {
+  it("deletes the bracket and keeps the list of entries, with the check-ins", async () => {
+    await insertManyCheckedIn(40);
+    await signInAs("admin");
+    await generateBracketAction();
+    refresh.mockClear();
+
+    const state = await resetBracketAction(null, createForm({ confirmation: "REINICIAR" }));
+
+    expect(state).toEqual({ status: "done", message: OUTCOMES.reset });
+    expect(await getTournament()).toBeNull();
+    expect(await getPrisma().tournamentEntry.count({ where: { status: "checked_in" } })).toBe(40);
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ["the word is missing", {}],
+    ["the word is typed in lowercase", { confirmation: "reiniciar" }],
+    ["the word is another one", { confirmation: "BORRAR" }],
+  ])("does nothing when %s", async (_case, fields) => {
+    await insertManyCheckedIn(40);
+    await signInAs("admin");
+    await generateBracketAction();
+    refresh.mockClear();
+
+    expect(await resetBracketAction(null, createForm(fields))).toEqual({
+      status: "error",
+      message: ERRORS.confirmationMismatch,
+    });
+    expect(await getTournament()).not.toBeNull();
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("accepts the word with spaces around it", async () => {
+    await insertManyCheckedIn(40);
+    await signInAs("admin");
+    await generateBracketAction();
+
+    expect((await resetBracketAction(null, createForm({ confirmation: "  REINICIAR " }))).status).toBe("done");
+  });
+
+  it("says there is nothing to reset before the bracket exists", async () => {
+    await signInAs("admin");
+
+    expect(await resetBracketAction(null, createForm({ confirmation: "REINICIAR" }))).toEqual({
+      status: "error",
+      message: OUTCOMES.nothingToReset,
+    });
+  });
+
+  it("lets the administrator generate a new bracket afterwards", async () => {
+    await insertManyCheckedIn(40);
+    await signInAs("admin");
+    await generateBracketAction();
+    await resetBracketAction(null, createForm({ confirmation: "REINICIAR" }));
+
+    expect((await generateBracketAction()).status).toBe("done");
+  });
+});
 
 async function signInAs(key: string) {
   stubCookies(createCookieJar());

@@ -25,6 +25,8 @@ export type GenerateResult =
   | { status: "tooEarly"; generatesAt: Date }
   | { status: "alreadyGenerated" };
 
+export type ResetResult = { status: "reset" } | { status: "notGenerated" };
+
 export type CommandResult =
   { status: "applied"; tournament: Tournament } | { status: "notGenerated" } | { status: "conflict" };
 
@@ -50,6 +52,38 @@ export async function generateTournament(
   return (await insertTournament(actorId, tournament))
     ? { status: "created", tournament }
     : { status: "alreadyGenerated" };
+}
+
+/**
+ * Deletes the stored bracket so a new one can be generated. The entries are not touched. The audit log keeps how many
+ * players and finished matches the bracket had, since the bracket itself is gone afterwards.
+ */
+export async function resetTournament(actorId: string): Promise<ResetResult> {
+  const current = await getTournament();
+
+  if (!current) return { status: "notGenerated" };
+
+  return getPrisma().$transaction(async (transaction) => {
+    const { count } = await transaction.kofTournament.deleteMany({
+      where: { id: TOURNAMENT_ROW_ID, version: current.version },
+    });
+
+    if (count === 0) return { status: "notGenerated" };
+
+    await recordAudit(transaction, {
+      actorId,
+      action: "kof_tournament.reset",
+      entityType: ENTITY_TYPE,
+      entityId: String(TOURNAMENT_ROW_ID),
+      detail: {
+        players: current.players.length,
+        version: current.version,
+        finishedMatches: current.matches.filter((match) => match.status === "finished").length,
+      },
+    });
+
+    return { status: "reset" };
+  });
 }
 
 /**

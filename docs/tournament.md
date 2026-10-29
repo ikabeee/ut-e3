@@ -45,6 +45,9 @@ de `event_settings`; ninguna está escrita en el código.
 | De 12:00 a 12:45 | Inscripción presencial: nace con el check-in hecho |
 | Desde las 12:45 | Se rechaza |
 
+- El administrador reinicia el torneo con el bloque "Reiniciar el torneo": borra el bracket y sus resultados, conserva
+  las inscripciones y deja generar uno nuevo. Pide escribir `REINICIAR`, solo lo hace el administrador de KOF y deja una fila
+  `kof_tournament.reset` en la bitácora con los jugadores y los combates terminados que se perdieron.
 - El check-in se hace tecleando el PIN del jugador, solo dentro de `kofCheckInStartsAt` a `kofCheckInEndsAt`. Un PIN que
   no es de nadie, o de alguien que no está en la lista, da el mismo mensaje y no crea nada.
 - Al llegar `kofCheckInEndsAt` los inscritos sin check-in pasan a "No se presentó" y ya no cambian. El cierre es

@@ -18,6 +18,9 @@ export const PLAYERS_PER_BOARD = 16;
 
 export const MATCHES_PER_BOARD = 15;
 
+/** What the administrator types to reset the tournament; the button alone is too easy to press by mistake. */
+export const RESET_CONFIRMATION = "REINICIAR";
+
 export const MAX_ENTRANTS = BOARD_NUMBERS.length * PLAYERS_PER_BOARD;
 
 /** The pre-registration list leaves at least 14 of the 64 places for the event day (RF-58). */
