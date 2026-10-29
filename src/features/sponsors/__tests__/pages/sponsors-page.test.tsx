@@ -45,12 +45,14 @@ describe("SponsorsView", () => {
     expect(getFirstCard().getByRole("link", { name: "998 123 4567" })).toHaveAttribute("href", "tel:+529981234567");
   });
 
-  it("shows the site navbar with Inicio", () => {
+  it("shows the site navbar with Inicio, Juegos and Patrocinadores", () => {
     render(<SponsorsView sponsors={SPONSORS} />);
 
     const navigation = within(screen.getByRole("navigation", { name: "Principal" }));
 
     expect(navigation.getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
+    expect(navigation.getByRole("link", { name: "Juegos" })).toHaveAttribute("href", "/games");
+    expect(navigation.getByRole("link", { name: "Patrocinadores" })).toHaveAttribute("href", "/sponsors");
   });
 });
 

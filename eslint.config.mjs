@@ -5,7 +5,7 @@ import nextTs from "eslint-config-next/typescript";
 import sonarjs from "eslint-plugin-sonarjs";
 
 const FEATURE_DEPENDENCIES = {
-  landing: ["games"],
+  landing: ["games", "sponsors"],
   "floor-plan": ["games"],
   schedule: ["accounts", "floor-plan"],
   visitors: ["games"],

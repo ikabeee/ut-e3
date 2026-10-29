@@ -2,7 +2,7 @@
 // npm run test:e2e:sponsors
 //
 // Creates its own SQLite database in the system temp dir, seeds it (the example sponsors of INITIAL_SPONSORS), starts
-// `next dev` on E2E_PORT and removes everything when it finishes. Flows SP-01 to SP-06 of odd/tasks/sponsors-page.md
+// `next dev` on E2E_PORT and removes everything when it finishes. Flows SP-01 to SP-07 of odd/tasks/sponsors-page.md
 // (S6). The expected sponsors are read from that database, so the flows keep passing when the seed changes.
 //
 // Browser: set E2E_CHROMIUM_PATH to an installed Chromium, or run `npx playwright-core install chromium`
@@ -177,6 +177,7 @@ async function runScenario(browser, sponsors, screenshots) {
     await checkPhoneLinks(session);
     await checkLandingCarousel(session);
     await checkViewports(session);
+    await checkNavbarToSponsors(session);
   } finally {
     check("no browser console errors", consoleErrors.length === 0, consoleErrors.slice(0, 5).join(" | ") || "none");
     await context.close();
@@ -292,9 +293,12 @@ async function checkPhoneLinks(session) {
   await screenshot(session, "02-links/01-sponsors-page");
 }
 
-// SP-05: the landing carousel shows the same sponsors and opens on the first one.
+// SP-05: the landing carousel shows the same sponsors and opens on the first one. Autoplay advances every 6.5 s and a
+// cold compile of / can take longer, so reduced motion (which pauses autoplay) keeps the first slide in place.
 async function checkLandingCarousel(session) {
   const { page, sponsors } = session;
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
   const carousel = page.locator("#sponsors");
   const current = await carousel.getByRole("heading", { level: 2 }).textContent();
@@ -304,6 +308,7 @@ async function checkLandingCarousel(session) {
   check("SP-05 one slide per sponsor", slides === sponsors.length, `slides=${slides}`);
   await carousel.scrollIntoViewIfNeeded();
   await carousel.screenshot({ path: screenshotPath(session, "03-landing-carousel/01-sponsors-section") });
+  await page.emulateMedia({ reducedMotion: null });
 }
 
 // SP-06: no horizontal scroll and 44x44 px touch targets at phone, landscape and desktop widths.
@@ -323,6 +328,26 @@ async function checkViewports(session) {
   await page.setViewportSize({ width: 390, height: 844 });
 }
 
+// SP-07: "Patrocinadores" in the landing navbar opens /sponsors, also at 360 px where the link list scrolls sideways.
+async function checkNavbarToSponsors(session) {
+  const { page } = session;
+
+  await page.setViewportSize({ width: 360, height: 780 });
+  await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
+  const link = page.getByRole("navigation").getByRole("link", { name: "Patrocinadores", exact: true });
+  await checkTouchTarget(link, "SP-07 360", "Patrocinadores");
+  await checkNoHorizontalScroll(page, "SP-07 360 landing");
+  await page.getByRole("navigation").screenshot({ path: screenshotPath(session, "05-navbar/01-landing-360") });
+
+  await link.click();
+  await page.waitForURL((url) => url.pathname === "/sponsors", { timeout: 30_000 });
+  await sponsorCards(page).waitFor({ timeout: 30_000 });
+
+  check("SP-07 navbar Patrocinadores opens /sponsors", page.url().endsWith("/sponsors"), page.url());
+  await screenshot(session, "05-navbar/02-sponsors-page");
+  await page.setViewportSize({ width: 390, height: 844 });
+}
+
 async function checkNoHorizontalScroll(page, label) {
   const [scrollWidth, innerWidth] = await page.evaluate(() => [
     document.documentElement.scrollWidth,
@@ -336,15 +361,22 @@ async function checkNoHorizontalScroll(page, label) {
   );
 }
 
+// The touch-target utility grows the hit area with an absolute ::before, so the target is the larger of the two boxes.
 async function checkTouchTarget(locator, label, name) {
-  const box = await locator.first().boundingBox();
-  const ok = box !== null && box.width >= MIN_TOUCH_TARGET_PX && box.height >= MIN_TOUCH_TARGET_PX;
+  const size = await locator.first().evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    const before = getComputedStyle(element, "::before");
+    const hasHitArea = before.content !== "none" && before.position === "absolute";
 
-  check(
-    `${label}: "${name}" is at least 44x44 px`,
-    ok,
-    box ? `${Math.round(box.width)}x${Math.round(box.height)}` : "",
-  );
+    return {
+      width: Math.max(box.width, hasHitArea ? Number.parseFloat(before.width) : 0),
+      height: Math.max(box.height, hasHitArea ? Number.parseFloat(before.height) : 0),
+    };
+  });
+
+  const ok = size.width >= MIN_TOUCH_TARGET_PX && size.height >= MIN_TOUCH_TARGET_PX;
+
+  check(`${label}: "${name}" is at least 44x44 px`, ok, `${Math.round(size.width)}x${Math.round(size.height)}`);
 }
 
 async function openSponsorsPage(page) {

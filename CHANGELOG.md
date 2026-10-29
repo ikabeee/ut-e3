@@ -9,7 +9,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 ### Agregado
 
 - Página de patrocinadores en `/sponsors`: una tarjeta por patrocinador con su logo, nombre, servicios, enlace a su
-  sitio (en pestaña nueva) y teléfono con formato legible que se marca con un toque.
+  sitio (en pestaña nueva) y teléfono con formato legible que se marca con un toque. "Patrocinadores" queda en el
+  navbar de todas las páginas.
 - Seis patrocinadores de ejemplo en el seed (nombres ficticios, sitios en `example.com` y logos "LOGO DE EJEMPLO" en
   `public/sponsors/`) mientras se confirman los reales; aparecen en `/sponsors` y en el carrusel de la portada.
 - Catálogo de juegos en `/games` al estilo de la tienda de Epic Games: carrusel de destacados con avance automático,

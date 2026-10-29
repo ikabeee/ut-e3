@@ -104,6 +104,15 @@ describe("LandingView", () => {
     );
   });
 
+  it("sends Patrocinadores in the navbar to the sponsors page", () => {
+    renderLanding();
+
+    expect(within(screen.getByRole("navigation")).getByRole("link", { name: "Patrocinadores" })).toHaveAttribute(
+      "href",
+      "/sponsors",
+    );
+  });
+
   it("keeps the logo linked to the top of the landing", () => {
     renderLanding();
 

@@ -31,6 +31,7 @@ import { getScheduleItems } from "@features/schedule/lib/server/schedule-queries
 import type { ScheduleItem } from "@features/schedule/lib/types";
 import { SponsorsCarousel } from "@features/sponsors/components/sponsors-carousel";
 import { getSponsors } from "@features/sponsors/lib/server/sponsors-queries";
+import { SPONSORS_PATH } from "@features/sponsors/lib/sponsors-links";
 import type { Sponsor } from "@features/sponsors/lib/types";
 import { JsonLd } from "@shared/components/json-ld";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
@@ -48,6 +49,7 @@ const NAV_LINKS = [
   { href: `#${TOP_SECTION_ID}`, label: LANDING_COPY.nav.links.home },
   { href: GAMES_PATH, label: LANDING_COPY.nav.links.games },
   { href: `#${FLOOR_PLAN_SECTION_ID}`, label: LANDING_COPY.nav.links.floorPlan },
+  { href: SPONSORS_PATH, label: LANDING_COPY.nav.links.sponsors },
 ];
 
 interface LandingViewProps {
