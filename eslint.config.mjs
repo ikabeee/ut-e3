@@ -171,7 +171,10 @@ const FEATURE_LAYERS = [
     patterns: [hooksLayer, componentsLayer, pagesLayer, apiLayer],
     allowServerOnly: true,
   },
-  { glob: "lib/*-actions{,.test}.ts", patterns: [hooksLayer, componentsLayer, pagesLayer, apiLayer, prismaClient] },
+  {
+    glob: "lib/*-actions{,.test,-hardening.test}.ts",
+    patterns: [hooksLayer, componentsLayer, pagesLayer, apiLayer, prismaClient],
+  },
   { glob: `hooks/**/*.${SOURCE}`, patterns: [componentsLayer, pagesLayer, apiRoutes, serverCode] },
   { glob: `components/**/*.${SOURCE}`, patterns: [pagesLayer, apiRoutes, serverCode] },
   { glob: `pages/**/*.${SOURCE}`, patterns: [hooksLayer, apiLayer, prismaClient], composesFeatures: true },
