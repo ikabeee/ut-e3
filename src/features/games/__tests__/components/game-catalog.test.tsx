@@ -17,6 +17,10 @@ function cover(name: string) {
   return screen.getByAltText(`Portada de ${name}`);
 }
 
+function caseLink(name: string) {
+  return screen.getByRole("link", { name: new RegExp(`^${name},`) });
+}
+
 async function press(label: string, times: number) {
   const user = userEvent.setup();
 
@@ -107,9 +111,27 @@ describe("GameCatalog", () => {
     expect(liveRegion()).toHaveTextContent("Juego 12");
   });
 
-  it("does not link the cases to a game page", () => {
+  it("links every case to the page of its game", () => {
     render(<GameCatalog games={games} />);
 
-    expect(screen.queryAllByRole("link")).toHaveLength(0);
+    expect(screen.getAllByRole("link")).toHaveLength(18);
+    expect(caseLink("Juego 09")).toHaveAttribute("href", "/games/juego-09");
+  });
+
+  // The coverflow opens on the middle game: Juego 09 of 18.
+  it("lets the click on the game at the center open its page", () => {
+    render(<GameCatalog games={games} />);
+
+    const isNotPrevented = fireEvent.click(caseLink("Juego 09"));
+
+    expect(isNotPrevented).toBe(true);
+  });
+
+  it("brings a side game to the center instead of opening it", () => {
+    render(<GameCatalog games={games} />);
+
+    const isNotPrevented = fireEvent.click(caseLink("Juego 12"));
+
+    expect(isNotPrevented).toBe(false);
   });
 });

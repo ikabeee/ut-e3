@@ -5,11 +5,11 @@ import nextTs from "eslint-config-next/typescript";
 import sonarjs from "eslint-plugin-sonarjs";
 
 const FEATURE_DEPENDENCIES = {
-  landing: [],
+  landing: ["games", "sponsors"],
   "floor-plan": ["games"],
   schedule: ["accounts", "floor-plan"],
   tournament: ["accounts"],
-  visitors: [],
+  visitors: ["games"],
 };
 
 const FEATURES = readdirSync(new URL("./src/features", import.meta.url), { withFileTypes: true })

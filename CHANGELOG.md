@@ -30,7 +30,32 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   local.
 - Las cuentas de KOF entran por `/login` y llegan a `/admin/kof`. El staff de KOF pasa a ser de 2 mesas (cada una con
   dos tableros) en lugar de 4 staffs, y `accounts.kof_board` es ahora `kof_desk` (SRS 2.4).
+- Página de patrocinadores en `/sponsors`: una tarjeta por patrocinador con su logo, nombre, servicios, enlace a su
+  sitio (en pestaña nueva) y teléfono con formato legible que se marca con un toque. "Patrocinadores" queda en el
+  navbar de todas las páginas.
+- Seis patrocinadores de ejemplo en el seed (nombres ficticios, sitios en `example.com` y logos "LOGO DE EJEMPLO" en
+  `public/sponsors/`) mientras se confirman los reales; aparecen en `/sponsors` y en el carrusel de la portada.
+- Catálogo de juegos en `/games` al estilo de la tienda de Epic Games: carrusel de destacados con avance automático,
+  miniaturas, flechas y deslizamiento; carrusel de géneros que filtra (el género queda en la URL, `?genre=<slug>`, para
+  compartirlo); buscador por nombre, género, stand o sinopsis, y cuadrícula de portadas que lleva a la ficha de cada
+  juego. "Juegos" del navbar abre el catálogo, igual que "Todos los juegos" y "Ver todos" de la ficha, y la etiqueta de
+  género de la ficha abre el catálogo filtrado por ese género.
+
+- Página 404 con el tema del sitio (fondo negro, tipografía UTG y navbar con "Inicio" y "Juegos"), en lugar de la página blanca
+  por defecto de Next.js; la usan las rutas que no existen y las fichas de juegos que no existen.
+
+- Ficha de cada juego en `/games/[slug]` al estilo de la tienda de Epic Games: visor de la galería con flechas y
+  miniaturas (portada primero; también con teclado y deslizando), sinopsis, género, "Dónde jugarlo" (stand, zona,
+  fecha y horario del evento), columna lateral con la portada, itch.io, "Ver en el croquis", "Quiero asistir" y la
+  ficha, y "Más juegos" (primero los del mismo género). Muestra sólo el código corto del stand.
+  El enlace a itch.io aparece a la hora configurada en `event_settings` (16:30), según la hora del servidor; antes,
+  la ficha indica a qué hora se activa. Al tocar el juego del centro del coverflow se abre su ficha. Un juego que no existe muestra la página de "no
+  encontrado" con `noindex`. Las pruebas e2e de la ficha corren con `npm run test:e2e:games`.
+
 - Consulta de pasaporte en `/passport` con gamertag y PIN descifrado asociado a la cookie del dispositivo.
+
+- Pasaporte con los stands visitados y los que faltan (códigos `ZA-S1`), barra de progreso hacia el siguiente boleto y
+  boletos al llegar a 9 y 18 visitas, con número global. Cada visitante tiene un check-in por stand.
 
 - Registro público de visitantes en `/register` con validación de nombre, gamertag único y correo, generación de PIN cifrado, cookie de dispositivo y enlace al aviso de privacidad en `/privacy`.
 

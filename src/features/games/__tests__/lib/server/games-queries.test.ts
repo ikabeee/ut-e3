@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import type * as NextCache from "next/cache";
-import { GAMES_CACHE_TAG, getGames } from "@features/games/lib/server/games-queries";
+import { GAMES_CACHE_TAG, getGameBySlug, getGames } from "@features/games/lib/server/games-queries";
 import { INITIAL_GAMES, seedGames } from "@features/games/lib/server/games-seed";
 import type { StandLocation } from "@features/games/lib/stand-code";
 import type { Game } from "@features/games/lib/types";
@@ -77,6 +77,29 @@ describe("getGames", () => {
 
   it("caches the catalog for hours under the games tag", async () => {
     await getGames();
+
+    expect(cacheLife).toHaveBeenCalledWith("hours");
+    expect(cacheTag).toHaveBeenCalledWith(GAMES_CACHE_TAG);
+  });
+});
+
+describe("getGameBySlug", () => {
+  it("returns the seeded game with its genre, stand and images", async () => {
+    await seedGames(getPrisma());
+
+    const expected = INITIAL_GAMES.find((game) => game.slug === "ceniza-protocol");
+
+    expect(await getGameBySlug("ceniza-protocol")).toEqual(expected && withUuids(expected));
+  });
+
+  it("returns null for a slug no game has", async () => {
+    await seedGames(getPrisma());
+
+    expect(await getGameBySlug("no-existe")).toBeNull();
+  });
+
+  it("caches the game for hours under the games tag", async () => {
+    await getGameBySlug("ceniza-protocol");
 
     expect(cacheLife).toHaveBeenCalledWith("hours");
     expect(cacheTag).toHaveBeenCalledWith(GAMES_CACHE_TAG);

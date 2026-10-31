@@ -42,5 +42,23 @@ export const VISITORS_COPY = {
     pinLabel: "PIN de identidad",
     gamertagLabel: "Gamertag",
     description: "Presenta tu PIN en cada stand para registrar tus visitas.",
+    progress: {
+      label: "Progreso hacia el siguiente boleto",
+      remaining: (count: number) =>
+        `Te faltan ${count} ${count === 1 ? "visita" : "visitas"} para tu siguiente boleto.`,
+      complete: "Ya tienes tus dos boletos. ¡Gracias por visitarnos!",
+    },
+    stands: {
+      title: "Stands",
+      summary: (visited: number, total: number) => `Visitados ${visited} de ${total}`,
+      visited: "Visitado",
+      pending: "Pendiente",
+    },
+    tickets: {
+      title: "Boletos",
+      empty: "Aún no tienes boletos. Se otorgan al llegar a 9 y a 18 visitas.",
+      ticket: (number: number) => `Boleto #${number}`,
+      milestone: (milestone: number) => `Al llegar a ${milestone} visitas`,
+    },
   },
 } as const;

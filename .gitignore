@@ -53,3 +53,6 @@ next-env.d.ts
 
 graphify-out/
 .claude/tests.lock
+
+# Capturas de los e2e (`npm run test:e2e:games`): son evidencia local, no código
+e2e/screenshots/

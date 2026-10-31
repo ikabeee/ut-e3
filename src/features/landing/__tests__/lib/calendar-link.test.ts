@@ -1,4 +1,7 @@
-import { buildCalendarUrl } from "@features/landing/lib/calendar-link";
+import { buildCalendarUrl, buildEventCalendarUrl } from "@features/landing/lib/calendar-link";
+import { LANDING_COPY } from "@features/landing/lib/landing-copy";
+import { EVENT_VENUE, formatCopyableAddress } from "@features/landing/lib/venue";
+import { siteConfig } from "@shared/lib/site-config";
 
 const SHOWCASE = {
   title: "UTG · Showcase de videojuegos",
@@ -38,5 +41,18 @@ describe("buildCalendarUrl", () => {
     expect(rawUrl).not.toContain(" ");
     expect(rawUrl).not.toContain("& gratuita");
     expect(rawUrl).not.toContain("·");
+  });
+});
+
+describe("buildEventCalendarUrl", () => {
+  it("builds the showcase event with the site title, the division, the venue and the event window", () => {
+    const url = new URL(
+      buildEventCalendarUrl({ startsAt: "2026-11-20T17:00:00.000Z", endsAt: "2026-11-21T00:00:00.000Z" }),
+    );
+
+    expect(url.searchParams.get("text")).toBe(siteConfig.title);
+    expect(url.searchParams.get("details")).toBe(LANDING_COPY.calendar.details(siteConfig.organization.division));
+    expect(url.searchParams.get("location")).toBe(formatCopyableAddress(EVENT_VENUE));
+    expect(url.searchParams.get("dates")).toBe("20261120T170000Z/20261121T000000Z");
   });
 });

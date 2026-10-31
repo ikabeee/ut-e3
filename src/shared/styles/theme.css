@@ -117,6 +117,8 @@
 }
 
 @theme inline {
+  /* Two columns on the game page (main column plus sidebar); mirrored by DETAIL_COLUMNS_MEDIA in games. */
+  --breakpoint-detail: 61.25rem;
   --color-paper: var(--utg-light);
   --color-paper-foreground: var(--utg-black);
   --color-paper-rule: #cfcfcf;

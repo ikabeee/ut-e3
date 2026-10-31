@@ -1,8 +1,6 @@
 import { Fragment, useRef } from "react";
-import { SPONSORS_COPY } from "@features/sponsors/lib/sponsors-copy";
-import { formatPhone } from "@features/sponsors/lib/phone-format";
+import { SponsorContactLinks } from "@features/sponsors/components/sponsor-contact-links";
 import type { Sponsor } from "@features/sponsors/lib/types";
-import { ActionLink } from "@shared/components/action-link";
 import { useFitText } from "@shared/hooks/use-fit-text";
 
 interface SponsorCaptionProps {
@@ -28,14 +26,7 @@ export function SponsorCaption({ sponsor }: Readonly<SponsorCaptionProps>) {
         ))}
       </h2>
       <p className="m-0 max-w-[42ch] text-[clamp(16px,1.3vw,19px)] leading-[1.35] text-copy">{sponsor.services}</p>
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-        <ActionLink href={sponsor.websiteUrl} arrow="ne" isExternal>
-          {SPONSORS_COPY.website}
-        </ActionLink>
-        <a href={`tel:${sponsor.phone}`} className="inline-flex min-h-11 items-center type-mono text-copy underline">
-          {formatPhone(sponsor.phone)}
-        </a>
-      </div>
+      <SponsorContactLinks sponsor={sponsor} />
     </div>
   );
 }

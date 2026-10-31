@@ -72,13 +72,14 @@ src/
 ├── app/                      # SOLO rutas de Next.js: renderizan una page de una feature
 ├── features/
 │   ├── landing/              # Portada (/): hero, actividades, invitadas, ubicación y la page
-│   ├── games/                # Juegos: carrusel de destacados y catálogo en coverflow
+│   ├── games/                # Juegos: coverflow de la portada, catálogo (/games) y ficha (/games/[slug])
 │   ├── floor-plan/           # Croquis interactivo con los stands (ZA-S3) y las zonas
 │   ├── schedule/             # Cronograma de actividades (portada y edición en el panel)
 │   ├── sponsors/             # Banda de patrocinadores
 │   ├── event-settings/       # Horarios y valores configurables del evento
 │   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
 │   ├── admin/                # Panel del sysadmin (/admin): compone las secciones que se administran
+│   ├── site/                 # Páginas del sitio que no son de un dominio: la 404 (src/app/not-found.tsx)
 │   └── tournament/           # Torneo de KOF (/admin/kof): bracket, permisos por mesa y bitácora
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)

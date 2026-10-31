@@ -7,7 +7,7 @@ import { FLOOR_PLAN_SECTION_ID, getZoneLink } from "@features/floor-plan/lib/flo
 import type { FloorPlanStand } from "@features/floor-plan/lib/types";
 import { GameCatalog } from "@features/games/components/game-catalog";
 import { getCoverImage } from "@features/games/lib/game-cover";
-import { GAMES_SECTION_ID } from "@features/games/lib/games-links";
+import { GAMES_PATH } from "@features/games/lib/games-links";
 import { getGames } from "@features/games/lib/server/games-queries";
 import { formatStandCode } from "@features/games/lib/stand-code";
 import type { Game } from "@features/games/lib/types";
@@ -19,18 +19,19 @@ import { SiteNav } from "@features/landing/components/site-nav";
 import { SpecialGuests } from "@features/landing/components/special-guests";
 import { VenueLocation } from "@features/landing/components/venue-location";
 import { VideoHero } from "@features/landing/components/video-hero";
-import { buildCalendarUrl } from "@features/landing/lib/calendar-link";
+import { buildEventCalendarUrl } from "@features/landing/lib/calendar-link";
 import { buildEventStructuredData } from "@features/landing/lib/event-structured-data";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { HOME_PATH, TOP_SECTION_ID } from "@features/landing/lib/landing-links";
 import { getCurrentMarketplaceRegistration } from "@features/landing/lib/server/marketplace-queries";
 import { SPECIAL_GUESTS } from "@features/landing/lib/special-guests";
-import { EVENT_VENUE, formatCopyableAddress } from "@features/landing/lib/venue";
+import { EVENT_VENUE } from "@features/landing/lib/venue";
 import { EventSchedule } from "@features/schedule/components/event-schedule";
 import { getScheduleItems } from "@features/schedule/lib/server/schedule-queries";
 import type { ScheduleItem } from "@features/schedule/lib/types";
 import { SponsorsCarousel } from "@features/sponsors/components/sponsors-carousel";
 import { getSponsors } from "@features/sponsors/lib/server/sponsors-queries";
+import { SPONSORS_PATH } from "@features/sponsors/lib/sponsors-links";
 import type { Sponsor } from "@features/sponsors/lib/types";
 import { JsonLd } from "@shared/components/json-ld";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
@@ -46,8 +47,9 @@ export const landingPageMetadata: Metadata = {
 
 const NAV_LINKS = [
   { href: `#${TOP_SECTION_ID}`, label: LANDING_COPY.nav.links.home },
-  { href: `#${GAMES_SECTION_ID}`, label: LANDING_COPY.nav.links.games },
+  { href: GAMES_PATH, label: LANDING_COPY.nav.links.games },
   { href: `#${FLOOR_PLAN_SECTION_ID}`, label: LANDING_COPY.nav.links.floorPlan },
+  { href: SPONSORS_PATH, label: LANDING_COPY.nav.links.sponsors },
 ];
 
 interface LandingViewProps {
@@ -86,9 +88,11 @@ export function LandingView({ settings, games, scheduleItems, sponsors, marketpl
 
   return (
     <>
-      <SiteNav links={NAV_LINKS} />
+      <SiteNav homeHref={`#${TOP_SECTION_ID}`} links={NAV_LINKS} />
       <main>
-        <VideoHero calendarUrl={buildEventCalendarUrl(settings)} />
+        <VideoHero
+          calendarUrl={buildEventCalendarUrl({ startsAt: settings.eventStartsAt, endsAt: settings.eventEndsAt })}
+        />
         <SponsorsCarousel sponsors={sponsors} />
         <EventActs
           gamesCount={games.length}
@@ -120,16 +124,6 @@ async function MarketplaceRegistration({ settings }: Readonly<{ settings: EventS
   });
 
   return <MarketplaceCard registration={registration} />;
-}
-
-function buildEventCalendarUrl(settings: EventSettings) {
-  return buildCalendarUrl({
-    title: siteConfig.title,
-    details: LANDING_COPY.calendar.details(siteConfig.organization.division),
-    location: formatCopyableAddress(EVENT_VENUE),
-    startsAt: settings.eventStartsAt,
-    endsAt: settings.eventEndsAt,
-  });
 }
 
 function raffleLabels(settings: EventSettings) {

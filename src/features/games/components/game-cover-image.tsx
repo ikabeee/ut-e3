@@ -7,10 +7,18 @@ interface GameCoverImageProps {
   game: Game;
   sizes: string;
   isDecorative?: boolean;
+  /** The main image of the first screen: fetched right away instead of lazily (image.md "preload"). */
+  isEager?: boolean;
   className?: string;
 }
 
-export function GameCoverImage({ game, sizes, isDecorative = false, className }: Readonly<GameCoverImageProps>) {
+export function GameCoverImage({
+  game,
+  sizes,
+  isDecorative = false,
+  isEager = false,
+  className,
+}: Readonly<GameCoverImageProps>) {
   const cover = getCoverImage(game);
 
   return (
@@ -19,6 +27,8 @@ export function GameCoverImage({ game, sizes, isDecorative = false, className }:
       alt={isDecorative ? "" : cover.alt}
       fill
       sizes={sizes}
+      loading={isEager ? "eager" : "lazy"}
+      fetchPriority={isEager ? "high" : "auto"}
       className={cn("object-cover", className)}
     />
   );

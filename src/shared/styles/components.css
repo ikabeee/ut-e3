@@ -237,6 +237,31 @@
   background: linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 92%, transparent), transparent);
 }
 
+/* Hero image with its title: darkened to the left and at the bottom on desktop, only at the bottom on mobile. */
+@utility shade-featured {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--utg-black) 85%, transparent) 0%,
+      color-mix(in srgb, var(--utg-black) 45%, transparent) 40%,
+      transparent 70%
+    ),
+    linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 90%, transparent) 0%, transparent 50%);
+}
+
+@utility shade-featured-mobile {
+  background: linear-gradient(
+    0deg,
+    var(--utg-black) 0%,
+    color-mix(in srgb, var(--utg-black) 75%, transparent) 40%,
+    transparent 75%
+  );
+}
+
+@utility shade-thumb {
+  background: linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 75%, transparent), transparent 60%);
+}
+
 @utility coverflow-rack {
   background: radial-gradient(
     70% 60% at 50% 38%,

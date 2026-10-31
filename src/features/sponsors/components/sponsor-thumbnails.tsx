@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { RefObject } from "react";
 import { cn } from "@heroui/react";
-import { useActiveThumbScroll } from "@features/sponsors/hooks/use-active-thumb-scroll";
+import { useActiveThumbScroll } from "@shared/hooks/use-active-thumb-scroll";
 import type { Sponsor } from "@features/sponsors/lib/types";
 
 interface SponsorThumbnailsProps {
