@@ -1,10 +1,11 @@
 "use client";
 
 import { Button } from "@heroui/react";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import type { ManagementAction } from "@features/accounts/components/invite-account-form";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import type { ManagedAccount } from "@features/accounts/lib/types";
+import { ConfirmActionForm } from "@shared/components/confirm-action-form";
 
 interface ManagedAccountListProps {
   accounts: readonly ManagedAccount[];
@@ -87,34 +88,17 @@ function DisableButton({
   name,
   action,
 }: Readonly<{ accountId: string; name: string; action: ManagementAction }>) {
-  const [isConfirming, setIsConfirming] = useState(false);
-  const [state, formAction, isPending] = useActionState(action, null);
-
-  if (!isConfirming) {
-    return (
-      <Button variant="tertiary" className="min-h-11 justify-self-start" onPress={() => setIsConfirming(true)}>
-        {COPY.disable}
-      </Button>
-    );
-  }
-
   return (
-    <form action={formAction} className="grid gap-3">
-      <input type="hidden" name="accountId" value={accountId} />
-      <p className="text-sm">{COPY.confirmDisable(name)}</p>
-      {state?.status === "error" && (
-        <p role="alert" className="text-sm text-danger">
-          {state.message}
-        </p>
-      )}
-      <div className="flex flex-wrap gap-3">
-        <Button type="submit" variant="danger" className="min-h-11" isPending={isPending}>
-          {COPY.confirmDisableAction}
-        </Button>
-        <Button variant="tertiary" className="min-h-11" onPress={() => setIsConfirming(false)}>
-          {COPY.cancel}
-        </Button>
-      </div>
-    </form>
+    <ConfirmActionForm
+      action={action}
+      field={{ name: "accountId", value: accountId }}
+      labels={{
+        trigger: COPY.disable,
+        prompt: COPY.confirmDisable(name),
+        confirm: COPY.confirmDisableAction,
+        cancel: COPY.cancel,
+      }}
+      triggerClassName="min-h-11 justify-self-start"
+    />
   );
 }

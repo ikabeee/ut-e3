@@ -1,10 +1,12 @@
 "use client";
 
-import { Button, Description, FieldError, Form, Input, Label, TextField } from "@heroui/react";
+import { Form } from "@heroui/react";
 import { useActionState } from "react";
+import { PasswordField } from "@features/accounts/components/password-field";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import type { ActivationState } from "@features/accounts/lib/activation-actions";
 import { MIN_PASSWORD_LENGTH } from "@features/accounts/lib/invitation-rules";
+import { FormSubmit } from "@shared/components/form-submit";
 import { useSubmitKeepingValues } from "@shared/hooks/use-submit-keeping-values";
 
 interface ActivateFormProps {
@@ -22,25 +24,14 @@ export function ActivateForm({ token, action }: Readonly<ActivateFormProps>) {
   return (
     <Form action={formAction} onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-5">
       <input type="hidden" name="token" value={token} />
-      <TextField name="password" type="password" autoComplete="new-password" isRequired>
-        <Label>{COPY.passwordLabel}</Label>
-        <Input className="min-h-11 text-base" />
-        <Description>{COPY.hint(MIN_PASSWORD_LENGTH)}</Description>
-        <FieldError />
-      </TextField>
-      <TextField name="confirmation" type="password" autoComplete="new-password" isRequired>
-        <Label>{COPY.confirmationLabel}</Label>
-        <Input className="min-h-11 text-base" />
-        <FieldError />
-      </TextField>
-      {state?.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
-      <Button type="submit" variant="primary" className="min-h-11" isPending={isPending}>
-        {isPending ? COPY.pending : COPY.submit}
-      </Button>
+      <PasswordField
+        name="password"
+        label={COPY.passwordLabel}
+        autoComplete="new-password"
+        hint={COPY.hint(MIN_PASSWORD_LENGTH)}
+      />
+      <PasswordField name="confirmation" label={COPY.confirmationLabel} autoComplete="new-password" />
+      <FormSubmit error={state?.error} isPending={isPending} copy={COPY} />
     </Form>
   );
 }

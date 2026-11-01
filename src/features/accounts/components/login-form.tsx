@@ -1,9 +1,11 @@
 "use client";
 
-import { Button, FieldError, Form, Input, Label, TextField } from "@heroui/react";
+import { FieldError, Form, Input, Label, TextField } from "@heroui/react";
 import { useActionState } from "react";
+import { PasswordField } from "@features/accounts/components/password-field";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import type { SignInState } from "@features/accounts/lib/accounts-actions";
+import { FormSubmit } from "@shared/components/form-submit";
 import { useSubmitKeepingValues } from "@shared/hooks/use-submit-keeping-values";
 
 interface LoginFormProps {
@@ -23,19 +25,8 @@ export function LoginForm({ action }: Readonly<LoginFormProps>) {
         <Input className="min-h-11 text-base" />
         <FieldError />
       </TextField>
-      <TextField name="password" type="password" autoComplete="current-password" isRequired>
-        <Label>{COPY.credentialLabel}</Label>
-        <Input className="min-h-11 text-base" />
-        <FieldError />
-      </TextField>
-      {state?.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
-      <Button type="submit" variant="primary" className="min-h-11" isPending={isPending}>
-        {isPending ? COPY.pending : COPY.submit}
-      </Button>
+      <PasswordField name="password" label={COPY.credentialLabel} autoComplete="current-password" />
+      <FormSubmit error={state?.error} isPending={isPending} copy={COPY} />
     </Form>
   );
 }
