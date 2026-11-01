@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
+import { VisitSurveyPrompt } from "@features/stands/components/visit-survey-prompt";
+import { answerVisitAction } from "@features/stands/lib/stands-actions";
 import { TournamentNotice } from "@features/tournament/components/tournament-notice";
 import { getEntrySchedule, getVisitorEntryStatus } from "@features/tournament/lib/server/entries-queries";
 import { PassportCard } from "@features/visitors/components/passport-card";
@@ -54,7 +56,18 @@ async function PassportGate() {
     redirect(REGISTER_PATH);
   }
 
-  return <PassportView passport={passport} visits={visits} extra={await loadTournamentNotice(visitorId)} />;
+  return (
+    <PassportView
+      passport={passport}
+      visits={visits}
+      extra={
+        <>
+          <VisitSurveyPrompt answerVisit={answerVisitAction} />
+          {await loadTournamentNotice(visitorId)}
+        </>
+      }
+    />
+  );
 }
 
 // The page is where the visitors and tournament features meet: the notice only exists for a player that entered (RF-75).

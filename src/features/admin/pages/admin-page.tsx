@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { AccountsPanel } from "@features/accounts/components/accounts-panel";
 import { SignOutButton } from "@features/accounts/components/sign-out-button";
@@ -35,6 +36,8 @@ export function AdminPage() {
 
 // Reads the session cookie, so it streams behind the Suspense boundary instead of blocking the static shell.
 async function SysadminPanel() {
+  await connection();
+
   const account = await requireSysadmin();
   const items = await getScheduleItems();
 

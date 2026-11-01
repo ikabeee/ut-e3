@@ -8,6 +8,7 @@ const FEATURE_DEPENDENCIES = {
   landing: ["games", "sponsors"],
   "floor-plan": ["games"],
   schedule: ["accounts", "floor-plan"],
+  stands: ["accounts", "games", "visitors"],
   tournament: ["accounts"],
   visitors: ["games"],
 };

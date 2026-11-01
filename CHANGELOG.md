@@ -8,6 +8,14 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Kiosko del stand en `/stand/kiosk` (cuentas `stand_admin` y `stand_staff`): el staff escribe el PIN del pasaporte, el
+  visitante recibe la encuesta de 3 preguntas (juego, stand y arte, de 1 a 5) en su propio pasaporte y la visita queda
+  registrada en una sola transacción con su voto y, si toca, el boleto de las visitas 9 y 18. La visita espera 3 minutos
+  a que el visitante califique; si su teléfono no tiene señal, el staff puede pasarle la tablet con "Calificar en esta
+  pantalla". El staff nunca ve las calificaciones, la pantalla
+  de gracias vuelve sola al PIN y cada visita guarda qué cuenta tenía abierto el kiosko. Un pasaporte solo visita una vez
+  cada stand, el stand necesita un juego registrado y no se aceptan visitas desde la hora de corte. Datos de prueba con
+  `npm run db:seed:stands`.
 - Bracket público del torneo de KOF en `/tournament`: cualquier visitante sigue los combates y los resultados desde su
   teléfono, sin sesión y sin datos personales, dibujado como un árbol de llaves con dos mitades en espejo.
 - El administrador de KOF puede reiniciar el torneo desde `/admin/kof` (borra el bracket y conserva las inscripciones), y el manual de uso está en `docs/manual-torneo.md`. El administrador de KOF puede cerrarlo y reabrirlo con "Cerrar al público".

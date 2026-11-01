@@ -48,6 +48,39 @@ export async function getKofAccount(): Promise<KofAccount | null> {
   return { ...account, role, kofDesk: toKofDesk(row?.kofDesk ?? null) };
 }
 
+export interface StandAccount extends SessionAccount {
+  role: "stand_admin" | "stand_staff";
+  /** The stand whose kiosk the account opens; the table guarantees every stand account has one. */
+  standId: string;
+}
+
+// Every kiosk page and Server Action calls this: the account only ever works at its own stand (RF-33).
+export async function requireStandAccount(): Promise<StandAccount> {
+  const account = await getStandAccount();
+
+  if (!account) {
+    redirect(LOGIN_PATH);
+  }
+
+  return account;
+}
+
+// For Route Handlers, which answer 401 instead of redirecting.
+export async function getStandAccount(): Promise<StandAccount | null> {
+  const account = await getSessionAccount();
+  const role = account ? toStandRole(account.role) : null;
+
+  if (!account || !role) return null;
+
+  const row = await getPrisma().account.findUnique({ where: { id: account.id }, select: { standId: true } });
+
+  return row?.standId ? { ...account, role, standId: row.standId } : null;
+}
+
+function toStandRole(role: string): StandAccount["role"] | null {
+  return role === "stand_admin" || role === "stand_staff" ? role : null;
+}
+
 function toKofRole(role: string): KofAccount["role"] | null {
   return role === "kof_admin" || role === "kof_staff" ? role : null;
 }

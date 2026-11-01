@@ -1,8 +1,8 @@
 import "server-only";
+import { createMissingDevAccounts } from "@features/accounts/lib/server/dev-accounts";
 import type { KofDesk } from "@features/accounts/lib/types";
 import { generateTournament } from "@features/tournament/lib/server/tournament-mutations";
 import type { Player } from "@features/tournament/lib/types";
-import { hashPassword } from "@shared/lib/server/password";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 export type KofDevEnv = Readonly<Record<string, string | undefined>>;
@@ -59,18 +59,7 @@ async function requireEventSettings(): Promise<void> {
 }
 
 async function createMissingAccounts(password: string): Promise<string[]> {
-  const created: string[] = [];
-
-  for (const account of KOF_DEV_ACCOUNTS) {
-    if (await getPrisma().account.findUnique({ where: { email: account.email }, select: { id: true } })) continue;
-
-    await getPrisma().account.create({
-      data: { ...account, status: "active", password: await hashPassword(password) },
-    });
-    created.push(account.email);
-  }
-
-  return created;
+  return createMissingDevAccounts(KOF_DEV_ACCOUNTS, password);
 }
 
 // The bracket is only generated from this hour on (RF-59); the date of the event stays untouched when it already passed.

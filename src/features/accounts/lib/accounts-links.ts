@@ -8,6 +8,11 @@ export const ACTIVATE_PATH = "/activate";
 // The KOF accounts sign in here instead of /admin; the page itself belongs to the tournament feature.
 export const KOF_HOME_PATH = "/admin/kof";
 
+// The stand accounts sign in to the kiosk of their stand; the page itself belongs to the stands feature.
+export const STAND_HOME_PATH = "/stand/kiosk";
+
 export function getHomePath(role: string): string {
-  return role === "kof_admin" || role === "kof_staff" ? KOF_HOME_PATH : SYSADMIN_HOME_PATH;
+  if (role === "kof_admin" || role === "kof_staff") return KOF_HOME_PATH;
+
+  return role === "stand_admin" || role === "stand_staff" ? STAND_HOME_PATH : SYSADMIN_HOME_PATH;
 }
