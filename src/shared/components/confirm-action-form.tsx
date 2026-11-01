@@ -3,7 +3,10 @@
 import { Button } from "@heroui/react";
 import { useActionState, useState } from "react";
 
-interface ConfirmActionFormProps<State extends { status: string }> {
+/** What an action answers: a status and, when it failed, the message to show. */
+type ActionState = { status: string; message?: string };
+
+interface ConfirmActionFormProps<State extends ActionState> {
   action: (previous: State | null, form: FormData) => Promise<State>;
   /** The hidden field that tells the action which record the confirmation is about. */
   field: { name: string; value: string };
@@ -11,14 +14,8 @@ interface ConfirmActionFormProps<State extends { status: string }> {
   triggerClassName?: string;
 }
 
-function readError(state: { status: string } | null): string | null {
-  if (state?.status !== "error" || !("message" in state)) return null;
-
-  return typeof state.message === "string" ? state.message : null;
-}
-
 // What cannot be undone: the first press only asks, and the action runs on the second.
-export function ConfirmActionForm<State extends { status: string }>({
+export function ConfirmActionForm<State extends ActionState>({
   action,
   field,
   labels,
@@ -26,7 +23,7 @@ export function ConfirmActionForm<State extends { status: string }>({
 }: Readonly<ConfirmActionFormProps<State>>) {
   const [isConfirming, setIsConfirming] = useState(false);
   const [state, formAction, isPending] = useActionState(action, null);
-  const error = readError(state);
+  const error = state?.status === "error" ? state.message : null;
 
   if (!isConfirming) {
     return (
