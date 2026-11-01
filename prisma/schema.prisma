@@ -39,23 +39,25 @@ model EventSettings {
 }
 
 model Account {
-  id          String     @id @default(uuid())
-  email       String     @unique
-  name        String
-  role        String
-  group       String?
-  studio      Int?
+  id                String              @id @default(uuid())
+  email             String              @unique
+  name              String
+  role              String
+  group             String?
+  studio            Int?
   /// scrypt hash with its parameters and salt (shared/lib/server/password.ts); null until the account is activated.
-  password    String?    @map("password_scrypt")
-  status      String
-  standId     String?    @map("stand_id")
-  stand       Stand?     @relation(fields: [standId], references: [id], onDelete: Restrict)
-  kofBoard    Int?       @map("kof_board")
-  createdById String?    @map("created_by_id")
-  createdBy   Account?   @relation("CreatedAccounts", fields: [createdById], references: [id], onDelete: Restrict)
-  created     Account[]  @relation("CreatedAccounts")
-  sessions    Session[]
-  auditLogs   AuditLog[]
+  password          String?             @map("password_scrypt")
+  status            String
+  standId           String?             @map("stand_id")
+  stand             Stand?              @relation(fields: [standId], references: [id], onDelete: Restrict)
+  kofDesk           Int?                @map("kof_desk")
+  createdById       String?             @map("created_by_id")
+  createdBy         Account?            @relation("CreatedAccounts", fields: [createdById], references: [id], onDelete: Restrict)
+  created           Account[]           @relation("CreatedAccounts")
+  sessions          Session[]
+  auditLogs         AuditLog[]
+  registeredEntries TournamentEntry[]
+  invitations       AccountInvitation[]
 
   @@map("accounts")
 }
@@ -82,6 +84,17 @@ model AuditLog {
   createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("audit_logs")
+}
+
+model KofTournament {
+  id        Int      @id
+  /// The whole bracket as JSON (features/tournament/lib/types.ts); only the server writes it.
+  state     Json
+  /// Raised by every command; a save succeeds only if the stored version is still the one that was read.
+  version   Int
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("kof_tournament")
 }
 
 model RateLimit {
@@ -168,16 +181,17 @@ model Sponsor {
 }
 
 model Visitor {
-  id            String         @id @default(uuid())
-  fullName      String         @map("full_name")
-  gamertag      String         @unique
-  email         String         @unique
-  pin           String         @map("pin_aes_gcm")
-  pinLookup     String         @unique @map("pin_hmac")
-  createdAt     DateTime       @default(now()) @map("created_at")
-  device        VisitorDevice?
-  checkIns      CheckIn[]
-  raffleTickets RaffleTicket[]
+  id              String           @id @default(uuid())
+  fullName        String           @map("full_name")
+  gamertag        String           @unique
+  email           String           @unique
+  pin             String           @map("pin_aes_gcm")
+  pinLookup       String           @unique @map("pin_hmac")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  device          VisitorDevice?
+  checkIns        CheckIn[]
+  raffleTickets   RaffleTicket[]
+  tournamentEntry TournamentEntry?
 
   @@map("visitors")
 }
@@ -212,6 +226,35 @@ model EmailOutbox {
   createdAt     DateTime  @default(now()) @map("created_at")
 
   @@map("email_outbox")
+}
+
+model TournamentEntry {
+  id             String    @id @default(uuid())
+  visitorId      String    @unique @map("visitor_id")
+  visitor        Visitor   @relation(fields: [visitorId], references: [id], onDelete: Restrict)
+  /// pre: the list that the KOF administrator builds before the event; onsite: the sign-up at the KOF area.
+  channel        String
+  /// registered, checked_in or no_show; a no_show never changes again (trigger in the migration).
+  status         String
+  checkedInAt    DateTime? @map("checked_in_at")
+  registeredById String?   @map("registered_by_id")
+  registeredBy   Account?  @relation(fields: [registeredById], references: [id], onDelete: Restrict)
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@map("tournament_entries")
+}
+
+model AccountInvitation {
+  id        String    @id @default(uuid())
+  accountId String    @map("account_id")
+  account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  /// SHA-256 of the token in the activation link (shared/lib/server/token-hash.ts); the token itself only travels by email.
+  token     String    @unique @map("token_sha256")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("account_invitations")
 }
 
 model CheckIn {

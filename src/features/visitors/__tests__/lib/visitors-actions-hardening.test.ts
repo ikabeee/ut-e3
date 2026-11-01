@@ -6,6 +6,7 @@ import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
 import { stubAfter, stubHeaders } from "@shared/__tests__/lib/server/headers-stub";
 import { createTestClient, createTestDatabase } from "@shared/__tests__/lib/server/test-database";
+import { getPrisma } from "@shared/lib/server/prisma";
 
 const TEST_KEY = Buffer.alloc(32, 7).toString("base64");
 
@@ -21,6 +22,7 @@ process.env.PIN_ENCRYPTION_KEY = TEST_KEY;
 
 afterAll(async () => {
   await prisma.$disconnect();
+  await getPrisma().$disconnect();
   database.remove();
 });
 

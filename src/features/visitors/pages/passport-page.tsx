@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
+import { TournamentNotice } from "@features/tournament/components/tournament-notice";
+import { getEntrySchedule, getVisitorEntryStatus } from "@features/tournament/lib/server/entries-queries";
 import { PassportCard } from "@features/visitors/components/passport-card";
 import { PassportProgress } from "@features/visitors/components/passport-progress";
 import { PassportStands } from "@features/visitors/components/passport-stands";
@@ -24,6 +26,8 @@ export const passportPageMetadata: Metadata = {
 interface PassportViewProps {
   passport: Passport;
   visits: PassportVisits;
+  /** What this page composes under the card, such as the tournament notice. */
+  extra?: ReactNode;
 }
 
 export function PassportPage() {
@@ -50,10 +54,27 @@ async function PassportGate() {
     redirect(REGISTER_PATH);
   }
 
-  return <PassportView passport={passport} visits={visits} />;
+  return <PassportView passport={passport} visits={visits} extra={await loadTournamentNotice(visitorId)} />;
 }
 
-export function PassportView({ passport, visits }: Readonly<PassportViewProps>) {
+// The page is where the visitors and tournament features meet: the notice only exists for a player that entered (RF-75).
+async function loadTournamentNotice(visitorId: string): Promise<ReactNode> {
+  const status = await getVisitorEntryStatus(visitorId);
+
+  if (!status) return null;
+
+  const schedule = await getEntrySchedule();
+
+  return (
+    <TournamentNotice
+      status={status}
+      checkInStartsAt={schedule.checkInStartsAt.toISOString()}
+      checkInEndsAt={schedule.checkInEndsAt.toISOString()}
+    />
+  );
+}
+
+export function PassportView({ passport, visits, extra }: Readonly<PassportViewProps>) {
   return (
     <main className="page-wrap flex min-h-svh flex-col items-center gap-8 py-16">
       <header className="flex flex-col items-center gap-2 text-center">
@@ -62,6 +83,7 @@ export function PassportView({ passport, visits }: Readonly<PassportViewProps>) 
       </header>
 
       <PassportCard passport={passport} />
+      {extra}
 
       <PassportProgress progress={getTicketProgress(visits.visitCount)} />
 

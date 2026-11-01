@@ -160,7 +160,7 @@ Flujos de punta a punta con Playwright. Cada flujo es un archivo `*.spec.ts` y c
 3. Un segundo intento (otro administrador o el mismo) muestra "El bracket ya se generó".
 
 ### E2E-11. Bracket en vivo
-**Actores:** staff del tablero 1, administrador de KOF, público (3 teléfonos). **Req:** RF-61 a RF-67, D2.
+**Actores:** staff de la mesa 1, administrador de KOF, público (3 teléfonos). **Req:** RF-61 a RF-67, D2.
 
 1. El público abre `/tournament`. Verifica el bracket.
 2. El staff activa un combate y marca al perdedor. Verifica que en los 3 teléfonos el ganador aparece en el siguiente combate sin recargar.

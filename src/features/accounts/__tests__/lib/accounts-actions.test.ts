@@ -4,6 +4,7 @@
 import { signIn, signOut } from "@features/accounts/lib/accounts-actions";
 import { seedSysadmin } from "@features/accounts/lib/server/sysadmin-seed";
 import { SESSION_COOKIE } from "@shared/lib/session-cookie";
+import { hashPassword } from "@shared/lib/server/password";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
@@ -47,6 +48,29 @@ describe("signIn", () => {
 
     expect(await getPrisma().session.count()).toBe(1);
     expect(jar.get(SESSION_COOKIE)?.value).toBeTruthy();
+  });
+
+  it.each([
+    ["kof_admin", null],
+    ["kof_staff", 1],
+  ] as const)("sends a %s to the KOF page instead of /admin", async (role, kofDesk) => {
+    await getPrisma().account.create({
+      data: {
+        email: "kof@ut.mx",
+        name: "KOF",
+        role,
+        status: "active",
+        password: await hashPassword(PASSWORD),
+        kofDesk,
+      },
+    });
+
+    await expect(signIn(null, credentials("kof@ut.mx", PASSWORD))).rejects.toMatchObject({
+      digest: expect.stringContaining(";/admin/kof;"),
+    });
+
+    await getPrisma().session.deleteMany();
+    await getPrisma().account.deleteMany({ where: { email: "kof@ut.mx" } });
   });
 
   it.each([

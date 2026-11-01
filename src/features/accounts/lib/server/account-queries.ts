@@ -6,5 +6,8 @@ const ACTIVE: AccountStatus = "active";
 
 // Only active accounts can sign in; an invited or disabled one looks the same as an unknown email.
 export function findSignInAccount(email: string) {
-  return getPrisma().account.findFirst({ where: { email, status: ACTIVE }, select: { id: true, password: true } });
+  return getPrisma().account.findFirst({
+    where: { email, status: ACTIVE },
+    select: { id: true, password: true, role: true },
+  });
 }

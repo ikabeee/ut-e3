@@ -60,14 +60,18 @@ describe("accounts table", () => {
     expect(await prisma.account.count()).toBe(0);
   });
 
-  it("rejects a KOF board outside 1 to 4 or on a role other than kof_staff", async () => {
-    await expect(
-      createAccount({ role: "kof_staff", status: "invited", password: null, kofBoard: 5 }),
-    ).rejects.toThrow();
-    await expect(
-      createAccount({ role: "kof_admin", status: "invited", password: null, kofBoard: 1 }),
-    ).rejects.toThrow();
+  it("rejects a KOF desk outside 1 to 2 or on a role other than kof_staff", async () => {
+    await expect(createAccount({ role: "kof_staff", status: "invited", password: null, kofDesk: 3 })).rejects.toThrow();
+    await expect(createAccount({ role: "kof_staff", status: "invited", password: null, kofDesk: 0 })).rejects.toThrow();
+    await expect(createAccount({ role: "kof_admin", status: "invited", password: null, kofDesk: 1 })).rejects.toThrow();
     expect(await prisma.account.count()).toBe(0);
+  });
+
+  it("accepts the two KOF desks, one for each pair of boards", async () => {
+    await createAccount({ role: "kof_staff", status: "invited", password: null, email: "desk1@ut.mx", kofDesk: 1 });
+    await createAccount({ role: "kof_staff", status: "invited", password: null, email: "desk2@ut.mx", kofDesk: 2 });
+
+    expect(await prisma.account.count({ where: { kofDesk: { in: [1, 2] } } })).toBe(2);
   });
 });
 
@@ -93,9 +97,9 @@ interface AccountFields {
   status: string;
   password: string | null;
   email?: string;
-  kofBoard?: number;
+  kofDesk?: number;
 }
 
-function createAccount({ role, status, password, email = "admin@ut.mx", kofBoard }: AccountFields) {
-  return prisma.account.create({ data: { email, name: "Sysadmin", role, status, password, kofBoard } });
+function createAccount({ role, status, password, email = "admin@ut.mx", kofDesk }: AccountFields) {
+  return prisma.account.create({ data: { email, name: "Sysadmin", role, status, password, kofDesk } });
 }

@@ -8,6 +8,28 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Bracket público del torneo de KOF en `/tournament`: cualquier visitante sigue los combates y los resultados desde su
+  teléfono, sin sesión y sin datos personales, dibujado como un árbol de llaves con dos mitades en espejo.
+- El administrador de KOF puede reiniciar el torneo desde `/admin/kof` (borra el bracket y conserva las inscripciones), y el manual de uso está en `docs/manual-torneo.md`. El administrador de KOF puede cerrarlo y reabrirlo con "Cerrar al público".
+- Invitaciones de cuentas: el sysadmin invita a los administradores de KOF, de rifa y de atención desde `/admin`, y el
+  administrador de KOF invita a su staff de las mesas 1 y 2 desde `/admin/kof`. Cada persona recibe un enlace por
+  correo (`/activate/<token>`, válido 72 horas, reenviable) para elegir su contraseña; solo se guarda el hash del enlace.
+  Se puede desactivar una cuenta, lo que cierra sus sesiones y libera la mesa. Una mesa tiene un solo staff invitado o
+  activo, y un correo con pasaporte de visitante no puede ser staff.
+- Torneo de KOF en `/admin/kof`: bracket de eliminación directa para 64 jugadores (63 combates, 4 tableros, 2
+  semifinales y la final) con byes, generado una sola vez a la hora configurada. El staff de cada mesa inicia los
+  combates, marca al perdedor o "No se presentó"; el administrador de KOF ve todo el bracket, congela, descalifica y
+  revierte. La pantalla se actualiza cada 3 segundos y cada cambio queda en la bitácora. Ver `docs/tournament.md`.
+- Inscripciones del torneo de KOF en `/admin/kof` para el administrador: lista previa de hasta 50, inscripción
+  presencial de 12:00 a 12:45 con el check-in ya hecho, check-in por PIN, cierre automático de "No se presentó" a las
+  12:45, cupo de 64 y botón que genera el bracket con los jugadores que hicieron check-in. Los horarios salen de la
+  configuración del evento.
+- El pasaporte de quien está en el torneo avisa cuándo y dónde hacer el check-in, y después confirma que ya está en el
+  bracket.
+- `npm run db:seed:kof` (solo desarrollo): crea las cuentas de KOF de prueba y un bracket de 40 jugadores en tu base
+  local.
+- Las cuentas de KOF entran por `/login` y llegan a `/admin/kof`. El staff de KOF pasa a ser de 2 mesas (cada una con
+  dos tableros) en lugar de 4 staffs, y `accounts.kof_board` es ahora `kof_desk` (SRS 2.4).
 - Página de patrocinadores en `/sponsors`: una tarjeta por patrocinador con su logo, nombre, servicios, enlace a su
   sitio (en pestaña nueva) y teléfono con formato legible que se marca con un toque. "Patrocinadores" queda en el
   navbar de todas las páginas.

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
-import { LOGIN_PATH, SYSADMIN_HOME_PATH } from "@features/accounts/lib/accounts-links";
+import { getHomePath, LOGIN_PATH } from "@features/accounts/lib/accounts-links";
 import { findSignInAccount } from "@features/accounts/lib/server/account-queries";
 import { readFormText } from "@shared/lib/form-data";
 import { hashPassword, verifyPassword } from "@shared/lib/server/password";
@@ -28,13 +28,13 @@ export async function signIn(_previous: SignInState | null, form: FormData): Pro
 
   if (!(await consumeAttempt(attemptKey, SIGN_IN_LIMIT))) return { error: errors.tooManyAttempts };
 
-  const accountId = await authenticate(email, password);
+  const account = await authenticate(email, password);
 
-  if (!accountId) return { error: errors.invalidCredentials };
+  if (!account) return { error: errors.invalidCredentials };
 
   await clearAttempts(attemptKey);
-  await createSession(accountId);
-  redirect(SYSADMIN_HOME_PATH);
+  await createSession(account.id);
+  redirect(getHomePath(account.role));
 }
 
 export async function signOut(): Promise<void> {
@@ -43,11 +43,11 @@ export async function signOut(): Promise<void> {
 }
 
 // An unknown email still pays for one scrypt run, so the response time does not reveal which accounts exist.
-async function authenticate(email: string, password: string): Promise<string | null> {
+async function authenticate(email: string, password: string): Promise<{ id: string; role: string } | null> {
   const account = await findSignInAccount(email);
   const isValid = await verifyPassword(password, account?.password ?? (await getDecoyHash()));
 
-  return account && isValid ? account.id : null;
+  return account && isValid ? { id: account.id, role: account.role } : null;
 }
 
 let decoyHash: Promise<string> | undefined;
