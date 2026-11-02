@@ -42,6 +42,7 @@ export function StandKiosk({
 }: Readonly<StandKioskProps>) {
   const [round, setRound] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
+
   const startNextRound = useCallback((nextNotice?: string) => {
     setRound((current) => current + 1);
     setNotice(nextNotice ?? null);
@@ -63,33 +64,51 @@ export function StandKiosk({
 // One visitor, from the PIN to the thanks. A new key gives the next visitor empty screens and empty action states.
 function KioskRound({ actions, createStatusLoader, onFinished }: Readonly<KioskRoundProps>) {
   const [requestState, requestVisit, isRequesting] = useActionState(actions.requestVisit, null);
-  const [visitState, submitVisit, isSending] = useActionState(actions.submitVisit, null);
-  const [screen, setScreen] = useState<Screen>("waiting");
-  const pendingVisitId = requestState?.status === "waiting" ? requestState.pendingVisitId : "";
-  const handleAnswered = useCallback(() => setScreen("answeredByPhone"), []);
-  const handleExpired = useCallback(() => onFinished(COPY.expired), [onFinished]);
-  const handleAnswerHere = useCallback(() => setScreen("answerHere"), []);
-  const handleCancel = useCallback(
-    () => void cancelAndFinish(actions, pendingVisitId, onFinished),
-    [actions, pendingVisitId, onFinished],
-  );
-
-  if (visitState?.status === "done") {
-    return <KioskThanks message={visitState.message} onFinished={onFinished} />;
-  }
 
   if (requestState?.status !== "waiting") {
     return <KioskPinStep state={requestState} action={requestVisit} isPending={isRequesting} />;
   }
 
-  if (screen === "answeredByPhone") {
-    return <KioskThanks message={COPY.thanks.message} onFinished={onFinished} />;
+  return (
+    <KioskVisit
+      visit={requestState}
+      actions={actions}
+      createStatusLoader={createStatusLoader}
+      onFinished={onFinished}
+    />
+  );
+}
+
+interface KioskVisitProps extends KioskRoundProps {
+  visit: { pin: string; pendingVisitId: string };
+}
+
+// A visit that is waiting: from the wait for the phone to the thanks, with the fallback of rating on this screen.
+function KioskVisit({ visit, actions, createStatusLoader, onFinished }: Readonly<KioskVisitProps>) {
+  const [visitState, submitVisit, isSending] = useActionState(actions.submitVisit, null);
+  const [screen, setScreen] = useState<Screen>("waiting");
+  const handleAnswered = useCallback(() => setScreen("answeredByPhone"), []);
+  const handleExpired = useCallback(() => onFinished(COPY.expired), [onFinished]);
+  const handleAnswerHere = useCallback(() => setScreen("answerHere"), []);
+
+  const handleCancel = useCallback(
+    () => void cancelAndFinish(actions, visit.pendingVisitId, onFinished),
+    [actions, visit.pendingVisitId, onFinished],
+  );
+
+  if (visitState?.status === "done" || screen === "answeredByPhone") {
+    return (
+      <KioskThanks
+        message={visitState?.status === "done" ? visitState.message : COPY.thanks.message}
+        onFinished={onFinished}
+      />
+    );
   }
 
   if (screen === "answerHere") {
     return (
       <KioskSurveyStep
-        pin={requestState.pin}
+        pin={visit.pin}
         state={visitState}
         action={submitVisit}
         isPending={isSending}
@@ -100,7 +119,7 @@ function KioskRound({ actions, createStatusLoader, onFinished }: Readonly<KioskR
 
   return (
     <KioskWaitingStep
-      pendingVisitId={requestState.pendingVisitId}
+      pendingVisitId={visit.pendingVisitId}
       createStatusLoader={createStatusLoader}
       onAnswered={handleAnswered}
       onExpired={handleExpired}

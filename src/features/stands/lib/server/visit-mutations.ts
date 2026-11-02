@@ -19,7 +19,15 @@ export interface NewVisit extends VisitRecord {
   pin: string;
 }
 
-type SettlePending = (transaction: Prisma.TransactionClient) => Promise<unknown>;
+type SettlePending = (transaction: Prisma.TransactionClient) => Promise<void>;
+
+/** A visit whose visitor and place were already checked; `settlePending` runs in the same transaction. */
+export interface RecordedVisit {
+  visit: VisitRecord;
+  visitorId: string;
+  now: Date;
+  settlePending: SettlePending;
+}
 
 /**
  * Records the visit and its survey in one transaction: without the survey there is no check-in (RF-28), and the ticket
@@ -31,22 +39,20 @@ export async function registerVisit(visit: NewVisit, now: Date): Promise<VisitRe
   if (check.status !== "ready") return check;
 
   // The kiosk answered here, so a pending visit of the same passport at this stand has nothing left to wait for.
-  const dropPending: SettlePending = (transaction) =>
-    transaction.pendingVisit.deleteMany({ where: { visitorId: check.visitorId, standId: visit.standId } });
+  const dropPending: SettlePending = async (transaction) => {
+    await transaction.pendingVisit.deleteMany({ where: { visitorId: check.visitorId, standId: visit.standId } });
+  };
 
-  return recordVisit(visit, check.visitorId, now, dropPending);
+  return recordVisit({ visit, visitorId: check.visitorId, now, settlePending: dropPending });
 }
 
-/** The write of a visit whose visitor and place were already checked; `settlePending` runs in the same transaction. */
-export async function recordVisit(
-  visit: VisitRecord,
-  visitorId: string,
-  now: Date,
-  settlePending: SettlePending,
-): Promise<VisitResult> {
+/** The write of a visit that was already checked. */
+export async function recordVisit(recorded: RecordedVisit): Promise<VisitResult> {
+  const { visit, visitorId, now, settlePending } = recorded;
+
   try {
     return await getPrisma().$transaction(async (transaction) => {
-      const result = await insertVisit(transaction, visit, visitorId, now);
+      const result = await insertVisit(transaction, { visit, visitorId, now });
 
       await settlePending(transaction);
 
@@ -61,9 +67,7 @@ export async function recordVisit(
 
 async function insertVisit(
   transaction: Prisma.TransactionClient,
-  visit: VisitRecord,
-  visitorId: string,
-  now: Date,
+  { visit, visitorId, now }: Omit<RecordedVisit, "settlePending">,
 ): Promise<VisitResult> {
   const checkIn = await transaction.checkIn.create({
     data: { visitorId, standId: visit.standId, scannedById: visit.scannedById, checkedInAt: now },

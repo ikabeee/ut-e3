@@ -30,6 +30,7 @@ export function KioskWaitingStep({
   onCancel,
 }: Readonly<KioskWaitingStepProps>) {
   const loadStatus = useMemo(() => createStatusLoader(pendingVisitId), [createStatusLoader, pendingVisitId]);
+
   const { value: status, hasConnectionError } = usePolledValue<VisitStatus>("waiting", {
     load: loadStatus,
     merge: takeIncoming,

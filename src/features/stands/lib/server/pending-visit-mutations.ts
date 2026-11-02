@@ -61,7 +61,12 @@ export async function answerPendingVisit(visitorId: string, ratings: Ratings, no
 
   const visit = { standId: pending.standId, scannedById: pending.requestedById, ratings };
 
-  return recordVisit(visit, visitorId, now, (transaction) =>
-    transaction.pendingVisit.updateMany({ where: { id: pending.id }, data: { answeredAt: now } }),
-  );
+  return recordVisit({
+    visit,
+    visitorId,
+    now,
+    settlePending: async (transaction) => {
+      await transaction.pendingVisit.updateMany({ where: { id: pending.id }, data: { answeredAt: now } });
+    },
+  });
 }

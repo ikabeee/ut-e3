@@ -13,10 +13,14 @@ import { readFormText } from "@shared/lib/form-data";
 import { consumeAttempt } from "@shared/lib/server/rate-limit";
 import { getDeviceVisitorId } from "@shared/lib/server/visitor-device";
 
-export type RequestVisitState =
-  { status: "waiting"; pin: string; pendingVisitId: string } | { status: "error"; message: string };
+export interface ActionError {
+  status: "error";
+  message: string;
+}
 
-export type VisitActionState = { status: "done"; message: string } | { status: "error"; message: string };
+export type RequestVisitState = { status: "waiting"; pin: string; pendingVisitId: string } | ActionError;
+
+export type VisitActionState = { status: "done"; message: string } | ActionError;
 
 const COPY = STANDS_COPY.kiosk;
 
@@ -88,6 +92,6 @@ export async function answerVisitAction(_previous: VisitActionState | null, form
     : failure(COPY.errors[result.status]);
 }
 
-function failure(message: string): { status: "error"; message: string } {
+function failure(message: string): ActionError {
   return { status: "error", message };
 }

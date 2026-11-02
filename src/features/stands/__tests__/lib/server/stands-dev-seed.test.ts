@@ -15,6 +15,9 @@ import { getPrisma } from "@shared/lib/server/prisma";
 import { verifyPassword } from "@shared/lib/server/password";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
+// Creating the accounts hashes their passwords, which can pass the default timeout when the machine is busy.
+jest.setTimeout(30_000);
+
 const database = createTestDatabase();
 
 process.env.DATABASE_URL = database.url;
@@ -36,6 +39,7 @@ beforeEach(async () => {
   await getPrisma().stand.deleteMany();
   await getPrisma().eventSettings.deleteMany();
   await createEventSettings();
+
   for (let number = 1; number <= 10; number += 1) await createStand(number);
 });
 

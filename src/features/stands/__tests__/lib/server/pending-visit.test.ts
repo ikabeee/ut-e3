@@ -127,6 +127,7 @@ describe("answerPendingVisit", () => {
 
       await getPrisma().checkIn.create({ data: { visitorId, standId: previous.id } });
     }
+
     await start();
 
     expect(await answerPendingVisit(visitorId, RATINGS, NOW)).toEqual({ status: "registered", ticketsGranted: 1 });
@@ -244,14 +245,14 @@ describe("getPendingVisitStatus", () => {
   });
 });
 
-function start() {
-  return requestVisit({ standId, scannedById: staffId, pin: PIN }, NOW);
-}
-
 async function answered(): Promise<string> {
   const started = await start();
 
   await answerPendingVisit(visitorId, RATINGS, NOW);
 
   return started.status === "requested" ? started.pendingVisitId : "";
+}
+
+function start() {
+  return requestVisit({ standId, scannedById: staffId, pin: PIN }, NOW);
 }
