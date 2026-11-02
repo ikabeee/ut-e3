@@ -9,6 +9,7 @@ const FEATURE_DEPENDENCIES = {
   "floor-plan": ["games"],
   schedule: ["accounts", "floor-plan"],
   stands: ["accounts", "games", "visitors"],
+  support: ["accounts", "visitors"],
   tournament: ["accounts"],
   visitors: ["games"],
 };

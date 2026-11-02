@@ -11,8 +11,13 @@ export const KOF_HOME_PATH = "/admin/kof";
 // The stand accounts sign in to the kiosk of their stand; the page itself belongs to the stands feature.
 export const STAND_HOME_PATH = "/stand/kiosk";
 
+// The help desk signs in to the recovery desk; the page itself belongs to the support feature.
+export const SUPPORT_HOME_PATH = "/support/recovery";
+
 export function getHomePath(role: string): string {
   if (role === "kof_admin" || role === "kof_staff") return KOF_HOME_PATH;
 
-  return role === "stand_admin" || role === "stand_staff" ? STAND_HOME_PATH : SYSADMIN_HOME_PATH;
+  if (role === "stand_admin" || role === "stand_staff") return STAND_HOME_PATH;
+
+  return role === "help_desk" ? SUPPORT_HOME_PATH : SYSADMIN_HOME_PATH;
 }

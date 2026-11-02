@@ -1,6 +1,6 @@
 import "server-only";
 import { redirect } from "next/navigation";
-import { LOGIN_PATH } from "@features/accounts/lib/accounts-links";
+import { getHomePath, LOGIN_PATH } from "@features/accounts/lib/accounts-links";
 import { getManagedRoles } from "@features/accounts/lib/invitation-rules";
 import type { AccountRole, KofDesk } from "@features/accounts/lib/types";
 import { getPrisma } from "@shared/lib/server/prisma";
@@ -75,6 +75,24 @@ export async function getStandAccount(): Promise<StandAccount | null> {
   const row = await getPrisma().account.findUnique({ where: { id: account.id }, select: { standId: true } });
 
   return row?.standId ? { ...account, role, standId: row.standId } : null;
+}
+
+const RECOVERY_ROLES: readonly string[] = ["help_desk", "sysadmin"];
+
+// The recovery desk (RF-69): the help desk does the work and the sysadmin can cover it. Any other role goes back to
+// its own home instead of the login, because it does have a session.
+export async function requireRecoveryAgent(): Promise<SessionAccount> {
+  const account = await getSessionAccount();
+
+  if (!account) {
+    redirect(LOGIN_PATH);
+  }
+
+  if (!RECOVERY_ROLES.includes(account.role)) {
+    redirect(getHomePath(account.role));
+  }
+
+  return account;
 }
 
 function toStandRole(role: string): StandAccount["role"] | null {

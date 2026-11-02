@@ -8,6 +8,12 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Mesa de recuperación en `/support/recovery` (cuentas de atención `help_desk`; el sysadmin también puede usarla): el
+  agente confirma al visitante con su nombre completo y su gamertag exactos y entrega un enlace nuevo de acceso al
+  pasaporte (`/passport/claim/<token>`). El teléfono anterior pierde el acceso, solo se guarda el hash del enlace y
+  cada recuperación (también la fallida por identidad que no coincide) queda en la bitácora. Límite de 30
+  recuperaciones por agente cada 10 minutos y 3 por pasaporte cada hora. La cuenta de atención entra directo a la mesa.
+  Datos de prueba con `npm run db:seed:support` (`help-desk@ejemplo.com`).
 - Kiosko del stand en `/stand/kiosk` (cuentas `stand_admin` y `stand_staff`): el staff escribe el PIN del pasaporte, el
   visitante recibe la encuesta de 3 preguntas (juego, stand y arte, de 1 a 5) en su propio pasaporte y la visita queda
   registrada en una sola transacción con su voto y, si toca, el boleto de las visitas 9 y 18. La visita espera 3 minutos

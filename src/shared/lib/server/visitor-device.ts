@@ -47,6 +47,16 @@ export async function getDeviceVisitorId(): Promise<string | null> {
   return device?.visitorId ?? null;
 }
 
+/** Whether the token is the one the visitor's current device holds; a replaced device's token is not. */
+export async function isActiveDeviceToken(token: string): Promise<boolean> {
+  const device = await getPrisma().visitorDevice.findUnique({
+    where: { token: hashToken(token) },
+    select: { id: true },
+  });
+
+  return device !== null;
+}
+
 async function readVisitorDeviceToken(): Promise<string | null> {
   return (await cookies()).get(VISITOR_DEVICE_COOKIE)?.value || null;
 }
