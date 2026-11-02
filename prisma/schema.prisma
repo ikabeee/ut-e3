@@ -58,6 +58,8 @@ model Account {
   auditLogs         AuditLog[]
   registeredEntries TournamentEntry[]
   invitations       AccountInvitation[]
+  scannedCheckIns   CheckIn[]           @relation("ScannedCheckIns")
+  requestedVisits   PendingVisit[]
 
   @@map("accounts")
 }
@@ -126,6 +128,8 @@ model Stand {
   game      Game?
   accounts  Account[]
   checkIns  CheckIn[]
+  votes     Vote[]
+  pending   PendingVisit[]
 
   @@unique([zone, number])
   @@map("stands")
@@ -192,6 +196,8 @@ model Visitor {
   checkIns        CheckIn[]
   raffleTickets   RaffleTicket[]
   tournamentEntry TournamentEntry?
+  votes           Vote[]
+  pendingVisit    PendingVisit?
 
   @@map("visitors")
 }
@@ -264,9 +270,31 @@ model CheckIn {
   standId     String   @map("stand_id")
   stand       Stand    @relation(fields: [standId], references: [id], onDelete: Restrict)
   checkedInAt DateTime @default(now()) @map("checked_in_at")
+  /// The staff account that had the kiosk open when the visit was recorded (RF-36).
+  scannedById String?  @map("scanned_by_id")
+  scannedBy   Account? @relation("ScannedCheckIns", fields: [scannedById], references: [id], onDelete: Restrict)
+  vote        Vote?
 
   @@unique([visitorId, standId])
   @@map("checkins")
+}
+
+/// The satisfaction survey of a visit (RF-26): one per visitor and stand, created together with its check-in (RF-28).
+model Vote {
+  id          String   @id @default(uuid())
+  checkInId   String   @unique @map("check_in_id")
+  checkIn     CheckIn  @relation(fields: [checkInId], references: [id], onDelete: Restrict)
+  visitorId   String   @map("visitor_id")
+  visitor     Visitor  @relation(fields: [visitorId], references: [id], onDelete: Restrict)
+  standId     String   @map("stand_id")
+  stand       Stand    @relation(fields: [standId], references: [id], onDelete: Restrict)
+  gameRating  Int      @map("game_rating")
+  standRating Int      @map("stand_rating")
+  artRating   Int      @map("art_rating")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([visitorId, standId])
+  @@map("votes")
 }
 
 model RaffleTicket {
@@ -280,4 +308,22 @@ model RaffleTicket {
 
   @@unique([visitorId, milestone])
   @@map("raffle_tickets")
+}
+
+/// A visit the staff started with the PIN and the visitor has not rated yet. The visitor answers it from the passport,
+/// which records the visit; it expires on its own. A visitor has at most one at a time.
+model PendingVisit {
+  id            String    @id @default(uuid())
+  visitorId     String    @unique @map("visitor_id")
+  visitor       Visitor   @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  standId       String    @map("stand_id")
+  stand         Stand     @relation(fields: [standId], references: [id], onDelete: Cascade)
+  /// The staff account that had the kiosk open; it becomes `scannedById` of the check-in (RF-36).
+  requestedById String    @map("requested_by_id")
+  requestedBy   Account   @relation(fields: [requestedById], references: [id], onDelete: Cascade)
+  expiresAt     DateTime  @map("expires_at")
+  answeredAt    DateTime? @map("answered_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@map("pending_visits")
 }

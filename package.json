@@ -20,13 +20,15 @@
     "test:e2e:games": "node e2e/games.e2e.mjs",
     "test:e2e": "node e2e/passport.e2e.mjs",
     "test:e2e:sponsors": "node e2e/sponsors.e2e.mjs",
+    "test:e2e:kiosk": "node e2e/kiosk.e2e.mjs",
     "test:coverage": "jest --coverage",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "db:seed:kof": "tsx --conditions=react-server prisma/seed-kof.ts"
+    "db:seed:kof": "tsx --conditions=react-server prisma/seed-kof.ts",
+    "db:seed:stands": "tsx --conditions=react-server prisma/seed-stands.ts"
   },
   "dependencies": {
     "@heroui/react": "^3.2.6",

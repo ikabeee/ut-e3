@@ -48,6 +48,7 @@ npm run db:generate        # genera el cliente de Prisma en generated/prisma (ta
 npm run db:migrate         # crea y aplica una migración en la BD de DATABASE_URL (prisma migrate dev)
 npm run db:deploy          # aplica las migraciones pendientes sin crear nuevas (prisma migrate deploy)
 npm run db:seed            # carga el contenido inicial en las tablas vacías; no toca las que ya tienen datos (prisma/seed.ts)
+npm run db:seed:stands    # solo desarrollo: staff por stand, administrador y 24 pasaportes de prueba (prisma/seed-stands.ts)
 npm run db:seed:kof       # solo desarrollo: cuentas de KOF de prueba y un bracket de 40 jugadores (prisma/seed-kof.ts)
 ```
 
@@ -80,6 +81,7 @@ src/
 │   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
 │   ├── admin/                # Panel del sysadmin (/admin): compone las secciones que se administran
 │   ├── site/                 # Páginas del sitio que no son de un dominio: la 404 (src/app/not-found.tsx)
+│   ├── stands/               # Kiosko del stand (/stand/kiosk): PIN, encuesta y registro de visitas
 │   └── tournament/           # Torneo de KOF (/admin/kof): bracket, permisos por mesa y bitácora
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)

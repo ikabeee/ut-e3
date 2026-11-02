@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  // Only the dev server reads this: it lets a phone on the local network (192.168.x.x) use the app while testing.
+  allowedDevOrigins: ["192.168.*.*"],
   experimental: {
     agentUpgrade: "security",
   },

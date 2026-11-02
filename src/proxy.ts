@@ -2,5 +2,5 @@ export { redirectWithoutSession as proxy } from "@features/accounts/lib/accounts
 
 // Next reads the matcher statically, so it stays a literal in this file.
 export const config = {
-  matcher: ["/admin", "/admin/:path*"],
+  matcher: ["/admin", "/admin/:path*", "/stand", "/stand/:path*"],
 };
