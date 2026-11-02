@@ -49,6 +49,7 @@ npm run db:migrate         # crea y aplica una migración en la BD de DATABASE_U
 npm run db:deploy          # aplica las migraciones pendientes sin crear nuevas (prisma migrate deploy)
 npm run db:seed            # carga el contenido inicial en las tablas vacías; no toca las que ya tienen datos (prisma/seed.ts)
 npm run db:seed:stands    # solo desarrollo: staff por stand, administrador y 24 pasaportes de prueba (prisma/seed-stands.ts)
+npm run db:seed:support  # solo desarrollo: cuenta de atención help-desk@ejemplo.com (prisma/seed-support.ts)
 npm run db:seed:kof       # solo desarrollo: cuentas de KOF de prueba y un bracket de 40 jugadores (prisma/seed-kof.ts)
 ```
 
@@ -82,6 +83,7 @@ src/
 │   ├── admin/                # Panel del sysadmin (/admin): compone las secciones que se administran
 │   ├── site/                 # Páginas del sitio que no son de un dominio: la 404 (src/app/not-found.tsx)
 │   ├── stands/               # Kiosko del stand (/stand/kiosk): PIN, encuesta y registro de visitas
+│   ├── support/              # Mesa de recuperación (/support/recovery): atención recupera pasaportes (RF-69, RF-70)
 │   └── tournament/           # Torneo de KOF (/admin/kof): bracket, permisos por mesa y bitácora
 └── shared/                   # Código transversal SIN reglas de negocio
     ├── __tests__/            # Pruebas de shared (mismas subcarpetas que el código)
@@ -239,6 +241,8 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | Quién invita a quién (sysadmin: administradores; administrador de KOF: su staff) | `getManagedRoles()` en `src/features/accounts/lib/invitation-rules.ts` |
 | Invitar, reenviar, desactivar y activar cuentas (enlace por correo, 72 horas) | `src/features/accounts/lib/server/invitations.ts` |
 | Política de contraseña nueva (12 caracteres) | `validateNewPassword()` en `invitation-rules.ts` |
+| Quién usa la mesa de recuperación (`help_desk` y `sysadmin`; el resto va a su home) | `requireRecoveryAgent()` en `current-account.ts` |
+| Home de cada rol al entrar (el de `help_desk` es `/support/recovery`) | `getHomePath()` en `src/features/accounts/lib/accounts-links.ts` |
 | Bitácora de auditoría | `recordAudit()` en `src/shared/lib/server/audit-log.ts`, dentro de la transacción del cambio |
 
 - Toda Server Action del panel empieza con `await requireSysadmin()` y, tras escribir, llama `updateTag` con el

@@ -1,7 +1,12 @@
 /**
  * @jest-environment node
  */
-import { getKofAccount, requireKofAccount, requireSysadmin } from "@features/accounts/lib/server/current-account";
+import {
+  getKofAccount,
+  requireKofAccount,
+  requireRecoveryAgent,
+  requireSysadmin,
+} from "@features/accounts/lib/server/current-account";
 import { createSession } from "@shared/lib/server/session";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
@@ -10,6 +15,12 @@ import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 const database = createTestDatabase();
 
 process.env.DATABASE_URL = database.url;
+
+let standId = "";
+
+beforeAll(async () => {
+  standId = (await getPrisma().stand.create({ data: { zone: "A", number: 1, studio: 1, groupCode: "101" } })).id;
+});
 
 afterAll(async () => {
   await getPrisma().$disconnect();
@@ -122,8 +133,53 @@ describe("requireKofAccount", () => {
   });
 });
 
+describe("requireRecoveryAgent", () => {
+  it.each(["help_desk", "sysadmin"])("returns a signed-in %s", async (role) => {
+    const account = await createAccount(role);
+
+    await createSession(account.id);
+
+    expect(await requireRecoveryAgent()).toEqual({ id: account.id, email: "cuenta@ut.mx", name: "Cuenta", role });
+  });
+
+  it("sends a visitor without a session to /login", async () => {
+    await expect(requireRecoveryAgent()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+
+  it.each([
+    ["stand_admin", "/stand/kiosk"],
+    ["stand_staff", "/stand/kiosk"],
+    ["kof_admin", "/admin/kof"],
+    ["kof_staff", "/admin/kof"],
+    ["raffle_admin", "/admin"],
+  ])("sends a %s to its own home, %s", async (role, home) => {
+    const account = await createAccount(role);
+
+    await createSession(account.id);
+
+    await expect(requireRecoveryAgent()).rejects.toMatchObject({ digest: expect.stringContaining(`;${home};`) });
+  });
+
+  it("sends a disabled help desk account to /login", async () => {
+    const account = await createAccount("help_desk");
+
+    await createSession(account.id);
+    await getPrisma().account.update({ where: { id: account.id }, data: { status: "disabled" } });
+
+    await expect(requireRecoveryAgent()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+});
+
 function createAccount(role: string, kofDesk?: number) {
   return getPrisma().account.create({
-    data: { email: "cuenta@ut.mx", name: "Cuenta", role, status: "active", password: "scrypt$1$1$1$a$b", kofDesk },
+    data: {
+      email: "cuenta@ut.mx",
+      name: "Cuenta",
+      role,
+      status: "active",
+      password: "scrypt$1$1$1$a$b",
+      kofDesk,
+      standId: role.startsWith("stand_") ? standId : undefined,
+    },
   });
 }
