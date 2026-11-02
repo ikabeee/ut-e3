@@ -8,7 +8,15 @@ import type { VisitActionState } from "@features/stands/lib/stands-actions";
 const refresh = jest.fn();
 
 // The App Router provides the router through this context; jest.mock is not allowed in this repository.
-const ROUTER = { refresh } as unknown as AppRouterInstance;
+const ROUTER: AppRouterInstance = {
+  back: () => undefined,
+  bfcacheId: "test",
+  forward: () => undefined,
+  prefetch: () => undefined,
+  push: () => undefined,
+  refresh,
+  replace: () => undefined,
+};
 
 const PENDING: PendingVisitView = { id: "pending-1", standCode: "ZA-S1", gameName: "Pixel Quest" };
 
@@ -93,6 +101,13 @@ describe("VisitSurveyPrompt", () => {
   });
 });
 
+async function openSurvey(failure?: { message: string }) {
+  renderPrompt(failure);
+  pending = PENDING;
+  await advance(3000);
+  await screen.findByRole("dialog");
+}
+
 function renderPrompt(failure?: { message: string }) {
   const answerVisit = async (_previous: VisitActionState | null, form: FormData): Promise<VisitActionState> => {
     if (failure) return { status: "error", message: failure.message };
@@ -107,13 +122,6 @@ function renderPrompt(failure?: { message: string }) {
       <VisitSurveyPrompt answerVisit={answerVisit} loadPending={async () => pending} />
     </AppRouterContext.Provider>,
   );
-}
-
-async function openSurvey(failure?: { message: string }) {
-  renderPrompt(failure);
-  pending = PENDING;
-  await advance(3000);
-  await screen.findByRole("dialog");
 }
 
 async function rate(question: string, value: string) {

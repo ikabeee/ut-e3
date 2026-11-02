@@ -19,26 +19,30 @@ export interface VisitStatusResponse {
   status: VisitStatus;
 }
 
-const VISIT_STATUSES: readonly unknown[] = ["waiting", "answered", "expired"];
-
 export function isPendingVisitResponse(value: unknown): value is PendingVisitResponse {
-  if (!isRecord(value) || !("pending" in value)) return false;
-
-  const pending = value.pending;
-
-  return (
-    pending === null ||
-    (isRecord(pending) &&
-      typeof pending.id === "string" &&
-      typeof pending.standCode === "string" &&
-      typeof pending.gameName === "string")
-  );
+  return isObject(value) && "pending" in value && (value.pending === null || isPendingVisitView(value.pending));
 }
 
 export function isVisitStatusResponse(value: unknown): value is VisitStatusResponse {
-  return isRecord(value) && VISIT_STATUSES.includes(value.status);
+  return isObject(value) && "status" in value && isVisitStatus(value.status);
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+function isPendingVisitView(value: unknown): value is PendingVisitView {
+  return (
+    isObject(value) &&
+    "id" in value &&
+    typeof value.id === "string" &&
+    "standCode" in value &&
+    typeof value.standCode === "string" &&
+    "gameName" in value &&
+    typeof value.gameName === "string"
+  );
+}
+
+function isVisitStatus(value: unknown): value is VisitStatus {
+  return value === "waiting" || value === "answered" || value === "expired";
+}
+
+function isObject(value: unknown): value is object {
   return value !== null && typeof value === "object";
 }

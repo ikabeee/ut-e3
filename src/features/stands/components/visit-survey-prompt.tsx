@@ -37,11 +37,13 @@ const THANKS_DURATION_MS = 4000;
  */
 export function VisitSurveyPrompt({ answerVisit, loadPending = fetchPendingVisit }: Readonly<VisitSurveyPromptProps>) {
   const router = useRouter();
+
   const { value: pending } = usePolledValue<PendingVisitView | null>(null, {
     load: loadPending,
     merge: takeIncoming,
     intervalMs: POLL_INTERVAL_MS,
   });
+
   const [isThanking, setIsThanking] = useState(false);
   const handleRecorded = useCallback(() => setIsThanking(true), []);
 

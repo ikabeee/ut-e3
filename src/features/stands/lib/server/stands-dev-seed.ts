@@ -54,10 +54,6 @@ export async function seedStandsDev(env: StandsDevEnv, now: Date): Promise<Stand
   return { createdAccounts, createdVisitors };
 }
 
-export function getStandDevStaffEmail(zone: string, number: number): string {
-  return `staff-${formatStandCode({ zone, number }).toLowerCase()}@ejemplo.com`;
-}
-
 interface DevStand {
   id: string;
   zone: string;
@@ -88,6 +84,10 @@ async function createMissingAccounts(stands: readonly DevStand[], password: stri
   });
 
   return createMissingDevAccounts(accounts, password);
+}
+
+export function getStandDevStaffEmail(zone: string, number: number): string {
+  return `staff-${formatStandCode({ zone, number }).toLowerCase()}@ejemplo.com`;
 }
 
 async function createMissingVisitors(): Promise<number> {

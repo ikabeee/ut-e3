@@ -188,15 +188,15 @@ function createStatusLoader() {
   };
 }
 
-async function typePin(pin: string) {
-  await userEvent.type(screen.getByLabelText("PIN de 5 dígitos"), pin);
-  await userEvent.click(screen.getByRole("button", { name: "Continuar" }));
-}
-
 async function reachSurvey() {
   await typePin("12345");
   await userEvent.click(await screen.findByRole("button", { name: "Calificar en esta pantalla" }));
   await screen.findByRole("heading", { name: "¿Qué te pareció?" });
+}
+
+async function typePin(pin: string) {
+  await userEvent.type(screen.getByLabelText("PIN de 5 dígitos"), pin);
+  await userEvent.click(screen.getByRole("button", { name: "Continuar" }));
 }
 
 async function rate(question: string, value: string) {

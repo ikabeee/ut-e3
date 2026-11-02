@@ -272,6 +272,17 @@ async function checkVisitRatedOnThePhone(session, pin) {
   check("the passport opens the survey of the stand", (await dialog.textContent()).includes("ZA-S1"));
   await visitorPage.screenshot({ path: path.join(screenshots, "kiosk-phone-survey.png"), fullPage: true });
 
+  await answerSurveyOnThePhone(dialog, database);
+  await checkKioskFinished(staffPage);
+  await checkVoteRecorded(database);
+
+  await visitorPage.reload({ waitUntil: "networkidle" });
+  const summary = (await visitorPage.getByText(/^Visitados \d+ de 18$/).textContent()).trim();
+
+  check("the passport shows the new visit", summary === "Visitados 1 de 18", summary);
+}
+
+async function answerSurveyOnThePhone(dialog, database) {
   await dialog.getByRole("button", { name: SUBMIT }).click();
   check(
     "the survey does not send without the three answers",
@@ -284,7 +295,9 @@ async function checkVisitRatedOnThePhone(session, pin) {
   await dialog.getByRole("button", { name: SUBMIT }).click();
   await dialog.getByText("Tu visita quedó registrada").waitFor({ timeout: UI_TIMEOUT_MS });
   check("the visitor sees the thanks", true);
+}
 
+async function checkKioskFinished(staffPage) {
   await staffPage.getByRole("heading", { name: "¡Gracias!" }).waitFor({ timeout: UI_TIMEOUT_MS });
   check(
     "the kiosk shows only the thanks, never the ratings",
@@ -292,12 +305,15 @@ async function checkVisitRatedOnThePhone(session, pin) {
   );
   await staffPage.getByRole("heading", { name: "Escribe tu PIN" }).waitFor({ timeout: UI_TIMEOUT_MS });
   check("the kiosk goes back to the PIN screen by itself", true);
+}
 
+async function checkVoteRecorded(database) {
   const vote = database
     .prepare(
       "SELECT v.game_rating AS g, v.stand_rating AS s, v.art_rating AS a, c.scanned_by_id AS by FROM votes v JOIN checkins c ON c.id = v.check_in_id JOIN visitors x ON x.id = v.visitor_id WHERE x.gamertag = ?",
     )
     .get(GAMERTAG);
+
   const staff = database.prepare("SELECT id FROM accounts WHERE email = ?").get(STAFF_EMAIL);
 
   check(
@@ -309,11 +325,6 @@ async function checkVisitRatedOnThePhone(session, pin) {
     "the answered visit is marked, not left waiting",
     count(database, "pending_visits", "answered_at IS NULL") === 0,
   );
-
-  await visitorPage.reload({ waitUntil: "networkidle" });
-  const summary = (await visitorPage.getByText(/^Visitados \d+ de 18$/).textContent()).trim();
-
-  check("the passport shows the new visit", summary === "Visitados 1 de 18", summary);
 }
 
 async function checkSecondVisitRefused(staffPage, pin) {
@@ -374,7 +385,7 @@ async function checkMilestoneTicket(staffPage, database) {
 
 async function checkStaffCannotOpenAdmin(page) {
   await page.goto(`${BASE_URL}/admin`, { waitUntil: "networkidle" });
-  check("a stand account does not get the sysadmin panel", !/\/admin$/.test(page.url()), page.url());
+  check("a stand account does not get the sysadmin panel", !page.url().endsWith("/admin"), page.url());
 }
 
 async function typePin(page, pin) {
