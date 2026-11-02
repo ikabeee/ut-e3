@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { SignOutButton } from "@features/accounts/components/sign-out-button";
+import { AccountPageHeader } from "@features/accounts/components/account-page-header";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { SUPPORT_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { requireRecoveryAgent } from "@features/accounts/lib/server/current-account";
@@ -36,13 +36,7 @@ async function RecoveryPanel() {
 
   return (
     <>
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="type-section">{COPY.title}</h1>
-          <p className="mt-2 text-sm text-muted">{COPY.signedInAs(account.name)}</p>
-        </div>
-        <SignOutButton action={signOut} />
-      </header>
+      <AccountPageHeader title={COPY.title} signedInAs={COPY.signedInAs(account.name)} signOutAction={signOut} />
       <RecoveryDesk recover={recoverPassportAction} />
     </>
   );
