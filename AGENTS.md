@@ -82,7 +82,7 @@ src/
 │   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
 │   ├── admin/                # Panel del sysadmin (/admin): compone las secciones que se administran
 │   ├── site/                 # Páginas del sitio que no son de un dominio: la 404 (src/app/not-found.tsx)
-│   ├── stands/               # Kiosko del stand (/stand/kiosk): PIN, encuesta y registro de visitas
+│   ├── stands/               # Stands: kiosko (/stand/kiosk), equipo (/stand/team) y alta de stands en /admin
 │   ├── support/              # Mesa de recuperación (/support/recovery): atención recupera pasaportes (RF-69, RF-70)
 │   └── tournament/           # Torneo de KOF (/admin/kof): bracket, permisos por mesa y bitácora
 └── shared/                   # Código transversal SIN reglas de negocio
@@ -241,10 +241,18 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | Quién invita a quién (sysadmin: administradores; administrador de KOF: su staff) | `getManagedRoles()` en `src/features/accounts/lib/invitation-rules.ts` |
 | Invitar, reenviar, desactivar y activar cuentas (enlace por correo, 72 horas) | `src/features/accounts/lib/server/invitations.ts` |
 | Política de contraseña nueva (12 caracteres) | `validateNewPassword()` en `invitation-rules.ts` |
+| Alta, edición y baja de stands, y la invitación de su administrador (RF-39) | `src/features/stands/lib/server/stand-admin-mutations.ts` y `stands-admin-actions.ts`; el panel está en `/admin` (`components/stands-admin.tsx`) |
+| Datos del juego de un stand (RF-31): el stand es siempre el de la sesión | `saveStandGame()` en `src/features/games/lib/server/stand-game-mutations.ts`; `/stand/game` |
+| Cuentas de staff de un stand (RF-32): invitar, reenviar y desactivar | `canManageAccount()` y `MAX_STAND_STAFF` en `invitation-rules.ts`; `/stand/team` usa las acciones de `management-actions.ts` |
+| Guarda de las pantallas del administrador de stand | `requireStandAdmin()` en `current-account.ts` (el staff vuelve a su kiosko) |
 | Quién usa la mesa de recuperación (`help_desk` y `sysadmin`; el resto va a su home) | `requireRecoveryAgent()` en `current-account.ts` |
 | Home de cada rol al entrar (el de `help_desk` es `/support/recovery`) | `getHomePath()` en `src/features/accounts/lib/accounts-links.ts` |
 | Bitácora de auditoría | `recordAudit()` en `src/shared/lib/server/audit-log.ts`, dentro de la transacción del cambio |
 
+- Un stand tiene un administrador activo y hasta 3 cuentas `stand_staff` invitadas o activas (RF-32, RF-39); lo hacen
+  cumplir `invitations.ts` y los triggers de la migración `*_stand_accounts`. El staff y el técnico usan el mismo rol
+  `stand_staff`. Solo el sysadmin crea stands y administradores; el staff lo da de alta el administrador de su stand.
+  Las imágenes y la portada de un juego no las edita el administrador del stand.
 - Toda Server Action del panel empieza con `await requireSysadmin()` y, tras escribir, llama `updateTag` con el
   tag de la consulta que cambió para que la portada lo muestre.
 - Los CHECKs de `accounts` y los triggers que hacen la bitácora de sólo inserción viven en el SQL de la migración

@@ -75,13 +75,17 @@ function DeskField() {
   );
 }
 
-function OptionSelect({
-  name,
-  label,
-  options,
-}: Readonly<{ name: string; label: string; options: readonly RoleOption[] }>) {
+interface OptionSelectProps {
+  name: string;
+  label: string;
+  options: readonly RoleOption[];
+  /** The option selected at first; the first one when it is left out. */
+  defaultValue?: string;
+}
+
+export function OptionSelect({ name, label, options, defaultValue }: Readonly<OptionSelectProps>) {
   return (
-    <Select name={name} defaultValue={options[0].value} className="max-w-sm">
+    <Select name={name} defaultValue={defaultValue ?? options[0].value} className="max-w-sm">
       <Label>{label}</Label>
       <Select.Trigger className="min-h-11">
         <Select.Value />

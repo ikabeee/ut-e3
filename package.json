@@ -22,6 +22,7 @@
     "test:e2e:sponsors": "node e2e/sponsors.e2e.mjs",
     "test:e2e:kiosk": "node e2e/kiosk.e2e.mjs",
     "test:e2e:support": "node e2e/support.e2e.mjs",
+    "test:e2e:stand-admin": "node e2e/stand-admin.e2e.mjs",
     "test:coverage": "jest --coverage",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",

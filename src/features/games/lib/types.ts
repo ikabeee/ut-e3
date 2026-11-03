@@ -41,3 +41,11 @@ export interface GenreSummary {
   /** Three covers: two at the back, then the one in front. */
   covers: Game[];
 }
+
+/** The data of its game that the administrator of a stand registers (RF-31). */
+export interface StandGame {
+  name: string;
+  synopsis: string;
+  genreId: string;
+  itchUrl: string | null;
+}

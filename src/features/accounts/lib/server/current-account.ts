@@ -1,7 +1,8 @@
 import "server-only";
 import { redirect } from "next/navigation";
-import { getHomePath, LOGIN_PATH } from "@features/accounts/lib/accounts-links";
+import { getHomePath, LOGIN_PATH, STAND_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { getManagedRoles } from "@features/accounts/lib/invitation-rules";
+import type { ManagingActor } from "@features/accounts/lib/server/invitations";
 import type { AccountRole, KofDesk } from "@features/accounts/lib/types";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { getSessionAccount, type SessionAccount } from "@shared/lib/server/session";
@@ -77,6 +78,22 @@ export async function getStandAccount(): Promise<StandAccount | null> {
   return row?.standId ? { ...account, role, standId: row.standId } : null;
 }
 
+// The pages and Server Actions of the game and the staff of a stand (RF-31, RF-32). The staff of the stand goes back to
+// its kiosk, because it has a session but not this role.
+export async function requireStandAdmin(): Promise<StandAccount> {
+  const account = await getStandAccount();
+
+  if (!account) {
+    redirect(LOGIN_PATH);
+  }
+
+  if (account.role !== "stand_admin") {
+    redirect(STAND_HOME_PATH);
+  }
+
+  return account;
+}
+
 const RECOVERY_ROLES: readonly string[] = ["help_desk", "sysadmin"];
 
 // The recovery desk (RF-69): the help desk does the work and the sysadmin can cover it. Any other role goes back to
@@ -107,14 +124,16 @@ function toKofDesk(value: number | null): KofDesk | null {
   return value === 1 || value === 2 ? value : null;
 }
 
-// Whoever invites, resends or disables accounts: the sysadmin and the KOF administrator. What each one may manage is
-// decided again for the target account by the functions of `invitations.ts`.
-export async function requireAccountManager(): Promise<SessionAccount> {
+// Whoever invites, resends or disables accounts: the sysadmin, the KOF administrator and the stand administrator. What
+// each one may manage is decided again for the target account by the functions of `invitations.ts`.
+export async function requireAccountManager(): Promise<ManagingActor> {
   const account = await getSessionAccount();
 
   if (!account || getManagedRoles(account.role).length === 0) {
     redirect(LOGIN_PATH);
   }
 
-  return account;
+  const row = await getPrisma().account.findUnique({ where: { id: account.id }, select: { standId: true } });
+
+  return { ...account, standId: row?.standId ?? null };
 }

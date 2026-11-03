@@ -1,4 +1,5 @@
 import {
+  canManageAccount,
   canManageRole,
   getManagedRoles,
   INVITATION_TTL_MS,
@@ -75,5 +76,44 @@ describe("validateNewPassword (S6)", () => {
 
   it("counts the characters as typed, without trimming the spaces", () => {
     expect(validateNewPassword(" ".repeat(12), " ".repeat(12))).toBeNull();
+  });
+});
+
+describe("canManageAccount (RF-32)", () => {
+  const OWN_STAND = "stand-1";
+
+  const standAdmin = { role: "stand_admin", standId: OWN_STAND };
+
+  it("lets the stand administrator manage the staff of its own stand", () => {
+    expect(canManageAccount({ actor: standAdmin, target: { role: "stand_staff", standId: OWN_STAND } })).toBe(true);
+  });
+
+  it("does not let it manage the staff of another stand", () => {
+    expect(canManageAccount({ actor: standAdmin, target: { role: "stand_staff", standId: "stand-2" } })).toBe(false);
+  });
+
+  it("does not let a stand administrator without a stand manage anyone", () => {
+    const actor = { role: "stand_admin", standId: null };
+
+    expect(canManageAccount({ actor, target: { role: "stand_staff", standId: null } })).toBe(false);
+  });
+
+  it("does not let it manage another administrator or the roles of other panels", () => {
+    expect(canManageAccount({ actor: standAdmin, target: { role: "stand_admin", standId: OWN_STAND } })).toBe(false);
+    expect(canManageAccount({ actor: standAdmin, target: { role: "kof_staff", standId: null } })).toBe(false);
+  });
+
+  it("lets the sysadmin manage the stand administrators but not the stand staff", () => {
+    const actor = { role: "sysadmin" };
+
+    expect(canManageAccount({ actor, target: { role: "stand_admin", standId: OWN_STAND } })).toBe(true);
+    expect(canManageAccount({ actor, target: { role: "stand_staff", standId: OWN_STAND } })).toBe(false);
+  });
+
+  it("keeps the rules by role of the other panels", () => {
+    expect(canManageAccount({ actor: { role: "kof_admin" }, target: { role: "kof_staff", standId: null } })).toBe(true);
+    expect(canManageAccount({ actor: { role: "stand_staff" }, target: { role: "stand_staff", standId: null } })).toBe(
+      false,
+    );
   });
 });

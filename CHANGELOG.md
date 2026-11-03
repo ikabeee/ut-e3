@@ -8,6 +8,13 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Alta de stands y de sus cuentas desde la aplicación. El sysadmin crea un stand (zona, número, estudio y grupo; el
+  código `ZA-S1-E6-101` se arma solo) junto con la invitación de su administrador, y puede editar el stand y reinvitar
+  o desactivar al administrador desde `/admin`. El administrador del stand activa su cuenta por correo, registra y edita
+  el juego de su stand en `/stand/game` (nombre, sinopsis, género y enlace a itch.io; un juego nuevo recibe una portada
+  genérica) y da de alta o desactiva hasta 3 cuentas de staff en `/stand/team`. Cada cambio queda en la bitácora; una
+  cuenta desactivada pierde su sesión al instante y no puede volver a entrar. Los tres límites (un administrador activo
+  y 3 cuentas de staff por stand, 18 stands) también los hace cumplir la base de datos.
 - Mesa de recuperación en `/support/recovery` (cuentas de atención `help_desk`; el sysadmin también puede usarla): el
   agente confirma al visitante con su nombre completo y su gamertag exactos y entrega un enlace nuevo de acceso al
   pasaporte (`/passport/claim/<token>`). El teléfono anterior pierde el acceso, solo se guarda el hash del enlace y
