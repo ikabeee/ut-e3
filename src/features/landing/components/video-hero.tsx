@@ -6,6 +6,7 @@ import { LedWordmark } from "@features/landing/components/led-wordmark";
 import { useVideoPlayback } from "@features/landing/hooks/use-video-playback";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { TOP_SECTION_ID } from "@features/landing/lib/landing-links";
+import { ActionLink } from "@shared/components/action-link";
 import { ScrambleText } from "@shared/components/scramble-text";
 import { siteConfig } from "@shared/lib/site-config";
 
@@ -24,9 +25,11 @@ const SLICE_CLASS = `${GLYPH_CLASS} pointer-events-none absolute top-1/2 left-1/
 
 interface VideoHeroProps {
   calendarUrl: string;
+  /** Where "Crear mi pasaporte" goes: the registration, which says by itself when it is not open yet. */
+  registerHref: string;
 }
 
-export function VideoHero({ calendarUrl }: Readonly<VideoHeroProps>) {
+export function VideoHero({ calendarUrl, registerHref }: Readonly<VideoHeroProps>) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { isPlaying, hasSource, togglePlayback } = useVideoPlayback(videoRef);
 
@@ -37,7 +40,7 @@ export function VideoHero({ calendarUrl }: Readonly<VideoHeroProps>) {
       className="flex min-h-[clamp(560px,calc(100svh-var(--nav-height)),1000px)] items-center border-b border-border bg-background py-[clamp(24px,4vw,64px)]"
     >
       <div className="page-wrap grid w-full items-center gap-[clamp(24px,4vw,56px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-        <HeroContent calendarUrl={calendarUrl} />
+        <HeroContent calendarUrl={calendarUrl} registerHref={registerHref} />
         <LoopPanel videoRef={videoRef} hasSource={hasSource}>
           <PlaybackToggle isPlaying={isPlaying} onToggle={togglePlayback} />
         </LoopPanel>
@@ -72,7 +75,7 @@ function LoopPanel({ videoRef, hasSource, children }: Readonly<LoopPanelProps>) 
   );
 }
 
-function HeroContent({ calendarUrl }: Readonly<VideoHeroProps>) {
+function HeroContent({ calendarUrl, registerHref }: Readonly<VideoHeroProps>) {
   const { hero } = LANDING_COPY;
 
   return (
@@ -90,7 +93,12 @@ function HeroContent({ calendarUrl }: Readonly<VideoHeroProps>) {
       <p className="m-0 max-w-[52ch] text-[clamp(15px,1.3vw,18px)] leading-[1.45] text-copy">
         {hero.description(siteConfig.organization.division)}
       </p>
-      <HeroCtaLink href={calendarUrl}>{hero.callToAction}</HeroCtaLink>
+      <div className="flex flex-wrap items-stretch gap-3 max-[640px]:w-full max-[640px]:flex-col">
+        <HeroCtaLink href={calendarUrl}>{hero.callToAction}</HeroCtaLink>
+        <ActionLink href={registerHref} variant="outline" arrow="e" className="min-h-11">
+          {hero.createPassport}
+        </ActionLink>
+      </div>
     </div>
   );
 }

@@ -20,6 +20,7 @@ class IntersectionObserverMock {
     intersectionCallbacks.push(callback);
   }
   observe() {}
+  unobserve() {}
   disconnect() {}
 }
 
@@ -51,6 +52,12 @@ describe("VideoHero", () => {
     const title = screen.getByRole("heading", { level: 1, name: "PIXEL & CODE" });
 
     expect(within(title).getByRole("img", { name: "PIXEL & CODE" }).tagName.toLowerCase()).toBe("svg");
+  });
+
+  it("offers Crear mi pasaporte next to the calendar link, going to the registration", () => {
+    renderHero();
+
+    expect(screen.getByRole("link", { name: /Crear mi pasaporte/ })).toHaveAttribute("href", "/register");
   });
 
   it("shows the slogan JUEGA. CALIFICA. GANA. with GANA. in the accent colour", () => {
@@ -163,7 +170,7 @@ describe("VideoHero", () => {
 });
 
 function renderHero() {
-  return render(<VideoHero calendarUrl={CALENDAR_URL} />);
+  return render(<VideoHero calendarUrl={CALENDAR_URL} registerHref="/register" />);
 }
 
 function simulateBrowser({ prefersSaveData = false, prefersReducedMotion = false }: BrowserConditions) {

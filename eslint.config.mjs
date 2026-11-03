@@ -7,7 +7,8 @@ import sonarjs from "eslint-plugin-sonarjs";
 const FEATURE_DEPENDENCIES = {
   landing: ["games", "sponsors"],
   "floor-plan": ["games"],
-  games: ["accounts"],
+  pwa: ["games", "visitors"],
+  games: ["accounts", "event-settings"],
   schedule: ["accounts", "floor-plan"],
   stands: ["accounts", "games", "visitors"],
   support: ["accounts", "visitors"],
@@ -122,9 +123,9 @@ const nonPageImports = {
 
 const rootLayoutImports = {
   regex:
-    "^@features/(?!site/components/|offline/components/offline-notices$)[^/]+/(lib|hooks|components|api)/|^@shared/components/(?!query-provider$)",
+    "^@features/(?!site/components/|pwa/components/service-worker-registration$|offline/components/offline-notices$)[^/]+/(lib|hooks|components|api)/|^@shared/components/(?!query-provider$)",
   message:
-    "El layout sólo monta `@features/site/components/*`, `OfflineNotices`, `QueryProvider` y estilos globales; el resto va en una page.",
+    "El layout sólo monta `@features/site/components/*`, `ServiceWorkerRegistration`, `OfflineNotices`, `QueryProvider` y estilos globales; el resto va en una page.",
 };
 
 const metadataFileImports = {

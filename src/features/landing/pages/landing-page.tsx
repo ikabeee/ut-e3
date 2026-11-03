@@ -33,6 +33,7 @@ import { SponsorsCarousel } from "@features/sponsors/components/sponsors-carouse
 import { getSponsors } from "@features/sponsors/lib/server/sponsors-queries";
 import { SPONSORS_PATH } from "@features/sponsors/lib/sponsors-links";
 import type { Sponsor } from "@features/sponsors/lib/types";
+import { REGISTER_PATH } from "@features/visitors/lib/visitors-links";
 import { JsonLd } from "@shared/components/json-ld";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
 import { buildOpenGraph } from "@shared/lib/metadata";
@@ -52,12 +53,15 @@ const NAV_LINKS = [
   { href: SPONSORS_PATH, label: LANDING_COPY.nav.links.sponsors },
 ];
 
+const REGISTER_CTA = { href: REGISTER_PATH, label: LANDING_COPY.nav.createPassport };
+
 interface LandingViewProps {
   settings: EventSettings;
   games: Game[];
   scheduleItems: ScheduleItem[];
   sponsors: Sponsor[];
-  marketplace: ReactNode;
+  /** The Marketplace card, left out of the landing until the form URL exists (see MarketplaceSlot). */
+  marketplace?: ReactNode;
 }
 
 export async function LandingPage() {
@@ -68,19 +72,7 @@ export async function LandingPage() {
     getSponsors(),
   ]);
 
-  return (
-    <LandingView
-      settings={settings}
-      games={games}
-      scheduleItems={scheduleItems}
-      sponsors={sponsors}
-      marketplace={
-        <Suspense fallback={null}>
-          <MarketplaceRegistration settings={settings} />
-        </Suspense>
-      }
-    />
-  );
+  return <LandingView settings={settings} games={games} scheduleItems={scheduleItems} sponsors={sponsors} />;
 }
 
 export function LandingView({ settings, games, scheduleItems, sponsors, marketplace }: Readonly<LandingViewProps>) {
@@ -88,10 +80,11 @@ export function LandingView({ settings, games, scheduleItems, sponsors, marketpl
 
   return (
     <>
-      <SiteNav homeHref={`#${TOP_SECTION_ID}`} links={NAV_LINKS} />
+      <SiteNav homeHref={`#${TOP_SECTION_ID}`} links={NAV_LINKS} cta={REGISTER_CTA} />
       <main>
         <VideoHero
           calendarUrl={buildEventCalendarUrl({ startsAt: settings.eventStartsAt, endsAt: settings.eventEndsAt })}
+          registerHref={REGISTER_PATH}
         />
         <SponsorsCarousel sponsors={sponsors} />
         <EventActs
@@ -114,6 +107,19 @@ export function LandingView({ settings, games, scheduleItems, sponsors, marketpl
       <SiteFooter />
       <JsonLd data={buildLandingStructuredData(settings)} />
     </>
+  );
+}
+
+/**
+ * The Marketplace card of RF-05 and RF-06, ready to plug back into the landing as `marketplace={<MarketplaceSlot .../>}`
+ * once the form URL is defined. It is not part of the page now because it reads the clock of the server, which makes
+ * the whole landing dynamic (no-store) and keeps it from being stored for offline use (RNF-14).
+ */
+export function MarketplaceSlot({ settings }: Readonly<{ settings: EventSettings }>) {
+  return (
+    <Suspense fallback={null}>
+      <MarketplaceRegistration settings={settings} />
+    </Suspense>
   );
 }
 

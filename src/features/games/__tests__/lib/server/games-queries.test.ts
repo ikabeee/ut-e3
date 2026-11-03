@@ -57,7 +57,6 @@ describe("getGames", () => {
       genre: { id: expect.stringMatching(UUID), name: "Acción", slug: "accion" },
       stand: { zone: "A", number: 1 },
       images: [{ path: "/games/ceniza-protocol.jpg", alt: "Portada de Ceniza Protocol", position: 1, isCover: true }],
-      itchUrl: null,
     });
   });
 
