@@ -5,6 +5,7 @@ import { AccountPageHeader } from "@features/accounts/components/account-page-he
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { STAND_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { requireStandAccount } from "@features/accounts/lib/server/current-account";
+import { StandAdminNav } from "@features/stands/components/stand-admin-nav";
 import { StandKiosk, type KioskActions } from "@features/stands/components/stand-kiosk";
 import { cancelVisitAction, requestVisitAction, submitVisitAction } from "@features/stands/lib/stands-actions";
 import { STANDS_COPY } from "@features/stands/lib/stands-copy";
@@ -45,6 +46,7 @@ async function KioskPanel() {
   return (
     <>
       <AccountPageHeader title={COPY.title} signedInAs={COPY.signedInAs(account.name)} signOutAction={signOut} />
+      {account.role === "stand_admin" && <StandAdminNav />}
       {stand.gameName ? (
         <StandKiosk standCode={stand.code} gameName={stand.gameName} actions={KIOSK_ACTIONS} />
       ) : (

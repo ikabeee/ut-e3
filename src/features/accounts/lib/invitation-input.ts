@@ -18,22 +18,36 @@ const NAME_MAX_LENGTH = 80;
 
 const EMAIL_MAX_LENGTH = 254;
 
+export type ParsedPerson = { isValid: true; name: string; email: string } | { isValid: false; message: string };
+
+interface PersonFields {
+  name: string;
+  email: string;
+}
+
 /** Reads the invite form of a Server Action; whether the actor may invite that role is checked later. */
 export function parseInviteInput(form: FormData): ParsedInviteInput {
-  const name = readFormText(form, "name").trim();
-  const email = readFormText(form, "email").trim().toLowerCase();
+  const person = parsePerson(form, { name: "name", email: "email" });
   const role = readFormText(form, "role").trim();
   const desk = parseDesk(readFormText(form, "desk").trim());
 
-  if (!name || name.length > NAME_MAX_LENGTH) return invalid(ERRORS.nameRequired);
-
-  if (!looksLikeEmail(email)) return invalid(ERRORS.emailInvalid);
+  if (!person.isValid) return invalid(person.message);
 
   if (!role) return invalid(ERRORS.roleRequired);
 
   if (desk === "invalid") return invalid(ERRORS.deskInvalid);
 
-  return { isValid: true, input: { name, email, role, kofDesk: desk } };
+  return { isValid: true, input: { name: person.name, email: person.email, role, kofDesk: desk } };
+}
+
+/** The name and the email of a person to invite, read from the fields that carry them in the form. */
+export function parsePerson(form: FormData, fields: PersonFields): ParsedPerson {
+  const name = readFormText(form, fields.name).trim();
+  const email = readFormText(form, fields.email).trim().toLowerCase();
+
+  if (!name || name.length > NAME_MAX_LENGTH) return { isValid: false, message: ERRORS.nameRequired };
+
+  return looksLikeEmail(email) ? { isValid: true, name, email } : { isValid: false, message: ERRORS.emailInvalid };
 }
 
 function parseDesk(value: string): KofDesk | null | "invalid" {

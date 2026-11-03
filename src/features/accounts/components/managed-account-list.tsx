@@ -52,9 +52,11 @@ function describe(account: ManagedAccount): string {
   return `${role}${desk} · ${COPY.statuses[account.status]}`;
 }
 
-// A role outside the four that the panels manage cannot be listed; the label of the staff is the safe fallback.
+// A role outside the ones that the panels manage cannot be listed; the label of the KOF staff is the safe fallback.
 function toRoleKey(role: string): keyof typeof COPY.roles {
   if (role === "kof_admin" || role === "raffle_admin" || role === "help_desk") return role;
+
+  if (role === "stand_admin" || role === "stand_staff") return role;
 
   return "kof_staff";
 }

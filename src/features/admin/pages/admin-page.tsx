@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { AccountPageHeader } from "@features/accounts/components/account-page-header";
 import { AccountsPanel } from "@features/accounts/components/accounts-panel";
-import { SignOutButton } from "@features/accounts/components/sign-out-button";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { SYSADMIN_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
@@ -14,6 +14,13 @@ import { ZONE_IDS } from "@features/floor-plan/lib/types";
 import { ScheduleAdmin } from "@features/schedule/components/schedule-admin";
 import { deleteScheduleItem, saveScheduleItem } from "@features/schedule/lib/schedule-actions";
 import { getScheduleItems } from "@features/schedule/lib/server/schedule-queries";
+import { StandsAdmin, type StandsAdminActions } from "@features/stands/components/stands-admin";
+import { listAdminStands } from "@features/stands/lib/server/stand-admin-queries";
+import {
+  createStandAction,
+  inviteStandAdminAction,
+  updateStandAction,
+} from "@features/stands/lib/stands-admin-actions";
 
 export const adminPageMetadata: Metadata = {
   title: ADMIN_COPY.title,
@@ -23,6 +30,14 @@ export const adminPageMetadata: Metadata = {
 };
 
 const ZONE_OPTIONS = ZONE_IDS.map((id) => ({ id, label: getZoneLink(id)?.label ?? id }));
+
+const STAND_ACTIONS: StandsAdminActions = {
+  create: createStandAction,
+  update: updateStandAction,
+  inviteAdmin: inviteStandAdminAction,
+  resend: ACCOUNT_ACTIONS.resend,
+  disable: ACCOUNT_ACTIONS.disable,
+};
 
 export function AdminPage() {
   return (
@@ -43,19 +58,18 @@ async function SysadminPanel() {
 
   return (
     <>
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="type-section">{ADMIN_COPY.title}</h1>
-          <p className="mt-2 text-sm text-muted">{ADMIN_COPY.signedInAs(account.name)}</p>
-        </div>
-        <SignOutButton action={signOut} />
-      </header>
+      <AccountPageHeader
+        title={ADMIN_COPY.title}
+        signedInAs={ADMIN_COPY.signedInAs(account.name)}
+        signOutAction={signOut}
+      />
       <AccountsPanel
         heading={ADMIN_COPY.accountsHeading}
         actorRole={account.role}
         accounts={await listManagedAccounts(account.role)}
         actions={ACCOUNT_ACTIONS}
       />
+      <StandsAdmin stands={await listAdminStands()} actions={STAND_ACTIONS} />
       <ScheduleAdmin
         items={items}
         zones={ZONE_OPTIONS}

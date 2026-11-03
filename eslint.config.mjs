@@ -7,6 +7,7 @@ import sonarjs from "eslint-plugin-sonarjs";
 const FEATURE_DEPENDENCIES = {
   landing: ["games", "sponsors"],
   "floor-plan": ["games"],
+  games: ["accounts"],
   schedule: ["accounts", "floor-plan"],
   stands: ["accounts", "games", "visitors"],
   support: ["accounts", "visitors"],

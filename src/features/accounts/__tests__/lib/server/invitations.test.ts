@@ -93,7 +93,7 @@ describe("inviteAccount", () => {
     });
 
     expect(entry).toMatchObject({ actorId: actors.sysadmin.id, entityType: "account" });
-    expect(entry.detail).toEqual({ role: "kof_admin", kofDesk: null });
+    expect(entry.detail).toEqual({ role: "kof_admin", kofDesk: null, standId: null });
   });
 
   it("lets the KOF administrator invite the staff of a desk (S3)", async () => {

@@ -1,10 +1,9 @@
 "use server";
 
-import { refresh } from "next/cache";
-import { after } from "next/server";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import { parseInviteInput } from "@features/accounts/lib/invitation-input";
 import { requireAccountManager } from "@features/accounts/lib/server/current-account";
+import { failManagement, finishManagement } from "@features/accounts/lib/server/management-outcome";
 import {
   disableAccount,
   inviteAccount,
@@ -12,7 +11,6 @@ import {
   type InviteResult,
   type ManageFailure,
 } from "@features/accounts/lib/server/invitations";
-import { deliverQueuedEmail } from "@shared/lib/server/email-delivery";
 import { readFormText } from "@shared/lib/form-data";
 
 export type ManagementActionState = { status: "done"; message: string } | { status: "error"; message: string };
@@ -30,13 +28,13 @@ export async function inviteAccountAction(
   const actor = await requireAccountManager();
   const parsed = parseInviteInput(form);
 
-  if (!parsed.isValid) return failure(parsed.message);
+  if (!parsed.isValid) return failManagement(parsed.message);
 
   const result = await inviteAccount(actor, parsed.input, new Date());
 
-  if (result.status !== "invited") return failure(describeInviteFailure(result));
+  if (result.status !== "invited") return failManagement(describeInviteFailure(result));
 
-  return finish(OUTCOMES.invited, result.emailId);
+  return finishManagement(OUTCOMES.invited, result.emailId);
 }
 
 export async function resendInvitationAction(
@@ -46,7 +44,9 @@ export async function resendInvitationAction(
   const actor = await requireAccountManager();
   const result = await resendInvitation(actor, readFormText(form, "accountId"), new Date());
 
-  return result.status === "sent" ? finish(OUTCOMES.resent, result.emailId) : failure(describeManageFailure(result));
+  return result.status === "sent"
+    ? finishManagement(OUTCOMES.resent, result.emailId)
+    : failManagement(describeManageFailure(result));
 }
 
 export async function disableAccountAction(
@@ -56,7 +56,9 @@ export async function disableAccountAction(
   const actor = await requireAccountManager();
   const result = await disableAccount(actor, readFormText(form, "accountId"));
 
-  return result.status === "disabled" ? finish(OUTCOMES.disabled) : failure(describeManageFailure(result));
+  return result.status === "disabled"
+    ? finishManagement(OUTCOMES.disabled)
+    : failManagement(describeManageFailure(result));
 }
 
 function describeInviteFailure(result: Exclude<InviteResult, { status: "invited" }>): string {
@@ -69,6 +71,8 @@ function describeInviteFailure(result: Exclude<InviteResult, { status: "invited"
       return ERRORS.hasPassport;
     case "deskTaken":
       return ERRORS.deskTaken;
+    case "standFull":
+      return ERRORS.standFull;
     case "forbidden":
       return ERRORS.forbidden;
   }
@@ -83,17 +87,4 @@ function describeManageFailure(result: ManageFailure): string {
     case "wrongState":
       return ERRORS.wrongState;
   }
-}
-
-// The email leaves after the answer, and the screen shows the new list at once.
-function finish(message: string, emailId?: string): ManagementActionState {
-  if (emailId) after(() => deliverQueuedEmail(emailId));
-
-  refresh();
-
-  return { status: "done", message };
-}
-
-function failure(message: string): ManagementActionState {
-  return { status: "error", message };
 }

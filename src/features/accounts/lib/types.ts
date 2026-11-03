@@ -24,3 +24,8 @@ export interface ManagedAccount {
   status: AccountStatus;
   kofDesk: KofDesk | null;
 }
+
+/** A stand account in a list of the sysadmin or of the stand administrator. */
+export interface StandAccountRow extends ManagedAccount {
+  standId: string;
+}

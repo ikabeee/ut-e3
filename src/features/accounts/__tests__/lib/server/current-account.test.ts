@@ -3,6 +3,8 @@
  */
 import {
   getKofAccount,
+  requireAccountManager,
+  requireStandAdmin,
   requireKofAccount,
   requireRecoveryAgent,
   requireSysadmin,
@@ -167,6 +169,75 @@ describe("requireRecoveryAgent", () => {
     await getPrisma().account.update({ where: { id: account.id }, data: { status: "disabled" } });
 
     await expect(requireRecoveryAgent()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+});
+
+describe("requireStandAdmin (RF-31, RF-32)", () => {
+  it("returns the signed-in stand administrator with its stand", async () => {
+    const account = await createAccount("stand_admin");
+
+    await createSession(account.id);
+
+    expect(await requireStandAdmin()).toEqual({
+      id: account.id,
+      email: "cuenta@ut.mx",
+      name: "Cuenta",
+      role: "stand_admin",
+      standId,
+    });
+  });
+
+  it("sends the staff of the stand back to its kiosk", async () => {
+    const account = await createAccount("stand_staff");
+
+    await createSession(account.id);
+
+    await expect(requireStandAdmin()).rejects.toMatchObject({ digest: expect.stringContaining(";/stand/kiosk;") });
+  });
+
+  it.each(["sysadmin", "help_desk", "kof_admin"])("sends a %s to /login", async (role) => {
+    const account = await createAccount(role);
+
+    await createSession(account.id);
+
+    await expect(requireStandAdmin()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+
+  it("sends a visitor without a session and a disabled administrator to /login", async () => {
+    await expect(requireStandAdmin()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+
+    const account = await createAccount("stand_admin");
+
+    await createSession(account.id);
+    await getPrisma().account.update({ where: { id: account.id }, data: { status: "disabled" } });
+
+    await expect(requireStandAdmin()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+});
+
+describe("requireAccountManager", () => {
+  it("carries the stand of a stand administrator, so the functions that manage accounts can scope to it", async () => {
+    const account = await createAccount("stand_admin");
+
+    await createSession(account.id);
+
+    expect(await requireAccountManager()).toMatchObject({ id: account.id, role: "stand_admin", standId });
+  });
+
+  it("has no stand for the sysadmin", async () => {
+    const account = await createAccount("sysadmin");
+
+    await createSession(account.id);
+
+    expect(await requireAccountManager()).toMatchObject({ id: account.id, standId: null });
+  });
+
+  it("is not available to the staff of a stand", async () => {
+    const account = await createAccount("stand_staff");
+
+    await createSession(account.id);
+
+    await expect(requireAccountManager()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
   });
 });
 

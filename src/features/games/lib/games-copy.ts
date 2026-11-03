@@ -65,6 +65,30 @@ export const GAMES_COPY = {
     heading: "Más juegos",
     seeAll: "Ver todos",
   },
+  standGame: {
+    title: "Mi juego",
+    description: "Registra los datos del juego de tu stand.",
+    loading: "Cargando tu juego...",
+    signedInAs: (name: string) => `Sesión de ${name}`,
+    fields: {
+      name: "Nombre del juego",
+      synopsis: "Sinopsis",
+      genre: "Género",
+      itchUrl: "Enlace a itch.io (opcional)",
+    },
+    itchHint: "Se muestra a los visitantes a partir de la hora de activación del evento.",
+    coverNote: "La portada y las imágenes las carga el sysadmin.",
+    submit: "Guardar juego",
+    pending: "Guardando...",
+    outcomes: { created: "Juego registrado.", updated: "Juego actualizado." },
+    errors: {
+      nameRequired: "Escribe el nombre del juego (máximo 80 caracteres).",
+      synopsisRequired: "Escribe la sinopsis (máximo 400 caracteres).",
+      genreInvalid: "Elige un género de la lista.",
+      itchInvalid: "El enlace debe ser una dirección https de itch.io.",
+      conflict: "Otro cambio se guardó al mismo tiempo. Intenta de nuevo.",
+    },
+  },
 };
 
 function padTwoDigits(value: number): string {

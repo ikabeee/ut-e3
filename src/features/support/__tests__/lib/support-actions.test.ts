@@ -51,6 +51,9 @@ beforeEach(async () => {
   await createVisitor("Neo_01", "Ana Pérez López");
   accountCount += 1;
 
+  // A stand holds 3 staff accounts at most, so the ones of the previous tests are disabled to free their place.
+  await getPrisma().account.updateMany({ where: { role: "stand_staff" }, data: { status: "disabled" } });
+
   // The audit log cannot be emptied, so every test has its own accounts and reads only the entries of its own.
   for (const role of ROLES) {
     const standAccount = role === "stand_staff" ? standId : undefined;
