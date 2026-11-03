@@ -17,6 +17,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
+import { encode } from "uqr";
 import { chromium } from "playwright-core";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -281,12 +282,71 @@ async function recoverPassport(page, database, screenshots) {
   const agent = database.prepare("SELECT id FROM accounts WHERE email = ?").get(HELP_DESK_EMAIL);
   const entry = database.prepare("SELECT actor_id AS actor FROM audit_logs WHERE action = 'passport_recovered'").all();
 
+  await checkQrEncodesTheLink(page, link);
   await page.screenshot({ path: path.join(screenshots, "support-recovered.png"), fullPage: true });
   check("the desk shows an access link for the visitor", link.startsWith(`${BASE_URL}/passport/claim/`), link);
   check("the recovery is audited with the agent", entry.length === 1 && entry[0].actor === agent.id);
   check("the page does not show a token hash", !/[0-9a-f]{64}/.test(await page.locator("body").innerText()));
 
   return link;
+}
+
+// The QR code is drawn in the page: its modules are read back from the SVG and compared with an encoder run on the link.
+async function checkQrEncodesTheLink(page, link) {
+  const qr = page.getByRole("img", { name: "Código QR para abrir el pasaporte" });
+  const box = await qr.boundingBox();
+
+  const drawn = await qr.evaluate((svg) => ({
+    size: Number(svg.getAttribute("data-qr-modules")),
+    path: svg.querySelector("path").getAttribute("d"),
+    fill: getComputedStyle(svg.querySelector("rect")).fill,
+    ink: getComputedStyle(svg.querySelector("path")).fill,
+  }));
+
+  const expected = encode(link, { ecc: "M", border: 0 });
+  const matches = readModules(drawn) === expectedModules(expected);
+  const requests = await page.evaluate(() => performance.getEntriesByType("resource").map((entry) => entry.name));
+
+  check(
+    "the recovery screen shows a QR code with the alternative text Código QR para abrir el pasaporte",
+    box !== null,
+  );
+  check(
+    "the QR code is big enough to scan from a screen",
+    box.width >= 240 && box.height >= 240,
+    `${box.width}x${box.height}`,
+  );
+  check(
+    "its modules are dark on a light background",
+    drawn.fill === "rgb(255, 255, 255)" && drawn.ink === "rgb(0, 0, 0)",
+  );
+  check("the QR code encodes exactly the same link as the text field", matches);
+  check(
+    "the link did not go to any other site",
+    requests.every((name) => name.startsWith(BASE_URL)),
+  );
+  check("the Copiar enlace button is there", await page.getByRole("button", { name: "Copiar enlace" }).isVisible());
+}
+
+// The dark modules of the drawn path, one "x,y" per module, with the 4 modules of quiet zone removed.
+function readModules({ path: drawnPath }) {
+  const modules = [];
+
+  for (const run of drawnPath.matchAll(/M(\d+),(\d+)h(\d+)v1h-\d+z/g)) {
+    for (let offset = 0; offset < Number(run[3]); offset += 1) {
+      modules.push(`${Number(run[1]) - 4 + offset},${Number(run[2]) - 4}`);
+    }
+  }
+
+  return modules.sort().join(" ");
+}
+
+function expectedModules({ data }) {
+  const modules = [];
+
+  data.forEach((row, y) => row.forEach((isDark, x) => isDark && modules.push(`${x},${y}`)));
+
+  return modules.sort().join(" ");
 }
 
 async function checkNewPhoneOpensTheLink(page, link, pin) {

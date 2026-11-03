@@ -8,6 +8,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- La mesa de recuperación (`/support/recovery`) muestra el enlace de acceso como un código QR grande (negro sobre
+  blanco, con texto alternativo "Código QR para abrir el pasaporte") para que el visitante lo escanee con su teléfono, junto
+  con el botón "Copiar enlace"; el campo de texto queda como respaldo. El QR codifica el mismo enlace de siempre y se
+  dibuja en la propia página (librería `uqr`, sin dependencias): el enlace no sale a ningún servicio.
 - La app del visitante se puede instalar como PWA y funciona sin conexión. El manifest abre en `/passport` con el nombre
   y los colores del evento (íconos de 192 y 512 px y uno maskable en `public/icons/`), y en `/passport` aparece "Instalar
   la app" cuando el navegador la ofrece o los pasos de Compartir y Añadir a pantalla de inicio en Safari de iPhone. Un

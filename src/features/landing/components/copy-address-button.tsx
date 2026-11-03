@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@heroui/react";
-import { useCopyToClipboard } from "@features/landing/hooks/use-copy-to-clipboard";
+import { useCopyToClipboard } from "@shared/hooks/use-copy-to-clipboard";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { ScrambleText } from "@shared/components/scramble-text";
 
