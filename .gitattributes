@@ -4,3 +4,6 @@ src/shared/lib/prisma/ops.json linguist-generated
 src/shared/lib/prisma/migration.json linguist-generated
 migrations/snapshots/**/contract.json linguist-generated
 migrations/snapshots/**/contract.d.ts linguist-generated
+# El entrypoint corre en Linux: con CRLF fallaria.
+*.sh text eol=lf
+Dockerfile text eol=lf

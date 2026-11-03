@@ -262,10 +262,25 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
   `stubCookies(createCookieJar())` de `src/shared/__tests__/lib/server/cookie-jar.ts` y revisan un `redirect()` por
   el `digest` del error (`";/login;"`).
 
+## Despliegue (Docker)
+
+La app se publica con Docker Compose detrás del proxy inverso del VPS (`docs/deploy.md`):
+
+- `next.config.ts` usa `output: "standalone"`; el `Dockerfile` (Node 22, usuario `node`) compila con una SQLite temporal
+  porque las consultas con `"use cache"` leen la base durante el build.
+- `docker/entrypoint.sh` corre `prisma migrate deploy` y `prisma db seed` (solo llena tablas vacías y crea al sysadmin si
+  no hay uno) antes de `node server.js`. La base vive en el volumen `app-data` (`/data/app.db`).
+- `GET /api/health` (`site/api/health-route.ts`) es el `HEALTHCHECK`: no toca la base.
+- Variables en `.env` (plantilla: `.env.production.example`). `NEXT_PUBLIC_SITE_URL` se incrusta al construir. SMTP es
+  opcional: sin `SMTP_HOST` el correo queda en `email_outbox`.
+- `docker/entrypoint.sh` debe tener fin de línea LF (`.gitattributes`); si lo editas en Windows, no lo conviertas a CRLF.
+- `db:seed:stands`, `db:seed:kof` y `db:seed:support` son de desarrollo y se niegan a correr con `NODE_ENV=production`.
+
 ## Documentación del proyecto
 
 - `docs/design-system.md`: tema UTG sobre HeroUI.
 - `docs/tournament.md`: torneo de KOF (formato, permisos por mesa, estados y cómo probarlo en local).
+- `docs/deploy.md`: despliegue con Docker, respaldos y proxy inverso (Nginx y Caddy).
 - `docs/versioning.md` y `CHANGELOG.md`: versionado semántico y releases con git flow.
 
 Si cambias algo visible, agrega una línea en `[Sin publicar]` de `CHANGELOG.md`.

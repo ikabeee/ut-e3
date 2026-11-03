@@ -8,6 +8,12 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Despliegue con Docker: `Dockerfile` en tres etapas (Node 22, usuario no root, `HEALTHCHECK` contra `GET /api/health`) y
+  `docker-compose.yml` con un servicio `app`, volumen persistente para la base SQLite, reinicio automático, apagado
+  ordenado de 30 s y puerto solo en `127.0.0.1:${APP_PORT:-3000}` para el proxy inverso del servidor. Al arrancar aplica
+  las migraciones y el seed (que crea al sysadmin si no existe). La guía `docs/deploy.md` explica construir, actualizar,
+  respaldar con `VACUUM INTO`, restaurar y configurar Nginx o Caddy; `.env.production.example` lista las variables. El
+  correo por SMTP es opcional. Next.js ahora genera `output: "standalone"`.
 - Alta de stands y de sus cuentas desde la aplicación. El sysadmin crea un stand (zona, número, estudio y grupo; el
   código `ZA-S1-E6-101` se arma solo) junto con la invitación de su administrador, y puede editar el stand y reinvitar
   o desactivar al administrador desde `/admin`. El administrador del stand activa su cuenta por correo, registra y edita
