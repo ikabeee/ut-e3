@@ -28,8 +28,8 @@ Estado: implementado en `feature/recovery-notices`, pendiente de revisión. Los 
 - RF-68 y RF-71 (autoservicio por correo) quedan fuera: esta tarea es solo la mesa de atención.
 - El enlace de recuperación es el propio token del dispositivo: abrirlo más de una vez en el mismo teléfono funciona
   y se invalida cuando otra recuperación lo reemplaza. No hay una tabla de enlaces de un solo uso.
-- Sin QR: no hay librería en el proyecto y no se agregó una dependencia. El enlace se muestra en un campo de solo lectura
-  para dictarlo o mostrarlo.
+- QR (rama `feature/recovery-qr`): la pantalla de resultado muestra el enlace también como código QR, dibujado en la página con la
+  librería `uqr` (sin dependencias), y un botón "Copiar enlace"; el campo de solo lectura queda como respaldo.
 
 ## Pruebas manuales
 

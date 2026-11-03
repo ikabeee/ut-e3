@@ -19,6 +19,9 @@ export const SUPPORT_COPY = {
       linkLabel: "Enlace de acceso",
       instructions:
         "Pídele al visitante que abra este enlace en su teléfono. El teléfono anterior ya no tiene acceso. No lo mandes por chat: muéstralo en pantalla.",
+      qrLabel: "Código QR para abrir el pasaporte",
+      qrHint: "El visitante puede escanear este código con la cámara de su teléfono.",
+      copyLink: { idle: "Copiar enlace", copied: "Enlace copiado", failed: "No se pudo copiar" },
       newRecovery: "Recuperar otro pasaporte",
     },
     errors: {

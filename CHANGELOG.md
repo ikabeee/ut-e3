@@ -8,6 +8,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- La mesa de recuperación (`/support/recovery`) muestra el enlace de acceso como un código QR grande (negro sobre
+  blanco, con texto alternativo "Código QR para abrir el pasaporte") para que el visitante lo escanee con su teléfono, junto
+  con el botón "Copiar enlace"; el campo de texto queda como respaldo. El QR codifica el mismo enlace de siempre y se
+  dibuja en la propia página (librería `uqr`, sin dependencias): el enlace no sale a ningún servicio.
 - Despliegue con Docker: `Dockerfile` en tres etapas (Node 22, usuario no root, `HEALTHCHECK` contra `GET /api/health`) y
   `docker-compose.yml` con un servicio `app`, volumen persistente para la base SQLite, reinicio automático, apagado
   ordenado de 30 s y puerto solo en `127.0.0.1:${APP_PORT:-3000}` para el proxy inverso del servidor. Al arrancar aplica

@@ -246,6 +246,7 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | Datos del juego de un stand (RF-31): el stand es siempre el de la sesión | `saveStandGame()` en `src/features/games/lib/server/stand-game-mutations.ts`; `/stand/game` |
 | Cuentas de staff de un stand (RF-32): invitar, reenviar y desactivar | `canManageAccount()` y `MAX_STAND_STAFF` en `invitation-rules.ts`; `/stand/team` usa las acciones de `management-actions.ts` |
 | Guarda de las pantallas del administrador de stand | `requireStandAdmin()` en `current-account.ts` (el staff vuelve a su kiosko) |
+| Código QR del enlace de recuperación (RF-69) | `QrCodeImage` (`src/shared/components/qr-code.tsx`) y `buildQrCode` (`src/shared/lib/qr-code.ts`, librería `uqr`); lo muestra `recovery-result.tsx` |
 | Quién usa la mesa de recuperación (`help_desk` y `sysadmin`; el resto va a su home) | `requireRecoveryAgent()` en `current-account.ts` |
 | Home de cada rol al entrar (el de `help_desk` es `/support/recovery`) | `getHomePath()` en `src/features/accounts/lib/accounts-links.ts` |
 | Bitácora de auditoría | `recordAudit()` en `src/shared/lib/server/audit-log.ts`, dentro de la transacción del cambio |
