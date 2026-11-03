@@ -35,4 +35,16 @@ describe("SiteNav", () => {
 
     expect(screen.getByRole("navigation")).toBeInTheDocument();
   });
+
+  it("shows the Crear mi pasaporte link at the end of the bar when it receives one", () => {
+    render(<SiteNav homeHref="#top" links={LINKS} cta={{ href: "/register", label: "Crear mi pasaporte" }} />);
+
+    expect(screen.getByRole("link", { name: "Crear mi pasaporte" })).toHaveAttribute("href", "/register");
+  });
+
+  it("has no extra link without it", () => {
+    render(<SiteNav homeHref="#top" links={LINKS} />);
+
+    expect(screen.queryByRole("link", { name: "Crear mi pasaporte" })).not.toBeInTheDocument();
+  });
 });

@@ -14,6 +14,18 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   las migraciones y el seed (que crea al sysadmin si no existe). La guía `docs/deploy.md` explica construir, actualizar,
   respaldar con `VACUUM INTO`, restaurar y configurar Nginx o Caddy; `.env.production.example` lista las variables. El
   correo por SMTP es opcional. Next.js ahora genera `output: "standalone"`.
+- La app del visitante se puede instalar como PWA y funciona sin conexión. El manifest abre en `/passport` con el nombre
+  y los colores del evento (íconos de 192 y 512 px y uno maskable en `public/icons/`), y en `/passport` aparece "Instalar
+  la app" cuando el navegador la ofrece o los pasos de Compartir y Añadir a pantalla de inicio en Safari de iPhone. Un
+  service worker escrito a mano (`public/sw.js`, con las reglas de caché en `public/sw-policy.js`) guarda la portada con el
+  croquis, el catálogo, cada juego, los patrocinadores y el aviso de privacidad, y nunca guarda `/passport`, `/api` ni las
+  áreas del staff. El pasaporte guarda en el propio teléfono su última versión y, sin conexión, `/offline` la muestra con
+  "Sin conexión. Datos de hace X"; la copia se borra cuando el teléfono deja de ser el dispositivo activo. El pasaporte
+  indica si hay conexión y se actualiza solo al volver la red. Solo se registra en producción.
+- El enlace a itch.io de cada ficha ya no va en la página: se pide a `GET /api/games/<slug>/itch`, que decide con la hora
+  del servidor (RF-10), así las fichas se pueden guardar sin conexión. La tarjeta del Marketplace sale de la portada
+  hasta tener el URL del formulario (RF-05 y RF-06 pendientes); su componente y su lógica siguen en el repositorio.
+- "Crear mi pasaporte" en la barra y en la portada de la landing, hacia `/register`.
 - Alta de stands y de sus cuentas desde la aplicación. El sysadmin crea un stand (zona, número, estudio y grupo; el
   código `ZA-S1-E6-101` se arma solo) junto con la invitación de su administrador, y puede editar el stand y reinvitar
   o desactivar al administrador desde `/admin`. El administrador del stand activa su cuenta por correo, registra y edita

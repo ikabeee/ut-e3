@@ -2,6 +2,7 @@ export const LANDING_COPY = {
   nav: {
     label: "Principal",
     homeLabel: "UTG, inicio",
+    createPassport: "Crear mi pasaporte",
     links: {
       home: "Inicio",
       games: "Juegos",
@@ -16,6 +17,7 @@ export const LANDING_COPY = {
     description: (division: string) =>
       `Juegos creados por la ${division}. Pruébalos, compite en los torneos y participa en la rifa.`,
     callToAction: "Quiero participar",
+    createPassport: "Crear mi pasaporte",
     playVideo: "Reproducir video",
   },
   acts: {

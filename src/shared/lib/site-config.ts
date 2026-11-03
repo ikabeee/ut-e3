@@ -16,4 +16,6 @@ export const siteConfig = {
   organizationLabel: `${organization.division} · ${organization.universityShortName}`,
   shareImage: "/media/reel.jpg",
   themeColor: "#000000",
+  // --utg-black, the background of the only theme of the design system.
+  backgroundColor: "#000000",
 } as const;

@@ -42,6 +42,9 @@ export const VISITORS_COPY = {
     pinLabel: "PIN de identidad",
     gamertagLabel: "Gamertag",
     description: "Presenta tu PIN en cada stand para registrar tus visitas.",
+    offline: {
+      notice: (age: string) => `Sin conexión. Datos de ${age}`,
+    },
     progress: {
       label: "Progreso hacia el siguiente boleto",
       remaining: (count: number) =>

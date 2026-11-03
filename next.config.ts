@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const MEDIA_CACHE_CONTROL = "public, max-age=86400, stale-while-revalidate=604800";
 
+const WORKER_HEADERS = [
+  { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+  { key: "Service-Worker-Allowed", value: "/" },
+];
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
@@ -17,7 +22,11 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   async headers() {
-    return [{ source: "/media/:path*", headers: [{ key: "Cache-Control", value: MEDIA_CACHE_CONTROL }] }];
+    return [
+      { source: "/media/:path*", headers: [{ key: "Cache-Control", value: MEDIA_CACHE_CONTROL }] },
+      // The browser must look for a new service worker (and its policy file) on every visit, or an old one lives on.
+      { source: "/:file(sw|sw-policy).js", headers: WORKER_HEADERS },
+    ];
   },
   turbopack: {
     rules: {

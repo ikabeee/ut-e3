@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
+import { ClearPassportSnapshot } from "@features/visitors/components/clear-passport-snapshot";
 import { PrivacyNotice } from "@features/visitors/components/privacy-notice";
 import { RegistrationForm } from "@features/visitors/components/registration-form";
 import { registerVisitor } from "@features/visitors/lib/visitors-actions";
@@ -52,6 +53,8 @@ function checkRegistrationOpen(registrationOpensAt: string): boolean {
 export function RegisterView({ isOpen, registrationOpensAt }: Readonly<RegisterViewProps>) {
   return (
     <main className="page-wrap flex min-h-svh flex-col items-center justify-center gap-8 py-16">
+      {/* A phone that reaches the registration has no active passport: its offline copy is deleted. */}
+      <ClearPassportSnapshot />
       <header className="flex flex-col items-center gap-2 text-center">
         <h1 className="type-section">{VISITORS_COPY.form.title}</h1>
         <p className="text-muted">{VISITORS_COPY.form.subtitle}</p>

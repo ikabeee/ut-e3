@@ -35,7 +35,6 @@ export function makeGame(overrides: GameOverrides): Game {
     genre: GENRES[0],
     stand: { zone: "A", number: 1 },
     images: [cover],
-    itchUrl: null,
     ...overrides,
   };
 }

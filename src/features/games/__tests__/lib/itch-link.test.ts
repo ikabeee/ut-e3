@@ -1,4 +1,4 @@
-import { resolveItchLink } from "@features/games/lib/itch-link";
+import { isItchLink, resolveItchLink } from "@features/games/lib/itch-link";
 
 // 16:30 in America/Cancun (UTC-5) on the event day, the seeded itchOpensAt.
 const ITCH_OPENS_AT = "2026-11-20T21:30:00.000Z";
@@ -34,5 +34,25 @@ describe("resolveItchLink", () => {
     const now = new Date("2026-11-20T21:29:00.000Z");
 
     expect(resolveItchLink({ itchUrl: null, itchOpensAt: ITCH_OPENS_AT, now })).toEqual({ status: "hidden" });
+  });
+});
+
+describe("isItchLink", () => {
+  it("accepts the three answers of the server", () => {
+    expect(isItchLink({ status: "hidden" })).toBe(true);
+    expect(isItchLink({ status: "pending", opensAt: "2026-11-20T21:30:00.000Z" })).toBe(true);
+    expect(isItchLink({ status: "open", url: "https://utg.itch.io/x" })).toBe(true);
+  });
+
+  it.each([
+    null,
+    "open",
+    {},
+    { status: "open" },
+    { status: "pending" },
+    { status: "other" },
+    { status: "open", url: 1 },
+  ])("refuses %j", (value) => {
+    expect(isItchLink(value)).toBe(false);
   });
 });

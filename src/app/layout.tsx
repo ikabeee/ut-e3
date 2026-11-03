@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ServiceWorkerRegistration } from "@features/pwa/components/service-worker-registration";
 import { fontVariables } from "@shared/lib/fonts";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
@@ -31,7 +32,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es" className={`dark ${fontVariables}`} data-theme="dark">
-      <body className="bg-background text-foreground">{children}</body>
+      <body className="bg-background text-foreground">
+        {children}
+        <ServiceWorkerRegistration />
+      </body>
     </html>
   );
 }

@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
 import type { EventSettings } from "@features/event-settings/lib/types";
 import { floorPlanItemHref } from "@features/floor-plan/lib/floor-plan-links";
 import { GameDetail } from "@features/games/components/game-detail";
-import { GameItchLink } from "@features/games/components/game-itch-link";
+import { LiveItchLink } from "@features/games/components/live-itch-link";
 import { getCoverImage } from "@features/games/lib/game-cover";
 import { GAMES_PATH, getGamePath } from "@features/games/lib/games-links";
-import { resolveItchLink, type ItchLink } from "@features/games/lib/itch-link";
 import { getRelatedGames } from "@features/games/lib/related-games";
 import { getGameBySlug, getGames } from "@features/games/lib/server/games-queries";
 import { formatStandCode } from "@features/games/lib/stand-code";
@@ -72,18 +70,7 @@ interface GameDetailViewProps {
 async function GameDetailContent({ params }: Readonly<{ params: GameParams }>) {
   const [game, games, settings] = await Promise.all([findGame(params), getGames(), getEventSettings()]);
 
-  return (
-    <GameDetailView
-      game={game}
-      games={games}
-      settings={settings}
-      itchLink={
-        <Suspense fallback={null}>
-          <GameItchLinkGate itchUrl={game.itchUrl} />
-        </Suspense>
-      }
-    />
-  );
+  return <GameDetailView game={game} games={games} settings={settings} itchLink={<LiveItchLink slug={game.slug} />} />;
 }
 
 export function GameDetailView({ game, games, settings, itchLink }: Readonly<GameDetailViewProps>) {
@@ -124,17 +111,4 @@ async function findGame(params: GameParams): Promise<Game> {
   if (!game) notFound();
 
   return game;
-}
-
-async function GameItchLinkGate({ itchUrl }: Readonly<Pick<Game, "itchUrl">>) {
-  return <GameItchLink link={await readItchLink(itchUrl)} />;
-}
-
-// RF-10 judges the link by the server clock, so only this block renders per request; the rest of the page is cached.
-async function readItchLink(itchUrl: string | null): Promise<ItchLink> {
-  await connection();
-
-  const { itchOpensAt } = await getEventSettings();
-
-  return resolveItchLink({ itchUrl, itchOpensAt, now: new Date() });
 }
