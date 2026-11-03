@@ -21,7 +21,6 @@ export interface Game {
   genre: Genre;
   stand: StandLocation;
   images: GameImage[];
-  itchUrl: string | null;
 }
 
 export interface GameEventLabels {

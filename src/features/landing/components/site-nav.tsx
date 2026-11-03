@@ -10,9 +10,11 @@ interface NavLink {
 interface SiteNavProps {
   homeHref: string;
   links: NavLink[];
+  /** A highlighted link at the end of the bar, such as "Crear mi pasaporte". */
+  cta?: NavLink;
 }
 
-export function SiteNav({ homeHref, links }: Readonly<SiteNavProps>) {
+export function SiteNav({ homeHref, links, cta }: Readonly<SiteNavProps>) {
   return (
     <nav
       aria-label={LANDING_COPY.nav.label}
@@ -20,7 +22,19 @@ export function SiteNav({ homeHref, links }: Readonly<SiteNavProps>) {
     >
       <HomeLink href={homeHref} />
       <NavLinkList links={links} />
+      {cta && <NavCta {...cta} />}
     </nav>
+  );
+}
+
+function NavCta({ href, label }: Readonly<NavLink>) {
+  return (
+    <Link
+      href={href}
+      className="touch-target relative flex flex-none items-center bg-accent px-4 font-nav text-[11px] leading-[1.3] font-bold tracking-[.02em] whitespace-nowrap text-background uppercase no-underline sm:px-6 sm:text-[13px]"
+    >
+      {label}
+    </Link>
   );
 }
 

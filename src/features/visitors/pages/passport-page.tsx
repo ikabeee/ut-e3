@@ -2,15 +2,14 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
+import { ConnectionIndicator } from "@features/pwa/components/connection-indicator";
+import { InstallAppPrompt } from "@features/pwa/components/install-app-prompt";
 import { VisitSurveyPrompt } from "@features/stands/components/visit-survey-prompt";
 import { answerVisitAction } from "@features/stands/lib/stands-actions";
 import { TournamentNotice } from "@features/tournament/components/tournament-notice";
 import { getEntrySchedule, getVisitorEntryStatus } from "@features/tournament/lib/server/entries-queries";
-import { PassportCard } from "@features/visitors/components/passport-card";
-import { PassportProgress } from "@features/visitors/components/passport-progress";
-import { PassportStands } from "@features/visitors/components/passport-stands";
-import { PassportTickets } from "@features/visitors/components/passport-tickets";
-import { getTicketProgress } from "@features/visitors/lib/passport-progress";
+import { PassportSections } from "@features/visitors/components/passport-sections";
+import { PassportSnapshotSaver } from "@features/visitors/components/passport-snapshot-saver";
 import { getPassport } from "@features/visitors/lib/server/passport-queries";
 import { getPassportVisits } from "@features/visitors/lib/server/passport-visits-queries";
 import type { Passport, PassportVisits } from "@features/visitors/lib/types";
@@ -95,14 +94,10 @@ export function PassportView({ passport, visits, extra }: Readonly<PassportViewP
         <p className="text-muted">{VISITORS_COPY.passport.subtitle}</p>
       </header>
 
-      <PassportCard passport={passport} />
-      {extra}
-
-      <PassportProgress progress={getTicketProgress(visits.visitCount)} />
-
-      <PassportStands stands={visits.stands} />
-
-      <PassportTickets tickets={visits.tickets} />
+      <ConnectionIndicator />
+      <PassportSections passport={passport} visits={visits} extra={extra} />
+      <InstallAppPrompt />
+      <PassportSnapshotSaver passport={passport} visits={visits} />
     </main>
   );
 }

@@ -82,6 +82,7 @@ src/
 │   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
 │   ├── admin/                # Panel del sysadmin (/admin): compone las secciones que se administran
 │   ├── site/                 # Páginas del sitio que no son de un dominio: la 404 (src/app/not-found.tsx)
+│   ├── pwa/                  # PWA: manifest, service worker (public/sw.js), /offline, indicador de conexión e instalación
 │   ├── stands/               # Stands: kiosko (/stand/kiosk), equipo (/stand/team) y alta de stands en /admin
 │   ├── support/              # Mesa de recuperación (/support/recovery): atención recupera pasaportes (RF-69, RF-70)
 │   └── tournament/           # Torneo de KOF (/admin/kof): bracket, permisos por mesa y bitácora
@@ -261,6 +262,29 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 - Pruebas: `jest.mock` está prohibido, así que las de Server Actions espían `cookies()` con
   `stubCookies(createCookieJar())` de `src/shared/__tests__/lib/server/cookie-jar.ts` y revisan un `redirect()` por
   el `digest` del error (`";/login;"`).
+
+## PWA y sin conexión (RNF-14)
+
+El contenido público y el pasaporte del visitante funcionan sin conexión (`odd/tasks/pwa.md`):
+
+- `src/app/manifest.ts` delega en `pwa/lib/pwa-manifest.ts`; el nombre y los colores salen de `siteConfig`. Los íconos
+  (`public/icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`) se reemplazan por el logo oficial con los mismos
+  nombres y tamaños (el maskable lleva el logo dentro del 80 % central).
+- El service worker es `public/sw.js` (eventos) más `public/sw-policy.js` (reglas puras, con pruebas en
+  `src/features/pwa/__tests__/lib/sw-policy.test.ts`, que ejecutan el archivo real). Cambia `CACHE_VERSION` en
+  `sw-policy.js` para invalidar todas las cachés. Solo guarda las páginas públicas de la lista, `/_next/static` y las
+  imágenes; ignora `/passport`, `/api`, `/admin`, `/stand`, `/support`, `/tournament`, `/login` y todo lo que no sea GET.
+- Respeta `Cache-Control: no-store` y `private` sin excepciones. Por eso una página pública solo funciona sin conexión
+  si Next la sirve sin esos encabezados, es decir, si no lee el reloj, la sesión ni las cookies en el servidor. El enlace a
+  itch.io (RF-10) no está en las fichas: `games/components/live-itch-link.tsx` lo pide a `GET /api/games/<slug>/itch`, que
+  decide con la hora del servidor y responde no-store; `Game` no lleva `itchUrl`. La tarjeta del Marketplace está fuera de
+  la portada hasta tener el URL del formulario (RF-05 y RF-06 pendientes; `MarketplaceSlot` queda listo en `landing-page.tsx`).
+- El pasaporte guarda su última versión en `localStorage` (`ute3.passport.v1`, `visitors/lib/passport-snapshot.ts`). Sin
+  red el worker manda `/passport` a `/offline`, que la lee. `/register` borra la copia: un teléfono que llega ahí ya no
+  es el dispositivo activo (RF-18, RF-70).
+- Solo se registra en producción y desde las páginas del flujo público y del visitante (`pwa/lib/registration-scope.ts`).
+  Los e2e que prueban el worker usan `next build` y `next start` (`npm run test:e2e:pwa`).
+- `public/` no se formatea con Prettier; el código de `public/sw*.js` sí lo revisan Oxlint y ESLint.
 
 ## Documentación del proyecto
 

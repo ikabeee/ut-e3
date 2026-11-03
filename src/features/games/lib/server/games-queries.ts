@@ -6,13 +6,13 @@ import { getPrisma } from "@shared/lib/server/prisma";
 
 export const GAMES_CACHE_TAG = "games";
 
-// Selects exactly the fields of the Game domain type, so a row needs no mapping.
+// Selects exactly the fields of the Game domain type, so a row needs no mapping. The itch.io link is not one of
+// them: it stays on the server until the activation time (RF-10, lib/server/itch-queries.ts).
 const GAME_FIELDS = {
   id: true,
   slug: true,
   name: true,
   synopsis: true,
-  itchUrl: true,
   genre: { select: { id: true, name: true, slug: true } },
   stand: { select: { zone: true, number: true } },
   images: { select: { path: true, alt: true, position: true, isCover: true }, orderBy: { position: "asc" } },

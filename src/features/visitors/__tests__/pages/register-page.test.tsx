@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { PASSPORT_SNAPSHOT_KEY } from "@features/visitors/lib/passport-snapshot";
 import { RegisterView, registerPageMetadata } from "@features/visitors/pages/register-page";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 import { REGISTER_PATH } from "@features/visitors/lib/visitors-links";
@@ -18,6 +19,14 @@ describe("RegisterPage and RegisterView", () => {
     expect(screen.getByRole("heading", { level: 1, name: VISITORS_COPY.form.title })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: VISITORS_COPY.form.submit })).not.toBeInTheDocument();
     expect(screen.getByText(VISITORS_COPY.closed("20.11.2026"))).toBeInTheDocument();
+  });
+
+  it("deletes the offline copy of the passport: a phone sent here is no longer an active device (RF-18)", () => {
+    window.localStorage.setItem(PASSPORT_SNAPSHOT_KEY, "{}");
+
+    render(<RegisterView isOpen={true} registrationOpensAt="2026-11-13T05:00:00.000Z" />);
+
+    expect(window.localStorage.getItem(PASSPORT_SNAPSHOT_KEY)).toBeNull();
   });
 
   it("exports valid metadata with canonical /register", () => {

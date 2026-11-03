@@ -158,7 +158,6 @@ function buildGame(fields: GameFields): Game {
     ...fields,
     id: fields.slug,
     images: [{ path: `/games/${fields.slug}.jpg`, alt: `Portada de ${fields.name}`, position: 1, isCover: true }],
-    itchUrl: null,
   };
 }
 
@@ -198,12 +197,12 @@ async function findOrCreateStand(prisma: Prisma.TransactionClient, location: Sta
 
 async function findOrCreateGame(
   prisma: Prisma.TransactionClient,
-  { slug, name, synopsis, itchUrl }: Game,
+  { slug, name, synopsis }: Game,
   links: { genreId: string; standId: string },
 ): Promise<string> {
   const game =
     (await prisma.game.findUnique({ where: { slug } })) ??
-    (await prisma.game.create({ data: { slug, name, synopsis, itchUrl, ...links } }));
+    (await prisma.game.create({ data: { slug, name, synopsis, ...links } }));
 
   return game.id;
 }

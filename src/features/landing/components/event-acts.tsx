@@ -18,7 +18,7 @@ interface EventActsProps {
   gamesCount: number;
   raffle: { startsAtLabel: string; cutoffLabel: string };
   kof: { checkInLabel: string; onsiteSignupLabel: string };
-  marketplace: ReactNode;
+  marketplace?: ReactNode;
 }
 
 type MotionOf = ReturnType<typeof useActMotion>["motionOf"];
