@@ -1,0 +1,25 @@
+# Despliegue de produccion (docs/deploy.md). El VPS ya tiene su proxy inverso: este archivo solo publica la app en
+# 127.0.0.1:${APP_PORT:-3000} para que ese proxy la use.
+services:
+  app:
+    build:
+      context: .
+      args:
+        # Se incrusta en el build (canonical, Open Graph y enlaces de los correos); si cambia, hay que reconstruir.
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?Define NEXT_PUBLIC_SITE_URL en el .env}
+    image: ut-e3-app:${APP_TAG:-latest}
+    # Reenvia las senales y recoge procesos huerfanos.
+    init: true
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: file:/data/app.db
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+    volumes:
+      - app-data:/data
+    # RNF-15: apagado ordenado de 30 s antes de que Docker mate el proceso.
+    stop_grace_period: 30s
+
+volumes:
+  app-data:

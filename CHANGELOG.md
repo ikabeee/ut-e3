@@ -12,6 +12,12 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   blanco, con texto alternativo "Código QR para abrir el pasaporte") para que el visitante lo escanee con su teléfono, junto
   con el botón "Copiar enlace"; el campo de texto queda como respaldo. El QR codifica el mismo enlace de siempre y se
   dibuja en la propia página (librería `uqr`, sin dependencias): el enlace no sale a ningún servicio.
+- Despliegue con Docker: `Dockerfile` en tres etapas (Node 22, usuario no root, `HEALTHCHECK` contra `GET /api/health`) y
+  `docker-compose.yml` con un servicio `app`, volumen persistente para la base SQLite, reinicio automático, apagado
+  ordenado de 30 s y puerto solo en `127.0.0.1:${APP_PORT:-3000}` para el proxy inverso del servidor. Al arrancar aplica
+  las migraciones y el seed (que crea al sysadmin si no existe). La guía `docs/deploy.md` explica construir, actualizar,
+  respaldar con `VACUUM INTO`, restaurar y configurar Nginx o Caddy; `.env.production.example` lista las variables. El
+  correo por SMTP es opcional. Next.js ahora genera `output: "standalone"`.
 - La app del visitante se puede instalar como PWA y funciona sin conexión. El manifest abre en `/passport` con el nombre
   y los colores del evento (íconos de 192 y 512 px y uno maskable en `public/icons/`), y en `/passport` aparece "Instalar
   la app" cuando el navegador la ofrece o los pasos de Compartir y Añadir a pantalla de inicio en Safari de iPhone. Un
