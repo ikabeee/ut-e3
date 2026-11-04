@@ -176,7 +176,7 @@ const FEATURE_LAYERS = [
     allowServerOnly: true,
   },
   {
-    glob: "lib/*-actions{,.test,-hardening.test}.ts",
+    glob: "lib/*-actions{,.test,-*.test}.ts",
     patterns: [hooksLayer, componentsLayer, pagesLayer, apiLayer, prismaClient],
   },
   { glob: `hooks/**/*.${SOURCE}`, patterns: [componentsLayer, pagesLayer, apiRoutes, serverCode] },

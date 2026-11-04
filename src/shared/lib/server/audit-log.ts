@@ -2,7 +2,8 @@ import "server-only";
 import type { Prisma } from "@generated/prisma/client";
 
 export interface AuditEntry {
-  actorId: string;
+  /** The account that made the change; null when no staff account did, such as a visitor's own email recovery. */
+  actorId: string | null;
   action: string;
   entityType: string;
   entityId: string;

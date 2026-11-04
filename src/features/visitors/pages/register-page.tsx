@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
 import { ClearPassportSnapshot } from "@features/visitors/components/clear-passport-snapshot";
 import { PrivacyNotice } from "@features/visitors/components/privacy-notice";
+import { RecoveryEntryLink } from "@features/visitors/components/recovery-entry-link";
 import { RegistrationForm } from "@features/visitors/components/registration-form";
 import { registerVisitor } from "@features/visitors/lib/visitors-actions";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
@@ -70,6 +71,9 @@ export function RegisterView({ isOpen, registrationOpensAt }: Readonly<RegisterV
           {VISITORS_COPY.closed(formatEventDate(registrationOpensAt, "numeric"))}
         </p>
       )}
+
+      {/* /passport sends a phone without a passport here, so this is where a visitor on a new phone looks for it. */}
+      <RecoveryEntryLink />
     </main>
   );
 }

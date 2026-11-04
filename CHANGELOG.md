@@ -8,6 +8,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Recuperación del pasaporte por correo en `/passport/recover`, enlazada desde `/register`: el visitante escribe su correo
+  y recibe un enlace de un solo uso que vence en 30 minutos. La respuesta es la misma exista o no el correo (y el trabajo
+  se hace después de responder), con un máximo de 3 solicitudes por correo por hora. El correo solo lleva el enlace. Al
+  abrirlo, el visitante confirma con "Abrir mi pasaporte"; el teléfono anterior pierde el acceso y la recuperación queda
+  en la bitácora. Un enlace vencido o usado lleva a "Este enlace ya no sirve" para pedir otro.
 - La mesa de recuperación (`/support/recovery`) muestra el enlace de acceso como un código QR grande (negro sobre
   blanco, con texto alternativo "Código QR para abrir el pasaporte") para que el visitante lo escanee con su teléfono, junto
   con el botón "Copiar enlace"; el campo de texto queda como respaldo. El QR codifica el mismo enlace de siempre y se

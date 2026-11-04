@@ -1,19 +1,36 @@
 import "server-only";
 import { NextResponse } from "next/server";
-import { PASSPORT_PATH, REGISTER_PATH } from "@features/visitors/lib/visitors-links";
+import { isUsableRecoveryToken } from "@features/visitors/lib/server/email-recovery";
+import {
+  PASSPORT_PATH,
+  RECOVERY_CONFIRM_PATH,
+  RECOVERY_LINK_EXPIRED_PATH,
+} from "@features/visitors/lib/visitors-links";
 import { isActiveDeviceToken, setVisitorDeviceCookie } from "@shared/lib/server/visitor-device";
 
-// Public on purpose: the token in the link is the proof. A phone that opens it becomes the device of the passport; a
-// token that was replaced since (another recovery) or never existed sends the visitor to register, like no cookie does.
+const HEADERS = { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" };
+
+// Public on purpose: the token in the link is the proof. Two kinds of link land here:
+// - the help desk link (RF-69) is the token of the device it issued, valid until another recovery replaces it;
+// - the email link (RF-68) is a one-use recovery token. A GET never spends it (mail scanners follow links): it goes
+//   to the confirmation page with the token in the fragment, and the visitor's tap there uses it.
+// Anything else (expired, used, replaced or made up) goes to the page that asks for a new link, without a cookie.
 export async function GET(request: Request, context: RouteContext<"/passport/claim/[token]">): Promise<Response> {
   const { token } = await context.params;
-  const valid = await isActiveDeviceToken(token);
 
-  if (valid) {
+  if (await isActiveDeviceToken(token)) {
     await setVisitorDeviceCookie(token);
+
+    return redirectTo(PASSPORT_PATH, request);
   }
 
-  return NextResponse.redirect(new URL(valid ? PASSPORT_PATH : REGISTER_PATH, request.url), {
-    headers: { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" },
-  });
+  if (await isUsableRecoveryToken(token, new Date())) {
+    return redirectTo(`${RECOVERY_CONFIRM_PATH}#${encodeURIComponent(token)}`, request);
+  }
+
+  return redirectTo(RECOVERY_LINK_EXPIRED_PATH, request);
+}
+
+function redirectTo(path: string, request: Request): Response {
+  return NextResponse.redirect(new URL(path, request.url), { headers: HEADERS });
 }
