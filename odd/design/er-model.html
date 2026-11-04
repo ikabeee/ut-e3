@@ -990,8 +990,9 @@ erDiagram
                 </li>
                 <li>
                   <span
-                    >ticketId <span class="keys"><span class="k fk">FK</span><span class="k uk">UQ</span></span></span
-                  ><span class="type">String</span>
+                    >ticketNumber
+                    <span class="keys"><span class="k fk">FK</span><span class="k uk">UQ</span></span></span
+                  ><span class="type">Int</span>
                 </li>
                 <li>
                   <span
@@ -1004,6 +1005,7 @@ erDiagram
                   ><span class="type">String</span>
                 </li>
                 <li><span>outcome</span><span class="type">String</span></li>
+                <li><span>drawnAt</span><span class="type">DateTime</span></li>
                 <li>
                   <span
                     >decidedAt <span class="keys"><span class="k opt">?</span></span></span
@@ -1024,8 +1026,8 @@ erDiagram
                 <div>
                   <span class="tag prisma">prisma</span
                   ><span
-                    ><code>ticketId</code> único (un boleto sale una vez); <code>requestId</code> único (idempotencia de
-                    "Girar")</span
+                    ><code>ticketNumber</code> único (un boleto sale una vez); <code>requestId</code> único
+                    (idempotencia de "Girar")</span
                   >
                 </div>
                 <div>
@@ -1040,7 +1042,17 @@ erDiagram
                 </div>
                 <div>
                   <span class="tag sql">sql</span
-                  ><span><code>prizeName</code> solo si <code>outcome = winner</code></span>
+                  ><span
+                    ><code>prizeName</code> solo si <code>outcome = winner</code>, junto con
+                    <code>prizeById</code></span
+                  >
+                </div>
+                <div>
+                  <span class="tag sql">sql</span
+                  ><span
+                    >Triggers: el giro no se borra; el boleto, la decisión y el premio no cambian una vez escritos
+                    (migración <code>*_raffle_draws</code>)</span
+                  >
                 </div>
               </div>
             </div>

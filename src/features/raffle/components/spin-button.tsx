@@ -24,10 +24,13 @@ const COPY = RAFFLE_COPY.admin.spin;
 export function SpinButton({ spin, isDisabled, onDrawn }: Readonly<SpinButtonProps>) {
   const [state, dispatch, isPending] = useActionState(spin, null);
   const requestId = useRef<string | null>(null);
+  const handledState = useRef<SpinActionState | null>(null);
 
+  // Each answer is handled once: `onDrawn` changes with every poll, and a ticket already decided must not come back.
   useEffect(() => {
-    if (!state) return;
+    if (!state || handledState.current === state) return;
 
+    handledState.current = state;
     requestId.current = null;
 
     if (state.status === "drawn") onDrawn(state.draw);

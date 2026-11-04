@@ -60,6 +60,22 @@ describe("RaffleDashboard", () => {
     await waitFor(() => expect(screen.queryByRole("heading", { name: "Boleto #12" })).not.toBeInTheDocument());
   });
 
+  it("never reopens a decided ticket when the polls that follow arrive (regression)", async () => {
+    const pending = createPendingDraw();
+
+    const load = jest
+      .fn()
+      .mockResolvedValueOnce(createAdminSnapshot({ pending, revision: 1 }))
+      .mockResolvedValue(createAdminSnapshot({ revision: 2, discardedCount: 1 }));
+
+    renderDashboard(createAdminSnapshot(), createActions(), load);
+    await userEvent.click(screen.getByRole("button", { name: "Girar" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Descartado" }));
+
+    await waitFor(() => expect(screen.getByText("Descartados: 1")).toBeInTheDocument());
+    expect(screen.queryByRole("heading", { name: "Boleto #12" })).not.toBeInTheDocument();
+  });
+
   it("shows the message of a refused spin", async () => {
     const actions = createActions({
       spin: jest.fn(async () => ({ status: "error" as const, message: "No quedan boletos" })),

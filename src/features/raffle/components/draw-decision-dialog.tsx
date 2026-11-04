@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertDialog, Button } from "@heroui/react";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import type { DecisionOutcome } from "@features/raffle/lib/raffle-input";
 import type { RaffleActionState } from "@features/raffle/lib/raffle-actions";
 import { RAFFLE_COPY } from "@features/raffle/lib/raffle-copy";
@@ -50,9 +50,14 @@ interface DecisionFormProps extends DrawDecisionDialogProps {
 
 function DecisionForm({ draw, outcome, decide, onDecided }: Readonly<DecisionFormProps>) {
   const [state, formAction, isPending] = useActionState(decide, null);
+  const handledState = useRef<RaffleActionState | null>(null);
 
+  // Each answer is handled once, although `onDecided` changes with every poll.
   useEffect(() => {
-    if (state?.status === "done") onDecided(draw.id);
+    if (state?.status !== "done" || handledState.current === state) return;
+
+    handledState.current = state;
+    onDecided(draw.id);
   }, [state, onDecided, draw.id]);
 
   return (

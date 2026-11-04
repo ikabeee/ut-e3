@@ -40,11 +40,11 @@ interface DrumContentProps extends RaffleDrumProps {
 function DrumContent({ snapshot, latest, isSpinning, rolling }: Readonly<DrumContentProps>) {
   if (snapshot.phase === "upcoming") return <BigLine>{COPY.upcoming(formatTimeOfDay(snapshot.startsAt))}</BigLine>;
 
+  if (snapshot.phase === "closed") return <BigLine>{COPY.closed}</BigLine>;
+
   if (isSpinning) return <Spinning rolling={rolling} />;
 
-  if (latest) return <Revealed draw={latest} />;
-
-  return <BigLine>{snapshot.phase === "closed" ? COPY.closed : COPY.waiting}</BigLine>;
+  return latest ? <Revealed draw={latest} /> : <BigLine>{COPY.waiting}</BigLine>;
 }
 
 function BigLine({ children }: Readonly<{ children: string }>) {

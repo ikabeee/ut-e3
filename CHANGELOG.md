@@ -8,6 +8,13 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Rifa final (M9): tómbola en vivo en `/raffle/live` para proyectar en el escenario (gira, muestra el número de boleto y
+  el gamertag y se actualiza sola), panel del animador en `/admin/raffle` (la cuenta `raffle_admin` entra por `/login`)
+  con "Girar", modal "Ganador" o "Descartado" que bloquea el siguiente giro, aviso "Otro animador está girando", registro
+  del premio entregado y "Cerrar la rifa"; sección pública de ganadores en `/raffle` y "Ganaste" con el premio en el
+  pasaporte. El sorteo usa `crypto.randomInt`, al salir un boleto se desactivan todos los del visitante, el ganador recibe
+  un correo por la bandeja de salida y todo queda en la bitácora. Seed de desarrollo `npm run db:seed:raffle` y prueba
+  `npm run test:e2e:raffle`.
 - La mesa de recuperación (`/support/recovery`) muestra el enlace de acceso como un código QR grande (negro sobre
   blanco, con texto alternativo "Código QR para abrir el pasaporte") para que el visitante lo escanee con su teléfono, junto
   con el botón "Copiar enlace"; el campo de texto queda como respaldo. El QR codifica el mismo enlace de siempre y se
