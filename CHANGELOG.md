@@ -16,8 +16,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   el pasaporte muestra el boleto anulado y el kiosco rechaza el PIN de un visitante excluido. Catálogos gestiona los
   géneros (no se borra uno con juegos, RF-72), los patrocinadores (RF-41) y la lista negra de correos de los equipos
   (RF-44). Servidor muestra como texto la memoria, la CPU, las pantallas del bracket público y la bandeja de salida con
-  "Reenviar" (RF-73), y el bracket público se cierra solo si la CPU o la memoria pasan del 50% durante 2 minutos
-  (RF-74). Migración `checkin_annulment_and_visitor_exclusion`.
+  "Reenviar" (RF-73), y el bracket público se cierra solo si la CPU o la memoria pasan del 85% durante 2 minutos
+  (RF-74; era 50%, pero en la prueba de carga de 1000 usuarios cerraba el bracket con la app respondiendo bien). Migración `checkin_annulment_and_visitor_exclusion`.
 - La mesa de recuperación (`/support/recovery`) muestra el enlace de acceso como un código QR grande (negro sobre
   blanco, con texto alternativo "Código QR para abrir el pasaporte") para que el visitante lo escanee con su teléfono, junto
   con el botón "Copiar enlace"; el campo de texto queda como respaldo. El QR codifica el mismo enlace de siempre y se

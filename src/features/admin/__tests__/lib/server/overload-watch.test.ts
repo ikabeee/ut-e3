@@ -32,7 +32,7 @@ function overloadedSampler(values: { cpu: number; memory: number }) {
 }
 
 describe("checkOverload (RF-74)", () => {
-  it("closes once the memory stayed above 50% for 2 minutes, then starts the history over", async () => {
+  it("closes once the memory stayed above 85% for 2 minutes, then starts the history over", async () => {
     const closes: string[] = [];
 
     const close = async (reason: string) => {
@@ -41,7 +41,7 @@ describe("checkOverload (RF-74)", () => {
       return true;
     };
 
-    const sample = overloadedSampler({ cpu: 0.1, memory: 0.55 });
+    const sample = overloadedSampler({ cpu: 0.1, memory: 0.9 });
 
     for (let at = 0; at < 120_000; at += 10_000) {
       await expect(checkOverload(at, { sample, close })).resolves.toBeNull();
@@ -53,9 +53,9 @@ describe("checkOverload (RF-74)", () => {
     await expect(checkOverload(130_000, { sample, close })).resolves.toBeNull();
   });
 
-  it("does nothing with the CPU at 55% for 90 seconds", async () => {
+  it("does nothing with the CPU at 90% for 90 seconds", async () => {
     const close = jest.fn(async () => true);
-    const sample = overloadedSampler({ cpu: 0.55, memory: 0.1 });
+    const sample = overloadedSampler({ cpu: 0.9, memory: 0.1 });
 
     for (let at = 0; at <= 90_000; at += 10_000) await checkOverload(at, { sample, close });
 
@@ -94,12 +94,12 @@ describe("the automatic close in the database (UT-AD-09)", () => {
       },
     });
 
-    for (let at = 0; at < 120_000; at += 10_000) recordLoadSample({ at, cpu: 0.2, memory: 0.8 });
+    for (let at = 0; at < 120_000; at += 10_000) recordLoadSample({ at, cpu: 0.2, memory: 0.9 });
 
     // The real close, as the watch of instrumentation.ts does it; a second close changes nothing.
     const close = (reason: string) => setPublicBracketEnabled(null, false, reason);
 
-    await expect(checkOverload(120_000, { sample: overloadedSampler({ cpu: 0.2, memory: 0.8 }), close })).resolves.toBe(
+    await expect(checkOverload(120_000, { sample: overloadedSampler({ cpu: 0.2, memory: 0.9 }), close })).resolves.toBe(
       "memory",
     );
     await expect(close("overload:memory")).resolves.toBe(false);

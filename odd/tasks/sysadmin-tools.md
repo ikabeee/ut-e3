@@ -43,7 +43,7 @@ El panel se divide en secciones con una navegación común (`admin/components/ad
 - S8 (RF-73): estado como texto: memoria (límite del cgroup si existe, si no la máquina), CPU, memoria del proceso,
   pantallas que consultaron `/api/tournament/public` en los últimos 10 s y solicitudes por minuto, y la bandeja de
   salida (enviados, pendientes y fallidos) con "Reenviar".
-- S9 (RF-74): `instrumentation.ts` toma una muestra cada 10 s; si la CPU o la memoria pasan del 50% en todas las
+- S9 (RF-74): `instrumentation.ts` toma una muestra cada 10 s; si la CPU o la memoria pasan del 85% en todas las
   muestras de los últimos 2 minutos, cierra el bracket público (`publicBracketEnabled = false`, bitácora sin actor y
   `reason: "overload:<metrica>"`) y reinicia el historial (UT-AD-07/08/09). El sysadmin también abre y cierra desde
   `/admin/server`.

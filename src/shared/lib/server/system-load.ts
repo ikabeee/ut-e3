@@ -133,7 +133,7 @@ function readOptionalFile(file: string): string {
 /**
  * The memory of the container from the cgroup v2 files. `memory.current` also counts the page cache (the SQLite file,
  * the build), which the kernel frees when it needs to; like `docker stats`, the inactive file cache is not "used", or
- * a quiet container would read above 50% and close the public bracket on its own (RF-74).
+ * a quiet container would read above the threshold and close the public bracket on its own (RF-74).
  */
 export function parseCgroupMemory(files: { max: string; current: string; stat: string }): MemoryReading | null {
   const max = files.max.trim();
