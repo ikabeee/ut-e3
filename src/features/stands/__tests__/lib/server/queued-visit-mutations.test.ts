@@ -100,6 +100,20 @@ describe("registerQueuedVisits", () => {
     expect(await getRejectedVisitNotices(visitorId)).toEqual([{ id: visit.id, standCode: "ZA-S3" }]);
   });
 
+  it("records once the same batch sent by two tabs at the same time", async () => {
+    const visit = entry({ scannedAt: at("20:00") });
+    const answers = await Promise.all([send([visit], at("20:05")), send([visit], at("20:05"))]);
+
+    expect(
+      answers
+        .flat()
+        .map((result) => result.status)
+        .sort(),
+    ).toEqual(["duplicate", "ok"]);
+    expect(await getPrisma().checkIn.count()).toBe(1);
+    expect(await getPrisma().vote.count()).toBe(1);
+  });
+
   it("answers duplicate, with no passport notice, to a late PIN of a visitor that already visited the stand", async () => {
     await send([entry({ scannedAt: at("20:00") })], at("20:05"));
 

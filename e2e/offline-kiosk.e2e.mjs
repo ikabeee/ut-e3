@@ -218,6 +218,8 @@ async function runScenario(browser, databaseFile, screenshots) {
     await checkLateVisit(session, pin);
     await checkDumbRequests(session);
     await checkMobileLayout(staffPage);
+    // Last: it spends every PIN attempt of the staff account for the next 5 minutes.
+    await checkPinGuessing(session, pin);
   } finally {
     check("no browser console errors", consoleErrors.length === 0, consoleErrors.slice(0, 5).join(" | ") || "none");
     await phone.close();
@@ -519,6 +521,41 @@ async function checkMobileLayout(staffPage) {
   const overflow = await staffPage.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 
   check("no horizontal scroll at 360 px with the rejected list", overflow <= 0, `${overflow}px`);
+}
+
+// The dumbest attack: guessing PINs through the queue, 50 per batch. The batches share the 100 attempts every 5 minutes
+// of the PIN screen (RNF-10), so the staff cannot sort the real PINs out of the candidates of the filter (RNF-19).
+async function checkPinGuessing({ staffPage, database }, registeredPin) {
+  const guesses = Array.from({ length: 160 }, (_, index) => String(40000 + index)).filter(
+    (pin) => pin !== registeredPin,
+  );
+  const scannedAt = new Date().toISOString();
+  const toVisit = (pin, index) => ({
+    id: `e2e00000-0000-4000-8000-${String(100 + index).padStart(12, "0")}`,
+    pin,
+    ratings: { gameRating: 5, standRating: 5, artRating: 5 },
+    scannedAt,
+  });
+  let answered = 0;
+
+  for (let start = 0; start < 150; start += 50) {
+    const response = await postBatch(staffPage, { visits: guesses.slice(start, start + 50).map(toVisit) });
+
+    answered += response.body?.results?.length ?? 0;
+  }
+
+  check("150 PIN guesses through the queue get at most 100 answers (RNF-10)", answered <= 100, `${answered} answers`);
+
+  const realPin = await postBatch(staffPage, { visits: [toVisit("10005", 999)] });
+  const recorded = database
+    .prepare("SELECT COUNT(*) AS total FROM checkins WHERE id = ?")
+    .get(toVisit("", 999).id).total;
+
+  check(
+    "once the attempts run out, a real PIN gets no answer either and nothing is recorded",
+    realPin.status === 200 && realPin.body.results.length === 0 && recorded === 0,
+    JSON.stringify(realPin.body),
+  );
 }
 
 async function postBatch(page, batch) {

@@ -52,6 +52,12 @@ filtro. Pruebas: Jest (`npm test`) y `npm run test:e2e:offline-kiosk` (E2E-07 y 
   los CHECK de `event_settings`.
 - D5: `/stand/kiosk` sigue fuera del service worker; si el navegador recarga sin red, el kiosco no abre (la cola sigue en
   IndexedDB y se envía al volver).
+- D6 (revisión): cada PIN de la cola que no es de nadie gasta un intento de la cuenta del kiosco, con el mismo límite de
+  la pantalla del PIN (100 cada 5 minutos, `lib/server/kiosk-attempts.ts`). Sin esto, la cola respondía 3,000 PIN cada
+  5 minutos y el staff podía separar los PIN reales de los candidatos del filtro (RNF-19). Al acabarse los intentos, el
+  lote se responde sin las visitas restantes y el kiosco las reintenta con su backoff.
+- D7 (revisión): una visita en cola de un visitante que ya tiene su visita al stand responde `duplicate` aunque llegue
+  tarde, para que el pasaporte no diga "no se registró" de una visita que sí cuenta (EC-03).
 
 ## Pruebas manuales
 
