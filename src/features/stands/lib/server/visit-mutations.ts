@@ -13,6 +13,10 @@ export interface VisitRecord {
   /** The staff account that had the kiosk open (RF-36). */
   scannedById: string;
   ratings: Ratings;
+  /** The id the kiosk gave to a visit of its offline queue; a new one otherwise. */
+  checkInId?: string;
+  /** When the kiosk took the PIN; a visit recorded at once was taken now (RN-04). */
+  scannedAt?: Date;
 }
 
 export interface NewVisit extends VisitRecord {
@@ -70,7 +74,14 @@ async function insertVisit(
   { visit, visitorId, now }: Omit<RecordedVisit, "settlePending">,
 ): Promise<VisitResult> {
   const checkIn = await transaction.checkIn.create({
-    data: { visitorId, standId: visit.standId, scannedById: visit.scannedById, checkedInAt: now },
+    data: {
+      id: visit.checkInId,
+      visitorId,
+      standId: visit.standId,
+      scannedById: visit.scannedById,
+      checkedInAt: now,
+      scannedAt: visit.scannedAt ?? now,
+    },
     select: { id: true },
   });
 

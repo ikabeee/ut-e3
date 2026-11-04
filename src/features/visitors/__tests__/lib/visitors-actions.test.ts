@@ -1,6 +1,7 @@
 /**
  * @jest-environment node
  */
+import type * as NextCache from "next/cache";
 import { registerVisitor } from "@features/visitors/lib/visitors-actions";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 import { getPrisma } from "@shared/lib/server/prisma";
@@ -12,6 +13,11 @@ import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 const TEST_KEY = Buffer.alloc(32, 7).toString("base64");
 
 let jar = createCookieJar();
+
+// updateTag only runs inside Next; the spy replaces it on the module object the action reads.
+const nextCache = jest.requireActual<typeof NextCache>("next/cache");
+
+const updateTag = jest.spyOn(nextCache, "updateTag").mockImplementation(() => undefined);
 
 const database = createTestDatabase();
 
@@ -178,6 +184,8 @@ describe("registerVisitor Server Action", () => {
     });
 
     expect(jar.get(VISITOR_DEVICE_COOKIE)?.value).toBeTruthy();
+    // The filter of the kiosks is rebuilt with the new PIN (RNF-19, UT-CI-33).
+    expect(updateTag).toHaveBeenCalledWith("visitor-pins");
     expect(afterStub.callbacks.length).toBeGreaterThanOrEqual(1);
 
     await expect(afterStub.callbacks[0]()).resolves.not.toThrow();

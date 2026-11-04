@@ -1,10 +1,12 @@
 "use server";
 
+import { updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { parseRegistrationInput } from "@features/visitors/lib/registration-input";
 import { getRegistrationOpensAt, registerVisitorRecord } from "@features/visitors/lib/server/visitor-registration";
+import { VISITOR_PINS_CACHE_TAG } from "@features/visitors/lib/visitor-cache-tags";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 import { PASSPORT_PATH } from "@features/visitors/lib/visitors-links";
 import { readFormText } from "@shared/lib/form-data";
@@ -95,6 +97,8 @@ async function executeRegistration(input: {
     };
   }
 
+  // The filter of the kiosks must include the new PIN (RNF-19).
+  updateTag(VISITOR_PINS_CACHE_TAG);
   await setVisitorDeviceCookie(result.deviceToken);
 
   after(async () => {
