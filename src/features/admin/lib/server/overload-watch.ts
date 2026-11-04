@@ -1,5 +1,5 @@
 import "server-only";
-import { findSustainedOverload, PUBLIC_BRACKET_OVERLOAD_RULE } from "@features/admin/lib/overload-rule";
+import { findSustainedOverload, formatShare, PUBLIC_BRACKET_OVERLOAD_RULE } from "@features/admin/lib/overload-rule";
 import { setPublicBracketEnabled } from "@features/tournament/lib/server/public-bracket-mutations";
 import { clearLoadSamples, getLoadSamples, takeLoadSample, type LoadSample } from "@shared/lib/server/system-load";
 
@@ -24,7 +24,8 @@ export function startOverloadWatch(): void {
 }
 
 /**
- * Takes a sample and, when the CPU or the memory stayed above 50% for 2 minutes, closes the public bracket on its own
+ * Takes a sample and, when the CPU or the memory stayed above the threshold of
+ * `PUBLIC_BRACKET_OVERLOAD_RULE` (85%) for 2 minutes, closes the public bracket on its own
  * (RF-74, UT-AD-09). The operation of the tournament keeps working. After a close the history starts over, so a
  * sysadmin who reopens the bracket gets 2 more minutes before the next automatic close.
  */
@@ -42,7 +43,10 @@ export async function checkOverload(
 
   const closed = await close(`overload:${metric}`);
 
-  if (closed) console.warn(`Public bracket closed automatically: ${metric} above 50% for 2 minutes.`);
+  if (closed)
+    console.warn(
+      `Public bracket closed automatically: ${metric} above ${formatShare(PUBLIC_BRACKET_OVERLOAD_RULE.threshold)} for 2 minutes.`,
+    );
 
   return metric;
 }

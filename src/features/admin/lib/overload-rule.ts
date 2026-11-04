@@ -12,8 +12,12 @@ export interface OverloadRule {
   durationMs: number;
 }
 
-/** RF-74: the public bracket closes on its own when the CPU or the memory stay above 50% for 2 minutes. */
-export const PUBLIC_BRACKET_OVERLOAD_RULE: OverloadRule = { threshold: 0.5, durationMs: 2 * 60_000 };
+/**
+ * RF-74: the public bracket closes on its own when the CPU or the memory stay above 85% for 2 minutes. In the load test
+ * of 1000 visitors on the event VPS (2 vCPU) the CPU averaged 44% with peaks of 71% while answers stayed fast, and the
+ * old 50% closed the bracket during the test; 85% keeps the close for real saturation.
+ */
+export const PUBLIC_BRACKET_OVERLOAD_RULE: OverloadRule = { threshold: 0.85, durationMs: 2 * 60_000 };
 
 /**
  * The metric that stayed above the threshold for the whole duration up to `now`, or null (UT-AD-07, UT-AD-08). The

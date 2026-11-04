@@ -231,7 +231,7 @@ Tomado del orden del día oficial. Es el contenido inicial del cronograma (RF-03
 | RF-46 | Puede anular un check-in (y su voto) o excluir a un visitante, con motivo; nada se borra. Anular un check-in que deja al visitante debajo de un hito anula ese boleto; si vuelve a llegar al hito, el mismo boleto se reactiva. Con la rifa iniciada, los boletos no cambian. |
 | RF-72 | Gestiona el catálogo de géneros. Un género con juegos asignados no se puede borrar. |
 | RF-73 | Ve el estado del servidor como texto: memoria, CPU, conexiones al bracket en vivo y bandeja de salida (enviados, pendientes y fallidos, con "Reenviar"). |
-| RF-74 | Puede cerrar y reabrir el bracket público ("Cerrar al público"). El sistema lo cierra solo si la CPU o la memoria superan el 50% durante 2 minutos. La operación del torneo conserva el acceso. |
+| RF-74 | Puede cerrar y reabrir el bracket público ("Cerrar al público"). El sistema lo cierra solo si la CPU o la memoria superan el 85% durante 2 minutos. La operación del torneo conserva el acceso. |
 
 ### M8. Patrocinadores (público)
 
@@ -341,7 +341,7 @@ Tomado del orden del día oficial. Es el contenido inicial del cronograma (RF-03
 | EC-11 | El sysadmin cambia la hora de la rifa | La tolerancia de los check-ins se mueve con ella. |
 | EC-12 | Se agota la cuota diaria de correo | El correo queda en la bandeja de salida y se reintenta. |
 | EC-13 | Se anula el check-in que le dio a un visitante su boleto del hito 9 | El boleto se anula; si vuelve a llegar a 9, el mismo boleto se reactiva. |
-| EC-14 | La CPU o la memoria superan el 50% durante 2 minutos | Se cierra el bracket público; la operación del torneo sigue conectada. |
+| EC-14 | La CPU o la memoria superan el 85% durante 2 minutos | Se cierra el bracket público; la operación del torneo sigue conectada. |
 | EC-15 | Un jugador de la lista previa de KOF llega a hacer su check-in a las 12:50 | Su inscripción ya quedó como "No se presentó" (RF-76). |
 | EC-16 | Un PIN mal tecleado pasa el filtro del kiosco (falso positivo) | El kiosco abre la encuesta; al llegar al servidor la visita se rechaza y aparece en la lista de rechazadas (RF-24 y RF-35). |
 

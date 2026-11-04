@@ -28,8 +28,8 @@ export const ADMIN_COPY = {
     cpu: (share: string) => `CPU: ${share} (todos los núcleos, desde la lectura anterior).`,
     processMemory: (rss: string) => `Memoria del proceso de Node: ${rss}.`,
     uptime: (minutes: number) => `Proceso en marcha desde hace ${minutes} min.`,
-    overloadRule: "Si la CPU o la memoria pasan del 50% durante 2 minutos, el bracket público se cierra solo.",
-    overloadSince: (metric: string, seconds: number) => `${metric} arriba del 50% desde hace ${seconds} s.`,
+    overloadRule: "Si la CPU o la memoria pasan del 85% durante 2 minutos, el bracket público se cierra solo.",
+    overloadSince: (metric: string, seconds: number) => `${metric} arriba del 85% desde hace ${seconds} s.`,
     metricNames: { cpu: "CPU", memory: "Memoria" },
     bracketHeading: "Bracket en vivo",
     bracketViewers: (viewers: number) =>
