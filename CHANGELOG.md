@@ -283,6 +283,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- Al detenerse (`docker compose stop` o `restart`), la app cierra SQLite y ya no deja `app.db-wal` ni `app.db-shm`; si
+  alguna conexión sigue abierta, sale sola a los 20 s, antes del `SIGKILL` de Docker. La guía de restauración de
+  `docs/deploy.md` borra esos archivos antes de copiar el respaldo: seguirla al pie de la letra dejaba la base corrupta.
 - Un registro rechazado porque el gamertag ya está en uso ya no gasta uno de los 3 intentos por hora del registro.
 - Herramientas del sysadmin: una visita que se termina de calificar después de excluir al visitante ya no queda
   registrada ni da boleto; el patrocinador no se guarda si su logo no existe en `public/`; un género sin letras a-z ni

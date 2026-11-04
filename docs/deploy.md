@@ -132,14 +132,19 @@ cuentan como "fuera del VPS": cópialos y borra los viejos (`docker compose exec
 
 ```bash
 docker compose stop app
+# Borra el WAL de la base actual ANTES de copiar el respaldo: SQLite lo aplicaría encima del respaldo y la base
+# quedaría corrupta ("database disk image is malformed"). Revisa que no queden con el ls.
+docker compose run --rm --no-deps --user root --entrypoint sh app -c 'rm -f /data/app.db-wal /data/app.db-shm && ls -la /data'
 docker compose cp ./app-<fecha>.db app:/data/app.db    # funciona con el contenedor detenido
 # docker cp deja el archivo como root; la app corre como "node" y sin este paso la base queda de solo lectura.
 docker compose run --rm --no-deps --user root --entrypoint chown app node:node /data/app.db
 docker compose up -d
 ```
 
-Con la app detenida de forma ordenada, SQLite ya integró y borró `app.db-wal` y `app.db-shm`. Si quedaron de un apagado
-brusco, bórralos antes de arrancar, o conservarán cambios que no pertenecen al respaldo.
+Al detenerse con `docker compose stop`, la app cierra SQLite (que integra y borra `app.db-wal` y `app.db-shm`) y, si
+alguna conexión sigue abierta, sale sola a los 20 s, antes de los 30 s de `stop_grace_period`. Aun así, un `kill -9`, un
+`docker kill` o un corte de luz los dejan: bórralos siempre antes de copiar el respaldo, como arriba. Nunca los borres
+con la app corriendo ni sin restaurar un respaldo después, porque ahí están las últimas escrituras.
 
 ## Proxy inverso
 
