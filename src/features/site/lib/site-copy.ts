@@ -13,4 +13,15 @@ export const SITE_COPY = {
       schedule: { label: "Cronograma", description: "Actividades y horarios del evento." },
     },
   },
+  error: {
+    // Error boundaries take no `metadata`, so the view sets the tab title itself.
+    documentTitle: (siteName: string) => `Algo salió mal · ${siteName}`,
+    kicker: "Error",
+    title: "Algo salió mal",
+    description:
+      "No pudimos cargar esta página. Revisa tu conexión e intenta de nuevo en unos segundos, o vuelve al inicio.",
+    digest: (digest: string) => `Código: ${digest}`,
+    retry: "Reintentar",
+    home: "Ir al inicio",
+  },
 };

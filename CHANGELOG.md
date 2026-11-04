@@ -283,6 +283,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- Vuelven las páginas de error en español (`error.tsx` y `global-error.tsx`, RF-45.1), que se habían perdido: una
+  excepción, como enviar la encuesta del pasaporte sin señal, mostraba la página genérica de Next en inglés. Ahora dice
+  "Algo salió mal" con "Reintentar" e "Ir al inicio".
 - Al detenerse (`docker compose stop` o `restart`), la app cierra SQLite y ya no deja `app.db-wal` ni `app.db-shm`; si
   alguna conexión sigue abierta, sale sola a los 20 s, antes del `SIGKILL` de Docker. La guía de restauración de
   `docs/deploy.md` borra esos archivos antes de copiar el respaldo: seguirla al pie de la letra dejaba la base corrupta.
