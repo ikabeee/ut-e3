@@ -1,8 +1,13 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
+import {
+  EDITABLE_INSTANT_FIELDS,
+  type EditableEventSettings,
+  type InstantField,
+} from "@features/event-settings/lib/event-settings-input";
 import { EVENT_SETTINGS_ID } from "@features/event-settings/lib/server/event-settings-seed";
 import type { EventSettings } from "@features/event-settings/lib/types";
-import type { Prisma } from "@generated/prisma/client";
+import type { EventSettings as EventSettingsFullRow, Prisma } from "@generated/prisma/client";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 export const EVENT_SETTINGS_CACHE_TAG = "event-settings";
@@ -62,5 +67,32 @@ function toEventSettings(row: EventSettingsRow): EventSettings {
     checkInCutoffAt: row.checkInCutoffAt.toISOString(),
     raffleStartsAt: row.raffleStartsAt.toISOString(),
     publicBracketEnabled: row.publicBracketEnabled,
+  };
+}
+
+/**
+ * What the form of the panel shows: the row as it is right now, with the fraud thresholds. Not cached, because the
+ * sysadmin must see the value that the last save left (RF-43).
+ */
+export async function getEditableEventSettings(): Promise<EditableEventSettings> {
+  const row = await getPrisma().eventSettings.findUnique({ where: { id: EVENT_SETTINGS_ID } });
+
+  if (!row) throw new Error(MISSING_ROW_MESSAGE);
+
+  return toEditableSettings(row);
+}
+
+export function toEditableSettings(row: EventSettingsFullRow): EditableEventSettings {
+  // SAFETY: the entries are built from EDITABLE_INSTANT_FIELDS, one per field, so the record has every key.
+  const instants = Object.fromEntries(
+    EDITABLE_INSTANT_FIELDS.map((field) => [field, row[field].toISOString()]),
+  ) as Record<InstantField, string>;
+
+  return {
+    ...instants,
+    marketplaceFormUrl: row.marketplaceFormUrl,
+    fraudTopScoreCount: row.fraudTopScoreCount,
+    fraudWindowMinutes: row.fraudWindowMinutes,
+    fraudSingleVisitMax: row.fraudSingleVisitMax,
   };
 }

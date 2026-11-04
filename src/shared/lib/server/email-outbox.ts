@@ -24,7 +24,8 @@ interface SmtpStatusPayload {
   responseCode: number;
 }
 
-const MAX_ATTEMPTS = 5;
+/** After this many attempts a row is abandoned: it counts as failed in the server status (RF-73). */
+export const MAX_ATTEMPTS = 5;
 
 const BASE_RETRY_DELAY_MS = 30_000;
 

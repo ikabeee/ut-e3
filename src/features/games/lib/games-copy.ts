@@ -89,6 +89,28 @@ export const GAMES_COPY = {
       conflict: "Otro cambio se guardó al mismo tiempo. Intenta de nuevo.",
     },
   },
+  genresAdmin: {
+    heading: "Catálogo de géneros",
+    lead: "Los géneros que eligen los stands para su juego. Un género con juegos no se puede borrar.",
+    newGenre: "Nuevo género",
+    name: "Nombre",
+    create: "Agregar género",
+    rename: "Renombrar",
+    pending: "Guardando...",
+    gameCount: (count: number) => (count === 1 ? "1 juego" : `${count} juegos`),
+    delete: "Borrar",
+    confirmDelete: (name: string) => `¿Borrar el género ${name}?`,
+    confirmDeleteAction: "Sí, borrar",
+    cancel: "Cancelar",
+    empty: "Aún no hay géneros.",
+    outcomes: { created: "Género agregado.", renamed: "Género renombrado.", deleted: "Género borrado." },
+    errors: {
+      nameLength: "Escribe un nombre de 2 a 40 caracteres con letras o números.",
+      taken: "Ya existe un género con ese nombre.",
+      hasGames: "Ese género tiene juegos asignados: cámbialos de género antes de borrarlo.",
+      notFound: "Ese género ya no existe. Recarga la página.",
+    },
+  },
 };
 
 function padTwoDigits(value: number): string {

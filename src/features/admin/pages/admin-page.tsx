@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { AccountPageHeader } from "@features/accounts/components/account-page-header";
 import { AccountsPanel } from "@features/accounts/components/accounts-panel";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { SYSADMIN_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
 import { requireSysadmin } from "@features/accounts/lib/server/current-account";
 import { listManagedAccounts } from "@features/accounts/lib/server/invitations";
+import { AdminHeader } from "@features/admin/components/admin-header";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import { getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
 import { ZONE_IDS } from "@features/floor-plan/lib/types";
@@ -58,9 +58,10 @@ async function SysadminPanel() {
 
   return (
     <>
-      <AccountPageHeader
+      <AdminHeader
         title={ADMIN_COPY.title}
-        signedInAs={ADMIN_COPY.signedInAs(account.name)}
+        accountName={account.name}
+        currentPath={SYSADMIN_HOME_PATH}
         signOutAction={signOut}
       />
       <AccountsPanel
