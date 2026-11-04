@@ -8,6 +8,16 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Herramientas del sysadmin en `/admin` (M7), con una navegación entre secciones: Configuración edita los horarios de
+  `event_settings`, la URL del Marketplace y los umbrales de fraude (RF-43); Moderación muestra las alertas de posible
+  fraude (stands con muchas calificaciones de 5 en poco tiempo y visitantes de un solo stand, RF-45) y permite anular una
+  visita o excluir a un visitante con motivo, sin borrar nada: el boleto de un hito que se pierde queda anulado y se
+  reactiva con su mismo número si el visitante vuelve a llegar, y con la rifa iniciada los boletos no cambian (RF-46);
+  el pasaporte muestra el boleto anulado y el kiosco rechaza el PIN de un visitante excluido. Catálogos gestiona los
+  géneros (no se borra uno con juegos, RF-72), los patrocinadores (RF-41) y la lista negra de correos de los equipos
+  (RF-44). Servidor muestra como texto la memoria, la CPU, las pantallas del bracket público y la bandeja de salida con
+  "Reenviar" (RF-73), y el bracket público se cierra solo si la CPU o la memoria pasan del 50% durante 2 minutos
+  (RF-74). Migración `checkin_annulment_and_visitor_exclusion`.
 - La mesa de recuperación (`/support/recovery`) muestra el enlace de acceso como un código QR grande (negro sobre
   blanco, con texto alternativo "Código QR para abrir el pasaporte") para que el visitante lo escanee con su teléfono, junto
   con el botón "Copiar enlace"; el campo de texto queda como respaldo. El QR codifica el mismo enlace de siempre y se
