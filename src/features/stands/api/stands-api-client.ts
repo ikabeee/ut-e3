@@ -47,4 +47,3 @@ export async function sendQueuedVisits(visits: QueuedVisit[]): Promise<QueuedVis
 
   return body.results;
 }
-
