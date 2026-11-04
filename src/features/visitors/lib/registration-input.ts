@@ -16,7 +16,7 @@ export type ParseRegistrationResult =
 
 const GAMERTAG_REGEX = /^[A-Za-z0-9_-]{3,20}$/;
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
 
 export function parseRegistrationInput(form: FormData): ParseRegistrationResult {
   const fullName = readFormText(form, "fullName").trim();

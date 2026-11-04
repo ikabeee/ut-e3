@@ -21,8 +21,16 @@ export function PassportTickets({ tickets }: Readonly<PassportTicketsProps>) {
               key={ticket.number}
               className="flex items-baseline justify-between gap-4 border border-border bg-surface p-3"
             >
-              <span className="type-mono text-foreground">{COPY.ticket(ticket.number)}</span>
-              <span className="type-tiny text-muted">{COPY.milestone(ticket.milestone)}</span>
+              <span
+                className={
+                  ticket.voided ? "type-mono whitespace-nowrap text-muted line-through" : "type-mono text-foreground"
+                }
+              >
+                {COPY.ticket(ticket.number)}
+              </span>
+              <span className="type-tiny text-muted">
+                {ticket.voided ? COPY.voided : COPY.milestone(ticket.milestone)}
+              </span>
             </li>
           ))}
         </ul>

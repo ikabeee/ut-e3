@@ -35,7 +35,7 @@ beforeEach(async () => {
 
 describe("GET /api/tournament/public (S3)", () => {
   it("answers without a session and says the bracket is pending before it exists", async () => {
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/tournament/public"));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -46,7 +46,7 @@ describe("GET /api/tournament/public (S3)", () => {
   it("sends the public bracket, never cached and without ids", async () => {
     await generateTournament(adminId, createPlayers(64), GENERATES_AT);
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/tournament/public"));
     const text = await response.text();
 
     expect(response.headers.get("Cache-Control")).toBe("no-store");
@@ -59,7 +59,7 @@ describe("GET /api/tournament/public (S3)", () => {
     await generateTournament(adminId, createPlayers(64), GENERATES_AT);
     await getPrisma().eventSettings.update({ where: { id: 1 }, data: { publicBracketEnabled: false } });
 
-    const text = await (await GET()).text();
+    const text = await (await GET(new Request("http://localhost/api/tournament/public"))).text();
 
     expect(JSON.parse(text)).toMatchObject({ state: "closed" });
     expect(text).not.toContain("Tag");

@@ -10,11 +10,15 @@ const FEATURE_DEPENDENCIES = {
   pwa: ["games", "visitors"],
   raffle: ["accounts"],
   games: ["accounts", "event-settings"],
+  "event-settings": ["accounts"],
   schedule: ["accounts", "floor-plan"],
+  sponsors: ["accounts"],
   stands: ["accounts", "games", "pwa", "visitors"],
   support: ["accounts", "visitors"],
   tournament: ["accounts"],
-  visitors: ["games"],
+  visitors: ["accounts", "games"],
+  moderation: ["accounts", "games", "visitors"],
+  admin: ["accounts", "tournament"],
 };
 
 const FEATURES = readdirSync(new URL("./src/features", import.meta.url), { withFileTypes: true })

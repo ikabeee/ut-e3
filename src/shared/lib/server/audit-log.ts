@@ -2,7 +2,8 @@ import "server-only";
 import type { Prisma } from "@generated/prisma/client";
 
 export interface AuditEntry {
-  actorId: string;
+  /** Null when the system itself made the change, such as the automatic close of the public bracket (RF-74). */
+  actorId: string | null;
   action: string;
   entityType: string;
   entityId: string;

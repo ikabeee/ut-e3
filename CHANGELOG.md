@@ -22,6 +22,16 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   en cola llega fuera de horario (RF-24). La pantalla del PIN ya no se desborda a 360 px. Los PIN de la cola que no son
   de nadie gastan los mismos intentos que la pantalla del PIN (100 cada 5 minutos), así que la cola no sirve para
   adivinar PIN.
+- Herramientas del sysadmin en `/admin` (M7), con una navegación entre secciones: Configuración edita los horarios de
+  `event_settings`, la URL del Marketplace y los umbrales de fraude (RF-43); Moderación muestra las alertas de posible
+  fraude (stands con muchas calificaciones de 5 en poco tiempo y visitantes de un solo stand, RF-45) y permite anular una
+  visita o excluir a un visitante con motivo, sin borrar nada: el boleto de un hito que se pierde queda anulado y se
+  reactiva con su mismo número si el visitante vuelve a llegar, y con la rifa iniciada los boletos no cambian (RF-46);
+  el pasaporte muestra el boleto anulado y el kiosco rechaza el PIN de un visitante excluido. Catálogos gestiona los
+  géneros (no se borra uno con juegos, RF-72), los patrocinadores (RF-41) y la lista negra de correos de los equipos
+  (RF-44). Servidor muestra como texto la memoria, la CPU, las pantallas del bracket público y la bandeja de salida con
+  "Reenviar" (RF-73), y el bracket público se cierra solo si la CPU o la memoria pasan del 50% durante 2 minutos
+  (RF-74). Migración `checkin_annulment_and_visitor_exclusion`.
 - La mesa de recuperación (`/support/recovery`) muestra el enlace de acceso como un código QR grande (negro sobre
   blanco, con texto alternativo "Código QR para abrir el pasaporte") para que el visitante lo escanee con su teléfono, junto
   con el botón "Copiar enlace"; el campo de texto queda como respaldo. El QR codifica el mismo enlace de siempre y se
@@ -263,6 +273,12 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- Herramientas del sysadmin: una visita que se termina de calificar después de excluir al visitante ya no queda
+  registrada ni da boleto; el patrocinador no se guarda si su logo no existe en `public/`; un género sin letras a-z ni
+  números (solo emojis o "日本") se rechaza en vez de guardarse con el slug "juego"; el motivo de una anulación o
+  exclusión necesita letras o números visibles; la lista negra rechaza correos de más de 254 caracteres; la memoria
+  del contenedor ya no cuenta la caché de archivos (cerraba el bracket público sin carga real), y el conteo de
+  pantallas del bracket y las alertas de fraude aguantan miles de peticiones y votos sin volverse lentos.
 - La portada ya no falla con el catálogo vacío (`DATA_SOURCE=prisma` antes de publicar juegos):
   el carrusel de destacados y el exhibidor 3D no se muestran hasta que haya juegos.
 - Pedir el boleto sin stands asignados responde "El sorteo se abre cuando los equipos tengan stand

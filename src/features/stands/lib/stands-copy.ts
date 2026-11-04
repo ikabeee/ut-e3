@@ -65,6 +65,7 @@ export const STANDS_COPY = {
       queueFailed: "No se pudo guardar la visita en este equipo. Inténtalo otra vez.",
       unknownPin: "PIN no reconocido, revísalo",
       alreadyVisited: "Este PIN ya registró su visita a este stand.",
+      excluded: "Este pasaporte no puede registrar visitas. Pídele que pase a la mesa de atención.",
       closed: "El registro de visitas ya cerró.",
       standWithoutGame: "Registra tu juego para empezar a recibir visitas",
       ratingsRequired: "Califica el juego, el stand y el arte.",
