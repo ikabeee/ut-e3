@@ -8,6 +8,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Página `/studio`: PIXEL & CODE presentado como estudio, al estilo de un sitio de agencia de videojuegos. Título en
+  letras LED con un clip flotante, reel que se endereza al hacer scroll, disciplinas que se apilan, carrusel de juegos
+  filtrable por género, tablero de citas de ejemplo, formulario de contacto (Server Action que por ahora sólo valida) y
+  banda final con cinta de letras LED. La fuente LED de la portada ahora tiene el alfabeto completo.
 - La mesa de recuperación (`/support/recovery`) muestra el enlace de acceso como un código QR grande (negro sobre
   blanco, con texto alternativo "Código QR para abrir el pasaporte") para que el visitante lo escanee con su teléfono, junto
   con el botón "Copiar enlace"; el campo de texto queda como respaldo. El QR codifica el mismo enlace de siempre y se

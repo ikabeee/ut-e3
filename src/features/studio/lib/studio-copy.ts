@@ -1,0 +1,70 @@
+export const STUDIO_COPY = {
+  page: {
+    title: "Estudio",
+    description: "PIXEL & CODE como estudio: diseño, arte, código y torneos hechos por estudiantes de la UT Cancún.",
+  },
+  hero: {
+    label: "PIXEL & CODE",
+    firstLine: "PIXEL",
+    secondLine: "& CODE",
+    badge: "E3 · UT Cancún",
+    intro: (division: string) =>
+      `Un estudio de videojuegos hecho por estudiantes de la ${division}. Diseñamos, dibujamos, programamos y competimos.`,
+    scrollCue: "Desliza para explorar",
+  },
+  reel: {
+    label: "Reel del estudio",
+    play: "Ver reel",
+    pause: "Pausar reel",
+  },
+  disciplines: {
+    heading: "Qué hacemos",
+    skillsLabel: "Habilidades",
+    moreSkills: (count: number, names: string) => `${count} habilidades más: ${names}`,
+  },
+  work: {
+    marquee: "NUESTROS JUEGOS -",
+    heading: "Juegos hechos en el E3.",
+    intro: "De prototipos de una semana a proyectos de todo el cuatrimestre: filtra por género y entra a cada uno.",
+    filterLabel: "Filtrar por",
+    allGenres: "Todos",
+    listLabel: "Juegos",
+    count: (count: number) => `${count} ${count === 1 ? "juego" : "juegos"}`,
+    page: (page: number, total: number) => `Página ${page} de ${total}`,
+    previousPage: "Juegos anteriores",
+    nextPage: "Más juegos",
+  },
+  testimonials: {
+    heading: "Lo que dicen",
+    badge: "Testimonios",
+  },
+  contact: {
+    intro: "¿Quieres patrocinar un stand, invitar a un equipo o proponer un torneo? Escríbenos y te respondemos.",
+    firstLine: "EMPIEZA",
+    secondLine: "TU HISTORIA",
+    heading: "Empieza tu historia",
+    formTitle: "Escríbenos",
+    fields: {
+      email: "Correo",
+      name: "Nombre",
+      organization: "Organización (opcional)",
+      message: "Mensaje",
+      consent: "Acepto que usen mis datos sólo para responderme.",
+    },
+    submit: "Enviar",
+    sent: (name: string, email: string) => `Gracias, ${name}. Recibimos tu mensaje y te responderemos a ${email}.`,
+    errors: {
+      email: "Escribe un correo válido.",
+      name: "Escribe tu nombre.",
+      tooLong: (max: number) => `Máximo ${max} caracteres.`,
+      messageTooShort: (min: number) => `Cuéntanos un poco más (mínimo ${min} caracteres).`,
+      consent: "Necesitamos tu permiso para responderte.",
+    },
+  },
+  closing: {
+    label: "Cierre",
+    marquee: "HECHO EN EL E3 -",
+    backToTop: "Volver arriba",
+    linksLabel: "Más del showcase",
+  },
+} as const;
