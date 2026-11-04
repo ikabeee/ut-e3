@@ -283,6 +283,7 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- Un registro rechazado porque el gamertag ya está en uso ya no gasta uno de los 3 intentos por hora del registro.
 - Herramientas del sysadmin: una visita que se termina de calificar después de excluir al visitante ya no queda
   registrada ni da boleto; el patrocinador no se guarda si su logo no existe en `public/`; un género sin letras a-z ni
   números (solo emojis o "日本") se rechaza en vez de guardarse con el slug "juego"; el motivo de una anulación o
@@ -301,6 +302,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Seguridad
 
+- El límite de registro (3 por hora) y el de inicio de sesión cuentan la dirección que agrega el proxy (la última de
+  `X-Forwarded-For`) y no la primera, que la escribe el cliente: falsificar el encabezado ya no da registros sin límite.
+  El inicio de sesión cuenta los intentos por correo y por dirección, así que tres contraseñas incorrectas desde un
+  equipo ya no dejan una hora sin panel al sysadmin, a los animadores de la rifa o al staff que entra desde otro.
 - El service worker ya no guarda el pasaporte (`/passport`) ni el enlace del QR (`/v/<token>`) en
   la caché del navegador: mostraban el gamertag y el token secreto del QR. Sin conexión responden
   la página `/offline`.

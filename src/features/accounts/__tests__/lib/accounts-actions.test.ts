@@ -7,6 +7,7 @@ import { SESSION_COOKIE } from "@shared/lib/session-cookie";
 import { hashPassword } from "@shared/lib/server/password";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
+import { stubHeaders } from "@shared/__tests__/lib/server/headers-stub";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
 const PASSWORD = "correct horse battery staple";
@@ -35,6 +36,7 @@ afterAll(async () => {
 beforeEach(async () => {
   jar = createCookieJar();
   stubCookies(jar);
+  stubHeaders({ "x-forwarded-for": "203.0.113.10" });
   await getPrisma().session.deleteMany();
   await getPrisma().rateLimit.deleteMany();
   await getPrisma().account.updateMany({ data: { status: "active" } });
@@ -104,6 +106,33 @@ describe("signIn", () => {
       error: "Demasiados intentos. Intenta de nuevo más tarde.",
     });
     expect(await getPrisma().session.count()).toBe(0);
+  });
+
+  it("does not lock the account for a client on another address", async () => {
+    stubHeaders({ "x-forwarded-for": "198.51.100.66" });
+
+    for (const attempt of [1, 2, 3, 4]) {
+      await signIn(null, credentials("admin@ut.mx", `wrong-${attempt}`));
+    }
+
+    stubHeaders({ "x-forwarded-for": "1.2.3.4, 203.0.113.20" });
+
+    await expect(signIn(null, credentials("admin@ut.mx", PASSWORD))).rejects.toMatchObject({
+      digest: expect.stringContaining(";/admin;"),
+    });
+  });
+
+  it("keeps blocking the address that spent its attempts, whatever it puts in X-Forwarded-For", async () => {
+    for (const attempt of [1, 2, 3]) {
+      stubHeaders({ "x-forwarded-for": `10.0.0.${attempt}, 198.51.100.66` });
+      await signIn(null, credentials("admin@ut.mx", `wrong-${attempt}`));
+    }
+
+    stubHeaders({ "x-forwarded-for": "10.0.0.9, 198.51.100.66" });
+
+    expect(await signIn(null, credentials("admin@ut.mx", PASSWORD))).toEqual({
+      error: "Demasiados intentos. Intenta de nuevo más tarde.",
+    });
   });
 
   it("answers at most three of a concurrent burst of wrong passwords and blocks the rest", async () => {

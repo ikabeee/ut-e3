@@ -5,6 +5,7 @@ import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import { getHomePath, LOGIN_PATH } from "@features/accounts/lib/accounts-links";
 import { findSignInAccount } from "@features/accounts/lib/server/account-queries";
 import { readFormText } from "@shared/lib/form-data";
+import { resolveClientIp } from "@shared/lib/server/client-ip";
 import { hashPassword, verifyPassword } from "@shared/lib/server/password";
 import { clearAttempts, consumeAttempt } from "@shared/lib/server/rate-limit";
 import { createSession, deleteSession } from "@shared/lib/server/session";
@@ -24,7 +25,8 @@ export async function signIn(_previous: SignInState | null, form: FormData): Pro
 
   if (!email || !password) return { error: errors.missingFields };
 
-  const attemptKey = `login:${email}`;
+  // Per address too: a prankster typing wrong passwords locks only their own device, not the staff member (RNF-10).
+  const attemptKey = `login:${email}:${await resolveClientIp()}`;
 
   if (!(await consumeAttempt(attemptKey, SIGN_IN_LIMIT))) return { error: errors.tooManyAttempts };
 

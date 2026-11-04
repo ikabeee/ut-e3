@@ -1,5 +1,6 @@
 import "server-only";
 import { createHash } from "node:crypto";
+import { readClientIp } from "@shared/lib/server/client-ip";
 
 /** A screen polls every 3 seconds; one that did not ask in this window left the bracket. */
 export const AUDIENCE_WINDOW_MS = 10_000;
@@ -58,13 +59,10 @@ function getStore(): AudienceStore {
 }
 
 function clientKey(request: Request): string {
-  const address = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? request.headers.get("x-real-ip");
+  const address = readClientIp(request.headers);
   const agent = request.headers.get("user-agent") ?? "";
 
-  return createHash("sha256")
-    .update(`${address ?? ""}|${agent}`)
-    .digest("base64url")
-    .slice(0, 16);
+  return createHash("sha256").update(`${address}|${agent}`).digest("base64url").slice(0, 16);
 }
 
 // Both maps are ordered by time, so pruning stops at the first entry that is still fresh: each request costs O(1)

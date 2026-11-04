@@ -143,11 +143,15 @@ brusco, bórralos antes de arrancar, o conservarán cambios que no pertenecen al
 
 ## Proxy inverso
 
-El proxy termina TLS y pasa todo a `127.0.0.1:3000` (o tu `APP_PORT`). Dos cosas importan en esta app:
+El proxy termina TLS y pasa todo a `127.0.0.1:3000` (o tu `APP_PORT`). Tres cosas importan en esta app:
 
 - **Sin buffering en las respuestas en streaming.** Next.js envía la página por partes (Suspense) y el tiempo real usa
   SSE (RNF-07). Con buffering las páginas se ven lentas y los eventos llegan tarde o nunca.
 - **`X-Forwarded-Proto` y `Host`** para que Next.js sepa que la petición original fue por HTTPS.
+- **`X-Forwarded-For` con la dirección que vio el proxy al final.** Los límites de registro y de inicio de sesión
+  (RNF-10) toman la **última** dirección del encabezado, porque las anteriores las escribe el cliente. Los dos bloques
+  de abajo ya lo hacen (Nginx con `$proxy_add_x_forwarded_for` y Caddy por defecto). Si pones otro proxy o una CDN
+  delante de este, esa última dirección sería la del proxy y todos los visitantes compartirían el límite.
 
 ### Nginx
 

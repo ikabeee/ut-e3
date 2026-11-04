@@ -33,6 +33,16 @@ export async function hasAttemptsLeft(key: string, rule: RateLimitRule, now = ne
   return (row?.count ?? 0) < rule.limit;
 }
 
+/** Gives back one attempt of the window of `now`, for a request that ended in a harmless mistake of the user. */
+export async function refundAttempt(key: string, rule: RateLimitRule, now: Date): Promise<void> {
+  const windowStart = windowStartOf(now, rule.windowMs);
+
+  await getPrisma().rateLimit.updateMany({
+    where: { key, windowStart, count: { gt: 0 } },
+    data: { count: { decrement: 1 } },
+  });
+}
+
 export async function clearAttempts(key: string): Promise<void> {
   await getPrisma().rateLimit.deleteMany({ where: { key } });
 }

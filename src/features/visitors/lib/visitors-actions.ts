@@ -1,7 +1,6 @@
 "use server";
 
 import { updateTag } from "next/cache";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { parseRecoveryEmail } from "@features/visitors/lib/email-recovery-input";
@@ -15,7 +14,8 @@ import { readFormText } from "@shared/lib/form-data";
 import { deliverQueuedEmail } from "@shared/lib/server/email-delivery";
 import { deliverEmail } from "@shared/lib/server/email-outbox";
 import { createSmtpSender } from "@shared/lib/server/mailer";
-import { consumeAttempt } from "@shared/lib/server/rate-limit";
+import { resolveClientIp } from "@shared/lib/server/client-ip";
+import { consumeAttempt, refundAttempt } from "@shared/lib/server/rate-limit";
 import { setVisitorDeviceCookie } from "@shared/lib/server/visitor-device";
 
 export interface RegistrationState {
@@ -52,14 +52,19 @@ export async function registerVisitor(_previous: RegistrationState | null, form:
     return { values: parsed.value, error: closedError };
   }
 
-  const clientIp = await resolveClientIp();
-  const allowed = await consumeAttempt(`register:${clientIp}`, REGISTRATION_RATE_LIMIT);
+  const attemptKey = `register:${await resolveClientIp()}`;
+  const attemptedAt = new Date();
 
-  if (!allowed) {
+  if (!(await consumeAttempt(attemptKey, REGISTRATION_RATE_LIMIT, attemptedAt))) {
     return { values: parsed.value, error: VISITORS_COPY.rateLimited };
   }
 
-  return executeRegistration(parsed.value);
+  const state = await executeRegistration(parsed.value);
+
+  // A taken gamertag is a typo, not a new passport: the visitor retries and the attempt is given back.
+  if (state.fieldErrors?.gamertag) await refundAttempt(attemptKey, REGISTRATION_RATE_LIMIT, attemptedAt);
+
+  return state;
 }
 
 async function checkRegistrationClosed(): Promise<string | null> {
@@ -71,17 +76,6 @@ async function checkRegistrationClosed(): Promise<string | null> {
   }
 
   return null;
-}
-
-async function resolveClientIp(): Promise<string> {
-  const headersList = await headers();
-  const forwarded = headersList.get("x-forwarded-for");
-
-  if (!forwarded) {
-    return "unknown";
-  }
-
-  return forwarded.split(",")[0].trim() || "unknown";
 }
 
 async function executeRegistration(input: {
