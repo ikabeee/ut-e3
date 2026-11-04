@@ -49,6 +49,26 @@ export async function getKofAccount(): Promise<KofAccount | null> {
   return { ...account, role, kofDesk: toKofDesk(row?.kofDesk ?? null) };
 }
 
+const RAFFLE_ROLE: AccountRole = "raffle_admin";
+
+// Every raffle page and Server Action calls this; only the raffle administrators spin, decide and register prizes.
+export async function requireRaffleAdmin(): Promise<SessionAccount> {
+  const account = await getRaffleAdmin();
+
+  if (!account) {
+    redirect(LOGIN_PATH);
+  }
+
+  return account;
+}
+
+// For Route Handlers, which answer 401 instead of redirecting.
+export async function getRaffleAdmin(): Promise<SessionAccount | null> {
+  const account = await getSessionAccount();
+
+  return account?.role === RAFFLE_ROLE ? account : null;
+}
+
 export interface StandAccount extends SessionAccount {
   role: "stand_admin" | "stand_staff";
   /** The stand whose kiosk the account opens; the table guarantees every stand account has one. */
