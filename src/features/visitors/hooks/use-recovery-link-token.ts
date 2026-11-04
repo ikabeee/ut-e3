@@ -14,8 +14,13 @@ function subscribe(onChange: () => void) {
   return () => window.removeEventListener("hashchange", onChange);
 }
 
+// A fragment edited by hand can be malformed ("#%E0"); that is an incomplete link, not a crash of the page.
 function readToken(): string {
-  return decodeURIComponent(window.location.hash.slice(1));
+  try {
+    return decodeURIComponent(window.location.hash.slice(1));
+  } catch {
+    return "";
+  }
 }
 
 function readServerToken(): null {

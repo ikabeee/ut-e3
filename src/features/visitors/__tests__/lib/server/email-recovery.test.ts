@@ -146,6 +146,27 @@ describe("claimRecoveryToken", () => {
     expect(await isUsableRecoveryToken(token, NOW)).toBe(false);
   });
 
+  it("closes the other pending links once one of them recovers the passport", async () => {
+    await requestEmailRecovery("neo@example.com", NOW);
+    await requestEmailRecovery("neo@example.com", NOW);
+
+    const [older, newer] = (await getPrisma().emailOutbox.findMany()).map(({ text }) => readLinkToken(text));
+
+    expect(older).not.toBe(newer);
+    expect(await claimRecoveryToken(newer, NOW)).not.toBeNull();
+    expect(await isUsableRecoveryToken(older, NOW)).toBe(false);
+    expect(await claimRecoveryToken(older, NOW)).toBeNull();
+  });
+
+  it("closes the pending email links when the help desk gives the passport a new device (RF-70)", async () => {
+    const token = await requestLink();
+
+    await getPrisma().$transaction((transaction) => createVisitorDevice(transaction, visitorId));
+
+    expect(await isUsableRecoveryToken(token, NOW)).toBe(false);
+    expect(await claimRecoveryToken(token, NOW)).toBeNull();
+  });
+
   it("refuses a made-up link and does not touch the device", async () => {
     const device = await getPrisma().$transaction((transaction) => createVisitorDevice(transaction, visitorId));
 
@@ -185,7 +206,10 @@ async function requestLink(): Promise<string> {
   await requestEmailRecovery("neo@example.com", NOW);
 
   const { text } = await getPrisma().emailOutbox.findFirstOrThrow({ orderBy: { createdAt: "desc" } });
-  const match = new RegExp(`${CLAIM_PATH}/(\\S+)`).exec(text);
 
-  return match?.[1] ?? "";
+  return readLinkToken(text);
+}
+
+function readLinkToken(text: string): string {
+  return new RegExp(`${CLAIM_PATH}/(\\S+)`).exec(text)?.[1] ?? "";
 }

@@ -10,9 +10,19 @@ export const VISITOR_DEVICE_COOKIE = "ut_visitor_device";
 
 const TOKEN_BYTES = 32;
 
+/**
+ * Gives the visitor a new device, which replaces the previous one (RF-70). It also closes every recovery link still
+ * pending for the visitor: once a phone recovers the passport (by email or at the help desk), an older email link must
+ * not take it back.
+ */
 export async function createVisitorDevice(transaction: Prisma.TransactionClient, visitorId: string): Promise<string> {
   const token = randomBytes(TOKEN_BYTES).toString("base64url");
   const hashedToken = hashToken(token);
+
+  await transaction.recoveryToken.updateMany({
+    where: { visitorId, usedAt: null },
+    data: { usedAt: new Date() },
+  });
 
   await transaction.visitorDevice.upsert({
     where: { visitorId },

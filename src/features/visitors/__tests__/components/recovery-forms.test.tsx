@@ -75,6 +75,13 @@ describe("RecoveryConfirmForm", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(COPY.confirmMissing);
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
+
+  it("treats a malformed fragment as an incomplete link instead of crashing", () => {
+    window.location.hash = "#%E0%A4%A";
+    render(<RecoveryConfirmForm action={async () => {}} />);
+
+    expect(screen.getByRole("alert")).toHaveTextContent(COPY.confirmMissing);
+  });
 });
 
 describe("RecoveryEntryLink", () => {

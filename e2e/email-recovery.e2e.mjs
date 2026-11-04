@@ -220,6 +220,8 @@ async function runScenario(browser, databaseFile, screenshots) {
     checkTheRecoveryIsAudited(database);
     await checkTheLinkOnlyWorksOnce(pages.stranger, link, screenshots);
     await checkHourlyLimit(pages.stranger, database);
+    await checkPendingLinksCloseAfterRecovery(pages.stranger, database);
+    await checkMalformedFragment(pages.phoneA);
   } finally {
     check("no browser console errors", consoleErrors.length === 0, consoleErrors.slice(0, 5).join(" | ") || "none");
 
@@ -359,6 +361,34 @@ async function checkHourlyLimit(page, database) {
 
   check("the fourth request in the hour shows the same message", new Set(messages).size === 1);
   check("and only three recovery emails were queued", recoveryEmails(database).length === 3);
+}
+
+// Emails 2 and 3 are still pending; using the newest one must close the other, so it cannot take the passport back.
+async function checkPendingLinksCloseAfterRecovery(page, database) {
+  const [, older, newer] = recoveryEmails(database).map(({ text }) => text.match(/https?:\/\/\S+/)[0]);
+
+  await page.goto(newer, { waitUntil: "networkidle" });
+  await page.waitForURL(/\/passport\/recover\/confirm#/, { timeout: UI_TIMEOUT_MS });
+  await page.getByRole("button", { name: "Abrir mi pasaporte" }).click();
+  await page.waitForURL(/\/passport$/, { timeout: UI_TIMEOUT_MS });
+
+  await page.goto(older, { waitUntil: "networkidle" });
+  await page.waitForURL(/\/passport\/recover\/(expired|confirm)/, { timeout: UI_TIMEOUT_MS });
+  check(
+    "after a recovery, an older pending link lands on the expired-link page",
+    page.url().endsWith("/passport/recover/expired"),
+    page.url(),
+  );
+}
+
+// A fragment edited by hand that is not valid percent-encoding says the link is incomplete instead of breaking.
+async function checkMalformedFragment(page) {
+  await page.goto(`${BASE_URL}/passport/recover/confirm#%E0%A4%A`, { waitUntil: "networkidle" });
+
+  const alert = page.getByRole("alert").filter({ hasText: "Este enlace está incompleto" });
+
+  await alert.waitFor({ timeout: UI_TIMEOUT_MS });
+  check("a malformed fragment shows the incomplete-link message", await alert.isVisible());
 }
 
 async function waitForRecoveryEmails(database, expected) {

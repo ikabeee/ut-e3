@@ -45,6 +45,10 @@ Estado: implementado en `feature/email-recovery`, pendiente de revisión.
 - Un enlace inválido ya no manda a `/register` sino a `/passport/recover/expired`, que explica qué pasó.
 - No hay límite por IP: en la sede todos los teléfonos pueden salir por la misma IP del Wi-Fi.
 - `recordAudit` acepta `actorId: null` (la recuperación por correo no la hace una cuenta del staff).
+- **Un dispositivo nuevo cierra los enlaces pendientes.** `createVisitorDevice` marca como usados los `recovery_tokens`
+  sin usar del visitante, así que un enlace viejo (de otra solicitud o anterior a una recuperación en la mesa) ya no
+  devuelve el pasaporte al teléfono de quien lo tenga. Mientras nadie recupere, los hasta 3 enlaces de la hora siguen
+  vigentes hasta vencer.
 
 ## Pruebas manuales
 
