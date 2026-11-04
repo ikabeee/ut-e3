@@ -32,11 +32,17 @@ export function findFewStandVisitors(
 function groupTimesByStand(votes: readonly TopScoreVote[]): Map<string, number[]> {
   const groups = new Map<string, number[]>();
 
+  // Push into one array per stand: copying the array on each vote made a stand with thousands of votes quadratic.
   for (const vote of votes) {
-    groups.set(vote.standId, [...(groups.get(vote.standId) ?? []), Date.parse(vote.createdAt)]);
+    const times = groups.get(vote.standId) ?? [];
+
+    times.push(Date.parse(vote.createdAt));
+    groups.set(vote.standId, times);
   }
 
-  return new Map([...groups].map(([standId, times]) => [standId, times.toSorted((first, second) => first - second)]));
+  for (const times of groups.values()) times.sort((first, second) => first - second);
+
+  return groups;
 }
 
 // Two pointers over sorted times: the lapse starts at a vote and holds the votes less than `windowMs` after it.

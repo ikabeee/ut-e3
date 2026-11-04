@@ -36,6 +36,18 @@ describe("findTopScoreBursts (RF-45)", () => {
   });
 });
 
+describe("findTopScoreBursts under load (RF-45)", () => {
+  it("evaluates 30 000 perfect votes of one stand in well under a second", () => {
+    const votes = votesEvery(30_000, 1000);
+    const startedAt = performance.now();
+
+    const [burst] = findTopScoreBursts(votes, THRESHOLDS);
+
+    expect(burst).toMatchObject({ standId: "stand-a", count: 600 });
+    expect(performance.now() - startedAt).toBeLessThan(1000);
+  });
+});
+
 describe("findFewStandVisitors (RF-45)", () => {
   it("lists a visitor with one check-in and not one with two (UT-AD-06)", () => {
     const visitors = [
