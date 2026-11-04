@@ -232,15 +232,24 @@ async function checkCards(session) {
   await screenshot(session, "01-cards/01-sponsors-page");
 }
 
-// SP-02: every logo loads (naturalWidth > 0) and its alt is the sponsor name.
+// SP-02: every logo loads (naturalWidth > 0) and its alt is the sponsor name. next/image loads lazily, so each logo is
+// scrolled into view first: at 390 px the last cards start below the fold and have not asked for their image yet.
 async function checkLogos(session) {
   const { page, sponsors } = session;
+  const images = sponsorCards(page).getByRole("img");
 
-  const logos = await sponsorCards(page)
-    .getByRole("img")
-    .evaluateAll((images) =>
-      images.map((image) => ({ alt: image.alt, src: image.getAttribute("src"), loaded: image.naturalWidth > 0 })),
-    );
+  for (const image of await images.all()) {
+    await image.scrollIntoViewIfNeeded();
+    await image
+      .evaluate((element) => element.decode())
+      .catch(() => {
+        // A logo that does not decode stays with naturalWidth 0 and fails the check below.
+      });
+  }
+
+  const logos = await images.evaluateAll((images) =>
+    images.map((image) => ({ alt: image.alt, src: image.getAttribute("src"), loaded: image.naturalWidth > 0 })),
+  );
 
   const broken = logos.filter((logo) => !logo.loaded).map(({ alt }) => alt);
 

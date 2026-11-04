@@ -165,7 +165,11 @@ async function waitForServer() {
 
   while (Date.now() < deadline) {
     try {
-      const response = await fetch(`${BASE_URL}/api/raffle/live`);
+      // /api/health and not a page or the raffle API: the waiting loop must not compile routes, and the body is
+      // cancelled so no response stays open. With /api/raffle/live left unread, next dev reloaded /login in a loop.
+      const response = await fetch(`${BASE_URL}/api/health`);
+
+      await response.body?.cancel();
 
       if (response.status < 500) {
         return;
