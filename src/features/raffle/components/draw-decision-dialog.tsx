@@ -25,7 +25,7 @@ export function DrawDecisionDialog({ draw, decide, onDecided }: Readonly<DrawDec
   return (
     <AlertDialog.Backdrop isOpen isDismissable={false} isKeyboardDismissDisabled>
       <AlertDialog.Container placement="center" size="md">
-        <AlertDialog.Dialog className="grid gap-4 rounded-none">
+        <AlertDialog.Dialog className="grid gap-4 rounded-none border border-border bg-surface p-6">
           <AlertDialog.Header>
             <AlertDialog.Heading className="type-section">{COPY.heading(draw.ticketNumber)}</AlertDialog.Heading>
           </AlertDialog.Header>
