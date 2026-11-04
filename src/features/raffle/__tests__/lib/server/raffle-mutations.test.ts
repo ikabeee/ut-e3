@@ -116,6 +116,22 @@ describe("spinRaffle", () => {
     expect(await getPrisma().raffleDraw.count()).toBe(1);
   });
 
+  it("EC-08: a retried spin whose ticket another administrator already decided does not reopen it", async () => {
+    await createVisitorWithTickets("Neo");
+    await createVisitorWithTickets("Trinity");
+    const requestId = nextRequestId();
+    const first = await spin({ requestId });
+
+    if (first.status !== "drawn") throw new Error("expected a draw");
+
+    const other = await createRaffleAdmin("Otro");
+
+    await decideDraw({ actorId: other.id, drawId: first.draw.id, outcome: "discarded", now: DURING_RAFFLE });
+
+    expect(await spin({ requestId })).toEqual({ status: "alreadyDecided" });
+    expect(await getPrisma().raffleDraw.count()).toBe(1);
+  });
+
   it("UT-RA-05: a visitor with two tickets loses both when one comes out, in the same transaction", async () => {
     const neo = await createVisitorWithTickets("Neo", [9, 18]);
     await createVisitorWithTickets("Trinity");

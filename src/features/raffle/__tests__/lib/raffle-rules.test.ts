@@ -1,3 +1,4 @@
+import { RAFFLE_COPY } from "@features/raffle/lib/raffle-copy";
 import { buildWinnerEmail } from "@features/raffle/lib/raffle-email";
 import { parseDecision, parsePrize, parseSpinRequest } from "@features/raffle/lib/raffle-input";
 import { resolvePendingDraw } from "@features/raffle/lib/raffle-pending";
@@ -69,6 +70,24 @@ describe("raffle forms", () => {
     });
     expect(parsePrize(formOf({ drawId: ID, prizeName: "x".repeat(80) })).ok).toBe(true);
     expect(parsePrize(formOf({ drawId: ID, prizeName: "x".repeat(81) })).ok).toBe(false);
+  });
+
+  it("refuses a prize made only of invisible characters and drops them from a real one", () => {
+    expect(parsePrize(formOf({ drawId: ID, prizeName: "\u200B\u200D\u202E" }))).toEqual({
+      ok: false,
+      message: RAFFLE_COPY.admin.errors.prizeRequired,
+    });
+    expect(parsePrize(formOf({ drawId: ID, prizeName: "Ta\u202Eza\u0000 UT" }))).toEqual({
+      ok: true,
+      value: { drawId: ID, prizeName: "Taza UT" },
+    });
+  });
+
+  it("counts an emoji as one character of the 80", () => {
+    expect(parsePrize(formOf({ drawId: ID, prizeName: "\u{1F3AE}".repeat(80) })).ok).toBe(true);
+    expect(parsePrize(formOf({ drawId: ID, prizeName: "\u{1F468}\u200D\u{1F4BB}" }))).toMatchObject({
+      value: { prizeName: "\u{1F468}\u200D\u{1F4BB}" },
+    });
   });
 });
 

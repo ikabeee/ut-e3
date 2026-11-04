@@ -121,10 +121,16 @@ export async function findPendingDraw(reader: RaffleReader): Promise<PendingDraw
   return row ? toPendingDraw(row) : null;
 }
 
-export async function findDrawByRequest(reader: RaffleReader, requestId: string): Promise<PendingDraw | null> {
+/** The draw a press of "Girar" already made, and whether it was decided since (RNF-05). */
+export interface RequestedDraw {
+  draw: PendingDraw;
+  isDecided: boolean;
+}
+
+export async function findDrawByRequest(reader: RaffleReader, requestId: string): Promise<RequestedDraw | null> {
   const row = await reader.raffleDraw.findUnique({ where: { requestId }, select: DRAW_SELECT });
 
-  return row ? toPendingDraw(row) : null;
+  return row ? { draw: toPendingDraw(row), isDecided: row.outcome !== "pending" } : null;
 }
 
 /** The win of a visitor for the passport (RF-25); a discarded ticket is not a win. */

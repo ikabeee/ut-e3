@@ -20,6 +20,10 @@ export const MAX_PRIZE_NAME = 80;
 // The panel generates the id with crypto.randomUUID(); anything else is not a request of the panel.
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// Control and format characters (zero-width spaces, bidi overrides...) show nothing, or turn the text around on the
+// public screen; the joiner of emoji sequences (U+200D) stays.
+const INVISIBLE = /(?!\u200D)[\p{Cc}\p{Cf}]/gu;
+
 const ERRORS = RAFFLE_COPY.admin.errors;
 
 /** The id of one press of "Girar" (RNF-05): the same id twice is the same spin. */
@@ -40,13 +44,14 @@ export function parseDecision(form: FormData): ParseResult<{ drawId: string; out
 
 export function parsePrize(form: FormData): ParseResult<PrizeInput> {
   const drawId = readFormText(form, "drawId").trim();
-  const prizeName = readFormText(form, "prizeName").replace(/\s+/g, " ").trim();
+  const prizeName = readFormText(form, "prizeName").replace(INVISIBLE, "").replace(/\s+/g, " ").trim();
 
   if (!UUID.test(drawId)) return invalid();
 
-  if (!prizeName) return { ok: false, message: ERRORS.prizeRequired };
+  if (!prizeName.replaceAll("\u200D", "")) return { ok: false, message: ERRORS.prizeRequired };
 
-  if (prizeName.length > MAX_PRIZE_NAME) return { ok: false, message: ERRORS.prizeTooLong };
+  // Counted by characters, as the CHECK of the table does, so an emoji is one and not two.
+  if ([...prizeName].length > MAX_PRIZE_NAME) return { ok: false, message: ERRORS.prizeTooLong };
 
   return { ok: true, value: { drawId, prizeName } };
 }

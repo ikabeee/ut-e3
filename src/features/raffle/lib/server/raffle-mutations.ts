@@ -9,6 +9,7 @@ import {
   findPendingDraw,
   getRaffleSchedule,
   toPendingDraw,
+  type RequestedDraw,
 } from "@features/raffle/lib/server/raffle-queries";
 import type { PendingDraw } from "@features/raffle/lib/types";
 import type { Prisma } from "@generated/prisma/client";
@@ -25,7 +26,9 @@ export type SpinResult =
   /** Another administrator has a ticket without a decision (RF-50). */
   | { status: "busy"; pending: PendingDraw }
   /** The same administrator has to decide its own ticket first (RF-51). */
-  | { status: "undecided"; pending: PendingDraw };
+  | { status: "undecided"; pending: PendingDraw }
+  /** A retried "Girar" whose ticket was decided meanwhile: it must not open the decision again. */
+  | { status: "alreadyDecided" };
 
 export interface SpinRequest {
   actorId: string;
@@ -55,7 +58,7 @@ export async function spinRaffle(request: SpinRequest): Promise<SpinResult> {
 async function spinInTransaction(transaction: Transaction, request: SpinRequest): Promise<SpinResult> {
   const repeated = await findDrawByRequest(transaction, request.requestId);
 
-  if (repeated) return { status: "drawn", draw: repeated };
+  if (repeated) return toRepeatedSpin(repeated);
 
   const blocked = await findSpinBlocker(transaction, request);
 
@@ -136,13 +139,19 @@ async function auditDraw(transaction: Transaction, actorId: string, { draw, cand
 async function resolveSpinConflict(request: SpinRequest): Promise<SpinResult> {
   const repeated = await findDrawByRequest(getPrisma(), request.requestId);
 
-  if (repeated) return { status: "drawn", draw: repeated };
+  if (repeated) return toRepeatedSpin(repeated);
 
   const pending = await findPendingDraw(getPrisma());
 
   if (!pending) throw new Error("El giro chocó con otro, pero no hay un giro pendiente.");
 
   return pending.drawnById === request.actorId ? { status: "undecided", pending } : { status: "busy", pending };
+}
+
+// The same request returns the same ticket while it waits (EC-08). Once another administrator decided it, the panel
+// that retries must not get a decision dialog it can neither answer nor dismiss.
+function toRepeatedSpin({ draw, isDecided }: RequestedDraw): SpinResult {
+  return isDecided ? { status: "alreadyDecided" } : { status: "drawn", draw };
 }
 
 export type DecisionResult =

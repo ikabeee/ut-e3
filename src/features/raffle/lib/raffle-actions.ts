@@ -56,6 +56,8 @@ function toSpinState(result: SpinResult): SpinActionState {
       return failure(ERRORS.busy);
     case "undecided":
       return failure(ERRORS.undecided(result.pending.ticketNumber));
+    case "alreadyDecided":
+      return failure(ERRORS.alreadyDecided);
   }
 }
 
