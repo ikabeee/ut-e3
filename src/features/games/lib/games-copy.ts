@@ -65,6 +65,11 @@ export const GAMES_COPY = {
     heading: "Más juegos",
     seeAll: "Ver todos",
   },
+  notFound: {
+    title: "Juego no encontrado",
+    description:
+      "Ese juego no está en el showcase: quizá cambió de nombre o el enlace está mal escrito. Estos sí te están esperando.",
+  },
   standGame: {
     title: "Mi juego",
     description: "Registra los datos del juego de tu stand.",

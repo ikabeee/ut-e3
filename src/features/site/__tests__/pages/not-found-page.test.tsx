@@ -9,10 +9,29 @@ describe("NotFoundPage", () => {
     expect(screen.getByRole("link", { name: /Volver al inicio/ })).toHaveAttribute("href", "/");
   });
 
+  it("offers the games, the floor plan and the schedule as ways out", () => {
+    render(<NotFoundPage />);
+
+    const exits = within(screen.getByRole("navigation", { name: "Sigue explorando" }));
+
+    expect(exits.getByRole("link", { name: /Juegos/ })).toHaveAttribute("href", "/games");
+    expect(exits.getByRole("link", { name: /Croquis/ })).toHaveAttribute("href", "/#floor-plan");
+    expect(exits.getByRole("link", { name: /Cronograma/ })).toHaveAttribute("href", "/#schedule");
+  });
+
+  it("draws the 404 as decoration, hidden from screen readers", () => {
+    const { container } = render(<NotFoundPage />);
+
+    const code = container.querySelector(".glitch-layer-base");
+
+    expect(code).toHaveTextContent("404");
+    expect(code?.closest("[aria-hidden=true]")).not.toBeNull();
+  });
+
   it("shows the site navbar with Inicio and Juegos", () => {
     render(<NotFoundPage />);
 
-    const navigation = within(screen.getByRole("navigation"));
+    const navigation = within(screen.getByRole("navigation", { name: "Principal" }));
 
     expect(navigation.getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
     expect(navigation.getByRole("link", { name: "Juegos" })).toHaveAttribute("href", "/games");

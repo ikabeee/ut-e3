@@ -39,6 +39,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   en la bitácora. Un enlace vencido o usado lleva a "Este enlace ya no sirve" para pedir otro Al recuperar el
   pasaporte (por correo o en la mesa de atención) se cierran los demás enlaces pendientes, y un enlace con el fragmento
   dañado muestra "Este enlace está incompleto" en lugar de romper la página.
+- La página 404 tiene la identidad del evento: un "404" grande con el efecto glitch del diseño y, además de "Volver al
+  inicio", salidas a Juegos, Croquis y Cronograma. Un juego que no existe (`/games/<slug>`) tiene su propia 404, "Juego
+  no encontrado", con cinco juegos del catálogo para seguir navegando (#108).
 - La mesa de recuperación (`/support/recovery`) muestra el enlace de acceso como un código QR grande (negro sobre
   blanco, con texto alternativo "Código QR para abrir el pasaporte") para que el visitante lo escanee con su teléfono, junto
   con el botón "Copiar enlace"; el campo de texto queda como respaldo. El QR codifica el mismo enlace de siempre y se
