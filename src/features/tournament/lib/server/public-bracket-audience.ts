@@ -4,7 +4,8 @@ import { createHash } from "node:crypto";
 /** A screen polls every 3 seconds; one that did not ask in this window left the bracket. */
 export const AUDIENCE_WINDOW_MS = 10_000;
 
-const MAX_TRACKED = 5000;
+/** The most screens the panel tracks at once; the count saturates there instead of growing without limit. */
+export const MAX_TRACKED = 5000;
 
 export interface PublicBracketAudience {
   viewers: number;
@@ -25,13 +26,15 @@ interface AudienceStore {
  */
 export function recordPublicBracketRequest(request: Request, now: number = Date.now()): void {
   const store = getStore();
-
+  const key = clientKey(request);
   const second = Math.floor(now / 1000);
 
-  store.lastSeen.set(clientKey(request), now);
+  // Deleting first moves the key to the end, so the map stays ordered from the oldest request to the newest one.
+  store.lastSeen.delete(key);
+  store.lastSeen.set(key, now);
   store.requestsBySecond.set(second, (store.requestsBySecond.get(second) ?? 0) + 1);
 
-  if (store.lastSeen.size > MAX_TRACKED || store.requestsBySecond.size > 120) prune(store, now);
+  prune(store, now);
 }
 
 /** The screens that asked in the last window, and the requests of the last minute. */
@@ -64,12 +67,19 @@ function clientKey(request: Request): string {
     .slice(0, 16);
 }
 
+// Both maps are ordered by time, so pruning stops at the first entry that is still fresh: each request costs O(1)
+// amortized, even when a flood of made-up X-Forwarded-For values fills the map. Past MAX_TRACKED the oldest screens
+// go first, so the memory stays bounded.
 function prune(store: AudienceStore, now: number): void {
   for (const [key, at] of store.lastSeen) {
-    if (now - at >= AUDIENCE_WINDOW_MS) store.lastSeen.delete(key);
+    if (now - at < AUDIENCE_WINDOW_MS && store.lastSeen.size <= MAX_TRACKED) break;
+
+    store.lastSeen.delete(key);
   }
 
   for (const second of store.requestsBySecond.keys()) {
-    if (now - second * 1000 >= 60_000) store.requestsBySecond.delete(second);
+    if (now - second * 1000 < 60_000) break;
+
+    store.requestsBySecond.delete(second);
   }
 }
