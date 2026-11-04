@@ -2,7 +2,10 @@ import "server-only";
 import type { Prisma } from "@generated/prisma/client";
 
 export interface AuditEntry {
-  /** Null when the system itself made the change, such as the automatic close of the public bracket (RF-74). */
+  /**
+   * The account that made the change; null when no staff account did, such as the automatic close of the public
+   * bracket (RF-74) or a visitor's own email recovery.
+   */
   actorId: string | null;
   action: string;
   entityType: string;

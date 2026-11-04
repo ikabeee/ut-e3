@@ -36,6 +36,32 @@ export const VISITORS_COPY = {
     body: (pin: string, gamertag: string, passportUrl: string) =>
       `¡Hola, ${gamertag}!\n\nTu registro en UT Game Showcase ha sido exitoso.\nTu PIN de identidad es: ${pin}\n\nPuedes consultar tu pasaporte digital en el siguiente enlace:\n${passportUrl}\n\n¡Te esperamos en el evento!`,
   },
+  recovery: {
+    title: "Recuperar mi pasaporte",
+    subtitle:
+      "Escribe el correo con el que te registraste y te enviaremos un enlace para abrir tu pasaporte en este teléfono.",
+    entryLink: "¿Ya tienes pasaporte en otro teléfono? Recupéralo por correo",
+    emailLabel: "Correo electrónico",
+    emailPlaceholder: "tu-correo@ejemplo.com",
+    submit: "Enviar enlace",
+    pending: "Enviando...",
+    sent: "Si el correo está registrado, te enviamos un enlace. Vence en 30 minutos y solo sirve una vez. Al abrirlo, el teléfono anterior pierde el acceso.",
+    retry: "Usar otro correo",
+    expiredTitle: "Este enlace ya no sirve",
+    expiredNotice: "El enlace venció o ya se usó. Pide uno nuevo con tu correo.",
+    helpDesk: "¿No tienes acceso a tu correo? Acude a la mesa de atención del evento.",
+    confirmTitle: "Abrir mi pasaporte aquí",
+    confirmNotice: "Tu pasaporte quedará en este teléfono y el teléfono anterior perderá el acceso.",
+    confirmSubmit: "Abrir mi pasaporte",
+    confirmPending: "Abriendo...",
+    confirmMissing: "Este enlace está incompleto. Ábrelo de nuevo desde el correo.",
+    email: {
+      subject: "Recupera tu pasaporte",
+      // RF-71: the email carries the one-use link and nothing else from the passport (no PIN, gamertag or name).
+      body: (claimUrl: string) =>
+        `Abre este enlace para recuperar tu pasaporte. Vence en 30 minutos y solo sirve una vez:\n${claimUrl}\n\nSi no lo pediste, ignora este correo.`,
+    },
+  },
   passport: {
     title: "Pasaporte digital",
     subtitle: "Tu identificación para el evento",

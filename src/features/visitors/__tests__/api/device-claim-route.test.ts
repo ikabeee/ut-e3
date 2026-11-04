@@ -2,6 +2,8 @@
  * @jest-environment node
  */
 import { GET } from "@features/visitors/api/device-claim-route";
+import { isUsableRecoveryToken, requestEmailRecovery } from "@features/visitors/lib/server/email-recovery";
+import { CLAIM_PATH } from "@features/visitors/lib/visitors-links";
 import { encryptPin, hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { VISITOR_DEVICE_COOKIE, createVisitorDevice } from "@shared/lib/server/visitor-device";
@@ -26,8 +28,11 @@ afterAll(async () => {
 beforeEach(async () => {
   jar = createCookieJar();
   stubCookies(jar);
+  await getPrisma().recoveryToken.deleteMany();
   await getPrisma().visitorDevice.deleteMany();
   await getPrisma().visitor.deleteMany();
+  await getPrisma().emailOutbox.deleteMany();
+  await getPrisma().rateLimit.deleteMany();
   visitorId = (
     await getPrisma().visitor.create({
       data: {
@@ -42,6 +47,22 @@ beforeEach(async () => {
 });
 
 describe("GET /passport/claim/[token]", () => {
+  it("sends a valid email link to the confirmation with the token in the fragment, without using it", async () => {
+    await requestEmailRecovery("neo@example.com", new Date());
+
+    const { text } = await getPrisma().emailOutbox.findFirstOrThrow();
+    const token = new RegExp(`${CLAIM_PATH}/(\\S+)`).exec(text)?.[1] ?? "";
+
+    const response = await claim(token);
+    const location = new URL(response.headers.get("location") ?? "");
+
+    expect(location.pathname).toBe("/passport/recover/confirm");
+    expect(location.hash).toBe(`#${token}`);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(jar.get(VISITOR_DEVICE_COOKIE)).toBeUndefined();
+    expect(await isUsableRecoveryToken(token, new Date())).toBe(true);
+  });
+
   it("makes the phone the device of the passport and sends it to the passport", async () => {
     const token = await getPrisma().$transaction((transaction) => createVisitorDevice(transaction, visitorId));
 
@@ -53,21 +74,21 @@ describe("GET /passport/claim/[token]", () => {
     expect(jar.get(VISITOR_DEVICE_COOKIE)?.value).toBe(token);
   });
 
-  it("sends a token replaced by a later recovery to the registration, without a cookie", async () => {
+  it("sends a token replaced by a later recovery to the expired-link page, without a cookie", async () => {
     const replaced = await getPrisma().$transaction((transaction) => createVisitorDevice(transaction, visitorId));
 
     await getPrisma().$transaction((transaction) => createVisitorDevice(transaction, visitorId));
 
     const response = await claim(replaced);
 
-    expect(new URL(response.headers.get("location") ?? "").pathname).toBe("/register");
+    expect(new URL(response.headers.get("location") ?? "").pathname).toBe("/passport/recover/expired");
     expect(jar.get(VISITOR_DEVICE_COOKIE)).toBeUndefined();
   });
 
-  it("sends a made-up token to the registration", async () => {
+  it("sends a made-up token to the expired-link page", async () => {
     const response = await claim("no-existe");
 
-    expect(new URL(response.headers.get("location") ?? "").pathname).toBe("/register");
+    expect(new URL(response.headers.get("location") ?? "").pathname).toBe("/passport/recover/expired");
     expect(jar.get(VISITOR_DEVICE_COOKIE)).toBeUndefined();
   });
 });
