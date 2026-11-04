@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { clearAttempts, consumeAttempt } from "@shared/lib/server/rate-limit";
+import { clearAttempts, consumeAttempt, hasAttemptsLeft } from "@shared/lib/server/rate-limit";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
@@ -63,6 +63,18 @@ describe("consumeAttempt", () => {
     expect(await getPrisma().rateLimit.findMany()).toEqual([
       { key: "login:admin@ut.mx", windowStart: TEN_AM, count: 3 },
     ]);
+  });
+});
+
+describe("hasAttemptsLeft", () => {
+  it("says whether the window still has attempts and spends none", async () => {
+    expect(await hasAttemptsLeft("login:admin@ut.mx", LIMIT, TEN_AM)).toBe(true);
+
+    await Promise.all([1, 2, 3].map(() => consumeAttempt("login:admin@ut.mx", LIMIT, TEN_AM)));
+
+    expect(await hasAttemptsLeft("login:admin@ut.mx", LIMIT, TEN_AM)).toBe(false);
+    expect(await hasAttemptsLeft("login:admin@ut.mx", LIMIT, ELEVEN_AM)).toBe(true);
+    expect(await getPrisma().rateLimit.findMany({ select: { count: true } })).toEqual([{ count: 3 }]);
   });
 });
 

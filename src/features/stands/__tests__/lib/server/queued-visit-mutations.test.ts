@@ -12,6 +12,7 @@ import {
   createVisitor,
 } from "@features/stands/__tests__/lib/server/stands-server-utils";
 import { getPrisma } from "@shared/lib/server/prisma";
+import { consumeAttempt } from "@shared/lib/server/rate-limit";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
 const database = createTestDatabase();
@@ -44,6 +45,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
+  await getPrisma().rateLimit.deleteMany();
   await getPrisma().rejectedVisit.deleteMany();
   await getPrisma().pendingVisit.deleteMany();
   await getPrisma().vote.deleteMany();
@@ -154,6 +156,54 @@ describe("registerQueuedVisits", () => {
     await send([entry({ scannedAt: at("20:01") })], at("20:02"));
 
     expect(await getPrisma().pendingVisit.count()).toBe(0);
+  });
+});
+
+describe("registerQueuedVisits and the PIN attempts of the kiosk (RNF-10, RNF-19)", () => {
+  const unknownPins = (count: number) =>
+    Array.from({ length: count }, (_, index) => entry({ pin: String(30000 + index), scannedAt: at("20:00") }));
+
+  it("answers at most 100 unknown PINs every 5 minutes, as the PIN screen, and keeps the rest unanswered", async () => {
+    const first = await send(unknownPins(50), at("20:05"));
+    const second = await send(unknownPins(50), at("20:05"));
+    const third = await send([...unknownPins(1), entry({ scannedAt: at("20:01") })], at("20:05"));
+
+    expect([...first, ...second].every((result) => result.status === "unknownVisitor")).toBe(true);
+    expect(third).toEqual([]);
+    expect(await getPrisma().checkIn.count()).toBe(0);
+  });
+
+  it("answers nothing, not even a real PIN, once the attempts ran out, so the answer tells no PIN apart", async () => {
+    await send(unknownPins(50), at("20:05"));
+    await send(unknownPins(50), at("20:05"));
+
+    expect(await send([entry({ scannedAt: at("20:01") })], at("20:06"))).toEqual([]);
+    expect(await getPrisma().checkIn.count()).toBe(0);
+  });
+
+  it("shares the attempts with the PIN screen of the same account", async () => {
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      await consumeAttempt(`kiosk:${ids.staff}`, { limit: 100, windowMs: 5 * 60 * 1000 }, at("20:05"));
+    }
+
+    expect(await send([entry({ scannedAt: at("20:01") })], at("20:06"))).toEqual([]);
+  });
+
+  it("does not spend attempts on the PINs that are someone's, so a long queue still empties", async () => {
+    const visits = Array.from({ length: 50 }, () => entry({ scannedAt: at("20:00") }));
+
+    await send(visits, at("20:05"));
+
+    expect(await getPrisma().rateLimit.count()).toBe(0);
+  });
+
+  it("answers again in the next window", async () => {
+    await send(unknownPins(50), at("20:05"));
+    await send(unknownPins(50), at("20:05"));
+
+    const visit = entry({ scannedAt: at("20:01") });
+
+    expect(await send([visit], at("20:11"))).toEqual([{ id: visit.id, status: "ok" }]);
   });
 });
 

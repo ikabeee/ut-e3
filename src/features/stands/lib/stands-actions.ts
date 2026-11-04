@@ -6,6 +6,7 @@ import {
   requestVisit,
   answerPendingVisit,
 } from "@features/stands/lib/server/pending-visit-mutations";
+import { KIOSK_ATTEMPT_RULE, kioskAttemptKey } from "@features/stands/lib/server/kiosk-attempts";
 import { registerVisit } from "@features/stands/lib/server/visit-mutations";
 import { STANDS_COPY } from "@features/stands/lib/stands-copy";
 import { parsePin, parseRatings } from "@features/stands/lib/survey-input";
@@ -24,9 +25,6 @@ export type VisitActionState = { status: "done"; message: string } | ActionError
 
 const COPY = STANDS_COPY.kiosk;
 
-// A kiosk serves one visitor a minute at most, so this never stops a real queue; it stops someone guessing PINs.
-const ATTEMPT_RULE = { limit: 100, windowMs: 5 * 60 * 1000 };
-
 const ANSWER_RULE = { limit: 20, windowMs: 5 * 60 * 1000 };
 
 // Server Actions are public endpoints: each one checks that the session is a stand account before reading the form.
@@ -39,7 +37,8 @@ export async function requestVisitAction(
 
   if (!pin) return failure(COPY.errors.pinFormat);
 
-  if (!(await consumeAttempt(`kiosk:${account.id}`, ATTEMPT_RULE))) return failure(COPY.errors.tooManyAttempts);
+  if (!(await consumeAttempt(kioskAttemptKey(account.id), KIOSK_ATTEMPT_RULE)))
+    return failure(COPY.errors.tooManyAttempts);
 
   const result = await requestVisit({ standId: account.standId, scannedById: account.id, pin }, new Date());
 
@@ -64,7 +63,8 @@ export async function submitVisitAction(_previous: VisitActionState | null, form
 
   if (!ratings) return failure(COPY.errors.ratingsRequired);
 
-  if (!(await consumeAttempt(`kiosk:${account.id}`, ATTEMPT_RULE))) return failure(COPY.errors.tooManyAttempts);
+  if (!(await consumeAttempt(kioskAttemptKey(account.id), KIOSK_ATTEMPT_RULE)))
+    return failure(COPY.errors.tooManyAttempts);
 
   const result = await registerVisit({ standId: account.standId, scannedById: account.id, pin, ratings }, new Date());
 

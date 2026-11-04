@@ -3,10 +3,12 @@ import type { ReceivedEntry, ReceivedQueuedVisit } from "@features/stands/lib/qu
 import { STANDS_COPY } from "@features/stands/lib/stands-copy";
 import type { QueuedVisitResult, QueuedVisitStatus } from "@features/stands/lib/visit-queue";
 import { clampScannedAt, isLateVisit, type VisitWindow } from "@features/stands/lib/visit-timing";
+import { KIOSK_ATTEMPT_RULE, kioskAttemptKey } from "@features/stands/lib/server/kiosk-attempts";
 import { recordVisit } from "@features/stands/lib/server/visit-mutations";
 import { isUniqueViolation } from "@shared/lib/server/database-errors";
 import { hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
+import { consumeAttempt, hasAttemptsLeft } from "@shared/lib/server/rate-limit";
 
 export interface QueuedVisitBatch {
   standId: string;
@@ -24,8 +26,14 @@ interface BatchContext {
 /**
  * Records a batch of the offline queue of a kiosk (RF-35). Each visit gets its own answer and its own transaction, so a
  * refused one never stops the others (D4). Sending the same batch again answers `duplicate` and records nothing new.
+ *
+ * A PIN that is nobody's spends an attempt of the kiosk, as on the PIN screen (RNF-10): otherwise the queue would answer
+ * 3,000 guesses every 5 minutes and the staff could sort the real PINs out of the filter (RNF-19). Once the attempts run
+ * out, the visits left get no answer, so the kiosk keeps them and sends them again after its backoff.
  */
 export async function registerQueuedVisits(batch: QueuedVisitBatch, receivedAt: Date): Promise<QueuedVisitResult[]> {
+  if (!(await hasAttemptsLeft(kioskAttemptKey(batch.scannedById), KIOSK_ATTEMPT_RULE, receivedAt))) return [];
+
   const window = await readVisitWindow();
   const hasGame = (await getPrisma().game.count({ where: { standId: batch.standId } })) > 0;
   const context: BatchContext = { batch, window, receivedAt };
@@ -34,6 +42,8 @@ export async function registerQueuedVisits(batch: QueuedVisitBatch, receivedAt: 
   // One after the other: SQLite writes one transaction at a time anyway, and the order of the PINs is kept.
   for (const entry of batch.entries) {
     const status = hasGame ? await settleEntry(context, entry) : "standWithoutGame";
+
+    if (status === OUT_OF_ATTEMPTS) break;
 
     results.push({ id: entry.id, status });
   }
@@ -52,7 +62,13 @@ async function readVisitWindow(): Promise<VisitWindow> {
   return settings;
 }
 
-async function settleEntry(context: BatchContext, entry: ReceivedEntry): Promise<QueuedVisitStatus> {
+// The PIN attempts of the kiosk ran out: the visit and the ones after it stay in the queue of the kiosk.
+const OUT_OF_ATTEMPTS = "outOfAttempts";
+
+async function settleEntry(
+  context: BatchContext,
+  entry: ReceivedEntry,
+): Promise<QueuedVisitStatus | typeof OUT_OF_ATTEMPTS> {
   if (!entry.visit) return "invalid";
 
   const previous = await findPreviousAnswer(entry.id);
@@ -64,7 +80,11 @@ async function settleEntry(context: BatchContext, entry: ReceivedEntry): Promise
     select: { id: true },
   });
 
-  if (!visitor) return "unknownVisitor";
+  if (!visitor) {
+    const key = kioskAttemptKey(context.batch.scannedById);
+
+    return (await consumeAttempt(key, KIOSK_ATTEMPT_RULE, context.receivedAt)) ? "unknownVisitor" : OUT_OF_ATTEMPTS;
+  }
 
   return settleVisit(context, entry.visit, visitor.id);
 }
