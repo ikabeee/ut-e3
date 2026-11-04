@@ -4,6 +4,11 @@ import { readFormText } from "@shared/lib/form-data";
 /** How many addresses one submission takes: a whole team pasted at once, with room to spare. */
 export const MAX_EMAILS_PER_SUBMISSION = 50;
 
+/** The longest address SMTP accepts (RFC 5321); a longer one cannot be a team member's email. */
+export const MAX_EMAIL_LENGTH = 254;
+
+const SHOWN_INVALID_LENGTH = 60;
+
 export type ParsedBlockedEmails =
   { isValid: true; emails: string[] } | { isValid: false; reason: "empty" | "invalid" | "tooMany"; invalid?: string };
 
@@ -25,7 +30,12 @@ export function parseBlockedEmails(form: FormData): ParsedBlockedEmails {
 
   if (emails.length > MAX_EMAILS_PER_SUBMISSION) return { isValid: false, reason: "tooMany" };
 
-  const invalid = emails.find((email) => !EMAIL_REGEX.test(email));
+  const invalid = emails.find((email) => email.length > MAX_EMAIL_LENGTH || !EMAIL_REGEX.test(email));
 
-  return invalid ? { isValid: false, reason: "invalid", invalid } : { isValid: true, emails };
+  if (!invalid) return { isValid: true, emails };
+
+  // The message repeats the address; a pasted wall of text is cut so the panel stays readable.
+  const shown = invalid.length > SHOWN_INVALID_LENGTH ? `${invalid.slice(0, SHOWN_INVALID_LENGTH)}…` : invalid;
+
+  return { isValid: false, reason: "invalid", invalid: shown };
 }
