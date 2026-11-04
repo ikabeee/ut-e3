@@ -15,6 +15,13 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   pasaporte. El sorteo usa `crypto.randomInt`, al salir un boleto se desactivan todos los del visitante, el ganador recibe
   un correo por la bandeja de salida y todo queda en la bitácora. Seed de desarrollo `npm run db:seed:raffle` y prueba
   `npm run test:e2e:raffle`.
+- El kiosco del stand funciona sin conexión (RF-35): guarda las visitas en IndexedDB, las envía en lotes de máximo 50
+  con reintentos con backoff exponencial y jitter, y muestra "Sin conexión · N visitas por enviar", "Enviando…",
+  "Todo enviado" y la lista "No registradas" con el motivo. Sin red detecta un PIN mal tecleado con un filtro de PIN con
+  falsos positivos a propósito (RF-78, RNF-19) y el pasaporte avisa "Tu visita a ZA-S3 no se registró" cuando una visita
+  en cola llega fuera de horario (RF-24). La pantalla del PIN ya no se desborda a 360 px. Los PIN de la cola que no son
+  de nadie gastan los mismos intentos que la pantalla del PIN (100 cada 5 minutos), así que la cola no sirve para
+  adivinar PIN.
 - La mesa de recuperación (`/support/recovery`) muestra el enlace de acceso como un código QR grande (negro sobre
   blanco, con texto alternativo "Código QR para abrir el pasaporte") para que el visitante lo escanee con su teléfono, junto
   con el botón "Copiar enlace"; el campo de texto queda como respaldo. El QR codifica el mismo enlace de siempre y se

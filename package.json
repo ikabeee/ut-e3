@@ -25,6 +25,7 @@
     "test:e2e:stand-admin": "node e2e/stand-admin.e2e.mjs",
     "test:e2e:pwa": "node e2e/pwa.e2e.mjs",
     "test:e2e:raffle": "node e2e/raffle.e2e.mjs",
+    "test:e2e:offline-kiosk": "node e2e/offline-kiosk.e2e.mjs",
     "test:coverage": "jest --coverage",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",

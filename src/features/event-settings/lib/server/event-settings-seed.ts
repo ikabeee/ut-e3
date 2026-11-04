@@ -22,12 +22,16 @@ export const INITIAL_EVENT_SETTINGS: EventSettings = {
   publicBracketEnabled: true,
 };
 
+// The salt of the PIN filter of the kiosk (RNF-19). It is fixed so the e2e flows can compute a PIN that passes the
+// filter without being anybody's; it is not a secret, because every kiosk downloads it to check the PINs offline.
+export const INITIAL_PIN_FILTER_SALT = "ut-e3-pixel-and-code-2026";
+
 // Creates row 1 only when it is missing, so a setting edited later survives a new seed. Prisma takes the ISO strings
 // as DateTime values, and the fraud thresholds come from the column defaults.
 export async function seedEventSettings(prisma: PrismaClient): Promise<void> {
   await prisma.eventSettings.upsert({
     where: { id: EVENT_SETTINGS_ID },
     update: {},
-    create: { id: EVENT_SETTINGS_ID, ...INITIAL_EVENT_SETTINGS },
+    create: { id: EVENT_SETTINGS_ID, ...INITIAL_EVENT_SETTINGS, pinFilterSalt: INITIAL_PIN_FILTER_SALT },
   });
 }

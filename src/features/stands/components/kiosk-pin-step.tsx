@@ -1,13 +1,13 @@
 "use client";
 
 import { Description, FieldError, Form, Input, Label, TextField } from "@heroui/react";
-import type { RequestVisitState } from "@features/stands/lib/stands-actions";
+import type { KioskRequestState } from "@features/stands/hooks/use-offline-kiosk";
 import { STANDS_COPY } from "@features/stands/lib/stands-copy";
 import { FormSubmit } from "@shared/components/form-submit";
 import { useSubmitKeepingValues } from "@shared/hooks/use-submit-keeping-values";
 
 interface KioskPinStepProps {
-  state: RequestVisitState | null;
+  state: KioskRequestState | null;
   action: (form: FormData) => void;
   isPending: boolean;
 }
@@ -19,12 +19,12 @@ export function KioskPinStep({ state, action, isPending }: Readonly<KioskPinStep
   const handleSubmit = useSubmitKeepingValues(action);
 
   return (
-    <Form action={action} onSubmit={handleSubmit} className="grid w-full max-w-sm gap-5">
+    <Form action={action} onSubmit={handleSubmit} className="grid w-full max-w-sm grid-cols-1 gap-5">
       <h2 className="type-section">{COPY.heading}</h2>
       <TextField name="pin" isRequired>
         <Label>{COPY.label}</Label>
         <Input
-          className="min-h-14 text-center font-mono text-3xl tracking-widest"
+          className="min-h-14 w-full min-w-0 text-center font-mono text-3xl tracking-widest"
           inputMode="numeric"
           maxLength={5}
           autoComplete="off"

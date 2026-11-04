@@ -21,6 +21,18 @@ export async function consumeAttempt(key: string, rule: RateLimitRule, now = new
   return count <= rule.limit;
 }
 
+/** Whether the key still has attempts in the current window, without spending one. */
+export async function hasAttemptsLeft(key: string, rule: RateLimitRule, now = new Date()): Promise<boolean> {
+  const windowStart = windowStartOf(now, rule.windowMs);
+
+  const row = await getPrisma().rateLimit.findUnique({
+    where: { key_windowStart: { key, windowStart } },
+    select: { count: true },
+  });
+
+  return (row?.count ?? 0) < rule.limit;
+}
+
 export async function clearAttempts(key: string): Promise<void> {
   await getPrisma().rateLimit.deleteMany({ where: { key } });
 }

@@ -249,6 +249,9 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | Datos del juego de un stand (RF-31): el stand es siempre el de la sesión | `saveStandGame()` en `src/features/games/lib/server/stand-game-mutations.ts`; `/stand/game` |
 | Cuentas de staff de un stand (RF-32): invitar, reenviar y desactivar | `canManageAccount()` y `MAX_STAND_STAFF` en `invitation-rules.ts`; `/stand/team` usa las acciones de `management-actions.ts` |
 | Guarda de las pantallas del administrador de stand | `requireStandAdmin()` en `current-account.ts` (el staff vuelve a su kiosko) |
+| Cola sin conexión del kiosco (RF-35): tamaño de lote y backoff | `MAX_QUEUE_BATCH` y `getRetryDelay()` en `src/features/stands/lib/visit-queue.ts`; IndexedDB en `visit-queue-store.ts`; lotes en `POST /api/stand/queued-visits` (`queued-visit-mutations.ts`) |
+| Filtro de PIN del kiosco (RF-78, RNF-19): rondas, factor y sal | `src/features/stands/lib/pin-filter.ts`; la sal es `event_settings.pin_filter_salt` (`INITIAL_PIN_FILTER_SALT` del seed); el registro invalida la etiqueta `visitor-pins` |
+| Aviso del pasaporte por una visita en cola rechazada (RF-24) | `rejected_visits`, `components/rejected-visit-notices.tsx` de `stands` |
 | Código QR del enlace de recuperación (RF-69) | `QrCodeImage` (`src/shared/components/qr-code.tsx`) y `buildQrCode` (`src/shared/lib/qr-code.ts`, librería `uqr`); lo muestra `recovery-result.tsx` |
 | Quién usa la mesa de recuperación (`help_desk` y `sysadmin`; el resto va a su home) | `requireRecoveryAgent()` en `current-account.ts` |
 | Home de cada rol al entrar (el de `help_desk` es `/support/recovery`) | `getHomePath()` en `src/features/accounts/lib/accounts-links.ts` |

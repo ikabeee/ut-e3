@@ -28,7 +28,7 @@ export const kioskPageMetadata: Metadata = {
 
 export function KioskPage() {
   return (
-    <main className="page-wrap grid gap-10 py-12">
+    <main className="page-wrap grid grid-cols-1 gap-10 py-12">
       <Suspense fallback={<p className="type-mono text-muted">{COPY.loading}</p>}>
         <KioskPanel />
       </Suspense>

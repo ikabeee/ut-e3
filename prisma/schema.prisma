@@ -34,6 +34,8 @@ model EventSettings {
   fraudTopScoreCount      Int       @default(12) @map("fraud_top_score_count")
   fraudWindowMinutes      Int       @default(10) @map("fraud_window_minutes")
   fraudSingleVisitMax     Int       @default(1) @map("fraud_single_visit_max")
+  /// Salt of the PIN filter of the kiosk (RNF-19). Fixed by the seed, so the e2e can compute a false positive.
+  pinFilterSalt           String    @default("ut-e3-pixel-and-code-2026") @map("pin_filter_salt")
 
   @@map("event_settings")
 }
@@ -132,6 +134,7 @@ model Stand {
   checkIns  CheckIn[]
   votes     Vote[]
   pending   PendingVisit[]
+  rejected  RejectedVisit[]
 
   @@unique([zone, number])
   @@map("stands")
@@ -200,6 +203,7 @@ model Visitor {
   tournamentEntry TournamentEntry?
   votes           Vote[]
   pendingVisit    PendingVisit?
+  rejectedVisits  RejectedVisit[]
 
   @@map("visitors")
 }
@@ -271,7 +275,10 @@ model CheckIn {
   visitor     Visitor  @relation(fields: [visitorId], references: [id], onDelete: Restrict)
   standId     String   @map("stand_id")
   stand       Stand    @relation(fields: [standId], references: [id], onDelete: Restrict)
+  /// When the server received the visit.
   checkedInAt DateTime @default(now()) @map("checked_in_at")
+  /// When the kiosk took the PIN: a visit of the offline queue reaches the server later (RN-04, RF-35).
+  scannedAt   DateTime? @map("scanned_at")
   /// The staff account that had the kiosk open when the visit was recorded (RF-36).
   scannedById String?  @map("scanned_by_id")
   scannedBy   Account? @relation("ScannedCheckIns", fields: [scannedById], references: [id], onDelete: Restrict)
@@ -354,4 +361,19 @@ model RaffleDraw {
   prizeBy      Account?     @relation("RafflePrizes", fields: [prizeById], references: [id], onDelete: Restrict)
 
   @@map("raffle_draws")
+/// A visit of the offline queue of a kiosk that the server refused for a known visitor, so the passport can say it
+/// (RF-24). A PIN that is nobody's identifies no one: it only stays in the list of the kiosk (RF-35).
+model RejectedVisit {
+  /// The id the kiosk gave to the queued visit: a batch sent twice records the refusal once.
+  id        String   @id
+  visitorId String   @map("visitor_id")
+  visitor   Visitor  @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  standId   String   @map("stand_id")
+  stand     Stand    @relation(fields: [standId], references: [id], onDelete: Cascade)
+  reason    String
+  scannedAt DateTime @map("scanned_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([visitorId])
+  @@map("rejected_visits")
 }

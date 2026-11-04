@@ -35,8 +35,34 @@ export const STANDS_COPY = {
       message: "Tu visita quedó registrada.",
       back: "Volviendo a la pantalla del PIN…",
     },
+    offline: {
+      queuedThanks: "Tu visita se guardó en este equipo y se enviará sola cuando vuelva la conexión.",
+    },
+    queue: {
+      label: "Visitas guardadas sin conexión",
+      offline: (count: number) =>
+        count === 0 ? "Sin conexión · las visitas se guardan en este equipo" : `Sin conexión · ${visitsToSend(count)}`,
+      sending: (count: number) => `Enviando… · ${visitsToSend(count)}`,
+      retrying: (count: number) => `Sin respuesta del servidor · ${visitsToSend(count)}. Se reintenta solo.`,
+      allSent: "Todo enviado",
+      rejectedHeading: "No registradas",
+      rejectedAt: (time: string) => `PIN tecleado a las ${time}`,
+      reasons: {
+        late: "Llegó después del cierre del registro de visitas.",
+        unknownVisitor: "PIN no reconocido.",
+        standWithoutGame: "El stand no tenía su juego registrado.",
+        invalid: "Los datos de la visita llegaron incompletos.",
+      },
+      instructions: {
+        late: "No cuenta para los boletos; el pasaporte del visitante muestra el aviso.",
+        unknownVisitor: "Que revise su pasaporte o vaya a Atención",
+        standWithoutGame: "Registra tu juego y pide al visitante que teclee su PIN otra vez.",
+        invalid: "Pide al visitante que teclee su PIN otra vez.",
+      },
+    },
     errors: {
       pinFormat: "El PIN tiene 5 dígitos.",
+      queueFailed: "No se pudo guardar la visita en este equipo. Inténtalo otra vez.",
       unknownPin: "PIN no reconocido, revísalo",
       alreadyVisited: "Este PIN ya registró su visita a este stand.",
       closed: "El registro de visitas ya cerró.",
@@ -103,6 +129,11 @@ export const STANDS_COPY = {
       hasPassport: "Ese correo ya tiene un pasaporte de visitante; un administrador no puede tenerlo.",
     },
   },
+  rejectedNotice: {
+    heading: (code: string) => `Tu visita a ${code} no se registró`,
+    late: "El kiosco del stand la envió después del cierre del registro de visitas, así que no cuenta para tus boletos.",
+    help: "Si crees que es un error, ve a Atención.",
+  },
   passportSurvey: {
     heading: "¿Qué te pareció?",
     standLine: (code: string, gameName: string) => `Acabas de visitar el stand ${code} · ${gameName}`,
@@ -112,3 +143,7 @@ export const STANDS_COPY = {
     thanks: "¡Gracias! Tu visita quedó registrada.",
   },
 } as const;
+
+function visitsToSend(count: number): string {
+  return count === 1 ? "1 visita por enviar" : `${count} visitas por enviar`;
+}
