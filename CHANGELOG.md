@@ -259,6 +259,12 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- Herramientas del sysadmin: una visita que se termina de calificar después de excluir al visitante ya no queda
+  registrada ni da boleto; el patrocinador no se guarda si su logo no existe en `public/`; un género sin letras a-z ni
+  números (solo emojis o "日本") se rechaza en vez de guardarse con el slug "juego"; el motivo de una anulación o
+  exclusión necesita letras o números visibles; la lista negra rechaza correos de más de 254 caracteres; la memoria
+  del contenedor ya no cuenta la caché de archivos (cerraba el bracket público sin carga real), y el conteo de
+  pantallas del bracket y las alertas de fraude aguantan miles de peticiones y votos sin volverse lentos.
 - La portada ya no falla con el catálogo vacío (`DATA_SOURCE=prisma` antes de publicar juegos):
   el carrusel de destacados y el exhibidor 3D no se muestran hasta que haya juegos.
 - Pedir el boleto sin stands asignados responde "El sorteo se abre cuando los equipos tengan stand
