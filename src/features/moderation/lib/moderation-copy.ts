@@ -54,7 +54,7 @@ export const MODERATION_COPY = {
     excluded: "Visitante excluido. Sus boletos quedan fuera de la rifa.",
   },
   errors: {
-    reasonLength: "Escribe un motivo de 5 a 280 caracteres.",
+    reasonLength: "Escribe un motivo de 5 a 280 caracteres, con letras o números.",
     notFound: "Ya no existe. Recarga la página.",
     alreadyAnnulled: "Esa visita ya estaba anulada.",
     alreadyExcluded: "Ese visitante ya estaba excluido.",
