@@ -283,6 +283,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- Cada página precargaba 202 archivos de fuente (3,6 MB de LINE Seed JP, que solo usa el tema claro); ahora precarga
+  solo las fuentes latinas del diseño. La app ya no comprime en Node: lo hace el proxy (`docs/deploy.md`), que era el
+  techo de la llegada de 1000 visitantes con la caché vacía.
 - Vuelven las páginas de error en español (`error.tsx` y `global-error.tsx`, RF-45.1), que se habían perdido: una
   excepción, como enviar la encuesta del pasaporte sin señal, mostraba la página genérica de Next en inglés. Ahora dice
   "Algo salió mal" con "Reintentar" e "Ir al inicio".
