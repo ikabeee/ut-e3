@@ -50,6 +50,7 @@ export const SPONSORS_COPY = {
       position: "El orden es un número entero de 1 a 999.",
       notFound: "Ese patrocinador ya no existe. Recarga la página.",
       rejected: "La base de datos rechazó los datos. Revisa el teléfono.",
+      missingLogo: "No existe ese archivo en public/. Sube el logo con el build y escribe su ruta.",
     },
   },
 } as const;

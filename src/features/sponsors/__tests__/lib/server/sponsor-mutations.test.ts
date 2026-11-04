@@ -96,6 +96,15 @@ describe("saveSponsor and deleteSponsor (RF-41)", () => {
     await expect(getPrisma().auditLog.count({ where: { entityType: "sponsor" } })).resolves.toBe(3);
   });
 
+  it("refuses a logo that is not a file of public/, so the landing shows no broken image", async () => {
+    const parsed = parseSponsorInput(sponsorForm({ logoPath: "/sponsors/no-existe.svg" }));
+
+    if (!parsed.isValid) throw new Error("expected a valid form");
+
+    await expect(saveSponsor(actorId, "", parsed.sponsor)).resolves.toEqual({ status: "missingLogo" });
+    await expect(getPrisma().sponsor.count({ where: { logoPath: "/sponsors/no-existe.svg" } })).resolves.toBe(0);
+  });
+
   it("answers rejected when the CHECK of the phone refuses the row", async () => {
     const parsed = parseSponsorInput(sponsorForm());
 
