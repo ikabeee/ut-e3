@@ -4,7 +4,9 @@ import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
 import { ConnectionIndicator } from "@features/pwa/components/connection-indicator";
 import { InstallAppPrompt } from "@features/pwa/components/install-app-prompt";
+import { RejectedVisitNotices } from "@features/stands/components/rejected-visit-notices";
 import { VisitSurveyPrompt } from "@features/stands/components/visit-survey-prompt";
+import { getRejectedVisitNotices } from "@features/stands/lib/server/rejected-visit-queries";
 import { answerVisitAction } from "@features/stands/lib/stands-actions";
 import { TournamentNotice } from "@features/tournament/components/tournament-notice";
 import { getEntrySchedule, getVisitorEntryStatus } from "@features/tournament/lib/server/entries-queries";
@@ -49,7 +51,11 @@ async function PassportGate() {
     redirect(REGISTER_PATH);
   }
 
-  const [passport, visits] = await Promise.all([getPassport(visitorId), getPassportVisits(visitorId)]);
+  const [passport, visits, rejectedVisits] = await Promise.all([
+    getPassport(visitorId),
+    getPassportVisits(visitorId),
+    getRejectedVisitNotices(visitorId),
+  ]);
 
   if (!passport) {
     redirect(REGISTER_PATH);
@@ -61,6 +67,7 @@ async function PassportGate() {
       visits={visits}
       extra={
         <>
+          <RejectedVisitNotices notices={rejectedVisits} />
           <VisitSurveyPrompt answerVisit={answerVisitAction} />
           {await loadTournamentNotice(visitorId)}
         </>

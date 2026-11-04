@@ -11,3 +11,9 @@ export interface AdminStand extends StandFields {
   /** Invited and active staff accounts, which are the ones that count against the limit of 3. */
   activeStaff: number;
 }
+
+/** A queued visit of the visitor that the server refused, as the passport says it (RF-24). */
+export interface RejectedVisitNotice {
+  id: string;
+  standCode: string;
+}

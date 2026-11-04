@@ -10,7 +10,7 @@ const FEATURE_DEPENDENCIES = {
   pwa: ["games", "visitors"],
   games: ["accounts", "event-settings"],
   schedule: ["accounts", "floor-plan"],
-  stands: ["accounts", "games", "visitors"],
+  stands: ["accounts", "games", "pwa", "visitors"],
   support: ["accounts", "visitors"],
   tournament: ["accounts"],
   visitors: ["games"],

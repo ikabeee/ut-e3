@@ -1,6 +1,7 @@
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { StandKiosk, type KioskActions } from "@features/stands/components/stand-kiosk";
+import { createMemoryVisitQueueStore } from "@features/stands/__tests__/lib/visit-queue-utils";
+import { StandKiosk, type KioskActions, type KioskOfflineSupport } from "@features/stands/components/stand-kiosk";
 import type { VisitStatus } from "@features/stands/lib/pending-visit";
 import type { RequestVisitState, VisitActionState } from "@features/stands/lib/stands-actions";
 
@@ -176,9 +177,22 @@ function renderKiosk(overrides: Partial<KioskActions> = {}) {
   };
 
   return render(
-    <StandKiosk standCode="ZA-S1" gameName="Pixel Quest" actions={actions} createStatusLoader={createStatusLoader} />,
+    <StandKiosk
+      standCode="ZA-S1"
+      gameName="Pixel Quest"
+      actions={actions}
+      createStatusLoader={createStatusLoader}
+      offlineSupport={OFFLINE_SUPPORT}
+    />,
   );
 }
+
+// Online the whole time: the queue stays empty and the filter is never needed.
+const OFFLINE_SUPPORT: KioskOfflineSupport = {
+  createStore: () => createMemoryVisitQueueStore().store,
+  sendBatch: async () => [],
+  loadPinFilter: async () => ({ salt: "sal", iterations: 1, modulus: 50, values: [] }),
+};
 
 function createStatusLoader() {
   return async () => {
