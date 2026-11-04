@@ -24,13 +24,13 @@ beforeEach(() => {
 
 describe("public bracket audience (RF-73)", () => {
   it("counts each screen once while it keeps polling, and forgets it after the window", () => {
-    recordPublicBracketRequest(screen("10.0.0.1"), START);
-    recordPublicBracketRequest(screen("10.0.0.1"), START + 3000);
-    recordPublicBracketRequest(screen("10.0.0.2"), START + 3000);
+    recordPublicBracketRequest(screen("phone-1"), START);
+    recordPublicBracketRequest(screen("phone-1"), START + 3000);
+    recordPublicBracketRequest(screen("phone-2"), START + 3000);
 
     expect(getPublicBracketAudience(START + 4000)).toEqual({ viewers: 2, requestsPerMinute: 3 });
 
-    recordPublicBracketRequest(screen("10.0.0.2"), START + 9000);
+    recordPublicBracketRequest(screen("phone-2"), START + 9000);
 
     expect(getPublicBracketAudience(START + 3000 + AUDIENCE_WINDOW_MS)).toEqual({ viewers: 1, requestsPerMinute: 4 });
     expect(getPublicBracketAudience(START + 61_000 + AUDIENCE_WINDOW_MS)).toEqual({ viewers: 0, requestsPerMinute: 0 });
@@ -41,7 +41,7 @@ describe("public bracket audience (RF-73)", () => {
     const startedAt = performance.now();
 
     for (let index = 0; index < flood; index += 1) {
-      recordPublicBracketRequest(screen(`198.51.${Math.floor(index / 256)}.${index % 256}`), START + (index % 5000));
+      recordPublicBracketRequest(screen(`made-up-${index}`), START + (index % 5000));
     }
 
     expect(getPublicBracketAudience(START + 5000).viewers).toBe(MAX_TRACKED);
