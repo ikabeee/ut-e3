@@ -76,7 +76,7 @@ describe("recoverPassportAction", () => {
   it.each([
     ["stand_staff", "/stand/kiosk"],
     ["kof_admin", "/admin/kof"],
-    ["raffle_admin", "/admin"],
+    ["raffle_admin", "/admin/raffle"],
   ])("sends a %s to its home without recovering anything", async (role, home) => {
     await createSession(accountIds[role]);
 

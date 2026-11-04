@@ -51,6 +51,7 @@ npm run db:seed            # carga el contenido inicial en las tablas vacías; n
 npm run db:seed:stands    # solo desarrollo: staff por stand, administrador y 24 pasaportes de prueba (prisma/seed-stands.ts)
 npm run db:seed:support  # solo desarrollo: cuenta de atención help-desk@ejemplo.com (prisma/seed-support.ts)
 npm run db:seed:kof       # solo desarrollo: cuentas de KOF de prueba y un bracket de 40 jugadores (prisma/seed-kof.ts)
+npm run db:seed:raffle    # solo desarrollo: 2 animadores, 30 pasaportes con 40 boletos y la rifa abierta ya (prisma/seed-raffle.ts)
 ```
 
 Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm run lint`,
@@ -65,7 +66,8 @@ seis: `landing`, `games`, `floor-plan`, `schedule`, `sponsors` y `event-settings
 SQLite y se leen con Prisma desde las consultas de `lib/server/`; `npm run db:seed` carga el contenido inicial
 desde las constantes `INITIAL_*` de cada `lib/server/<feature>-seed.ts`. Además, `accounts` da el inicio de
 sesión (`/login`) y `admin` el panel del sysadmin (`/admin`), donde se edita el cronograma; `tournament` lleva el
-torneo de KOF en `/admin/kof` (ver `docs/tournament.md`). La portada estática
+torneo de KOF en `/admin/kof` (ver `docs/tournament.md`) y `raffle` la rifa: la tómbola `/raffle/live`, los ganadores
+`/raffle` y el panel del animador `/admin/raffle` (ver `docs/raffle.md`). La portada estática
 anterior se conserva en la rama `archive/landing-v1`, y la versión previa del proyecto (catálogo,
 croquis, pasaporte, panel, Prisma y TanStack Query) en `archive/develop-v1`.
 
@@ -82,6 +84,7 @@ src/
 │   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
 │   ├── admin/                # Panel del sysadmin (/admin): compone las secciones que se administran
 │   ├── site/                 # Páginas del sitio que no son de un dominio: la 404 (src/app/not-found.tsx)
+│   ├── raffle/               # Rifa: tómbola en vivo (/raffle/live), ganadores (/raffle) y panel (/admin/raffle)
 │   ├── pwa/                  # PWA: manifest, service worker (public/sw.js), /offline, indicador de conexión e instalación
 │   ├── stands/               # Stands: kiosko (/stand/kiosk), equipo (/stand/team) y alta de stands en /admin
 │   ├── support/              # Mesa de recuperación (/support/recovery): atención recupera pasaportes (RF-69, RF-70)
@@ -249,6 +252,8 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | Código QR del enlace de recuperación (RF-69) | `QrCodeImage` (`src/shared/components/qr-code.tsx`) y `buildQrCode` (`src/shared/lib/qr-code.ts`, librería `uqr`); lo muestra `recovery-result.tsx` |
 | Quién usa la mesa de recuperación (`help_desk` y `sysadmin`; el resto va a su home) | `requireRecoveryAgent()` en `current-account.ts` |
 | Home de cada rol al entrar (el de `help_desk` es `/support/recovery`) | `getHomePath()` en `src/features/accounts/lib/accounts-links.ts` |
+| Rifa: sorteo, bloqueo del segundo giro, decisión, correo al ganador, cierre y premio (RF-49 a RF-56) | `src/features/raffle/lib/server/raffle-mutations.ts`; las reglas de la BD (un solo giro `pending`, premio solo para `winner`, triggers) en la migración `*_raffle_draws` |
+| Quién usa el panel de la rifa (`raffle_admin`; entra por `/login` a `/admin/raffle`) | `requireRaffleAdmin()` en `current-account.ts` y `getHomePath()` en `accounts-links.ts` |
 | Bitácora de auditoría | `recordAudit()` en `src/shared/lib/server/audit-log.ts`, dentro de la transacción del cambio |
 
 - Un stand tiene un administrador activo y hasta 3 cuentas `stand_staff` invitadas o activas (RF-32, RF-39); lo hacen
@@ -276,7 +281,7 @@ La app se publica con Docker Compose detrás del proxy inverso del VPS (`docs/de
 - Variables en `.env` (plantilla: `.env.production.example`). `NEXT_PUBLIC_SITE_URL` se incrusta al construir. SMTP es
   opcional: sin `SMTP_HOST` el correo queda en `email_outbox`.
 - `docker/entrypoint.sh` debe tener fin de línea LF (`.gitattributes`); si lo editas en Windows, no lo conviertas a CRLF.
-- `db:seed:stands`, `db:seed:kof` y `db:seed:support` son de desarrollo y se niegan a correr con `NODE_ENV=production`.
+- `db:seed:stands`, `db:seed:kof`, `db:seed:support` y `db:seed:raffle` son de desarrollo y se niegan a correr con `NODE_ENV=production`.
 ## PWA y sin conexión (RNF-14)
 
 El contenido público y el pasaporte del visitante funcionan sin conexión (`odd/tasks/pwa.md`):
@@ -304,6 +309,7 @@ El contenido público y el pasaporte del visitante funcionan sin conexión (`odd
 
 - `docs/design-system.md`: tema UTG sobre HeroUI.
 - `docs/tournament.md`: torneo de KOF (formato, permisos por mesa, estados y cómo probarlo en local).
+- `docs/raffle.md`: rifa (tómbola, reglas del giro, correo al ganador y cómo probarla en local).
 - `docs/deploy.md`: despliegue con Docker, respaldos y proxy inverso (Nginx y Caddy).
 - `docs/versioning.md` y `CHANGELOG.md`: versionado semántico y releases con git flow.
 

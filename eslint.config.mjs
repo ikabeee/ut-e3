@@ -8,6 +8,7 @@ const FEATURE_DEPENDENCIES = {
   landing: ["games", "sponsors"],
   "floor-plan": ["games"],
   pwa: ["games", "visitors"],
+  raffle: ["accounts"],
   games: ["accounts", "event-settings"],
   schedule: ["accounts", "floor-plan"],
   stands: ["accounts", "games", "visitors"],

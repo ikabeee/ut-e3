@@ -8,7 +8,7 @@ describe("getHomePath", () => {
     ["stand_admin", "/stand/kiosk"],
     ["stand_staff", "/stand/kiosk"],
     ["sysadmin", "/admin"],
-    ["raffle_admin", "/admin"],
+    ["raffle_admin", "/admin/raffle"],
   ])("sends a %s to %s", (role, path) => {
     expect(getHomePath(role)).toBe(path);
   });

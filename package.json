@@ -24,6 +24,7 @@
     "test:e2e:support": "node e2e/support.e2e.mjs",
     "test:e2e:stand-admin": "node e2e/stand-admin.e2e.mjs",
     "test:e2e:pwa": "node e2e/pwa.e2e.mjs",
+    "test:e2e:raffle": "node e2e/raffle.e2e.mjs",
     "test:coverage": "jest --coverage",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
@@ -32,7 +33,8 @@
     "db:seed": "prisma db seed",
     "db:seed:kof": "tsx --conditions=react-server prisma/seed-kof.ts",
     "db:seed:stands": "tsx --conditions=react-server prisma/seed-stands.ts",
-    "db:seed:support": "tsx --conditions=react-server prisma/seed-support.ts"
+    "db:seed:support": "tsx --conditions=react-server prisma/seed-support.ts",
+    "db:seed:raffle": "tsx --conditions=react-server prisma/seed-raffle.ts"
   },
   "dependencies": {
     "@heroui/react": "^3.2.6",
