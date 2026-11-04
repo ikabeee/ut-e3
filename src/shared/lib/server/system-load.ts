@@ -33,6 +33,8 @@ const CGROUP_MEMORY_MAX = "/sys/fs/cgroup/memory.max";
 
 const CGROUP_MEMORY_CURRENT = "/sys/fs/cgroup/memory.current";
 
+const CGROUP_MEMORY_STAT = "/sys/fs/cgroup/memory.stat";
+
 /**
  * Takes a sample and keeps it in the history of this process. CPU is the share of busy time of all the cores since the
  * previous sample, so the first one reads the time since the machine started.
@@ -110,13 +112,37 @@ function cpuShare(previous: CpuTimes | null, current: CpuTimes): number {
 // Inside Docker the machine numbers are the ones of the host; the cgroup says what the container may use.
 function readCgroupMemory(): MemoryReading | null {
   try {
-    const max = readFileSync(CGROUP_MEMORY_MAX, "utf8").trim();
-    const current = Number(readFileSync(CGROUP_MEMORY_CURRENT, "utf8").trim());
-
-    if (max === "max" || !Number.isFinite(current)) return null;
-
-    return { usedBytes: current, totalBytes: Number(max), source: "cgroup" };
+    return parseCgroupMemory({
+      max: readFileSync(CGROUP_MEMORY_MAX, "utf8"),
+      current: readFileSync(CGROUP_MEMORY_CURRENT, "utf8"),
+      stat: readOptionalFile(CGROUP_MEMORY_STAT),
+    });
   } catch {
     return null;
   }
+}
+
+function readOptionalFile(file: string): string {
+  try {
+    return readFileSync(file, "utf8");
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * The memory of the container from the cgroup v2 files. `memory.current` also counts the page cache (the SQLite file,
+ * the build), which the kernel frees when it needs to; like `docker stats`, the inactive file cache is not "used", or
+ * a quiet container would read above 50% and close the public bracket on its own (RF-74).
+ */
+export function parseCgroupMemory(files: { max: string; current: string; stat: string }): MemoryReading | null {
+  const max = files.max.trim();
+  const current = Number(files.current.trim());
+  const totalBytes = Number(max);
+
+  if (max === "max" || !Number.isFinite(current) || !Number.isFinite(totalBytes) || totalBytes <= 0) return null;
+
+  const inactiveFile = Number(/^inactive_file (\d+)$/m.exec(files.stat)?.[1] ?? 0);
+
+  return { usedBytes: Math.max(0, current - inactiveFile), totalBytes, source: "cgroup" };
 }
