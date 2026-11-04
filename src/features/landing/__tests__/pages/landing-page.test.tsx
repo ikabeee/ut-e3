@@ -65,6 +65,13 @@ describe("landingPageMetadata", () => {
 });
 
 describe("LandingView", () => {
+  it("shows the venue in the Edificio B with its map region", () => {
+    renderLanding();
+
+    expect(screen.getByText("Edificio B · Lobby y áreas externas")).toBeInTheDocument();
+    expect(screen.getByLabelText("Mapa de la ubicación del evento: Edificio B, UT Cancún")).toBeInTheDocument();
+  });
+
   it("renders the sections in the landing order", () => {
     renderLanding();
 

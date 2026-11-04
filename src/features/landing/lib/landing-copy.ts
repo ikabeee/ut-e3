@@ -62,6 +62,7 @@ export const LANDING_COPY = {
   venue: {
     heading: "Ubicación",
     kicker: "Sede",
+    building: (building: string) => `${building} · Lobby y áreas externas`,
     openMaps: "Abrir en Google Maps",
     copyAddress: {
       idle: "Copiar dirección",
@@ -69,6 +70,10 @@ export const LANDING_COPY = {
       failed: "No se pudo copiar",
     },
     map: {
+      regionLabel: (venueBuilding: string, venueShortName: string) =>
+        `Mapa de la ubicación del evento: ${venueBuilding}, ${venueShortName}`,
+      zoomIn: "Acercar",
+      zoomOut: "Alejar",
       label: (venueShortName: string) =>
         `Esquema: la ${venueShortName} está sobre la carretera Cancún–Aeropuerto, entre el centro y el aeropuerto`,
       sea: "Caribe",

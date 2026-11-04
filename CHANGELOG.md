@@ -8,10 +8,16 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
-- Página `/studio`: PIXEL & CODE presentado como estudio, al estilo de un sitio de agencia de videojuegos. Título en
-  letras LED con un clip flotante, reel que se endereza al hacer scroll, disciplinas que se apilan, carrusel de juegos
-  filtrable por género, tablero de citas de ejemplo, formulario de contacto (Server Action que por ahora sólo valida) y
-  banda final con cinta de letras LED. La fuente LED de la portada ahora tiene el alfabeto completo.
+- Página `/showcase` (sin enlace en el menú): el evento con el estilo de un sitio de videojuegos. Título en letras LED
+  con un clip flotante, fecha y sede, botón "Crear mi pasaporte", video que se endereza al hacer scroll, carrusel de los
+  juegos del evento, invitadas especiales, cronograma, patrocinadores, croquis, ubicación y banda final con cinta de
+  letras LED. Reutiliza los componentes de la portada y el contenido sale de la base de datos y de los textos del
+  evento. La fuente LED de la portada ahora tiene el alfabeto completo.
+- Mapa propio de la ubicación (Leaflet con teselas de OpenStreetMap en tono oscuro) en la landing y en `/showcase`:
+  pin con el bloque "PIXEL & CODE / UT CANCÚN", controles de zoom cuadrados, atribución visible y carga solo al llegar
+  a la sección. Sin conexión, o si las teselas fallan, se muestra el esquema de siempre. La rueda del ratón solo hace
+  zoom tras un clic o con ctrl, y en el teléfono un dedo desplaza la página. Las teselas se piden a OpenStreetMap desde
+  el navegador del visitante (ver "Mapa de la sede" en `AGENTS.md`).
 - La mesa de recuperación (`/support/recovery`) muestra el enlace de acceso como un código QR grande (negro sobre
   blanco, con texto alternativo "Código QR para abrir el pasaporte") para que el visitante lo escanee con su teléfono, junto
   con el botón "Copiar enlace"; el campo de texto queda como respaldo. El QR codifica el mismo enlace de siempre y se
@@ -209,6 +215,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- La sede se presenta como el Edificio B de la UT Cancún (lobby y áreas externas), como dice el SRS: la tarjeta de
+  ubicación, la dirección para copiar, la descripción de patrocinadores y `AGENTS.md`. "Abrir en Google Maps" apunta al
+  lugar del Edificio B.
 - Panel de administración: se retiró el formulario de alta manual de videojuegos (`/admin/games`),
   trasladando la responsabilidad del registro inicial y mantenimiento de la información del juego
   directamente a los líderes de cada equipo desde su portal (`/team`). El administrador ahora se

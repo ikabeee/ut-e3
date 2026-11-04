@@ -209,6 +209,7 @@ async function runScenario({ browser, databaseFile, screenshots }) {
 
     await checkWorkerAndSnapshot({ page: phone.page, pin });
     await checkPublicPagesAreSaved({ page: phone.page, database });
+    await checkVenueMapOnline(phone.page);
     await checkIosSteps({ browser, context: phone.context });
     await checkOffline({ phone, database, screenshots, pin });
     await checkNothingSavedWithoutCopy(browser);
@@ -372,6 +373,41 @@ async function listCachedPaths(page) {
   });
 }
 
+const VENUE_MAP_REGION = "[role=region][aria-label^='Mapa de la ubicación']";
+
+// RF-07 and the venue map: it draws OpenStreetMap tiles online, the worker never stores them (another origin), and the
+// schematic stays underneath as the fallback.
+async function checkVenueMapOnline(page) {
+  await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
+  await page.locator("#venue").scrollIntoViewIfNeeded();
+
+  const region = page.locator(VENUE_MAP_REGION);
+
+  await page.waitForSelector(".venue-map img.leaflet-tile-loaded", { timeout: UI_TIMEOUT_MS });
+  check("online, the venue map shows tiles", (await region.getAttribute("aria-hidden")) === "false");
+  check(
+    "the venue map names Edificio B and credits OpenStreetMap",
+    (await region.getAttribute("aria-label")).includes("Edificio B") &&
+      (await page.locator(".leaflet-control-attribution").innerText()).includes("OpenStreetMap contributors"),
+  );
+
+  const origins = await page.evaluate(async () => {
+    const found = new Set();
+
+    for (const name of await caches.keys()) {
+      for (const request of await (await caches.open(name)).keys()) found.add(new URL(request.url).origin);
+    }
+
+    return [...found];
+  });
+
+  check(
+    "the worker never stores the map tiles of another origin",
+    origins.every((origin) => origin === BASE_URL),
+    origins.join(", "),
+  );
+}
+
 async function checkIosSteps({ browser, context }) {
   const errors = [];
   const iphone = await openPage({ browser, errors, options: { userAgent: SAFARI_IPHONE } });
@@ -408,6 +444,12 @@ async function checkOfflinePublicPages({ page, database }) {
 
   await page.goto(`${BASE_URL}/`, { waitUntil: "domcontentloaded" });
   check("offline, the landing opens", await page.getByRole("heading", { level: 1, name: "PIXEL & CODE" }).isVisible());
+  await page.locator("#venue").scrollIntoViewIfNeeded();
+  await page.waitForSelector(`${VENUE_MAP_REGION}[aria-hidden=true]`, { state: "attached", timeout: UI_TIMEOUT_MS });
+  check(
+    "offline, the venue map gives way to the schematic",
+    await page.getByRole("img", { name: /entre el centro y el aeropuerto/ }).isVisible(),
+  );
   check(
     "offline, the landing still shows the floor plan",
     await page.locator("#floor-plan, #croquis").first().isVisible(),

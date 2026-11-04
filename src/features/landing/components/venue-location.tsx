@@ -1,4 +1,5 @@
 import { CopyAddressButton } from "@features/landing/components/copy-address-button";
+import { VenueMap } from "@features/landing/components/venue-map";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { VENUE_SECTION_ID } from "@features/landing/lib/landing-links";
 import type { EventVenue } from "@features/landing/lib/types";
@@ -28,7 +29,7 @@ export function VenueLocation({ venue }: Readonly<VenueLocationProps>) {
         <div className="mt-[clamp(36px,5vw,64px)] grid grid-cols-[.85fr_1.15fr] gap-gutter max-[860px]:grid-cols-1">
           <VenueDetails venue={venue} />
           <div className="min-w-0 overflow-hidden border border-border bg-background">
-            <VenueSchematic venue={venue} />
+            <VenueMap venue={venue} fallback={<VenueSchematic venue={venue} />} />
           </div>
         </div>
       </div>
@@ -42,6 +43,7 @@ function VenueDetails({ venue }: Readonly<VenueLocationProps>) {
       <PaperCard className="flex-1 gap-3 px-[22px] pt-[22px] pb-7">
         <span className="type-tiny">{LANDING_COPY.venue.kicker}</span>
         <h3 className="type-wide text-[clamp(22px,2.8vw,38px)] leading-[.95] tracking-[-.03em]">{venue.name}</h3>
+        <p className="m-0 type-tiny">{LANDING_COPY.venue.building(venue.building)}</p>
         <p className="m-0 max-w-[40ch] text-lg leading-[1.2]">{formatVenueAddress(venue)}</p>
       </PaperCard>
       <div className="flex flex-wrap justify-end">
