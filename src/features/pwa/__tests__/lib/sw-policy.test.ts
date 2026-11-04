@@ -57,6 +57,15 @@ describe("classifyRequest: requests that are not page loads", () => {
     expect(classify({ ...navigation("/games"), url: "https://other.example/games" })).toBe("ignore");
   });
 
+  it("never touches the map tiles of another origin", () => {
+    const tile = {
+      ...resource("/dark_all/17/30000/55000@2x.png", "image"),
+      url: "https://a.basemaps.cartocdn.com/dark_all/17/30000/55000@2x.png",
+    };
+
+    expect(classify(tile)).toBe("ignore");
+  });
+
   it("answers for the static files of the build and for the optimized images", () => {
     expect(classify(resource("/_next/static/chunks/app-1a2b.js", "script"))).toBe("asset");
     expect(classify(resource("/_next/static/media/font.woff2", "font"))).toBe("asset");

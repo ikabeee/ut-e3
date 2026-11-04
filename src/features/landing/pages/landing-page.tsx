@@ -4,12 +4,10 @@ import { getEventSettings } from "@features/event-settings/lib/server/event-sett
 import type { EventSettings } from "@features/event-settings/lib/types";
 import { FloorPlan } from "@features/floor-plan/components/floor-plan";
 import { FLOOR_PLAN_SECTION_ID, getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
-import type { FloorPlanStand } from "@features/floor-plan/lib/types";
+import { toFloorPlanStand } from "@features/floor-plan/lib/floor-plan-stands";
 import { GameCatalog } from "@features/games/components/game-catalog";
-import { getCoverImage } from "@features/games/lib/game-cover";
 import { GAMES_PATH } from "@features/games/lib/games-links";
 import { getGames } from "@features/games/lib/server/games-queries";
-import { formatStandCode } from "@features/games/lib/stand-code";
 import type { Game } from "@features/games/lib/types";
 import { ClosingBand } from "@features/landing/components/closing-band";
 import { EventActs } from "@features/landing/components/event-acts";
@@ -148,19 +146,6 @@ function kofLabels(settings: EventSettings) {
 
 function formatTimeRange(startsAt: string, endsAt: string) {
   return LANDING_COPY.acts.timeRange(formatTimeOfDay(startsAt), formatTimeOfDay(endsAt));
-}
-
-function toFloorPlanStand(game: Game): FloorPlanStand {
-  const cover = getCoverImage(game);
-
-  return {
-    code: formatStandCode(game.stand),
-    name: game.name,
-    genre: game.genre.name,
-    synopsis: game.synopsis,
-    coverSrc: cover.path,
-    coverAlt: cover.alt,
-  };
 }
 
 function buildLandingStructuredData(settings: EventSettings) {

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { useOnlineStatus } from "@features/pwa/hooks/use-online-status";
+import { useOnlineStatus } from "@shared/hooks/use-online-status";
 import { PWA_COPY } from "@features/pwa/lib/pwa-copy";
 import { resolveReconnectTarget } from "@features/pwa/lib/reconnect-target";
 

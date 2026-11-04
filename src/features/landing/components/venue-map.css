@@ -1,0 +1,108 @@
+/* The venue map (Leaflet) in the style of the site: square corners, thin borders, mono type, tokens only. */
+
+.venue-map {
+  background: var(--background);
+  font-family: var(--font-mono);
+}
+
+/* OpenStreetMap only serves a light style: invert it and turn the hue back to get a dark map in the site palette. */
+.venue-map .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(200deg) brightness(0.8) contrast(0.95) saturate(0.6);
+}
+
+.venue-map .leaflet-bar {
+  border: 0;
+  box-shadow: none;
+}
+
+.venue-map .leaflet-bar a {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.venue-map .leaflet-bar a + a {
+  border-top: 0;
+}
+
+.venue-map .leaflet-bar a:hover,
+.venue-map .leaflet-bar a:focus-visible {
+  background: var(--accent);
+  color: var(--background);
+}
+
+.venue-map:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.venue-map .leaflet-control-attribution {
+  padding: 2px 6px;
+  background: color-mix(in srgb, var(--background) 80%, transparent);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+
+.venue-map .leaflet-control-attribution a {
+  color: var(--foreground);
+}
+
+.venue-pin-icon {
+  border: 0;
+  background: transparent;
+}
+
+.venue-pin {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.venue-pin__name,
+.venue-pin__place {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--accent);
+  color: var(--background);
+  white-space: nowrap;
+}
+
+.venue-pin__name {
+  padding: 6px 8px 0;
+  font-family: var(--font-wide);
+  font-size: 16px;
+  font-variation-settings: "wdth" 125;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.venue-pin__place {
+  padding: 4px 8px 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.venue-pin__line {
+  width: 2px;
+  height: 100%;
+  align-self: center;
+  background: var(--accent);
+}

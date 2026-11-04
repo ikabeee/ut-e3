@@ -21,6 +21,21 @@ describe("VenueLocation", () => {
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
 
+  it("names the Edificio B in the card", () => {
+    render(<VenueLocation venue={EVENT_VENUE} />);
+
+    expect(screen.getByText("Edificio B · Lobby y áreas externas")).toBeInTheDocument();
+  });
+
+  it("labels the map region and shows the schematic until the map is ready", () => {
+    render(<VenueLocation venue={EVENT_VENUE} />);
+
+    const region = screen.getByLabelText("Mapa de la ubicación del evento: Edificio B, UT Cancún");
+
+    expect(region).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByRole("img", { name: /entre el centro y el aeropuerto/ })).toBeInTheDocument();
+  });
+
   it("describes the schematic for assistive technology", () => {
     render(<VenueLocation venue={EVENT_VENUE} />);
 

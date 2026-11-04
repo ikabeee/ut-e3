@@ -581,7 +581,51 @@
   }
 }
 
+/* Endless ribbon: the content is painted twice and the track moves half of its width. */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Slow float of a tilted card; the tilt comes from `--float-tilt`. */
+@keyframes float {
+  0%,
+  100% {
+    transform: rotate(var(--float-tilt, 6deg)) translateY(0);
+  }
+
+  50% {
+    transform: rotate(calc(var(--float-tilt, 6deg) - 2deg)) translateY(-12px);
+  }
+}
+
+/* Straightens a tilted block while it enters the screen (scroll-driven animations). */
+@keyframes settle {
+  from {
+    transform: rotate(var(--settle-tilt, -4deg)) scale(0.9);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+/*
+ * Only in browsers with `animation-timeline`; elsewhere the block stays straight.
+ * With `prefers-reduced-motion` the global rule of typography.css removes the animation.
+ */
+@utility scroll-settle {
+  @supports (animation-timeline: view()) {
+    animation: settle linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 45%;
+  }
+}
+
 @theme inline {
+  --animate-marquee: marquee 28s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
   --animate-approach: approach 0.7s var(--ease-snap) both;
   --animate-win-glow: win-glow 1s ease-out both;
   --animate-arrive: arrive 0.8s var(--ease-snap) both;

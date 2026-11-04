@@ -1,6 +1,16 @@
+export interface VenueCoordinates {
+  latitude: number;
+  longitude: number;
+}
+
 export interface EventVenue {
   name: string;
   shortName: string;
+  /** The building of the event inside the campus, such as "Edificio B" (SRS 1). */
+  building: string;
+  coordinates: VenueCoordinates;
+  /** Zoom of the venue map; the pin sits at `coordinates`. */
+  mapZoom: number;
   landmark: string;
   streetAddress: string;
   locality: string;

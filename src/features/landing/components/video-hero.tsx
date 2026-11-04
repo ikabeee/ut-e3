@@ -4,18 +4,12 @@ import { useRef, type ReactNode, type RefObject } from "react";
 import { ToggleButton } from "@heroui/react";
 import { LedWordmark } from "@features/landing/components/led-wordmark";
 import { useVideoPlayback } from "@features/landing/hooks/use-video-playback";
+import { HERO_LOOP } from "@features/landing/lib/hero-loop";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { TOP_SECTION_ID } from "@features/landing/lib/landing-links";
 import { ActionLink } from "@shared/components/action-link";
 import { ScrambleText } from "@shared/components/scramble-text";
 import { siteConfig } from "@shared/lib/site-config";
-
-const LOOP_POSTER = "/media/hero-loop-poster.jpg";
-
-const LOOP_SOURCES = [
-  { src: "/media/hero-loop.webm", type: "video/webm" },
-  { src: "/media/hero-loop.mp4", type: "video/mp4" },
-] as const;
 
 const ARROW_GLYPH = "↗";
 
@@ -64,11 +58,12 @@ function LoopPanel({ videoRef, hasSource, children }: Readonly<LoopPanelProps>) 
         loop
         playsInline
         preload="none"
-        poster={LOOP_POSTER}
+        poster={HERO_LOOP.poster}
         aria-hidden="true"
         className="absolute inset-0 size-full object-cover"
       >
-        {hasSource && LOOP_SOURCES.map((source) => <source key={source.src} src={source.src} type={source.type} />)}
+        {hasSource &&
+          HERO_LOOP.sources.map((source) => <source key={source.src} src={source.src} type={source.type} />)}
       </video>
       {children}
     </div>

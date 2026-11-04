@@ -11,7 +11,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 # AGENTS.md — UT Game Showcase
 
 Plataforma comunitaria de la universidad para el evento donde se exhiben los videojuegos
-desarrollados por los estudiantes del edificio E3. Contribuyen estudiantes de toda la
+desarrollados por los estudiantes de la UT Cancún, en el Edificio B. Contribuyen estudiantes de toda la
 generación, así que el código debe ser **simple, predecible y fácil de leer**.
 
 Idioma: la interfaz, la documentación, los issues y los commits van en **español**.
@@ -28,6 +28,7 @@ Todo el naming (directorios, archivos y código) va en **inglés**.
 | Prisma | `7.10.1` + `@prisma/adapter-better-sqlite3` | Base de datos SQLite en modo WAL (`busy_timeout` de 5000 ms). Cliente generado en `generated/prisma/` (fuera de git; lo crea `postinstall`). Esquema en `prisma/schema.prisma` y configuración en `prisma7.config.ts`. |
 | Tailwind CSS | `4` | Configurado vía `@tailwindcss/turbopack`. |
 | HeroUI | `3.x` (`@heroui/react`, `@heroui/styles`) | Librería de componentes (React Aria + Tailwind 4). |
+| Leaflet | `1.9` (+ `@types/leaflet`) | Mapa de la sede (BSD-2-Clause). Solo se carga en el navegador y cuando la sección es visible. |
 | ESLint | `9.x` + `eslint-plugin-sonarjs` | Reglas de SonarQube. ESLint 10 aún no es compatible con `eslint-config-next`. |
 | Oxlint | `1.89.0` + `eslint-plugin-readable-code` + `eslint-plugin-better-tailwindcss` | Reglas anti-slop (copiadas en `tools/oxlint/anti-slop`), de lectura de arriba abajo ([readable-code](https://github.com/ikabeee/eslint-plugin-readable-code)) y de clases canónicas de Tailwind ([better-tailwindcss](https://github.com/schoero/eslint-plugin-better-tailwindcss)). |
 | Jest | `30.x` + Testing Library | Pruebas unitarias y de componentes (`next/jest`). |
@@ -84,6 +85,7 @@ src/
 │   ├── site/                 # Páginas del sitio que no son de un dominio: la 404 (src/app/not-found.tsx)
 │   ├── pwa/                  # PWA: manifest, service worker (public/sw.js), /offline, indicador de conexión e instalación
 │   ├── stands/               # Stands: kiosko (/stand/kiosk), equipo (/stand/team) y alta de stands en /admin
+│   ├── showcase/             # Vitrina del evento (/showcase, sin enlace en el menú): hero LED, video y las secciones de la portada (juegos, invitadas, agenda, patrocinadores, croquis y sede)
 │   ├── support/              # Mesa de recuperación (/support/recovery): atención recupera pasaportes (RF-69, RF-70)
 │   └── tournament/           # Torneo de KOF (/admin/kof): bracket, permisos por mesa y bitácora
 └── shared/                   # Código transversal SIN reglas de negocio
@@ -299,6 +301,25 @@ El contenido público y el pasaporte del visitante funcionan sin conexión (`odd
 - Solo se registra en producción y desde las páginas del flujo público y del visitante (`pwa/lib/registration-scope.ts`).
   Los e2e que prueban el worker usan `next build` y `next start` (`npm run test:e2e:pwa`).
 - `public/` no se formatea con Prettier; el código de `public/sw*.js` sí lo revisan Oxlint y ESLint.
+
+## Mapa de la sede
+
+- **Sede.** `EVENT_VENUE` (`landing/lib/venue.ts`) es la única fuente del nombre, el edificio (Edificio B, según el SRS),
+  la dirección, las coordenadas (`21.04958, -86.84682`), el zoom y el enlace de "Abrir en Google Maps" (el lugar de
+  Google del Edificio B).
+- **Mapa (`VenueMap`).** Leaflet sobre teselas estándar de OpenStreetMap, con un filtro CSS que las vuelve oscuras
+  (`landing/components/venue-map.css`). La URL de las teselas y la atribución viven solo en `landing/lib/venue-map.ts`;
+  CARTO Dark Matter ya exige API key y devolvía una marca de agua, por eso no se usa. La lógica pura (opciones del mapa,
+  respaldo) está en ese archivo y se prueba sin Leaflet; el montaje está en `venue-map-session.ts`.
+  - No pide Leaflet ni teselas hasta que la sección está por verse (`IntersectionObserver`). Sin esa API, o sin conexión
+    o con teselas que fallan, se queda el esquema SVG de `VenueLocation` (RNF-14).
+  - La rueda solo hace zoom tras un clic en el mapa o con ctrl; en pantallas táctiles un dedo no arrastra el mapa (se
+    desplaza la página) y el pellizco sí hace zoom.
+  - `public/sw.js` ignora todo lo que no es de este origen, así que nunca guarda ni intercepta las teselas.
+  - No hay CSP en `next.config.ts`; si se añade una, `img-src` debe permitir `tile.openstreetmap.org`.
+- **Privacidad.** Las teselas se piden a OpenStreetMap (`tile.openstreetmap.org`) desde el navegador del visitante, así
+  que la Fundación OSM recibe su IP y el `Referer` al ver la sección de ubicación. No se envía ninguna cookie ni dato del
+  pasaporte. Si se cambia de proveedor, actualiza esta nota.
 
 ## Documentación del proyecto
 
