@@ -98,10 +98,6 @@ async function findPreviousAnswer(id: string): Promise<QueuedVisitStatus | null>
   return rejected ? "late" : null;
 }
 
-async function hasVisitedStand(visitorId: string, standId: string): Promise<boolean> {
-  return (await getPrisma().checkIn.count({ where: { visitorId, standId } })) > 0;
-}
-
 async function settleVisit(
   context: BatchContext,
   visit: ReceivedQueuedVisit,
@@ -135,6 +131,10 @@ async function settleVisit(
   });
 
   return result.status === "registered" ? "ok" : "duplicate";
+}
+
+async function hasVisitedStand(visitorId: string, standId: string): Promise<boolean> {
+  return (await getPrisma().checkIn.count({ where: { visitorId, standId } })) > 0;
 }
 
 // The passport shows it (RF-24); two batches that carry the same visit record it once.

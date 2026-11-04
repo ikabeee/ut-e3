@@ -529,13 +529,16 @@ async function checkPinGuessing({ staffPage, database }, registeredPin) {
   const guesses = Array.from({ length: 160 }, (_, index) => String(40000 + index)).filter(
     (pin) => pin !== registeredPin,
   );
+
   const scannedAt = new Date().toISOString();
+
   const toVisit = (pin, index) => ({
     id: `e2e00000-0000-4000-8000-${String(100 + index).padStart(12, "0")}`,
     pin,
     ratings: { gameRating: 5, standRating: 5, artRating: 5 },
     scannedAt,
   });
+
   let answered = 0;
 
   for (let start = 0; start < 150; start += 50) {
@@ -547,6 +550,7 @@ async function checkPinGuessing({ staffPage, database }, registeredPin) {
   check("150 PIN guesses through the queue get at most 100 answers (RNF-10)", answered <= 100, `${answered} answers`);
 
   const realPin = await postBatch(staffPage, { visits: [toVisit("10005", 999)] });
+
   const recorded = database
     .prepare("SELECT COUNT(*) AS total FROM checkins WHERE id = ?")
     .get(toVisit("", 999).id).total;
