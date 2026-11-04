@@ -48,6 +48,9 @@ describe("the catalog of genres (RF-72)", () => {
     });
     expect(parseGenreInput(nameForm("x"))).toEqual({ isValid: false });
     expect(parseGenreInput(nameForm("--"))).toEqual({ isValid: false });
+    expect(parseGenreInput(nameForm("🎮🎮"))).toEqual({ isValid: false });
+    expect(parseGenreInput(nameForm("日本"))).toEqual({ isValid: false });
+    expect(parseGenreInput(nameForm("🎮 Ñandú"))).toEqual({ isValid: true, name: "🎮 Ñandú", slug: "nandu" });
   });
 
   it("creates, renames and refuses a repeated name", async () => {

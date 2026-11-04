@@ -105,7 +105,7 @@ export const GAMES_COPY = {
     empty: "Aún no hay géneros.",
     outcomes: { created: "Género agregado.", renamed: "Género renombrado.", deleted: "Género borrado." },
     errors: {
-      nameLength: "Escribe un nombre de 2 a 40 caracteres con letras o números.",
+      nameLength: "Escribe un nombre de 2 a 40 caracteres con letras (a-z, con o sin acento) o números.",
       taken: "Ya existe un género con ese nombre.",
       hasGames: "Ese género tiene juegos asignados: cámbialos de género antes de borrarlo.",
       notFound: "Ese género ya no existe. Recarga la página.",

@@ -13,7 +13,9 @@ export function parseGenreInput(form: FormData): ParsedGenre {
 
   if (name.length < GENRE_NAME_MIN_LENGTH || name.length > GENRE_NAME_MAX_LENGTH) return { isValid: false };
 
-  if (!/[\p{L}\p{N}]/u.test(name)) return { isValid: false };
+  // The slug keeps only a-z and 0-9: a name without them ("日本", "🎮🎮") would fall back to the slug of a game
+  // ("juego"), so the filter of the catalog would read ?genre=juego and a second such genre would read as taken.
+  if (!/[a-z0-9]/.test(name.normalize("NFD").toLowerCase())) return { isValid: false };
 
   return { isValid: true, name, slug: buildGameSlug(name) };
 }
