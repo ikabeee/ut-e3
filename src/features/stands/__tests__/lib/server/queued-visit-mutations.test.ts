@@ -100,6 +100,16 @@ describe("registerQueuedVisits", () => {
     expect(await getRejectedVisitNotices(visitorId)).toEqual([{ id: visit.id, standCode: "ZA-S3" }]);
   });
 
+  it("answers duplicate, with no passport notice, to a late PIN of a visitor that already visited the stand", async () => {
+    await send([entry({ scannedAt: at("20:00") })], at("20:05"));
+
+    const late = entry({ scannedAt: at("21:55") });
+
+    expect(await send([late], at("21:56"))).toEqual([{ id: late.id, status: "duplicate" }]);
+    expect(await getRejectedVisitNotices(visitorId)).toEqual([]);
+    expect(await getPrisma().checkIn.count()).toBe(1);
+  });
+
   it("answers late when it arrives once the raffle started, even if the PIN was before the cutoff (UT-CI-10)", async () => {
     const visit = entry({ scannedAt: at("21:49") });
 

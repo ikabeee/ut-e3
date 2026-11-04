@@ -98,6 +98,10 @@ async function findPreviousAnswer(id: string): Promise<QueuedVisitStatus | null>
   return rejected ? "late" : null;
 }
 
+async function hasVisitedStand(visitorId: string, standId: string): Promise<boolean> {
+  return (await getPrisma().checkIn.count({ where: { visitorId, standId } })) > 0;
+}
+
 async function settleVisit(
   context: BatchContext,
   visit: ReceivedQueuedVisit,
@@ -105,6 +109,9 @@ async function settleVisit(
 ): Promise<QueuedVisitStatus> {
   const { batch, window, receivedAt } = context;
   const scannedAt = clampScannedAt(visit.scannedAt, receivedAt, window.eventStartsAt);
+
+  // A visitor whose visit to the stand already counts gets no notice that it "did not register" (EC-03, RF-24).
+  if (await hasVisitedStand(visitorId, batch.standId)) return "duplicate";
 
   if (isLateVisit(scannedAt, receivedAt, window)) {
     await recordRejection({ id: visit.id, visitorId, standId: batch.standId, scannedAt });
