@@ -132,6 +132,20 @@ describe("registerVisit", () => {
     });
   });
 
+  it("refuses the PIN of an excluded visitor, before and after the survey (UT-CI-19)", async () => {
+    const { visit } = await setUpStand(1);
+    const excluded = await createVisitor("Excluido", "54321");
+
+    await getPrisma().visitor.update({
+      where: { id: excluded.id },
+      data: { excludedAt: ONE_MINUTE_BEFORE_CUTOFF, excludedReason: "Integrante de un equipo" },
+    });
+
+    expect(await checkVisit(visit.standId, "54321", ONE_MINUTE_BEFORE_CUTOFF)).toEqual({ status: "excluded" });
+    expect(await registerVisit({ ...visit, pin: "54321" }, ONE_MINUTE_BEFORE_CUTOFF)).toEqual({ status: "excluded" });
+    expect(await getPrisma().checkIn.count({ where: { visitorId: excluded.id } })).toBe(0);
+  });
+
   it("refuses visits while the stand has no game (RF-34)", async () => {
     const { visit } = await setUpStand(1, null);
 

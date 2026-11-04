@@ -9,7 +9,7 @@ export const PENDING_VISIT_TTL_MS = 3 * 60 * 1000;
 
 export type RequestVisitResult =
   | { status: "requested"; pendingVisitId: string }
-  | { status: "closed" | "standWithoutGame" | "unknownPin" | "alreadyVisited" };
+  | { status: "closed" | "standWithoutGame" | "unknownPin" | "alreadyVisited" | "excluded" };
 
 export type AnswerVisitResult = VisitResult | { status: "noPending" };
 

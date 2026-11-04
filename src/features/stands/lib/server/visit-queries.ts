@@ -10,7 +10,9 @@ export interface KioskStand {
   gameName: string | null;
 }
 
-export type VisitRefusal = { status: "closed" | "standWithoutGame" | "unknownPin" | "alreadyVisited" };
+export type VisitRefusal = {
+  status: "closed" | "standWithoutGame" | "unknownPin" | "alreadyVisited" | "excluded";
+};
 
 export type VisitCheck = { status: "ready"; visitorId: string } | VisitRefusal;
 
@@ -34,10 +36,13 @@ export async function checkVisit(standId: string, pin: string, now: Date): Promi
 
   const visitor = await getPrisma().visitor.findUnique({
     where: { pinLookup: hashPinForLookup(pin) },
-    select: { id: true, checkIns: { where: { standId }, select: { id: true } } },
+    select: { id: true, excludedAt: true, checkIns: { where: { standId }, select: { id: true } } },
   });
 
   if (!visitor) return { status: "unknownPin" };
+
+  // An excluded passport records nothing (RF-46, UT-CI-19). An annulled visit still holds its stand (RF-23).
+  if (visitor.excludedAt) return { status: "excluded" };
 
   return visitor.checkIns.length > 0 ? { status: "alreadyVisited" } : { status: "ready", visitorId: visitor.id };
 }
@@ -48,9 +53,16 @@ export async function checkVisitor(standId: string, visitorId: string, now: Date
 
   if (refusal) return refusal;
 
-  const visits = await getPrisma().checkIn.count({ where: { standId, visitorId } });
+  const visitor = await getPrisma().visitor.findUnique({
+    where: { id: visitorId },
+    select: { excludedAt: true, _count: { select: { checkIns: { where: { standId } } } } },
+  });
 
-  return visits > 0 ? { status: "alreadyVisited" } : { status: "ready", visitorId };
+  if (!visitor) return { status: "unknownPin" };
+
+  if (visitor.excludedAt) return { status: "excluded" };
+
+  return visitor._count.checkIns > 0 ? { status: "alreadyVisited" } : { status: "ready", visitorId };
 }
 
 async function findStandRefusal(standId: string, now: Date): Promise<VisitRefusal | null> {

@@ -62,6 +62,31 @@ export const VISITORS_COPY = {
       empty: "Aún no tienes boletos. Se otorgan al llegar a 9 y a 18 visitas.",
       ticket: (number: number) => `Boleto #${number}`,
       milestone: (milestone: number) => `Al llegar a ${milestone} visitas`,
+      voided: "Anulado: vuelve a llegar al hito para reactivarlo",
+    },
+  },
+  blocklist: {
+    heading: "Lista negra de correos",
+    lead: "Correos de los integrantes de los equipos: no pueden registrarse como visitantes. Uno por línea o separados por comas.",
+    field: "Correos",
+    add: "Agregar a la lista",
+    adding: "Agregando...",
+    empty: "La lista está vacía.",
+    hasPassport: "Ya tiene pasaporte: exclúyelo en Moderación.",
+    remove: "Quitar",
+    confirmRemove: (email: string) => `¿Quitar ${email} de la lista negra? Podrá registrarse como visitante.`,
+    confirmRemoveAction: "Sí, quitar",
+    cancel: "Cancelar",
+    outcomes: {
+      added: (added: number, repeated: number) =>
+        repeated > 0 ? `Agregados: ${added}. Ya estaban: ${repeated}.` : `Agregados: ${added}.`,
+      removed: "Correo quitado de la lista.",
+    },
+    errors: {
+      empty: "Escribe al menos un correo.",
+      invalid: (email: string) => `"${email}" no es un correo válido.`,
+      tooMany: (max: number) => `Agrega como máximo ${max} correos a la vez.`,
+      notFound: "Ese correo ya no estaba en la lista.",
     },
   },
 } as const;

@@ -59,6 +59,7 @@ model Account {
   registeredEntries TournamentEntry[]
   invitations       AccountInvitation[]
   scannedCheckIns   CheckIn[]           @relation("ScannedCheckIns")
+  annulledCheckIns  CheckIn[]           @relation("AnnulledCheckIns")
   requestedVisits   PendingVisit[]
 
   @@map("accounts")
@@ -120,11 +121,11 @@ model ScheduleItem {
 }
 
 model Stand {
-  id        String    @id @default(uuid())
+  id        String         @id @default(uuid())
   zone      String
   number    Int
   studio    Int
-  groupCode String    @map("group_code")
+  groupCode String         @map("group_code")
   game      Game?
   accounts  Account[]
   checkIns  CheckIn[]
@@ -192,6 +193,10 @@ model Visitor {
   pin             String           @map("pin_aes_gcm")
   pinLookup       String           @unique @map("pin_hmac")
   createdAt       DateTime         @default(now()) @map("created_at")
+  /// Set by the sysadmin with a reason (RF-46): the passport stays, but its visits stop counting and its tickets
+  /// stay out of the raffle. Both columns go together (CHECK in the migration).
+  excludedAt      DateTime?        @map("excluded_at")
+  excludedReason  String?          @map("excluded_reason")
   device          VisitorDevice?
   checkIns        CheckIn[]
   raffleTickets   RaffleTicket[]
@@ -264,16 +269,22 @@ model AccountInvitation {
 }
 
 model CheckIn {
-  id          String   @id @default(uuid())
-  visitorId   String   @map("visitor_id")
-  visitor     Visitor  @relation(fields: [visitorId], references: [id], onDelete: Restrict)
-  standId     String   @map("stand_id")
-  stand       Stand    @relation(fields: [standId], references: [id], onDelete: Restrict)
-  checkedInAt DateTime @default(now()) @map("checked_in_at")
+  id             String    @id @default(uuid())
+  visitorId      String    @map("visitor_id")
+  visitor        Visitor   @relation(fields: [visitorId], references: [id], onDelete: Restrict)
+  standId        String    @map("stand_id")
+  stand          Stand     @relation(fields: [standId], references: [id], onDelete: Restrict)
+  checkedInAt    DateTime  @default(now()) @map("checked_in_at")
   /// The staff account that had the kiosk open when the visit was recorded (RF-36).
-  scannedById String?  @map("scanned_by_id")
-  scannedBy   Account? @relation("ScannedCheckIns", fields: [scannedById], references: [id], onDelete: Restrict)
-  vote        Vote?
+  scannedById    String?   @map("scanned_by_id")
+  scannedBy      Account?  @relation("ScannedCheckIns", fields: [scannedById], references: [id], onDelete: Restrict)
+  /// An annulled check-in (RF-46) is kept: it stops counting in visits, tickets, averages and alerts. The three
+  /// columns go together (CHECK in the migration).
+  annulledAt     DateTime? @map("annulled_at")
+  annulledReason String?   @map("annulled_reason")
+  annulledById   String?   @map("annulled_by_id")
+  annulledBy     Account?  @relation("AnnulledCheckIns", fields: [annulledById], references: [id], onDelete: Restrict)
+  vote           Vote?
 
   @@unique([visitorId, standId])
   @@map("checkins")
