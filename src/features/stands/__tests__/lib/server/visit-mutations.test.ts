@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { registerVisit, type NewVisit } from "@features/stands/lib/server/visit-mutations";
+import { recordVisit, registerVisit, type NewVisit } from "@features/stands/lib/server/visit-mutations";
 import { checkVisit, getKioskStand } from "@features/stands/lib/server/visit-queries";
 import {
   createEventSettings,
@@ -144,6 +144,26 @@ describe("registerVisit", () => {
     expect(await checkVisit(visit.standId, "54321", ONE_MINUTE_BEFORE_CUTOFF)).toEqual({ status: "excluded" });
     expect(await registerVisit({ ...visit, pin: "54321" }, ONE_MINUTE_BEFORE_CUTOFF)).toEqual({ status: "excluded" });
     expect(await getPrisma().checkIn.count({ where: { visitorId: excluded.id } })).toBe(0);
+  });
+
+  it("records nothing when the exclusion lands after the PIN was checked (RF-46)", async () => {
+    const { visit } = await setUpStand(1);
+    const late = await createVisitor("Tardio", "54322");
+
+    await getPrisma().visitor.update({
+      where: { id: late.id },
+      data: { excludedAt: ONE_MINUTE_BEFORE_CUTOFF, excludedReason: "Pasaporte falso" },
+    });
+
+    const result = await recordVisit({
+      visit,
+      visitorId: late.id,
+      now: ONE_MINUTE_BEFORE_CUTOFF,
+      settlePending: async () => {},
+    });
+
+    expect(result).toEqual({ status: "excluded" });
+    expect(await getPrisma().checkIn.count({ where: { visitorId: late.id } })).toBe(0);
   });
 
   it("refuses visits while the stand has no game (RF-34)", async () => {

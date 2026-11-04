@@ -69,6 +69,14 @@ async function insertVisit(
   transaction: Prisma.TransactionClient,
   { visit, visitorId, now }: Omit<RecordedVisit, "settlePending">,
 ): Promise<VisitResult> {
+  // Read again inside the write: an exclusion committed after checkVisit (or while the visitor rated from the
+  // passport) must not leave a visit or a ticket behind (RF-46, UT-CI-19).
+  const visitor = await transaction.visitor.findUnique({ where: { id: visitorId }, select: { excludedAt: true } });
+
+  if (!visitor) return { status: "unknownPin" };
+
+  if (visitor.excludedAt) return { status: "excluded" };
+
   const checkIn = await transaction.checkIn.create({
     data: { visitorId, standId: visit.standId, scannedById: visit.scannedById, checkedInAt: now },
     select: { id: true },
