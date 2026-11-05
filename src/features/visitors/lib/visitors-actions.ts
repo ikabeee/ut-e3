@@ -12,8 +12,6 @@ import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 import { PASSPORT_PATH, RECOVERY_LINK_EXPIRED_PATH } from "@features/visitors/lib/visitors-links";
 import { readFormText } from "@shared/lib/form-data";
 import { deliverQueuedEmail } from "@shared/lib/server/email-delivery";
-import { deliverEmail } from "@shared/lib/server/email-outbox";
-import { createSmtpSender } from "@shared/lib/server/mailer";
 import { resolveClientIp } from "@shared/lib/server/client-ip";
 import { consumeAttempt, refundAttempt } from "@shared/lib/server/rate-limit";
 import { setVisitorDeviceCookie } from "@shared/lib/server/visitor-device";
@@ -101,23 +99,10 @@ async function executeRegistration(input: {
   await setVisitorDeviceCookie(result.deviceToken);
 
   after(async () => {
-    await deliverPassportEmailSafely(result.emailId);
+    await deliverQueuedEmail(result.emailId);
   });
 
   redirect(PASSPORT_PATH);
-}
-
-async function deliverPassportEmailSafely(emailId: string): Promise<void> {
-  try {
-    const send = createSmtpSender();
-
-    await deliverEmail(emailId, send);
-  } catch (cause) {
-    // Only the message: a nodemailer error can carry the recipient address.
-    const message = cause instanceof Error ? cause.message : "Unknown error";
-
-    console.error(`Registration email delivery failed: ${message}`);
-  }
 }
 
 /**

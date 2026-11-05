@@ -12,11 +12,14 @@ process.env.DATABASE_URL = database.url;
 const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
 
 afterAll(async () => {
+  delete process.env.SMTP_HOST;
   await getPrisma().$disconnect();
   database.remove();
 });
 
 beforeEach(async () => {
+  // A host without the rest of the variables: the mailer cannot be built and the delivery fails.
+  process.env.SMTP_HOST = "smtp.ejemplo.com";
   consoleError.mockClear();
   await getPrisma().emailOutbox.deleteMany();
 });
@@ -40,5 +43,18 @@ describe("deliverQueuedEmail", () => {
 
     expect(consoleError).toHaveBeenCalledTimes(1);
     expect(String(consoleError.mock.calls[0][0])).not.toContain("ana@ut.mx");
+  });
+
+  it("stays quiet without SMTP_HOST: the email waits in the outbox and nothing is logged (docs/deploy.md)", async () => {
+    delete process.env.SMTP_HOST;
+    const queued = await getPrisma().emailOutbox.create({ data: { to: "ana@ut.mx", subject: "Hola", text: "Texto" } });
+
+    await deliverQueuedEmail(queued.id);
+
+    const row = await getPrisma().emailOutbox.findUniqueOrThrow({ where: { id: queued.id } });
+
+    expect(consoleError).not.toHaveBeenCalled();
+    expect(row.sentAt).toBeNull();
+    expect(row.attempts).toBe(0);
   });
 });
