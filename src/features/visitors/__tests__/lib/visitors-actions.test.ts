@@ -168,6 +168,21 @@ describe("registerVisitor Server Action", () => {
     ).rejects.toMatchObject({ digest: expect.stringContaining(";/passport;") });
   });
 
+  it("answers a taken gamertag on the first attempt of the window instead of failing", async () => {
+    await expect(
+      registerVisitor(null, createForm({ fullName: "Owner Visitor", gamertag: "OwnedTag", email: "owner@ut.mx" })),
+    ).rejects.toMatchObject({ digest: expect.stringContaining(";/passport;") });
+    await getPrisma().rateLimit.deleteMany();
+
+    const state = await registerVisitor(
+      null,
+      createForm({ fullName: "Late Visitor", gamertag: "ownedtag", email: "late@ut.mx" }),
+    );
+
+    expect(state.fieldErrors?.gamertag).toBe(VISITORS_COPY.errors.gamertagTaken);
+    expect(await getPrisma().rateLimit.findMany()).toEqual([]);
+  });
+
   it("returns exactly the generic rejection message when email is blocked", async () => {
     await getPrisma().emailBlocklist.create({
       data: { email: "blocked@ut.mx" },

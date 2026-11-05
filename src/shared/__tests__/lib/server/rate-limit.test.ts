@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { clearAttempts, consumeAttempt, hasAttemptsLeft } from "@shared/lib/server/rate-limit";
+import { clearAttempts, consumeAttempt, hasAttemptsLeft, refundAttempt } from "@shared/lib/server/rate-limit";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
@@ -75,6 +75,31 @@ describe("hasAttemptsLeft", () => {
     expect(await hasAttemptsLeft("login:admin@ut.mx", LIMIT, TEN_AM)).toBe(false);
     expect(await hasAttemptsLeft("login:admin@ut.mx", LIMIT, ELEVEN_AM)).toBe(true);
     expect(await getPrisma().rateLimit.findMany({ select: { count: true } })).toEqual([{ count: 3 }]);
+  });
+});
+
+describe("refundAttempt", () => {
+  it("gives back the only attempt of the window by deleting its row", async () => {
+    await consumeAttempt("register:10.0.0.1", LIMIT, TEN_AM);
+
+    await refundAttempt("register:10.0.0.1", LIMIT, TEN_AM);
+
+    expect(await getPrisma().rateLimit.findMany()).toEqual([]);
+  });
+
+  it("gives back one of several attempts and keeps the rest", async () => {
+    await Promise.all([1, 2, 3].map(() => consumeAttempt("register:10.0.0.1", LIMIT, TEN_AM)));
+
+    await refundAttempt("register:10.0.0.1", LIMIT, TEN_FIFTY_NINE);
+
+    expect(await getPrisma().rateLimit.findMany({ select: { count: true } })).toEqual([{ count: 2 }]);
+    expect(await hasAttemptsLeft("register:10.0.0.1", LIMIT, TEN_AM)).toBe(true);
+  });
+
+  it("does nothing when the window has no attempts", async () => {
+    await refundAttempt("register:10.0.0.1", LIMIT, TEN_AM);
+
+    expect(await getPrisma().rateLimit.findMany()).toEqual([]);
   });
 });
 
