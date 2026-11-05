@@ -45,6 +45,22 @@ describe("StandKiosk", () => {
     expect(screen.queryByRole("heading", { name: "Esperando la calificación" })).not.toBeInTheDocument();
   });
 
+  it("keeps the five digits of a PIN pasted or typed with spaces, instead of cutting the last one", async () => {
+    renderKiosk();
+
+    const input = screen.getByLabelText("PIN de 5 dígitos");
+
+    await userEvent.click(input);
+    await userEvent.paste(" 62192");
+
+    expect(input).toHaveValue("62192");
+
+    await userEvent.clear(input);
+    await userEvent.type(input, "6 2 1 9 2 7");
+
+    expect(input).toHaveValue("62192");
+  });
+
   it("waits for the visitor to rate from the passport instead of opening the survey", async () => {
     renderKiosk();
 

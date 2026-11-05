@@ -283,6 +283,7 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- El campo del PIN del kiosco ya no corta el último dígito de un PIN pegado o tecleado con espacios (" 62192").
 - "Crear mi pasaporte" en un teléfono que ya tiene pasaporte lleva a `/passport` en lugar del formulario, que borraba
   la copia sin conexión y permitía un segundo registro que dejaba al primer pasaporte fuera del teléfono.
 - Una visita cuyo PIN se tecleó antes del corte de check-ins cuenta aunque el visitante conteste la encuesta del
