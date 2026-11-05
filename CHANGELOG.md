@@ -283,6 +283,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- "Crear mi pasaporte" en un teléfono que ya tiene pasaporte lleva a `/passport` en lugar del formulario, que borraba
+  la copia sin conexión y permitía un segundo registro que dejaba al primer pasaporte fuera del teléfono.
 - Una visita cuyo PIN se tecleó antes del corte de check-ins cuenta aunque el visitante conteste la encuesta del
   pasaporte después del corte, como en la cola sin conexión (RN-04); antes se perdía sin aviso. Sigue sin contar si
   la encuesta llega después del inicio de la rifa.

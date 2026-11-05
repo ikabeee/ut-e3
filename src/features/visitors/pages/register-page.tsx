@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
@@ -8,10 +9,11 @@ import { RecoveryEntryLink } from "@features/visitors/components/recovery-entry-
 import { RegistrationForm } from "@features/visitors/components/registration-form";
 import { registerVisitor } from "@features/visitors/lib/visitors-actions";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
-import { REGISTER_PATH } from "@features/visitors/lib/visitors-links";
+import { PASSPORT_PATH, REGISTER_PATH } from "@features/visitors/lib/visitors-links";
 import { formatEventDate } from "@shared/lib/date-time";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
+import { getDeviceVisitorId } from "@shared/lib/server/visitor-device";
 
 export const registerPageMetadata: Metadata = {
   title: VISITORS_COPY.form.title,
@@ -37,9 +39,13 @@ export function RegisterPage() {
   );
 }
 
-// Whether registration is open depends on the request time, so it renders at request time, not at build time.
+// Whether registration is open depends on the request time, so it renders at request time, not at build time. A phone
+// that already holds a passport goes to it ("Crear mi pasaporte" links here from every page): showing the form would
+// delete its offline copy and let a second registration take the phone away from the first passport (RF-18).
 async function RegistrationGate() {
   await connection();
+
+  if (await getDeviceVisitorId()) redirect(PASSPORT_PATH);
 
   const settings = await getEventSettings();
   const isOpen = checkRegistrationOpen(settings.registrationOpensAt);
