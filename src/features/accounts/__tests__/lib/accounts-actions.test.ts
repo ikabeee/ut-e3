@@ -43,6 +43,13 @@ beforeEach(async () => {
 });
 
 describe("signIn", () => {
+  it("answers the missing fields error to a body that is not FormData, instead of a 500", async () => {
+    // curl -H "Next-Action: <id>" -H "content-type: text/plain" -d "[1,2,3]" decodes the arguments as (1, 2).
+    await expect(signIn(null, 2)).resolves.toEqual({
+      error: "Escribe tu correo y tu contraseña.",
+    });
+  });
+
   it("opens a session for the right email and password and goes to /admin", async () => {
     await expect(signIn(null, credentials(" Admin@UT.mx ", PASSWORD))).rejects.toMatchObject({
       digest: expect.stringContaining(";/admin;"),

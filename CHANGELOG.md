@@ -283,6 +283,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- Una Server Action que recibe un cuerpo que no es un formulario (por ejemplo JSON enviado a mano) responde su error
+  de validación en lugar de un 500 con un `TypeError` en el log.
 - Cada página precargaba 202 archivos de fuente (3,6 MB de LINE Seed JP, que solo usa el tema claro); ahora precarga
   solo las fuentes latinas del diseño. La app ya no comprime en Node: lo hace el proxy (`docs/deploy.md`), que era el
   techo de la llegada de 1000 visitantes con la caché vacía.

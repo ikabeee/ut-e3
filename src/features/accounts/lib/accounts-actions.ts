@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import { getHomePath, LOGIN_PATH } from "@features/accounts/lib/accounts-links";
 import { findSignInAccount } from "@features/accounts/lib/server/account-queries";
-import { readFormText } from "@shared/lib/form-data";
+import { readFormText, type ServerActionForm } from "@shared/lib/form-data";
 import { resolveClientIp } from "@shared/lib/server/client-ip";
 import { hashPassword, verifyPassword } from "@shared/lib/server/password";
 import { clearAttempts, consumeAttempt } from "@shared/lib/server/rate-limit";
@@ -19,7 +19,7 @@ const SIGN_IN_LIMIT = { limit: 3, windowMs: 60 * 60 * 1000 };
 const { errors } = ACCOUNTS_COPY.signIn;
 
 // Server Actions are public endpoints: the form fields are untrusted until checked here.
-export async function signIn(_previous: SignInState | null, form: FormData): Promise<SignInState> {
+export async function signIn(_previous: SignInState | null, form: ServerActionForm): Promise<SignInState> {
   const email = readFormText(form, "email").trim().toLowerCase();
   const password = readFormText(form, "password");
 
