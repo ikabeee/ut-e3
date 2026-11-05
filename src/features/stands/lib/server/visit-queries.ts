@@ -1,6 +1,7 @@
 import "server-only";
 import { formatStandCode } from "@features/games/lib/stand-code";
 import { STANDS_COPY } from "@features/stands/lib/stands-copy";
+import { isLateVisit } from "@features/stands/lib/visit-timing";
 import { hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 
@@ -47,9 +48,17 @@ export async function checkVisit(standId: string, pin: string, now: Date): Promi
   return visitor.checkIns.length > 0 ? { status: "alreadyVisited" } : { status: "ready", visitorId: visitor.id };
 }
 
-/** The same check for a visitor that is already known, such as the one answering a pending visit from the passport. */
-export async function checkVisitor(standId: string, visitorId: string, now: Date): Promise<VisitCheck> {
-  const refusal = await findStandRefusal(standId, now);
+/**
+ * The same check for a visitor that is already known, such as the one answering a pending visit from the passport.
+ * `scannedAt` is when the staff typed the PIN: as in the offline queue, the visit counts if that was before the cutoff
+ * and the answer arrives before the raffle (RN-04).
+ */
+export async function checkVisitor(
+  standId: string,
+  visitorId: string,
+  { scannedAt, now }: { scannedAt: Date; now: Date },
+): Promise<VisitCheck> {
+  const refusal = await findStandRefusal(standId, now, scannedAt);
 
   if (refusal) return refusal;
 
@@ -65,22 +74,22 @@ export async function checkVisitor(standId: string, visitorId: string, now: Date
   return visitor._count.checkIns > 0 ? { status: "alreadyVisited" } : { status: "ready", visitorId };
 }
 
-async function findStandRefusal(standId: string, now: Date): Promise<VisitRefusal | null> {
-  if (await isPastCutoff(now)) return { status: "closed" };
+async function findStandRefusal(standId: string, now: Date, scannedAt = now): Promise<VisitRefusal | null> {
+  if (await isLate(scannedAt, now)) return { status: "closed" };
 
   return (await standHasGame(standId)) ? null : { status: "standWithoutGame" };
 }
 
 // Visits count until the cutoff (RN-04). Read from the table, not from the cache: the sysadmin can move the hour.
-async function isPastCutoff(now: Date): Promise<boolean> {
+async function isLate(scannedAt: Date, now: Date): Promise<boolean> {
   const settings = await getPrisma().eventSettings.findUnique({
     where: { id: 1 },
-    select: { checkInCutoffAt: true },
+    select: { checkInCutoffAt: true, raffleStartsAt: true },
   });
 
   if (!settings) throw new Error(STANDS_COPY.kiosk.errors.missingSettings);
 
-  return now >= settings.checkInCutoffAt;
+  return isLateVisit(scannedAt, now, settings);
 }
 
 async function standHasGame(standId: string): Promise<boolean> {

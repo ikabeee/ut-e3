@@ -16,6 +16,10 @@ export function clampScannedAt(scannedAt: Date, receivedAt: Date, eventStartsAt:
 }
 
 /** A visit counts if the PIN was taken before the cutoff and it reaches the server before the raffle (RN-04, EC-02). */
-export function isLateVisit(scannedAt: Date, receivedAt: Date, window: VisitWindow): boolean {
+export function isLateVisit(
+  scannedAt: Date,
+  receivedAt: Date,
+  window: Pick<VisitWindow, "checkInCutoffAt" | "raffleStartsAt">,
+): boolean {
   return scannedAt >= window.checkInCutoffAt || receivedAt >= window.raffleStartsAt;
 }

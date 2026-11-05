@@ -146,11 +146,33 @@ describe("answerPendingVisit", () => {
     expect(await getPrisma().checkIn.count()).toBe(0);
   });
 
-  it("records nothing and keeps the visit waiting when the cutoff has passed", async () => {
-    await requestVisit({ standId, scannedById: staffId, pin: PIN }, new Date(CUTOFF_AT.getTime() - 1000));
+  it("records a visit whose PIN was typed before the cutoff although the survey arrives after it (RN-04)", async () => {
+    const typedAt = new Date(CUTOFF_AT.getTime() - 15_000);
 
-    expect(await answerPendingVisit(visitorId, RATINGS, CUTOFF_AT)).toEqual({ status: "closed" });
-    expect(await getPrisma().checkIn.count()).toBe(0);
+    await requestVisit({ standId, scannedById: staffId, pin: PIN }, typedAt);
+
+    expect(await answerPendingVisit(visitorId, RATINGS, new Date(CUTOFF_AT.getTime() + 5000))).toEqual({
+      status: "registered",
+      ticketsGranted: 0,
+    });
+    expect(await getPrisma().checkIn.findFirstOrThrow()).toMatchObject({ scannedAt: typedAt });
+  });
+
+  it("records nothing once the raffle started, even for a PIN typed before the cutoff", async () => {
+    const { raffleStartsAt } = await getPrisma().eventSettings.findUniqueOrThrow({ where: { id: 1 } });
+    const lateCutoff = new Date(raffleStartsAt.getTime() - 60_000);
+
+    // A cutoff one minute before the raffle, so the survey can still arrive within the three minutes of the visit.
+    await getPrisma().eventSettings.update({ where: { id: 1 }, data: { checkInCutoffAt: lateCutoff } });
+
+    try {
+      await requestVisit({ standId, scannedById: staffId, pin: PIN }, new Date(lateCutoff.getTime() - 1000));
+
+      expect(await answerPendingVisit(visitorId, RATINGS, raffleStartsAt)).toEqual({ status: "closed" });
+      expect(await getPrisma().checkIn.count()).toBe(0);
+    } finally {
+      await getPrisma().eventSettings.update({ where: { id: 1 }, data: { checkInCutoffAt: CUTOFF_AT } });
+    }
   });
 
   it("rolls the visit back when the survey is invalid", async () => {

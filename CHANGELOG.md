@@ -283,6 +283,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- Una visita cuyo PIN se tecleó antes del corte de check-ins cuenta aunque el visitante conteste la encuesta del
+  pasaporte después del corte, como en la cola sin conexión (RN-04); antes se perdía sin aviso. Sigue sin contar si
+  la encuesta llega después del inicio de la rifa.
 - `GET /api/health` responde 503 (`low-disk`) cuando al volumen de la base le quedan menos de 64 MB, así que
   `docker compose ps` muestra la app como `unhealthy` con el disco lleno (antes seguía en 200 con los kioskos en 500).
 - `docs/deploy.md`: el bloque de Caddy ya no usa un chequeo activo (un reinicio o la sobrecarga dejaban 30 s de
