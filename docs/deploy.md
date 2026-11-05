@@ -11,7 +11,7 @@ el `Dockerfile` y el `docker-compose.yml`; el proxy (Nginx o Caddy) lo pones tú
 | `docker/entrypoint.sh` | Al arrancar aplica las migraciones pendientes (`prisma migrate deploy`), carga el contenido inicial y la cuenta del sysadmin (`prisma db seed`) y deja `node server.js` como proceso principal. |
 | `docker-compose.yml` | Un servicio `app`, volumen `app-data` con la base SQLite, reinicio automático y `stop_grace_period: 30s`. Publica solo en `127.0.0.1`. |
 | `.env.production.example` | Plantilla de variables. Se copia a `.env` en el VPS. |
-| `GET /api/health` | Ruta ligera que usa el `HEALTHCHECK` de la imagen. No toca la base. |
+| `GET /api/health` | Ruta ligera que usa el `HEALTHCHECK` de la imagen. No consulta la base: responde 503 (`low-disk`) si al volumen de la base le quedan menos de 64 MB, y `docker compose ps` lo muestra como `unhealthy`. No la uses como chequeo activo del proxy (ver "Caddy"). |
 
 La base vive en `/data/app.db` dentro del contenedor, en el volumen `app-data`. Está en modo WAL con `busy_timeout`
 (RNF-08); el código lo configura al abrir cada conexión.
@@ -53,12 +53,14 @@ El contenedor se niega a arrancar si faltan `NEXT_PUBLIC_SITE_URL` o `PIN_ENCRYP
 
 ### Correo (SMTP opcional)
 
-Los correos (hoy, las invitaciones de cuenta) se guardan primero en la tabla `email_outbox` de la base (RNF-03).
+Todos los correos (invitaciones de cuenta, el pasaporte de cada registro, la recuperación por correo y el aviso al
+ganador de la rifa) se guardan primero en la tabla `email_outbox` de la base (RNF-03).
 
 - **Con `SMTP_HOST`** (y `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` y `SMTP_FROM`, las cinco son obligatorias juntas): cada
   correo sale justo después de la petición y un temporizador reintenta cada minuto los que fallaron, con retroceso
   exponencial.
-- **Sin `SMTP_HOST`**: nada sale. Los correos se quedan en `email_outbox` y el temporizador de reintentos no se inicia.
+- **Sin `SMTP_HOST`**: nada sale ni se escribe en el log. Los correos se quedan en `email_outbox` y el temporizador de
+  reintentos no se inicia.
   Sirve para pruebas, y en una emergencia se puede entregar el enlace a mano:
 
 ```bash
@@ -101,7 +103,11 @@ docker compose build
 docker compose up -d     # recrea el contenedor; las migraciones se aplican solas al arrancar
 docker compose ps
 docker image prune -f    # opcional: borra las imágenes viejas
+docker builder prune -f  # opcional: borra la caché de build (varios GB tras unas cuantas compilaciones)
 ```
+
+Construir en el VPS usa CPU y unos GB de disco: hazlo antes de abrir el registro, nunca durante el evento, y revisa el
+espacio con `docker system df`.
 
 Los datos no se pierden porque la base está en el volumen. Antes de actualizar el día del evento, haz un respaldo (abajo).
 Si una migración falla, el contenedor se reinicia en bucle y el log lo muestra (`docker compose logs app`): restaura el
@@ -148,11 +154,14 @@ con la app corriendo ni sin restaurar un respaldo después, porque ahí están l
 
 ## Proxy inverso
 
-El proxy termina TLS y pasa todo a `127.0.0.1:3000` (o tu `APP_PORT`). Tres cosas importan en esta app:
+El proxy termina TLS y pasa todo a `127.0.0.1:3000` (o tu `APP_PORT`). Cuatro cosas importan en esta app:
 
 - **Sin buffering en las respuestas en streaming.** Next.js envía la página por partes (Suspense) y el tiempo real usa
   SSE (RNF-07). Con buffering las páginas se ven lentas y los eventos llegan tarde o nunca.
 - **`X-Forwarded-Proto` y `Host`** para que Next.js sepa que la petición original fue por HTTPS.
+- **Compresión en el proxy.** La app no comprime sus respuestas (`compress: false` en `next.config.ts`) para que Node
+  no gaste CPU en eso durante la llegada del público; los dos bloques de abajo comprimen (`gzip` en Nginx y `encode` en
+  Caddy). Sin eso, cada visitante baja el JS y el CSS sin comprimir (unas 4 veces más).
 - **`X-Forwarded-For` con la dirección que vio el proxy al final.** Los límites de registro y de inicio de sesión
   (RNF-10) toman la **última** dirección del encabezado, porque las anteriores las escribe el cliente. Los dos bloques
   de abajo ya lo hacen (Nginx con `$proxy_add_x_forwarded_for` y Caddy por defecto). Si pones otro proxy o una CDN
@@ -167,6 +176,13 @@ server {
 
     ssl_certificate     /etc/letsencrypt/live/showcase.ejemplo.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/showcase.ejemplo.com/privkey.pem;
+
+    # Comprime aquí y no en Node (next.config.ts tiene compress: false). text/html ya va siempre.
+    gzip            on;
+    gzip_proxied    any;
+    gzip_comp_level 5;
+    gzip_types      text/css application/javascript application/json image/svg+xml text/x-component
+                    application/manifest+json;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -204,13 +220,31 @@ Si ya usas `Connection "upgrade"` para WebSocket en otros sitios del mismo servi
 ```caddyfile
 showcase.ejemplo.com {
     # TLS automático (Let's Encrypt). Caddy envía X-Forwarded-Proto y Host por defecto.
+
+    # Comprime aquí y no en Node (next.config.ts tiene compress: false): con 1000 visitantes llegando con la caché
+    # vacía, comprimir cada JS y CSS en el único proceso de Node era el techo de la carga.
+    # Solo estos tipos: el SSE (text/event-stream) no se comprime para que cada evento salga en cuanto se escribe.
+    encode zstd gzip {
+        match {
+            header Content-Type text/html*
+            header Content-Type text/css*
+            header Content-Type text/x-component*
+            header Content-Type application/javascript*
+            header Content-Type application/json*
+            header Content-Type application/manifest+json*
+            header Content-Type image/svg+xml*
+        }
+    }
+
     reverse_proxy 127.0.0.1:3000 {
         # Vacía el buffer en cada escritura: streaming de Next.js y SSE.
         flush_interval -1
 
-        # Verificación de salud de la app.
-        health_uri /api/health
-        health_interval 30s
+        # Hay una sola app: si se reinicia (unos 3 s), Caddy espera hasta 10 s a que vuelva en lugar de responder 502.
+        # Sin health_uri: con un chequeo activo, un reinicio dejaba 30 s de "503 no upstreams available" y, con la app
+        # saturada, el chequeo vencía y Caddy respondía 503 a todos (la app sí contestaba, lenta).
+        lb_try_duration 10s
+        lb_try_interval 250ms
     }
 }
 ```
@@ -226,7 +260,8 @@ docker compose down -v            # ¡borra también la base!
 ```
 
 El reinicio automático (`restart: unless-stopped`) levanta el contenedor si el proceso cae o si el VPS se reinicia
-(RNF-17). Para un cambio de `.env` sin cambio de `NEXT_PUBLIC_SITE_URL`, basta `docker compose up -d`.
+(RNF-17). Docker no lo levanta tras una parada manual: `docker compose stop`, `docker stop` y también `docker kill`
+(aunque sea con `-s KILL`) lo dejan detenido hasta un `docker compose up -d`. Para un cambio de `.env` sin cambio de `NEXT_PUBLIC_SITE_URL`, basta `docker compose up -d`.
 
 ## Qué no cubre esta guía
 

@@ -265,7 +265,7 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | Alertas de fraude (RF-45) | `moderation/lib/fraud-alerts.ts` (reglas puras) y `lib/server/moderation-queries.ts` |
 | Anular visitas y excluir visitantes (RF-46); boletos que se anulan y se reactivan | `moderation/lib/server/moderation-mutations.ts` y `visitors/lib/server/milestone-tickets.ts` (`VALID_CHECK_IN_WHERE`, `RAFFLE_ELIGIBLE_TICKET_WHERE`) |
 | Lista negra de correos (RF-44), géneros (RF-72) y patrocinadores (RF-41) | `visitors/lib/server/email-blocklist.ts`, `games/lib/server/genre-admin.ts` y `sponsors/lib/server/sponsor-mutations.ts` |
-| Estado del servidor (RF-73) y cierre automático del bracket público (RF-74) | `admin/lib/server/server-status.ts`, `admin/lib/overload-rule.ts` (50% durante 2 min) y `admin/lib/server/overload-watch.ts`, que arranca `src/instrumentation.ts` |
+| Estado del servidor (RF-73) y cierre automático del bracket público (RF-74) | `admin/lib/server/server-status.ts`, `admin/lib/overload-rule.ts` (85% durante 2 min) y `admin/lib/server/overload-watch.ts`, que arranca `src/instrumentation.ts` |
 
 - Un stand tiene un administrador activo y hasta 3 cuentas `stand_staff` invitadas o activas (RF-32, RF-39); lo hacen
   cumplir `invitations.ts` y los triggers de la migración `*_stand_accounts`. El staff y el técnico usan el mismo rol
@@ -288,7 +288,8 @@ La app se publica con Docker Compose detrás del proxy inverso del VPS (`docs/de
   porque las consultas con `"use cache"` leen la base durante el build.
 - `docker/entrypoint.sh` corre `prisma migrate deploy` y `prisma db seed` (solo llena tablas vacías y crea al sysadmin si
   no hay uno) antes de `node server.js`. La base vive en el volumen `app-data` (`/data/app.db`).
-- `GET /api/health` (`site/api/health-route.ts`) es el `HEALTHCHECK`: no toca la base.
+- `GET /api/health` (`site/api/health-route.ts`) es el `HEALTHCHECK`: no consulta la base; responde 503 si al volumen
+  de la base le quedan menos de 64 MB (`site/lib/health-status.ts`).
 - Variables en `.env` (plantilla: `.env.production.example`). `NEXT_PUBLIC_SITE_URL` se incrusta al construir. SMTP es
   opcional: sin `SMTP_HOST` el correo queda en `email_outbox`.
 - `docker/entrypoint.sh` debe tener fin de línea LF (`.gitattributes`); si lo editas en Windows, no lo conviertas a CRLF.

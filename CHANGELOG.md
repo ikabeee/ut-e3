@@ -283,6 +283,12 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- `GET /api/health` responde 503 (`low-disk`) cuando al volumen de la base le quedan menos de 64 MB, así que
+  `docker compose ps` muestra la app como `unhealthy` con el disco lleno (antes seguía en 200 con los kioskos en 500).
+- `docs/deploy.md`: el bloque de Caddy ya no usa un chequeo activo (un reinicio o la sobrecarga dejaban 30 s de
+  "503 no upstreams available" a todos) y espera hasta 10 s a que la app vuelva; Nginx y Caddy comprimen las
+  respuestas; la guía aclara que `docker kill` deja el contenedor detenido, que todos los correos pasan por
+  `email_outbox` y cómo borrar la caché de build.
 - Una Server Action que recibe un cuerpo que no es un formulario (por ejemplo JSON enviado a mano) responde su error
   de validación en lugar de un 500 con un `TypeError` en el log.
 - Cada página precargaba 202 archivos de fuente (3,6 MB de LINE Seed JP, que solo usa el tema claro); ahora precarga
