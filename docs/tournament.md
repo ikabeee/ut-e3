@@ -126,6 +126,6 @@ puede repetirse: solo agrega lo que falta.
 - Registrar en el momento a un visitante que no tiene pasaporte (UT-TO-38): el registro liga un dispositivo al pasaporte,
   así que el visitante se registra en su teléfono y el administrador lo agrega por gamertag.
 - Una lista de espera para los lugares de "No se presentó" (UT-TO-44): quedan vacíos y son byes.
-- El cierre automático del bracket público cuando la CPU o la memoria pasan del 50% durante 2 minutos (necesita monitoreo del
+- El cierre automático del bracket público cuando la CPU o la memoria pasan del 85% durante 2 minutos (necesita monitoreo del
   servidor), el tope de conexiones y el tiempo real por SSE: se usa consulta cada 3 segundos.
 - El alta de las cuentas de staff por el administrador de KOF y la asignación de su mesa.
