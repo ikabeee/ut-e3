@@ -283,6 +283,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- La barra de la portada ya no desborda a 320 px (tapaba "Inicio" bajo "Crear mi pasaporte") y, debajo de 420 px,
+  los enlaces se desvanecen en el borde derecho para que se note que la lista sigue al desplazarla.
 - El campo del PIN del kiosco ya no corta el último dígito de un PIN pegado o tecleado con espacios (" 62192").
 - "Crear mi pasaporte" en un teléfono que ya tiene pasaporte lleva a `/passport` en lugar del formulario, que borraba
   la copia sin conexión y permitía un segundo registro que dejaba al primer pasaporte fuera del teléfono.
