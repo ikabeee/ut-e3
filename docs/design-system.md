@@ -15,7 +15,7 @@ Definidos en `src/shared/styles/theme.css`. Usa siempre las clases del tema, no 
 | `--white` | `#FFFFFF` | `text-foreground` |
 | `--panel` | `#1C1C1C` | `bg-surface`, `border-separator` |
 | `--mid` | `#3A3A3A` | `border-border` |
-| `--grey` | `#717171` | `text-muted` |
+| `--grey` | `#8a8a8a` | `text-muted` (contraste AA para texto pequeño sobre negro y sobre el panel) |
 | `--acid` | `#178FDD` | `bg-accent`, `text-accent` |
 | `--light` | `#F4F4F4` | `bg-paper` (con `text-paper-foreground`) |
 | `--blue-1` / `--blue-4` / `--blue-5` | `#68B5E6` / `#0582D4` / `#04598F` | `accent-hi`, `accent-strong`, `accent-deep` |

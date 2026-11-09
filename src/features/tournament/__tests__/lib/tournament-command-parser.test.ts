@@ -64,4 +64,8 @@ describe("parseTournamentCommand", () => {
 
     expect(parseTournamentCommand(form)).toEqual({ isValid: false });
   });
+
+  it("rejects a Server Action body that is not FormData instead of throwing", () => {
+    expect(parseTournamentCommand([1, 2, 3])).toEqual({ isValid: false });
+  });
 });

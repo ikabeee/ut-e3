@@ -1,12 +1,32 @@
 /**
  * @jest-environment node
  */
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { INITIAL_GAMES, seedGames } from "@features/games/lib/server/games-seed";
 import { formatStandCode } from "@features/games/lib/stand-code";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
-const EVENT_STANDS = [
+// Provisional slots, in the order of the games: the floor plan of the landing does not show them.
+const GAME_NAMES = [
+  "Abby's Tower",
+  "After Light",
+  "Astrolabio",
+  "Carencia",
+  "Dark Mutant",
+  "EchoScrap",
+  "Identity Dissolution",
+  "Laboratorio 4",
+  "Reencarnación Express",
+  "Saatan Paal",
+  "True Hero",
+  "Turno Rosso",
+  "Unknown Game",
+  "Vaporlock",
+];
+
+const GAME_STANDS = [
   "ZA-S1",
   "ZA-S2",
   "ZA-S3",
@@ -21,10 +41,6 @@ const EVENT_STANDS = [
   "ZD-S3",
   "ZT-S1",
   "ZT-S2",
-  "ZT-S3",
-  "ZT-S4",
-  "ZT-S5",
-  "ZT-S6",
 ];
 
 const database = createTestDatabase();
@@ -37,10 +53,37 @@ afterAll(async () => {
 });
 
 describe("INITIAL_GAMES", () => {
-  it("puts one sample game in each of the 18 stands of blocks A to D and T", () => {
-    const stands = INITIAL_GAMES.map((game) => formatStandCode(game.stand));
+  it("lists the 14 games of the showcase in alphabetical order", () => {
+    expect(INITIAL_GAMES.map((game) => game.name)).toEqual(GAME_NAMES);
+  });
 
-    expect(stands.toSorted()).toEqual(EVENT_STANDS.toSorted());
+  it("gives each game one of the first 14 provisional stands, in order", () => {
+    expect(INITIAL_GAMES.map((game) => formatStandCode(game.stand))).toEqual(GAME_STANDS);
+  });
+
+  it("announces no genre and no synopsis, because the sources do not give them", () => {
+    for (const game of INITIAL_GAMES) {
+      expect(game.genre).toEqual({ id: "por-anunciar", name: "Por anunciar", slug: "por-anunciar" });
+      expect(game.synopsis).toBe("");
+    }
+  });
+
+  it("uses the portrait cover as the main image, and a landscape one second except for Vaporlock", () => {
+    for (const game of INITIAL_GAMES) {
+      const expectedPaths =
+        game.slug === "vaporlock"
+          ? [`/games/${game.slug}.jpg`]
+          : [`/games/${game.slug}.jpg`, `/games/${game.slug}-portada.jpg`];
+
+      expect(game.images.map((image) => image.path)).toEqual(expectedPaths);
+      expect(game.images[0]).toMatchObject({ position: 1, isCover: true, alt: `Portada de ${game.name}` });
+    }
+  });
+
+  it("only points to image files that exist in public/", () => {
+    for (const image of INITIAL_GAMES.flatMap((game) => game.images)) {
+      expect(existsSync(join(process.cwd(), "public", image.path))).toBe(true);
+    }
   });
 });
 
@@ -54,31 +97,48 @@ describe("seedGames", () => {
     await prisma.genre.deleteMany();
   });
 
-  it("writes one stand per game location, 18 in all", async () => {
+  it("writes one stand per game location, 14 in all", async () => {
     await seedGames(getPrisma());
 
     const stands = await getPrisma().stand.findMany();
 
-    expect(stands.map(formatStandCode).toSorted()).toEqual(EVENT_STANDS.toSorted());
+    expect(stands.map(formatStandCode).toSorted()).toEqual(GAME_STANDS.toSorted());
   });
 
-  it("writes each genre the games use once", async () => {
+  it("writes the Por anunciar genre once for all the games", async () => {
     await seedGames(getPrisma());
 
     const genres = await getPrisma().genre.findMany();
 
-    expect(genres.map((genre) => genre.slug).toSorted()).toEqual(
-      [...new Set(INITIAL_GAMES.map((game) => game.genre.slug))].toSorted(),
-    );
+    expect(genres).toEqual([expect.objectContaining({ name: "Por anunciar", slug: "por-anunciar" })]);
   });
 
-  it("writes every game with one cover image at position 1", async () => {
+  it("writes every game with an empty synopsis and its cover at position 1", async () => {
     await seedGames(getPrisma());
 
-    const games = await getPrisma().game.findMany({ include: { images: true } });
+    const games = await getPrisma().game.findMany({ include: { images: { orderBy: { position: "asc" } } } });
 
     expect(games.map((game) => game.slug).toSorted()).toEqual(INITIAL_GAMES.map((game) => game.slug).toSorted());
-    games.forEach((game) => expect(game.images).toEqual([expect.objectContaining({ position: 1, isCover: true })]));
+    games.forEach((game) => {
+      expect(game.synopsis).toBe("");
+      expect(game.images[0]).toMatchObject({ position: 1, isCover: true });
+    });
+  });
+
+  it("writes the landscape image of each game at position 2, except Vaporlock which has none", async () => {
+    await seedGames(getPrisma());
+
+    const games = await getPrisma().game.findMany({ include: { images: { orderBy: { position: "asc" } } } });
+
+    const imagePositions = Object.fromEntries(
+      games.map((game) => [game.slug, game.images.map((image) => `${image.position}:${image.isCover}`)]),
+    );
+
+    expect(imagePositions).toEqual(
+      Object.fromEntries(
+        INITIAL_GAMES.map((game) => [game.slug, game.slug === "vaporlock" ? ["1:true"] : ["1:true", "2:false"]]),
+      ),
+    );
   });
 
   it("leaves the same rows when it runs twice", async () => {
@@ -92,13 +152,13 @@ describe("seedGames", () => {
 
   it("keeps a game renamed after the first run and adds no duplicate", async () => {
     await seedGames(getPrisma());
-    await getPrisma().game.update({ where: { slug: "ceniza-protocol" }, data: { name: "Ceniza Protocol DX" } });
+    await getPrisma().game.update({ where: { slug: "abby-s-tower" }, data: { name: "Abby's Tower DX" } });
 
     await seedGames(getPrisma());
 
     expect(await getPrisma().game.count()).toBe(INITIAL_GAMES.length);
-    expect(await getPrisma().game.findUnique({ where: { slug: "ceniza-protocol" } })).toMatchObject({
-      name: "Ceniza Protocol DX",
+    expect(await getPrisma().game.findUnique({ where: { slug: "abby-s-tower" } })).toMatchObject({
+      name: "Abby's Tower DX",
     });
   });
 
@@ -106,11 +166,11 @@ describe("seedGames", () => {
     await seedGames(getPrisma());
 
     const game = await getPrisma().game.update({
-      where: { slug: "ceniza-protocol" },
-      data: { slug: "ceniza-protocol-final" },
+      where: { slug: "abby-s-tower" },
+      data: { slug: "abby-s-tower-final" },
     });
 
-    await getPrisma().gameImage.updateMany({ where: { gameId: game.id }, data: { position: 2 } });
+    await getPrisma().gameImage.updateMany({ where: { gameId: game.id, isCover: true }, data: { position: 3 } });
 
     const editedCatalog = await readCatalog();
 
@@ -122,7 +182,7 @@ describe("seedGames", () => {
   it("does not bring back a game deleted after the first run", async () => {
     await seedGames(getPrisma());
 
-    const game = await getPrisma().game.findUniqueOrThrow({ where: { slug: "ceniza-protocol" } });
+    const game = await getPrisma().game.findUniqueOrThrow({ where: { slug: "abby-s-tower" } });
 
     await getPrisma().gameImage.deleteMany({ where: { gameId: game.id } });
     await getPrisma().game.delete({ where: { id: game.id } });
@@ -130,17 +190,19 @@ describe("seedGames", () => {
     await seedGames(getPrisma());
 
     expect(await getPrisma().game.count()).toBe(INITIAL_GAMES.length - 1);
-    expect(await getPrisma().game.findUnique({ where: { slug: "ceniza-protocol" } })).toBeNull();
+    expect(await getPrisma().game.findUnique({ where: { slug: "abby-s-tower" } })).toBeNull();
   });
 
   it("writes no game when a run fails partway, so the next run fills the whole catalog", async () => {
-    // "Pelea" is first used by the 16th sample game, so this genre name makes the run fail after 15 games.
-    const conflictingGenre = await getPrisma().genre.create({ data: { name: "Pelea", slug: "pelea-antigua" } });
+    // The event admits 18 stands: with 5 already taken, the 14th game finds no room after 13 games were written.
+    const takenStands = await getPrisma().stand.createManyAndReturn({
+      data: [4, 5, 6, 7, 8].map((number) => ({ zone: "D", number, studio: 0, groupCode: "000" })),
+    });
 
     await expect(seedGames(getPrisma())).rejects.toThrow();
     expect(await getPrisma().game.count()).toBe(0);
 
-    await getPrisma().genre.delete({ where: { id: conflictingGenre.id } });
+    await getPrisma().stand.deleteMany({ where: { id: { in: takenStands.map((stand) => stand.id) } } });
     await seedGames(getPrisma());
 
     expect(await getPrisma().game.count()).toBe(INITIAL_GAMES.length);

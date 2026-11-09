@@ -43,7 +43,7 @@ function HomeLink({ href }: Readonly<{ href: string }>) {
     <Link
       href={href}
       aria-label={LANDING_COPY.nav.homeLabel}
-      className="group relative grid flex-none place-items-center border-r border-separator bg-background px-[18px]"
+      className="group relative grid flex-none place-items-center border-r border-separator bg-background px-[18px] max-[420px]:px-3"
     >
       <UtgLogo
         variant="extruded"
@@ -53,9 +53,11 @@ function HomeLink({ href }: Readonly<{ href: string }>) {
   );
 }
 
+// Below 420 px the links do not fit next to the logo and the call to action: the list scrolls sideways and fades at the
+// right edge so it reads as cut, not as complete.
 function NavLinkList({ links }: Readonly<Pick<SiteNavProps, "links">>) {
   return (
-    <ul className="m-0 scrollbar-none flex min-w-0 flex-1 list-none items-center gap-[clamp(14px,3vw,40px)] overflow-x-auto px-gutter font-nav text-[13px] leading-[1.3] font-medium tracking-[.02em] uppercase [font-variation-settings:'wdth'_87.5] max-[420px]:gap-3 max-[420px]:text-[11px]">
+    <ul className="m-0 scrollbar-none flex min-w-0 flex-1 list-none items-center gap-[clamp(14px,3vw,40px)] overflow-x-auto px-gutter font-nav text-[13px] leading-[1.3] font-medium tracking-[.02em] uppercase [font-variation-settings:'wdth'_87.5] max-[420px]:gap-3 max-[420px]:mask-r-from-75% max-[420px]:px-3 max-[420px]:text-[11px]">
       {links.map((link) => (
         <li key={link.href}>
           <Link href={link.href} className="touch-target relative link-wipe whitespace-nowrap no-underline">

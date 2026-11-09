@@ -4,7 +4,11 @@ import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
 import { ConnectionIndicator } from "@features/pwa/components/connection-indicator";
 import { InstallAppPrompt } from "@features/pwa/components/install-app-prompt";
+import { RaffleWinNotice } from "@features/raffle/components/raffle-win-notice";
+import { getVisitorRaffleWin } from "@features/raffle/lib/server/raffle-queries";
+import { RejectedVisitNotices } from "@features/stands/components/rejected-visit-notices";
 import { VisitSurveyPrompt } from "@features/stands/components/visit-survey-prompt";
+import { getRejectedVisitNotices } from "@features/stands/lib/server/rejected-visit-queries";
 import { answerVisitAction } from "@features/stands/lib/stands-actions";
 import { TournamentNotice } from "@features/tournament/components/tournament-notice";
 import { getEntrySchedule, getVisitorEntryStatus } from "@features/tournament/lib/server/entries-queries";
@@ -49,7 +53,11 @@ async function PassportGate() {
     redirect(REGISTER_PATH);
   }
 
-  const [passport, visits] = await Promise.all([getPassport(visitorId), getPassportVisits(visitorId)]);
+  const [passport, visits, rejectedVisits] = await Promise.all([
+    getPassport(visitorId),
+    getPassportVisits(visitorId),
+    getRejectedVisitNotices(visitorId),
+  ]);
 
   if (!passport) {
     redirect(REGISTER_PATH);
@@ -61,12 +69,21 @@ async function PassportGate() {
       visits={visits}
       extra={
         <>
+          {await loadRaffleWin(visitorId)}
+          <RejectedVisitNotices notices={rejectedVisits} />
           <VisitSurveyPrompt answerVisit={answerVisitAction} />
           {await loadTournamentNotice(visitorId)}
         </>
       }
     />
   );
+}
+
+// "Ganaste" only exists for a confirmed winner of the raffle (RF-25); the prize appears once it is registered.
+async function loadRaffleWin(visitorId: string): Promise<ReactNode> {
+  const win = await getVisitorRaffleWin(visitorId);
+
+  return win ? <RaffleWinNotice win={win} /> : null;
 }
 
 // The page is where the visitors and tournament features meet: the notice only exists for a player that entered (RF-75).

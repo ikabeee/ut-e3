@@ -173,6 +173,7 @@ async function runScenario(browser, databaseFile, screenshots) {
 
     await expectRedirectWithoutDevice(page);
     await registerVisitor(page);
+    await expectRegisterSendsToPassport(page);
     await checkPassport(session, "360 px 0 visits", ZERO_VISITS);
     await checkPassport(session, "360 px 9 visits", nineVisits(database));
     await checkPassport(session, "360 px 16 visits", sixteenVisits(database));
@@ -230,6 +231,14 @@ function eighteenVisits(database) {
     visited: 18,
     tickets: 2,
   };
+}
+
+// "Crear mi pasaporte" links to /register from every page: a phone with a passport goes back to it instead of the form,
+// which deleted the offline copy and allowed a second passport on the same phone.
+async function expectRegisterSendsToPassport(page) {
+  await page.goto(`${BASE_URL}/register`, { waitUntil: "networkidle" });
+  await page.waitForURL(/\/passport$/, { timeout: 20_000 });
+  check("device with a passport: /register -> /passport", page.url().endsWith("/passport"), page.url());
 }
 
 async function expectRedirectWithoutDevice(page) {

@@ -1,7 +1,8 @@
 /**
  * @jest-environment node
  */
-import { getPrisma } from "@shared/lib/server/prisma";
+import { existsSync } from "node:fs";
+import { closeOpenConnections, getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
 const database = createTestDatabase();
@@ -48,5 +49,20 @@ describe("getPrisma", () => {
 
     expect(stored.storageClass).toBe("text");
     expect(stored.text).toMatch(/^2026-11-20T17:00:00\.000(Z|\+00:00)$/);
+  });
+
+  // Runs last: it closes the connection of the shared client.
+  it("checkpoints the WAL and deletes app.db-wal and app.db-shm when the process exits", async () => {
+    const file = database.url.slice("file:".length);
+
+    await getPrisma().scheduleItem.deleteMany();
+
+    expect(existsSync(`${file}-wal`)).toBe(true);
+    expect(process.listeners("exit")).toContain(closeOpenConnections);
+
+    closeOpenConnections();
+
+    expect(existsSync(`${file}-wal`)).toBe(false);
+    expect(existsSync(`${file}-shm`)).toBe(false);
   });
 });

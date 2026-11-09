@@ -7,7 +7,7 @@
     --utg-black: #000000;
     --utg-panel: #1c1c1c;
     --utg-mid: #3a3a3a;
-    --utg-grey: #717171;
+    --utg-grey: #8a8a8a; /* 6.1:1 on black and 4.9:1 on the panel: AA for small text (was #717171, 4.3:1). */
     --utg-white: #ffffff;
     --utg-light: #f4f4f4;
     --utg-acid: #178fdd;

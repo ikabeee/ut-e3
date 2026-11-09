@@ -22,7 +22,7 @@ export const INITIAL_SCHEDULE_ITEMS: ScheduleItem[] = [
   {
     id: "stand-exhibition",
     title: "Exhibición en los stands de los bloques A a D y en la zona de terror",
-    description: "Juega los 18 videojuegos y registra cada visita con tu PIN para la rifa.",
+    description: "Juega los videojuegos de los equipos y registra cada visita con tu PIN para la rifa.",
     startsAt: "2026-11-20T17:00:00.000Z",
     endsAt: "2026-11-20T21:50:00.000Z",
     zone: null,

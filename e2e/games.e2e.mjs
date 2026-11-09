@@ -35,9 +35,10 @@ const ITCH_LEAD_MS = 90_000;
 
 const ITCH_OPEN_MARGIN_MS = 2000;
 
-const FEATURED_SLUG = "ceniza-protocol";
+// Vaporlock is the seeded game with only its cover, so the gallery images of the test take positions 2 to 5.
+const FEATURED_SLUG = "vaporlock";
 
-const FEATURED_ITCH_URL = "https://utg.itch.io/ceniza-protocol";
+const FEATURED_ITCH_URL = "https://utg.itch.io/vaporlock";
 
 const EXTRA_IMAGE_PATHS = ["/games/cenote.jpg", "/games/circuito-7.jpg", "/games/eco-nulo.jpg", "/games/hormigon.jpg"];
 
@@ -230,7 +231,7 @@ function addGalleryImages(database, game) {
   });
 }
 
-// The coverflow opens on the middle game in stand order: the 9th of the 18 seeded games.
+// The coverflow opens on the middle game in stand order.
 function readMiddleGame(database) {
   const { count } = database.prepare("SELECT COUNT(*) AS count FROM games").get();
 
@@ -287,6 +288,7 @@ async function runScenario(browser, fixture, screenshots) {
     await checkCatalogToGamePage(session);
     await checkGallery(session);
     await checkUnknownSlug(session);
+    await checkFontPreloads(session);
     await checkShortCodeOnly(session);
     await waitUntil(fixture.itchOpensAt.getTime() + ITCH_OPEN_MARGIN_MS);
     await checkItchOpen(session);
@@ -593,14 +595,14 @@ function gameCards(page) {
   return gameGrid(page).getByRole("link");
 }
 
-// G-06: an unknown slug shows the not-found page with noindex. With Cache Components the first visit gets the App
+// G-06: an unknown slug shows the not-found page of a game ("Juego no encontrado", GAMES_COPY.notFound) with noindex. With Cache Components the first visit gets the App
 // Shell before notFound() streams, so the status is 200 on that visit and 404 once cached (S4, L7 of game-detail).
 async function checkUnknownSlug(session) {
   const { page } = session;
   const response = await page.goto(`${BASE_URL}/games/no-existe`, { waitUntil: "networkidle" });
   const status = response?.status();
   const robots = await page.locator('meta[name="robots"]').first().getAttribute("content");
-  const notFoundText = await page.getByRole("heading", { level: 1, name: "Página no encontrada" }).count();
+  const notFoundText = await page.getByRole("heading", { level: 1, name: "Juego no encontrado" }).count();
   const background = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 
   check("G-06 unknown slug answers 200 or 404", status === 200 || status === 404, `status=${status}`);
@@ -608,6 +610,24 @@ async function checkUnknownSlug(session) {
   check("G-06 not-found page has noindex", robots?.includes("noindex") === true, `robots=${robots}`);
   check("G-06 not-found page uses the black theme", background === "rgb(0, 0, 0)", background);
   await screenshot(session, "04-unknown-slug/01-not-found");
+}
+
+// G-14: a page preloads only the latin fonts it draws. LINE Seed JP comes in about 70 slices per weight and its preload
+// put 202 woff2 files (3.6 MB) on every page, which saturated the server while 1000 visitors arrived.
+const MAX_FONT_PRELOADS = 20;
+
+async function checkFontPreloads(session) {
+  const { page } = session;
+
+  await page.goto(`${BASE_URL}/games`, { waitUntil: "load" });
+
+  const preloads = await page.locator('link[rel="preload"][as="font"]').count();
+
+  check(
+    "G-14 the page preloads at most 20 fonts",
+    preloads > 0 && preloads <= MAX_FONT_PRELOADS,
+    `preloads=${preloads}`,
+  );
 }
 
 // G-07: the visitor sees the short stand code, never the full one.

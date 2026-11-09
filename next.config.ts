@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  // The proxy compresses (docs/deploy.md): gzip in the only Node process was the ceiling of 1000 visitors arriving with
+  // an empty cache, because every JS and CSS file was compressed again on every request.
+  compress: false,
   // The Docker image runs the server that `next build` traces into .next/standalone (docs/deploy.md).
   output: "standalone",
   // Only the dev server reads this: it lets a phone on the local network (192.168.x.x) use the app while testing.
@@ -19,7 +22,9 @@ const nextConfig: NextConfig = {
     agentUpgrade: "security",
   },
   images: {
-    formats: ["image/avif", "image/webp"],
+    // Only WebP: AVIF takes several times the CPU to encode, and the first wave of phones at the event would make the
+    // server encode every size of every cover at once.
+    formats: ["image/webp"],
   },
   async headers() {
     return [

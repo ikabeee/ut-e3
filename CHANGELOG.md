@@ -8,6 +8,48 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Kill switch para publicar solo la portada: con `SITE_MODE=landing` (el valor por defecto en producción) el sitio
+  sirve la portada, el aviso de privacidad y sus imágenes, y todo lo demás redirige a la portada, responde 404 (`/api`)
+  o 405 (formularios). La portada no enlaza a lo bloqueado. `SITE_MODE=full` publica la app completa. Compose levanta
+  producción y una demo como dos proyectos separados, cada uno con su base (ver `docs/deploy.md`).
+- La portada muestra los 14 juegos reales con sus portadas y a los patrocinadores Algorix Insights, Bonavida, Mermelada y
+  Nemo Submarine. Un patrocinador puede no tener sitio, teléfono o servicios, y la portada no muestra los que faltan.
+- Con solo la portada publicada, la barra deja Juegos, Croquis y Patrocinadores (el logo lleva al inicio) y la portada no
+  muestra lo que necesita el pasaporte o está por anunciar: el acto CALIFICA, el marketplace y las invitadas.
+- Rifa final (M9): tómbola en vivo en `/raffle/live` para proyectar en el escenario (gira, muestra el número de boleto y
+  el gamertag y se actualiza sola), panel del animador en `/admin/raffle` (la cuenta `raffle_admin` entra por `/login`)
+  con "Girar", modal "Ganador" o "Descartado" que bloquea el siguiente giro, aviso "Otro animador está girando", registro
+  del premio entregado y "Cerrar la rifa"; sección pública de ganadores en `/raffle` y "Ganaste" con el premio en el
+  pasaporte. El sorteo usa `crypto.randomInt`, al salir un boleto se desactivan todos los del visitante, el ganador recibe
+  un correo por la bandeja de salida y todo queda en la bitácora. Seed de desarrollo `npm run db:seed:raffle` y prueba
+  `npm run test:e2e:raffle`.
+- El kiosco del stand funciona sin conexión (RF-35): guarda las visitas en IndexedDB, las envía en lotes de máximo 50
+  con reintentos con backoff exponencial y jitter, y muestra "Sin conexión · N visitas por enviar", "Enviando…",
+  "Todo enviado" y la lista "No registradas" con el motivo. Sin red detecta un PIN mal tecleado con un filtro de PIN con
+  falsos positivos a propósito (RF-78, RNF-19) y el pasaporte avisa "Tu visita a ZA-S3 no se registró" cuando una visita
+  en cola llega fuera de horario (RF-24). La pantalla del PIN ya no se desborda a 360 px. Los PIN de la cola que no son
+  de nadie gastan los mismos intentos que la pantalla del PIN (100 cada 5 minutos), así que la cola no sirve para
+  adivinar PIN.
+- Herramientas del sysadmin en `/admin` (M7), con una navegación entre secciones: Configuración edita los horarios de
+  `event_settings`, la URL del Marketplace y los umbrales de fraude (RF-43); Moderación muestra las alertas de posible
+  fraude (stands con muchas calificaciones de 5 en poco tiempo y visitantes de un solo stand, RF-45) y permite anular una
+  visita o excluir a un visitante con motivo, sin borrar nada: el boleto de un hito que se pierde queda anulado y se
+  reactiva con su mismo número si el visitante vuelve a llegar, y con la rifa iniciada los boletos no cambian (RF-46);
+  el pasaporte muestra el boleto anulado y el kiosco rechaza el PIN de un visitante excluido. Catálogos gestiona los
+  géneros (no se borra uno con juegos, RF-72), los patrocinadores (RF-41) y la lista negra de correos de los equipos
+  (RF-44). Servidor muestra como texto la memoria, la CPU, las pantallas del bracket público y la bandeja de salida con
+  "Reenviar" (RF-73), y el bracket público se cierra solo si la CPU o la memoria pasan del 85% durante 2 minutos
+  (RF-74; era 50%, pero en la prueba de carga de 1000 usuarios cerraba el bracket con la app respondiendo bien). Migración `checkin_annulment_and_visitor_exclusion`.
+- Recuperación del pasaporte por correo en `/passport/recover`, enlazada desde `/register`: el visitante escribe su correo
+  y recibe un enlace de un solo uso que vence en 30 minutos. La respuesta es la misma exista o no el correo (y el trabajo
+  se hace después de responder), con un máximo de 3 solicitudes por correo por hora. El correo solo lleva el enlace. Al
+  abrirlo, el visitante confirma con "Abrir mi pasaporte"; el teléfono anterior pierde el acceso y la recuperación queda
+  en la bitácora. Un enlace vencido o usado lleva a "Este enlace ya no sirve" para pedir otro Al recuperar el
+  pasaporte (por correo o en la mesa de atención) se cierran los demás enlaces pendientes, y un enlace con el fragmento
+  dañado muestra "Este enlace está incompleto" en lugar de romper la página.
+- La página 404 tiene la identidad del evento: un "404" grande con el efecto glitch del diseño y, además de "Volver al
+  inicio", salidas a Juegos, Croquis y Cronograma. Un juego que no existe (`/games/<slug>`) tiene su propia 404, "Juego
+  no encontrado", con cinco juegos del catálogo para seguir navegando (#108).
 - Página `/showcase` (sin enlace en el menú): el evento con el estilo de un sitio de videojuegos. Título en letras LED
   con un clip flotante, fecha y sede, botón "Crear mi pasaporte", video que se endereza al hacer scroll, carrusel de los
   juegos del evento, invitadas especiales, cronograma, patrocinadores, croquis, ubicación y banda final con cinta de
@@ -215,6 +257,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- El botón del hero dice "Agregar al calendario", que es lo que hace.
+- El gris de los textos secundarios (`--utg-grey`) pasa de `#717171` a `#8a8a8a` para cumplir el contraste AA.
+- El croquis abre en el escenario mientras ningún stand tiene juego, en lugar de un stand vacío.
+- La caja del coverflow con el foco muestra el contorno de foco.
 - La sede se presenta como el Edificio B de la UT Cancún (lobby y áreas externas), como dice el SRS: la tarjeta de
   ubicación, la dirección para copiar, la descripción de patrocinadores y `AGENTS.md`. "Abrir en Google Maps" apunta al
   lugar del Edificio B.
@@ -262,6 +308,38 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- La barra de la portada ya no desborda a 320 px (tapaba "Inicio" bajo "Crear mi pasaporte") y, debajo de 420 px,
+  los enlaces se desvanecen en el borde derecho para que se note que la lista sigue al desplazarla.
+- El campo del PIN del kiosco ya no corta el último dígito de un PIN pegado o tecleado con espacios (" 62192").
+- "Crear mi pasaporte" en un teléfono que ya tiene pasaporte lleva a `/passport` en lugar del formulario, que borraba
+  la copia sin conexión y permitía un segundo registro que dejaba al primer pasaporte fuera del teléfono.
+- Una visita cuyo PIN se tecleó antes del corte de check-ins cuenta aunque el visitante conteste la encuesta del
+  pasaporte después del corte, como en la cola sin conexión (RN-04); antes se perdía sin aviso. Sigue sin contar si
+  la encuesta llega después del inicio de la rifa.
+- `GET /api/health` responde 503 (`low-disk`) cuando al volumen de la base le quedan menos de 64 MB, así que
+  `docker compose ps` muestra la app como `unhealthy` con el disco lleno (antes seguía en 200 con los kioskos en 500).
+- `docs/deploy.md`: el bloque de Caddy ya no usa un chequeo activo (un reinicio o la sobrecarga dejaban 30 s de
+  "503 no upstreams available" a todos) y espera hasta 10 s a que la app vuelva; Nginx y Caddy comprimen las
+  respuestas; la guía aclara que `docker kill` deja el contenedor detenido, que todos los correos pasan por
+  `email_outbox` y cómo borrar la caché de build.
+- Una Server Action que recibe un cuerpo que no es un formulario (por ejemplo JSON enviado a mano) responde su error
+  de validación en lugar de un 500 con un `TypeError` en el log.
+- Cada página precargaba 202 archivos de fuente (3,6 MB de LINE Seed JP, que solo usa el tema claro); ahora precarga
+  solo las fuentes latinas del diseño. La app ya no comprime en Node: lo hace el proxy (`docs/deploy.md`), que era el
+  techo de la llegada de 1000 visitantes con la caché vacía.
+- Vuelven las páginas de error en español (`error.tsx` y `global-error.tsx`, RF-45.1), que se habían perdido: una
+  excepción, como enviar la encuesta del pasaporte sin señal, mostraba la página genérica de Next en inglés. Ahora dice
+  "Algo salió mal" con "Reintentar" e "Ir al inicio".
+- Al detenerse (`docker compose stop` o `restart`), la app cierra SQLite y ya no deja `app.db-wal` ni `app.db-shm`; si
+  alguna conexión sigue abierta, sale sola a los 20 s, antes del `SIGKILL` de Docker. La guía de restauración de
+  `docs/deploy.md` borra esos archivos antes de copiar el respaldo: seguirla al pie de la letra dejaba la base corrupta.
+- Un registro rechazado porque el gamertag ya está en uso ya no gasta uno de los 3 intentos por hora del registro.
+- Herramientas del sysadmin: una visita que se termina de calificar después de excluir al visitante ya no queda
+  registrada ni da boleto; el patrocinador no se guarda si su logo no existe en `public/`; un género sin letras a-z ni
+  números (solo emojis o "日本") se rechaza en vez de guardarse con el slug "juego"; el motivo de una anulación o
+  exclusión necesita letras o números visibles; la lista negra rechaza correos de más de 254 caracteres; la memoria
+  del contenedor ya no cuenta la caché de archivos (cerraba el bracket público sin carga real), y el conteo de
+  pantallas del bracket y las alertas de fraude aguantan miles de peticiones y votos sin volverse lentos.
 - La portada ya no falla con el catálogo vacío (`DATA_SOURCE=prisma` antes de publicar juegos):
   el carrusel de destacados y el exhibidor 3D no se muestran hasta que haya juegos.
 - Pedir el boleto sin stands asignados responde "El sorteo se abre cuando los equipos tengan stand
@@ -274,6 +352,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Seguridad
 
+- El límite de registro (3 por hora) y el de inicio de sesión cuentan la dirección que agrega el proxy (la última de
+  `X-Forwarded-For`) y no la primera, que la escribe el cliente: falsificar el encabezado ya no da registros sin límite.
+  El inicio de sesión cuenta los intentos por correo y por dirección, así que tres contraseñas incorrectas desde un
+  equipo ya no dejan una hora sin panel al sysadmin, a los animadores de la rifa o al staff que entra desde otro.
 - El service worker ya no guarda el pasaporte (`/passport`) ni el enlace del QR (`/v/<token>`) en
   la caché del navegador: mostraban el gamertag y el token secreto del QR. Sin conexión responden
   la página `/offline`.

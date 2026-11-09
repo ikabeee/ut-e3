@@ -20,7 +20,9 @@ export function SponsorCard({ sponsor }: Readonly<SponsorCardProps>) {
       </div>
       <div className="flex flex-1 flex-col gap-4 border-t border-separator px-gutter pt-4 pb-[clamp(20px,3vw,32px)]">
         <h2 className="type-wide text-[clamp(28px,3vw,44px)] leading-[.92] tracking-tighter">{sponsor.name}</h2>
-        <p className="m-0 flex-1 text-[clamp(16px,1.3vw,19px)] leading-[1.35] text-copy">{sponsor.services}</p>
+        {sponsor.services === "" ? null : (
+          <p className="m-0 flex-1 text-[clamp(16px,1.3vw,19px)] leading-[1.35] text-copy">{sponsor.services}</p>
+        )}
         <SponsorContactLinks sponsor={sponsor} />
       </div>
     </article>

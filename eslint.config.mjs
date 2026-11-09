@@ -8,13 +8,19 @@ const FEATURE_DEPENDENCIES = {
   landing: ["games", "sponsors"],
   "floor-plan": ["games"],
   pwa: ["games", "visitors"],
+  raffle: ["accounts"],
   games: ["accounts", "event-settings"],
+  "event-settings": ["accounts"],
   schedule: ["accounts", "floor-plan"],
-  stands: ["accounts", "games", "visitors"],
+  sponsors: ["accounts"],
+  stands: ["accounts", "games", "pwa", "visitors"],
   support: ["accounts", "visitors"],
   tournament: ["accounts"],
-  visitors: ["games"],
+  visitors: ["accounts", "games"],
+  moderation: ["accounts", "games", "visitors"],
+  admin: ["accounts", "tournament"],
   showcase: ["landing"],
+  site: ["accounts", "landing", "visitors"],
 };
 
 const FEATURES = readdirSync(new URL("./src/features", import.meta.url), { withFileTypes: true })
@@ -177,7 +183,7 @@ const FEATURE_LAYERS = [
     allowServerOnly: true,
   },
   {
-    glob: "lib/*-actions{,.test,-hardening.test}.ts",
+    glob: "lib/*-actions{,.test,-*.test}.ts",
     patterns: [hooksLayer, componentsLayer, pagesLayer, apiLayer, prismaClient],
   },
   { glob: `hooks/**/*.${SOURCE}`, patterns: [componentsLayer, pagesLayer, apiRoutes, serverCode] },

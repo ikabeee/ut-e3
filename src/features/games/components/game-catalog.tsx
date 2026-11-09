@@ -17,20 +17,22 @@ const RACK_VARIABLES = [
 
 interface GameCatalogProps {
   games: Game[];
+  /** False while the game pages are not published: the case at the center stays where it is. */
+  linksToGamePages?: boolean;
 }
 
-export function GameCatalog({ games }: Readonly<GameCatalogProps>) {
+export function GameCatalog({ games, linksToGamePages = true }: Readonly<GameCatalogProps>) {
   return (
     <section id={GAMES_SECTION_ID} className="section-block">
       <div className="page-wrap">
         <h2 className="text-center type-giant text-[clamp(24px,4.6vw,68px)]">{GAMES_COPY.catalog.heading}</h2>
       </div>
-      {games.length > 0 ? <Coverflow games={games} /> : null}
+      {games.length > 0 ? <Coverflow games={games} linksToGamePages={linksToGamePages} /> : null}
     </section>
   );
 }
 
-function Coverflow({ games }: Readonly<GameCatalogProps>) {
+function Coverflow({ games, linksToGamePages }: Readonly<GameCatalogProps>) {
   const coverflow = useCoverflow(games.length);
   const keyboard = useCoverflowKeyboard(coverflow);
 
@@ -54,6 +56,7 @@ function Coverflow({ games }: Readonly<GameCatalogProps>) {
             index={index}
             current={coverflow.current}
             onSelect={coverflow.goTo}
+            linksToGamePage={linksToGamePages}
           />
         ))}
         <CoverflowPlate

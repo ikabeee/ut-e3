@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { AccountsPanel } from "@features/accounts/components/accounts-panel";
 import { SignOutButton } from "@features/accounts/components/sign-out-button";
@@ -43,8 +44,11 @@ export function KofPage() {
   );
 }
 
-// Reads the session cookie and the live bracket, so it streams behind the Suspense boundary.
+// Reads the session cookie and the live bracket, so it streams behind the Suspense boundary. connection() goes first:
+// the session check reads the clock, which Cache Components only allows once the page is known to be dynamic.
 async function KofPanel() {
+  await connection();
+
   const account = await requireKofAccount();
   const tournament = await getTournament();
 

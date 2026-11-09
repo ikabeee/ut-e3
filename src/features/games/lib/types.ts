@@ -6,6 +6,11 @@ export interface Genre {
   slug: string;
 }
 
+/** A genre of the catalog as the sysadmin manages it (RF-72): with how many games use it. */
+export interface AdminGenre extends Genre {
+  gameCount: number;
+}
+
 export interface GameImage {
   path: string;
   alt: string;

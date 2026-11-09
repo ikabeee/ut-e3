@@ -9,7 +9,7 @@ export const PENDING_VISIT_TTL_MS = 3 * 60 * 1000;
 
 export type RequestVisitResult =
   | { status: "requested"; pendingVisitId: string }
-  | { status: "closed" | "standWithoutGame" | "unknownPin" | "alreadyVisited" };
+  | { status: "closed" | "standWithoutGame" | "unknownPin" | "alreadyVisited" | "excluded" };
 
 export type AnswerVisitResult = VisitResult | { status: "noPending" };
 
@@ -32,6 +32,8 @@ export async function requestVisit(visit: StartVisit, now: Date): Promise<Reques
         visitorId: check.visitorId,
         standId: visit.standId,
         requestedById: visit.scannedById,
+        // The hour of the PIN for the cutoff (RN-04), from the same clock as the rest of the visit.
+        createdAt: now,
         expiresAt: new Date(now.getTime() + PENDING_VISIT_TTL_MS),
       },
       select: { id: true },
@@ -50,16 +52,18 @@ export async function cancelPendingVisit(pendingVisitId: string, standId: string
 export async function answerPendingVisit(visitorId: string, ratings: Ratings, now: Date): Promise<AnswerVisitResult> {
   const pending = await getPrisma().pendingVisit.findFirst({
     where: { visitorId, answeredAt: null, expiresAt: { gt: now } },
-    select: { id: true, standId: true, requestedById: true },
+    select: { id: true, standId: true, requestedById: true, createdAt: true },
   });
 
   if (!pending) return { status: "noPending" };
 
-  const check = await checkVisitor(pending.standId, visitorId, now);
+  // The PIN was taken when the staff typed it: a survey answered after the cutoff still counts (RN-04).
+  const scannedAt = pending.createdAt;
+  const check = await checkVisitor(pending.standId, visitorId, { scannedAt, now });
 
   if (check.status !== "ready") return check;
 
-  const visit = { standId: pending.standId, scannedById: pending.requestedById, ratings };
+  const visit = { standId: pending.standId, scannedById: pending.requestedById, ratings, scannedAt };
 
   return recordVisit({
     visit,

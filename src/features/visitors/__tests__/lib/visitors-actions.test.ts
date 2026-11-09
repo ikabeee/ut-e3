@@ -1,6 +1,7 @@
 /**
  * @jest-environment node
  */
+import type * as NextCache from "next/cache";
 import { registerVisitor } from "@features/visitors/lib/visitors-actions";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 import { getPrisma } from "@shared/lib/server/prisma";
@@ -12,6 +13,11 @@ import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 const TEST_KEY = Buffer.alloc(32, 7).toString("base64");
 
 let jar = createCookieJar();
+
+// updateTag only runs inside Next; the spy replaces it on the module object the action reads.
+const nextCache = jest.requireActual<typeof NextCache>("next/cache");
+
+const updateTag = jest.spyOn(nextCache, "updateTag").mockImplementation(() => undefined);
 
 const database = createTestDatabase();
 
@@ -121,6 +127,62 @@ describe("registerVisitor Server Action", () => {
     expect(fourthState.error).toBeTruthy();
   });
 
+  it("counts the hop our proxy appended, so a made-up X-Forwarded-For does not get past the limit", async () => {
+    for (let index = 1; index <= 3; index++) {
+      stubHeaders({ "x-forwarded-for": `1.2.3.${index}, 198.51.100.43` });
+
+      await expect(
+        registerVisitor(
+          null,
+          createForm({ fullName: `Spoof User ${index}`, gamertag: `Spoof${index}`, email: `spoof${index}@ut.mx` }),
+        ),
+      ).rejects.toMatchObject({ digest: expect.stringContaining(";/passport;") });
+    }
+
+    stubHeaders({ "x-forwarded-for": "1.2.3.99, 198.51.100.43" });
+
+    const state = await registerVisitor(
+      null,
+      createForm({ fullName: "Spoof User Four", gamertag: "Spoof4", email: "spoof4@ut.mx" }),
+    );
+
+    expect(state.error).toBe(VISITORS_COPY.rateLimited);
+  });
+
+  it("does not spend the quota on a taken gamertag", async () => {
+    await expect(
+      registerVisitor(null, createForm({ fullName: "First Visitor", gamertag: "Taken", email: "taken@ut.mx" })),
+    ).rejects.toMatchObject({ digest: expect.stringContaining(";/passport;") });
+
+    for (let index = 1; index <= 3; index++) {
+      const state = await registerVisitor(
+        null,
+        createForm({ fullName: `Retry Visitor ${index}`, gamertag: "taken", email: `retry${index}@ut.mx` }),
+      );
+
+      expect(state.fieldErrors?.gamertag).toBe(VISITORS_COPY.errors.gamertagTaken);
+    }
+
+    await expect(
+      registerVisitor(null, createForm({ fullName: "Retry Visitor", gamertag: "FreeTag", email: "retry@ut.mx" })),
+    ).rejects.toMatchObject({ digest: expect.stringContaining(";/passport;") });
+  });
+
+  it("answers a taken gamertag on the first attempt of the window instead of failing", async () => {
+    await expect(
+      registerVisitor(null, createForm({ fullName: "Owner Visitor", gamertag: "OwnedTag", email: "owner@ut.mx" })),
+    ).rejects.toMatchObject({ digest: expect.stringContaining(";/passport;") });
+    await getPrisma().rateLimit.deleteMany();
+
+    const state = await registerVisitor(
+      null,
+      createForm({ fullName: "Late Visitor", gamertag: "ownedtag", email: "late@ut.mx" }),
+    );
+
+    expect(state.fieldErrors?.gamertag).toBe(VISITORS_COPY.errors.gamertagTaken);
+    expect(await getPrisma().rateLimit.findMany()).toEqual([]);
+  });
+
   it("returns exactly the generic rejection message when email is blocked", async () => {
     await getPrisma().emailBlocklist.create({
       data: { email: "blocked@ut.mx" },
@@ -178,6 +240,8 @@ describe("registerVisitor Server Action", () => {
     });
 
     expect(jar.get(VISITOR_DEVICE_COOKIE)?.value).toBeTruthy();
+    // The filter of the kiosks is rebuilt with the new PIN (RNF-19, UT-CI-33).
+    expect(updateTag).toHaveBeenCalledWith("visitor-pins");
     expect(afterStub.callbacks.length).toBeGreaterThanOrEqual(1);
 
     await expect(afterStub.callbacks[0]()).resolves.not.toThrow();

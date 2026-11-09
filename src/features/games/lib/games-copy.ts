@@ -65,6 +65,11 @@ export const GAMES_COPY = {
     heading: "Más juegos",
     seeAll: "Ver todos",
   },
+  notFound: {
+    title: "Juego no encontrado",
+    description:
+      "Ese juego no está en el showcase: quizá cambió de nombre o el enlace está mal escrito. Estos sí te están esperando.",
+  },
   standGame: {
     title: "Mi juego",
     description: "Registra los datos del juego de tu stand.",
@@ -87,6 +92,28 @@ export const GAMES_COPY = {
       genreInvalid: "Elige un género de la lista.",
       itchInvalid: "El enlace debe ser una dirección https de itch.io.",
       conflict: "Otro cambio se guardó al mismo tiempo. Intenta de nuevo.",
+    },
+  },
+  genresAdmin: {
+    heading: "Catálogo de géneros",
+    lead: "Los géneros que eligen los stands para su juego. Un género con juegos no se puede borrar.",
+    newGenre: "Nuevo género",
+    name: "Nombre",
+    create: "Agregar género",
+    rename: "Renombrar",
+    pending: "Guardando...",
+    gameCount: (count: number) => (count === 1 ? "1 juego" : `${count} juegos`),
+    delete: "Borrar",
+    confirmDelete: (name: string) => `¿Borrar el género ${name}?`,
+    confirmDeleteAction: "Sí, borrar",
+    cancel: "Cancelar",
+    empty: "Aún no hay géneros.",
+    outcomes: { created: "Género agregado.", renamed: "Género renombrado.", deleted: "Género borrado." },
+    errors: {
+      nameLength: "Escribe un nombre de 2 a 40 caracteres con letras (a-z, con o sin acento) o números.",
+      taken: "Ya existe un género con ese nombre.",
+      hasGames: "Ese género tiene juegos asignados: cámbialos de género antes de borrarlo.",
+      notFound: "Ese género ya no existe. Recarga la página.",
     },
   },
 };

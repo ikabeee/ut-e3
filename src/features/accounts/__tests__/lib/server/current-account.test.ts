@@ -3,9 +3,11 @@
  */
 import {
   getKofAccount,
+  getRaffleAdmin,
   requireAccountManager,
   requireStandAdmin,
   requireKofAccount,
+  requireRaffleAdmin,
   requireRecoveryAgent,
   requireSysadmin,
 } from "@features/accounts/lib/server/current-account";
@@ -59,6 +61,30 @@ describe("requireSysadmin", () => {
     await createSession(account.id);
 
     await expect(requireSysadmin()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+});
+
+describe("requireRaffleAdmin", () => {
+  it("returns the signed-in raffle administrator", async () => {
+    const account = await createAccount("raffle_admin");
+
+    await createSession(account.id);
+
+    expect(await requireRaffleAdmin()).toMatchObject({ id: account.id, role: "raffle_admin" });
+  });
+
+  it("sends the sysadmin and a visitor without a session to /login", async () => {
+    await expect(requireRaffleAdmin()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+
+    await createSession((await createAccount("sysadmin")).id);
+
+    await expect(requireRaffleAdmin()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+
+  it("answers null in a Route Handler for any other role", async () => {
+    await createSession((await createAccount("kof_admin")).id);
+
+    expect(await getRaffleAdmin()).toBeNull();
   });
 });
 
@@ -153,7 +179,7 @@ describe("requireRecoveryAgent", () => {
     ["stand_staff", "/stand/kiosk"],
     ["kof_admin", "/admin/kof"],
     ["kof_staff", "/admin/kof"],
-    ["raffle_admin", "/admin"],
+    ["raffle_admin", "/admin/raffle"],
   ])("sends a %s to its own home, %s", async (role, home) => {
     const account = await createAccount(role);
 

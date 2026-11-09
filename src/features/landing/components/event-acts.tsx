@@ -19,11 +19,13 @@ interface EventActsProps {
   raffle: { startsAtLabel: string; cutoffLabel: string };
   kof: { checkInLabel: string; onsiteSignupLabel: string };
   marketplace?: ReactNode;
+  /** Only the landing is published: the rating needs the passport and the marketplace has no sign-up yet. */
+  isLandingOnly?: boolean;
 }
 
 type MotionOf = ReturnType<typeof useActMotion>["motionOf"];
 
-export function EventActs({ gamesCount, raffle, kof, marketplace }: Readonly<EventActsProps>) {
+export function EventActs({ gamesCount, raffle, kof, marketplace, isLandingOnly = false }: Readonly<EventActsProps>) {
   const { containerRef, motionOf } = useActMotion<HTMLElement>();
 
   return (
@@ -31,9 +33,9 @@ export function EventActs({ gamesCount, raffle, kof, marketplace }: Readonly<Eve
       <div className="page-wrap">
         <h2 className="sr-only">{LANDING_COPY.acts.heading}</h2>
         <PlayAct gamesCount={gamesCount} motionOf={motionOf} />
-        <RateAct cutoffLabel={raffle.cutoffLabel} motionOf={motionOf} />
+        {isLandingOnly ? null : <RateAct cutoffLabel={raffle.cutoffLabel} motionOf={motionOf} />}
         <WinAct raffle={raffle} kof={kof} motionOf={motionOf} />
-        <MarketplaceStrip>{marketplace}</MarketplaceStrip>
+        {isLandingOnly ? null : <MarketplaceStrip>{marketplace}</MarketplaceStrip>}
       </div>
     </section>
   );

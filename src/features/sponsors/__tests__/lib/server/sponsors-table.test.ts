@@ -29,6 +29,12 @@ describe("sponsors table", () => {
     await expect(createSponsor("9981234567")).rejects.toThrow();
     expect(await prisma.sponsor.count()).toBe(1);
   });
+
+  it("accepts a sponsor that gave no phone", async () => {
+    await createSponsor("");
+
+    expect(await prisma.sponsor.findFirst({ select: { phone: true } })).toEqual({ phone: "" });
+  });
 });
 
 function createSponsor(phone: string) {

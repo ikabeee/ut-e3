@@ -34,6 +34,8 @@ model EventSettings {
   fraudTopScoreCount      Int       @default(12) @map("fraud_top_score_count")
   fraudWindowMinutes      Int       @default(10) @map("fraud_window_minutes")
   fraudSingleVisitMax     Int       @default(1) @map("fraud_single_visit_max")
+  /// Salt of the PIN filter of the kiosk (RNF-19). Fixed by the seed, so the e2e can compute a false positive.
+  pinFilterSalt           String    @default("ut-e3-pixel-and-code-2026") @map("pin_filter_salt")
 
   @@map("event_settings")
 }
@@ -58,8 +60,12 @@ model Account {
   auditLogs         AuditLog[]
   registeredEntries TournamentEntry[]
   invitations       AccountInvitation[]
+  recoveryTokens    RecoveryToken[]
   scannedCheckIns   CheckIn[]           @relation("ScannedCheckIns")
+  annulledCheckIns  CheckIn[]           @relation("AnnulledCheckIns")
   requestedVisits   PendingVisit[]
+  raffleDraws       RaffleDraw[]        @relation("RaffleDraws")
+  rafflePrizes      RaffleDraw[]        @relation("RafflePrizes")
 
   @@map("accounts")
 }
@@ -120,16 +126,17 @@ model ScheduleItem {
 }
 
 model Stand {
-  id        String    @id @default(uuid())
+  id        String          @id @default(uuid())
   zone      String
   number    Int
   studio    Int
-  groupCode String    @map("group_code")
+  groupCode String          @map("group_code")
   game      Game?
   accounts  Account[]
   checkIns  CheckIn[]
   votes     Vote[]
   pending   PendingVisit[]
+  rejected  RejectedVisit[]
 
   @@unique([zone, number])
   @@map("stands")
@@ -192,12 +199,18 @@ model Visitor {
   pin             String           @map("pin_aes_gcm")
   pinLookup       String           @unique @map("pin_hmac")
   createdAt       DateTime         @default(now()) @map("created_at")
+  /// Set by the sysadmin with a reason (RF-46): the passport stays, but its visits stop counting and its tickets
+  /// stay out of the raffle. Both columns go together (CHECK in the migration).
+  excludedAt      DateTime?        @map("excluded_at")
+  excludedReason  String?          @map("excluded_reason")
   device          VisitorDevice?
   checkIns        CheckIn[]
   raffleTickets   RaffleTicket[]
   tournamentEntry TournamentEntry?
   votes           Vote[]
   pendingVisit    PendingVisit?
+  rejectedVisits  RejectedVisit[]
+  recoveryTokens  RecoveryToken[]
 
   @@map("visitors")
 }
@@ -211,6 +224,24 @@ model VisitorDevice {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("visitor_devices")
+}
+
+/// One-use recovery link (RF-68): the SQL of the migration checks the channel and that help_desk names its agent.
+model RecoveryToken {
+  id         String    @id @default(uuid())
+  visitorId  String    @map("visitor_id")
+  visitor    Visitor   @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  /// SHA-256 of the token in the link; the token itself only travels in the email.
+  token      String    @unique @map("token_sha256")
+  channel    String
+  issuedById String?   @map("issued_by_id")
+  issuedBy   Account?  @relation(fields: [issuedById], references: [id], onDelete: Restrict)
+  expiresAt  DateTime  @map("expires_at")
+  usedAt     DateTime? @map("used_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([visitorId])
+  @@map("recovery_tokens")
 }
 
 model EmailBlocklist {
@@ -264,16 +295,24 @@ model AccountInvitation {
 }
 
 model CheckIn {
-  id          String   @id @default(uuid())
-  visitorId   String   @map("visitor_id")
-  visitor     Visitor  @relation(fields: [visitorId], references: [id], onDelete: Restrict)
-  standId     String   @map("stand_id")
-  stand       Stand    @relation(fields: [standId], references: [id], onDelete: Restrict)
-  checkedInAt DateTime @default(now()) @map("checked_in_at")
+  id             String    @id @default(uuid())
+  visitorId      String    @map("visitor_id")
+  visitor        Visitor   @relation(fields: [visitorId], references: [id], onDelete: Restrict)
+  standId        String    @map("stand_id")
+  stand          Stand     @relation(fields: [standId], references: [id], onDelete: Restrict)
+  checkedInAt    DateTime  @default(now()) @map("checked_in_at")
+  /// When the kiosk took the PIN: a visit of the offline queue reaches the server later (RN-04, RF-35).
+  scannedAt      DateTime? @map("scanned_at")
   /// The staff account that had the kiosk open when the visit was recorded (RF-36).
-  scannedById String?  @map("scanned_by_id")
-  scannedBy   Account? @relation("ScannedCheckIns", fields: [scannedById], references: [id], onDelete: Restrict)
-  vote        Vote?
+  scannedById    String?   @map("scanned_by_id")
+  scannedBy      Account?  @relation("ScannedCheckIns", fields: [scannedById], references: [id], onDelete: Restrict)
+  /// An annulled check-in (RF-46) is kept: it stops counting in visits, tickets, averages and alerts. The three
+  /// columns go together (CHECK in the migration).
+  annulledAt     DateTime? @map("annulled_at")
+  annulledReason String?   @map("annulled_reason")
+  annulledById   String?   @map("annulled_by_id")
+  annulledBy     Account?  @relation("AnnulledCheckIns", fields: [annulledById], references: [id], onDelete: Restrict)
+  vote           Vote?
 
   @@unique([visitorId, standId])
   @@map("checkins")
@@ -299,12 +338,15 @@ model Vote {
 
 model RaffleTicket {
   /// Global autoincremental ticket number (RF-22). SQLite only autoincrements the primary key, so it is the id.
-  number    Int      @id @default(autoincrement())
-  visitorId String   @map("visitor_id")
-  visitor   Visitor  @relation(fields: [visitorId], references: [id], onDelete: Restrict)
+  number    Int         @id @default(autoincrement())
+  visitorId String      @map("visitor_id")
+  visitor   Visitor     @relation(fields: [visitorId], references: [id], onDelete: Restrict)
   milestone Int
-  status    String   @default("active")
-  createdAt DateTime @default(now()) @map("created_at")
+  /// active: enters the raffle; drawn: its visitor was drawn, so none of the visitor's tickets enter again (RF-52,
+  /// RN-05); voided: annulled with its check-in (RF-46).
+  status    String      @default("active")
+  createdAt DateTime    @default(now()) @map("created_at")
+  draw      RaffleDraw?
 
   @@unique([visitorId, milestone])
   @@map("raffle_tickets")
@@ -326,4 +368,44 @@ model PendingVisit {
   createdAt     DateTime  @default(now()) @map("created_at")
 
   @@map("pending_visits")
+}
+
+/// One spin of the raffle drum (RF-49 to RF-55). The partial unique index of the migration allows a single `pending`
+/// draw, so nobody can spin again until the drawn ticket is decided (RF-51).
+model RaffleDraw {
+  id           String       @id @default(uuid())
+  /// A ticket comes out once at most.
+  ticketNumber Int          @unique @map("ticket_number")
+  ticket       RaffleTicket @relation(fields: [ticketNumber], references: [number], onDelete: Restrict)
+  /// Generated by the panel for each press of "Girar", so a repeated request returns the same draw (RNF-05, EC-08).
+  requestId    String       @unique @map("request_id")
+  drawnById    String       @map("drawn_by_id")
+  drawnBy      Account      @relation("RaffleDraws", fields: [drawnById], references: [id], onDelete: Restrict)
+  /// pending, winner or discarded; once decided it never changes (trigger in the migration).
+  outcome      String       @default("pending")
+  drawnAt      DateTime     @default(now()) @map("drawn_at")
+  decidedAt    DateTime?    @map("decided_at")
+  /// The prize handed to a winner (RF-55); only a `winner` has one and it is written once.
+  prizeName    String?      @map("prize_name")
+  prizeById    String?      @map("prize_by_id")
+  prizeBy      Account?     @relation("RafflePrizes", fields: [prizeById], references: [id], onDelete: Restrict)
+
+  @@map("raffle_draws")
+}
+
+/// A visit of the offline queue of a kiosk that the server refused for a known visitor, so the passport can say it
+/// (RF-24). A PIN that is nobody's identifies no one: it only stays in the list of the kiosk (RF-35).
+model RejectedVisit {
+  /// The id the kiosk gave to the queued visit: a batch sent twice records the refusal once.
+  id        String   @id
+  visitorId String   @map("visitor_id")
+  visitor   Visitor  @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  standId   String   @map("stand_id")
+  stand     Stand    @relation(fields: [standId], references: [id], onDelete: Cascade)
+  reason    String
+  scannedAt DateTime @map("scanned_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([visitorId])
+  @@map("rejected_visits")
 }

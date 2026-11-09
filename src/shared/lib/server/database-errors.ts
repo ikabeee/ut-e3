@@ -6,6 +6,11 @@ export function isUniqueViolation(cause: unknown): boolean {
   return cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === "P2002";
 }
 
+/** A CHECK of the table refused the row (SQLite says "CHECK constraint failed: <name>"). */
+export function isCheckViolation(cause: unknown): boolean {
+  return readDatabaseMessage(cause).includes("CHECK constraint failed");
+}
+
 /**
  * The text of a failure. A trigger that aborts with `RAISE(ABORT, ...)` reaches Prisma as a foreign key error (P2003)
  * whose generic message hides the text of the trigger, so it is read from the driver error in the meta.

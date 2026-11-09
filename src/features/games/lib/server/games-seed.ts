@@ -3,161 +3,54 @@ import type { StandLocation } from "@features/games/lib/stand-code";
 import type { Game, GameImage, Genre } from "@features/games/lib/types";
 import type { Prisma, PrismaClient } from "@generated/prisma/client";
 
-const GENRES = {
-  accion: { id: "accion", name: "Acción", slug: "accion" },
-  aventura: { id: "aventura", name: "Aventura", slug: "aventura" },
-  puzle: { id: "puzle", name: "Puzle", slug: "puzle" },
-  carreras: { id: "carreras", name: "Carreras", slug: "carreras" },
-  roguelike: { id: "roguelike", name: "Roguelike", slug: "roguelike" },
-  simulacion: { id: "simulacion", name: "Simulación", slug: "simulacion" },
-  ritmo: { id: "ritmo", name: "Ritmo", slug: "ritmo" },
-  metroidvania: { id: "metroidvania", name: "Metroidvania", slug: "metroidvania" },
-  estrategia: { id: "estrategia", name: "Estrategia", slug: "estrategia" },
-  arcade: { id: "arcade", name: "Arcade", slug: "arcade" },
-  plataformas: { id: "plataformas", name: "Plataformas", slug: "plataformas" },
-  sigilo: { id: "sigilo", name: "Sigilo", slug: "sigilo" },
-  pelea: { id: "pelea", name: "Pelea", slug: "pelea" },
-} satisfies Record<string, Genre>;
+// The sources give no genre and no synopsis yet, so every game shares this placeholder genre.
+const TO_BE_ANNOUNCED: Genre = { id: "por-anunciar", name: "Por anunciar", slug: "por-anunciar" };
 
-type GameFields = Pick<Game, "slug" | "name" | "genre" | "synopsis" | "stand">;
+type GameFields = Pick<Game, "slug" | "name" | "stand"> & { hasLandscapeImage?: boolean };
 
-// Sample studio and group, like the sample games, until the sysadmin registers the real stands (RF-39).
+// Sample studio and group until the sysadmin registers the real stands (RF-39).
 const SAMPLE_STAND_GROUP = { studio: 0, groupCode: "000" };
 
+// The stands are provisional slots: the floor plan of the landing does not show them.
 export const INITIAL_GAMES: Game[] = [
-  buildGame({
-    slug: "ceniza-protocol",
-    name: "Ceniza Protocol",
-    genre: GENRES.accion,
-    synopsis: "Shooter de extracción en una ciudad sepultada por ceniza volcánica.",
-    stand: { zone: "A", number: 1 },
-  }),
-  buildGame({
-    slug: "los-ultimos-faros",
-    name: "Los Últimos Faros",
-    genre: GENRES.aventura,
-    synopsis: "Mantén encendido el último faro del Caribe mientras la marea cambia la isla cada noche.",
-    stand: { zone: "A", number: 2 },
-  }),
-  buildGame({
-    slug: "hormigon",
-    name: "Hormigón",
-    genre: GENRES.puzle,
-    synopsis: "Vierte, fragua y apila concreto para construir torres imposibles.",
-    stand: { zone: "A", number: 3 },
-  }),
-  buildGame({
-    slug: "ruta-9",
-    name: "Ruta 9",
-    genre: GENRES.carreras,
-    synopsis: "Carreras arcade nocturnas sobre periféricos que nunca terminan.",
-    stand: { zone: "B", number: 1 },
-  }),
-  buildGame({
-    slug: "subsuelo",
-    name: "Subsuelo",
-    genre: GENRES.roguelike,
-    synopsis: "Desciende por cenotes y galerías que cambian en cada partida.",
-    stand: { zone: "B", number: 2 },
-  }),
-  buildGame({
-    slug: "kaiju-mercado",
-    name: "Kaiju Mercado",
-    genre: GENRES.simulacion,
-    synopsis: "Administra un tianguis donde los clientes miden treinta metros.",
-    stand: { zone: "B", number: 3 },
-  }),
-  buildGame({
-    slug: "eco-nulo",
-    name: "Eco/Nulo",
-    genre: GENRES.ritmo,
-    synopsis: "Cada golpe en el ritmo borra una frecuencia del mapa.",
-    stand: { zone: "C", number: 1 },
-  }),
-  buildGame({
-    slug: "templo-404",
-    name: "Templo 404",
-    genre: GENRES.metroidvania,
-    synopsis: "Explora un templo que se corrompe como un archivo dañado.",
-    stand: { zone: "C", number: 2 },
-  }),
-  buildGame({
-    slug: "marea-roja",
-    name: "Marea Roja",
-    genre: GENRES.estrategia,
-    synopsis: "Defiende el arrecife de una marea tóxica colocando torres de coral.",
-    stand: { zone: "C", number: 3 },
-  }),
-  buildGame({
-    slug: "neon-taqueria",
-    name: "Neón Taquería",
-    genre: GENRES.arcade,
-    synopsis: "Atiende pedidos imposibles en una taquería que nunca cierra.",
-    stand: { zone: "D", number: 1 },
-  }),
-  buildGame({
-    slug: "pulso-cero",
-    name: "Pulso Cero",
-    genre: GENRES.ritmo,
-    synopsis: "Sincroniza tus saltos con el bajo para cruzar una ciudad apagada.",
-    stand: { zone: "D", number: 2 },
-  }),
-  buildGame({
-    slug: "xibalba-run",
-    name: "Xibalbá Run",
-    genre: GENRES.plataformas,
-    synopsis: "Corre por el inframundo maya antes de que se cierre la última puerta.",
-    stand: { zone: "D", number: 3 },
-  }),
-  buildGame({
-    slug: "turbina",
-    name: "Turbina",
-    genre: GENRES.carreras,
-    synopsis: "Carreras de drones caseros por los techos de Cancún.",
-    stand: { zone: "T", number: 1 },
-  }),
-  buildGame({
-    slug: "sombra-jade",
-    name: "Sombra Jade",
-    genre: GENRES.sigilo,
-    synopsis: "Infíltrate en un museo para recuperar una máscara robada.",
-    stand: { zone: "T", number: 2 },
-  }),
-  buildGame({
-    slug: "granja-orbital",
-    name: "Granja Orbital",
-    genre: GENRES.simulacion,
-    synopsis: "Cultiva nopales en gravedad cero y abastece una estación espacial.",
-    stand: { zone: "T", number: 3 },
-  }),
-  buildGame({
-    slug: "lucha-pixel",
-    name: "Lucha Pixel",
-    genre: GENRES.pelea,
-    synopsis: "Lucha libre en 2D con llaves que se arman como combos.",
-    stand: { zone: "T", number: 4 },
-  }),
-  buildGame({
-    slug: "cenote",
-    name: "Cenote",
-    genre: GENRES.aventura,
-    synopsis: "Explora cenotes inundados y descubre lo que guardan sus paredes.",
-    stand: { zone: "T", number: 5 },
-  }),
-  buildGame({
-    slug: "circuito-7",
-    name: "Circuito 7",
-    genre: GENRES.puzle,
-    synopsis: "Conecta circuitos antes de que se acabe la batería del robot.",
-    stand: { zone: "T", number: 6 },
-  }),
+  buildGame({ slug: "abby-s-tower", name: "Abby's Tower", stand: { zone: "A", number: 1 } }),
+  buildGame({ slug: "after-light", name: "After Light", stand: { zone: "A", number: 2 } }),
+  buildGame({ slug: "astrolabio", name: "Astrolabio", stand: { zone: "A", number: 3 } }),
+  buildGame({ slug: "carencia", name: "Carencia", stand: { zone: "B", number: 1 } }),
+  buildGame({ slug: "dark-mutant", name: "Dark Mutant", stand: { zone: "B", number: 2 } }),
+  buildGame({ slug: "echoscrap", name: "EchoScrap", stand: { zone: "B", number: 3 } }),
+  buildGame({ slug: "identity-dissolution", name: "Identity Dissolution", stand: { zone: "C", number: 1 } }),
+  buildGame({ slug: "laboratorio-4", name: "Laboratorio 4", stand: { zone: "C", number: 2 } }),
+  buildGame({ slug: "reencarnacion-express", name: "Reencarnación Express", stand: { zone: "C", number: 3 } }),
+  buildGame({ slug: "saatan-paal", name: "Saatan Paal", stand: { zone: "D", number: 1 } }),
+  buildGame({ slug: "true-hero", name: "True Hero", stand: { zone: "D", number: 2 } }),
+  buildGame({ slug: "turno-rosso", name: "Turno Rosso", stand: { zone: "D", number: 3 } }),
+  buildGame({ slug: "unknown-game", name: "Unknown Game", stand: { zone: "T", number: 1 } }),
+  // Its only artwork is the portrait cover.
+  buildGame({ slug: "vaporlock", name: "Vaporlock", stand: { zone: "T", number: 2 }, hasLandscapeImage: false }),
 ];
 
-function buildGame(fields: GameFields): Game {
+function buildGame({ hasLandscapeImage = true, ...fields }: GameFields): Game {
+  const cover: GameImage = {
+    path: `/games/${fields.slug}.jpg`,
+    alt: `Portada de ${fields.name}`,
+    position: 1,
+    isCover: true,
+  };
+
+  const landscape: GameImage = {
+    path: `/games/${fields.slug}-portada.jpg`,
+    alt: `Portada horizontal de ${fields.name}`,
+    position: 2,
+    isCover: false,
+  };
+
   return {
     ...fields,
     id: fields.slug,
-    images: [{ path: `/games/${fields.slug}.jpg`, alt: `Portada de ${fields.name}`, position: 1, isCover: true }],
+    genre: TO_BE_ANNOUNCED,
+    synopsis: "",
+    images: hasLandscapeImage ? [cover, landscape] : [cover],
   };
 }
 

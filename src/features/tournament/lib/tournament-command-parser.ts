@@ -1,12 +1,12 @@
 import type { SlotIndex, TournamentCommand } from "@features/tournament/lib/types";
-import { readFormText } from "@shared/lib/form-data";
+import { readFormText, type ServerActionForm } from "@shared/lib/form-data";
 
 export type ParsedTournamentCommand = { isValid: true; command: TournamentCommand } | { isValid: false };
 
 const INVALID: ParsedTournamentCommand = { isValid: false };
 
 /** Reads the form of a Server Action: `type`, `matchId` and, when the command names players, one `slot` per player. */
-export function parseTournamentCommand(form: FormData): ParsedTournamentCommand {
+export function parseTournamentCommand(form: ServerActionForm): ParsedTournamentCommand {
   const type = readFormText(form, "type");
   const matchId = readFormText(form, "matchId").trim();
   const slots = readSlots(form);
@@ -29,7 +29,9 @@ export function parseTournamentCommand(form: FormData): ParsedTournamentCommand 
   }
 }
 
-function readSlots(form: FormData): SlotIndex[] | null {
+function readSlots(form: ServerActionForm): SlotIndex[] | null {
+  if (!(form instanceof FormData)) return null;
+
   const slots: SlotIndex[] = [];
 
   for (const value of form.getAll("slot")) {

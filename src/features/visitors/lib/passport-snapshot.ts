@@ -106,7 +106,8 @@ function isTicket(value: unknown): value is PassportTicket {
     "number" in value &&
     typeof value.number === "number" &&
     "milestone" in value &&
-    typeof value.milestone === "number"
+    typeof value.milestone === "number" &&
+    (!("voided" in value) || typeof value.voided === "boolean")
   );
 }
 

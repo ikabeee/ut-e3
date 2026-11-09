@@ -31,10 +31,15 @@ COPY . .
 # Las consultas con "use cache" leen la base durante el build (igual que en el CI): se migra y se carga una SQLite
 # temporal que no llega a la imagen final.
 ARG NEXT_PUBLIC_SITE_URL
+# Kill switch (docs/deploy.md): la portada se compila sin los enlaces que el modo `landing` bloquea.
+ARG SITE_MODE=landing
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL} \
+    SITE_MODE=${SITE_MODE} \
     DATABASE_URL=file:/tmp/build.db
 
 RUN test -n "$NEXT_PUBLIC_SITE_URL" || (echo "Falta el argumento NEXT_PUBLIC_SITE_URL (por ejemplo https://showcase.ejemplo.com)." && exit 1)
+RUN case "$SITE_MODE" in landing|full) ;; *) echo "SITE_MODE debe ser landing o full (recibido: $SITE_MODE)." && exit 1 ;; esac \
+    && printf '%s' "$SITE_MODE" > .site-mode
 RUN npx prisma migrate deploy && npx prisma db seed && npm run build && rm -f /tmp/build.db*
 
 FROM base AS runtime-deps
@@ -59,6 +64,9 @@ RUN npm ci --omit=dev --ignore-scripts \
 
 FROM base AS runner
 
+# El servidor bloquea lo mismo que se compilo: la imagen lleva el modo con el que se construyo.
+ARG SITE_MODE=landing
+
 # Prisma necesita OpenSSL para su motor de migraciones.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates openssl \
@@ -67,6 +75,7 @@ RUN apt-get update \
     && chown node:node /data
 
 ENV NODE_ENV=production \
+    SITE_MODE=${SITE_MODE} \
     HOSTNAME=0.0.0.0 \
     PORT=3000 \
     DATABASE_URL=file:/data/app.db \
@@ -79,6 +88,7 @@ COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
 COPY --from=build --chown=node:node /app/generated ./generated
+COPY --from=build --chown=node:node /app/.site-mode ./.site-mode
 COPY --chown=node:node package.json tsconfig.json prisma7.config.ts ./
 COPY --chown=node:node prisma ./prisma
 COPY --chown=node:node src ./src

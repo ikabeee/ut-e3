@@ -1,6 +1,7 @@
 /**
  * @jest-environment node
  */
+import type * as NextCache from "next/cache";
 import { registerVisitor } from "@features/visitors/lib/visitors-actions";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
@@ -11,6 +12,11 @@ import { getPrisma } from "@shared/lib/server/prisma";
 const TEST_KEY = Buffer.alloc(32, 7).toString("base64");
 
 let jar = createCookieJar();
+
+// updateTag only runs inside Next; the spy replaces it on the module object the action reads.
+const nextCache = jest.requireActual<typeof NextCache>("next/cache");
+
+jest.spyOn(nextCache, "updateTag").mockImplementation(() => undefined);
 
 const database = createTestDatabase();
 

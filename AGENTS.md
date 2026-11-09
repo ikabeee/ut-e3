@@ -52,6 +52,7 @@ npm run db:seed            # carga el contenido inicial en las tablas vacías; n
 npm run db:seed:stands    # solo desarrollo: staff por stand, administrador y 24 pasaportes de prueba (prisma/seed-stands.ts)
 npm run db:seed:support  # solo desarrollo: cuenta de atención help-desk@ejemplo.com (prisma/seed-support.ts)
 npm run db:seed:kof       # solo desarrollo: cuentas de KOF de prueba y un bracket de 40 jugadores (prisma/seed-kof.ts)
+npm run db:seed:raffle    # solo desarrollo: 2 animadores, 30 pasaportes con 40 boletos y la rifa abierta ya (prisma/seed-raffle.ts)
 ```
 
 Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm run lint`,
@@ -66,7 +67,8 @@ seis: `landing`, `games`, `floor-plan`, `schedule`, `sponsors` y `event-settings
 SQLite y se leen con Prisma desde las consultas de `lib/server/`; `npm run db:seed` carga el contenido inicial
 desde las constantes `INITIAL_*` de cada `lib/server/<feature>-seed.ts`. Además, `accounts` da el inicio de
 sesión (`/login`) y `admin` el panel del sysadmin (`/admin`), donde se edita el cronograma; `tournament` lleva el
-torneo de KOF en `/admin/kof` (ver `docs/tournament.md`). La portada estática
+torneo de KOF en `/admin/kof` (ver `docs/tournament.md`) y `raffle` la rifa: la tómbola `/raffle/live`, los ganadores
+`/raffle` y el panel del animador `/admin/raffle` (ver `docs/raffle.md`). La portada estática
 anterior se conserva en la rama `archive/landing-v1`, y la versión previa del proyecto (catálogo,
 croquis, pasaporte, panel, Prisma y TanStack Query) en `archive/develop-v1`.
 
@@ -81,8 +83,10 @@ src/
 │   ├── sponsors/             # Banda de patrocinadores
 │   ├── event-settings/       # Horarios y valores configurables del evento
 │   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
-│   ├── admin/                # Panel del sysadmin (/admin): compone las secciones que se administran
+│   ├── admin/                # Panel del sysadmin (/admin y sus secciones), estado del servidor y cierre automático del bracket
+│   ├── moderation/           # Alertas de fraude, anular visitas y excluir visitantes (RF-45, RF-46)
 │   ├── site/                 # Páginas del sitio que no son de un dominio: la 404 (src/app/not-found.tsx)
+│   ├── raffle/               # Rifa: tómbola en vivo (/raffle/live), ganadores (/raffle) y panel (/admin/raffle)
 │   ├── pwa/                  # PWA: manifest, service worker (public/sw.js), /offline, indicador de conexión e instalación
 │   ├── stands/               # Stands: kiosko (/stand/kiosk), equipo (/stand/team) y alta de stands en /admin
 │   ├── showcase/             # Vitrina del evento (/showcase, sin enlace en el menú): hero LED, video y las secciones de la portada (juegos, invitadas, agenda, patrocinadores, croquis y sede)
@@ -248,10 +252,22 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | Datos del juego de un stand (RF-31): el stand es siempre el de la sesión | `saveStandGame()` en `src/features/games/lib/server/stand-game-mutations.ts`; `/stand/game` |
 | Cuentas de staff de un stand (RF-32): invitar, reenviar y desactivar | `canManageAccount()` y `MAX_STAND_STAFF` en `invitation-rules.ts`; `/stand/team` usa las acciones de `management-actions.ts` |
 | Guarda de las pantallas del administrador de stand | `requireStandAdmin()` en `current-account.ts` (el staff vuelve a su kiosko) |
+| Cola sin conexión del kiosco (RF-35): tamaño de lote y backoff | `MAX_QUEUE_BATCH` y `getRetryDelay()` en `src/features/stands/lib/visit-queue.ts`; IndexedDB en `visit-queue-store.ts`; lotes en `POST /api/stand/queued-visits` (`queued-visit-mutations.ts`) |
+| Filtro de PIN del kiosco (RF-78, RNF-19): rondas, factor y sal | `src/features/stands/lib/pin-filter.ts`; la sal es `event_settings.pin_filter_salt` (`INITIAL_PIN_FILTER_SALT` del seed); el registro invalida la etiqueta `visitor-pins` |
+| Aviso del pasaporte por una visita en cola rechazada (RF-24) | `rejected_visits`, `components/rejected-visit-notices.tsx` de `stands` |
 | Código QR del enlace de recuperación (RF-69) | `QrCodeImage` (`src/shared/components/qr-code.tsx`) y `buildQrCode` (`src/shared/lib/qr-code.ts`, librería `uqr`); lo muestra `recovery-result.tsx` |
+| Recuperación por correo (RF-68, RF-71): límite, vigencia del enlace y uso de un solo uso | `src/features/visitors/lib/server/email-recovery.ts`; la página es `/passport/recover` (`visitors/pages/recover-page.tsx`) |
 | Quién usa la mesa de recuperación (`help_desk` y `sysadmin`; el resto va a su home) | `requireRecoveryAgent()` en `current-account.ts` |
 | Home de cada rol al entrar (el de `help_desk` es `/support/recovery`) | `getHomePath()` en `src/features/accounts/lib/accounts-links.ts` |
+| Rifa: sorteo, bloqueo del segundo giro, decisión, correo al ganador, cierre y premio (RF-49 a RF-56) | `src/features/raffle/lib/server/raffle-mutations.ts`; las reglas de la BD (un solo giro `pending`, premio solo para `winner`, triggers) en la migración `*_raffle_draws` |
+| Quién usa el panel de la rifa (`raffle_admin`; entra por `/login` a `/admin/raffle`) | `requireRaffleAdmin()` en `current-account.ts` y `getHomePath()` en `accounts-links.ts` |
 | Bitácora de auditoría | `recordAudit()` en `src/shared/lib/server/audit-log.ts`, dentro de la transacción del cambio |
+| Secciones del panel (`/admin/settings`, `/moderation`, `/catalog`, `/server`) y su navegación | `src/features/admin/pages/` (marco común en `admin-section-shell.tsx`) y `admin/components/admin-nav.tsx` |
+| Valores de `event_settings` y umbrales de fraude (RF-43) | `event-settings/lib/event-settings-input.ts` (validación) y `lib/server/event-settings-mutations.ts` |
+| Alertas de fraude (RF-45) | `moderation/lib/fraud-alerts.ts` (reglas puras) y `lib/server/moderation-queries.ts` |
+| Anular visitas y excluir visitantes (RF-46); boletos que se anulan y se reactivan | `moderation/lib/server/moderation-mutations.ts` y `visitors/lib/server/milestone-tickets.ts` (`VALID_CHECK_IN_WHERE`, `RAFFLE_ELIGIBLE_TICKET_WHERE`) |
+| Lista negra de correos (RF-44), géneros (RF-72) y patrocinadores (RF-41) | `visitors/lib/server/email-blocklist.ts`, `games/lib/server/genre-admin.ts` y `sponsors/lib/server/sponsor-mutations.ts` |
+| Estado del servidor (RF-73) y cierre automático del bracket público (RF-74) | `admin/lib/server/server-status.ts`, `admin/lib/overload-rule.ts` (85% durante 2 min) y `admin/lib/server/overload-watch.ts`, que arranca `src/instrumentation.ts` |
 
 - Un stand tiene un administrador activo y hasta 3 cuentas `stand_staff` invitadas o activas (RF-32, RF-39); lo hacen
   cumplir `invitations.ts` y los triggers de la migración `*_stand_accounts`. El staff y el técnico usan el mismo rol
@@ -274,11 +290,25 @@ La app se publica con Docker Compose detrás del proxy inverso del VPS (`docs/de
   porque las consultas con `"use cache"` leen la base durante el build.
 - `docker/entrypoint.sh` corre `prisma migrate deploy` y `prisma db seed` (solo llena tablas vacías y crea al sysadmin si
   no hay uno) antes de `node server.js`. La base vive en el volumen `app-data` (`/data/app.db`).
-- `GET /api/health` (`site/api/health-route.ts`) es el `HEALTHCHECK`: no toca la base.
+- `GET /api/health` (`site/api/health-route.ts`) es el `HEALTHCHECK`: no consulta la base; responde 503 si al volumen
+  de la base le quedan menos de 64 MB (`site/lib/health-status.ts`).
 - Variables en `.env` (plantilla: `.env.production.example`). `NEXT_PUBLIC_SITE_URL` se incrusta al construir. SMTP es
   opcional: sin `SMTP_HOST` el correo queda en `email_outbox`.
 - `docker/entrypoint.sh` debe tener fin de línea LF (`.gitattributes`); si lo editas en Windows, no lo conviertas a CRLF.
-- `db:seed:stands`, `db:seed:kof` y `db:seed:support` son de desarrollo y se niegan a correr con `NODE_ENV=production`.
+- `db:seed:stands`, `db:seed:kof`, `db:seed:support` y `db:seed:raffle` son de desarrollo y se niegan a correr con `NODE_ENV=production`.
+## Kill switch (SITE_MODE)
+
+`SITE_MODE=landing` publica solo la portada; `full`, la app completa (`docs/deploy.md`, "Kill switch").
+
+- El modo se lee en `@shared/lib/site-mode` (`siteMode`). Sin valor, producción usa `landing` y desarrollo `full`.
+- `src/proxy.ts` usa `site/lib/site-proxy.ts`: primero `decideSiteAccess()` (`site/lib/site-access.ts`, la lista de lo
+  que se publica en `landing`) y después la revisión de sesión de `/admin`, `/stand` y `/support`. Una ruta nueva que
+  deba verse con el kill switch activo se agrega a `LANDING_ONLY_PATHS`; un archivo nuevo de `public/` que use la
+  portada va en una de las carpetas de `PUBLIC_ASSET_FOLDERS`.
+- La portada recibe `isLandingOnly` y entonces no enlaza fuera de la página: barra con anclas, sin "Crear mi pasaporte",
+  coverflow sin fichas y croquis sin juegos mientras los stands sean provisionales. El layout no registra el service
+  worker.
+
 ## PWA y sin conexión (RNF-14)
 
 El contenido público y el pasaporte del visitante funcionan sin conexión (`odd/tasks/pwa.md`):
@@ -325,6 +355,7 @@ El contenido público y el pasaporte del visitante funcionan sin conexión (`odd
 
 - `docs/design-system.md`: tema UTG sobre HeroUI.
 - `docs/tournament.md`: torneo de KOF (formato, permisos por mesa, estados y cómo probarlo en local).
+- `docs/raffle.md`: rifa (tómbola, reglas del giro, correo al ganador y cómo probarla en local).
 - `docs/deploy.md`: despliegue con Docker, respaldos y proxy inverso (Nginx y Caddy).
 - `docs/versioning.md` y `CHANGELOG.md`: versionado semántico y releases con git flow.
 

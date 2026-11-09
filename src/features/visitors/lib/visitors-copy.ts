@@ -36,6 +36,32 @@ export const VISITORS_COPY = {
     body: (pin: string, gamertag: string, passportUrl: string) =>
       `¡Hola, ${gamertag}!\n\nTu registro en UT Game Showcase ha sido exitoso.\nTu PIN de identidad es: ${pin}\n\nPuedes consultar tu pasaporte digital en el siguiente enlace:\n${passportUrl}\n\n¡Te esperamos en el evento!`,
   },
+  recovery: {
+    title: "Recuperar mi pasaporte",
+    subtitle:
+      "Escribe el correo con el que te registraste y te enviaremos un enlace para abrir tu pasaporte en este teléfono.",
+    entryLink: "¿Ya tienes pasaporte en otro teléfono? Recupéralo por correo",
+    emailLabel: "Correo electrónico",
+    emailPlaceholder: "tu-correo@ejemplo.com",
+    submit: "Enviar enlace",
+    pending: "Enviando...",
+    sent: "Si el correo está registrado, te enviamos un enlace. Vence en 30 minutos y solo sirve una vez. Al abrirlo, el teléfono anterior pierde el acceso.",
+    retry: "Usar otro correo",
+    expiredTitle: "Este enlace ya no sirve",
+    expiredNotice: "El enlace venció o ya se usó. Pide uno nuevo con tu correo.",
+    helpDesk: "¿No tienes acceso a tu correo? Acude a la mesa de atención del evento.",
+    confirmTitle: "Abrir mi pasaporte aquí",
+    confirmNotice: "Tu pasaporte quedará en este teléfono y el teléfono anterior perderá el acceso.",
+    confirmSubmit: "Abrir mi pasaporte",
+    confirmPending: "Abriendo...",
+    confirmMissing: "Este enlace está incompleto. Ábrelo de nuevo desde el correo.",
+    email: {
+      subject: "Recupera tu pasaporte",
+      // RF-71: the email carries the one-use link and nothing else from the passport (no PIN, gamertag or name).
+      body: (claimUrl: string) =>
+        `Abre este enlace para recuperar tu pasaporte. Vence en 30 minutos y solo sirve una vez:\n${claimUrl}\n\nSi no lo pediste, ignora este correo.`,
+    },
+  },
   passport: {
     title: "Pasaporte digital",
     subtitle: "Tu identificación para el evento",
@@ -62,6 +88,31 @@ export const VISITORS_COPY = {
       empty: "Aún no tienes boletos. Se otorgan al llegar a 9 y a 18 visitas.",
       ticket: (number: number) => `Boleto #${number}`,
       milestone: (milestone: number) => `Al llegar a ${milestone} visitas`,
+      voided: "Anulado: vuelve a llegar al hito para reactivarlo",
+    },
+  },
+  blocklist: {
+    heading: "Lista negra de correos",
+    lead: "Correos de los integrantes de los equipos: no pueden registrarse como visitantes. Uno por línea o separados por comas.",
+    field: "Correos",
+    add: "Agregar a la lista",
+    adding: "Agregando...",
+    empty: "La lista está vacía.",
+    hasPassport: "Ya tiene pasaporte: exclúyelo en Moderación.",
+    remove: "Quitar",
+    confirmRemove: (email: string) => `¿Quitar ${email} de la lista negra? Podrá registrarse como visitante.`,
+    confirmRemoveAction: "Sí, quitar",
+    cancel: "Cancelar",
+    outcomes: {
+      added: (added: number, repeated: number) =>
+        repeated > 0 ? `Agregados: ${added}. Ya estaban: ${repeated}.` : `Agregados: ${added}.`,
+      removed: "Correo quitado de la lista.",
+    },
+    errors: {
+      empty: "Escribe al menos un correo.",
+      invalid: (email: string) => `"${email}" no es un correo válido.`,
+      tooMany: (max: number) => `Agrega como máximo ${max} correos a la vez.`,
+      notFound: "Ese correo ya no estaba en la lista.",
     },
   },
 } as const;

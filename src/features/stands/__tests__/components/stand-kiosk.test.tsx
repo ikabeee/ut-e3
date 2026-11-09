@@ -1,6 +1,7 @@
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { StandKiosk, type KioskActions } from "@features/stands/components/stand-kiosk";
+import { createMemoryVisitQueueStore } from "@features/stands/__tests__/lib/visit-queue-utils";
+import { StandKiosk, type KioskActions, type KioskOfflineSupport } from "@features/stands/components/stand-kiosk";
 import type { VisitStatus } from "@features/stands/lib/pending-visit";
 import type { RequestVisitState, VisitActionState } from "@features/stands/lib/stands-actions";
 
@@ -42,6 +43,22 @@ describe("StandKiosk", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("PIN no reconocido, revísalo");
     expect(screen.getByLabelText("PIN de 5 dígitos")).toHaveValue("99999");
     expect(screen.queryByRole("heading", { name: "Esperando la calificación" })).not.toBeInTheDocument();
+  });
+
+  it("keeps the five digits of a PIN pasted or typed with spaces, instead of cutting the last one", async () => {
+    renderKiosk();
+
+    const input = screen.getByLabelText("PIN de 5 dígitos");
+
+    await userEvent.click(input);
+    await userEvent.paste(" 62192");
+
+    expect(input).toHaveValue("62192");
+
+    await userEvent.clear(input);
+    await userEvent.type(input, "6 2 1 9 2 7");
+
+    expect(input).toHaveValue("62192");
   });
 
   it("waits for the visitor to rate from the passport instead of opening the survey", async () => {
@@ -176,9 +193,22 @@ function renderKiosk(overrides: Partial<KioskActions> = {}) {
   };
 
   return render(
-    <StandKiosk standCode="ZA-S1" gameName="Pixel Quest" actions={actions} createStatusLoader={createStatusLoader} />,
+    <StandKiosk
+      standCode="ZA-S1"
+      gameName="Pixel Quest"
+      actions={actions}
+      createStatusLoader={createStatusLoader}
+      offlineSupport={OFFLINE_SUPPORT}
+    />,
   );
 }
+
+// Online the whole time: the queue stays empty and the filter is never needed.
+const OFFLINE_SUPPORT: KioskOfflineSupport = {
+  createStore: () => createMemoryVisitQueueStore().store,
+  sendBatch: async () => [],
+  loadPinFilter: async () => ({ salt: "sal", iterations: 1, modulus: 50, values: [] }),
+};
 
 function createStatusLoader() {
   return async () => {

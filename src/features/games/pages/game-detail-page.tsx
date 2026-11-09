@@ -7,6 +7,7 @@ import { floorPlanItemHref } from "@features/floor-plan/lib/floor-plan-links";
 import { GameDetail } from "@features/games/components/game-detail";
 import { LiveItchLink } from "@features/games/components/live-itch-link";
 import { getCoverImage } from "@features/games/lib/game-cover";
+import { isGameSlug } from "@features/games/lib/game-slug";
 import { GAMES_PATH, getGamePath } from "@features/games/lib/games-links";
 import { getRelatedGames } from "@features/games/lib/related-games";
 import { getGameBySlug, getGames } from "@features/games/lib/server/games-queries";
@@ -106,6 +107,10 @@ function buildDetailLinks(game: Game, settings: EventSettings): GameDetailLinks 
 
 async function findGame(params: GameParams): Promise<Game> {
   const { slug } = await params;
+
+  // A segment such as "x.png" or ".." is never a game: answering it before the query keeps it out of the cache.
+  if (!isGameSlug(slug)) notFound();
+
   const game = await getGameBySlug(slug);
 
   if (!game) notFound();
