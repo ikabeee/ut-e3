@@ -19,8 +19,11 @@ const SLICE_CLASS = `${GLYPH_CLASS} pointer-events-none absolute top-1/2 left-1/
 
 interface VideoHeroProps {
   calendarUrl: string;
-  /** Where "Crear mi pasaporte" goes: the registration, which says by itself when it is not open yet. */
-  registerHref: string;
+  /**
+   * Where "Crear mi pasaporte" goes: the registration, which says by itself when it is not open yet. Without it the
+   * button is left out (only the landing is published).
+   */
+  registerHref?: string;
 }
 
 export function VideoHero({ calendarUrl, registerHref }: Readonly<VideoHeroProps>) {
@@ -90,9 +93,11 @@ function HeroContent({ calendarUrl, registerHref }: Readonly<VideoHeroProps>) {
       </p>
       <div className="flex flex-wrap items-stretch gap-3 max-[640px]:w-full max-[640px]:flex-col">
         <HeroCtaLink href={calendarUrl}>{hero.callToAction}</HeroCtaLink>
-        <ActionLink href={registerHref} variant="outline" arrow="e" className="min-h-11">
-          {hero.createPassport}
-        </ActionLink>
+        {registerHref && (
+          <ActionLink href={registerHref} variant="outline" arrow="e" className="min-h-11">
+            {hero.createPassport}
+          </ActionLink>
+        )}
       </div>
     </div>
   );

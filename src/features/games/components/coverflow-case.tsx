@@ -4,7 +4,7 @@ import { cn } from "@heroui/react";
 import { GameCoverImage } from "@features/games/components/game-cover-image";
 import { getCoverflowPlacement } from "@features/games/lib/coverflow-layout";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
-import { getGamePath } from "@features/games/lib/games-links";
+import { GAMES_SECTION_ID, getGamePath } from "@features/games/lib/games-links";
 import type { Game } from "@features/games/lib/types";
 
 const COVER_SIZES = "270px";
@@ -15,14 +15,23 @@ interface CoverflowCaseProps {
   index: number;
   current: number;
   onSelect: (index: number) => void;
+  linksToGamePage?: boolean;
 }
 
-export function CoverflowCase({ ref, game, index, current, onSelect }: Readonly<CoverflowCaseProps>) {
+export function CoverflowCase({
+  ref,
+  game,
+  index,
+  current,
+  onSelect,
+  linksToGamePage = true,
+}: Readonly<CoverflowCaseProps>) {
   const placement = getCoverflowPlacement(index, current);
+  const opensGamePage = placement.isCurrent && linksToGamePage;
 
   // The case at the center opens the game page; a side case turns to the center first.
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (placement.isCurrent) return;
+    if (opensGamePage) return;
 
     event.preventDefault();
     onSelect(index);
@@ -31,7 +40,7 @@ export function CoverflowCase({ ref, game, index, current, onSelect }: Readonly<
   return (
     <Link
       ref={ref}
-      href={getGamePath(game.slug)}
+      href={linksToGamePage ? getGamePath(game.slug) : `#${GAMES_SECTION_ID}`}
       tabIndex={placement.isCurrent ? 0 : -1}
       aria-label={GAMES_COPY.coverflow.caseLabel(game)}
       aria-current={placement.isCurrent}

@@ -34,7 +34,42 @@ curl -s http://127.0.0.1:3000/api/health
 ```
 
 Después configura el proxy inverso (ver más abajo). Entra a `https://<tu-dominio>/login` con `SYSADMIN_EMAIL` y
-`SYSADMIN_PASSWORD`.
+`SYSADMIN_PASSWORD` (solo en un entorno con `SITE_MODE=full`; ver "Kill switch").
+
+### Kill switch: solo la portada
+
+`SITE_MODE` decide cuánto del sitio publica un despliegue:
+
+| Valor | Qué se publica |
+| --- | --- |
+| `landing` (por defecto en producción) | Solo la portada `/`, el aviso `/privacy`, los archivos de `public/` y `GET /api/health`. Cualquier otra página redirige a `/`, el resto de `/api` responde 404 y todo lo que no sea `GET` o `HEAD` (formularios y Server Actions) responde 405. La portada no enlaza a nada bloqueado y no registra el service worker. |
+| `full` | La app completa: pasaporte, kiosco, panel, rifa, torneo y PWA. |
+
+El valor se lee al construir (la portada se compila con o sin esos enlaces) y al arrancar (`src/proxy.ts` bloquea), así
+que la imagen guarda el modo con el que se construyó: para cambiarlo, cambia `SITE_MODE` y reconstruye. Si falta en un
+servidor de producción, el sitio arranca en `landing`; un valor distinto de `landing` o `full` detiene el build.
+
+### Dos entornos: producción y demo
+
+Cada entorno es un proyecto de Compose aparte (`-p`), con su archivo de variables, su puerto, su volumen (su propia base)
+y su imagen (`ut-e3-app:<modo>-<etiqueta>`). Se pueden tener los dos en el mismo VPS.
+
+```bash
+# Producción: solo la portada.
+cp .env.production.example .env.prod
+nano .env.prod           # SITE_MODE=landing, APP_PORT=3000, ENV_FILE=.env.prod y la URL pública
+docker compose -p ut-e3-prod --env-file .env.prod up -d --build
+
+# Demo (la PWA completa para la clase): otra URL, otro puerto, otra base.
+cp .env.production.example .env.demo
+nano .env.demo           # SITE_MODE=full, APP_PORT=3001, ENV_FILE=.env.demo y la URL de la demo
+docker compose -p ut-e3-demo --env-file .env.demo up -d --build
+```
+
+`ENV_FILE` le dice a Compose qué archivo pasa al contenedor; sin él usa `.env`. Todos los comandos de esta guía (`ps`,
+`logs`, `exec`, respaldos) llevan el mismo `-p` y `--env-file` del entorno que quieres tocar. En el proxy inverso, cada
+dominio apunta a su puerto. La demo arranca con las fechas reales del evento: para enseñar el registro antes del 13 de
+noviembre, el sysadmin adelanta la apertura en `/admin/settings`.
 
 ### Variables
 
@@ -45,6 +80,8 @@ Todas viven en `.env` (nunca se versiona). `.env.production.example` las lista c
 | `NEXT_PUBLIC_SITE_URL` | Sí | URL pública sin `/` final. **Se incrusta al construir**: si cambia, `docker compose build` de nuevo. |
 | `PIN_ENCRYPTION_KEY` | Sí | 32 bytes en base64: `openssl rand -base64 32`. Guárdala fuera del VPS; sin ella no se pueden leer los PIN guardados. |
 | `SYSADMIN_EMAIL`, `SYSADMIN_NAME`, `SYSADMIN_PASSWORD` | Sí, la primera vez | Crean la cuenta del sysadmin solo si todavía no existe uno. Si ya existe, se ignoran: cambiar la contraseña aquí no la cambia. |
+| `SITE_MODE` | No | `landing` (por defecto) o `full`. **Se incrusta al construir**; ver "Kill switch". |
+| `ENV_FILE` | No | Archivo de variables del contenedor. Por defecto `.env`; ver "Dos entornos". |
 | `APP_PORT` | No | Puerto en `127.0.0.1` para el proxy. Por defecto `3000`. |
 | `APP_TAG` | No | Etiqueta de la imagen. Por defecto `latest`. |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | No | Ver "Correo". |

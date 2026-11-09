@@ -296,6 +296,19 @@ La app se publica con Docker Compose detrás del proxy inverso del VPS (`docs/de
   opcional: sin `SMTP_HOST` el correo queda en `email_outbox`.
 - `docker/entrypoint.sh` debe tener fin de línea LF (`.gitattributes`); si lo editas en Windows, no lo conviertas a CRLF.
 - `db:seed:stands`, `db:seed:kof`, `db:seed:support` y `db:seed:raffle` son de desarrollo y se niegan a correr con `NODE_ENV=production`.
+## Kill switch (SITE_MODE)
+
+`SITE_MODE=landing` publica solo la portada; `full`, la app completa (`docs/deploy.md`, "Kill switch").
+
+- El modo se lee en `@shared/lib/site-mode` (`siteMode`). Sin valor, producción usa `landing` y desarrollo `full`.
+- `src/proxy.ts` usa `site/lib/site-proxy.ts`: primero `decideSiteAccess()` (`site/lib/site-access.ts`, la lista de lo
+  que se publica en `landing`) y después la revisión de sesión de `/admin`, `/stand` y `/support`. Una ruta nueva que
+  deba verse con el kill switch activo se agrega a `LANDING_ONLY_PATHS`; un archivo nuevo de `public/` que use la
+  portada va en una de las carpetas de `PUBLIC_ASSET_FOLDERS`.
+- La portada recibe `isLandingOnly` y entonces no enlaza fuera de la página: barra con anclas, sin "Crear mi pasaporte",
+  coverflow sin fichas y croquis sin juegos mientras los stands sean provisionales. El layout no registra el service
+  worker.
+
 ## PWA y sin conexión (RNF-14)
 
 El contenido público y el pasaporte del visitante funcionan sin conexión (`odd/tasks/pwa.md`):

@@ -184,3 +184,47 @@ describe("LandingView", () => {
     expect(eventSection).toHaveTextContent("Registro de vendedores cerrado");
   });
 });
+
+describe("LandingView with only the landing published", () => {
+  function renderLandingOnly() {
+    return render(
+      <LandingView settings={SETTINGS} games={games} scheduleItems={SCHEDULE} sponsors={[]} isLandingOnly />,
+    );
+  }
+
+  it("links every navigation entry to a section of the same page", () => {
+    renderLandingOnly();
+
+    const links = within(screen.getByRole("navigation")).getAllByRole("link");
+
+    links.forEach((link) => expect(link.getAttribute("href")).toMatch(/^#/));
+  });
+
+  it("leaves out the passport registration, which is closed", () => {
+    renderLandingOnly();
+
+    expect(screen.queryByRole("link", { name: /crear mi pasaporte/i })).not.toBeInTheDocument();
+  });
+
+  it("does not link to any page other than the landing and outside sites", () => {
+    renderLandingOnly();
+
+    const internalLinks = Array.from(document.querySelectorAll("a[href^='/']")).map((link) =>
+      link.getAttribute("href"),
+    );
+
+    expect(internalLinks).toEqual([]);
+  });
+
+  it("keeps the games of the coverflow without a link to their page", () => {
+    renderLandingOnly();
+
+    expect(screen.getByRole("link", { name: /Juego 01/ })).toHaveAttribute("href", "#games");
+  });
+
+  it("does not place the games in the croquis while their stands are provisional", () => {
+    renderLandingOnly();
+
+    expect(screen.queryByRole("button", { name: "Stand ZA-S1, Juego 01" })).not.toBeInTheDocument();
+  });
+});

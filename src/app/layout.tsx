@@ -3,6 +3,7 @@ import { ServiceWorkerRegistration } from "@features/pwa/components/service-work
 import { fontVariables } from "@shared/lib/fonts";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
+import { siteMode } from "@shared/lib/site-mode";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -34,7 +35,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="es" className={`dark ${fontVariables}`} data-theme="dark">
       <body className="bg-background text-foreground">
         {children}
-        <ServiceWorkerRegistration />
+        {/* With only the landing published there is no offline app to install (SITE_MODE=landing). */}
+        {siteMode === "full" && <ServiceWorkerRegistration />}
       </body>
     </html>
   );

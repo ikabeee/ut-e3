@@ -8,6 +8,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Kill switch para publicar solo la portada: con `SITE_MODE=landing` (el valor por defecto en producción) el sitio
+  sirve la portada, el aviso de privacidad y sus imágenes, y todo lo demás redirige a la portada, responde 404 (`/api`)
+  o 405 (formularios). La portada no enlaza a lo bloqueado. `SITE_MODE=full` publica la app completa. Compose levanta
+  producción y una demo como dos proyectos separados, cada uno con su base (ver `docs/deploy.md`).
 - Rifa final (M9): tómbola en vivo en `/raffle/live` para proyectar en el escenario (gira, muestra el número de boleto y
   el gamertag y se actualiza sola), panel del animador en `/admin/raffle` (la cuenta `raffle_admin` entra por `/login`)
   con "Girar", modal "Ganador" o "Descartado" que bloquea el siguiente giro, aviso "Otro animador está girando", registro

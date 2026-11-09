@@ -6,7 +6,7 @@ import { FloorPlan } from "@features/floor-plan/components/floor-plan";
 import { FLOOR_PLAN_SECTION_ID, getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
 import { toFloorPlanStand } from "@features/floor-plan/lib/floor-plan-stands";
 import { GameCatalog } from "@features/games/components/game-catalog";
-import { GAMES_PATH } from "@features/games/lib/games-links";
+import { GAMES_PATH, GAMES_SECTION_ID } from "@features/games/lib/games-links";
 import { getGames } from "@features/games/lib/server/games-queries";
 import type { Game } from "@features/games/lib/types";
 import { ClosingBand } from "@features/landing/components/closing-band";
@@ -29,13 +29,14 @@ import { getScheduleItems } from "@features/schedule/lib/server/schedule-queries
 import type { ScheduleItem } from "@features/schedule/lib/types";
 import { SponsorsCarousel } from "@features/sponsors/components/sponsors-carousel";
 import { getSponsors } from "@features/sponsors/lib/server/sponsors-queries";
-import { SPONSORS_PATH } from "@features/sponsors/lib/sponsors-links";
+import { SPONSORS_PATH, SPONSORS_SECTION_ID } from "@features/sponsors/lib/sponsors-links";
 import type { Sponsor } from "@features/sponsors/lib/types";
 import { REGISTER_PATH } from "@features/visitors/lib/visitors-links";
 import { JsonLd } from "@shared/components/json-ld";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
+import { siteMode } from "@shared/lib/site-mode";
 
 export const landingPageMetadata: Metadata = {
   title: { absolute: siteConfig.title },
@@ -51,6 +52,14 @@ const NAV_LINKS = [
   { href: SPONSORS_PATH, label: LANDING_COPY.nav.links.sponsors },
 ];
 
+// While only the landing is published (SITE_MODE=landing), every entry stays on this page.
+const LANDING_ONLY_NAV_LINKS = [
+  { href: `#${TOP_SECTION_ID}`, label: LANDING_COPY.nav.links.home },
+  { href: `#${GAMES_SECTION_ID}`, label: LANDING_COPY.nav.links.games },
+  { href: `#${FLOOR_PLAN_SECTION_ID}`, label: LANDING_COPY.nav.links.floorPlan },
+  { href: `#${SPONSORS_SECTION_ID}`, label: LANDING_COPY.nav.links.sponsors },
+];
+
 const REGISTER_CTA = { href: REGISTER_PATH, label: LANDING_COPY.nav.createPassport };
 
 interface LandingViewProps {
@@ -60,6 +69,8 @@ interface LandingViewProps {
   sponsors: Sponsor[];
   /** The Marketplace card, left out of the landing until the form URL exists (see MarketplaceSlot). */
   marketplace?: ReactNode;
+  /** Only the landing is published: no link leaves the page and the provisional stands stay out of the croquis. */
+  isLandingOnly?: boolean;
 }
 
 export async function LandingPage() {
@@ -70,19 +81,34 @@ export async function LandingPage() {
     getSponsors(),
   ]);
 
-  return <LandingView settings={settings} games={games} scheduleItems={scheduleItems} sponsors={sponsors} />;
+  return (
+    <LandingView
+      settings={settings}
+      games={games}
+      scheduleItems={scheduleItems}
+      sponsors={sponsors}
+      isLandingOnly={siteMode === "landing"}
+    />
+  );
 }
 
-export function LandingView({ settings, games, scheduleItems, sponsors, marketplace }: Readonly<LandingViewProps>) {
+export function LandingView({
+  settings,
+  games,
+  scheduleItems,
+  sponsors,
+  marketplace,
+  isLandingOnly = false,
+}: Readonly<LandingViewProps>) {
   const eventDate = formatEventDate(settings.eventStartsAt, "numeric");
 
   return (
     <>
-      <SiteNav homeHref={`#${TOP_SECTION_ID}`} links={NAV_LINKS} cta={REGISTER_CTA} />
+      <LandingNav isLandingOnly={isLandingOnly} />
       <main>
         <VideoHero
           calendarUrl={buildEventCalendarUrl({ startsAt: settings.eventStartsAt, endsAt: settings.eventEndsAt })}
-          registerHref={REGISTER_PATH}
+          registerHref={isLandingOnly ? undefined : REGISTER_PATH}
         />
         <SponsorsCarousel sponsors={sponsors} />
         <EventActs
@@ -92,13 +118,13 @@ export function LandingView({ settings, games, scheduleItems, sponsors, marketpl
           marketplace={marketplace}
         />
         <SpecialGuests guests={SPECIAL_GUESTS} />
-        <GameCatalog games={games} />
+        <GameCatalog games={games} linksToGamePages={!isLandingOnly} />
         <EventSchedule
           heading={formatEventDate(settings.eventStartsAt, "2-digit")}
           items={scheduleItems}
           zoneLink={getZoneLink}
         />
-        <FloorPlan stands={games.map(toFloorPlanStand)} />
+        <FloorPlan stands={isLandingOnly ? [] : games.map(toFloorPlanStand)} />
         <VenueLocation venue={EVENT_VENUE} />
         <ClosingBand dateLabel={eventDate} />
       </main>
@@ -106,6 +132,12 @@ export function LandingView({ settings, games, scheduleItems, sponsors, marketpl
       <JsonLd data={buildLandingStructuredData(settings)} />
     </>
   );
+}
+
+function LandingNav({ isLandingOnly }: Readonly<{ isLandingOnly: boolean }>) {
+  if (isLandingOnly) return <SiteNav homeHref={`#${TOP_SECTION_ID}`} links={LANDING_ONLY_NAV_LINKS} />;
+
+  return <SiteNav homeHref={`#${TOP_SECTION_ID}`} links={NAV_LINKS} cta={REGISTER_CTA} />;
 }
 
 /**
