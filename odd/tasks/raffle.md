@@ -41,7 +41,7 @@ Estado: implementado en `feature/raffle` (desde `develop` en `02d473a`), pendien
 
 | ID | Requisitos | Estado | Commit |
 | --- | --- | --- | --- |
-| T1 | Migración `20261104120000_raffle_draws`, esquema y ER | hecho | `d435872` |
+| T1 | Migración `20261104120200_raffle_draws`, esquema y ER | hecho | `d435872` |
 | T2 | Sorteo, decisión, cierre y premio (RF-49 a RF-55) con bitácora y correo | hecho | `d435872` |
 | T3 | Guarda `requireRaffleAdmin`, `/login` a `/admin/raffle` | hecho | `d435872` |
 | T4 | Tómbola, panel, ganadores públicos y "Ganaste" (RF-25, RF-49, RF-56) | hecho | `d435872` |

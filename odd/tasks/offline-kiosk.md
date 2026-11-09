@@ -34,7 +34,7 @@ filtro. Pruebas: Jest (`npm test`) y `npm run test:e2e:offline-kiosk` (E2E-07 y 
 
 | ID | Specs | Qué | Estado | Commit |
 | --- | --- | --- | --- | --- |
-| T1 | S2, S5, S6 | Migración `20261104120000_offline_kiosk_queue` (`checkins.scanned_at`, `event_settings.pin_filter_salt` sin redefinir la tabla, `rejected_visits`) y sal en el seed | hecho | ver `git log` |
+| T1 | S2, S5, S6 | Migración `20261104120100_offline_kiosk_queue` (`checkins.scanned_at`, `event_settings.pin_filter_salt` sin redefinir la tabla, `rejected_visits`) y sal en el seed | hecho | ver `git log` |
 | T2 | S2, S3 | `lib/visit-timing.ts`, `lib/queued-visit-input.ts`, `lib/server/queued-visit-mutations.ts`, `api/queued-visits-route.ts` | hecho | ver `git log` |
 | T3 | S4 | `lib/pin-filter.ts`, `lib/server/pin-filter-queries.ts`, `api/pin-filter-route.ts`, `updateTag` en el registro | hecho | ver `git log` |
 | T4 | S1 | `lib/visit-queue.ts`, `lib/visit-queue-store.ts`, hooks `use-visit-queue`, `use-pin-filter`, `use-offline-kiosk`, `KioskQueueStatus` | hecho | ver `git log` |
