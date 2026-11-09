@@ -91,7 +91,7 @@ describe("VideoHero", () => {
     simulateBrowser({});
     renderHero();
 
-    const cta = screen.getByRole("link", { name: /Quiero participar/ });
+    const cta = screen.getByRole("link", { name: /Agregar al calendario/ });
 
     expect(cta).toHaveAttribute("href", CALENDAR_URL);
     expect(cta).toHaveAttribute("target", "_blank");

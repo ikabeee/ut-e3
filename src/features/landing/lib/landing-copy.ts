@@ -16,7 +16,7 @@ export const LANDING_COPY = {
     slogan: { lead: "JUEGA. CALIFICA.", accent: "GANA." },
     description: (division: string) =>
       `Juegos creados por la ${division}. Pruébalos, compite en los torneos y participa en la rifa.`,
-    callToAction: "Quiero participar",
+    callToAction: "Agregar al calendario",
     createPassport: "Crear mi pasaporte",
     playVideo: "Reproducir video",
   },

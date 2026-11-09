@@ -55,6 +55,13 @@ describe("FloorPlan buttons", () => {
 });
 
 describe("FloorPlan selection", () => {
+  it("opens on the main stage while no stand has a game, instead of an empty stand", () => {
+    render(<FloorPlan stands={[]} />);
+
+    expect(screen.getByRole("button", { name: "Escenario principal" })).toHaveAttribute("aria-current", "true");
+    expect(getPanel().getByRole("heading", { name: "Escenario principal" })).toBeInTheDocument();
+  });
+
   it("selects ZA-S1 by default", () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 

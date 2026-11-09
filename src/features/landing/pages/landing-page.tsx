@@ -52,9 +52,9 @@ const NAV_LINKS = [
   { href: SPONSORS_PATH, label: LANDING_COPY.nav.links.sponsors },
 ];
 
-// While only the landing is published (SITE_MODE=landing), every entry stays on this page.
+// While only the landing is published (SITE_MODE=landing), every entry stays on this page and the logo goes home, so
+// the three entries fit a 360 px phone.
 const LANDING_ONLY_NAV_LINKS = [
-  { href: `#${TOP_SECTION_ID}`, label: LANDING_COPY.nav.links.home },
   { href: `#${GAMES_SECTION_ID}`, label: LANDING_COPY.nav.links.games },
   { href: `#${FLOOR_PLAN_SECTION_ID}`, label: LANDING_COPY.nav.links.floorPlan },
   { href: `#${SPONSORS_SECTION_ID}`, label: LANDING_COPY.nav.links.sponsors },
@@ -69,7 +69,10 @@ interface LandingViewProps {
   sponsors: Sponsor[];
   /** The Marketplace card, left out of the landing until the form URL exists (see MarketplaceSlot). */
   marketplace?: ReactNode;
-  /** Only the landing is published: no link leaves the page and the provisional stands stay out of the croquis. */
+  /**
+   * Only the landing is published: no link leaves the page, the provisional stands stay out of the croquis and what
+   * needs the passport or is not announced yet (rating, marketplace, special guests) is left out.
+   */
   isLandingOnly?: boolean;
 }
 
@@ -111,13 +114,12 @@ export function LandingView({
           registerHref={isLandingOnly ? undefined : REGISTER_PATH}
         />
         <SponsorsCarousel sponsors={sponsors} />
-        <EventActs
+        <LandingEvent
+          settings={settings}
           gamesCount={games.length}
-          raffle={raffleLabels(settings)}
-          kof={kofLabels(settings)}
           marketplace={marketplace}
+          isLandingOnly={isLandingOnly}
         />
-        <SpecialGuests guests={SPECIAL_GUESTS} />
         <GameCatalog games={games} linksToGamePages={!isLandingOnly} />
         <EventSchedule
           heading={formatEventDate(settings.eventStartsAt, "2-digit")}
@@ -138,6 +140,29 @@ function LandingNav({ isLandingOnly }: Readonly<{ isLandingOnly: boolean }>) {
   if (isLandingOnly) return <SiteNav homeHref={`#${TOP_SECTION_ID}`} links={LANDING_ONLY_NAV_LINKS} />;
 
   return <SiteNav homeHref={`#${TOP_SECTION_ID}`} links={NAV_LINKS} cta={REGISTER_CTA} />;
+}
+
+interface LandingEventProps {
+  settings: EventSettings;
+  gamesCount: number;
+  marketplace?: ReactNode;
+  isLandingOnly: boolean;
+}
+
+// What happens at the event: the acts and, once they are announced, the special guests.
+function LandingEvent({ settings, gamesCount, marketplace, isLandingOnly }: Readonly<LandingEventProps>) {
+  return (
+    <>
+      <EventActs
+        gamesCount={gamesCount}
+        raffle={raffleLabels(settings)}
+        kof={kofLabels(settings)}
+        marketplace={marketplace}
+        isLandingOnly={isLandingOnly}
+      />
+      {isLandingOnly ? null : <SpecialGuests guests={SPECIAL_GUESTS} />}
+    </>
+  );
 }
 
 /**

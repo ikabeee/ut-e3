@@ -46,7 +46,7 @@ export function CoverflowCase({
       aria-current={placement.isCurrent}
       onClick={handleClick}
       className={cn(
-        "absolute top-(--top) left-1/2 -ml-[calc(var(--cw)/2)] block h-(--ch) w-(--cw) cursor-pointer border-0 bg-transparent p-0 [transition:transform_.55s_cubic-bezier(.2,.8,.2,1),opacity_.4s,filter_.4s] transform-3d focus-visible:outline-none",
+        "absolute top-(--top) left-1/2 -ml-[calc(var(--cw)/2)] block h-(--ch) w-(--cw) cursor-pointer border-0 bg-transparent p-0 [transition:transform_.55s_cubic-bezier(.2,.8,.2,1),opacity_.4s,filter_.4s] transform-3d",
         placement.isCurrent ? "brightness-100" : "brightness-[.72] hover:brightness-[.95]",
       )}
       style={placement.style}

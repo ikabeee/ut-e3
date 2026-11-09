@@ -12,6 +12,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   sirve la portada, el aviso de privacidad y sus imágenes, y todo lo demás redirige a la portada, responde 404 (`/api`)
   o 405 (formularios). La portada no enlaza a lo bloqueado. `SITE_MODE=full` publica la app completa. Compose levanta
   producción y una demo como dos proyectos separados, cada uno con su base (ver `docs/deploy.md`).
+- La portada muestra los 14 juegos reales con sus portadas y a los patrocinadores Algorix Insights, Bonavida, Mermelada y
+  Nemo Submarine. Un patrocinador puede no tener sitio, teléfono o servicios, y la portada no muestra los que faltan.
+- Con solo la portada publicada, la barra deja Juegos, Croquis y Patrocinadores (el logo lleva al inicio) y la portada no
+  muestra lo que necesita el pasaporte o está por anunciar: el acto CALIFICA, el marketplace y las invitadas.
 - Rifa final (M9): tómbola en vivo en `/raffle/live` para proyectar en el escenario (gira, muestra el número de boleto y
   el gamertag y se actualiza sola), panel del animador en `/admin/raffle` (la cuenta `raffle_admin` entra por `/login`)
   con "Girar", modal "Ganador" o "Descartado" que bloquea el siguiente giro, aviso "Otro animador está girando", registro
@@ -253,6 +257,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- El botón del hero dice "Agregar al calendario", que es lo que hace.
+- El gris de los textos secundarios (`--utg-grey`) pasa de `#717171` a `#8a8a8a` para cumplir el contraste AA.
+- El croquis abre en el escenario mientras ningún stand tiene juego, en lugar de un stand vacío.
+- La caja del coverflow con el foco muestra el contorno de foco.
 - La sede se presenta como el Edificio B de la UT Cancún (lobby y áreas externas), como dice el SRS: la tarjeta de
   ubicación, la dirección para copiar, la descripción de patrocinadores y `AGENTS.md`. "Abrir en Google Maps" apunta al
   lugar del Edificio B.

@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import type { EventSettings } from "@features/event-settings/lib/types";
 import { makeGames } from "@features/games/__tests__/components/game-test-data";
+import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { LandingView, landingPageMetadata } from "@features/landing/pages/landing-page";
 import type { ScheduleItem } from "@features/schedule/lib/types";
 
@@ -129,7 +130,7 @@ describe("LandingView", () => {
   it("points the call to action to Google Calendar for 20 Nov 2026 from 12:00 to 19:00 in Cancun", () => {
     renderLanding();
 
-    const callToAction = screen.getByRole("link", { name: /Quiero participar/ });
+    const callToAction = screen.getByRole("link", { name: /Agregar al calendario/ });
     const url = new URL(callToAction.getAttribute("href") ?? "");
 
     expect(url.hostname).toBe("calendar.google.com");
@@ -161,7 +162,7 @@ describe("LandingView", () => {
   it("names the page PIXEL & CODE in the title, the calendar event and the footer", () => {
     renderLanding();
 
-    const callToAction = screen.getByRole("link", { name: /Quiero participar/ });
+    const callToAction = screen.getByRole("link", { name: /Agregar al calendario/ });
     const calendarUrl = new URL(callToAction.getAttribute("href") ?? "");
 
     expect(screen.getByRole("heading", { level: 1, name: "PIXEL & CODE" })).toBeInTheDocument();
@@ -198,6 +199,20 @@ describe("LandingView with only the landing published", () => {
     const links = within(screen.getByRole("navigation")).getAllByRole("link");
 
     links.forEach((link) => expect(link.getAttribute("href")).toMatch(/^#/));
+  });
+
+  it("leaves the way home to the logo", () => {
+    renderLandingOnly();
+
+    expect(within(screen.getByRole("navigation")).queryByRole("link", { name: "Inicio" })).not.toBeInTheDocument();
+  });
+
+  it("leaves out what needs the passport or is not announced yet: rating, marketplace and special guests", () => {
+    renderLandingOnly();
+
+    expect(document.getElementById("rate")).toBeNull();
+    expect(document.getElementById("guests")).toBeNull();
+    expect(screen.queryByText(LANDING_COPY.acts.marketplace.title)).not.toBeInTheDocument();
   });
 
   it("leaves out the passport registration, which is closed", () => {
