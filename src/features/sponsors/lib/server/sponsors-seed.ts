@@ -2,24 +2,33 @@ import "server-only";
 import type { Sponsor } from "@features/sponsors/lib/types";
 import type { PrismaClient } from "@generated/prisma/client";
 
-interface ExampleSponsor {
-  slug: string;
-  name: string;
-  services: string;
-}
+type SponsorFields = Pick<Sponsor, "name" | "logoPath"> & Partial<Pick<Sponsor, "websiteUrl" | "phone" | "services">>;
 
-// Example sponsors until the real ones are confirmed: fictitious names, example.com sites and placeholder logos.
-const EXAMPLE_SPONSORS: ExampleSponsor[] = [
-  { slug: "arrecife-digital", name: "Arrecife Digital", services: "Desarrollo web y aplicaciones móviles." },
-  { slug: "nodo-caribe", name: "Nodo Caribe", services: "Hospedaje de servidores y servicios en la nube." },
-  { slug: "jaguar-byte", name: "Jaguar Byte", services: "Equipo, periféricos y accesorios para gaming." },
-  { slug: "cenote-labs", name: "Cenote Labs", services: "Talleres de programación y robótica para jóvenes." },
-  { slug: "marea-studio", name: "Marea Studio", services: "Arte digital, animación y modelado 3D." },
-  { slug: "selva-net", name: "Selva Net", services: "Internet de alta velocidad para eventos." },
+// The sponsors that gave a logo. What a source does not give stays empty and the cards leave it out.
+const REAL_SPONSORS: SponsorFields[] = [
+  {
+    name: "Algorix Insights",
+    logoPath: "/sponsors/algorix-insights.png",
+    websiteUrl: "https://algorixinsights.com",
+    services: "Desarrollo web, agentes de IA y software a medida.",
+  },
+  {
+    name: "Bonavida",
+    logoPath: "/sponsors/bonavida.png",
+    websiteUrl: "https://aguabonavida.com.mx/",
+    phone: "+529983048120",
+  },
+  { name: "Mermelada", logoPath: "/sponsors/mermelada.jpg" },
+  {
+    name: "Nemo Submarine",
+    logoPath: "/sponsors/nemo-submarine.png",
+    websiteUrl: "https://www.nemoisla.com/",
+    phone: "+19038019083",
+  },
 ];
 
 // Frozen because nothing appends to it at runtime: it changes only by editing this file.
-export const INITIAL_SPONSORS: readonly Sponsor[] = Object.freeze(EXAMPLE_SPONSORS.map(toSponsor));
+export const INITIAL_SPONSORS: readonly Sponsor[] = Object.freeze(REAL_SPONSORS.map(toSponsor));
 
 // Sponsors have no natural key, so the seed only fills an empty table; the database assigns UUID ids.
 export async function seedSponsors(prisma: PrismaClient): Promise<void> {
@@ -32,16 +41,13 @@ function toSponsorRow({ name, logoPath, websiteUrl, phone, services, position }:
   return { name, logoPath, websiteUrl, phone, services, position };
 }
 
-function toSponsor({ slug, name, services }: ExampleSponsor, index: number): Sponsor {
-  const position = index + 1;
+function toSponsor(
+  { name, logoPath, websiteUrl = "", phone = "", services = "" }: SponsorFields,
+  index: number,
+): Sponsor {
+  return { id: slugify(name), name, logoPath, websiteUrl, phone, services, position: index + 1 };
+}
 
-  return {
-    id: slug,
-    name,
-    logoPath: `/sponsors/${slug}.svg`,
-    websiteUrl: `https://example.com/${slug}`,
-    phone: `+52998000${String(position).padStart(4, "0")}`,
-    services,
-    position,
-  };
+function slugify(name: string): string {
+  return name.toLowerCase().replaceAll(/\s+/g, "-");
 }

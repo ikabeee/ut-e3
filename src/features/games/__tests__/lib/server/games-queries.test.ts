@@ -37,26 +37,34 @@ beforeEach(async () => {
 });
 
 describe("getGames", () => {
-  // INITIAL_GAMES is written in stand order (ZA-S1 to ZT-S6), so it is also the expected order.
+  // INITIAL_GAMES is written in stand order (ZA-S1 to ZT-S2), so it is also the expected order.
   it("returns the seeded games ordered by stand, with UUID ids", async () => {
     await seedGames(getPrisma());
 
     expect(await getGames()).toEqual(INITIAL_GAMES.map(withUuids));
   });
 
-  it("puts Ceniza Protocol at ZA-S1 with its action genre and one cover at position 1", async () => {
+  it("puts Abby's Tower at ZA-S1 with its portrait cover first and its landscape artwork second", async () => {
     await seedGames(getPrisma());
 
     const [first] = await getGames();
 
     expect(first).toEqual({
       id: expect.stringMatching(UUID),
-      slug: "ceniza-protocol",
-      name: "Ceniza Protocol",
-      synopsis: "Shooter de extracción en una ciudad sepultada por ceniza volcánica.",
-      genre: { id: expect.stringMatching(UUID), name: "Acción", slug: "accion" },
+      slug: "abby-s-tower",
+      name: "Abby's Tower",
+      synopsis: "",
+      genre: { id: expect.stringMatching(UUID), name: "Por anunciar", slug: "por-anunciar" },
       stand: { zone: "A", number: 1 },
-      images: [{ path: "/games/ceniza-protocol.jpg", alt: "Portada de Ceniza Protocol", position: 1, isCover: true }],
+      images: [
+        { path: "/games/abby-s-tower.jpg", alt: "Portada de Abby's Tower", position: 1, isCover: true },
+        {
+          path: "/games/abby-s-tower-portada.jpg",
+          alt: "Portada horizontal de Abby's Tower",
+          position: 2,
+          isCover: false,
+        },
+      ],
     });
   });
 
@@ -86,9 +94,9 @@ describe("getGameBySlug", () => {
   it("returns the seeded game with its genre, stand and images", async () => {
     await seedGames(getPrisma());
 
-    const expected = INITIAL_GAMES.find((game) => game.slug === "ceniza-protocol");
+    const expected = INITIAL_GAMES.find((game) => game.slug === "abby-s-tower");
 
-    expect(await getGameBySlug("ceniza-protocol")).toEqual(expected && withUuids(expected));
+    expect(await getGameBySlug("abby-s-tower")).toEqual(expected && withUuids(expected));
   });
 
   it("returns null for a slug no game has", async () => {
@@ -98,7 +106,7 @@ describe("getGameBySlug", () => {
   });
 
   it("caches the game for hours under the games tag", async () => {
-    await getGameBySlug("ceniza-protocol");
+    await getGameBySlug("abby-s-tower");
 
     expect(cacheLife).toHaveBeenCalledWith("hours");
     expect(cacheTag).toHaveBeenCalledWith(GAMES_CACHE_TAG);

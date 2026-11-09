@@ -21,7 +21,10 @@ const PHONE = /^\+\d{8,15}$/;
 
 const ERRORS = SPONSORS_COPY.admin.errors;
 
-/** The card of a sponsor (RF-41): name, logo, website, contact phone, services and the place in the list. */
+/**
+ * The card of a sponsor (RF-41): name, logo, website, contact phone, services and the place in the list. The website,
+ * the phone and the services may stay empty: not every sponsor gives them, and the landing leaves them out.
+ */
 export function parseSponsorInput(form: FormData): ParsedSponsor {
   const sponsor = {
     name: readFormText(form, "name").trim(),
@@ -41,9 +44,9 @@ function findErrors(sponsor: SponsorInput): SponsorErrors {
   const checks: [SponsorField, boolean][] = [
     ["name", sponsor.name.length > 0 && sponsor.name.length <= NAME_MAX_LENGTH],
     ["logoPath", LOGO_PATH.test(sponsor.logoPath) && !sponsor.logoPath.includes("..")],
-    ["websiteUrl", isHttpsUrl(sponsor.websiteUrl)],
-    ["phone", PHONE.test(sponsor.phone)],
-    ["services", sponsor.services.length > 0 && sponsor.services.length <= SERVICES_MAX_LENGTH],
+    ["websiteUrl", sponsor.websiteUrl === "" || isHttpsUrl(sponsor.websiteUrl)],
+    ["phone", sponsor.phone === "" || PHONE.test(sponsor.phone)],
+    ["services", sponsor.services.length <= SERVICES_MAX_LENGTH],
     ["position", Number.isInteger(sponsor.position) && sponsor.position >= 1 && sponsor.position <= 999],
   ];
 

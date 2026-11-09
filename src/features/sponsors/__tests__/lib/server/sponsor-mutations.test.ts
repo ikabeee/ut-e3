@@ -56,6 +56,13 @@ describe("parseSponsorInput (RF-41)", () => {
     });
   });
 
+  it("accepts a sponsor without website, phone or services, which some sponsors do not give", () => {
+    expect(parseSponsorInput(sponsorForm({ websiteUrl: " ", phone: "", services: "" }))).toEqual({
+      isValid: true,
+      sponsor: { ...VALID, websiteUrl: "", phone: "", services: "", position: 3 },
+    });
+  });
+
   it("refuses a remote or climbing logo, a plain http site and a phone without +", () => {
     const parsed = parseSponsorInput(
       sponsorForm({ logoPath: "/../secret.png", websiteUrl: "http://example.com", phone: "9981234567", position: "0" }),

@@ -20,10 +20,10 @@ interface SponsorsAdminProps {
 const COPY = SPONSORS_COPY.admin;
 
 const TEXT_FIELDS = [
-  { name: "name", maxLength: NAME_MAX_LENGTH, type: "text", hint: null },
-  { name: "logoPath", maxLength: 200, type: "text", hint: COPY.hints.logoPath },
-  { name: "websiteUrl", maxLength: 300, type: "url", hint: null },
-  { name: "phone", maxLength: 20, type: "tel", hint: COPY.hints.phone },
+  { name: "name", maxLength: NAME_MAX_LENGTH, type: "text", hint: null, isRequired: true },
+  { name: "logoPath", maxLength: 200, type: "text", hint: COPY.hints.logoPath, isRequired: true },
+  { name: "websiteUrl", maxLength: 300, type: "url", hint: null, isRequired: false },
+  { name: "phone", maxLength: 20, type: "tel", hint: COPY.hints.phone, isRequired: false },
 ] as const;
 
 /** Registers, edits and deletes the sponsors of the public cards (RF-41). */
@@ -99,7 +99,7 @@ function SponsorTextFields({ sponsor }: Readonly<{ sponsor?: Sponsor }>) {
       type={field.type}
       defaultValue={sponsor?.[field.name]}
       maxLength={field.maxLength}
-      isRequired
+      isRequired={field.isRequired}
     >
       <Label>{COPY.fields[field.name]}</Label>
       <Input className="min-h-11 text-base" />
@@ -112,7 +112,7 @@ function SponsorTextFields({ sponsor }: Readonly<{ sponsor?: Sponsor }>) {
 function SponsorExtraFields({ sponsor, nextPosition }: Readonly<{ sponsor?: Sponsor; nextPosition: number }>) {
   return (
     <>
-      <TextField name="services" defaultValue={sponsor?.services} maxLength={SERVICES_MAX_LENGTH} isRequired>
+      <TextField name="services" defaultValue={sponsor?.services} maxLength={SERVICES_MAX_LENGTH}>
         <Label>{COPY.fields.services}</Label>
         <TextArea className="text-base" rows={2} />
         <FieldError />

@@ -35,9 +35,10 @@ const ITCH_LEAD_MS = 90_000;
 
 const ITCH_OPEN_MARGIN_MS = 2000;
 
-const FEATURED_SLUG = "ceniza-protocol";
+// Vaporlock is the seeded game with only its cover, so the gallery images of the test take positions 2 to 5.
+const FEATURED_SLUG = "vaporlock";
 
-const FEATURED_ITCH_URL = "https://utg.itch.io/ceniza-protocol";
+const FEATURED_ITCH_URL = "https://utg.itch.io/vaporlock";
 
 const EXTRA_IMAGE_PATHS = ["/games/cenote.jpg", "/games/circuito-7.jpg", "/games/eco-nulo.jpg", "/games/hormigon.jpg"];
 
@@ -230,7 +231,7 @@ function addGalleryImages(database, game) {
   });
 }
 
-// The coverflow opens on the middle game in stand order: the 9th of the 18 seeded games.
+// The coverflow opens on the middle game in stand order.
 function readMiddleGame(database) {
   const { count } = database.prepare("SELECT COUNT(*) AS count FROM games").get();
 

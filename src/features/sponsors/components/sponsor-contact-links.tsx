@@ -8,14 +8,25 @@ interface SponsorContactLinksProps {
 }
 
 export function SponsorContactLinks({ sponsor }: Readonly<SponsorContactLinksProps>) {
+  const hasWebsite = sponsor.websiteUrl !== "";
+  const hasPhone = sponsor.phone !== "";
+
+  if (!hasWebsite && !hasPhone) {
+    return null;
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-      <ActionLink href={sponsor.websiteUrl} arrow="ne" isExternal>
-        {SPONSORS_COPY.website}
-      </ActionLink>
-      <a href={`tel:${sponsor.phone}`} className="inline-flex min-h-11 items-center type-mono text-copy underline">
-        {formatPhone(sponsor.phone)}
-      </a>
+      {hasWebsite ? (
+        <ActionLink href={sponsor.websiteUrl} arrow="ne" isExternal>
+          {SPONSORS_COPY.website}
+        </ActionLink>
+      ) : null}
+      {hasPhone ? (
+        <a href={`tel:${sponsor.phone}`} className="inline-flex min-h-11 items-center type-mono text-copy underline">
+          {formatPhone(sponsor.phone)}
+        </a>
+      ) : null}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 // End-to-end check of the sponsors page /sponsors and the sponsors carousel of the landing in a real browser:
 // npm run test:e2e:sponsors
 //
-// Creates its own SQLite database in the system temp dir, seeds it (the example sponsors of INITIAL_SPONSORS), starts
+// Creates its own SQLite database in the system temp dir, seeds it (the sponsors of INITIAL_SPONSORS), starts
 // `next dev` on E2E_PORT and removes everything when it finishes. Flows SP-01 to SP-07 of odd/tasks/sponsors-page.md
 // (S6). The expected sponsors are read from that database, so the flows keep passing when the seed changes.
 //

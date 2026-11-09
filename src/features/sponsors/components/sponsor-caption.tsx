@@ -25,7 +25,9 @@ export function SponsorCaption({ sponsor }: Readonly<SponsorCaptionProps>) {
           </Fragment>
         ))}
       </h2>
-      <p className="m-0 max-w-[42ch] text-[clamp(16px,1.3vw,19px)] leading-[1.35] text-copy">{sponsor.services}</p>
+      {sponsor.services === "" ? null : (
+        <p className="m-0 max-w-[42ch] text-[clamp(16px,1.3vw,19px)] leading-[1.35] text-copy">{sponsor.services}</p>
+      )}
       <SponsorContactLinks sponsor={sponsor} />
     </div>
   );

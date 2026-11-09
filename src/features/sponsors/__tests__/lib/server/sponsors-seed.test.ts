@@ -21,18 +21,45 @@ beforeEach(async () => {
   await getPrisma().sponsor.deleteMany();
 });
 
-const MEXICAN_E164 = /^\+52\d{10}$/;
+const E164 = /^\+\d{8,15}$/;
 
 describe("INITIAL_SPONSORS", () => {
-  it("has example sponsors until the real ones are confirmed", () => {
-    expect(INITIAL_SPONSORS.length).toBeGreaterThan(0);
+  it("lists the four sponsors with a logo, in the order of the carousel", () => {
+    expect(INITIAL_SPONSORS.map((sponsor) => sponsor.name)).toEqual([
+      "Algorix Insights",
+      "Bonavida",
+      "Mermelada",
+      "Nemo Submarine",
+    ]);
   });
 
-  it("gives every example sponsor a logo in public/, an https site and a +52 phone", () => {
+  it("gives every sponsor a logo that exists in public/", () => {
     for (const sponsor of INITIAL_SPONSORS) {
       expect(existsSync(join(process.cwd(), "public", sponsor.logoPath))).toBe(true);
-      expect(sponsor.websiteUrl).toMatch(/^https:\/\//);
-      expect(sponsor.phone).toMatch(MEXICAN_E164);
+    }
+  });
+
+  it("keeps the website and the phone only where the sources give them", () => {
+    expect(INITIAL_SPONSORS.map(({ name, websiteUrl, phone }) => ({ name, websiteUrl, phone }))).toEqual([
+      { name: "Algorix Insights", websiteUrl: "https://algorixinsights.com", phone: "" },
+      { name: "Bonavida", websiteUrl: "https://aguabonavida.com.mx/", phone: "+529983048120" },
+      { name: "Mermelada", websiteUrl: "", phone: "" },
+      { name: "Nemo Submarine", websiteUrl: "https://www.nemoisla.com/", phone: "+19038019083" },
+    ]);
+  });
+
+  it("describes only Algorix Insights, the only sponsor with a services text", () => {
+    expect(INITIAL_SPONSORS.map((sponsor) => sponsor.services)).toEqual([
+      "Desarrollo web, agentes de IA y software a medida.",
+      "",
+      "",
+      "",
+    ]);
+  });
+
+  it("writes every phone that exists in E.164", () => {
+    for (const { phone } of INITIAL_SPONSORS.filter((sponsor) => sponsor.phone !== "")) {
+      expect(phone).toMatch(E164);
     }
   });
 
