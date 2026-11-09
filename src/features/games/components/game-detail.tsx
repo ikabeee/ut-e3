@@ -9,6 +9,7 @@ import { getGalleryImages } from "@features/games/lib/game-cover";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { getGenrePath } from "@features/games/lib/games-links";
 import type { Game, GameDetailLinks, GameEventLabels, Genre } from "@features/games/lib/types";
+import { GenericCover } from "@shared/components/generic-cover";
 
 interface GameDetailProps {
   game: Game;
@@ -35,10 +36,23 @@ export function GameDetail({ game, itchLink, event, links, relatedGames }: Reado
 function GameOverview({ game, event }: Readonly<Pick<GameDetailProps, "game" | "event">>) {
   return (
     <div className="flex min-w-0 flex-col gap-7">
-      <GameGallery images={getGalleryImages(game)} />
+      <GameCover game={game} />
       <p className="max-w-[62ch] text-[clamp(17px,1.5vw,20px)] leading-[1.4] text-copy-strong">{game.synopsis}</p>
       <GameTags genre={game.genre} />
       <GamePlayLocation stand={game.stand} event={event} />
+    </div>
+  );
+}
+
+// A game without artwork shows its generic cover in the place of the gallery.
+function GameCover({ game }: Readonly<{ game: Game }>) {
+  const images = getGalleryImages(game);
+
+  if (images.length > 0) return <GameGallery images={images} />;
+
+  return (
+    <div className="relative aspect-video overflow-hidden">
+      <GenericCover title={game.name} />
     </div>
   );
 }

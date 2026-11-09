@@ -29,22 +29,22 @@ function Carousel({ sponsors }: Readonly<SponsorsCarouselProps>) {
       id={SPONSORS_SECTION_ID}
       aria-roledescription={SPONSORS_COPY.roleDescription}
       aria-label={SPONSORS_COPY.heading}
-      className="grid h-[clamp(640px,calc(100svh-56px),1000px)] grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,7fr)_minmax(0,3fr)] bg-background max-[760px]:h-auto max-[760px]:grid-rows-[auto_auto]"
+      className="grid grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto] bg-background"
       {...carousel.pauseHandlers}
     >
-      <div className="flex min-h-0 flex-col bg-surface" {...carousel.swipeHandlers}>
+      <div className="flex flex-col bg-surface" {...carousel.swipeHandlers}>
         <SponsorSlides sponsors={sponsors} current={carousel.current} />
         <SponsorCaption sponsor={sponsors[carousel.current]} />
       </div>
 
-      <div className="flex min-h-0 min-w-0 flex-col gap-2.5 border-t border-separator px-gutter pt-3.5 pb-4">
+      <div className="flex min-w-0 flex-col items-center gap-2.5 border-t border-separator px-gutter pt-3.5 pb-4">
         <SponsorThumbnails
           sponsors={sponsors}
           current={carousel.current}
           onSelect={carousel.goTo}
           progressBarRef={carousel.progressBarRef}
         />
-        <div className="flex [&>*+*]:border-l-0">
+        <div className="flex justify-center [&>*+*]:border-l-0">
           <ArrowButton direction="previous" label={SPONSORS_COPY.previous} onPress={carousel.goPrevious} />
           <ArrowButton direction="next" label={SPONSORS_COPY.next} onPress={carousel.goNext} />
         </div>

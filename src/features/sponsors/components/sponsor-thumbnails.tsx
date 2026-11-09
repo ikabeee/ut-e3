@@ -17,7 +17,7 @@ export function SponsorThumbnails({ sponsors, current, onSelect, progressBarRef 
   return (
     <div
       ref={trackRef}
-      className="scrollbar-none flex min-h-0 flex-1 snap-x snap-mandatory gap-2.5 overflow-x-auto max-[760px]:h-30 max-[760px]:flex-none"
+      className="scrollbar-none flex h-30 w-full flex-none snap-x snap-mandatory justify-center-safe gap-2.5 overflow-x-auto"
     >
       {sponsors.map((sponsor, index) => (
         <SponsorThumbnail
@@ -70,10 +70,11 @@ function ThumbnailLogo({ sponsor, isCurrent }: Readonly<{ sponsor: Sponsor; isCu
         src={sponsor.logoPath}
         alt=""
         fill
+        unoptimized
         sizes="200px"
         className={cn(
-          "object-contain transition-[filter] duration-300",
-          !isCurrent && "brightness-50 grayscale group-hover:brightness-90 group-hover:grayscale-30",
+          "object-contain transition-opacity duration-300",
+          !isCurrent && "opacity-60 group-hover:opacity-90",
         )}
       />
     </span>

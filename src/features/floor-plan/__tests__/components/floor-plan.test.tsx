@@ -87,6 +87,16 @@ describe("FloorPlan selection", () => {
     expect(screen.getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" })).not.toHaveAttribute("aria-current");
   });
 
+  it("shows a generic cover with the name of a game that has no artwork yet", async () => {
+    const stands = [{ ...STAND_FIXTURES[0], coverSrc: null }];
+
+    render(<FloorPlan stands={stands} />);
+
+    await userEvent.setup().click(screen.getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" }));
+
+    expect(getPanel().getByRole("img", { name: "Ceniza Protocol" })).toBeInTheDocument();
+  });
+
   it("shows a help center with what it attends and no cover", async () => {
     render(<FloorPlan stands={STAND_FIXTURES} />);
 

@@ -1,57 +1,116 @@
 import "server-only";
-import type { StandLocation } from "@features/games/lib/stand-code";
+import type { AdminStandLocation, StandLocation } from "@features/games/lib/stand-code";
 import type { Game, GameImage, Genre } from "@features/games/lib/types";
 import type { Prisma, PrismaClient } from "@generated/prisma/client";
 
-// The sources give no genre and no synopsis yet, so every game shares this placeholder genre.
+// The sources give no genre and no synopsis yet, so every game shares this placeholder genre. A genre is required by
+// the model, so the games that were just added use it too.
 const TO_BE_ANNOUNCED: Genre = { id: "por-anunciar", name: "Por anunciar", slug: "por-anunciar" };
 
-type GameFields = Pick<Game, "slug" | "name" | "stand"> & { hasLandscapeImage?: boolean };
+interface SeedGame {
+  slug: string;
+  name: string;
+  stand: StandLocation;
+  studio: number;
+  groupCode: string;
+  /** False for the games that have no artwork yet: they show a generic cover with their name. */
+  hasCover?: boolean;
+  /** False for the games whose only artwork is the portrait cover. */
+  hasLandscapeImage?: boolean;
+}
 
-// Sample studio and group until the sysadmin registers the real stands (RF-39).
-const SAMPLE_STAND_GROUP = { studio: 0, groupCode: "000" };
-
-// The stands are provisional slots: the floor plan of the landing does not show them.
-export const INITIAL_GAMES: Game[] = [
-  buildGame({ slug: "abby-s-tower", name: "Abby's Tower", stand: { zone: "A", number: 1 } }),
-  buildGame({ slug: "after-light", name: "After Light", stand: { zone: "A", number: 2 } }),
-  buildGame({ slug: "astrolabio", name: "Astrolabio", stand: { zone: "A", number: 3 } }),
-  buildGame({ slug: "carencia", name: "Carencia", stand: { zone: "B", number: 1 } }),
-  buildGame({ slug: "dark-mutant", name: "Dark Mutant", stand: { zone: "B", number: 2 } }),
-  buildGame({ slug: "echoscrap", name: "EchoScrap", stand: { zone: "B", number: 3 } }),
-  buildGame({ slug: "identity-dissolution", name: "Identity Dissolution", stand: { zone: "C", number: 1 } }),
-  buildGame({ slug: "laboratorio-4", name: "Laboratorio 4", stand: { zone: "C", number: 2 } }),
-  buildGame({ slug: "reencarnacion-express", name: "Reencarnación Express", stand: { zone: "C", number: 3 } }),
-  buildGame({ slug: "saatan-paal", name: "Saatan Paal", stand: { zone: "D", number: 1 } }),
-  buildGame({ slug: "true-hero", name: "True Hero", stand: { zone: "D", number: 2 } }),
-  buildGame({ slug: "turno-rosso", name: "Turno Rosso", stand: { zone: "D", number: 3 } }),
-  buildGame({ slug: "unknown-game", name: "Unknown Game", stand: { zone: "T", number: 1 } }),
-  // Its only artwork is the portrait cover.
-  buildGame({ slug: "vaporlock", name: "Vaporlock", stand: { zone: "T", number: 2 }, hasLandscapeImage: false }),
+// The real stands of the event, by zone and number: studio and group as the organizers assigned them. ZC-S3 has no
+// game, so it has no row either.
+const SEED_GAMES: SeedGame[] = [
+  {
+    slug: "make-em-fall",
+    name: "Make 'em Fall",
+    stand: { zone: "A", number: 1 },
+    studio: 6,
+    groupCode: "101",
+    hasCover: false,
+  },
+  { slug: "true-hero", name: "True Hero", stand: { zone: "A", number: 2 }, studio: 5, groupCode: "102" },
+  { slug: "laboratorio-4", name: "Laboratorio 4", stand: { zone: "A", number: 3 }, studio: 4, groupCode: "103" },
+  { slug: "abby-s-tower", name: "Abby's Tower", stand: { zone: "B", number: 1 }, studio: 2, groupCode: "103" },
+  { slug: "one-mind", name: "One Mind", stand: { zone: "B", number: 2 }, studio: 4, groupCode: "101", hasCover: false },
+  {
+    slug: "vaporlock",
+    name: "Vaporlock",
+    stand: { zone: "B", number: 3 },
+    studio: 3,
+    groupCode: "103",
+    hasLandscapeImage: false,
+  },
+  { slug: "unknown-game", name: "Unknown Game", stand: { zone: "C", number: 1 }, studio: 6, groupCode: "103" },
+  {
+    slug: "sombra-del-mictlan",
+    name: "Sombra del Mictlán",
+    stand: { zone: "C", number: 2 },
+    studio: 1,
+    groupCode: "101",
+    hasCover: false,
+  },
+  { slug: "turno-rosso", name: "Turno Rosso", stand: { zone: "D", number: 1 }, studio: 2, groupCode: "102" },
+  {
+    slug: "reencarnacion-express",
+    name: "Reencarnación Express",
+    stand: { zone: "D", number: 2 },
+    studio: 5,
+    groupCode: "103",
+  },
+  { slug: "astrolabio", name: "Astrolabio", stand: { zone: "D", number: 3 }, studio: 1, groupCode: "103" },
+  { slug: "echoscrap", name: "EchoScrap", stand: { zone: "T", number: 1 }, studio: 6, groupCode: "102" },
+  { slug: "after-light", name: "After Light", stand: { zone: "T", number: 2 }, studio: 1, groupCode: "102" },
+  { slug: "dark-mutant", name: "Dark Mutant", stand: { zone: "T", number: 3 }, studio: 4, groupCode: "102" },
+  { slug: "saatan-paal", name: "Saatan Paal", stand: { zone: "T", number: 4 }, studio: 3, groupCode: "102" },
+  { slug: "carencia", name: "Carencia", stand: { zone: "T", number: 5 }, studio: 3, groupCode: "101" },
+  {
+    slug: "identity-dissolution",
+    name: "Identity Dissolution",
+    stand: { zone: "T", number: 6 },
+    studio: 2,
+    groupCode: "101",
+  },
 ];
 
-function buildGame({ hasLandscapeImage = true, ...fields }: GameFields): Game {
+export const INITIAL_GAMES: Game[] = SEED_GAMES.map(buildGame);
+
+/** The stand of each game with its studio and group, like `ZA-S3-E4-103` once formatted (RF-11). */
+export const INITIAL_STANDS: AdminStandLocation[] = SEED_GAMES.map(({ stand, studio, groupCode }) => ({
+  ...stand,
+  studio,
+  groupCode,
+}));
+
+function buildGame({ hasCover = true, hasLandscapeImage = true, slug, name, stand }: SeedGame): Game {
   const cover: GameImage = {
-    path: `/games/${fields.slug}.jpg`,
-    alt: `Portada de ${fields.name}`,
+    path: `/games/${slug}.jpg`,
+    alt: `Portada de ${name}`,
     position: 1,
     isCover: true,
   };
 
   const landscape: GameImage = {
-    path: `/games/${fields.slug}-portada.jpg`,
-    alt: `Portada horizontal de ${fields.name}`,
+    path: `/games/${slug}-portada.jpg`,
+    alt: `Portada horizontal de ${name}`,
     position: 2,
     isCover: false,
   };
 
   return {
-    ...fields,
-    id: fields.slug,
+    id: slug,
+    slug,
+    name,
+    stand,
     genre: TO_BE_ANNOUNCED,
     synopsis: "",
-    images: hasLandscapeImage ? [cover, landscape] : [cover],
+    images: [hasCover ? cover : null, hasCover && hasLandscapeImage ? landscape : null].filter(isImage),
   };
+}
+
+function isImage(image: GameImage | null): image is GameImage {
+  return image !== null;
 }
 
 // Fills the catalog only while it has no games: once the sysadmin edits or deletes a game, a new seed leaves the
@@ -61,13 +120,13 @@ export async function seedGames(prisma: PrismaClient): Promise<void> {
 
   // One transaction: a run that fails partway writes no game, so the next run still finds an empty catalog.
   await prisma.$transaction(async (transaction) => {
-    for (const game of INITIAL_GAMES) await seedGame(transaction, game);
+    for (const [index, game] of INITIAL_GAMES.entries()) await seedGame(transaction, game, INITIAL_STANDS[index]);
   });
 }
 
-async function seedGame(prisma: Prisma.TransactionClient, game: Game): Promise<void> {
+async function seedGame(prisma: Prisma.TransactionClient, game: Game, stand: AdminStandLocation): Promise<void> {
   const genreId = await findOrCreateGenre(prisma, game.genre);
-  const standId = await findOrCreateStand(prisma, game.stand);
+  const standId = await findOrCreateStand(prisma, stand);
   const gameId = await findOrCreateGame(prisma, game, { genreId, standId });
 
   for (const image of game.images) await findOrCreateImage(prisma, gameId, image);
@@ -80,12 +139,12 @@ async function findOrCreateGenre(prisma: Prisma.TransactionClient, { name, slug 
   return genre.id;
 }
 
-async function findOrCreateStand(prisma: Prisma.TransactionClient, location: StandLocation): Promise<string> {
-  const stand =
-    (await prisma.stand.findUnique({ where: { zone_number: location } })) ??
-    (await prisma.stand.create({ data: { ...location, ...SAMPLE_STAND_GROUP } }));
+async function findOrCreateStand(prisma: Prisma.TransactionClient, stand: AdminStandLocation): Promise<string> {
+  const row =
+    (await prisma.stand.findUnique({ where: { zone_number: { zone: stand.zone, number: stand.number } } })) ??
+    (await prisma.stand.create({ data: stand }));
 
-  return stand.id;
+  return row.id;
 }
 
 async function findOrCreateGame(

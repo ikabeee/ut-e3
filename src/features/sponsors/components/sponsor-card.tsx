@@ -14,6 +14,7 @@ export function SponsorCard({ sponsor }: Readonly<SponsorCardProps>) {
           src={sponsor.logoPath}
           alt={sponsor.name}
           fill
+          unoptimized
           sizes="(min-width: 1200px) 33vw, (min-width: 760px) 50vw, 100vw"
           className="object-contain p-gutter"
         />
