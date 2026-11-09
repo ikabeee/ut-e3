@@ -12,6 +12,8 @@ import { useOnlineStatus } from "@shared/hooks/use-online-status";
 interface UseVenueMapInput {
   venue: EventVenue;
   labels: VenueMapLabels;
+  /** The public Mapbox token; the map is drawn only when the hook is enabled with one. */
+  accessToken: string;
   /** Becomes true when the section is about to be seen: until then no script or tile is requested. */
   isEnabled: boolean;
 }
@@ -22,6 +24,7 @@ const NO_TILES: TileCounts = { loaded: 0, failed: 0 };
 export function useVenueMap({
   venue,
   labels,
+  accessToken,
   isEnabled,
 }: UseVenueMapInput): [RefObject<HTMLDivElement | null>, { isReady: boolean }] {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,7 +42,7 @@ export function useVenueMap({
     let isCancelled = false;
     let session: VenueMapSession | undefined;
 
-    startVenueMap({ container, venue, labels, onTiles: setTiles })
+    startVenueMap({ container, venue, labels, accessToken, onTiles: setTiles })
       .then((started) => {
         if (isCancelled) {
           started.destroy();
@@ -55,7 +58,7 @@ export function useVenueMap({
       session?.destroy();
       setIsStarted(false);
     };
-  }, [isEnabled, venue, labels]);
+  }, [isEnabled, venue, labels, accessToken]);
 
   const isFallback = shouldShowFallback({ isOnline, loadedTiles: tiles.loaded, failedTiles: tiles.failed });
 

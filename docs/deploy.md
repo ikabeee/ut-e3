@@ -81,6 +81,7 @@ Todas viven en `.env` (nunca se versiona). `.env.production.example` las lista c
 | `NEXT_PUBLIC_SITE_URL` | Sí | URL pública sin `/` final. **Se incrusta al construir**: si cambia, `docker compose build` de nuevo. |
 | `PIN_ENCRYPTION_KEY` | Sí | 32 bytes en base64: `openssl rand -base64 32`. Guárdala fuera del VPS; sin ella no se pueden leer los PIN guardados. |
 | `SYSADMIN_EMAIL`, `SYSADMIN_NAME`, `SYSADMIN_PASSWORD` | Sí, la primera vez | Crean la cuenta del sysadmin solo si todavía no existe uno. Si ya existe, se ignoran: cambiar la contraseña aquí no la cambia. |
+| `NEXT_PUBLIC_MAPBOX_TOKEN` | No | Token **público** de Mapbox (`pk.`) del mapa de la sede. **Se incrusta al construir.** Sin él, o con un token secreto (`sk.`), la portada muestra el esquema de la sede en lugar del mapa. En el panel de Mapbox restríngelo a la URL del sitio. |
 | `SITE_MODE` | No | `landing` (por defecto) o `full`. **Se incrusta al construir**; ver "Kill switch". |
 | `ENV_FILE` | No | Archivo de variables del contenedor. Por defecto `.env`; ver "Dos entornos". |
 | `APP_PORT` | No | Puerto en `127.0.0.1` para el proxy. Por defecto `3000`. |

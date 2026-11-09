@@ -24,6 +24,8 @@ interface StartVenueMapInput {
   container: HTMLElement;
   venue: EventVenue;
   labels: VenueMapLabels;
+  /** The public Mapbox token of the tile URL. */
+  accessToken: string;
   onTiles: (counts: TileCounts) => void;
 }
 
@@ -36,6 +38,7 @@ export async function startVenueMap({
   container,
   venue,
   labels,
+  accessToken,
   onTiles,
 }: StartVenueMapInput): Promise<VenueMapSession> {
   const leaflet = await loadLeaflet();
@@ -44,7 +47,8 @@ export async function startVenueMap({
 
   map.attributionControl.setPrefix(false);
   leaflet.control.zoom({ position: "topright", zoomInTitle: labels.zoomIn, zoomOutTitle: labels.zoomOut }).addTo(map);
-  watchTiles(leaflet.tileLayer(VENUE_MAP_TILES.url, buildTileLayerOptions()).addTo(map), onTiles);
+  watchTiles(leaflet.tileLayer(VENUE_MAP_TILES.url, buildTileLayerOptions(accessToken)).addTo(map), onTiles);
+  addMapboxLogo(leaflet, map);
   addVenuePin(leaflet, map, { venue, labels });
 
   const stopWheelGuard = guardWheelZoom(map, container);
@@ -68,6 +72,25 @@ function watchTiles(layer: Leaflet.TileLayer, onTiles: (counts: TileCounts) => v
 
   layer.on("tileload", () => onTiles({ ...counts, loaded: ++counts.loaded }));
   layer.on("tileerror", () => onTiles({ ...counts, failed: ++counts.failed }));
+}
+
+/** Mapbox requires its logo, linked to mapbox.com, on every map that shows its tiles. */
+function addMapboxLogo(leaflet: typeof Leaflet, map: Leaflet.Map) {
+  const logo = new leaflet.Control({ position: "bottomleft" });
+
+  logo.onAdd = () => {
+    const link = document.createElement("a");
+
+    link.className = "venue-map__logo";
+    link.href = VENUE_MAP_TILES.logo.href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.setAttribute("aria-label", VENUE_MAP_TILES.logo.label);
+
+    return link;
+  };
+
+  logo.addTo(map);
 }
 
 interface PinInput {

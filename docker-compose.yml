@@ -10,6 +10,8 @@ services:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?Define NEXT_PUBLIC_SITE_URL en el .env}
         # Kill switch: `landing` publica solo la portada y `full` la app completa. El build y el servidor usan el mismo.
         SITE_MODE: ${SITE_MODE:-landing}
+        # Token público de Mapbox (pk.) del mapa de la sede; se incrusta en el build.
+        NEXT_PUBLIC_MAPBOX_TOKEN: ${NEXT_PUBLIC_MAPBOX_TOKEN:-}
     image: ut-e3-app:${SITE_MODE:-landing}-${APP_TAG:-latest}
     # Reenvia las senales y recoge procesos huerfanos.
     init: true

@@ -337,18 +337,20 @@ El contenido público y el pasaporte del visitante funcionan sin conexión (`odd
 - **Sede.** `EVENT_VENUE` (`landing/lib/venue.ts`) es la única fuente del nombre, el edificio (Edificio B, según el SRS),
   la dirección, las coordenadas (`21.04958, -86.84682`), el zoom y el enlace de "Abrir en Google Maps" (el lugar de
   Google del Edificio B).
-- **Mapa (`VenueMap`).** Leaflet sobre teselas estándar de OpenStreetMap, con un filtro CSS que las vuelve oscuras
-  (`landing/components/venue-map.css`). La URL de las teselas y la atribución viven solo en `landing/lib/venue-map.ts`;
-  CARTO Dark Matter ya exige API key y devolvía una marca de agua, por eso no se usa. La lógica pura (opciones del mapa,
-  respaldo) está en ese archivo y se prueba sin Leaflet; el montaje está en `venue-map-session.ts`.
+- **Mapa (`VenueMap`).** Leaflet sobre las teselas del estilo Mapbox Dark (`mapbox/dark-v11`, 512 px). La URL, la
+  atribución y el logo viven solo en `landing/lib/venue-map.ts`; los términos de Mapbox exigen su logo (enlazado a
+  mapbox.com, `public/media/mapbox-logo.svg`) y los enlaces "© Mapbox", "© OpenStreetMap" e "Improve this map". El token
+  público sale de `NEXT_PUBLIC_MAPBOX_TOKEN` al construir; sin él, o si no empieza con `pk.`, no se pide el mapa y se
+  queda el esquema. La lógica pura (opciones del mapa, token, respaldo) está en ese archivo y se prueba sin Leaflet; el
+  montaje está en `venue-map-session.ts`.
   - No pide Leaflet ni teselas hasta que la sección está por verse (`IntersectionObserver`). Sin esa API, o sin conexión
     o con teselas que fallan, se queda el esquema SVG de `VenueLocation` (RNF-14).
   - La rueda solo hace zoom tras un clic en el mapa o con ctrl; en pantallas táctiles un dedo no arrastra el mapa (se
     desplaza la página) y el pellizco sí hace zoom.
   - `public/sw.js` ignora todo lo que no es de este origen, así que nunca guarda ni intercepta las teselas.
-  - No hay CSP en `next.config.ts`; si se añade una, `img-src` debe permitir `tile.openstreetmap.org`.
-- **Privacidad.** Las teselas se piden a OpenStreetMap (`tile.openstreetmap.org`) desde el navegador del visitante, así
-  que la Fundación OSM recibe su IP y el `Referer` al ver la sección de ubicación. No se envía ninguna cookie ni dato del
+  - No hay CSP en `next.config.ts`; si se añade una, `img-src` debe permitir `api.mapbox.com`.
+- **Privacidad.** Las teselas se piden a Mapbox (`api.mapbox.com`) desde el navegador del visitante, así que Mapbox
+  recibe su IP y el `Referer` al ver la sección de ubicación. No se envía ninguna cookie ni dato del
   pasaporte. Si se cambia de proveedor, actualiza esta nota.
 
 ## Documentación del proyecto

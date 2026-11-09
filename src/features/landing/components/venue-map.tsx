@@ -8,6 +8,7 @@ import { useVenueMap } from "@features/landing/hooks/use-venue-map";
 import { useVisibleOnce } from "@features/landing/hooks/use-visible-once";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import type { EventVenue } from "@features/landing/lib/types";
+import { MAPBOX_ACCESS_TOKEN } from "@features/landing/lib/venue-map";
 import { siteConfig } from "@shared/lib/site-config";
 
 interface VenueMapProps {
@@ -16,7 +17,10 @@ interface VenueMapProps {
   fallback: ReactNode;
 }
 
-/** The venue map of Leaflet over the schematic. The map is requested only when the section is about to be seen. */
+/**
+ * The venue map of Leaflet over the schematic. The map is requested only when the section is about to be seen, and
+ * never without a Mapbox token: then the schematic stays.
+ */
 export function VenueMap({ venue, fallback }: Readonly<VenueMapProps>) {
   const { map } = LANDING_COPY.venue;
   const [sectionRef, isVisible] = useVisibleOnce<HTMLDivElement>();
@@ -26,7 +30,12 @@ export function VenueMap({ venue, fallback }: Readonly<VenueMapProps>) {
     [map.zoomIn, map.zoomOut, venue.shortName],
   );
 
-  const [mapRef, { isReady }] = useVenueMap({ venue, labels, isEnabled: isVisible });
+  const [mapRef, { isReady }] = useVenueMap({
+    venue,
+    labels,
+    accessToken: MAPBOX_ACCESS_TOKEN,
+    isEnabled: isVisible && MAPBOX_ACCESS_TOKEN !== "",
+  });
 
   return (
     <div ref={sectionRef} className="relative h-full min-h-80">
