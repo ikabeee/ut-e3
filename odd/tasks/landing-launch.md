@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 ---
 
 # Lanzamiento de la landing a producción con kill switch
@@ -47,7 +47,7 @@ recuperación por correo). Entrega: un PR hacia `develop`. Pruebas: Jest (`npm t
 | T2 | S2 | inline | hecho | `d5ec147`, `cdbabf8` |
 | T3 | S3, S4 | delegada (subagente Claude; Muse y Gemini no arrancan en el sandbox) + migración inline | hecho | `7018e59` |
 | T4 | S5 | inline + dos auditorías de solo lectura | hecho (carga por HTTP pendiente en el VPS) | `b1ce2e1`, `1c2e415`, `cdbabf8` |
-| T5 | S6 | inline (requiere el merge del PR) | pendiente | |
+| T5 | S6 | inline | hecho | PR #129 (`204ef97`) |
 
 ## Log
 
@@ -99,3 +99,9 @@ recuperación por correo). Entrega: un PR hacia `develop`. Pruebas: Jest (`npm t
   verde; `eslint`, `lint:oxlint`, `lint:duplication` y `typecheck` en verde; `format:check` en verde salvo
   `.env.example` y `.env.production.example`, que el sandbox no deja leer y la rama no toca. Siguiente: PR hacia
   `develop` (el usuario lo crea con `gh`) y, tras el merge, T5.
+- **L10 (2026-11-09).** PR #129 fusionado en `develop` (`204ef97`) con el CI en verde (incluye `npm run build`). Ramas
+  borradas tras verificar que `develop` las contiene (ancestro, o con squash y todos sus archivos presentes):
+  `feat/nice-gauss-t92g86`, `feature/{108-not-found-page,email-recovery,event-day-integration,offline-kiosk,raffle,
+  sysadmin-tools,pwa,recovery-qr,games-catalog,visitor-passport*}`. Quedan `main`, `develop` y `archive/*`. Pendiente
+  fuera de esta feature: `npm run test:load` contra el VPS, `proxy_pass` con URI en Nginx, `sw.js` que se desregistre,
+  textos de la agenda con el PIN en la base, logos de Fresh Air y OpSET.

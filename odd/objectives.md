@@ -12,4 +12,4 @@
 8. [KOF entries and check-in (M10)](tasks/kof-entries.md) — unknown
 9. [Account invitations and staff management](tasks/account-invitations.md) — done
 10. [KOF public bracket](tasks/kof-public-bracket.md) — in-progress
-11. [Landing launch with kill switch](tasks/landing-launch.md) — in-progress
+11. [Landing launch with kill switch](tasks/landing-launch.md) — done
