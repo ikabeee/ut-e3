@@ -43,10 +43,10 @@ recuperación por correo). Entrega: un PR hacia `develop`. Pruebas: Jest (`npm t
 
 | ID | Specs | Ruta | Estado | Commit |
 | --- | --- | --- | --- | --- |
-| T1 | S1 | inline | pendiente | |
-| T2 | S2 | inline | pendiente | |
-| T3 | S3, S4 | delegada (subagente Claude; Muse y Gemini no arrancan en el sandbox) | pendiente | |
-| T4 | S5 | inline + verificador | pendiente | |
+| T1 | S1 | inline | hecho | `d5ec147`, `cdbabf8` |
+| T2 | S2 | inline | hecho | `d5ec147`, `cdbabf8` |
+| T3 | S3, S4 | delegada (subagente Claude; Muse y Gemini no arrancan en el sandbox) + migración inline | hecho | `7018e59` |
+| T4 | S5 | inline + dos auditorías de solo lectura | hecho (carga por HTTP pendiente en el VPS) | `b1ce2e1`, `1c2e415`, `cdbabf8` |
 | T5 | S6 | inline (requiere el merge del PR) | pendiente | |
 
 ## Log
@@ -79,3 +79,23 @@ recuperación por correo). Entrega: un PR hacia `develop`. Pruebas: Jest (`npm t
 - **L3.** Gemini (`agy`) y Muse no arrancan en este sandbox (no pueden abrir un puerto local ni escribir su directorio de
   sesión). El trabajo delegado va a subagentes de Claude.
 - **L4.** `gh` no funciona en el sandbox (TLS y keyring): el PR y el merge los corre el usuario con `!`.
+- **L5.** El CHECK `sponsors_phone_check` exigía teléfono; Algorix y Mermelada no tienen. La migración
+  `20261109120000_sponsor_optional_contact` acepta el teléfono vacío (uno escrito sigue en E.164) y el panel deja sitio,
+  teléfono y servicios como opcionales. Mermelada usa `logo-4` (el único completo en alta resolución).
+- **L6.** Auditoría de UI/UX: en modo `landing` se quitan "Inicio" (el logo lleva al inicio), CALIFICA, el marketplace y
+  las invitadas por anunciar; el croquis abre en el escenario sin juegos; "Agregar al calendario"; `--utg-grey` a
+  `#8a8a8a` (AA). Pendientes sugeridos sin aplicar: carrusel de patrocinadores que cambia de alto en móvil, textos de la
+  agenda que mencionan el PIN, fecha y sede en el hero.
+- **L7.** Auditoría de escenarios catastróficos: ninguna ruta salta el kill switch. Se corrigieron: lista cerrada de
+  extensiones públicas (sin `.rsc`), `isGameSlug` antes de consultar la ficha, el contenedor no arranca si su
+  `SITE_MODE` no es el de la imagen, y solo WebP en el optimizador. Pendientes: `proxy_pass` con URI en Nginx para
+  normalizar `..`, y un `sw.js` que se desregistre si alguna vez hubo un despliegue `full` en el mismo dominio.
+- **L8.** El sandbox no permite abrir puertos ni sockets: no hay `next start`, e2e ni prueba de carga por HTTP local.
+  `npm run test:load` queda para correrse contra el VPS; la carga local se mide inyectando peticiones en el handler de
+  Next dentro del proceso.
+- **L9 (2026-11-09).** `next build` local se queda colgado bajando las fuentes de Google (`fonts.gstatic.com` no es
+  alcanzable desde el sandbox), así que no hay build local ni carga dentro del proceso; el build lo corre el CI del PR y
+  la carga, `npm run test:load` contra el VPS. Verificación: Jest en Node 22 (el del CI) 272 suites y 1976 pruebas en
+  verde; `eslint`, `lint:oxlint`, `lint:duplication` y `typecheck` en verde; `format:check` en verde salvo
+  `.env.example` y `.env.production.example`, que el sandbox no deja leer y la rama no toca. Siguiente: PR hacia
+  `develop` (el usuario lo crea con `gh`) y, tras el merge, T5.
