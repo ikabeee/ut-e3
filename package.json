@@ -38,7 +38,8 @@
     "db:seed:kof": "tsx --conditions=react-server prisma/seed-kof.ts",
     "db:seed:stands": "tsx --conditions=react-server prisma/seed-stands.ts",
     "db:seed:support": "tsx --conditions=react-server prisma/seed-support.ts",
-    "db:seed:raffle": "tsx --conditions=react-server prisma/seed-raffle.ts"
+    "db:seed:raffle": "tsx --conditions=react-server prisma/seed-raffle.ts",
+    "test:load": "node tools/load/landing-load.mjs"
   },
   "dependencies": {
     "@heroui/react": "^3.2.6",

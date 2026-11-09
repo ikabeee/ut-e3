@@ -131,6 +131,22 @@ docker compose exec -e NODE_ENV=development -e STAND_DEV_PASSWORD='<una-clave-de
 Si por error se corrió en producción, esas cuentas deben desactivarse desde `/admin` y los pasaportes falsos no tienen
 datos reales, pero cuentan como visitantes: recrea la base desde un respaldo anterior.
 
+## Prueba de carga
+
+`npm run test:load` simula a muchos teléfonos que abren la portada a la vez: cada usuario pide el HTML y, en su primera
+visita, los scripts, estilos e imágenes que el HTML enlaza (después los toma de su caché, como un navegador). Con el kill
+switch activo también comprueba que una página bloqueada siga respondiendo con la redirección. No usa dependencias.
+
+```bash
+BASE_URL=https://<tu-dominio> USERS=1000 DURATION=60 npm run test:load            # producción (SITE_MODE=landing)
+BASE_URL=https://<demo> USERS=300 DURATION=60 CHECK_BLOCKED=0 npm run test:load   # demo (SITE_MODE=full)
+```
+
+Imprime peticiones por segundo y los percentiles 50, 95 y 99 de cada tipo de petición, y sale con error si más del 1 %
+de las respuestas no es la esperada (`MAX_ERROR_RATE`) o si el p95 del HTML pasa de 1500 ms (`MAX_P95_MS`). Córrela
+desde otro equipo, no desde el VPS, y nunca en horario del evento. Detrás de un proxy corporativo agrega
+`NODE_USE_ENV_PROXY=1`.
+
 ## Actualizar
 
 ```bash
