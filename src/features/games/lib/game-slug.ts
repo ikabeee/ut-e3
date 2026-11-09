@@ -1,5 +1,10 @@
 const FALLBACK_SLUG = "juego";
 
+// What buildGameSlug produces: lower-case words of letters and digits joined by single hyphens.
+const GAME_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+const SLUG_MAX_LENGTH = 80;
+
 /** The URL name of a game: lower case, without accents, with hyphens between words. */
 export function buildGameSlug(name: string): string {
   const slug = name
@@ -22,4 +27,9 @@ export function pickFreeSlug(base: string, taken: ReadonlySet<string>): string {
   while (taken.has(`${base}-${suffix}`)) suffix += 1;
 
   return `${base}-${suffix}`;
+}
+
+/** Whether a URL segment can name a game at all, checked before anything looks it up or caches it. */
+export function isGameSlug(slug: string): boolean {
+  return slug.length <= SLUG_MAX_LENGTH && GAME_SLUG.test(slug);
 }

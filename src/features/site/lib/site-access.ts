@@ -21,6 +21,9 @@ const LANDING_ONLY_PATHS = new Set([HOME_PATH, PRIVACY_PATH, HEALTH_PATH]);
 // Folders of public/ whose files the landing shows. A file name elsewhere could still reach a page or a Route Handler.
 const PUBLIC_ASSET_FOLDERS = ["/games/", "/sponsors/", "/media/", "/icons/"];
 
+// The kinds of file public/ holds. Anything else with a dot (".rsc", ".json") could be read by Next as a page.
+const PUBLIC_FILE_EXTENSION = /\.(?:avif|ico|jpe?g|js|mp4|png|svg|webm|webmanifest|webp)$/i;
+
 /**
  * Decides what the kill switch does with a request. In `landing` mode only reads of the landing, its public files and
  * the health check pass: every write is refused, which also closes the Server Actions (a POST to any page).
@@ -40,13 +43,9 @@ function isLandingOnlyPath(pathname: string): boolean {
 }
 
 function isPublicFile(pathname: string): boolean {
-  if (!hasFileExtension(pathname)) return false;
+  if (!PUBLIC_FILE_EXTENSION.test(pathname)) return false;
 
   const isAtRoot = pathname.lastIndexOf("/") === 0;
 
   return isAtRoot || PUBLIC_ASSET_FOLDERS.some((folder) => pathname.startsWith(folder));
-}
-
-function hasFileExtension(pathname: string): boolean {
-  return /\.[a-z0-9]+$/i.test(pathname.slice(pathname.lastIndexOf("/") + 1));
 }

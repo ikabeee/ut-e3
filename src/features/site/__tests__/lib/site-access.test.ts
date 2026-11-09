@@ -52,6 +52,13 @@ describe("decideSiteAccess in landing mode", () => {
     expect(decideSiteAccess("landing", { method, pathname })).toBe("methodNotAllowed");
   });
 
+  it.each(["/admin.rsc", "/register.rsc", "/games.rsc", "/passport.json", "/games/x.php"])(
+    "does not take %s for a public file, since its extension is not one the landing serves",
+    (pathname) => {
+      expect(decideSiteAccess("landing", { method: "GET", pathname })).toBe("redirectHome");
+    },
+  );
+
   it("does not let a file name open a page outside the public folders", () => {
     expect(decideSiteAccess("landing", { method: "GET", pathname: "/admin/report.csv" })).toBe("redirectHome");
     expect(decideSiteAccess("landing", { method: "GET", pathname: "/api/raffle.json" })).toBe("notFound");

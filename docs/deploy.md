@@ -46,8 +46,9 @@ Después configura el proxy inverso (ver más abajo). Entra a `https://<tu-domin
 | `full` | La app completa: pasaporte, kiosco, panel, rifa, torneo y PWA. |
 
 El valor se lee al construir (la portada se compila con o sin esos enlaces) y al arrancar (`src/proxy.ts` bloquea), así
-que la imagen guarda el modo con el que se construyó: para cambiarlo, cambia `SITE_MODE` y reconstruye. Si falta en un
-servidor de producción, el sitio arranca en `landing`; un valor distinto de `landing` o `full` detiene el build.
+que la imagen guarda el modo con el que se construyó: para cambiarlo, cambia `SITE_MODE` y reconstruye. Si el contenedor
+arranca con un `SITE_MODE` distinto al de su imagen, se detiene y lo dice en el log. Si falta en un servidor de
+producción, el sitio arranca en `landing`; un valor distinto de `landing` o `full` detiene el build.
 
 ### Dos entornos: producción y demo
 

@@ -22,7 +22,9 @@ const nextConfig: NextConfig = {
     agentUpgrade: "security",
   },
   images: {
-    formats: ["image/avif", "image/webp"],
+    // Only WebP: AVIF takes several times the CPU to encode, and the first wave of phones at the event would make the
+    // server encode every size of every cover at once.
+    formats: ["image/webp"],
   },
   async headers() {
     return [

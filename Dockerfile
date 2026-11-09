@@ -38,7 +38,8 @@ ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL} \
     DATABASE_URL=file:/tmp/build.db
 
 RUN test -n "$NEXT_PUBLIC_SITE_URL" || (echo "Falta el argumento NEXT_PUBLIC_SITE_URL (por ejemplo https://showcase.ejemplo.com)." && exit 1)
-RUN case "$SITE_MODE" in landing|full) ;; *) echo "SITE_MODE debe ser landing o full (recibido: $SITE_MODE)." && exit 1 ;; esac
+RUN case "$SITE_MODE" in landing|full) ;; *) echo "SITE_MODE debe ser landing o full (recibido: $SITE_MODE)." && exit 1 ;; esac \
+    && printf '%s' "$SITE_MODE" > .site-mode
 RUN npx prisma migrate deploy && npx prisma db seed && npm run build && rm -f /tmp/build.db*
 
 FROM base AS runtime-deps
@@ -87,6 +88,7 @@ COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
 COPY --from=build --chown=node:node /app/generated ./generated
+COPY --from=build --chown=node:node /app/.site-mode ./.site-mode
 COPY --chown=node:node package.json tsconfig.json prisma7.config.ts ./
 COPY --chown=node:node prisma ./prisma
 COPY --chown=node:node src ./src
