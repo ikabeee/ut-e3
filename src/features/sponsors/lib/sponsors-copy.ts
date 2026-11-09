@@ -8,7 +8,7 @@ export const SPONSORS_COPY = {
   page: {
     pageTitle: "Patrocinadores",
     pageDescription:
-      "Las empresas que hacen posible el showcase de videojuegos del edificio E3: sus servicios, sitio y teléfono.",
+      "Las empresas que hacen posible el showcase de videojuegos del Edificio B de la UT Cancún: sus servicios, sitio y teléfono.",
     listLabel: "Patrocinadores del evento",
   },
   admin: {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useCallback, useMemo, useState } from "react";
-import { useOnlineStatus } from "@features/pwa/hooks/use-online-status";
+import { useOnlineStatus } from "@shared/hooks/use-online-status";
 import { createVisitStatusLoader, fetchPinFilter, sendQueuedVisits } from "@features/stands/api/stands-api-client";
 import { KioskPinStep } from "@features/stands/components/kiosk-pin-step";
 import { KioskQueueStatus } from "@features/stands/components/kiosk-queue-status";

@@ -46,4 +46,10 @@ describe("layoutLedText", () => {
   it("measures PIXEL & CODE as 67 columns wide", () => {
     expect(layoutLedText("PIXEL & CODE").columns).toBe(67);
   });
+
+  it("draws every letter of the alphabet, so other pages can write any word", () => {
+    for (const letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+      expect(layoutLedText(letter).cells.length).toBeGreaterThan(0);
+    }
+  });
 });

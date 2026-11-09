@@ -19,6 +19,7 @@ const FEATURE_DEPENDENCIES = {
   visitors: ["accounts", "games"],
   moderation: ["accounts", "games", "visitors"],
   admin: ["accounts", "tournament"],
+  showcase: ["landing"],
 };
 
 const FEATURES = readdirSync(new URL("./src/features", import.meta.url), { withFileTypes: true })
