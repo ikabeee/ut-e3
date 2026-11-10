@@ -8,23 +8,24 @@ type SponsorFields = Pick<Sponsor, "name" | "logoPath"> & Partial<Pick<Sponsor, 
 const REAL_SPONSORS: SponsorFields[] = [
   {
     name: "Algorix Insights",
-    logoPath: "/sponsors/algorix-insights.png",
+    logoPath: "/sponsors/algorix-insights.svg",
     websiteUrl: "https://algorixinsights.com",
     services: "Desarrollo web, agentes de IA y software a medida.",
   },
   {
     name: "Bonavida",
-    logoPath: "/sponsors/bonavida.png",
+    logoPath: "/sponsors/bonavida.svg",
     websiteUrl: "https://aguabonavida.com.mx/",
     phone: "+529983048120",
   },
-  { name: "Mermelada", logoPath: "/sponsors/mermelada.jpg" },
+  { name: "Mermelada", logoPath: "/sponsors/mermelada.svg" },
   {
     name: "Nemo Submarine",
-    logoPath: "/sponsors/nemo-submarine.png",
+    logoPath: "/sponsors/nemo-submarine.svg",
     websiteUrl: "https://www.nemoisla.com/",
     phone: "+19038019083",
   },
+  { name: "OpSET", logoPath: "/sponsors/opset.svg" },
 ];
 
 // Frozen because nothing appends to it at runtime: it changes only by editing this file.

@@ -18,6 +18,15 @@ describe("getCoverImage", () => {
   });
 });
 
+describe("a game without artwork", () => {
+  it("has no cover and an empty gallery", () => {
+    const game = makeGame({ id: "one-mind", name: "One Mind", images: [] });
+
+    expect(getCoverImage(game)).toBeNull();
+    expect(getGalleryImages(game)).toEqual([]);
+  });
+});
+
 describe("getGalleryImages", () => {
   it("puts the cover first and the other images in position order", () => {
     const pits: GameImage = { path: "/games/ruta-9-pits.jpg", alt: "Ruta 9: pits", position: 1, isCover: false };

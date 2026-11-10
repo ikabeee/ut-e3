@@ -3,7 +3,8 @@ export interface FloorPlanStand {
   name: string;
   genre: string;
   synopsis: string;
-  coverSrc: string;
+  /** Null while the game has no artwork: the panel shows a generic cover with its name. */
+  coverSrc: string | null;
   coverAlt: string;
 }
 
@@ -67,7 +68,7 @@ export interface StandCell {
 }
 
 export interface PlanCover {
-  src: string;
+  src: string | null;
   alt: string;
 }
 

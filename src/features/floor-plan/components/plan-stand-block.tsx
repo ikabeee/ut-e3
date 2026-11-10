@@ -55,7 +55,7 @@ function PlanStand({ item, rect, nameSize, selection, touchRect }: Readonly<Plan
   const [firstLine, secondLine] = splitStandName(item.drawingName);
 
   const nameProps = {
-    maxWidth: width - 14,
+    maxWidth: width - 16,
     x: x + 8,
     fontSize: nameSize,
     fontWeight: 500,

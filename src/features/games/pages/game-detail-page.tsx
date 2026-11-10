@@ -43,9 +43,14 @@ export async function generateGameDetailPageMetadata({ params }: PageProps<"/gam
       title: `${game.name} | ${siteConfig.title}`,
       description: game.synopsis,
       url: getGamePath(game.slug),
-      images: [{ url: cover.path, alt: cover.alt }],
+      images: cover ? [{ url: cover.path, alt: cover.alt }] : siteShareImages(),
     }),
   };
+}
+
+// A game without artwork shares the image of the site, like any other page.
+function siteShareImages() {
+  return [{ url: siteConfig.shareImage, alt: siteConfig.title }];
 }
 
 // partialPrefetching shares one App Shell across every slug, so the params read waits behind Suspense. An unknown

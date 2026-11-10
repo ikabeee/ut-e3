@@ -44,18 +44,18 @@ describe("getGames", () => {
     expect(await getGames()).toEqual(INITIAL_GAMES.map(withUuids));
   });
 
-  it("puts Abby's Tower at ZA-S1 with its portrait cover first and its landscape artwork second", async () => {
+  it("puts Abby's Tower at ZB-S1 with its portrait cover first and its landscape artwork second", async () => {
     await seedGames(getPrisma());
 
-    const [first] = await getGames();
+    const game = (await getGames()).find((candidate) => candidate.slug === "abby-s-tower");
 
-    expect(first).toEqual({
+    expect(game).toEqual({
       id: expect.stringMatching(UUID),
       slug: "abby-s-tower",
       name: "Abby's Tower",
       synopsis: "",
       genre: { id: expect.stringMatching(UUID), name: "Por anunciar", slug: "por-anunciar" },
-      stand: { zone: "A", number: 1 },
+      stand: { zone: "B", number: 1 },
       images: [
         { path: "/games/abby-s-tower.jpg", alt: "Portada de Abby's Tower", position: 1, isCover: true },
         {

@@ -7,7 +7,7 @@ import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { GAMES_SECTION_ID, getGamePath } from "@features/games/lib/games-links";
 import type { Game } from "@features/games/lib/types";
 
-const COVER_SIZES = "270px";
+const COVER_SIZES = "360px";
 
 interface CoverflowCaseProps {
   ref: Ref<HTMLAnchorElement>;
@@ -78,7 +78,7 @@ function CoverflowCover({ game, isCurrent, isReflection = false }: Readonly<Cove
         )}
       >
         <span className="relative block flex-1 overflow-hidden bg-surface">
-          <GameCoverImage game={game} sizes={COVER_SIZES} isDecorative={isReflection} />
+          <GameCoverImage game={game} sizes={COVER_SIZES} isDecorative={isReflection} isTitleShown={false} />
           <span aria-hidden="true" className="absolute inset-x-0 bottom-0 block h-[42%] shade-cover" />
           <span className="absolute inset-x-[10px] bottom-[10px] z-1 block text-left type-wide text-[calc(var(--cw)*0.085)] leading-none tracking-[-.03em] text-foreground">
             {game.name}
