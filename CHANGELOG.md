@@ -8,6 +8,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- El mapa de la sede usa el estilo oscuro de Mapbox, con su logo y su crédito. El token público se define al construir
+  con `NEXT_PUBLIC_MAPBOX_TOKEN`; sin él, la sección muestra el esquema de la sede.
+
 - Kill switch para publicar solo la portada: con `SITE_MODE=landing` (el valor por defecto en producción) el sitio
   sirve la portada, el aviso de privacidad y sus imágenes, y todo lo demás redirige a la portada, responde 404 (`/api`)
   o 405 (formularios). La portada no enlaza a lo bloqueado. `SITE_MODE=full` publica la app completa. Compose levanta

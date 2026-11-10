@@ -5,9 +5,13 @@
   font-family: var(--font-mono);
 }
 
-/* OpenStreetMap only serves a light style: invert it and turn the hue back to get a dark map in the site palette. */
-.venue-map .leaflet-tile-pane {
-  filter: invert(1) hue-rotate(200deg) brightness(0.8) contrast(0.95) saturate(0.6);
+/* The Mapbox logo (required by its terms), at the size of its attribution guide. */
+.venue-map .venue-map__logo {
+  display: block;
+  width: 65px;
+  height: 20px;
+  margin: 0 0 6px 6px;
+  background: url("/media/mapbox-logo.svg") no-repeat 0 0 / 65px 20px;
 }
 
 .venue-map .leaflet-bar {

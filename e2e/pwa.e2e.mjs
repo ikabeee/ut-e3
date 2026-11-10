@@ -375,8 +375,8 @@ async function listCachedPaths(page) {
 
 const VENUE_MAP_REGION = "[role=region][aria-label^='Mapa de la ubicación']";
 
-// RF-07 and the venue map: it draws OpenStreetMap tiles online, the worker never stores them (another origin), and the
-// schematic stays underneath as the fallback.
+// RF-07 and the venue map: it draws the Mapbox tiles online (the build needs NEXT_PUBLIC_MAPBOX_TOKEN, from the
+// environment or .env), the worker never stores them (another origin), and the schematic stays underneath as the fallback.
 async function checkVenueMapOnline(page) {
   await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
   await page.locator("#venue").scrollIntoViewIfNeeded();
@@ -385,10 +385,16 @@ async function checkVenueMapOnline(page) {
 
   await page.waitForSelector(".venue-map img.leaflet-tile-loaded", { timeout: UI_TIMEOUT_MS });
   check("online, the venue map shows tiles", (await region.getAttribute("aria-hidden")) === "false");
+  const credit = await page.locator(".leaflet-control-attribution").innerText();
+
   check(
-    "the venue map names Edificio B and credits OpenStreetMap",
+    "the venue map names Edificio B and credits Mapbox and OpenStreetMap",
     (await region.getAttribute("aria-label")).includes("Edificio B") &&
-      (await page.locator(".leaflet-control-attribution").innerText()).includes("OpenStreetMap contributors"),
+      ["© Mapbox", "© OpenStreetMap", "Improve this map"].every((text) => credit.includes(text)),
+  );
+  check(
+    "the venue map shows the Mapbox logo linked to mapbox.com",
+    (await page.locator(".venue-map__logo").getAttribute("href")) === "https://www.mapbox.com/",
   );
 
   const origins = await page.evaluate(async () => {

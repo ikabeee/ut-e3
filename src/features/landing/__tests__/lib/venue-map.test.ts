@@ -2,31 +2,65 @@ import { EVENT_VENUE } from "@features/landing/lib/venue";
 import {
   buildMapOptions,
   buildTileLayerOptions,
+  parseMapboxToken,
   shouldShowFallback,
   TILE_ERROR_LIMIT,
   VENUE_MAP_TILES,
 } from "@features/landing/lib/venue-map";
 
+const PUBLIC_TOKEN = "pk.example-public-token";
+
 describe("venue map tiles", () => {
-  it("uses the standard OpenStreetMap tiles, which need no API key", () => {
-    expect(VENUE_MAP_TILES.url).toBe("https://tile.openstreetmap.org/{z}/{x}/{y}.png");
-    expect(VENUE_MAP_TILES.url).not.toMatch(/key|token/i);
+  it("uses the dark style of Mapbox, with the token as a placeholder and never written in the URL", () => {
+    expect(VENUE_MAP_TILES.url).toBe(
+      "https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}{r}?access_token={accessToken}",
+    );
+  });
+
+  it("asks for the 512 px tiles of Mapbox with the token it is given", () => {
+    const options = buildTileLayerOptions(PUBLIC_TOKEN);
+
+    expect(options.accessToken).toBe(PUBLIC_TOKEN);
+    expect(options.tileSize).toBe(512);
+    expect(options.zoomOffset).toBe(-1);
   });
 
   it("never asks for a zoom the tiles do not have", () => {
-    const { minZoom, maxZoom } = buildTileLayerOptions();
+    const { minZoom, maxZoom } = buildTileLayerOptions(PUBLIC_TOKEN);
 
-    expect(maxZoom).toBeLessThanOrEqual(19);
+    expect(maxZoom).toBeLessThanOrEqual(22);
     expect(EVENT_VENUE.mapZoom).toBeGreaterThanOrEqual(minZoom ?? 0);
     expect(EVENT_VENUE.mapZoom).toBeLessThanOrEqual(maxZoom ?? 0);
   });
 
-  it("credits OpenStreetMap contributors with a link that opens safely", () => {
-    const { attribution } = buildTileLayerOptions();
+  it("credits Mapbox and OpenStreetMap and links to Improve this map, as Mapbox requires", () => {
+    const { attribution } = buildTileLayerOptions(PUBLIC_TOKEN);
 
-    expect(attribution).toContain("OpenStreetMap</a> contributors");
-    expect(attribution).toContain("https://www.openstreetmap.org/copyright");
-    expect(attribution).toContain('rel="noopener noreferrer"');
+    expect(attribution).toContain('href="https://www.mapbox.com/about/maps/"');
+    expect(attribution).toContain("&copy; Mapbox</a>");
+    expect(attribution).toContain('href="https://www.openstreetmap.org/copyright"');
+    expect(attribution).toContain("&copy; OpenStreetMap</a>");
+    expect(attribution).toContain('href="https://apps.mapbox.com/feedback/"');
+    expect(attribution).toContain("Improve this map</a>");
+    expect(attribution?.match(/rel="noopener noreferrer"/g)).toHaveLength(3);
+  });
+
+  it("links the Mapbox logo to mapbox.com", () => {
+    expect(VENUE_MAP_TILES.logo).toEqual({ href: "https://www.mapbox.com/", label: "Mapbox" });
+  });
+});
+
+describe("parseMapboxToken", () => {
+  it("takes a public token, without the spaces around it", () => {
+    expect(parseMapboxToken(` ${PUBLIC_TOKEN} `)).toBe(PUBLIC_TOKEN);
+  });
+
+  it.each([undefined, "", "   "])("leaves the map off without a token (%p)", (value) => {
+    expect(parseMapboxToken(value)).toBe("");
+  });
+
+  it("never sends a secret token to the browser", () => {
+    expect(parseMapboxToken("sk.secret-token")).toBe("");
   });
 });
 

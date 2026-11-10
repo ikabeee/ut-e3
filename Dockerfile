@@ -33,7 +33,10 @@ COPY . .
 ARG NEXT_PUBLIC_SITE_URL
 # Kill switch (docs/deploy.md): la portada se compila sin los enlaces que el modo `landing` bloquea.
 ARG SITE_MODE=landing
+# Token público de Mapbox (pk.) para el mapa de la sede; sin él, la portada muestra el esquema de la sede.
+ARG NEXT_PUBLIC_MAPBOX_TOKEN=""
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL} \
+    NEXT_PUBLIC_MAPBOX_TOKEN=${NEXT_PUBLIC_MAPBOX_TOKEN} \
     SITE_MODE=${SITE_MODE} \
     DATABASE_URL=file:/tmp/build.db
 
