@@ -449,13 +449,19 @@ async function registerSponsor({ page, database, screenshots }) {
   await form.getByLabel("Ruta del logo").fill("/sponsors/nodo-caribe.svg");
   await form.getByLabel("Sitio web").fill("https://example.com/pixel-coffee");
   await form.getByLabel("Teléfono de contacto").fill("+52 998 555 0101");
+  await form.getByLabel("Correo", { exact: true }).fill("  Hola@Pixel-Coffee.example ");
   await form.getByLabel("Servicios").fill("Café para los desarrolladores.");
   await form.getByRole("button", { name: "Agregar patrocinador" }).click();
   await page.getByText("Patrocinador agregado.").waitFor({ timeout: UI_TIMEOUT_MS });
 
-  const sponsor = database.prepare("SELECT phone FROM sponsors WHERE name = 'Pixel Coffee'").get();
+  const sponsor = database.prepare("SELECT phone, email FROM sponsors WHERE name = 'Pixel Coffee'").get();
 
   check("the sponsor is stored with its phone in E.164", sponsor?.phone === "+529985550101", sponsor?.phone);
+  check(
+    "the sponsor email is stored trimmed and in lowercase",
+    sponsor?.email === "hola@pixel-coffee.example",
+    sponsor?.email,
+  );
   await page.screenshot({ path: path.join(screenshots, "sysadmin-tools-06-catalog.png"), fullPage: true });
 
   await page.goto(`${BASE_URL}/sponsors`, { waitUntil: "networkidle" });
