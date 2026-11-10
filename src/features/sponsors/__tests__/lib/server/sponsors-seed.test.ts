@@ -24,13 +24,14 @@ beforeEach(async () => {
 const E164 = /^\+\d{8,15}$/;
 
 describe("INITIAL_SPONSORS", () => {
-  it("lists the five sponsors with a logo, in the order of the carousel", () => {
+  it("lists the six sponsors with a logo, in the order of the carousel", () => {
     expect(INITIAL_SPONSORS.map((sponsor) => sponsor.name)).toEqual([
       "Algorix Insights",
       "Bonavida",
       "Mermelada",
       "Nemo Submarine",
       "OpSET",
+      "Le Jardin d'Aurore",
     ]);
   });
 
@@ -47,12 +48,14 @@ describe("INITIAL_SPONSORS", () => {
       { name: "Mermelada", websiteUrl: "", phone: "" },
       { name: "Nemo Submarine", websiteUrl: "https://www.nemoisla.com/", phone: "+19038019083" },
       { name: "OpSET", websiteUrl: "", phone: "" },
+      { name: "Le Jardin d'Aurore", websiteUrl: "", phone: "" },
     ]);
   });
 
   it("describes only Algorix Insights, the only sponsor with a services text", () => {
     expect(INITIAL_SPONSORS.map((sponsor) => sponsor.services)).toEqual([
       "Desarrollo web, agentes de IA y software a medida.",
+      "",
       "",
       "",
       "",
