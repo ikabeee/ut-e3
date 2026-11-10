@@ -263,12 +263,10 @@
 }
 
 @utility coverflow-rack {
-  background: radial-gradient(
-    70% 60% at 50% 38%,
-    var(--utg-rack-top) 0%,
-    var(--utg-rack-bottom) 55%,
-    var(--utg-black) 100%
-  );
+  /* The linear layer fades the top and bottom edges to black so the rack has no hard cut against the section. */
+  background:
+    linear-gradient(to bottom, var(--utg-black) 0%, transparent 22%, transparent 78%, var(--utg-black) 100%),
+    radial-gradient(70% 60% at 50% 38%, var(--utg-rack-top) 0%, var(--utg-rack-bottom) 55%, var(--utg-black) 100%);
 }
 
 @utility coverflow-glow {
