@@ -20,7 +20,7 @@ Definidos en `src/shared/styles/theme.css`. Usa siempre las clases del tema, no 
 | `--light` | `#F4F4F4` | `bg-paper` (con `text-paper-foreground`) |
 | `--blue-1` / `--blue-4` / `--blue-5` | `#68B5E6` / `#0582D4` / `#04598F` | `accent-hi`, `accent-strong`, `accent-deep` |
 | Grises de texto secundario | `#D8D8D8`, `#E4E4E4`, `#C9C8C1`, `#BDBDBD` | `text-copy`, `text-copy-strong`, `text-copy-warm`, `text-copy-dim` |
-| Cajas del exhibidor 3D (`--utg-case-border`, `--utg-case-face`, `--utg-case-edge`) | `#D6D6D6` / `#0B0B0D` / `#BDBDBD` | `border-case-border`, `bg-case-face`; el canto en `coverflow-edge` |
+| Cajas del exhibidor 3D (`--utg-case-border`, `--utg-case-face`) | `#D6D6D6` / `#0B0B0D` | `border-case-border`, `bg-case-face` |
 | Fondo del rack (`--utg-rack-top`, `--utg-rack-bottom`) | `#1E1E20` / `#0C0C0D` | `coverflow-rack` |
 | Sombra de una portada sobre otras | negro al 70 % | `shadow-cover` |
 
@@ -80,7 +80,7 @@ Utilidades de `components.css` para leer texto sobre imágenes y para el exhibid
 | Utilidad | Uso |
 | --- | --- |
 | `shade-cover` | Portada de una caja del exhibidor. |
-| `coverflow-rack`, `coverflow-edge`, `coverflow-glow`, `coverflow-reflection` | Fondo del rack, cantos, brillo de la caja al frente y reflejo tenue. |
+| `coverflow-rack`, `coverflow-glow`, `coverflow-reflection` | Fondo del rack, brillo de la caja al frente y reflejo tenue. Las cajas de los lados se oscurecen con una capa negra, no con `filter`: un filtro por caja hace que el navegador redibuje cada una como superficie aparte al hacer scroll (#128). |
 
 ## Efectos
 

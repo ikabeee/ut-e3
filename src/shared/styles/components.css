@@ -271,10 +271,6 @@
   );
 }
 
-@utility coverflow-edge {
-  background: linear-gradient(90deg, var(--utg-case-edge), var(--utg-white) 50%, var(--utg-case-edge));
-}
-
 @utility coverflow-glow {
   box-shadow:
     0 0 0 1px var(--utg-white),
@@ -282,8 +278,10 @@
     0 30px 70px -20px color-mix(in srgb, var(--utg-white) 25%, transparent);
 }
 
+/* The faint reflection's opacity lives in the mask (22% at 90% opacity): an opacity on top of the mask made the
+   browser draw each reflection through one more offscreen surface (#128). */
 @utility coverflow-reflection {
-  mask-image: linear-gradient(to top, color-mix(in srgb, var(--utg-black) 22%, transparent), transparent 32%);
+  mask-image: linear-gradient(to top, color-mix(in srgb, var(--utg-black) 19.8%, transparent), transparent 32%);
 }
 
 @utility arrow-glyph {
