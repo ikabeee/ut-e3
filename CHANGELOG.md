@@ -311,6 +311,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- La sección "Explora el catálogo" ya no se traba al hacer scroll (#128): las cajas de los lados se oscurecen con una capa
+  en lugar de un filtro y las portadas ya no se componen como capas aparte, así que el navegador deja de redibujar
+  unas 22 superficies por cuadro (ahora son 3). Se ve igual que antes.
 - La barra de la portada ya no desborda a 320 px (tapaba "Inicio" bajo "Crear mi pasaporte") y, debajo de 420 px,
   los enlaces se desvanecen en el borde derecho para que se note que la lista sigue al desplazarla.
 - El campo del PIN del kiosco ya no corta el último dígito de un PIN pegado o tecleado con espacios (" 62192").
