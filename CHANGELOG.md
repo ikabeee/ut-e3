@@ -319,6 +319,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   por ejemplo `ZA-S3-E4-103`) también con solo la portada publicada, sin enlaces a sus fichas; ZC-S3 queda vacío. Los
   juegos sin imagen (Make 'em Fall, One Mind y Sombra del Mictlán) muestran una portada genérica con su título en el
   coverflow, las tarjetas, la ficha y el croquis. Los logos de los patrocinadores son SVG.
+- Croquis: los stands de las zonas A a D van numerados de derecha a izquierda (S3, S2, S1), como en la sede. El fondo
+  del catálogo se funde con negro arriba y abajo, sin corte contra la sección.
 - La barra de la portada ya no desborda a 320 px (tapaba "Inicio" bajo "Crear mi pasaporte") y, debajo de 420 px,
   los enlaces se desvanecen en el borde derecho para que se note que la lista sigue al desplazarla.
 - El campo del PIN del kiosco ya no corta el último dígito de un PIN pegado o tecleado con espacios (" 62192").

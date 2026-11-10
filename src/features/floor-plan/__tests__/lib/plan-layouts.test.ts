@@ -34,13 +34,29 @@ describe("plan layouts", () => {
     expect(codes.toSorted()).toEqual(STAND_CODES.toSorted());
   });
 
-  it("numbers blocks A to D from S1 at the rear of the lobby in the tall layout", () => {
+  it("numbers blocks A to D from S3 at the top down to S1 in the tall layout", () => {
     ["A", "B", "C", "D"].forEach((zone) => {
-      const [first, second, third] = numberedCodes(zone, 3).map((code) => centerOf(PLAN_LAYOUTS.tall, code).y);
+      const [s1, s2, s3] = numberedCodes(zone, 3).map((code) => centerOf(PLAN_LAYOUTS.tall, code).y);
 
-      expect(first).toBeLessThan(second);
-      expect(second).toBeLessThan(third);
+      expect(s3).toBeLessThan(s2);
+      expect(s2).toBeLessThan(s1);
     });
+  });
+
+  it("numbers blocks A to D from S3 on the left to S1 on the right in the wide layout", () => {
+    ["A", "B", "C", "D"].forEach((zone) => {
+      const [s1, s2, s3] = numberedCodes(zone, 3).map((code) => centerOf(PLAN_LAYOUTS.wide, code).x);
+
+      expect(s3).toBeLessThan(s2);
+      expect(s2).toBeLessThan(s1);
+    });
+  });
+
+  it("puts ZC-S1 at the right end and ZC-S3 at the left end of block C in the wide layout", () => {
+    const cells = getStandCells(PLAN_LAYOUTS.wide.standBlocks.find((block) => block.zone === "C")!);
+    const byX = cells.toSorted((a, b) => a.rect[0] - b.rect[0]).map((cell) => cell.code);
+
+    expect(byX).toEqual(["ZC-S3", "ZC-S2", "ZC-S1"]);
   });
 
   it("rotates the tall plan 90 degrees counterclockwise for the wide layout", () => {
