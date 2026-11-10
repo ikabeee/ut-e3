@@ -12,7 +12,7 @@ export function SponsorCaption({ sponsor }: Readonly<SponsorCaptionProps>) {
   useFitText(nameRef, sponsor.name);
 
   return (
-    <div className="flex flex-col gap-4 px-gutter pt-4 pb-[clamp(20px,3vw,40px)]">
+    <div className="flex flex-col items-center gap-4 px-gutter pt-4 pb-[clamp(20px,3vw,40px)] text-center">
       <h2
         ref={nameRef}
         key={sponsor.id}
@@ -28,7 +28,9 @@ export function SponsorCaption({ sponsor }: Readonly<SponsorCaptionProps>) {
       {sponsor.services === "" ? null : (
         <p className="m-0 max-w-[42ch] text-[clamp(16px,1.3vw,19px)] leading-[1.35] text-copy">{sponsor.services}</p>
       )}
-      <SponsorContactLinks sponsor={sponsor} />
+      <div className="flex justify-center">
+        <SponsorContactLinks sponsor={sponsor} />
+      </div>
     </div>
   );
 }

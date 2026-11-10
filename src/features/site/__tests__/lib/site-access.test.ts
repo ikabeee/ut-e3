@@ -9,7 +9,7 @@ describe("decideSiteAccess in landing mode", () => {
     expect(decideSiteAccess("landing", { method: "HEAD", pathname: "/" })).toBe("allow");
   });
 
-  it.each(["/games/abby-s-tower.jpg", "/sponsors/bonavida.png", "/media/hero-loop.mp4", "/icons/icon-192.png"])(
+  it.each(["/games/abby-s-tower.jpg", "/sponsors/bonavida.svg", "/media/hero-loop.mp4", "/icons/icon-192.png"])(
     "serves the public file %s",
     (pathname) => {
       expect(decideSiteAccess("landing", { method: "GET", pathname })).toBe("allow");

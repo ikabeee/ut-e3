@@ -48,16 +48,16 @@ export const landingPageMetadata: Metadata = {
 const NAV_LINKS = [
   { href: `#${TOP_SECTION_ID}`, label: LANDING_COPY.nav.links.home },
   { href: GAMES_PATH, label: LANDING_COPY.nav.links.games },
-  { href: `#${FLOOR_PLAN_SECTION_ID}`, label: LANDING_COPY.nav.links.floorPlan },
   { href: SPONSORS_PATH, label: LANDING_COPY.nav.links.sponsors },
+  { href: `#${FLOOR_PLAN_SECTION_ID}`, label: LANDING_COPY.nav.links.floorPlan },
 ];
 
 // While only the landing is published (SITE_MODE=landing), every entry stays on this page and the logo goes home, so
 // the three entries fit a 360 px phone.
 const LANDING_ONLY_NAV_LINKS = [
   { href: `#${GAMES_SECTION_ID}`, label: LANDING_COPY.nav.links.games },
-  { href: `#${FLOOR_PLAN_SECTION_ID}`, label: LANDING_COPY.nav.links.floorPlan },
   { href: `#${SPONSORS_SECTION_ID}`, label: LANDING_COPY.nav.links.sponsors },
+  { href: `#${FLOOR_PLAN_SECTION_ID}`, label: LANDING_COPY.nav.links.floorPlan },
 ];
 
 const REGISTER_CTA = { href: REGISTER_PATH, label: LANDING_COPY.nav.createPassport };
@@ -70,7 +70,7 @@ interface LandingViewProps {
   /** The Marketplace card, left out of the landing until the form URL exists (see MarketplaceSlot). */
   marketplace?: ReactNode;
   /**
-   * Only the landing is published: no link leaves the page, the provisional stands stay out of the croquis and what
+   * Only the landing is published: no link leaves the page and what
    * needs the passport or is not announced yet (rating, marketplace, special guests) is left out.
    */
   isLandingOnly?: boolean;
@@ -113,20 +113,20 @@ export function LandingView({
           calendarUrl={buildEventCalendarUrl({ startsAt: settings.eventStartsAt, endsAt: settings.eventEndsAt })}
           registerHref={isLandingOnly ? undefined : REGISTER_PATH}
         />
-        <SponsorsCarousel sponsors={sponsors} />
+        <GameCatalog games={games} linksToGamePages={!isLandingOnly} />
         <LandingEvent
           settings={settings}
           gamesCount={games.length}
           marketplace={marketplace}
           isLandingOnly={isLandingOnly}
         />
-        <GameCatalog games={games} linksToGamePages={!isLandingOnly} />
+        <SponsorsCarousel sponsors={sponsors} />
         <EventSchedule
           heading={formatEventDate(settings.eventStartsAt, "2-digit")}
           items={scheduleItems}
           zoneLink={getZoneLink}
         />
-        <FloorPlan stands={isLandingOnly ? [] : games.map(toFloorPlanStand)} />
+        <FloorPlan stands={games.map(toFloorPlanStand)} />
         <VenueLocation venue={EVENT_VENUE} />
         <ClosingBand dateLabel={eventDate} />
       </main>

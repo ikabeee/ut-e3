@@ -7,8 +7,12 @@ type FitSvgTextProps = SVGProps<SVGTextElement> & {
   children: string;
 };
 
+// A long word first shrinks down to this share of its font size, and only then is squeezed, so it stays legible.
+const MIN_FONT_SCALE = 0.75;
+
 export function FitSvgText({ maxWidth, children, ...textProps }: Readonly<FitSvgTextProps>) {
   const textRef = useRef<SVGTextElement>(null);
+  const baseSize = Number(textProps.fontSize);
 
   useEffect(() => {
     const text = textRef.current;
@@ -21,7 +25,7 @@ export function FitSvgText({ maxWidth, children, ...textProps }: Readonly<FitSvg
 
     const fit = () => {
       if (isActive) {
-        compressToWidth(text, maxWidth);
+        compressToWidth(text, maxWidth, baseSize);
       }
     };
 
@@ -31,7 +35,7 @@ export function FitSvgText({ maxWidth, children, ...textProps }: Readonly<FitSvg
     return () => {
       isActive = false;
     };
-  }, [maxWidth, children]);
+  }, [maxWidth, children, baseSize]);
 
   return (
     <text ref={textRef} {...textProps}>
@@ -40,14 +44,28 @@ export function FitSvgText({ maxWidth, children, ...textProps }: Readonly<FitSvg
   );
 }
 
-function compressToWidth(text: SVGTextElement, maxWidth: number) {
+function compressToWidth(text: SVGTextElement, maxWidth: number, baseSize: number) {
   text.removeAttribute("textLength");
   text.removeAttribute("lengthAdjust");
 
-  const length = text.getComputedTextLength ? text.getComputedTextLength() : 0;
+  if (Number.isFinite(baseSize)) text.setAttribute("font-size", String(baseSize));
 
-  if (length > maxWidth) {
+  const length = measure(text);
+
+  if (length <= maxWidth) return;
+
+  if (Number.isFinite(baseSize)) {
+    const scale = Math.max(maxWidth / length, MIN_FONT_SCALE);
+
+    text.setAttribute("font-size", String(baseSize * scale));
+  }
+
+  if (measure(text) > maxWidth) {
     text.setAttribute("textLength", String(maxWidth));
     text.setAttribute("lengthAdjust", "spacingAndGlyphs");
   }
+}
+
+function measure(text: SVGTextElement): number {
+  return text.getComputedTextLength ? text.getComputedTextLength() : 0;
 }

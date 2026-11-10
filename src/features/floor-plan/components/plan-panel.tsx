@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { GenericCover } from "@shared/components/generic-cover";
 import { PaperCard } from "@shared/components/paper-card";
 import type { PlanItem } from "@features/floor-plan/lib/types";
 
@@ -13,7 +14,11 @@ export function PlanPanel({ item }: Readonly<PlanPanelProps>) {
     <div className="flex min-w-0 flex-col" aria-live="polite">
       {item.cover ? (
         <div className="relative aspect-video max-w-full overflow-hidden bg-surface">
-          <Image src={item.cover.src} alt={item.cover.alt} fill sizes={COVER_SIZES} className="object-cover" />
+          {item.cover.src === null ? (
+            <GenericCover title={item.title} />
+          ) : (
+            <Image src={item.cover.src} alt={item.cover.alt} fill sizes={COVER_SIZES} className="object-cover" />
+          )}
         </div>
       ) : null}
       <PaperCard className="gap-[10px] px-[22px] pt-[22px] pb-7">

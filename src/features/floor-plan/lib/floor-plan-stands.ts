@@ -12,7 +12,7 @@ export function toFloorPlanStand(game: Game): FloorPlanStand {
     name: game.name,
     genre: game.genre.name,
     synopsis: game.synopsis,
-    coverSrc: cover.path,
-    coverAlt: cover.alt,
+    coverSrc: cover?.path ?? null,
+    coverAlt: cover?.alt ?? `Portada de ${game.name}`,
   };
 }

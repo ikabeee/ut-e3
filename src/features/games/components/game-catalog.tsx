@@ -10,8 +10,8 @@ import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { Game } from "@features/games/lib/types";
 
 const RACK_VARIABLES = [
-  "[--cw:clamp(190px,19cqw,270px)] [--top:44px] [--rack-pad:44px] [--gap-f:.9] [--step-f:.27] [--depth-f:.85] [--angle:60deg] [--persp-f:4.6]",
-  "@max-[640px]:[--cw:min(190px,46cqw)] @max-[640px]:[--top:28px] @max-[640px]:[--rack-pad:28px] @max-[640px]:[--gap-f:.7] @max-[640px]:[--step-f:.2] @max-[640px]:[--depth-f:.7] @max-[640px]:[--angle:64deg] @max-[640px]:[--persp-f:4.2]",
+  "[--cw:clamp(240px,26cqw,360px)] [--top:44px] [--rack-pad:44px] [--gap-f:.9] [--step-f:.27] [--depth-f:.85] [--angle:60deg] [--persp-f:4.6]",
+  "@max-[640px]:[--cw:min(240px,60cqw)] @max-[640px]:[--top:28px] @max-[640px]:[--rack-pad:28px] @max-[640px]:[--gap-f:.7] @max-[640px]:[--step-f:.2] @max-[640px]:[--depth-f:.7] @max-[640px]:[--angle:64deg] @max-[640px]:[--persp-f:4.2]",
   "[--ch:calc(var(--cw)*1.36)] [--cd:max(6px,calc(var(--cw)*.07))]",
 ].join(" ");
 

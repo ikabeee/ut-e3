@@ -4,6 +4,8 @@ import { makeGames } from "@features/games/__tests__/components/game-test-data";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { LandingView, landingPageMetadata } from "@features/landing/pages/landing-page";
 import type { ScheduleItem } from "@features/schedule/lib/types";
+import { PIXEL_FORGE } from "@features/sponsors/__tests__/components/sponsor-test-data";
+import type { Sponsor } from "@features/sponsors/lib/types";
 
 const SETTINGS: EventSettings = {
   eventStartsAt: "2026-11-20T17:00:00.000Z",
@@ -34,17 +36,17 @@ const SCHEDULE: ScheduleItem[] = [
   },
 ];
 
-const SECTION_ORDER = ["top", "event", "guests", "games", "schedule", "floor-plan", "venue"];
+const SECTION_ORDER = ["top", "games", "event", "guests", "sponsors", "schedule", "floor-plan", "venue"];
 
 const games = makeGames(18);
 
-function renderLanding() {
+function renderLanding(sponsors: Sponsor[] = []) {
   return render(
     <LandingView
       settings={SETTINGS}
       games={games}
       scheduleItems={SCHEDULE}
-      sponsors={[]}
+      sponsors={sponsors}
       marketplace={<p>Registro de vendedores cerrado</p>}
     />,
   );
@@ -74,7 +76,7 @@ describe("LandingView", () => {
   });
 
   it("renders the sections in the landing order", () => {
-    renderLanding();
+    renderLanding([PIXEL_FORGE]);
 
     const sections = SECTION_ORDER.map((id) => document.getElementById(id));
 
@@ -237,9 +239,9 @@ describe("LandingView with only the landing published", () => {
     expect(screen.getByRole("link", { name: /Juego 01/ })).toHaveAttribute("href", "#games");
   });
 
-  it("does not place the games in the croquis while their stands are provisional", () => {
+  it("places the games in the croquis, with no link to their page", () => {
     renderLandingOnly();
 
-    expect(screen.queryByRole("button", { name: "Stand ZA-S1, Juego 01" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Stand ZA-S1, Juego 01" })).toBeInTheDocument();
   });
 });
