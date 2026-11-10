@@ -46,6 +46,7 @@ export const SPONSORS_COPY = {
       logoPath: "La ruta empieza con / y termina en .svg, .png, .jpg o .webp.",
       websiteUrl: "El sitio debe ser una dirección https.",
       phone: "Escribe el teléfono con + y de 8 a 15 dígitos.",
+      email: "Escribe un correo válido, por ejemplo contacto@empresa.com (máximo 254 caracteres).",
       services: "Describe los servicios (máximo 200 caracteres).",
       position: "El orden es un número entero de 1 a 999.",
       notFound: "Ese patrocinador ya no existe. Recarga la página.",

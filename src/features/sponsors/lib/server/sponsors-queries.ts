@@ -13,6 +13,7 @@ const SPONSOR_FIELDS = {
   logoPath: true,
   websiteUrl: true,
   phone: true,
+  email: true,
   services: true,
   position: true,
 } satisfies Prisma.SponsorSelect;

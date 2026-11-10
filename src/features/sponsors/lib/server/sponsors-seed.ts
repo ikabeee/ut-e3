@@ -2,7 +2,8 @@ import "server-only";
 import type { Sponsor } from "@features/sponsors/lib/types";
 import type { PrismaClient } from "@generated/prisma/client";
 
-type SponsorFields = Pick<Sponsor, "name" | "logoPath"> & Partial<Pick<Sponsor, "websiteUrl" | "phone" | "services">>;
+type SponsorFields = Pick<Sponsor, "name" | "logoPath"> &
+  Partial<Pick<Sponsor, "websiteUrl" | "phone" | "email" | "services">>;
 
 // The sponsors that gave a logo. What a source does not give stays empty and the cards leave it out.
 const REAL_SPONSORS: SponsorFields[] = [
@@ -39,15 +40,15 @@ export async function seedSponsors(prisma: PrismaClient): Promise<void> {
   await prisma.sponsor.createMany({ data: INITIAL_SPONSORS.map(toSponsorRow) });
 }
 
-function toSponsorRow({ name, logoPath, websiteUrl, phone, services, position }: Sponsor) {
-  return { name, logoPath, websiteUrl, phone, services, position };
+function toSponsorRow({ name, logoPath, websiteUrl, phone, email, services, position }: Sponsor) {
+  return { name, logoPath, websiteUrl, phone, email, services, position };
 }
 
 function toSponsor(
-  { name, logoPath, websiteUrl = "", phone = "", services = "" }: SponsorFields,
+  { name, logoPath, websiteUrl = "", phone = "", email = null, services = "" }: SponsorFields,
   index: number,
 ): Sponsor {
-  return { id: slugify(name), name, logoPath, websiteUrl, phone, services, position: index + 1 };
+  return { id: slugify(name), name, logoPath, websiteUrl, phone, email, services, position: index + 1 };
 }
 
 function slugify(name: string): string {
