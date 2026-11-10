@@ -25,6 +25,7 @@ const REAL_SPONSORS: SponsorFields[] = [
     websiteUrl: "https://www.nemoisla.com/",
     phone: "+19038019083",
   },
+  { name: "OpSET", logoPath: "/sponsors/opset.svg" },
 ];
 
 // Frozen because nothing appends to it at runtime: it changes only by editing this file.
