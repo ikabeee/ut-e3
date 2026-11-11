@@ -1,24 +1,34 @@
-import type { Game, GenreSummary } from "@features/games/lib/types";
+import type { Game, Genre, GenreSummary } from "@features/games/lib/types";
 
-/**
- * Géneros para el carrusel: primero los que tienen más juegos y, a igual cantidad,
- * en orden alfabético. Cada uno lleva tres portadas (dos al fondo y una al frente).
- */
+// Two covers at the back and the genre's first game in front, so the front slot comes last.
+const COVER_ORDER = [1, 2, 0];
+
 export function summarizeGenres(games: readonly Game[]): GenreSummary[] {
-  const gamesByGenre = new Map<string, Game[]>();
-  for (const game of games) {
-    gamesByGenre.set(game.genre, [...(gamesByGenre.get(game.genre) ?? []), game]);
-  }
-
-  return [...gamesByGenre.entries()]
-    .map(([name, genreGames]) => ({
-      name,
-      gameCount: genreGames.length,
-      covers: [1, 2, 0].map((index) => genreGames[index % genreGames.length]),
-    }))
-    .sort((a, b) => b.gameCount - a.gameCount || a.name.localeCompare(b.name, "es"));
+  return [...groupByGenre(games).values()].map(toSummary).toSorted(compareSummaries);
 }
 
-export function isKnownGenre(games: readonly Game[], genre: string | null): genre is string {
-  return genre !== null && games.some((game) => game.genre === genre);
+export function findGenre(games: readonly Game[], slug: string | null): Genre | null {
+  return games.find((game) => game.genre.slug === slug)?.genre ?? null;
+}
+
+function groupByGenre(games: readonly Game[]): Map<string, Game[]> {
+  const groups = new Map<string, Game[]>();
+
+  for (const game of games) {
+    groups.set(game.genre.slug, [...(groups.get(game.genre.slug) ?? []), game]);
+  }
+
+  return groups;
+}
+
+function toSummary(genreGames: Game[]): GenreSummary {
+  return {
+    genre: genreGames[0].genre,
+    gameCount: genreGames.length,
+    covers: COVER_ORDER.map((index) => genreGames[index % genreGames.length]),
+  };
+}
+
+function compareSummaries(first: GenreSummary, second: GenreSummary): number {
+  return second.gameCount - first.gameCount || first.genre.name.localeCompare(second.genre.name, "es");
 }

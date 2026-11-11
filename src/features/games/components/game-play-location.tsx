@@ -1,32 +1,37 @@
-import { GameDetailSection } from "@features/games/components/game-detail-section";
-import { getStandAisle } from "@features/games/lib/game-details";
-import type { Game } from "@features/games/lib/types";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
+import { formatStandCode, type StandLocation } from "@features/games/lib/stand-code";
+import type { GameEventLabels } from "@features/games/lib/types";
+
+const HEADING_ID = "play-location-heading";
 
 interface GamePlayLocationProps {
-  game: Game;
-  eventDateLabel: string;
-  eventHoursLabel: string;
+  stand: StandLocation;
+  event: GameEventLabels;
 }
 
-/** "Dónde jugarlo": stand, pasillo, fecha y horario (`.where`). */
-export function GamePlayLocation({ game, eventDateLabel, eventHoursLabel }: Readonly<GamePlayLocationProps>) {
+export function GamePlayLocation({ stand, event }: Readonly<GamePlayLocationProps>) {
+  const { playLocation, labels } = GAMES_COPY;
+
   const cells = [
-    { label: "Stand", value: game.stand },
-    { label: "Pasillo", value: getStandAisle(game.stand) },
-    { label: "Fecha", value: eventDateLabel },
-    { label: "Horario", value: eventHoursLabel },
+    { label: labels.stand, value: formatStandCode(stand) },
+    { label: labels.zone, value: stand.zone },
+    { label: labels.date, value: event.dateLabel },
+    { label: labels.hours, value: event.hoursLabel },
   ];
 
   return (
-    <GameDetailSection title="Dónde jugarlo">
-      <div className="grid grid-cols-4 gap-px border border-border bg-border max-[560px]:grid-cols-2">
+    <section aria-labelledby={HEADING_ID} className="flex flex-col gap-4">
+      <h2 id={HEADING_ID} className="type-section">
+        {playLocation.heading}
+      </h2>
+      <dl className="grid grid-cols-2 gap-px border border-border bg-border min-[560px]:grid-cols-4">
         {cells.map((cell) => (
-          <div key={cell.label} className="flex flex-col gap-1 bg-background p-[14px]">
-            <span className="type-tiny text-muted">{cell.label}</span>
-            <b className="font-mono text-[15px]">{cell.value}</b>
+          <div key={cell.label} className="flex flex-col gap-1 bg-background p-3.5">
+            <dt className="type-tiny text-muted">{cell.label}</dt>
+            <dd className="font-mono text-[15px] font-bold">{cell.value}</dd>
           </div>
         ))}
-      </div>
-    </GameDetailSection>
+      </dl>
+    </section>
   );
 }

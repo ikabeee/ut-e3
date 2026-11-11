@@ -1,42 +1,58 @@
-import { Chip } from "@heroui/react";
-import { GameMedia } from "@features/games/components/game-media";
-import { getGameFacts } from "@features/games/lib/game-details";
-import { getStandMapPath } from "@features/games/lib/game-links";
-import type { Game } from "@features/games/lib/types";
+import type { ReactNode } from "react";
+import { GameCoverImage } from "@features/games/components/game-cover-image";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
+import { formatStandCode } from "@features/games/lib/stand-code";
+import type { Game, GameDetailLinks } from "@features/games/lib/types";
 import { ActionLink } from "@shared/components/action-link";
+
+const COVER_SIZES = "320px";
 
 interface GameSidebarProps {
   game: Game;
+  itchLink: ReactNode;
   eventDateLabel: string;
-  admissionLabel: string;
-  calendarUrl: string;
+  links: GameDetailLinks;
 }
 
-/** Columna lateral fija: portada, acceso, acciones y ficha (`.jg-side`). */
-export function GameSidebar({ game, eventDateLabel, admissionLabel, calendarUrl }: Readonly<GameSidebarProps>) {
+// The cover and the facts repeat the page on a phone, so they only show beside the main column.
+export function GameSidebar({ game, itchLink, eventDateLabel, links }: Readonly<GameSidebarProps>) {
   return (
-    <aside className="sticky top-[calc(env(safe-area-inset-top,0px)+76px)] flex flex-col gap-3 max-[980px]:static max-[980px]:-order-1">
-      <div className="relative aspect-[3/4] max-w-full overflow-hidden border border-border bg-surface max-[980px]:hidden">
-        <GameMedia game={game} sizes="320px" />
+    <aside
+      aria-label={GAMES_COPY.sidebar.label(game.name)}
+      className="-order-1 flex flex-col gap-3 detail:sticky detail:top-[calc(env(safe-area-inset-top,0px)+var(--spacing-nav)+20px)] detail:order-0"
+    >
+      <div className="relative hidden aspect-3/4 overflow-hidden border border-border bg-surface detail:block">
+        <GameCoverImage game={game} sizes={COVER_SIZES} />
       </div>
-      <Chip className="type-tiny h-6 self-start rounded-none border border-border px-[9px] py-0 font-normal">
-        Demo jugable
-      </Chip>
-      <p className="m-0 font-wide text-lg font-bold uppercase">{admissionLabel}</p>
-      <ActionLink href={getStandMapPath(game.stand)} variant="primary" arrow="ne" fullWidth>
-        Ver en el croquis
+      {itchLink}
+      <ActionLink href={links.floorPlan} variant="primary" arrow="ne" fullWidth>
+        {GAMES_COPY.sidebar.viewOnMap}
       </ActionLink>
-      <ActionLink href={calendarUrl} arrow="ne" isExternal fullWidth>
-        Quiero asistir
+      <ActionLink href={links.calendar} arrow="ne" isExternal fullWidth>
+        {GAMES_COPY.sidebar.attend}
       </ActionLink>
-      <dl className="mt-[6px] mb-0 flex flex-col max-[980px]:hidden">
-        {getGameFacts(game, eventDateLabel).map((fact) => (
-          <div key={fact.label} className="flex justify-between gap-3 border-b border-separator py-[11px]">
-            <dt className="font-mono text-xs text-muted uppercase">{fact.label}</dt>
-            <dd className="m-0 text-right font-mono text-xs uppercase">{fact.value}</dd>
-          </div>
-        ))}
-      </dl>
+      <GameFacts game={game} eventDateLabel={eventDateLabel} />
     </aside>
+  );
+}
+
+function GameFacts({ game, eventDateLabel }: Readonly<Pick<GameSidebarProps, "game" | "eventDateLabel">>) {
+  const { labels } = GAMES_COPY;
+
+  const rows = [
+    { label: labels.genre, value: game.genre.name },
+    { label: labels.stand, value: formatStandCode(game.stand) },
+    { label: labels.event, value: eventDateLabel },
+  ];
+
+  return (
+    <dl className="mt-1.5 hidden flex-col detail:flex">
+      {rows.map((row) => (
+        <div key={row.label} className="flex justify-between gap-3 border-b border-separator py-2.75">
+          <dt className="font-mono text-xs text-muted uppercase">{row.label}</dt>
+          <dd className="text-right font-mono text-xs uppercase">{row.value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
