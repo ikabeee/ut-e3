@@ -10,6 +10,10 @@ interface ScrambleTextProps {
   className?: string;
 }
 
+/**
+ * Etiqueta que se "decodifica" cuando el mouse entra al enlace o botón que la contiene.
+ * Los lectores de pantalla siempre leen el texto real.
+ */
 export function ScrambleText({ text, className }: Readonly<ScrambleTextProps>) {
   const ref = useRef<HTMLSpanElement>(null);
   const [scrambled, setScrambled] = useState<string | null>(null);
@@ -17,36 +21,29 @@ export function ScrambleText({ text, className }: Readonly<ScrambleTextProps>) {
 
   useEffect(() => {
     const host = ref.current?.closest("a, button");
-
     if (!host || prefersReducedMotion) {
       return;
     }
 
     let timer: number | undefined;
-
     const startScramble = () => {
       window.clearInterval(timer);
       let frame = 0;
       timer = window.setInterval(() => {
         frame += 1;
-
         if (frame >= SCRAMBLE_FRAMES) {
           window.clearInterval(timer);
           setScrambled(null);
-
           return;
         }
-
         setScrambled(scrambleFrame(text, frame));
       }, SCRAMBLE_FRAME_MS);
     };
 
     host.addEventListener("mouseenter", startScramble);
-
     return () => {
       host.removeEventListener("mouseenter", startScramble);
       window.clearInterval(timer);
-      setScrambled(null);
     };
   }, [text, prefersReducedMotion]);
 

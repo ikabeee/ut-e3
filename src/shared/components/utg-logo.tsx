@@ -1,11 +1,15 @@
+// Letras "UTG" en bloques; el mismo trazo se apila para dar volumen.
 const LOGO_PATH =
   "M0 0 L2 0 L2 4 L3 4 L3 0 L5 0 L5 5 L4 6 L1 6 L0 5Z M5.7 0 L10.7 0 L10.7 2 L9.2 2 L9.2 6 L7.2 6 L7.2 2 L5.7 2Z M12.4 0 L16.4 0 L16.4 1.6 L13.4 1.6 L13.4 4.4 L14.4 4.4 L14.4 2.6 L16.4 2.6 L16.4 5 L15.4 6 L12.4 6 L11.4 5 L11.4 1Z";
 
+// Capas de la extrusión del logo de la navegación (de atrás hacia adelante).
 const EXTRUSION_OFFSETS = [0.63, 0.56, 0.49, 0.42, 0.35, 0.28, 0.21, 0.14, 0.07];
 
 interface UtgLogoProps {
+  /** `extruded`: logo de la navegación. `flat`: logo grande del video principal. */
   variant: "extruded" | "flat";
   className?: string;
+  /** Si se omite, el logo es decorativo (`aria-hidden`). */
   label?: string;
 }
 
@@ -26,7 +30,12 @@ export function UtgLogo({ variant, className, label }: Readonly<UtgLogoProps>) {
         <>
           <path d={LOGO_PATH} transform="translate(.75 .75)" fill="var(--utg-black)" />
           {EXTRUSION_OFFSETS.map((offset) => (
-            <path key={offset} d={LOGO_PATH} transform={`translate(${offset} ${offset})`} fill="var(--utg-blue-5)" />
+            <path
+              key={offset}
+              d={LOGO_PATH}
+              transform={`translate(${offset} ${offset})`}
+              fill="var(--utg-blue-5)"
+            />
           ))}
         </>
       ) : (

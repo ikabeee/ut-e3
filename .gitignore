@@ -33,7 +33,6 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
-!.env.production.example
 
 # vercel
 .vercel
@@ -41,19 +40,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
 # prisma
 .prisma/
-/generated/
-
-# sqlite
-*.db
-*.db-wal
-*.db-shm
-
-
-graphify-out/
-.claude/tests.lock
-
-# Capturas de los e2e (`npm run test:e2e:games`): son evidencia local, no código
-e2e/screenshots/

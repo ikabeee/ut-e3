@@ -1,3 +1,17 @@
+/*
+ * Ajustes de los componentes de HeroUI al diseño UTG y efectos de movimiento compartidos.
+ *
+ * HeroUI usa clases BEM (`.button`, `.button--primary`...). Aquí sólo se cambian sus variables
+ * y medidas; la accesibilidad y los estados (hover, pressed, focus) siguen siendo de HeroUI.
+ *
+ * Variantes de Button según el diseño:
+ *   primary   -> `.btn.solid`  bloque azul, se rellena de blanco al pasar el mouse.
+ *   outline   -> `.btn`        negro con borde blanco, se rellena de azul.
+ *   tertiary  -> `.btn.tab`    negro sin borde, se rellena de azul.
+ *   ghost     -> `.arrow`      flechas con borde gris.
+ *   size="lg" -> pestaña (`.tab`): sin borde y con más relleno.
+ */
+
 @layer components {
   .button {
     --btn-base: var(--utg-black);
@@ -89,222 +103,42 @@
     justify-content: center;
   }
 
-  .button--plate {
-    --btn-base: var(--utg-black);
-    --btn-edge: var(--utg-black);
-    --btn-fill: var(--utg-white);
-    --btn-ink-hover: var(--utg-black);
-    font-size: 20px;
-
-    &:disabled,
-    &[data-disabled="true"] {
-      opacity: 0.35;
-    }
-  }
-
-  .button--overlay {
-    --btn-base: color-mix(in srgb, var(--utg-black) 75%, transparent);
-    --btn-edge: var(--border);
-    font-size: 18px;
-    line-height: 28px;
-    transition: none;
-  }
-
-  .button--segment {
-    --btn-edge: var(--border);
-    --btn-ink-hover: var(--background);
-    --button-bg-hover: var(--accent);
-    --button-bg-pressed: var(--accent);
-    height: 44px;
-    width: 46px;
-    padding: 0;
-    border-width: 0 0 0 1px;
-    background-image: none;
-    font-size: 20px;
-    transition:
-      background-color 0.2s,
-      color 0.2s;
-
-    &:first-child {
-      border-left-width: 0;
-    }
-
-    &:active,
-    &[data-pressed="true"] {
-      transform: none;
-    }
-  }
-
-  .toggle-button {
-    border-radius: 0;
-
-    &:active,
-    &[data-pressed="true"] {
-      transform: none;
-    }
-  }
-
-  .toggle-button--tile {
-    --toggle-button-bg: var(--surface);
-    --toggle-button-bg-hover: var(--surface);
-    --toggle-button-bg-pressed: var(--surface);
-    --toggle-button-fg: var(--foreground);
-    --toggle-button-bg-selected: var(--surface);
-    --toggle-button-bg-selected-hover: var(--surface);
-    --toggle-button-bg-selected-pressed: var(--surface);
-    --toggle-button-fg-selected: var(--foreground);
-    height: auto;
-    width: auto;
-    flex-direction: column;
-    gap: 16px;
-    padding: 22px 18px 18px;
-    border: 1px solid var(--surface);
-    font-family: var(--font-sans);
-    font-size: 16px;
-    font-weight: 400;
-    white-space: normal;
-    transition:
-      border-color 0.2s,
-      background-color 0.2s;
-
-    @media (hover: hover) {
-      &:hover,
-      &[data-hovered="true"] {
-        border-color: var(--border);
-      }
-    }
-
-    &[data-selected="true"] {
-      border-color: var(--accent);
-    }
-  }
-
-  .toggle-button--filter {
-    --toggle-button-bg: var(--background);
-    --toggle-button-bg-hover: var(--background);
-    --toggle-button-bg-pressed: var(--background);
-    --toggle-button-fg: var(--foreground);
-    --toggle-button-bg-selected: var(--background);
-    --toggle-button-bg-selected-hover: var(--background);
-    --toggle-button-bg-selected-pressed: var(--background);
-    --toggle-button-fg-selected: var(--foreground);
-    height: auto;
-    gap: 8px;
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    opacity: 0.4;
-    transition:
-      border-color 0.2s,
-      opacity 0.2s;
-
-    @media (hover: hover) {
-      &:hover,
-      &[data-hovered="true"] {
-        border-color: var(--accent);
-      }
-    }
-
-    &[data-selected="true"] {
-      opacity: 1;
-    }
-  }
-
-  .toggle-button--overlay {
-    --toggle-button-bg: color-mix(in srgb, var(--utg-black) 60%, transparent);
-    --toggle-button-bg-hover: var(--foreground);
-    --toggle-button-bg-pressed: var(--foreground);
-    --toggle-button-bg-selected: var(--toggle-button-bg);
-    --toggle-button-bg-selected-hover: var(--foreground);
-    --toggle-button-bg-selected-pressed: var(--foreground);
-    min-width: 0;
-    padding: 0;
-    border: 1px solid var(--foreground);
-  }
-
   .button--outline,
   .button--ghost,
   .button--tertiary {
     border-style: solid;
   }
 
+  /* Campos de búsqueda: cuadrados, sin sombra y con el acento al enfocar. */
   .search-field__group {
     border-radius: 0;
     box-shadow: none;
   }
 }
 
-@utility shade-cover {
-  background: linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 92%, transparent), transparent);
-}
-
-/* Hero image with its title: darkened to the left and at the bottom on desktop, only at the bottom on mobile. */
-@utility shade-featured {
-  background:
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--utg-black) 85%, transparent) 0%,
-      color-mix(in srgb, var(--utg-black) 45%, transparent) 40%,
-      transparent 70%
-    ),
-    linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 90%, transparent) 0%, transparent 50%);
-}
-
-@utility shade-featured-mobile {
-  background: linear-gradient(
-    0deg,
-    var(--utg-black) 0%,
-    color-mix(in srgb, var(--utg-black) 75%, transparent) 40%,
-    transparent 75%
-  );
-}
-
-@utility shade-thumb {
-  background: linear-gradient(0deg, color-mix(in srgb, var(--utg-black) 75%, transparent), transparent 60%);
-}
-
-@utility coverflow-rack {
-  /* The linear layer fades the top and bottom edges to black so the rack has no hard cut against the section. */
-  background:
-    linear-gradient(to bottom, var(--utg-black) 0%, transparent 22%, transparent 78%, var(--utg-black) 100%),
-    radial-gradient(70% 60% at 50% 38%, var(--utg-rack-top) 0%, var(--utg-rack-bottom) 55%, var(--utg-black) 100%);
-}
-
-@utility coverflow-glow {
-  box-shadow:
-    0 0 0 1px var(--utg-white),
-    0 0 28px color-mix(in srgb, var(--utg-white) 35%, transparent),
-    0 30px 70px -20px color-mix(in srgb, var(--utg-white) 25%, transparent);
-}
-
-/* The faint reflection's opacity lives in the mask (22% at 90% opacity): an opacity on top of the mask made the
-   browser draw each reflection through one more offscreen surface (#128). */
-@utility coverflow-reflection {
-  mask-image: linear-gradient(to top, color-mix(in srgb, var(--utg-black) 19.8%, transparent), transparent 32%);
-}
-
+/* Flechas de los botones: se desplazan hacia su dirección al pasar el mouse. */
 @utility arrow-glyph {
   display: inline-block;
   transition: transform 0.32s cubic-bezier(0.3, 1.6, 0.5, 1);
 
-  @media (hover: hover) {
-    :hover > &[data-direction="ne"] {
-      transform: translate(3px, -3px);
-    }
+  :hover > &[data-direction="ne"] {
+    transform: translate(3px, -3px);
+  }
 
-    :hover > &[data-direction="s"] {
-      transform: translateY(3px);
-    }
+  :hover > &[data-direction="s"] {
+    transform: translateY(3px);
+  }
 
-    :hover > &[data-direction="e"] {
-      transform: translateX(4px);
-    }
+  :hover > &[data-direction="e"] {
+    transform: translateX(4px);
+  }
 
-    :hover > &[data-direction="w"] {
-      transform: translateX(-4px);
-    }
+  :hover > &[data-direction="w"] {
+    transform: translateX(-4px);
   }
 }
 
+/* Subrayado que se dibuja de izquierda a derecha (navegación y enlaces del programa). */
 @utility link-wipe {
   padding-bottom: 3px;
   background: linear-gradient(var(--accent), var(--accent)) no-repeat left bottom / 0% 1px;
@@ -312,27 +146,25 @@
     background-size 0.3s var(--ease-wipe),
     color 0.2s;
 
-  @media (hover: hover) {
-    &:hover {
-      background-size: 100% 1px;
-      color: var(--accent);
-    }
+  &:hover {
+    background-size: 100% 1px;
+    color: var(--accent);
   }
 }
 
+/* Botón con relleno de izquierda a derecha para elementos que no son Button de HeroUI. */
 @utility fill-wipe {
   background: var(--wipe-base, var(--utg-black))
-    linear-gradient(var(--wipe-fill, var(--accent)), var(--wipe-fill, var(--accent))) no-repeat left center / 0% 100%;
+    linear-gradient(var(--wipe-fill, var(--accent)), var(--wipe-fill, var(--accent))) no-repeat left
+    center / 0% 100%;
   transition:
     background-size 0.38s var(--ease-wipe),
     color 0.18s 0.06s,
     transform 0.12s;
 
-  @media (hover: hover) {
-    &:hover {
-      background-size: 100% 100%;
-      color: var(--wipe-ink, var(--utg-black));
-    }
+  &:hover {
+    background-size: 100% 100%;
+    color: var(--wipe-ink, var(--utg-black));
   }
 
   &:active {
@@ -340,15 +172,7 @@
   }
 }
 
-@utility touch-target {
-  &::before {
-    content: "";
-    position: absolute;
-    inset-block: min(0px, calc((100% - 44px) / 2));
-    inset-inline: min(0px, calc((100% - 44px) / 2));
-  }
-}
-
+/* Icono con interferencia (CTA principal): una capa que tiembla y dos cortes desplazados. */
 @utility glitch-layer-base {
   animation: glitch-jitter 2.8s steps(1) infinite;
 }
@@ -446,73 +270,7 @@
   }
 }
 
-@utility beat {
-  --beat: 0.46875s;
-  transform-box: var(--box, fill-box);
-  transform-origin: var(--origin, center);
-  animation-duration: calc(var(--span, 1) * var(--beat));
-  animation-delay: calc(var(--at, 0) * var(--beat));
-  animation-timing-function: var(--ease-snap);
-  animation-fill-mode: both;
-  animation-play-state: paused;
-
-  :where([data-motion="played"]) & {
-    animation-play-state: running;
-  }
-}
-
-@utility beat-from {
-  animation-name: beat-from;
-}
-
-@utility beat-unlit {
-  animation-name: beat-unlit;
-}
-
-@utility beat-blink-in {
-  animation-name: beat-blink-in;
-}
-
-@utility beat-blink-pass {
-  animation-name: beat-blink-pass;
-}
-
-@keyframes beat-from {
-  from {
-    transform: var(--from, none);
-    opacity: var(--from-opacity, 1);
-  }
-}
-
-@keyframes beat-unlit {
-  from {
-    fill: transparent;
-    stroke: var(--muted);
-    transform: scale(1.4);
-  }
-}
-
-@keyframes beat-blink-in {
-  0% {
-    opacity: 0;
-    animation-timing-function: step-start;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes beat-blink-pass {
-  0%,
-  100% {
-    opacity: 0;
-  }
-  1%,
-  99% {
-    opacity: 1;
-  }
-}
-
+/* Entrada de los títulos (palabra por palabra). */
 @keyframes rise {
   from {
     transform: translateY(0.25em);
@@ -520,6 +278,7 @@
   }
 }
 
+/* Parpadeo de un stand seleccionado desde el directorio del croquis. */
 @keyframes flash {
   50% {
     fill: var(--utg-white);
@@ -527,104 +286,7 @@
   }
 }
 
-@keyframes approach {
-  from {
-    transform: scale(1);
-  }
-
-  to {
-    transform: scale(1.12);
-    box-shadow: 0 0 0 2px var(--accent);
-  }
-}
-
-@keyframes win-glow {
-  0% {
-    transform: scale(1.12);
-    box-shadow: 0 0 0 2px var(--accent);
-  }
-
-  35% {
-    transform: scale(1.14);
-    box-shadow:
-      0 0 0 3px var(--accent),
-      0 0 28px 6px var(--accent);
-  }
-
-  100% {
-    transform: scale(1.12);
-    box-shadow:
-      0 0 0 2px var(--accent),
-      0 0 12px 2px var(--accent);
-  }
-}
-
-@keyframes arrive {
-  from {
-    transform: translateX(var(--arrive-from, -1.5rem));
-    background-color: var(--accent);
-    opacity: 0;
-  }
-
-  60% {
-    background-color: var(--accent);
-    opacity: 1;
-  }
-
-  to {
-    transform: translateX(0);
-    background-color: transparent;
-  }
-}
-
-/* Endless ribbon: the content is painted twice and the track moves half of its width. */
-@keyframes marquee {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-/* Slow float of a tilted card; the tilt comes from `--float-tilt`. */
-@keyframes float {
-  0%,
-  100% {
-    transform: rotate(var(--float-tilt, 6deg)) translateY(0);
-  }
-
-  50% {
-    transform: rotate(calc(var(--float-tilt, 6deg) - 2deg)) translateY(-12px);
-  }
-}
-
-/* Straightens a tilted block while it enters the screen (scroll-driven animations). */
-@keyframes settle {
-  from {
-    transform: rotate(var(--settle-tilt, -4deg)) scale(0.9);
-  }
-
-  to {
-    transform: none;
-  }
-}
-
-/*
- * Only in browsers with `animation-timeline`; elsewhere the block stays straight.
- * With `prefers-reduced-motion` the global rule of typography.css removes the animation.
- */
-@utility scroll-settle {
-  @supports (animation-timeline: view()) {
-    animation: settle linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 45%;
-  }
-}
-
 @theme inline {
-  --animate-marquee: marquee 28s linear infinite;
-  --animate-float: float 7s ease-in-out infinite;
-  --animate-approach: approach 0.7s var(--ease-snap) both;
-  --animate-win-glow: win-glow 1s ease-out both;
-  --animate-arrive: arrive 0.8s var(--ease-snap) both;
   --animate-rise: rise 0.6s var(--ease-snap) both;
   --animate-flash: flash 0.45s steps(2) 6;
 }

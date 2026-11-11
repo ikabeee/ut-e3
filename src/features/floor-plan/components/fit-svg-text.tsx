@@ -3,69 +3,53 @@
 import { useEffect, useRef, type SVGProps } from "react";
 
 type FitSvgTextProps = SVGProps<SVGTextElement> & {
+  /** Ancho máximo en unidades del SVG; si el texto mide más, se comprime. */
   maxWidth: number;
   children: string;
 };
 
-// A long word first shrinks down to this share of its font size, and only then is squeezed, so it stays legible.
-const MIN_FONT_SCALE = 0.75;
-
+/**
+ * Texto de SVG que se comprime para caber en su stand o zona (`textLength`).
+ * Se vuelve a medir al cargar las tipografías y cuando el SVG cambia de tamaño o aparece.
+ */
 export function FitSvgText({ maxWidth, children, ...textProps }: Readonly<FitSvgTextProps>) {
-  const textRef = useRef<SVGTextElement>(null);
-  const baseSize = Number(textProps.fontSize);
+  const ref = useRef<SVGTextElement>(null);
 
   useEffect(() => {
-    const text = textRef.current;
-
+    const text = ref.current;
     if (!text) {
       return;
     }
-
     let isActive = true;
-
     const fit = () => {
-      if (isActive) {
-        compressToWidth(text, maxWidth, baseSize);
+      if (!isActive) {
+        return;
+      }
+      text.removeAttribute("textLength");
+      text.removeAttribute("lengthAdjust");
+      // jsdom (pruebas) no implementa la medición de texto.
+      const length = typeof text.getComputedTextLength === "function" ? text.getComputedTextLength() : 0;
+      if (length > maxWidth) {
+        text.setAttribute("textLength", String(maxWidth));
+        text.setAttribute("lengthAdjust", "spacingAndGlyphs");
       }
     };
 
     fit();
     document.fonts.ready.then(fit).catch(() => undefined);
-
+    const observer = new ResizeObserver(fit);
+    if (text.ownerSVGElement) {
+      observer.observe(text.ownerSVGElement);
+    }
     return () => {
       isActive = false;
+      observer.disconnect();
     };
-  }, [maxWidth, children, baseSize]);
+  }, [maxWidth, children]);
 
   return (
-    <text ref={textRef} {...textProps}>
+    <text ref={ref} {...textProps}>
       {children}
     </text>
   );
-}
-
-function compressToWidth(text: SVGTextElement, maxWidth: number, baseSize: number) {
-  text.removeAttribute("textLength");
-  text.removeAttribute("lengthAdjust");
-
-  if (Number.isFinite(baseSize)) text.setAttribute("font-size", String(baseSize));
-
-  const length = measure(text);
-
-  if (length <= maxWidth) return;
-
-  if (Number.isFinite(baseSize)) {
-    const scale = Math.max(maxWidth / length, MIN_FONT_SCALE);
-
-    text.setAttribute("font-size", String(baseSize * scale));
-  }
-
-  if (measure(text) > maxWidth) {
-    text.setAttribute("textLength", String(maxWidth));
-    text.setAttribute("lengthAdjust", "spacingAndGlyphs");
-  }
-}
-
-function measure(text: SVGTextElement): number {
-  return text.getComputedTextLength ? text.getComputedTextLength() : 0;
 }

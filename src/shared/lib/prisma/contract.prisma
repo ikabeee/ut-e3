@@ -1,0 +1,5 @@
+// use prisma-8
+
+// Contrato de datos del proyecto.
+// Agrega aquí tus modelos, ejecuta `npm run db:emit`
+// y sube a git contract.json y contract.d.ts.

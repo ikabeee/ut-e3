@@ -1,52 +1,32 @@
 import Link from "next/link";
-import { GameCoverImage } from "@features/games/components/game-cover-image";
-import { GAMES_COPY } from "@features/games/lib/games-copy";
-import { getGamePath } from "@features/games/lib/games-links";
+import { GameCard } from "@features/games/components/game-card";
+import { GAME_SECTION_HEADING_CLASS } from "@features/games/components/game-detail-section";
 import type { Game } from "@features/games/lib/types";
-import { DETAIL_COLUMNS_MEDIA } from "@features/games/lib/game-detail-layout";
-
-const HEADING_ID = "related-games-heading";
-
-const COVER_SIZES = `${DETAIL_COLUMNS_MEDIA} 20vw, (min-width: 560px) 33vw, 50vw`;
+import { routes } from "@shared/lib/site-config";
 
 interface RelatedGamesProps {
-  games: Game[];
-  catalogHref: string;
+  games: readonly Game[];
 }
 
-export function RelatedGames({ games, catalogHref }: Readonly<RelatedGamesProps>) {
-  if (games.length === 0) return null;
+const COVER_SIZES = "(max-width: 560px) 50vw, (max-width: 980px) 33vw, 20vw";
 
+/** "Más juegos" al final del detalle (`.more`). */
+export function RelatedGames({ games }: Readonly<RelatedGamesProps>) {
   return (
-    <section aria-labelledby={HEADING_ID} className="mt-[clamp(56px,8vw,96px)] flex flex-col gap-4">
-      <div className="flex items-end justify-between gap-3">
-        <h2 id={HEADING_ID} className="type-section">
-          {GAMES_COPY.related.heading}
+    <section className="mt-[clamp(56px,8vw,96px)]" aria-labelledby="related-games-heading">
+      <div className="mb-4 flex items-end justify-between gap-3">
+        <h2 id="related-games-heading" className={GAME_SECTION_HEADING_CLASS}>
+          Más juegos
         </h2>
-        <Link href={catalogHref} className="touch-target relative type-tiny text-accent no-underline">
-          {GAMES_COPY.related.seeAll}
+        <Link href={routes.games} className="type-tiny text-accent no-underline">
+          Ver todos ↗
         </Link>
       </div>
-      <ul className="grid grid-cols-2 gap-4 min-[560px]:grid-cols-3 detail:grid-cols-5">
+      <div className="grid grid-cols-5 gap-4 max-[980px]:grid-cols-3 max-[560px]:grid-cols-2">
         {games.map((game) => (
-          <li key={game.slug}>
-            <RelatedGameCard game={game} />
-          </li>
+          <GameCard key={game.slug} game={game} coverSizes={COVER_SIZES} variant="compact" />
         ))}
-      </ul>
+      </div>
     </section>
-  );
-}
-
-// The name is in the link, so the cover is decorative.
-function RelatedGameCard({ game }: Readonly<{ game: Game }>) {
-  return (
-    <Link href={getGamePath(game.slug)} className="group flex flex-col gap-2 no-underline">
-      <span className="relative block aspect-3/4 overflow-hidden border border-border bg-surface group-hover:border-accent">
-        <GameCoverImage game={game} sizes={COVER_SIZES} isDecorative />
-      </span>
-      <span className="type-wide text-sm wrap-break-word">{game.name}</span>
-      <span className="type-tiny text-muted">{game.genre.name}</span>
-    </Link>
   );
 }
