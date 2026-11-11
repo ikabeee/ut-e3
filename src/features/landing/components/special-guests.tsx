@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { GUESTS_SECTION_ID } from "@features/landing/lib/landing-links";
 import type { SpecialGuest } from "@features/landing/lib/types";
@@ -27,10 +28,26 @@ export function SpecialGuests({ guests }: Readonly<SpecialGuestsProps>) {
 function GuestCard({ guest }: Readonly<{ guest: SpecialGuest }>) {
   return (
     <PaperCard className="flex-1 gap-3 px-[22px] pt-[22px] pb-7">
-      <div aria-hidden="true" className="aspect-4/3 w-full bg-paper-rule" />
+      <GuestPhoto photo={guest.photo} />
       {guest.role ? <span className="type-tiny">{guest.role}</span> : null}
       <h3 className="type-wide text-[clamp(24px,2.6vw,34px)] leading-[.95] tracking-[-.03em]">{guest.name}</h3>
       <p className="m-0 max-w-[40ch] text-lg leading-[1.2]">{guest.talk}</p>
     </PaperCard>
+  );
+}
+
+function GuestPhoto({ photo }: Readonly<{ photo: SpecialGuest["photo"] }>) {
+  if (!photo) return <div aria-hidden="true" className="aspect-4/3 w-full bg-paper-rule" />;
+
+  return (
+    <div className="relative aspect-4/3 w-full overflow-hidden bg-paper-rule">
+      <Image
+        src={photo.src}
+        alt={photo.alt}
+        fill
+        sizes="(min-width: 821px) 560px, 100vw"
+        className="object-cover object-top"
+      />
+    </div>
   );
 }
