@@ -4,11 +4,13 @@ import { SponsorCard } from "@features/sponsors/components/sponsor-card";
 import { SponsorsCarousel } from "@features/sponsors/components/sponsors-carousel";
 import type { Sponsor } from "@features/sponsors/lib/types";
 
-const LOGO_ONLY: Sponsor = { ...PIXEL_FORGE, websiteUrl: "", phone: "", services: "" };
+const LOGO_ONLY: Sponsor = { ...PIXEL_FORGE, websiteUrl: "", phone: "", email: null, services: "" };
 
 const WEBSITE_ONLY: Sponsor = { ...LOGO_ONLY, websiteUrl: PIXEL_FORGE.websiteUrl };
 
 const PHONE_ONLY: Sponsor = { ...LOGO_ONLY, phone: PIXEL_FORGE.phone };
+
+const EMAIL_ONLY: Sponsor = { ...LOGO_ONLY, email: "ceo@opset.com.mx" };
 
 describe("SponsorsCarousel with a sponsor that only has a logo", () => {
   it("shows the name and no contact links", () => {
@@ -36,6 +38,38 @@ describe("SponsorsCarousel with a sponsor that only has a logo", () => {
 
     expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(screen.getByRole("link", { name: "998 123 4567" })).toHaveAttribute("href", "tel:+529981234567");
+  });
+});
+
+describe("sponsor email", () => {
+  it("shows the contact section with only the email, as a mailto link", () => {
+    render(<SponsorsCarousel sponsors={[EMAIL_ONLY]} />);
+
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "ceo@opset.com.mx" })).toHaveAttribute("href", "mailto:ceo@opset.com.mx");
+  });
+
+  it("shows the website, the phone and the email together in the card", () => {
+    render(<SponsorCard sponsor={{ ...PIXEL_FORGE, email: "hola@pixel-forge.example" }} />);
+
+    expect(screen.getAllByRole("link")).toHaveLength(3);
+    expect(screen.getByRole("link", { name: "hola@pixel-forge.example" })).toHaveAttribute(
+      "href",
+      "mailto:hola@pixel-forge.example",
+    );
+  });
+
+  it("renders no mailto link and no extra element when the sponsor has no email", () => {
+    const { container } = render(<SponsorCard sponsor={PIXEL_FORGE} />);
+
+    expect(container.querySelector('a[href^="mailto:"]')).toBeNull();
+    expect(screen.getAllByRole("link")).toHaveLength(2);
+  });
+
+  it("renders no contact section for an empty string email", () => {
+    const { container } = render(<SponsorCard sponsor={{ ...LOGO_ONLY, email: "" }} />);
+
+    expect(container.querySelector("a")).toBeNull();
   });
 });
 

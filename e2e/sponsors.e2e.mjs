@@ -115,7 +115,7 @@ function readSponsors(databaseFile) {
   try {
     return database
       .prepare(
-        `SELECT name, logo_path AS logoPath, website_url AS websiteUrl, phone, services
+        `SELECT name, logo_path AS logoPath, website_url AS websiteUrl, phone, email, services
          FROM sponsors ORDER BY position`,
       )
       .all();
@@ -175,6 +175,7 @@ async function runScenario(browser, sponsors, screenshots) {
     await checkLogos(session);
     await checkWebsiteLinks(session);
     await checkPhoneLinks(session);
+    await checkEmailLinks(session);
     await checkLandingCarousel(session);
     await checkViewports(session);
     await checkNavbarToSponsors(session);
@@ -272,7 +273,8 @@ async function checkWebsiteLinks(session) {
 
   check(
     "SP-03 website href of every sponsor",
-    JSON.stringify(links.map(({ href }) => href)) === JSON.stringify(sponsors.map(({ websiteUrl }) => websiteUrl)),
+    JSON.stringify(links.map(({ href }) => href)) ===
+      JSON.stringify(sponsors.map(({ websiteUrl }) => websiteUrl).filter((websiteUrl) => websiteUrl !== "")),
   );
   check(
     "SP-03 target=_blank",
@@ -291,15 +293,33 @@ async function checkPhoneLinks(session) {
 
   check(
     "SP-04 tel: href of every sponsor",
-    JSON.stringify(links.map(({ href }) => href)) === JSON.stringify(sponsors.map(({ phone }) => `tel:${phone}`)),
+    JSON.stringify(links.map(({ href }) => href)) ===
+      JSON.stringify(sponsors.filter(({ phone }) => phone !== "").map(({ phone }) => `tel:${phone}`)),
     links.map(({ href }) => href).join(", "),
   );
   check(
-    "SP-04 phone shown as 998 000 0000",
-    links.every(({ text }) => READABLE_MEXICAN_PHONE.test(text)),
+    "SP-04 Mexican phones shown as 998 000 0000",
+    links.filter(({ href }) => href?.startsWith("tel:+52")).every(({ text }) => READABLE_MEXICAN_PHONE.test(text)),
     links.map(({ text }) => text).join(", "),
   );
   await screenshot(session, "02-links/01-sponsors-page");
+}
+
+// The email is a mailto: link only for the sponsors that have one; the others render no empty link.
+async function checkEmailLinks(session) {
+  const { page, sponsors } = session;
+  const links = await linkAttributes(sponsorCards(page).locator('a[href^="mailto:"]'));
+  const expected = sponsors.filter(({ email }) => email).map(({ email }) => `mailto:${email}`);
+
+  check(
+    "SP-04 mailto: href of every sponsor with an email",
+    JSON.stringify(links.map(({ href }) => href)) === JSON.stringify(expected),
+    links.map(({ href }) => href).join(", ") || "none",
+  );
+  check(
+    "SP-04 the email is shown as written",
+    links.every(({ href, text }) => href === `mailto:${text}`),
+  );
 }
 
 // SP-05: the landing carousel shows the same sponsors and opens on the first one. Autoplay advances every 6.5 s and a

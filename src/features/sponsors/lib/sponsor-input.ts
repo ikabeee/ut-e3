@@ -1,9 +1,12 @@
 import { SPONSORS_COPY } from "@features/sponsors/lib/sponsors-copy";
 import { readFormText } from "@shared/lib/form-data";
 
-export type SponsorField = "name" | "logoPath" | "websiteUrl" | "phone" | "services" | "position";
+export type SponsorField = "name" | "logoPath" | "websiteUrl" | "phone" | "email" | "services" | "position";
 
-export type SponsorInput = Record<Exclude<SponsorField, "position">, string> & { position: number };
+export type SponsorInput = Record<Exclude<SponsorField, "position" | "email">, string> & {
+  email: string | null;
+  position: number;
+};
 
 export type SponsorErrors = Partial<Record<SponsorField, string>>;
 
@@ -13,17 +16,23 @@ export const NAME_MAX_LENGTH = 80;
 
 export const SERVICES_MAX_LENGTH = 200;
 
+// The longest address an SMTP path allows (RFC 5321).
+export const EMAIL_MAX_LENGTH = 254;
+
 // A file served from public/ (next/image only loads local logos), without `..` segments.
 const LOGO_PATH = /^\/(?:[\w-]+\/)*[\w.-]+\.(?:svg|png|jpe?g|webp)$/i;
 
 // E.164, as the CHECK of the table asks (`phone GLOB '+[0-9]*'`).
 const PHONE = /^\+\d{8,15}$/;
 
+// Something@something.tld with no spaces: enough to catch typos, the owner confirms the rest.
+const EMAIL = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
+
 const ERRORS = SPONSORS_COPY.admin.errors;
 
 /**
  * The card of a sponsor (RF-41): name, logo, website, contact phone, services and the place in the list. The website,
- * the phone and the services may stay empty: not every sponsor gives them, and the landing leaves them out.
+ * the phone, the email and the services may stay empty: not every sponsor gives them, and the landing leaves them out.
  */
 export function parseSponsorInput(form: FormData): ParsedSponsor {
   const sponsor = {
@@ -31,6 +40,7 @@ export function parseSponsorInput(form: FormData): ParsedSponsor {
     logoPath: readFormText(form, "logoPath").trim(),
     websiteUrl: readFormText(form, "websiteUrl").trim(),
     phone: readFormText(form, "phone").replaceAll(/[\s()-]/g, ""),
+    email: readFormText(form, "email").trim().toLowerCase() || null,
     services: readFormText(form, "services").trim(),
     position: Number(readFormText(form, "position").trim()),
   };
@@ -46,6 +56,7 @@ function findErrors(sponsor: SponsorInput): SponsorErrors {
     ["logoPath", LOGO_PATH.test(sponsor.logoPath) && !sponsor.logoPath.includes("..")],
     ["websiteUrl", sponsor.websiteUrl === "" || isHttpsUrl(sponsor.websiteUrl)],
     ["phone", sponsor.phone === "" || PHONE.test(sponsor.phone)],
+    ["email", sponsor.email === null || (sponsor.email.length <= EMAIL_MAX_LENGTH && EMAIL.test(sponsor.email))],
     ["services", sponsor.services.length <= SERVICES_MAX_LENGTH],
     ["position", Number.isInteger(sponsor.position) && sponsor.position >= 1 && sponsor.position <= 999],
   ];

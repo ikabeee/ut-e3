@@ -15,6 +15,7 @@ const VALID = {
   logoPath: "/sponsors/nodo-caribe.svg",
   websiteUrl: "https://example.com/nodo",
   phone: "+52 998 123 4567",
+  email: "",
   services: "Servidores en la nube.",
   position: "3",
 };
@@ -52,15 +53,41 @@ describe("parseSponsorInput (RF-41)", () => {
   it("normalizes the phone to E.164 and reads the position", () => {
     expect(parseSponsorInput(sponsorForm())).toEqual({
       isValid: true,
-      sponsor: { ...VALID, phone: "+529981234567", position: 3 },
+      sponsor: { ...VALID, phone: "+529981234567", email: null, position: 3 },
     });
   });
 
   it("accepts a sponsor without website, phone or services, which some sponsors do not give", () => {
     expect(parseSponsorInput(sponsorForm({ websiteUrl: " ", phone: "", services: "" }))).toEqual({
       isValid: true,
-      sponsor: { ...VALID, websiteUrl: "", phone: "", services: "", position: 3 },
+      sponsor: { ...VALID, websiteUrl: "", phone: "", email: null, services: "", position: 3 },
     });
+  });
+
+  it("trims and lowercases the email, and stores an empty one as null", () => {
+    expect(parseSponsorInput(sponsorForm({ email: "  Contacto@Empresa.COM " }))).toMatchObject({
+      isValid: true,
+      sponsor: { email: "contacto@empresa.com" },
+    });
+    expect(parseSponsorInput(sponsorForm({ email: "   " }))).toMatchObject({ isValid: true, sponsor: { email: null } });
+    expect(parseSponsorInput(sponsorForm())).toMatchObject({ isValid: true, sponsor: { email: null } });
+  });
+
+  it.each(["sin-arroba", "a@b", "a b@empresa.com", "@empresa.com", "a@@empresa.com", "a@empresa..com"])(
+    "refuses the email %s",
+    (email) => {
+      expect(parseSponsorInput(sponsorForm({ email }))).toMatchObject({
+        isValid: false,
+        errors: { email: expect.any(String) },
+      });
+    },
+  );
+
+  it("refuses an email longer than 254 characters and accepts one of exactly 254", () => {
+    const exact = `${"a".repeat(254 - "@empresa.com".length)}@empresa.com`;
+
+    expect(parseSponsorInput(sponsorForm({ email: exact })).isValid).toBe(true);
+    expect(parseSponsorInput(sponsorForm({ email: `a${exact}` })).isValid).toBe(false);
   });
 
   it("refuses a remote or climbing logo, a plain http site and a phone without +", () => {
@@ -101,6 +128,24 @@ describe("saveSponsor and deleteSponsor (RF-41)", () => {
     await expect(deleteSponsor(actorId, stored.id)).resolves.toEqual({ status: "saved" });
     await expect(deleteSponsor(actorId, stored.id)).resolves.toEqual({ status: "notFound" });
     await expect(getPrisma().auditLog.count({ where: { entityType: "sponsor" } })).resolves.toBe(3);
+  });
+
+  it("stores the email and null when it is empty", async () => {
+    const withEmail = parseSponsorInput(sponsorForm({ name: "Con correo", email: "Hola@Empresa.com" }));
+    const without = parseSponsorInput(sponsorForm({ name: "Sin correo" }));
+
+    if (!withEmail.isValid || !without.isValid) throw new Error("expected valid forms");
+
+    await saveSponsor(actorId, "", withEmail.sponsor);
+    await saveSponsor(actorId, "", without.sponsor);
+
+    await expect(getPrisma().sponsor.findFirstOrThrow({ where: { name: "Con correo" } })).resolves.toMatchObject({
+      email: "hola@empresa.com",
+    });
+    await expect(getPrisma().sponsor.findFirstOrThrow({ where: { name: "Sin correo" } })).resolves.toMatchObject({
+      email: null,
+    });
+    await getPrisma().sponsor.deleteMany({ where: { name: { in: ["Con correo", "Sin correo"] } } });
   });
 
   it("refuses a logo that is not a file of public/, so the landing shows no broken image", async () => {

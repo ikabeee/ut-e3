@@ -1,7 +1,7 @@
 "use client";
 
 import { Description, FieldError, Form, Input, Label, TextArea, TextField } from "@heroui/react";
-import { NAME_MAX_LENGTH, SERVICES_MAX_LENGTH } from "@features/sponsors/lib/sponsor-input";
+import { EMAIL_MAX_LENGTH, NAME_MAX_LENGTH, SERVICES_MAX_LENGTH } from "@features/sponsors/lib/sponsor-input";
 import type { SponsorActionState } from "@features/sponsors/lib/sponsors-admin-actions";
 import { SPONSORS_COPY } from "@features/sponsors/lib/sponsors-copy";
 import type { Sponsor } from "@features/sponsors/lib/types";
@@ -24,6 +24,7 @@ const TEXT_FIELDS = [
   { name: "logoPath", maxLength: 200, type: "text", hint: COPY.hints.logoPath, isRequired: true },
   { name: "websiteUrl", maxLength: 300, type: "url", hint: null, isRequired: false },
   { name: "phone", maxLength: 20, type: "tel", hint: COPY.hints.phone, isRequired: false },
+  { name: "email", maxLength: EMAIL_MAX_LENGTH, type: "email", hint: COPY.hints.email, isRequired: false },
 ] as const;
 
 /** Registers, edits and deletes the sponsors of the public cards (RF-41). */
@@ -97,7 +98,7 @@ function SponsorTextFields({ sponsor }: Readonly<{ sponsor?: Sponsor }>) {
       key={field.name}
       name={field.name}
       type={field.type}
-      defaultValue={sponsor?.[field.name]}
+      defaultValue={sponsor?.[field.name] ?? undefined}
       maxLength={field.maxLength}
       isRequired={field.isRequired}
     >
