@@ -6,6 +6,7 @@ import {
   RECOVERY_CONFIRM_PATH,
   RECOVERY_LINK_EXPIRED_PATH,
 } from "@features/visitors/lib/visitors-links";
+import { parseSiteUrl } from "@shared/lib/env";
 import { isActiveDeviceToken, setVisitorDeviceCookie } from "@shared/lib/server/visitor-device";
 
 const HEADERS = { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" };
@@ -31,6 +32,11 @@ export async function GET(request: Request, context: RouteContext<"/passport/cla
   return redirectTo(RECOVERY_LINK_EXPIRED_PATH, request);
 }
 
+// Behind a proxy or a tunnel `request.url` carries the internal origin (http://localhost:3000), which the visitor's phone
+// cannot reach. The public origin is the one the emails use (NEXT_PUBLIC_SITE_URL); without it, the request decides.
 function redirectTo(path: string, request: Request): Response {
-  return NextResponse.redirect(new URL(path, request.url), { headers: HEADERS });
+  const publicSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  const origin = publicSiteUrl ? parseSiteUrl(publicSiteUrl, process.env.NODE_ENV) : request.url;
+
+  return NextResponse.redirect(new URL(path, origin), { headers: HEADERS });
 }

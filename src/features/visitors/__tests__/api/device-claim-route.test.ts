@@ -93,6 +93,52 @@ describe("GET /passport/claim/[token]", () => {
   });
 });
 
+describe("GET /passport/claim/[token] behind a proxy", () => {
+  const originalSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
+  afterEach(() => {
+    if (originalSiteUrl === undefined) delete process.env.NEXT_PUBLIC_SITE_URL;
+    else process.env.NEXT_PUBLIC_SITE_URL = originalSiteUrl;
+  });
+
+  it("redirects to the public origin of NEXT_PUBLIC_SITE_URL, not to the internal one of the request", async () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://showcase.example.com";
+
+    const response = await claim("no-existe");
+
+    expect(response.headers.get("location")).toBe("https://showcase.example.com/passport/recover/expired");
+  });
+
+  it("keeps the token in the fragment on the public origin for an email link", async () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://showcase.example.com";
+    await requestEmailRecovery("neo@example.com", new Date());
+
+    const { text } = await getPrisma().emailOutbox.findFirstOrThrow();
+    const token = new RegExp(`${CLAIM_PATH}/(\\S+)`).exec(text)?.[1] ?? "";
+    const location = new URL((await claim(token)).headers.get("location") ?? "");
+
+    expect(location.origin).toBe("https://showcase.example.com");
+    expect(location.pathname).toBe("/passport/recover/confirm");
+    expect(location.hash).toBe(`#${token}`);
+  });
+
+  it("falls back to the origin of the request when NEXT_PUBLIC_SITE_URL is not defined", async () => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+
+    const response = await claim("no-existe");
+
+    expect(response.headers.get("location")).toBe("http://localhost/passport/recover/expired");
+  });
+
+  it("falls back to the origin of the request when NEXT_PUBLIC_SITE_URL is blank", async () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "  ";
+
+    const response = await claim("no-existe");
+
+    expect(response.headers.get("location")).toBe("http://localhost/passport/recover/expired");
+  });
+});
+
 function claim(token: string): Promise<Response> {
   return GET(new Request(`http://localhost/passport/claim/${token}`), { params: Promise.resolve({ token }) });
 }
