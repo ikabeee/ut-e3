@@ -3,9 +3,11 @@ import type { AdminStandLocation, StandLocation } from "@features/games/lib/stan
 import type { Game, GameImage, Genre } from "@features/games/lib/types";
 import type { Prisma, PrismaClient } from "@generated/prisma/client";
 
-// The sources give no genre and no synopsis yet, so every game shares this placeholder genre. A genre is required by
-// the model, so the games that were just added use it too.
+// The sources give no synopsis yet and, except for DON'T PET ME, no genre, so most games share this placeholder genre.
+// A genre is required by the model, so the games that were just added use it too.
 const TO_BE_ANNOUNCED: Genre = { id: "por-anunciar", name: "Por anunciar", slug: "por-anunciar" };
+
+const PLATFORMS_3D: Genre = { id: "plataformas-3d", name: "Plataformas 3D", slug: "plataformas-3d" };
 
 interface SeedGame {
   slug: string;
@@ -17,10 +19,11 @@ interface SeedGame {
   hasCover?: boolean;
   /** False for the games whose only artwork is the portrait cover. */
   hasLandscapeImage?: boolean;
+  /** Defaults to the placeholder genre, which the sources still give for most games. */
+  genre?: Genre;
 }
 
-// The real stands of the event, by zone and number: studio and group as the organizers assigned them. ZC-S3 has no
-// game, so it has no row either.
+// The 18 stands of the event, by zone and number: studio and group as the organizers assigned them.
 const SEED_GAMES: SeedGame[] = [
   {
     slug: "make-em-fall",
@@ -50,6 +53,15 @@ const SEED_GAMES: SeedGame[] = [
     studio: 1,
     groupCode: "101",
     hasCover: false,
+  },
+  {
+    slug: "don-t-pet-me",
+    name: "DON'T PET ME",
+    stand: { zone: "C", number: 3 },
+    studio: 5,
+    groupCode: "101",
+    hasCover: false,
+    genre: PLATFORMS_3D,
   },
   { slug: "turno-rosso", name: "Turno Rosso", stand: { zone: "D", number: 1 }, studio: 2, groupCode: "102" },
   {
@@ -83,7 +95,14 @@ export const INITIAL_STANDS: AdminStandLocation[] = SEED_GAMES.map(({ stand, stu
   groupCode,
 }));
 
-function buildGame({ hasCover = true, hasLandscapeImage = true, slug, name, stand }: SeedGame): Game {
+function buildGame({
+  hasCover = true,
+  hasLandscapeImage = true,
+  genre = TO_BE_ANNOUNCED,
+  slug,
+  name,
+  stand,
+}: SeedGame): Game {
   const cover: GameImage = {
     path: `/games/${slug}.jpg`,
     alt: `Portada de ${name}`,
@@ -103,7 +122,7 @@ function buildGame({ hasCover = true, hasLandscapeImage = true, slug, name, stan
     slug,
     name,
     stand,
-    genre: TO_BE_ANNOUNCED,
+    genre,
     synopsis: "",
     images: [hasCover ? cover : null, hasCover && hasLandscapeImage ? landscape : null].filter(isImage),
   };
