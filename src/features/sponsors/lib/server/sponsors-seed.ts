@@ -30,6 +30,8 @@ const REAL_SPONSORS: SponsorFields[] = [
   {
     name: "Le Jardin d'Aurore",
     logoPath: "/sponsors/le-jardin-d-aurore.svg",
+    websiteUrl: "https://www.lejardindaurore.com/",
+    phone: "+529981878194",
     email: "contacto@lejardindaurore.com",
   },
 ];
