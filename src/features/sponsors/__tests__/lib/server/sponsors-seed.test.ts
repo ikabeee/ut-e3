@@ -4,6 +4,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { PIXEL_FORGE } from "@features/sponsors/__tests__/components/sponsor-test-data";
+import { parseSponsorInput } from "@features/sponsors/lib/sponsor-input";
 import { INITIAL_SPONSORS, seedSponsors } from "@features/sponsors/lib/server/sponsors-seed";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
@@ -48,7 +49,7 @@ describe("INITIAL_SPONSORS", () => {
       { name: "Mermelada", websiteUrl: "", phone: "" },
       { name: "Nemo Submarine", websiteUrl: "https://www.nemoisla.com/", phone: "+19038019083" },
       { name: "OpSET", websiteUrl: "", phone: "+529981878194" },
-      { name: "Le Jardin d'Aurore", websiteUrl: "", phone: "" },
+      { name: "Le Jardin d'Aurore", websiteUrl: "https://www.lejardindaurore.com/", phone: "+529981878194" },
     ]);
   });
 
@@ -63,10 +64,23 @@ describe("INITIAL_SPONSORS", () => {
     ]);
   });
 
-  it("keeps the website and the services of OpSET and Le Jardin d'Aurore empty", () => {
+  it("keeps the website and the services of OpSET, and the services of Le Jardin d'Aurore, empty", () => {
     const [opset, jardin] = INITIAL_SPONSORS.slice(4);
 
-    expect([opset.websiteUrl, opset.services, jardin.websiteUrl, jardin.services]).toEqual(["", "", "", ""]);
+    expect([opset.websiteUrl, opset.services, jardin.services]).toEqual(["", "", ""]);
+  });
+
+  it("gives Le Jardin d'Aurore data that the admin validation accepts (https, E.164, email)", () => {
+    const jardin = INITIAL_SPONSORS.find((sponsor) => sponsor.name === "Le Jardin d'Aurore");
+    const form = new FormData();
+
+    for (const [field, value] of Object.entries({ ...jardin, position: String(jardin?.position) }))
+      form.set(field, value === null ? "" : String(value));
+
+    expect(parseSponsorInput(form)).toMatchObject({
+      isValid: true,
+      sponsor: { websiteUrl: "https://www.lejardindaurore.com/", phone: "+529981878194" },
+    });
   });
 
   it("describes only Algorix Insights, the only sponsor with a services text", () => {
