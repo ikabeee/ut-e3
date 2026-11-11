@@ -1,7 +1,7 @@
 name: CI
 
-# Puerta de calidad: todo PR hacia develop o main debe pasar lint (ESLint con las reglas
-# de SonarQube y Oxlint con las reglas anti-slop y readable-code), código duplicado (jscpd), formato (Prettier), typecheck, pruebas, migraciones de la base y build.
+# Puerta de calidad: todo PR hacia develop o main debe pasar lint
+# (incluye las reglas de SonarQube), typecheck, pruebas y build.
 on:
   pull_request:
     branches: [develop, main]
@@ -18,10 +18,6 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-
-    env:
-      DO_NOT_TRACK: 1
-
     steps:
       - uses: actions/checkout@v4
 
@@ -32,19 +28,6 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
-      - run: npm run lint:oxlint
-      - run: npm run lint:duplication
-      - run: npm run format:check
       - run: npm run typecheck
       - run: npm test -- --coverage
-      # Las consultas con "use cache" leen la base durante el build: se migra y se carga una SQLite temporal.
-      - run: |
-          npm run db:deploy
-          npm run db:seed
-        env:
-          DATABASE_URL: file:${{ runner.temp }}/ci.db
       - run: npm run build
-        env:
-          # Obligatoria en producción (src/shared/lib/env.ts); basta un valor de ejemplo.
-          NEXT_PUBLIC_SITE_URL: https://example.com
-          DATABASE_URL: file:${{ runner.temp }}/ci.db

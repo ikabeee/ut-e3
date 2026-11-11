@@ -1,55 +1,47 @@
-import type { StandLocation } from "@features/games/lib/stand-code";
+/** Colores de la paleta del diseño que puede usar el arte generado de un juego. */
+export type ArtColor = "acid" | "black" | "white" | "panel" | "light";
 
-export interface Genre {
-  id: string;
-  name: string;
-  slug: string;
-}
-
-/** A genre of the catalog as the sysadmin manages it (RF-72): with how many games use it. */
-export interface AdminGenre extends Genre {
-  gameCount: number;
+/**
+ * Arte generado (canvas) que se muestra cuando un juego todavía no tiene imagen,
+ * y en las tomas extra de su galería.
+ */
+export interface GameKeyArt {
+  /** Semilla que decide la composición y el ruido del arte. */
+  seed: number;
+  /** `[color de la figura, color del fondo]`. */
+  palette: readonly [ArtColor, ArtColor];
 }
 
 export interface GameImage {
-  path: string;
-  alt: string;
-  position: number;
-  isCover: boolean;
+  /** Ruta pública de la imagen (por ejemplo `/mock/games/ruta-9.jpg`). */
+  src: string;
+  /** Encuadre CSS (`object-position`), por ejemplo `"60% 35%"`. */
+  position: string;
 }
 
+/** Lo que se pinta en una portada o toma: una imagen o el arte generado. */
+export type GameVisual = { kind: "image"; image: GameImage } | { kind: "art"; art: GameKeyArt };
+
+/** Videojuego presentado por un equipo en su stand. */
 export interface Game {
-  id: string;
   slug: string;
   name: string;
-  synopsis: string;
-  genre: Genre;
-  stand: StandLocation;
-  images: GameImage[];
+  genre: string;
+  /** Nombre del equipo, por ejemplo "Equipo Grava". */
+  team: string;
+  members: number;
+  /** Código del stand en el croquis, por ejemplo "A1". */
+  stand: string;
+  hasTournament: boolean;
+  description: string;
+  image: GameImage | null;
+  art: GameKeyArt;
 }
 
-export interface GameEventLabels {
-  dateLabel: string;
-  hoursLabel: string;
-}
-
-export interface GameDetailLinks {
-  catalog: string;
-  floorPlan: string;
-  calendar: string;
-}
-
+/** Género con sus juegos, para el carrusel de géneros del catálogo. */
 export interface GenreSummary {
-  genre: Genre;
-  gameCount: number;
-  /** Three covers: two at the back, then the one in front. */
-  covers: Game[];
-}
-
-/** The data of its game that the administrator of a stand registers (RF-31). */
-export interface StandGame {
   name: string;
-  synopsis: string;
-  genreId: string;
-  itchUrl: string | null;
+  gameCount: number;
+  /** Tres portadas: dos al fondo y la del frente al final. */
+  covers: readonly Game[];
 }

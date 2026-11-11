@@ -20,12 +20,20 @@
     ],
     "paths": {
       "@features/*": ["./src/features/*"],
-      "@shared/*": ["./src/shared/*"],
-      "@app/*": ["./src/app/*"],
-      "@generated/*": ["./generated/*"]
+      "@shared/*": ["./src/shared/*"]
     },
-    "types": ["node", "jest"]
+    "types": [
+      "node",
+      "jest"
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts", "**/*.mts"],
-  "exclude": ["node_modules", "tools/oxlint"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
 }

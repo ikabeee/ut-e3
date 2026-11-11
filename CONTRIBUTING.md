@@ -51,7 +51,7 @@ feat(games): agregar filtro por género
 fix(teams): corregir avatar roto en la tarjeta de equipo
 docs: actualizar guía de contribución
 refactor(shared): extraer componente Button
-chore(deps): actualizar next
+chore(deps): actualizar prisma
 ```
 
 El *scope* entre paréntesis es la feature afectada.
@@ -64,72 +64,44 @@ Si tu cambio se nota en el sitio, agrega una línea en la sección `[Sin publica
 
 ## 4. Entorno local
 
-Requisitos: **Node.js ≥ 22.18**.
+Requisitos: **Node.js ≥ 22.18** y **PostgreSQL ≥ 15**.
 
 ```bash
 npm install
+cp .env.example .env        # configura DATABASE_URL
+npm run db:emit             # genera contract.json y contract.d.ts
+npm run db:init             # crea las tablas en tu base local
 npm run dev                 # http://localhost:3000
-```
-
-Configura también `git blame` para que salte los commits que sólo cambian el formato (están en
-[`.git-blame-ignore-revs`](./.git-blame-ignore-revs)); así ves quién hizo el último cambio real de
-cada línea:
-
-```bash
-git config blame.ignoreRevsFile .git-blame-ignore-revs
 ```
 
 Antes de abrir tu PR:
 
 ```bash
-npm run format      # aplica el formato con Prettier
 npm run lint        # incluye las reglas de SonarQube
 npm run typecheck
 npm test
 ```
 
-El CI de GitHub Actions corre estos mismos pasos (y `npm run build`) en cada Pull Request. En lugar de
-`npm run format`, el CI corre `npm run format:check`, que falla si algún archivo no tiene el formato.
-Las pruebas viven en la carpeta `__tests__/` de su feature (o de `src/shared/` y `src/app/`), con las
-mismas subcarpetas que el código: `landing/lib/countdown.ts` -> `landing/__tests__/lib/countdown.test.ts`.
-
-### Formato del código
-
-[Prettier](https://prettier.io/) formatea el código (`prettier.config.mjs`): ancho de 120 columnas,
-comillas dobles, punto y coma y comas finales. No discutas espacios en las revisiones: lo decide Prettier.
-
-- **Activa "format on save" en tu editor.** En VS Code instala la extensión "Prettier - Code formatter"
-  (`esbenp.prettier-vscode`) y en tu configuración de usuario pon `"editor.formatOnSave": true` y
-  `"editor.defaultFormatter": "esbenp.prettier-vscode"`. WebStorm lo trae integrado: activa
-  "Run on save" en Settings > Languages & Frameworks > JavaScript > Prettier.
-- Si no lo tienes, corre `npm run format` antes de abrir tu PR.
-- `prettier-plugin-tailwindcss` ordena las clases de Tailwind dentro de cada cadena (también dentro de
-  `cn(...)`). Sólo reordena dentro de una misma cadena: el orden de los argumentos de `cn()` sí importa
-  para tailwind-merge, que descarta la clase que choca con una posterior (por ejemplo, `text-sm` después
-  de `leading-*` borra el interlineado). Pon el tamaño del texto en un argumento anterior al interlineado.
-- No se formatean los archivos generados (`package-lock.json`), las
-  salidas de compilación, `public/` ni el Markdown, porque Prettier alinea las tablas con espacios y
-  editar una celda reescribiría la tabla completa (ver `.prettierignore`).
-- `.nvmrc` fija Node 22: con [nvm](https://github.com/nvm-sh/nvm), `nvm use` selecciona esa versión.
+El CI de GitHub Actions corre estos mismos pasos (y `npm run build`) en cada Pull Request.
+Las pruebas viven junto al archivo que prueban: `game-filters.ts` -> `game-filters.test.ts`.
 
 ## 5. Arquitectura
 
 El código está organizado con **screaming architecture**: las carpetas gritan *de qué trata* la aplicación
 (cada dominio es una carpeta en `src/features/`), no *con qué está hecha*.
-Hoy sólo existe la feature `landing` (una portada provisional mientras se construye la versión 2).
+Como punto de partida existe la feature `example`.
 
-- Cada feature en `src/features/<feature>/` se organiza en `lib/`, `hooks/`, `components/` y `pages/`,
-  más `__tests__/` para sus pruebas. Crea cada carpeta cuando la necesites; el linter valida las que existen. No dejes
-  carpetas vacías ni `.gitkeep`.
-- `npm run lint` valida qué capa puede importar a cuál y qué features pueden depender de otras
-  (`FEATURE_DEPENDENCIES` en `eslint.config.mjs`). Si te bloquea, el mensaje dice qué hacer.
+- Cada feature en `src/features/<feature>/` tiene siempre `lib/`, `hooks/`, `components/` y `pages/`.
 - Las `pages/` son contenedores: obtienen datos y componen componentes. `src/app/` sólo las renderiza.
 - **Todo el naming va en inglés**: directorios, archivos, código, ramas y labels. Sólo los textos de la
   interfaz y la documentación van en español.
 
 Las reglas completas están en [`AGENTS.md`](./AGENTS.md). Para orientarte rápido:
 
+- [`docs/where-to-edit.md`](./docs/where-to-edit.md): dónde cambiar textos, juegos, colores o el croquis.
+- [`docs/architecture.md`](./docs/architecture.md): capas, flujo de datos y principios SOLID.
 - [`docs/design-system.md`](./docs/design-system.md): cómo usar HeroUI con el tema UTG.
+- [`docs/data-sources.md`](./docs/data-sources.md): datos mock y cómo conectar Prisma.
 
 ## 6. Código de conducta
 

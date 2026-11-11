@@ -1,3 +1,8 @@
+/*
+ * Estilos base y utilidades tipográficas del diseño UTG.
+ * Se usan como clases de Tailwind: `type-mono`, `type-tiny`, `type-giant`, `page-wrap`...
+ */
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -48,13 +53,14 @@
   }
 }
 
+/* Contenedor de página: el `.wrap` del diseño. */
 @utility page-wrap {
   max-width: 1600px;
   margin-inline: auto;
-  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
-  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+  padding-inline: var(--gutter);
 }
 
+/* Texto monoespaciado en mayúsculas (`.mono`). */
 @utility type-mono {
   font-family: var(--font-mono);
   font-weight: 500;
@@ -63,6 +69,7 @@
   text-transform: uppercase;
 }
 
+/* Etiquetas pequeñas (`.tiny`). */
 @utility type-tiny {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -70,15 +77,7 @@
   text-transform: uppercase;
 }
 
-@utility type-section {
-  font-family: var(--font-wide);
-  font-weight: 700;
-  font-size: clamp(18px, 1.8vw, 24px);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-}
-
+/* Títulos gigantes de sección (`.giant`). */
 @utility type-giant {
   font-family: var(--font-wide);
   font-weight: 700;
@@ -88,12 +87,14 @@
   text-transform: uppercase;
 }
 
+/* Títulos anchos en mayúsculas (h3 de tarjetas, nombres de juegos...). */
 @utility type-wide {
   font-family: var(--font-wide);
   font-weight: 700;
   text-transform: uppercase;
 }
 
+/* Espaciado vertical entre secciones (`section.block`). */
 @utility section-block {
   padding-top: clamp(80px, 11vw, 160px);
 }
