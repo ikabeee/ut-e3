@@ -10,5 +10,5 @@ export const SPECIAL_GUESTS: readonly SpecialGuest[] = [
       alt: "Retrato de la persona invitada, con lentes, frente a un muro oscuro y plantas",
     },
   },
-  { id: "guest-2", name: "Por anunciar", talk: "Plática por anunciar" },
+  // To bring the second card back, restore: { id: "guest-2", name: "Por anunciar", talk: "Plática por anunciar" },
 ];

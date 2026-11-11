@@ -2,6 +2,7 @@ import Image from "next/image";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { GUESTS_SECTION_ID } from "@features/landing/lib/landing-links";
 import type { SpecialGuest } from "@features/landing/lib/types";
+import { cn } from "@heroui/react";
 import { PaperCard } from "@shared/components/paper-card";
 
 interface SpecialGuestsProps {
@@ -13,7 +14,12 @@ export function SpecialGuests({ guests }: Readonly<SpecialGuestsProps>) {
     <section id={GUESTS_SECTION_ID} className="section-block">
       <div className="page-wrap">
         <h2 className="type-giant">{LANDING_COPY.guests.heading}</h2>
-        <ul className="m-0 mt-[clamp(36px,5vw,64px)] grid list-none grid-cols-2 gap-gutter p-0 max-[820px]:grid-cols-1">
+        <ul
+          className={cn(
+            "m-0 mt-[clamp(36px,5vw,64px)] grid list-none gap-gutter p-0",
+            guests.length === 1 ? "mx-auto max-w-140 grid-cols-1" : "grid-cols-2 max-[820px]:grid-cols-1",
+          )}
+        >
           {guests.map((guest) => (
             <li key={guest.id} className="flex min-w-0 flex-col">
               <GuestCard guest={guest} />
