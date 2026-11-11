@@ -1,20 +1,15 @@
 "use client";
 
-import { EmptyState } from "@heroui/react";
-import { ActionButton } from "@shared/components/action-button";
+import { Button } from "@heroui/react";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
 
-interface GamesEmptyStateProps {
-  onReset: () => void;
-}
-
-/** Mensaje cuando la búsqueda no encuentra juegos (`.empty` del diseño). */
-export function GamesEmptyState({ onReset }: Readonly<GamesEmptyStateProps>) {
+export function GamesEmptyState({ onReset }: Readonly<{ onReset: () => void }>) {
   return (
-    <EmptyState className="flex flex-col items-center gap-4 border border-dashed border-border px-5 py-10 text-center text-base">
-      <p className="m-0 text-copy-warm">Ningún juego coincide con tu búsqueda.</p>
-      <ActionButton variant="outline" onPress={onReset}>
-        Ver todos los juegos
-      </ActionButton>
-    </EmptyState>
+    <div className="flex flex-col items-center gap-5 border border-separator px-gutter py-[clamp(48px,8vw,96px)] text-center">
+      <p className="m-0 type-wide text-[clamp(18px,2vw,24px)] tracking-[-.02em]">{GAMES_COPY.catalog.empty}</p>
+      <Button variant="outline" onPress={onReset}>
+        {GAMES_COPY.catalog.showAll}
+      </Button>
+    </div>
   );
 }
