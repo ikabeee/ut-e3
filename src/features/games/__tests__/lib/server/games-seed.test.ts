@@ -8,7 +8,7 @@ import { formatAdminStandCode } from "@features/games/lib/stand-code";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
-// The 17 games of the showcase with their real stand, studio and group, in stand order. ZC-S3 has no game.
+// The 18 stands of the event with their studio and group, in stand order.
 const GAMES = [
   ["ZA-S1-E6-101", "Make 'em Fall"],
   ["ZA-S2-E5-102", "True Hero"],
@@ -18,6 +18,7 @@ const GAMES = [
   ["ZB-S3-E3-103", "Vaporlock"],
   ["ZC-S1-E6-103", "Unknown Game"],
   ["ZC-S2-E1-101", "Sombra del Mictlán"],
+  ["ZC-S3-E5-101", "DON'T PET ME"],
   ["ZD-S1-E2-102", "Turno Rosso"],
   ["ZD-S2-E5-103", "Reencarnación Express"],
   ["ZD-S3-E1-103", "Astrolabio"],
@@ -30,7 +31,7 @@ const GAMES = [
 ] as const;
 
 // They have no artwork yet: the pages show a generic cover with their name.
-const GAMES_WITHOUT_COVER = ["make-em-fall", "one-mind", "sombra-del-mictlan"];
+const GAMES_WITHOUT_COVER = ["make-em-fall", "one-mind", "sombra-del-mictlan", "don-t-pet-me"];
 
 const database = createTestDatabase();
 
@@ -42,7 +43,7 @@ afterAll(async () => {
 });
 
 describe("INITIAL_GAMES", () => {
-  it("lists the 17 games of the showcase in stand order", () => {
+  it("lists the 18 games of the showcase in stand order", () => {
     expect(INITIAL_GAMES.map((game) => game.name)).toEqual(GAMES.map(([, name]) => name));
   });
 
@@ -50,13 +51,34 @@ describe("INITIAL_GAMES", () => {
     expect(INITIAL_STANDS.map(formatAdminStandCode)).toEqual(GAMES.map(([code]) => code));
   });
 
-  it("leaves ZC-S3 without a game", () => {
-    expect(INITIAL_STANDS.map(formatAdminStandCode).some((code) => code.startsWith("ZC-S3"))).toBe(false);
+  it("has the 18 stands of the event, ZC-S3 among them", () => {
+    const codes = INITIAL_STANDS.map(formatAdminStandCode);
+
+    expect(INITIAL_STANDS).toHaveLength(18);
+    expect(INITIAL_GAMES).toHaveLength(18);
+    expect(codes.filter((code) => code.startsWith("ZC-S3-"))).toEqual(["ZC-S3-E5-101"]);
   });
 
-  it("announces no genre and no synopsis, because the sources do not give them", () => {
+  it("holds DON'T PET ME in ZC-S3 as a platformer with no artwork, synopsis or genre text beyond its name", () => {
+    const game = INITIAL_GAMES.find((candidate) => candidate.stand.zone === "C" && candidate.stand.number === 3);
+
+    expect(game).toMatchObject({
+      slug: "don-t-pet-me",
+      name: "DON'T PET ME",
+      synopsis: "",
+      images: [],
+      genre: { id: "plataformas-3d", name: "Plataformas 3D", slug: "plataformas-3d" },
+    });
+  });
+
+  it("announces the genre of every game but DON'T PET ME, and no synopsis, because the sources do not give them", () => {
     for (const game of INITIAL_GAMES) {
-      expect(game.genre).toEqual({ id: "por-anunciar", name: "Por anunciar", slug: "por-anunciar" });
+      const expected =
+        game.slug === "don-t-pet-me"
+          ? { id: "plataformas-3d", name: "Plataformas 3D", slug: "plataformas-3d" }
+          : { id: "por-anunciar", name: "Por anunciar", slug: "por-anunciar" };
+
+      expect(game.genre).toEqual(expected);
       expect(game.synopsis).toBe("");
     }
   });
@@ -97,7 +119,7 @@ describe("seedGames", () => {
     await prisma.genre.deleteMany();
   });
 
-  it("writes one stand per game with its studio and group, 17 in all", async () => {
+  it("writes one stand per game with its studio and group, 18 in all", async () => {
     await seedGames(getPrisma());
 
     const stands = await getPrisma().stand.findMany();
@@ -105,12 +127,15 @@ describe("seedGames", () => {
     expect(stands.map(formatAdminStandCode).toSorted()).toEqual(GAMES.map(([code]) => code).toSorted());
   });
 
-  it("writes the Por anunciar genre once for all the games", async () => {
+  it("writes the Por anunciar genre once for its games, and the Plataformas 3D genre for DON'T PET ME", async () => {
     await seedGames(getPrisma());
 
-    const genres = await getPrisma().genre.findMany();
+    const genres = await getPrisma().genre.findMany({ orderBy: { slug: "asc" } });
 
-    expect(genres).toEqual([expect.objectContaining({ name: "Por anunciar", slug: "por-anunciar" })]);
+    expect(genres).toEqual([
+      expect.objectContaining({ name: "Plataformas 3D", slug: "plataformas-3d" }),
+      expect.objectContaining({ name: "Por anunciar", slug: "por-anunciar" }),
+    ]);
   });
 
   it("writes every game with an empty synopsis and its cover at position 1 when it has one", async () => {

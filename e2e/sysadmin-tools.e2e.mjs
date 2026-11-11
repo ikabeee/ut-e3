@@ -297,7 +297,9 @@ async function registerVisitorWithNineVisits({ page, database }) {
     .run(visitor.id, timestamp(0));
 
   await page.reload({ waitUntil: "networkidle" });
-  await page.getByText("Visitados 9 de 18").waitFor({ timeout: UI_TIMEOUT_MS });
+  const total = database.prepare("SELECT COUNT(*) AS total FROM stands").get().total;
+
+  await page.getByText(`Visitados 9 de ${total}`).waitFor({ timeout: UI_TIMEOUT_MS });
   check(
     "the passport shows 9 visits and a ticket before the annulment",
     await page.getByText(/Boleto #\d+/).isVisible(),
@@ -368,7 +370,9 @@ async function annulOneVisit({ pages, database, screenshots, visitorId }) {
   await page.screenshot({ path: path.join(screenshots, "sysadmin-tools-04-annulment.png"), fullPage: true });
 
   await pages.visitor.reload({ waitUntil: "networkidle" });
-  await pages.visitor.getByText("Visitados 8 de 18").waitFor({ timeout: UI_TIMEOUT_MS });
+  await pages.visitor
+    .getByText(`Visitados 8 de ${database.prepare("SELECT COUNT(*) AS total FROM stands").get().total}`)
+    .waitFor({ timeout: UI_TIMEOUT_MS });
   check("the passport shows 8 visits and the voided ticket", await pages.visitor.getByText(/^Anulado/).isVisible());
   await pages.visitor.screenshot({
     path: path.join(screenshots, "sysadmin-tools-05-passport-voided.png"),
@@ -412,6 +416,7 @@ async function manageGenres({ page, database }) {
   await page.getByRole("button", { name: "Agregar género" }).click();
   await page.getByText("Género agregado.").waitFor({ timeout: UI_TIMEOUT_MS });
   check("the new genre is in the catalog", count(database, "genres", "slug = 'party'") === 1);
+  const genresWithParty = count(database, "genres");
 
   const used = page
     .getByTestId("genres-admin")
@@ -423,7 +428,7 @@ async function manageGenres({ page, database }) {
   await used.getByRole("button", { name: "Borrar" }).click();
   await used.getByRole("button", { name: "Sí, borrar" }).click();
   await used.getByText("Ese género tiene juegos asignados").waitFor({ timeout: UI_TIMEOUT_MS });
-  check("a genre with games cannot be deleted", count(database, "genres") === 14);
+  check("a genre with games cannot be deleted", count(database, "genres") === genresWithParty);
 
   const party = page.getByTestId("genres-admin").getByRole("listitem").filter({ hasText: "Party" });
 

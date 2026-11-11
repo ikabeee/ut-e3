@@ -174,7 +174,8 @@ async function runScenario(browser, databaseFile, screenshots) {
     await expectRedirectWithoutDevice(page);
     await registerVisitor(page);
     await expectRegisterSendsToPassport(page);
-    await checkPassport(session, "360 px 0 visits", ZERO_VISITS);
+    checkStandTotal(database);
+    await checkPassport(session, "360 px 0 visits", zeroVisits(database));
     await checkPassport(session, "360 px 9 visits", nineVisits(database));
     await checkPassport(session, "360 px 16 visits", sixteenVisits(database));
     await checkPassport(session, "360 px 18 visits", eighteenVisits(database));
@@ -188,14 +189,17 @@ async function runScenario(browser, databaseFile, screenshots) {
 }
 
 // Visit scenarios are cumulative: each one adds visits to the same visitor and then checks the page.
-const ZERO_VISITS = {
-  progress: "Te faltan 9 visitas para tu siguiente boleto.",
-  bar: "0",
-  summary: "Visitados 0 de 18",
-  visited: 0,
-  tickets: 0,
-  emptyTicketsText: "Aún no tienes boletos. Se otorgan al llegar a 9 y a 18 visitas.",
-};
+function zeroVisits(database) {
+  return {
+    progress: "Te faltan 9 visitas para tu siguiente boleto.",
+    bar: "0",
+    summary: `Visitados 0 de ${countStands(database)}`,
+    total: countStands(database),
+    visited: 0,
+    tickets: 0,
+    emptyTicketsText: "Aún no tienes boletos. Se otorgan al llegar a 9 y a 18 visitas.",
+  };
+}
 
 function nineVisits(database) {
   seedVisits(database, 9);
@@ -203,7 +207,8 @@ function nineVisits(database) {
   return {
     progress: "Te faltan 9 visitas para tu siguiente boleto.",
     bar: "0",
-    summary: "Visitados 9 de 18",
+    summary: `Visitados 9 de ${countStands(database)}`,
+    total: countStands(database),
     visited: 9,
     tickets: 1,
   };
@@ -215,7 +220,8 @@ function sixteenVisits(database) {
   return {
     progress: "Te faltan 2 visitas para tu siguiente boleto.",
     bar: "78",
-    summary: "Visitados 16 de 18",
+    summary: `Visitados 16 de ${countStands(database)}`,
+    total: countStands(database),
     visited: 16,
     tickets: 1,
   };
@@ -227,7 +233,8 @@ function eighteenVisits(database) {
   return {
     progress: "Ya tienes tus dos boletos. ¡Gracias por visitarnos!",
     bar: "100",
-    summary: "Visitados 18 de 18",
+    summary: `Visitados 18 de ${countStands(database)}`,
+    total: countStands(database),
     visited: 18,
     tickets: 2,
   };
@@ -273,21 +280,21 @@ async function checkPassport(session, label, expected) {
 
   check(`${label}: progressbar value`, bar === expected.bar, `aria-valuenow=${bar}`);
 
-  const summary = (await page.getByText(/^Visitados \d+ de 18$/).textContent()).trim();
+  const summary = (await page.getByText(/^Visitados \d+ de \d+$/).textContent()).trim();
   check(`${label}: stands summary`, summary === expected.summary, `"${summary}"`);
 
-  await checkStandItems(page, label, expected.visited);
+  await checkStandItems(page, label, expected);
   await checkTickets(page, label, expected);
   await checkNoHorizontalScroll(page, label);
 
   await page.screenshot({ path: path.join(screenshots, `${slugify(label)}.png`), fullPage: true });
 }
 
-async function checkStandItems(page, label, visitedCount) {
+async function checkStandItems(page, label, { visited: visitedCount, total }) {
   const items = await page.locator("ul.grid > li").allTextContents();
   const visited = items.filter((text) => text.includes("Visitado") && !text.includes("Pendiente"));
 
-  check(`${label}: 18 stand items listed`, items.length === 18, `count=${items.length}`);
+  check(`${label}: ${total} stand items listed`, items.length === total, `count=${items.length}`);
   check(`${label}: visited stand items`, visited.length === visitedCount, `count=${visited.length}`);
 }
 
@@ -328,6 +335,15 @@ function checkTicketsInDatabase(database) {
   const milestones = tickets.map((ticket) => ticket.milestone).join(",");
 
   check("tickets in the database: milestones 9 then 18", milestones === "9,18", milestones);
+}
+
+// The event has 18 stands and the milestone of the second ticket is the 18th visit, so the seed must not drift.
+function checkStandTotal(database) {
+  check("the seed has the 18 stands of the event", countStands(database) === 18, `count=${countStands(database)}`);
+}
+
+function countStands(database) {
+  return database.prepare("SELECT COUNT(*) AS total FROM stands").get().total;
 }
 
 // Stand-in for the kiosk (M5): records visits on the first free stands, then applies the milestone rule.

@@ -277,9 +277,10 @@ async function checkVisitRatedOnThePhone(session, pin) {
   await checkVoteRecorded(database);
 
   await visitorPage.reload({ waitUntil: "networkidle" });
-  const summary = (await visitorPage.getByText(/^Visitados \d+ de 18$/).textContent()).trim();
+  const total = database.prepare("SELECT COUNT(*) AS total FROM stands").get().total;
+  const summary = (await visitorPage.getByText(/^Visitados \d+ de \d+$/).textContent()).trim();
 
-  check("the passport shows the new visit", summary === "Visitados 1 de 18", summary);
+  check("the passport shows the new visit", summary === `Visitados 1 de ${total}`, summary);
 }
 
 async function answerSurveyOnThePhone(dialog, database) {
