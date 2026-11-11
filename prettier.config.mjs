@@ -1,0 +1,11 @@
+const config = {
+  printWidth: 120,
+  semi: true,
+  singleQuote: false,
+  trailingComma: "all",
+  plugins: ["prettier-plugin-tailwindcss"],
+  tailwindStylesheet: "./src/app/globals.css",
+  tailwindFunctions: ["cn"],
+};
+
+export default config;

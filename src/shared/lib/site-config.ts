@@ -1,23 +1,21 @@
-/**
- * Datos generales del sitio (nombre, URL pública, textos de SEO).
- * Cambia `NEXT_PUBLIC_SITE_URL` en el `.env` del despliegue para generar URLs absolutas
- * correctas en metadata, sitemap y Open Graph.
- */
-export const siteConfig = {
-  name: "UTG",
-  title: "UTG · Showcase de videojuegos",
-  description:
-    "Showcase de videojuegos de la División de Ingeniería y Tecnologías de la UT Cancún. Prueba los juegos, compite en los torneos y participa en los sorteos.",
-  url: process.env["NEXT_PUBLIC_SITE_URL"] ?? "http://localhost:3000",
-  locale: "es_MX",
-  organization: "División de Ingeniería y Tecnologías · UT Cancún",
-  /** Imagen para compartir en redes cuando una página no define la suya. */
-  shareImage: "/media/reel.jpg",
+import { env } from "@shared/lib/env";
+
+const organization = {
+  division: "División de Ingeniería y Tecnologías",
+  university: "Universidad Tecnológica de Cancún",
+  universityShortName: "UT Cancún",
 } as const;
 
-/** Rutas principales del sitio. */
-export const routes = {
-  home: "/",
-  games: "/games",
-  floorPlan: "/floor-plan",
+export const siteConfig = {
+  name: "PIXEL & CODE",
+  title: "PIXEL & CODE · Showcase de videojuegos",
+  description: `Showcase PIXEL & CODE de videojuegos de la ${organization.division} de la ${organization.universityShortName}. Juega, califica y gana.`,
+  url: env.siteUrl,
+  locale: "es_MX",
+  organization,
+  organizationLabel: `${organization.division} · ${organization.universityShortName}`,
+  shareImage: "/media/reel.jpg",
+  themeColor: "#000000",
+  // --utg-black, the background of the only theme of the design system.
+  backgroundColor: "#000000",
 } as const;

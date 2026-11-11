@@ -1,37 +1,33 @@
+import { formatStandCode } from "@features/games/lib/stand-code";
 import type { Game } from "@features/games/lib/types";
-import { normalizeText } from "@shared/lib/text";
 
 export interface GameFilters {
-  /** Género seleccionado en el carrusel; `null` muestra todos. */
-  genre: string | null;
-  /** Texto del buscador. */
+  /** `null` shows every genre. */
+  genreSlug: string | null;
   keyword: string;
 }
 
-export const EMPTY_GAME_FILTERS: GameFilters = { genre: null, keyword: "" };
-
-/** Texto en el que busca el buscador: nombre, equipo, género, stand y descripción. */
-function searchableText(game: Game) {
-  return normalizeText(`${game.name} ${game.team} ${game.genre} ${game.stand} ${game.description}`);
-}
-
-/** Aplica el género y el texto de búsqueda (sin distinguir acentos ni mayúsculas). */
-export function filterGames(games: readonly Game[], { genre, keyword }: GameFilters) {
+export function filterGames(games: readonly Game[], { genreSlug, keyword }: GameFilters): Game[] {
   const query = normalizeText(keyword.trim());
 
   return games.filter(
-    (game) =>
-      (genre === null || game.genre === genre) && (query === "" || searchableText(game).includes(query)),
+    (game) => (genreSlug === null || game.genre.slug === genreSlug) && searchableText(game).includes(query),
   );
 }
 
-/** Seleccionar el género activo lo quita; seleccionar otro lo reemplaza. */
-export function toggleGenre(current: string | null, genre: string) {
-  return current === genre ? null : genre;
+// Selecting the active genre clears it; selecting another one replaces it.
+export function toggleGenre(current: string | null, genreSlug: string): string | null {
+  return current === genreSlug ? null : genreSlug;
 }
 
-/** Contador del catálogo: "4 de 18 juegos" o "2 de 18 juegos · Puzle". */
-export function describeResults(visible: number, total: number, genre: string | null) {
-  const count = `${visible} de ${total} juegos`;
-  return genre === null ? count : `${count} · ${genre}`;
+function searchableText(game: Game): string {
+  return normalizeText(`${game.name} ${game.genre.name} ${formatStandCode(game.stand)} ${game.synopsis}`);
+}
+
+// "Acción" and "accion" match: NFD splits each accent into a combining mark, which the regex removes.
+function normalizeText(text: string): string {
+  return text
+    .normalize("NFD")
+    .replaceAll(/\p{Diacritic}/gu, "")
+    .toLowerCase();
 }

@@ -1,87 +1,124 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { EVENT_INFO } from "@features/event/lib/event-info";
-import { GameAbout } from "@features/games/components/game-about";
-import { GameDetailHeader } from "@features/games/components/game-detail-header";
-import { GameGallery } from "@features/games/components/game-gallery";
-import { GamePlayLocation } from "@features/games/components/game-play-location";
-import { GameSidebar } from "@features/games/components/game-sidebar";
-import { GameTags } from "@features/games/components/game-tags";
-import { RelatedGames } from "@features/games/components/related-games";
-import { getRelatedGames } from "@features/games/lib/game-details";
-import { getGalleryShots } from "@features/games/lib/game-gallery";
-import { getGamePath } from "@features/games/lib/game-links";
-import { buildGameStructuredData } from "@features/games/lib/game-structured-data";
-import { getGameBySlug, listGames } from "@features/games/lib/games-queries";
-import { JsonLd } from "@shared/components/json-ld";
+import { Suspense, type ReactNode } from "react";
+import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
+import type { EventSettings } from "@features/event-settings/lib/types";
+import { floorPlanItemHref } from "@features/floor-plan/lib/floor-plan-links";
+import { GameDetail } from "@features/games/components/game-detail";
+import { LiveItchLink } from "@features/games/components/live-itch-link";
+import { getCoverImage } from "@features/games/lib/game-cover";
+import { isGameSlug } from "@features/games/lib/game-slug";
+import { GAMES_PATH, getGamePath } from "@features/games/lib/games-links";
+import { getRelatedGames } from "@features/games/lib/related-games";
+import { getGameBySlug, getGames } from "@features/games/lib/server/games-queries";
+import { formatStandCode } from "@features/games/lib/stand-code";
+import type { Game, GameDetailLinks, GameEventLabels } from "@features/games/lib/types";
+import { SiteNav } from "@features/landing/components/site-nav";
+import { buildEventCalendarUrl } from "@features/landing/lib/calendar-link";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
+import { HOME_NAV_LINKS } from "@features/landing/lib/home-nav-links";
+import { HOME_PATH } from "@features/landing/lib/landing-links";
+import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
 
-type GameDetailPageProps = PageProps<"/games/[slug]">;
+type GameParams = PageProps<"/games/[slug]">["params"];
 
-/** Prerenderiza el detalle de todos los juegos en el build (SEO y carga instantánea). */
+// With Cache Components the build needs at least one sample slug; games added later render on their first request.
 export async function generateGameDetailStaticParams() {
-  const games = await listGames();
-  return games.map((game) => ({ slug: game.slug }));
+  const games = await getGames();
+
+  return games.map(({ slug }) => ({ slug }));
 }
 
-export async function generateGameDetailMetadata({ params }: GameDetailPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const game = await getGameBySlug(slug);
-  if (!game) {
-    return { title: "Juego no encontrado" };
-  }
+export async function generateGameDetailPageMetadata({ params }: PageProps<"/games/[slug]">): Promise<Metadata> {
+  const game = await findGame(params);
+  const cover = getCoverImage(game);
 
-  const openGraph = buildOpenGraph({
-    title: game.name,
-    description: game.description,
-    ...(game.image ? { images: [{ url: game.image.src, alt: game.name }] } : {}),
-  });
   return {
     title: game.name,
-    description: `${game.description} ${game.team} · Stand ${game.stand} · ${game.genre}.`,
+    description: game.synopsis,
     alternates: { canonical: getGamePath(game.slug) },
-    openGraph,
-    twitter: { card: "summary_large_image", title: game.name, description: game.description },
+    openGraph: buildOpenGraph({
+      title: `${game.name} | ${siteConfig.title}`,
+      description: game.synopsis,
+      url: getGamePath(game.slug),
+      images: cover ? [{ url: cover.path, alt: cover.alt }] : siteShareImages(),
+    }),
   };
 }
 
-export async function GameDetailPage({ params }: GameDetailPageProps) {
-  const { slug } = await params;
-  const [game, games] = await Promise.all([getGameBySlug(slug), listGames()]);
-  if (!game) {
-    notFound();
-  }
+// A game without artwork shares the image of the site, like any other page.
+function siteShareImages() {
+  return [{ url: siteConfig.shareImage, alt: siteConfig.title }];
+}
 
+// partialPrefetching shares one App Shell across every slug, so the params read waits behind Suspense. An unknown
+// slug then streams the not-found page with noindex; its first visit answers 200, later ones 404 (S4, L7).
+export function GameDetailPage({ params }: PageProps<"/games/[slug]">) {
   return (
-    <main className="pt-[clamp(24px,4vw,48px)]">
-      <JsonLd data={buildGameStructuredData(game, siteConfig.url)} />
-      <div className="page-wrap">
-        <GameDetailHeader game={game} />
-
-        <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-[clamp(24px,4vw,56px)] max-[980px]:grid-cols-1">
-          <div className="flex min-w-0 flex-col gap-7">
-            <GameGallery
-              gameName={game.name}
-              shots={getGalleryShots(game, games.length)}
-              labels={{ stand: game.stand, genre: game.genre, members: game.members }}
-            />
-            <p className="m-0 max-w-[62ch] text-[clamp(17px,1.5vw,20px)] leading-[1.4] text-copy-strong">{game.description}</p>
-            <GameTags game={game} />
-            <GameAbout game={game} />
-            <GamePlayLocation game={game} eventDateLabel={EVENT_INFO.dateLabel} eventHoursLabel={EVENT_INFO.hoursLabel} />
-          </div>
-
-          <GameSidebar
-            game={game}
-            eventDateLabel={EVENT_INFO.dateLabel}
-            admissionLabel={EVENT_INFO.admission}
-            calendarUrl={EVENT_INFO.calendarUrl}
-          />
-        </div>
-
-        <RelatedGames games={getRelatedGames(games, game)} />
-      </div>
-    </main>
+    <>
+      <SiteNav homeHref={HOME_PATH} links={HOME_NAV_LINKS} />
+      <Suspense fallback={null}>
+        <GameDetailContent params={params} />
+      </Suspense>
+    </>
   );
+}
+
+interface GameDetailViewProps {
+  game: Game;
+  games: Game[];
+  settings: EventSettings;
+  itchLink: ReactNode;
+}
+
+async function GameDetailContent({ params }: Readonly<{ params: GameParams }>) {
+  const [game, games, settings] = await Promise.all([findGame(params), getGames(), getEventSettings()]);
+
+  return <GameDetailView game={game} games={games} settings={settings} itchLink={<LiveItchLink slug={game.slug} />} />;
+}
+
+export function GameDetailView({ game, games, settings, itchLink }: Readonly<GameDetailViewProps>) {
+  return (
+    <GameDetail
+      game={game}
+      itchLink={itchLink}
+      event={buildEventLabels(settings)}
+      links={buildDetailLinks(game, settings)}
+      relatedGames={getRelatedGames(games, game)}
+    />
+  );
+}
+
+function buildEventLabels(settings: EventSettings): GameEventLabels {
+  return {
+    dateLabel: formatEventDate(settings.eventStartsAt, "numeric"),
+    hoursLabel: GAMES_COPY.playLocation.hoursRange(
+      formatTimeOfDay(settings.eventStartsAt),
+      formatTimeOfDay(settings.eventEndsAt),
+    ),
+  };
+}
+
+// The floor plan is a section of the landing until it gets its own page.
+function buildDetailLinks(game: Game, settings: EventSettings): GameDetailLinks {
+  return {
+    catalog: GAMES_PATH,
+    floorPlan: `${HOME_PATH}${floorPlanItemHref(formatStandCode(game.stand))}`,
+    calendar: buildEventCalendarUrl({ startsAt: settings.eventStartsAt, endsAt: settings.eventEndsAt }),
+  };
+}
+
+async function findGame(params: GameParams): Promise<Game> {
+  const { slug } = await params;
+
+  // A segment such as "x.png" or ".." is never a game: answering it before the query keeps it out of the cache.
+  if (!isGameSlug(slug)) notFound();
+
+  const game = await getGameBySlug(slug);
+
+  if (!game) notFound();
+
+  return game;
 }

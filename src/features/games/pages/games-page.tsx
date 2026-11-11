@@ -1,28 +1,44 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { GamesCatalog } from "@features/games/components/games-catalog";
-import { GamesCatalogSkeleton } from "@features/games/components/games-catalog-skeleton";
-import { getGamesHydrationState } from "@features/games/lib/games-prefetch";
-import { QueryHydrationBoundary } from "@shared/components/query-hydration-boundary";
-import { routes } from "@shared/lib/site-config";
+import { FeaturedGamesCarousel } from "@features/games/components/featured-games-carousel";
+import { UrlGamesBrowser } from "@features/games/components/url-games-browser";
+import { GAMES_COPY } from "@features/games/lib/games-copy";
+import { GAMES_PATH } from "@features/games/lib/games-links";
+import { getGames } from "@features/games/lib/server/games-queries";
+import type { Game } from "@features/games/lib/types";
+import { SiteNav } from "@features/landing/components/site-nav";
+import { HOME_NAV_LINKS } from "@features/landing/lib/home-nav-links";
+import { HOME_PATH } from "@features/landing/lib/landing-links";
+import { buildOpenGraph } from "@shared/lib/metadata";
+import { siteConfig } from "@shared/lib/site-config";
+
+const { pageTitle, pageDescription } = GAMES_COPY.catalog;
 
 export const gamesPageMetadata: Metadata = {
-  title: "Juegos",
-  description:
-    "Explora los videojuegos del showcase de la UT Cancún por género, equipo o stand y encuentra dónde jugarlos.",
-  alternates: { canonical: routes.games },
+  title: pageTitle,
+  description: pageDescription,
+  alternates: { canonical: GAMES_PATH },
+  openGraph: buildOpenGraph({
+    title: `${pageTitle} | ${siteConfig.title}`,
+    description: pageDescription,
+    url: GAMES_PATH,
+  }),
 };
 
-export function GamesPage() {
+export async function GamesPage() {
+  return <GamesView games={await getGames()} />;
+}
+
+export function GamesView({ games }: Readonly<{ games: Game[] }>) {
   return (
-    <main className="pt-[clamp(32px,5vw,64px)]">
-      <div className="page-wrap">
-        <Suspense fallback={<GamesCatalogSkeleton />}>
-          <QueryHydrationBoundary state={getGamesHydrationState()}>
-            <GamesCatalog />
-          </QueryHydrationBoundary>
-        </Suspense>
-      </div>
-    </main>
+    <>
+      <SiteNav homeHref={HOME_PATH} links={HOME_NAV_LINKS} />
+      <main>
+        <h1 className="sr-only">{pageTitle}</h1>
+        <FeaturedGamesCarousel games={games} />
+        <div className="page-wrap pt-[clamp(40px,6vw,72px)] pb-[clamp(56px,8vw,112px)]">
+          <UrlGamesBrowser games={games} />
+        </div>
+      </main>
+    </>
   );
 }

@@ -1,0 +1,31 @@
+# Despliegue (docs/deploy.md). El VPS ya tiene su proxy inverso: este archivo solo publica la app en
+# 127.0.0.1:${APP_PORT:-3000} para que ese proxy la use. Cada entorno (produccion y demo) es un proyecto de Compose
+# aparte (`-p`) con su propio archivo de variables, puerto, volumen e imagen.
+services:
+  app:
+    build:
+      context: .
+      args:
+        # Se incrusta en el build (canonical, Open Graph y enlaces de los correos); si cambia, hay que reconstruir.
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?Define NEXT_PUBLIC_SITE_URL en el .env}
+        # Kill switch: `landing` publica solo la portada y `full` la app completa. El build y el servidor usan el mismo.
+        SITE_MODE: ${SITE_MODE:-landing}
+        # Token público de Mapbox (pk.) del mapa de la sede; se incrusta en el build.
+        NEXT_PUBLIC_MAPBOX_TOKEN: ${NEXT_PUBLIC_MAPBOX_TOKEN:-}
+    image: ut-e3-app:${SITE_MODE:-landing}-${APP_TAG:-latest}
+    # Reenvia las senales y recoge procesos huerfanos.
+    init: true
+    restart: unless-stopped
+    env_file: ${ENV_FILE:-.env}
+    environment:
+      DATABASE_URL: file:/data/app.db
+      SITE_MODE: ${SITE_MODE:-landing}
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+    volumes:
+      - app-data:/data
+    # RNF-15: apagado ordenado de 30 s antes de que Docker mate el proceso.
+    stop_grace_period: 30s
+
+volumes:
+  app-data:

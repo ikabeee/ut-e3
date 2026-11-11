@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { QueryProvider } from "@shared/components/query-provider";
-import { SiteFooter } from "@shared/components/site-footer";
-import { SiteHeader } from "@shared/components/site-header";
+import { ServiceWorkerRegistration } from "@features/pwa/components/service-worker-registration";
 import { fontVariables } from "@shared/lib/fonts";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
+import { siteMode } from "@shared/lib/site-mode";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,24 +17,26 @@ export const metadata: Metadata = {
   openGraph: buildOpenGraph(),
   twitter: { card: "summary_large_image" },
   formatDetection: { telephone: false },
+  icons: {
+    icon: { url: "/icon.svg", type: "image/svg+xml" },
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: { capable: true, title: siteConfig.name, statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: siteConfig.themeColor,
   colorScheme: "dark",
   viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // El diseño tiene un solo tema oscuro: se fija el tema "dark" de HeroUI.
     <html lang="es" className={`dark ${fontVariables}`} data-theme="dark">
       <body className="bg-background text-foreground">
-        <QueryProvider>
-          <SiteHeader />
-          {children}
-          <SiteFooter />
-        </QueryProvider>
+        {children}
+        {/* With only the landing published there is no offline app to install (SITE_MODE=landing). */}
+        {siteMode === "full" && <ServiceWorkerRegistration />}
       </body>
     </html>
   );
