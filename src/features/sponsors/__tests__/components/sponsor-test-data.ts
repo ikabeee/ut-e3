@@ -6,6 +6,7 @@ export const PIXEL_FORGE: Sponsor = {
   logoPath: "/sponsors/pixel-forge.png",
   websiteUrl: "https://pixel-forge.example",
   phone: "+529981234567",
+  email: null,
   services: "Estudio de arte digital",
   position: 1,
 };
@@ -16,6 +17,7 @@ export const NORTH_BYTE: Sponsor = {
   logoPath: "/sponsors/north-byte.png",
   websiteUrl: "https://north-byte.example",
   phone: "+529987654321",
+  email: null,
   services: "Hospedaje de servidores",
   position: 2,
 };
@@ -26,6 +28,7 @@ export const CODE_LAB: Sponsor = {
   logoPath: "/sponsors/code-lab.png",
   websiteUrl: "https://code-lab.example",
   phone: "+529985550123",
+  email: null,
   services: "Talleres de programación",
   position: 3,
 };

@@ -47,9 +47,26 @@ describe("INITIAL_SPONSORS", () => {
       { name: "Bonavida", websiteUrl: "https://aguabonavida.com.mx/", phone: "+529983048120" },
       { name: "Mermelada", websiteUrl: "", phone: "" },
       { name: "Nemo Submarine", websiteUrl: "https://www.nemoisla.com/", phone: "+19038019083" },
-      { name: "OpSET", websiteUrl: "", phone: "" },
+      { name: "OpSET", websiteUrl: "", phone: "+529981878194" },
       { name: "Le Jardin d'Aurore", websiteUrl: "", phone: "" },
     ]);
+  });
+
+  it("gives an email only to OpSET and Le Jardin d'Aurore, and stores the others as null", () => {
+    expect(INITIAL_SPONSORS.map(({ name, email }) => ({ name, email }))).toEqual([
+      { name: "Algorix Insights", email: null },
+      { name: "Bonavida", email: null },
+      { name: "Mermelada", email: null },
+      { name: "Nemo Submarine", email: null },
+      { name: "OpSET", email: "ceo@opset.com.mx" },
+      { name: "Le Jardin d'Aurore", email: "contacto@lejardindaurore.com" },
+    ]);
+  });
+
+  it("keeps the website and the services of OpSET and Le Jardin d'Aurore empty", () => {
+    const [opset, jardin] = INITIAL_SPONSORS.slice(4);
+
+    expect([opset.websiteUrl, opset.services, jardin.websiteUrl, jardin.services]).toEqual(["", "", "", ""]);
   });
 
   it("describes only Algorix Insights, the only sponsor with a services text", () => {
@@ -79,6 +96,25 @@ describe("seedSponsors", () => {
     await seedSponsors(getPrisma());
 
     expect(await getPrisma().sponsor.count()).toBe(INITIAL_SPONSORS.length);
+  });
+
+  it("writes the emails and the OpSET phone to the table, and null where there is no email", async () => {
+    await seedSponsors(getPrisma());
+
+    const rows = await getPrisma().sponsor.findMany({
+      orderBy: { position: "asc" },
+      select: { name: true, email: true, phone: true },
+    });
+
+    expect(rows.map(({ email }) => email)).toEqual([
+      null,
+      null,
+      null,
+      null,
+      "ceo@opset.com.mx",
+      "contacto@lejardindaurore.com",
+    ]);
+    expect(rows[4]?.phone).toBe("+529981878194");
   });
 
   it("leaves the same rows when it runs twice", async () => {

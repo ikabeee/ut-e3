@@ -185,6 +185,7 @@ model Sponsor {
   logoPath   String @map("logo_path")
   websiteUrl String @map("website_url")
   phone      String
+  email      String?
   services   String
   position   Int
 
