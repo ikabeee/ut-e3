@@ -26,7 +26,7 @@ interface PublicBracketViewProps {
   checkInStartsAt?: string;
   checkInEndsAt?: string;
   bracketGeneratesAt?: string;
-  /** Built by the page from `getZoneLink("kof")`, prefixed with the landing path. */
+  /** Built by the page from `getFloorPlanItemPath("kof")`. */
   kofLink?: ExitLink;
   /** Built by the page from the schedule section id of the landing. */
   scheduleLink?: ExitLink;

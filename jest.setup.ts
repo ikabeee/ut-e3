@@ -109,6 +109,29 @@ if (typeof window !== "undefined") {
 
   Object.defineProperty(window, "ResizeObserver", { writable: true, value: ResizeObserverMock });
 
+  if (typeof globalThis.PointerEvent === "undefined") {
+    class PointerEventMock extends MouseEvent {
+      readonly pointerId: number;
+      readonly pointerType: string;
+      readonly isPrimary: boolean;
+      readonly width: number;
+      readonly height: number;
+      readonly pressure: number;
+
+      constructor(type: string, init: PointerEventInit = {}) {
+        super(type, init);
+        this.pointerId = init.pointerId ?? 0;
+        this.pointerType = init.pointerType ?? "";
+        this.isPrimary = init.isPrimary ?? false;
+        this.width = init.width ?? 1;
+        this.height = init.height ?? 1;
+        this.pressure = init.pressure ?? 0;
+      }
+    }
+
+    Object.defineProperty(window, "PointerEvent", { writable: true, value: PointerEventMock });
+  }
+
   class IntersectionObserverMock {
     observe() {}
     unobserve() {}

@@ -10,6 +10,7 @@ export function toFloorPlanStand(game: Game): FloorPlanStand {
   return {
     code: formatStandCode(game.stand),
     name: game.name,
+    slug: game.slug,
     genre: game.genre.name,
     synopsis: game.synopsis,
     coverSrc: cover?.path ?? null,

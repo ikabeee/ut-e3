@@ -1,4 +1,4 @@
-import type { PlanCategory, StandZone, ZoneId } from "@features/floor-plan/lib/types";
+import type { StandZone, ZoneId } from "@features/floor-plan/lib/types";
 
 interface ZoneCopy {
   kind: string;
@@ -39,13 +39,6 @@ const ZONES: Record<ZoneId, ZoneCopy> = {
   "help-center-4": { ...HELP_CENTER, title: "Centro de atención 4" },
 };
 
-const CATEGORY_LABELS: Record<PlanCategory, string> = {
-  team: "Stand de equipo",
-  info: "Centro de atención",
-  act: "Escenario y actividades",
-  srv: "Servicios",
-};
-
 const BLOCK_LABELS: Record<StandZone, string> = {
   A: "Bloque A",
   B: "Bloque B",
@@ -69,8 +62,10 @@ const ZONE_DRAWING_LABELS: Record<ZoneId, string> = {
 export const FLOOR_PLAN_COPY = {
   heading: "Croquis",
   mapLabel: "Croquis del Edificio B con zonas y stands",
+  detailLabel: "Detalle del croquis",
+  compactHint: "Pellizca o toca + para ver los juegos",
+  sectionLink: "Abrir el croquis",
   zones: ZONES,
-  categoryLabels: CATEGORY_LABELS,
   unassignedTitle: "Stand por asignar",
   unassignedDescription: "Este stand todavía no tiene un juego asignado.",
   drawing: {
@@ -80,4 +75,41 @@ export const FLOOR_PLAN_COPY = {
   },
   standKicker: (code: string, kind: string) => `Stand ${code} · ${kind}`,
   unassignedKicker: (code: string) => `Stand ${code}`,
+  blockLine: (blockLabel: string, number: number, size: number) => `${blockLabel} · stand ${number} de ${size}`,
+  filters: {
+    groupLabel: "Filtrar marcadores",
+    all: "Todos",
+    stands: "Stands",
+    activities: "Actividades",
+    services: "Servicios",
+    chipLabel: (label: string, count: number) => `${label} ${count}`,
+  },
+  controls: {
+    groupLabel: "Controles del mapa",
+    zoomIn: "Acercar",
+    zoomOut: "Alejar",
+    recenter: "Centrar el mapa",
+  },
+  list: {
+    show: "Ver como lista",
+    hide: "Ocultar lista",
+  },
+  legend: {
+    label: "Simbología",
+    entries: ["Stand", "Actividad o servicio", "Zona"],
+  },
+  detail: {
+    close: "Cerrar detalle",
+    dismiss: "Cerrar",
+    gameLink: "Ver ficha del juego",
+  },
+  page: {
+    kicker: (siteName: string, building: string, shortName: string) => `${siteName} · ${building}, ${shortName}`,
+    lead: (building: string) =>
+      `Ubica cada stand, las actividades y los servicios del ${building}. Toca un marcador para ver el juego.`,
+    summary: (stands: number, blocks: number, activities: number) =>
+      `${stands} stands · ${blocks} bloques · ${activities} actividades`,
+    description: (building: string) =>
+      `Mapa del ${building} con los stands, las actividades y los servicios del evento.`,
+  },
 } as const;

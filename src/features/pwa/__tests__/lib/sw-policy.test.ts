@@ -5,7 +5,7 @@ const ORIGIN = "https://showcase.example";
 const policy = loadSwPolicy();
 
 describe("classifyRequest: the pages the worker answers for (RNF-14)", () => {
-  it.each(["/", "/games", "/games/ruta-9", "/sponsors", "/privacy", "/offline"])(
+  it.each(["/", "/games", "/games/ruta-9", "/sponsors", "/floor-plan", "/privacy", "/offline"])(
     "treats the navigation to %s as a public page",
     (pathname) => {
       expect(classify(navigation(pathname))).toBe("public-page");

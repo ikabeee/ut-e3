@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
+import { getFloorPlanItemPath, getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
 import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { SCHEDULE_SECTION_ID } from "@features/schedule/lib/schedule-links";
 import { PublicBracketView } from "@features/tournament/components/public-bracket-view";
@@ -59,7 +59,7 @@ function buildKofLink() {
 
   if (!zone) return undefined;
 
-  return { href: `${HOME_PATH}${zone.href}`, label: zone.label };
+  return { href: getFloorPlanItemPath("kof"), label: zone.label };
 }
 
 function buildScheduleLink() {

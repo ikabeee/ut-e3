@@ -159,6 +159,16 @@ describe("LandingView", () => {
     expect(screen.getByRole("button", { name: "Stand ZA-S3, Juego 03" })).toBeInTheDocument();
   });
 
+  it("links under the map to the floor plan page", () => {
+    renderLanding();
+
+    const section = document.getElementById("floor-plan");
+
+    if (!section) throw new Error("The floor plan section is missing");
+
+    expect(within(section).getByRole("link", { name: /Abrir el croquis/ })).toHaveAttribute("href", "/floor-plan");
+  });
+
   it("shows the sponsors as numbered raffle tickets", () => {
     renderLanding([PIXEL_FORGE]);
 
@@ -220,5 +230,11 @@ describe("LandingView with only the landing published", () => {
     renderLandingOnly();
 
     expect(screen.getByRole("button", { name: "Stand ZA-S1, Juego 01" })).toBeInTheDocument();
+  });
+
+  it("has no link to the floor plan page while only the landing is published", () => {
+    renderLandingOnly();
+
+    expect(screen.queryByRole("link", { name: /Abrir el croquis/ })).not.toBeInTheDocument();
   });
 });

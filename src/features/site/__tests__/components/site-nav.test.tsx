@@ -5,7 +5,7 @@ import { SiteNav } from "@features/site/components/site-nav";
 const APP_LINKS = [
   ["Inicio", "/"],
   ["Juegos", "/games"],
-  ["Croquis", "/#floor-plan"],
+  ["Croquis", "/floor-plan"],
   ["Patrocinadores", "/sponsors"],
   ["Rifa", "/raffle"],
   ["Torneo", "/tournament"],
