@@ -7,7 +7,7 @@ interface PlanPanelProps {
   item: PlanItem;
 }
 
-const COVER_SIZES = "(min-width: 1000px) 340px, 100vw";
+const COVER_SIZES = "(min-width: 1000px) 440px, 100vw";
 
 export function PlanPanel({ item }: Readonly<PlanPanelProps>) {
   return (
