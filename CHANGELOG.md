@@ -62,6 +62,13 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- El hero de /games y la parte de arriba de la ficha de cada juego usan la imagen horizontal (16:9) en vez de la portada
+  vertical recortada; la vertical sigue en el panel lateral, el coverflow y las tarjetas. Un juego sin imagen horizontal
+  (Vaporlock) conserva la vertical. Al compartir una ficha también sale la horizontal.
+- Cada juego tiene su género confirmado en el seed (Acción, Terror, Plataformas, Survival Horror, Sigilo, RPG, Simulación y
+  Roguelike; Make 'em Fall sigue en "Por anunciar"). En una base que ya tiene juegos se aplica con
+  `npm run db:backfill:genres`, que no toca los géneros cambiados a mano.
+
 - `/offline` regresa al pasaporte aunque se recargue ya con red: comprueba que el servidor responda, reintenta cada pocos
   segundos y con un botón "Reintentar", y dice "Tenemos red pero no llegamos al servidor" en lugar de "Sin conexión".
 - El kiosco avisa en la parte de arriba con la hora del corte cuando el registro de visitas cerró y desactiva el PIN.

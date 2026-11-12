@@ -6,7 +6,7 @@ import type { EventSettings } from "@features/event-settings/lib/types";
 import { getFloorPlanItemPath } from "@features/floor-plan/lib/floor-plan-links";
 import { GameDetail } from "@features/games/components/game-detail";
 import { LiveItchLink } from "@features/games/components/live-itch-link";
-import { getCoverImage } from "@features/games/lib/game-cover";
+import { getHeroImage } from "@features/games/lib/game-cover";
 import { isGameSlug } from "@features/games/lib/game-slug";
 import { GAMES_PATH, getGamePath } from "@features/games/lib/games-links";
 import { getRelatedGames } from "@features/games/lib/related-games";
@@ -30,7 +30,7 @@ export async function generateGameDetailStaticParams() {
 
 export async function generateGameDetailPageMetadata({ params }: PageProps<"/games/[slug]">): Promise<Metadata> {
   const game = await findGame(params);
-  const cover = getCoverImage(game);
+  const cover = getHeroImage(game);
 
   return {
     title: game.name,

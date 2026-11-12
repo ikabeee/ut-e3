@@ -55,6 +55,7 @@ function FeaturedSlide({ game, isCurrent, isMounted, isFirst }: Readonly<Feature
       {isMounted ? (
         <GameCoverImage
           game={game}
+          isHero
           sizes="100vw"
           isEager={isFirst}
           className={cn("transition-transform duration-7000 ease-linear", isCurrent ? "scale-100" : "scale-105")}

@@ -54,7 +54,7 @@ describe("getGames", () => {
       slug: "abby-s-tower",
       name: "Abby's Tower",
       synopsis: "",
-      genre: { id: expect.stringMatching(UUID), name: "Por anunciar", slug: "por-anunciar" },
+      genre: { id: expect.stringMatching(UUID), name: "Acción", slug: "accion" },
       stand: { zone: "B", number: 1 },
       images: [
         { path: "/games/abby-s-tower.jpg", alt: "Portada de Abby's Tower", position: 1, isCover: true },
