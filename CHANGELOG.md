@@ -21,6 +21,18 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   teléfono los enlaces van en un menú. No aparece en el panel del staff, el kiosco, la mesa de atención ni la tómbola en
   vivo, y con `SITE_MODE=landing` conserva solo las anclas de la portada.
 - `/sponsors` muestra los mismos boletos de rifa que la portada, con los servicios de cada patrocinador.
+- La barra muestra "Volver" en todas las páginas menos la portada: regresa a la página anterior del sitio o, si no la
+  hay, a la página padre. Con el menú del teléfono abierto, el gesto de "atrás" lo cierra.
+- Después de registrarte, "atrás" ya no regresa al registro. El pasaporte muestra el nombre del juego de cada stand y
+  el registro muestra sus errores en español. El enlace al aviso de privacidad tiene área táctil de 44 px.
+- La tómbola en vivo tiene un enlace para volver a los ganadores. Mientras el bracket no se publica, `/tournament`
+  dice a qué hora es el check-in y el bracket y enlaza a la Arena KOF del croquis y al cronograma.
+- Catálogo: opción "Todos" para quitar el filtro de género, "atrás" regresa al catálogo sin filtro, el título y el
+  buscador aparecen antes del carrusel destacado y el regreso de la ficha lleva flecha.
+- Croquis: tiene su propia pantalla `/floor-plan` (la entrada "Croquis" de la barra lleva ahí) con el mapa del Edificio B
+  en horizontal: marcadores circulares con la portada del juego, filtros, detalle sobre el mapa, lista y leyenda. La
+  ficha del juego y el bracket enlazan a su marcador y la portada enlaza a "Abrir el croquis". La página se guarda para
+  usarla sin conexión.
 
 ### Agregado
 

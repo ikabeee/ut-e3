@@ -33,7 +33,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`dark ${fontVariables}`} data-theme="dark">
+    <html lang="es" className={`dark ${fontVariables}`} data-theme="dark" data-scroll-behavior="smooth">
       <body className="bg-background text-foreground">
         <SiteHeader isLandingOnly={siteMode === "landing"} />
         {children}

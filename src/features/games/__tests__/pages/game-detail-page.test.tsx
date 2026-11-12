@@ -44,10 +44,13 @@ describe("GameDetailView", () => {
     expect(definitionOf(where, "Horario")).toBe("12:00 a 19:00");
   });
 
-  it("links the stand to its place on the landing floor plan", () => {
+  it("links the stand to its item on the floor plan page", () => {
     renderView();
 
-    expect(screen.getByRole("link", { name: /Ver en el croquis/ })).toHaveAttribute("href", "/#floor-plan-ZA-S4");
+    expect(screen.getByRole("link", { name: /Ver en el croquis/ })).toHaveAttribute(
+      "href",
+      "/floor-plan#floor-plan-ZA-S4",
+    );
   });
 
   it("adds the event to the calendar with the same event the landing uses", () => {

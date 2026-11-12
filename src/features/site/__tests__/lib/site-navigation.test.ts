@@ -9,6 +9,7 @@ describe("isSiteNavShown", () => {
     "/showcase",
     "/raffle",
     "/tournament",
+    "/floor-plan",
     "/passport",
     "/passport/recover",
     "/register",
@@ -46,7 +47,7 @@ describe("getSiteNavigation", () => {
     expect(navigation.links).toEqual([
       { href: "/", label: "Inicio" },
       { href: "/games", label: "Juegos" },
-      { href: "/#floor-plan", label: "Croquis" },
+      { href: "/floor-plan", label: "Croquis" },
       { href: "/sponsors", label: "Patrocinadores" },
       { href: "/raffle", label: "Rifa" },
       { href: "/tournament", label: "Torneo" },
@@ -68,12 +69,13 @@ describe("getSiteNavigation", () => {
 });
 
 describe("getCurrentNavHref", () => {
-  const hrefs = ["/", "/games", "/#floor-plan", "/sponsors", "/raffle", "/tournament", "/passport"];
+  const hrefs = ["/", "/games", "/floor-plan", "/sponsors", "/raffle", "/tournament", "/passport"];
 
   it.each([
     ["/", "/"],
     ["/games", "/games"],
     ["/games/abby-s-tower", "/games"],
+    ["/floor-plan", "/floor-plan"],
     ["/sponsors", "/sponsors"],
     ["/raffle", "/raffle"],
     ["/tournament", "/tournament"],

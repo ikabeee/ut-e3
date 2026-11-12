@@ -11,8 +11,8 @@ const PASSPORT = { gamertag: "PlayerOne", pin: "12345" };
 const VISITS = {
   visitCount: 9,
   stands: [
-    { code: "ZA-S1", visited: true },
-    { code: "ZA-S2", visited: false },
+    { code: "ZA-S1", visited: true, gameName: null },
+    { code: "ZA-S2", visited: false, gameName: null },
   ],
   tickets: [{ number: 3, milestone: 9 }],
 };

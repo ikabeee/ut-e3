@@ -2,7 +2,7 @@
 
 import { Button, Drawer } from "@heroui/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useMenuHistory } from "@features/site/hooks/use-menu-history";
 import { SITE_COPY } from "@features/site/lib/site-copy";
 import type { SiteNavLink } from "@features/site/lib/site-navigation";
 
@@ -14,13 +14,15 @@ interface SiteNavMenuProps {
 /**
  * The menu of the navbar below 1024 px, where the six entries do not fit next to the logo and Mi pasaporte. The drawer
  * (React Aria Modal) traps the focus, closes with Escape or a tap outside and returns the focus to the button.
+ * Opening pushes a same-URL history entry so the Back gesture closes the menu and stays on the page; closing by any
+ * other means removes that entry again so history stays clean.
  */
 export function SiteNavMenu({ links, currentHref }: Readonly<SiteNavMenuProps>) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, handleOpenChange, handleChoose } = useMenuHistory();
 
   return (
     <div className="flex flex-none items-center border-l border-separator lg:hidden">
-      <Drawer isOpen={isOpen} onOpenChange={setIsOpen}>
+      <Drawer isOpen={isOpen} onOpenChange={handleOpenChange}>
         <Button variant="tertiary" isIconOnly aria-label={SITE_COPY.nav.openMenu} className="size-11 min-w-11">
           <MenuIcon />
         </Button>
@@ -32,7 +34,7 @@ export function SiteNavMenu({ links, currentHref }: Readonly<SiteNavMenuProps>) 
                 <Drawer.Heading className="type-mono">{SITE_COPY.nav.menuTitle}</Drawer.Heading>
               </Drawer.Header>
               <Drawer.Body>
-                <MenuLinks links={links} currentHref={currentHref} onChoose={() => setIsOpen(false)} />
+                <MenuLinks links={links} currentHref={currentHref} onChoose={handleChoose} />
               </Drawer.Body>
             </Drawer.Dialog>
           </Drawer.Content>

@@ -6,6 +6,8 @@ export interface Passport {
 export interface PassportStand {
   code: string;
   visited: boolean;
+  /** The game of the stand; `null` while the stand has no game yet (the grid shows only the code). */
+  gameName: string | null;
 }
 
 export interface PassportTicket {

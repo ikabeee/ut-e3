@@ -14,6 +14,7 @@ export const GAMES_COPY = {
     pageTitle: "Catálogo de juegos",
     pageDescription: "Explora los videojuegos del showcase por género o por stand y entra a la ficha de cada uno.",
     genresHeading: "Géneros",
+    allGenres: "Todos",
     previousGenres: "Géneros anteriores",
     nextGenres: "Más géneros",
     gameCount: (count: number) => `${count} ${count === 1 ? "juego" : "juegos"}`,

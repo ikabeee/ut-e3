@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
 import type { EventSettings } from "@features/event-settings/lib/types";
-import { floorPlanItemHref } from "@features/floor-plan/lib/floor-plan-links";
+import { getFloorPlanItemPath } from "@features/floor-plan/lib/floor-plan-links";
 import { GameDetail } from "@features/games/components/game-detail";
 import { LiveItchLink } from "@features/games/components/live-itch-link";
 import { getCoverImage } from "@features/games/lib/game-cover";
@@ -15,7 +15,6 @@ import { formatStandCode } from "@features/games/lib/stand-code";
 import type { Game, GameDetailLinks, GameEventLabels } from "@features/games/lib/types";
 import { buildEventCalendarUrl } from "@features/landing/lib/calendar-link";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
-import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
@@ -96,11 +95,10 @@ function buildEventLabels(settings: EventSettings): GameEventLabels {
   };
 }
 
-// The floor plan is a section of the landing until it gets its own page.
 function buildDetailLinks(game: Game, settings: EventSettings): GameDetailLinks {
   return {
     catalog: GAMES_PATH,
-    floorPlan: `${HOME_PATH}${floorPlanItemHref(formatStandCode(game.stand))}`,
+    floorPlan: getFloorPlanItemPath(formatStandCode(game.stand)),
     calendar: buildEventCalendarUrl({ startsAt: settings.eventStartsAt, endsAt: settings.eventEndsAt }),
   };
 }

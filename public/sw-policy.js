@@ -24,7 +24,7 @@ const PASSPORT_PATH = "/passport";
 
 const GAME_DETAIL_PREFIX = "/games/";
 
-const PUBLIC_PAGE_PATHS = Object.freeze(["/", "/games", "/sponsors", "/privacy", OFFLINE_PATH]);
+const PUBLIC_PAGE_PATHS = Object.freeze(["/", "/games", "/sponsors", "/floor-plan", "/privacy", OFFLINE_PATH]);
 
 const IMAGE_PATH_PREFIXES = Object.freeze(["/games/", "/media/", "/sponsors/", "/icons/"]);
 
@@ -76,7 +76,7 @@ function classifyResource({ pathname, destination }) {
   return destination === "image" && isPublicImage ? "image" : "ignore";
 }
 
-/** The public pages: the landing, the catalog and each game, the sponsors, the privacy notice and the offline page. */
+/** The public pages: the landing, the catalog and each game, the sponsors, the croquis, the privacy notice and the offline page. */
 function isPublicPagePath(pathname) {
   if (PUBLIC_PAGE_PATHS.includes(pathname)) return true;
 

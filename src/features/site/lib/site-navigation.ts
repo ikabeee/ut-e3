@@ -1,5 +1,5 @@
 import { LOGIN_PATH, ACTIVATE_PATH } from "@features/accounts/lib/accounts-links";
-import { FLOOR_PLAN_SECTION_ID } from "@features/floor-plan/lib/floor-plan-links";
+import { FLOOR_PLAN_PATH, FLOOR_PLAN_SECTION_ID } from "@features/floor-plan/lib/floor-plan-links";
 import { GAMES_PATH, GAMES_SECTION_ID } from "@features/games/lib/games-links";
 import { HOME_PATH, TOP_SECTION_ID } from "@features/landing/lib/landing-links";
 import { RAFFLE_LIVE_PATH, RAFFLE_WINNERS_PATH } from "@features/raffle/lib/raffle-links";
@@ -32,7 +32,7 @@ const FULL_NAVIGATION: SiteNavigation = {
   links: [
     { href: HOME_PATH, label: LABELS.home },
     { href: GAMES_PATH, label: LABELS.games },
-    { href: landingAnchor(FLOOR_PLAN_SECTION_ID), label: LABELS.floorPlan },
+    { href: FLOOR_PLAN_PATH, label: LABELS.floorPlan },
     { href: SPONSORS_PATH, label: LABELS.sponsors },
     { href: RAFFLE_WINNERS_PATH, label: LABELS.raffle },
     { href: PUBLIC_BRACKET_PATH, label: LABELS.tournament },

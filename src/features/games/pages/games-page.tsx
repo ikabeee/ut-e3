@@ -28,11 +28,7 @@ export async function GamesPage() {
 export function GamesView({ games }: Readonly<{ games: Game[] }>) {
   return (
     <main>
-      <h1 className="sr-only">{pageTitle}</h1>
-      <FeaturedGamesCarousel games={games} />
-      <div className="page-wrap pt-[clamp(40px,6vw,72px)] pb-[clamp(56px,8vw,112px)]">
-        <UrlGamesBrowser games={games} />
-      </div>
+      <UrlGamesBrowser games={games} hero={<FeaturedGamesCarousel games={games} />} />
     </main>
   );
 }

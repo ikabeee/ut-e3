@@ -3,7 +3,7 @@ import { Suspense, type ReactNode } from "react";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
 import type { EventSettings } from "@features/event-settings/lib/types";
 import { FloorPlan } from "@features/floor-plan/components/floor-plan";
-import { getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
+import { FLOOR_PLAN_PATH, getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
 import { toFloorPlanStand } from "@features/floor-plan/lib/floor-plan-stands";
 import { GameCatalog } from "@features/games/components/game-catalog";
 import { getGames } from "@features/games/lib/server/games-queries";
@@ -105,7 +105,7 @@ export function LandingView({
           items={scheduleItems}
           zoneLink={getZoneLink}
         />
-        <FloorPlan stands={games.map(toFloorPlanStand)} />
+        <FloorPlan stands={games.map(toFloorPlanStand)} pageHref={isLandingOnly ? undefined : FLOOR_PLAN_PATH} />
         <VenueLocation venue={EVENT_VENUE} />
         <ClosingBand dateLabel={eventDate} />
       </main>

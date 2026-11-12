@@ -24,7 +24,7 @@ describe("OfflinePage (RNF-14, item 4)", () => {
     setNetwork(false);
     savePassportSnapshot({
       passport: { gamertag: "PlayerOne", pin: "12345" },
-      visits: { visitCount: 3, stands: [{ code: "ZA-S1", visited: true }], tickets: [] },
+      visits: { visitCount: 3, stands: [{ code: "ZA-S1", visited: true, gameName: null }], tickets: [] },
       now: new Date(Date.now() - 2 * 60_000),
     });
 
@@ -40,7 +40,7 @@ describe("OfflinePage (RNF-14, item 4)", () => {
   it("with a network it does not say Sin conexión anywhere next to the En línea indicator", () => {
     savePassportSnapshot({
       passport: { gamertag: "PlayerOne", pin: "12345" },
-      visits: { visitCount: 3, stands: [{ code: "ZA-S1", visited: true }], tickets: [] },
+      visits: { visitCount: 3, stands: [{ code: "ZA-S1", visited: true, gameName: null }], tickets: [] },
       now: new Date(Date.now() - 2 * 60_000),
     });
 
