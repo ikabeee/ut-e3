@@ -70,12 +70,17 @@ describe("GameDetail", () => {
     );
   });
 
-  it("opens the gallery on the cover", () => {
+  it("opens the gallery on the landscape image, and keeps the vertical cover in the sidebar", () => {
     renderDetail();
 
     const gallery = screen.getByRole("region", { name: "Galería" });
 
-    expect(within(gallery).getByRole("img")).toHaveAttribute("alt", "Portada de Ruta 9");
+    expect(within(gallery).getByRole("img")).toHaveAttribute("alt", "Ruta 9: pits");
+    expect(
+      within(screen.getByRole("complementary", { name: "Ficha de Ruta 9" })).getByRole("img", {
+        name: "Portada de Ruta 9",
+      }),
+    ).toBeInTheDocument();
   });
 
   it("says where to play it: stand, zone, event date and hours", () => {
