@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { redirectWithoutSession } from "@features/accounts/lib/accounts-proxy";
 import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { decideSiteAccess, READ_METHODS } from "@features/site/lib/site-access";
+import { buildPublicUrl } from "@shared/lib/public-url";
 import { siteMode, type SiteMode } from "@shared/lib/site-mode";
 
 // The staff areas: the proxy only checks that a session cookie exists, and the page checks the session itself.
@@ -17,7 +18,7 @@ export function proxySiteRequest(request: NextRequest, mode: SiteMode): NextResp
 
   switch (decideSiteAccess(mode, { method: request.method, pathname })) {
     case "redirectHome":
-      return NextResponse.redirect(new URL(HOME_PATH, request.nextUrl));
+      return NextResponse.redirect(buildPublicUrl(HOME_PATH, request.nextUrl));
     case "notFound":
       return new NextResponse(null, { status: 404 });
     case "methodNotAllowed":
