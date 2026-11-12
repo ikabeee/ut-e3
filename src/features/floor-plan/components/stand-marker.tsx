@@ -5,6 +5,7 @@ import type { CSSProperties, ReactElement } from "react";
 import type { MapItem } from "@features/floor-plan/lib/plan-items";
 import { gameInitials } from "@features/floor-plan/lib/game-initials";
 import { NAME_SCALE, isCompact, type MapPoint } from "@features/floor-plan/lib/map-viewport";
+import { MapMarkerButton } from "@features/floor-plan/components/map-marker-button";
 
 const COVER_SIZE = 52;
 
@@ -22,16 +23,9 @@ interface StandMarkerProps {
 /** A stand of the map: its game cover, its initials or an empty circle, with its code badge and game name. */
 export function StandMarker({ item, point, scale, selected, onSelect }: Readonly<StandMarkerProps>): ReactElement {
   return (
-    <button
-      type="button"
-      aria-label={item.label}
-      aria-pressed={selected}
-      onClick={() => onSelect(item.id)}
-      style={{ left: point.x, top: point.y }}
-      className="touch-target absolute flex -translate-1/2 flex-col items-center"
-    >
+    <MapMarkerButton item={item} point={point} selected={selected} onSelect={onSelect}>
       {isCompact(scale) ? compactDot(item) : fullMarker(item, selected, scale)}
-    </button>
+    </MapMarkerButton>
   );
 }
 

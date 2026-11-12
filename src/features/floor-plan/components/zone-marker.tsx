@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import type { MapItem } from "@features/floor-plan/lib/plan-items";
 import type { MapPoint } from "@features/floor-plan/lib/map-viewport";
 import type { ZoneId } from "@features/floor-plan/lib/types";
+import { MapMarkerButton } from "@features/floor-plan/components/map-marker-button";
 import { ZoneIcon } from "@features/floor-plan/components/zone-icon";
 
 interface ZoneMarkerProps {
@@ -17,16 +18,9 @@ interface ZoneMarkerProps {
 /** A zone of the map: a foreground circle with its icon and its name below. */
 export function ZoneMarker({ item, point, selected, compact, onSelect }: Readonly<ZoneMarkerProps>): ReactElement {
   return (
-    <button
-      type="button"
-      aria-label={item.label}
-      aria-pressed={selected}
-      onClick={() => onSelect(item.id)}
-      style={{ left: point.x, top: point.y }}
-      className="touch-target absolute flex -translate-1/2 flex-col items-center"
-    >
+    <MapMarkerButton item={item} point={point} selected={selected} onSelect={onSelect}>
       {compact ? compactDot(item, selected) : fullMarker(item, selected)}
-    </button>
+    </MapMarkerButton>
   );
 }
 
