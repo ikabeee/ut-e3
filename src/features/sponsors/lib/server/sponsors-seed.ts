@@ -34,6 +34,22 @@ const REAL_SPONSORS: SponsorFields[] = [
     phone: "+529981878194",
     email: "contacto@lejardindaurore.com",
   },
+  {
+    name: "Noxy Digital",
+    logoPath: "/sponsors/noxy-digital.png",
+    websiteUrl: "https://www.noxy.digital/",
+    phone: "+529981725547",
+    email: "info@noxy.digital",
+  },
+  // The sponsor model has one phone and one website: the second phone (998 768 2460) is left out, and the website is
+  // the Facebook page of the agency, which is the only web presence the sponsor gave.
+  {
+    name: "Directrix Studio",
+    logoPath: "/sponsors/directrix-studio.png",
+    websiteUrl: "https://www.facebook.com/GrupoDirectrixAgenciaCreativa/",
+    phone: "+529981268631",
+    email: "directrixstudio@gmail.com",
+  },
 ];
 
 // Frozen because nothing appends to it at runtime: it changes only by editing this file.
