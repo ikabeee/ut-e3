@@ -218,7 +218,7 @@ async function checkCards(session) {
   const { page, sponsors } = session;
   const response = await openSponsorsPage(page);
   const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
-  const names = await sponsorCards(page).getByRole("heading", { level: 2 }).allTextContents();
+  const names = await sponsorCards(page).getByRole("heading", { level: 3 }).allTextContents();
   const body = await bodyText(page);
   const missingServices = sponsors.filter((sponsor) => !body.includes(sponsor.services)).map(({ name }) => name);
 
@@ -354,17 +354,22 @@ async function checkViewports(session) {
   await page.setViewportSize({ width: 390, height: 844 });
 }
 
-// SP-07: "Patrocinadores" in the landing navbar opens /sponsors, also at 360 px where the link list scrolls sideways.
+// SP-07: "Patrocinadores" in the navbar opens /sponsors, also at 360 px where the entries live in the menu (S10 of
+// odd/tasks/badges-raffle-tickets-floor-plan.md).
 async function checkNavbarToSponsors(session) {
   const { page } = session;
 
   await page.setViewportSize({ width: 360, height: 780 });
   await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
-  const link = page.getByRole("navigation").getByRole("link", { name: "Patrocinadores", exact: true });
-  await checkTouchTarget(link, "SP-07 360", "Patrocinadores");
+  const navbar = page.getByRole("navigation", { name: "Principal" });
+  const menuButton = navbar.getByRole("button", { name: "Abrir menú" });
+  await checkTouchTarget(menuButton, "SP-07 360", "Abrir menú");
   await checkNoHorizontalScroll(page, "SP-07 360 landing");
-  await page.getByRole("navigation").screenshot({ path: screenshotPath(session, "05-navbar/01-landing-360") });
+  await navbar.screenshot({ path: screenshotPath(session, "05-navbar/01-landing-360") });
 
+  await menuButton.click();
+  const link = page.getByRole("dialog", { name: "Menú" }).getByRole("link", { name: "Patrocinadores", exact: true });
+  await checkTouchTarget(link, "SP-07 360 menu", "Patrocinadores");
   await link.click();
   await page.waitForURL((url) => url.pathname === "/sponsors", { timeout: 30_000 });
   await sponsorCards(page).waitFor({ timeout: 30_000 });

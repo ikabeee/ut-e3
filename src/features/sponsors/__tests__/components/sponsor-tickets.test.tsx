@@ -68,4 +68,14 @@ describe("SponsorTickets", () => {
     expect(website).toHaveAttribute("target", "_blank");
     expect(website).toHaveAttribute("rel", "noopener noreferrer");
   });
+
+  it("shows the services of a sponsor that gives them and no empty line for one that does not", () => {
+    render(<SponsorTickets sponsors={[PIXEL_FORGE, { ...CODE_LAB, services: "" }]} />);
+
+    const [withServices, withoutServices] = getTickets();
+
+    expect(within(withServices).getByText(PIXEL_FORGE.services)).toBeInTheDocument();
+    expect(within(withoutServices).queryByText(CODE_LAB.services)).not.toBeInTheDocument();
+    expect(withoutServices.querySelectorAll("p")).toHaveLength(0);
+  });
 });

@@ -12,7 +12,7 @@ interface SponsorTicketProps {
 const VERTICAL_TEXT = "rotate-180 [writing-mode:vertical-rl]";
 
 /**
- * A horizontal raffle ticket: the numbered stub, the perforation and the body with the logo, name and contact. The
+ * A horizontal raffle ticket: the numbered stub, the perforation and the body with the logo, name, services and contact. The
  * `@min-[420px]` sizes answer to the width of the ticket (its list item is the container), not to the viewport: two
  * columns on a tablet are as narrow as one on a phone.
  */
@@ -27,6 +27,7 @@ export function SponsorTicket({ sponsor, order }: Readonly<SponsorTicketProps>) 
           <h3 className="type-wide text-[11px] leading-[1.15] wrap-break-word @min-[420px]:text-[13px]">
             {sponsor.name}
           </h3>
+          {sponsor.services === "" ? null : <p className="m-0 text-sm/snug text-copy">{sponsor.services}</p>}
           <SponsorContactLinks sponsor={sponsor} className="flex-col items-start gap-y-0" isCompact />
         </div>
       </div>

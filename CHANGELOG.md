@@ -16,6 +16,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   logos ocupan la misma área visual aunque tengan proporciones distintas. Se retira el carrusel de patrocinadores.
 - Croquis: es vertical en todas las pantallas; en escritorio el panel queda fijo a su lado. Se quitan el Marketplace
   trasero y la Cafetería externa.
+- Una sola barra de navegación para todo el sitio público (antes cada página traía la suya y el pasaporte, el registro,
+  la rifa y el torneo no tenían): Inicio, Juegos, Croquis, Patrocinadores, Rifa, Torneo y "Mi pasaporte". En el
+  teléfono los enlaces van en un menú. No aparece en el panel del staff, el kiosco, la mesa de atención ni la tómbola en
+  vivo, y con `SITE_MODE=landing` conserva solo las anclas de la portada.
+- `/sponsors` muestra los mismos boletos de rifa que la portada, con los servicios de cada patrocinador.
 
 ## [1.0.0] - 2026-11-11
 

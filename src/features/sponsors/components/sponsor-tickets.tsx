@@ -1,4 +1,4 @@
-import { SponsorTicket } from "@features/sponsors/components/sponsor-ticket";
+import { SponsorTicketList } from "@features/sponsors/components/sponsor-ticket-list";
 import { SPONSORS_SECTION_ID } from "@features/sponsors/lib/sponsors-links";
 import { SPONSORS_COPY } from "@features/sponsors/lib/sponsors-copy";
 import type { Sponsor } from "@features/sponsors/lib/types";
@@ -22,16 +22,7 @@ export function SponsorTickets({ sponsors }: Readonly<SponsorTicketsProps>) {
           {SPONSORS_COPY.heading}
         </h2>
         <p className="mt-4 text-[17px] text-muted min-[761px]:text-xl">{SPONSORS_COPY.tickets.lead}</p>
-        <ul
-          aria-label={SPONSORS_COPY.page.listLabel}
-          className="m-0 mt-[clamp(36px,5vw,64px)] grid list-none grid-cols-1 gap-4 p-0 min-[760px]:grid-cols-2 min-[760px]:gap-6 min-[1200px]:grid-cols-3"
-        >
-          {sponsors.map((sponsor, index) => (
-            <li key={sponsor.id} className="@container">
-              <SponsorTicket sponsor={sponsor} order={index + 1} />
-            </li>
-          ))}
-        </ul>
+        <SponsorTicketList sponsors={sponsors} className="mt-[clamp(36px,5vw,64px)]" />
       </div>
     </section>
   );

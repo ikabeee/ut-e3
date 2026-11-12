@@ -80,7 +80,7 @@ src/
 │   ├── games/                # Juegos: coverflow de la portada, catálogo (/games) y ficha (/games/[slug])
 │   ├── floor-plan/           # Croquis interactivo con los stands (ZA-S3) y las zonas
 │   ├── schedule/             # Cronograma de actividades (portada y edición en el panel)
-│   ├── sponsors/             # Banda de patrocinadores
+│   ├── sponsors/             # Patrocinadores: boletos de rifa (portada y /sponsors) y su gestión en /admin
 │   ├── event-settings/       # Horarios y valores configurables del evento
 │   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
 │   ├── admin/                # Panel del sysadmin (/admin y sus secciones), estado del servidor y cierre automático del bracket

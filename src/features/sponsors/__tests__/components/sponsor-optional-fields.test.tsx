@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import { PIXEL_FORGE } from "@features/sponsors/__tests__/components/sponsor-test-data";
-import { SponsorCard } from "@features/sponsors/components/sponsor-card";
 import { SponsorTickets } from "@features/sponsors/components/sponsor-tickets";
 import type { Sponsor } from "@features/sponsors/lib/types";
 
@@ -50,8 +49,8 @@ describe("sponsor email", () => {
     expect(screen.getByRole("link", { name: "ceo@opset.com.mx" })).toHaveAttribute("href", "mailto:ceo@opset.com.mx");
   });
 
-  it("shows the website, the phone and the email together in the card", () => {
-    render(<SponsorCard sponsor={{ ...PIXEL_FORGE, email: "hola@pixel-forge.example" }} />);
+  it("shows the website, the phone and the email together in the ticket", () => {
+    render(<SponsorTickets sponsors={[{ ...PIXEL_FORGE, email: "hola@pixel-forge.example" }]} />);
 
     expect(screen.getAllByRole("link")).toHaveLength(3);
     expect(screen.getByRole("link", { name: "hola@pixel-forge.example" })).toHaveAttribute(
@@ -61,26 +60,26 @@ describe("sponsor email", () => {
   });
 
   it("renders no mailto link and no extra element when the sponsor has no email", () => {
-    const { container } = render(<SponsorCard sponsor={PIXEL_FORGE} />);
+    const { container } = render(<SponsorTickets sponsors={[PIXEL_FORGE]} />);
 
     expect(container.querySelector('a[href^="mailto:"]')).toBeNull();
     expect(screen.getAllByRole("link")).toHaveLength(2);
   });
 
   it("renders no contact section for an empty string email", () => {
-    const { container } = render(<SponsorCard sponsor={{ ...LOGO_ONLY, email: "" }} />);
+    const { container } = render(<SponsorTickets sponsors={[{ ...LOGO_ONLY, email: "" }]} />);
 
     expect(container.querySelector("a")).toBeNull();
   });
 });
 
-describe("SponsorCard with a sponsor that only has a logo", () => {
+describe("ticket of a sponsor that only has a logo", () => {
   it("shows the name and the logo without services or contact links", () => {
-    const { container } = render(<SponsorCard sponsor={LOGO_ONLY} />);
+    render(<SponsorTickets sponsors={[LOGO_ONLY]} />);
 
-    expect(screen.getByRole("heading", { level: 2, name: LOGO_ONLY.name })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: LOGO_ONLY.name })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: LOGO_ONLY.name })).toBeInTheDocument();
-    expect(container.querySelectorAll("p")).toHaveLength(0);
+    expect(screen.getByRole("listitem").querySelectorAll("p")).toHaveLength(0);
     expect(screen.queryAllByRole("link")).toHaveLength(0);
   });
 });
