@@ -214,6 +214,7 @@ async function runScenario({ browser, databaseFile, screenshots }) {
     await checkOffline({ phone, database, screenshots, pin });
     await checkNothingSavedWithoutCopy(browser);
     await checkReconnectRetries({ phone, pin });
+    await checkReloadedOfflinePageLeavesWithNetwork({ phone, pin });
     await checkStaffIsNeverStored(desk);
     await checkDeviceReplacement({ phone, desk, browser });
   } finally {
@@ -440,6 +441,7 @@ async function checkOffline({ phone, database, screenshots, pin }) {
     "the page says there is no connection",
     await page.getByText("Sin conexión", { exact: true }).first().isVisible(),
   );
+  check("the page offers a Reintentar button", await page.getByRole("button", { name: "Reintentar" }).isVisible());
   await page.screenshot({ path: path.join(screenshots, "pwa-offline-passport.png"), fullPage: true });
 
   await checkOfflinePublicPages({ page, database });
@@ -506,6 +508,17 @@ async function checkReconnectRetries({ phone, pin }) {
   await page.waitForURL(/\/passport$/, { timeout: UI_TIMEOUT_MS });
   await page.getByText("En línea", { exact: true }).waitFor({ timeout: UI_TIMEOUT_MS });
   check("when the network returns, the page retries by itself and shows the live passport", true, page.url());
+  check("with the same PIN", (await page.locator("body").innerText()).includes(pin));
+}
+
+// The worker serves /offline from its cache, so a reload with a network never sees an offline -> online change: the
+// page has to ask the server by itself and leave.
+async function checkReloadedOfflinePageLeavesWithNetwork({ phone, pin }) {
+  const { page } = phone;
+
+  await page.goto(`${BASE_URL}/offline`, { waitUntil: "domcontentloaded" });
+  await page.waitForURL(/\/passport$/, { timeout: UI_TIMEOUT_MS });
+  check("reloading /offline with a network ends at /passport", /\/passport$/.test(page.url()), page.url());
   check("with the same PIN", (await page.locator("body").innerText()).includes(pin));
 }
 

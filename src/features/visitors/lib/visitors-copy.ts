@@ -70,6 +70,8 @@ export const VISITORS_COPY = {
     description: "Presenta tu PIN en cada stand para registrar tus visitas.",
     offline: {
       notice: (age: string) => `Sin conexión. Datos de ${age}`,
+      // With a network (the page is reaching for the server) "Sin conexión" would contradict the indicator.
+      noticeOnline: (age: string) => `Datos guardados ${age}`,
     },
     progress: {
       label: "Progreso hacia el siguiente boleto",
