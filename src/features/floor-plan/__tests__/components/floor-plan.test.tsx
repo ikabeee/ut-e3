@@ -8,9 +8,7 @@ const ZONE_TITLES = [
   "Arena KOF",
   "Mario Kart",
   "Baños",
-  "Marketplace trasero",
   "Marketplace central",
-  "Cafetería externa",
   "Centro de atención 1",
   "Centro de atención 2",
   "Centro de atención 3",
@@ -47,10 +45,16 @@ describe("FloorPlan buttons", () => {
     );
   });
 
-  it("switches layout at 600 px of container width", () => {
-    expect(getMapViewBox(360)).toBe(getMapViewBox(599));
-    expect(getMapViewBox(600)).toBe(getMapViewBox(1200));
-    expect(getMapViewBox(600)).not.toBe(getMapViewBox(599));
+  it("keeps the vertical croquis, with no empty band at the top, at every container width", () => {
+    expect(getMapViewBox(360)).toBe("0 0 410 820");
+    expect(getMapViewBox(1200)).toBe("0 0 410 820");
+  });
+
+  it("leaves the rear marketplace and the cafeteria out of the croquis", () => {
+    render(<FloorPlan stands={STAND_FIXTURES} />);
+
+    expect(screen.queryByRole("button", { name: "Marketplace trasero" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Cafetería externa" })).not.toBeInTheDocument();
   });
 });
 

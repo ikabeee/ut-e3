@@ -1,4 +1,20 @@
 export const SITE_COPY = {
+  nav: {
+    label: "Principal",
+    homeLabel: "UTG, inicio",
+    links: {
+      home: "Inicio",
+      games: "Juegos",
+      floorPlan: "Croquis",
+      sponsors: "Patrocinadores",
+      raffle: "Rifa",
+      tournament: "Torneo",
+    },
+    passport: "Mi pasaporte",
+    openMenu: "Abrir menú",
+    menuTitle: "Menú",
+    closeMenu: "Cerrar menú",
+  },
   notFound: {
     title: "Página no encontrada",
     kicker: "Error 404",

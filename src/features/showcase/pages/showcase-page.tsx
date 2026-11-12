@@ -6,12 +6,11 @@ import { getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
 import { toFloorPlanStand } from "@features/floor-plan/lib/floor-plan-stands";
 import { FeaturedGamesCarousel } from "@features/games/components/featured-games-carousel";
 import { getGames } from "@features/games/lib/server/games-queries";
+import { GAMES_PATH } from "@features/games/lib/games-links";
 import type { Game } from "@features/games/lib/types";
 import { SiteFooter } from "@features/landing/components/site-footer";
-import { SiteNav } from "@features/landing/components/site-nav";
 import { SpecialGuests } from "@features/landing/components/special-guests";
 import { VenueLocation } from "@features/landing/components/venue-location";
-import { HOME_NAV_LINKS } from "@features/landing/lib/home-nav-links";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { SPECIAL_GUESTS } from "@features/landing/lib/special-guests";
@@ -27,8 +26,10 @@ import { splitEventTitle } from "@features/showcase/lib/event-title";
 import { buildMarqueeText } from "@features/showcase/lib/marquee-text";
 import { SHOWCASE_COPY } from "@features/showcase/lib/showcase-copy";
 import { SHOWCASE_PATH } from "@features/showcase/lib/showcase-links";
-import { SponsorsCarousel } from "@features/sponsors/components/sponsors-carousel";
+import { SITE_COPY } from "@features/site/lib/site-copy";
+import { SponsorTickets } from "@features/sponsors/components/sponsor-tickets";
 import { getSponsors } from "@features/sponsors/lib/server/sponsors-queries";
+import { SPONSORS_PATH } from "@features/sponsors/lib/sponsors-links";
 import type { Sponsor } from "@features/sponsors/lib/types";
 import { REGISTER_PATH } from "@features/visitors/lib/visitors-links";
 import { formatEventDate } from "@shared/lib/date-time";
@@ -49,6 +50,13 @@ export const showcasePageMetadata: Metadata = {
 };
 
 const REGISTER_CTA = { href: REGISTER_PATH, label: LANDING_COPY.hero.createPassport };
+
+// The ways out of the closing band: the same entries as the navbar of the pages outside the landing.
+const CLOSING_LINKS = [
+  { href: HOME_PATH, label: SITE_COPY.nav.links.home },
+  { href: GAMES_PATH, label: SITE_COPY.nav.links.games },
+  { href: SPONSORS_PATH, label: SITE_COPY.nav.links.sponsors },
+];
 
 const CLOSING_MARQUEE = buildMarqueeText(LANDING_COPY.closing.firstLine, LANDING_COPY.closing.secondLine);
 
@@ -74,7 +82,6 @@ export async function ShowcasePage() {
 export function ShowcaseView({ settings, games, scheduleItems, sponsors }: Readonly<ShowcaseViewProps>) {
   return (
     <>
-      <SiteNav homeHref={HOME_PATH} links={HOME_NAV_LINKS} />
       <ShowcaseHero
         title={splitEventTitle(siteConfig.name)}
         badge={SHOWCASE_COPY.hero.badge(formatEventDate(settings.eventStartsAt, "numeric"), EVENT_VENUE.shortName)}
@@ -92,11 +99,11 @@ export function ShowcaseView({ settings, games, scheduleItems, sponsors }: Reado
           items={scheduleItems}
           zoneLink={getZoneLink}
         />
-        <SponsorsCarousel sponsors={sponsors} />
+        <SponsorTickets sponsors={sponsors} />
         <FloorPlan stands={games.map(toFloorPlanStand)} />
         <VenueLocation venue={EVENT_VENUE} />
       </main>
-      <ShowcaseClosing marquee={CLOSING_MARQUEE} links={HOME_NAV_LINKS} />
+      <ShowcaseClosing marquee={CLOSING_MARQUEE} links={CLOSING_LINKS} />
       <SiteFooter />
     </>
   );

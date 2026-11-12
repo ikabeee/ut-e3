@@ -6,6 +6,22 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Cambiado
+
+- Invitadas especiales: cada invitada es un gafete del evento en un carrusel, con cinta, contador "Pase 01 de 02" y
+  botones anterior y siguiente. El gafete cae colgando de la cinta al aparecer, entra columpiándose al cambiar de pase y
+  se mece en reposo; con movimiento reducido no se anima. Vuelve la segunda invitada "Por anunciar".
+- Patrocinadores: en la portada y en `/showcase` cada patrocinador es un boleto de rifa con talón numerado (Nº 001),
+  perforación, el logo a color y sus contactos, con "Gracias a quienes hacen posible el evento." bajo el título. Los
+  logos ocupan la misma área visual aunque tengan proporciones distintas. Se retira el carrusel de patrocinadores.
+- Croquis: es vertical en todas las pantallas; en escritorio el panel queda fijo a su lado. Se quitan el Marketplace
+  trasero y la Cafetería externa.
+- Una sola barra de navegación para todo el sitio público (antes cada página traía la suya y el pasaporte, el registro,
+  la rifa y el torneo no tenían): Inicio, Juegos, Croquis, Patrocinadores, Rifa, Torneo y "Mi pasaporte". En el
+  teléfono los enlaces van en un menú. No aparece en el panel del staff, el kiosco, la mesa de atención ni la tómbola en
+  vivo, y con `SITE_MODE=landing` conserva solo las anclas de la portada.
+- `/sponsors` muestra los mismos boletos de rifa que la portada, con los servicios de cada patrocinador.
+
 ### Agregado
 
 - Moderación: cada alerta de calificaciones de 5 tiene "Ver visitantes" con gamertag, correo enmascarado, hora y
@@ -20,6 +36,22 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   los 3 staff por stand, la mesa única de KOF y el administrador único por stand) y queda en la bitácora.
 - `npm run db:seed:demo` crea las cuentas de demo (stands, KOF, atención y rifa) con una sola contraseña (`DEMO_PASSWORD`)
   sin mover los horarios del evento; `-- --open-raffle` abre la rifa ahora. Se niega a correr en producción.
+
+### Corregido
+
+- `/offline` regresa al pasaporte aunque se recargue ya con red: comprueba que el servidor responda, reintenta cada pocos
+  segundos y con un botón "Reintentar", y dice "Tenemos red pero no llegamos al servidor" en lugar de "Sin conexión".
+- El kiosco avisa en la parte de arriba con la hora del corte cuando el registro de visitas cerró y desactiva el PIN.
+- El error del formulario de Configuración se limpia al editar el campo afectado (o el otro horario de su par).
+- `.env.example` usa `SMTP_FROM` (el código no lee `EMAIL_FROM`) y la guía de despliegue aclara que sin alguna variable
+  SMTP el servidor no arranca.
+- Detrás de un proxy o túnel, las redirecciones del proxy de la app (a `/login` y a la portada) usan el origen público de
+  `NEXT_PUBLIC_SITE_URL` en lugar de `localhost:3000`.
+
+## [1.0.0] - 2026-11-11
+
+### Agregado
+
 - El mapa de la sede usa el estilo oscuro de Mapbox, con su logo y su crédito. El token público se define al construir
   con `NEXT_PUBLIC_MAPBOX_TOKEN`; sin él, la sección muestra el esquema de la sede.
 
@@ -323,14 +355,6 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
-- `/offline` regresa al pasaporte aunque se recargue ya con red: comprueba que el servidor responda, reintenta cada pocos
-  segundos y con un botón "Reintentar", y dice "Tenemos red pero no llegamos al servidor" en lugar de "Sin conexión".
-- El kiosco avisa en la parte de arriba con la hora del corte cuando el registro de visitas cerró y desactiva el PIN.
-- El error del formulario de Configuración se limpia al editar el campo afectado (o el otro horario de su par).
-- `.env.example` usa `SMTP_FROM` (el código no lee `EMAIL_FROM`) y la guía de despliegue aclara que sin alguna variable
-  SMTP el servidor no arranca.
-- Detrás de un proxy o túnel, las redirecciones del proxy de la app (a `/login` y a la portada) usan el origen público de
-  `NEXT_PUBLIC_SITE_URL` en lugar de `localhost:3000`.
 - La sección "Explora el catálogo" ya no se traba al hacer scroll (#128): las cajas de los lados se oscurecen con una capa
   en lugar de un filtro y las portadas ya no se componen como capas aparte, así que el navegador deja de redibujar
   unas 22 superficies por cuadro (ahora son 3). Se ve igual que antes.

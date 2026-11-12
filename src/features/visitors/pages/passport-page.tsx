@@ -105,7 +105,7 @@ async function loadTournamentNotice(visitorId: string): Promise<ReactNode> {
 
 export function PassportView({ passport, visits, extra }: Readonly<PassportViewProps>) {
   return (
-    <main className="page-wrap flex min-h-svh flex-col items-center gap-8 py-16">
+    <main className="page-wrap flex min-h-[calc(100svh-var(--nav-height))] flex-col items-center gap-8 py-16">
       <header className="flex flex-col items-center gap-2 text-center">
         <h1 className="type-section">{VISITORS_COPY.passport.title}</h1>
         <p className="text-muted">{VISITORS_COPY.passport.subtitle}</p>

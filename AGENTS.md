@@ -81,12 +81,12 @@ src/
 │   ├── games/                # Juegos: coverflow de la portada, catálogo (/games) y ficha (/games/[slug])
 │   ├── floor-plan/           # Croquis interactivo con los stands (ZA-S3) y las zonas
 │   ├── schedule/             # Cronograma de actividades (portada y edición en el panel)
-│   ├── sponsors/             # Banda de patrocinadores
+│   ├── sponsors/             # Patrocinadores: boletos de rifa (portada y /sponsors) y su gestión en /admin
 │   ├── event-settings/       # Horarios y valores configurables del evento
 │   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
 │   ├── admin/                # Panel del sysadmin (/admin y sus secciones), estado del servidor y cierre automático del bracket
 │   ├── moderation/           # Alertas de fraude, anular visitas y excluir visitantes (RF-45, RF-46)
-│   ├── site/                 # Páginas del sitio que no son de un dominio: la 404 (src/app/not-found.tsx)
+│   ├── site/                 # Lo que no es de un dominio: la barra de navegación del layout (site-header) y la 404
 │   ├── raffle/               # Rifa: tómbola en vivo (/raffle/live), ganadores (/raffle) y panel (/admin/raffle)
 │   ├── pwa/                  # PWA: manifest, service worker (public/sw.js), /offline, indicador de conexión e instalación
 │   ├── stands/               # Stands: kiosko (/stand/kiosk), equipo (/stand/team) y alta de stands en /admin

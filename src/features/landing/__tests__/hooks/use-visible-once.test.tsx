@@ -10,7 +10,10 @@ class FakeObserver implements IntersectionObserver {
   readonly thresholds = [];
   isDisconnected = false;
 
-  constructor(private readonly callback: IntersectionObserverCallback) {
+  constructor(
+    private readonly callback: IntersectionObserverCallback,
+    readonly options?: IntersectionObserverInit,
+  ) {
     observers.push(this);
   }
 
@@ -50,8 +53,8 @@ afterEach(() => {
   observers = [];
 });
 
-function Probe() {
-  const [ref, isVisible] = useVisibleOnce<HTMLDivElement>();
+function Probe({ rootMargin }: Readonly<{ rootMargin?: string }>) {
+  const [ref, isVisible] = useVisibleOnce<HTMLDivElement>(rootMargin);
 
   return <div ref={ref}>{isVisible ? "visible" : "hidden"}</div>;
 }
@@ -73,5 +76,17 @@ describe("useVisibleOnce", () => {
     act(() => observers[0].show(true));
     expect(screen.getByText("visible")).toBeInTheDocument();
     expect(observers[0].isDisconnected).toBe(true);
+  });
+
+  it("preloads 200px ahead by default and accepts another margin", () => {
+    globalThis.IntersectionObserver = FakeObserver;
+    const { unmount } = render(<Probe />);
+
+    expect(observers[0].options).toEqual({ rootMargin: "200px" });
+    unmount();
+
+    render(<Probe rootMargin="0px 0px -20% 0px" />);
+
+    expect(observers[1].options).toEqual({ rootMargin: "0px 0px -20% 0px" });
   });
 });

@@ -10,6 +10,12 @@ describe("GameNotFoundView", () => {
     expect(screen.getByRole("link", { name: /Volver al inicio/ })).toHaveAttribute("href", "/");
   });
 
+  it("renders no navbar of its own: the root layout mounts the site navbar", () => {
+    render(<GameNotFoundView games={[]} />);
+
+    expect(screen.queryByRole("navigation", { name: "Principal" })).not.toBeInTheDocument();
+  });
+
   it("shows up to five games to keep browsing and the catalog", () => {
     const games = makeGames(8);
 
