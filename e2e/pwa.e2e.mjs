@@ -518,7 +518,8 @@ async function checkReloadedOfflinePageLeavesWithNetwork({ phone, pin }) {
 
   await page.goto(`${BASE_URL}/offline`, { waitUntil: "domcontentloaded" });
   await page.waitForURL(/\/passport$/, { timeout: UI_TIMEOUT_MS });
-  check("reloading /offline with a network ends at /passport", /\/passport$/.test(page.url()), page.url());
+  check("reloading /offline with a network ends at /passport", page.url().endsWith("/passport"), page.url());
+  await page.getByText("En línea", { exact: true }).waitFor({ timeout: UI_TIMEOUT_MS });
   check("with the same PIN", (await page.locator("body").innerText()).includes(pin));
 }
 
@@ -572,9 +573,9 @@ async function checkDeviceReplacement({ phone, desk, browser }) {
 
 async function recoverPassport(page) {
   await page.goto(`${BASE_URL}/support/recovery`, { waitUntil: "networkidle" });
-  await page.getByLabel("Nombre completo").fill(FULL_NAME);
-  await page.getByLabel("Gamertag").fill(GAMERTAG);
-  await page.getByRole("button", { name: "Recuperar pasaporte" }).click();
+  await page.getByLabel("Correo, gamertag o nombre completo").fill(GAMERTAG);
+  await page.getByRole("button", { name: "Buscar pasaporte" }).click();
+  await page.getByRole("button", { name: "Recuperar este pasaporte" }).click();
   await page.getByRole("heading", { name: "Pasaporte recuperado" }).waitFor({ timeout: UI_TIMEOUT_MS });
 }
 
