@@ -1,0 +1,50 @@
+name: E2E
+
+# Pruebas de extremo a extremo con un navegador real en los PR hacia main. Es un workflow aparte de "CI": el único check
+# requerido sigue siendo "quality" (ci.yml), así que un e2e inestable no bloquea el merge, pero se ve en el PR.
+# Cada recorrido crea su propia SQLite temporal, levanta la app y la borra al terminar (e2e/lib/e2e-harness.mjs).
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: e2e (${{ matrix.suite }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      DO_NOT_TRACK: 1
+
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [pwa, demo, proxy, reconnect, sysadmin-tools, support, kiosk, offline-kiosk, raffle]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright-core install --with-deps chromium
+      # Los scripts leen npm_execpath para correr las seeds: se lanzan con npm, no con node.
+      # El e2e de pwa omite el mapa de la sede (Mapbox) cuando no hay NEXT_PUBLIC_MAPBOX_TOKEN o no hay red.
+      - run: npm run test:e2e:${{ matrix.suite }}
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-${{ matrix.suite }}-screenshots
+          path: e2e/screenshots
+          if-no-files-found: ignore

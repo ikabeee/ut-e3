@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { SPECIAL_GUESTS } from "@features/landing/lib/special-guests";
+import { PENDING_NOXY_SPEAKER, SPECIAL_GUESTS } from "@features/landing/lib/special-guests";
 
 describe("SPECIAL_GUESTS", () => {
   it("lists the first guest with her name and a second guest still to be announced, without photo", () => {
@@ -25,5 +25,14 @@ describe("SPECIAL_GUESTS", () => {
     for (const guest of SPECIAL_GUESTS) {
       expect(guest.role).toBeUndefined();
     }
+  });
+});
+
+describe("PENDING_NOXY_SPEAKER", () => {
+  it("has its photo in public/ but no name, role or talk yet, and no page shows it", () => {
+    expect(PENDING_NOXY_SPEAKER).toMatchObject({ name: "", talk: "" });
+    expect(PENDING_NOXY_SPEAKER.role).toBeUndefined();
+    expect(existsSync(join(process.cwd(), "public", PENDING_NOXY_SPEAKER.photo?.src ?? ""))).toBe(true);
+    expect(SPECIAL_GUESTS).not.toContain(PENDING_NOXY_SPEAKER);
   });
 });

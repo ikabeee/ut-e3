@@ -60,7 +60,6 @@ const SEED_GAMES: SeedGame[] = [
     stand: { zone: "C", number: 3 },
     studio: 5,
     groupCode: "101",
-    hasCover: false,
     genre: PLATFORMS_3D,
   },
   { slug: "turno-rosso", name: "Turno Rosso", stand: { zone: "D", number: 1 }, studio: 2, groupCode: "102" },

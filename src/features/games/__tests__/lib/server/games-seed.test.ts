@@ -31,7 +31,7 @@ const GAMES = [
 ] as const;
 
 // They have no artwork yet: the pages show a generic cover with their name.
-const GAMES_WITHOUT_COVER = ["make-em-fall", "one-mind", "sombra-del-mictlan", "don-t-pet-me"];
+const GAMES_WITHOUT_COVER = ["make-em-fall", "one-mind", "sombra-del-mictlan"];
 
 const database = createTestDatabase();
 
@@ -59,14 +59,17 @@ describe("INITIAL_GAMES", () => {
     expect(codes.filter((code) => code.startsWith("ZC-S3-"))).toEqual(["ZC-S3-E5-101"]);
   });
 
-  it("holds DON'T PET ME in ZC-S3 as a platformer with no artwork, synopsis or genre text beyond its name", () => {
+  it("holds DON'T PET ME in ZC-S3 as a platformer with its cover and landscape image, and no synopsis", () => {
     const game = INITIAL_GAMES.find((candidate) => candidate.stand.zone === "C" && candidate.stand.number === 3);
 
     expect(game).toMatchObject({
       slug: "don-t-pet-me",
       name: "DON'T PET ME",
       synopsis: "",
-      images: [],
+      images: [
+        { path: "/games/don-t-pet-me.jpg", isCover: true },
+        { path: "/games/don-t-pet-me-portada.jpg", isCover: false },
+      ],
       genre: { id: "plataformas-3d", name: "Plataformas 3D", slug: "plataformas-3d" },
     });
   });
