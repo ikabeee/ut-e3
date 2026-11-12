@@ -22,6 +22,32 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   vivo, y con `SITE_MODE=landing` conserva solo las anclas de la portada.
 - `/sponsors` muestra los mismos boletos de rifa que la portada, con los servicios de cada patrocinador.
 
+### Agregado
+
+- Moderación: cada alerta de calificaciones de 5 tiene "Ver visitantes" con gamertag, correo enmascarado, hora y
+  calificaciones de cada visita, "Revisar" y acciones en bloque (anular visitas o excluir visitantes con un motivo). La
+  vista "Por stand" lista las visitas de un stand, quién las registró y su estado, y las exporta a CSV. Nunca muestra el PIN.
+- Mesa de atención: "Registrar visitante" crea el pasaporte en persona (nombre, gamertag y correo, con las mismas
+  validaciones del registro) y muestra el PIN, el QR y el enlace; durante la inscripción presencial del KOF puede
+  inscribirlo también en el torneo. Límite por agente por hora y bitácora de quién lo creó.
+- Mesa de recuperación: se busca por correo, gamertag o nombre completo y, antes de generar el acceso, muestra el
+  gamertag, los stands visitados, el correo enmascarado y la hora del registro para verificar la identidad.
+- Cuentas: "Reactivar" una cuenta desactivada la regresa a invitación pendiente con un enlace nuevo de 72 horas (respeta
+  los 3 staff por stand, la mesa única de KOF y el administrador único por stand) y queda en la bitácora.
+- `npm run db:seed:demo` crea las cuentas de demo (stands, KOF, atención y rifa) con una sola contraseña (`DEMO_PASSWORD`)
+  sin mover los horarios del evento; `-- --open-raffle` abre la rifa ahora. Se niega a correr en producción.
+
+### Corregido
+
+- `/offline` regresa al pasaporte aunque se recargue ya con red: comprueba que el servidor responda, reintenta cada pocos
+  segundos y con un botón "Reintentar", y dice "Tenemos red pero no llegamos al servidor" en lugar de "Sin conexión".
+- El kiosco avisa en la parte de arriba con la hora del corte cuando el registro de visitas cerró y desactiva el PIN.
+- El error del formulario de Configuración se limpia al editar el campo afectado (o el otro horario de su par).
+- `.env.example` usa `SMTP_FROM` (el código no lee `EMAIL_FROM`) y la guía de despliegue aclara que sin alguna variable
+  SMTP el servidor no arranca.
+- Detrás de un proxy o túnel, las redirecciones del proxy de la app (a `/login` y a la portada) usan el origen público de
+  `NEXT_PUBLIC_SITE_URL` en lugar de `localhost:3000`.
+
 ## [1.0.0] - 2026-11-11
 
 ### Agregado

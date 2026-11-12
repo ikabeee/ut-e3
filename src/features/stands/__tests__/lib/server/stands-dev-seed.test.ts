@@ -53,6 +53,17 @@ describe("seedStandsDev", () => {
     await expect(seedStandsDev({ NODE_ENV: "production" }, NOW)).rejects.toThrow("producción");
   });
 
+  it("leaves the registration hour alone when it is told not to move the hours", async () => {
+    const before = await getPrisma().eventSettings.findUniqueOrThrow({ where: { id: 1 } });
+
+    await seedStandsDev({}, BEFORE_REGISTRATION, { moveHours: false });
+
+    const after = await getPrisma().eventSettings.findUniqueOrThrow({ where: { id: 1 } });
+
+    expect(after.registrationOpensAt).toEqual(before.registrationOpensAt);
+    expect(await getPrisma().account.count()).toBe(11);
+  });
+
   it("asks for the sample stands first", async () => {
     await getPrisma().game.deleteMany();
 

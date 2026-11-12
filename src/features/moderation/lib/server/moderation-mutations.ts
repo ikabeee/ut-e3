@@ -19,6 +19,61 @@ export type AnnulResult =
 
 export type ExcludeResult = { status: "excluded"; ticketsFrozen: boolean } | { status: "notFound" | "alreadyExcluded" };
 
+/** How many visits or visitors one bulk action takes: a form with more is not a review anymore. */
+export const MAX_BULK_TARGETS = 200;
+
+export interface BulkRequest {
+  actorId: string;
+  /** The check-ins the sysadmin ticked in a list. */
+  checkInIds: string[];
+  reason: string;
+  now: Date;
+}
+
+export interface BulkResult {
+  done: number;
+  skipped: number;
+}
+
+/** Annuls each ticked visit with the same reason; one already annulled or gone is skipped, not an error. */
+export async function annulCheckIns(request: BulkRequest): Promise<BulkResult> {
+  const { checkInIds, ...rest } = request;
+
+  const result = { done: 0, skipped: 0 };
+
+  for (const targetId of uniqueTargets(checkInIds)) {
+    const outcome = await annulCheckIn({ ...rest, targetId });
+
+    result[outcome.status === "annulled" ? "done" : "skipped"] += 1;
+  }
+
+  return result;
+}
+
+/** Excludes the visitors behind the ticked visits, once each, with the same reason. */
+export async function excludeVisitorsOfCheckIns(request: BulkRequest): Promise<BulkResult> {
+  const { checkInIds, ...rest } = request;
+
+  const checkIns = await getPrisma().checkIn.findMany({
+    where: { id: { in: uniqueTargets(checkInIds) } },
+    select: { visitorId: true },
+  });
+
+  const result = { done: 0, skipped: 0 };
+
+  for (const targetId of new Set(checkIns.map((checkIn) => checkIn.visitorId))) {
+    const outcome = await excludeVisitor({ ...rest, targetId });
+
+    result[outcome.status === "excluded" ? "done" : "skipped"] += 1;
+  }
+
+  return result;
+}
+
+function uniqueTargets(ids: readonly string[]): string[] {
+  return [...new Set(ids)].slice(0, MAX_BULK_TARGETS);
+}
+
 /**
  * Annuls a check-in and, with it, its vote (RF-46): the row stays with its date, reason and who annulled it, and
  * stops counting in visits, tickets, averages and alerts (UT-AD-03). Before the raffle, a ticket whose milestone the

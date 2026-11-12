@@ -1,4 +1,4 @@
-import { parseEventSettingsInput } from "@features/event-settings/lib/event-settings-input";
+import { getRelatedFields, parseEventSettingsInput } from "@features/event-settings/lib/event-settings-input";
 
 // The initial values of section 1.1, as the form sends them: Cancun wall-clock times.
 const VALID = {
@@ -91,5 +91,17 @@ describe("parseEventSettingsInput (RF-43)", () => {
       isValid: false,
       errors: { itchOpensAt: "Escribe una fecha y hora válidas." },
     });
+  });
+});
+
+describe("getRelatedFields", () => {
+  it("is the field itself and the other hour of its pair", () => {
+    expect(getRelatedFields("checkInCutoffAt")).toEqual(["checkInCutoffAt", "checkInCutoffAt", "raffleStartsAt"]);
+    expect(getRelatedFields("raffleStartsAt")).toContain("checkInCutoffAt");
+  });
+
+  it("is only the field when it has no pair", () => {
+    expect(getRelatedFields("itchOpensAt")).toEqual(["itchOpensAt"]);
+    expect(getRelatedFields("fraudTopScoreCount")).toEqual(["fraudTopScoreCount"]);
   });
 });

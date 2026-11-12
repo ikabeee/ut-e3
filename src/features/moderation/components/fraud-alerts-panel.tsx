@@ -1,16 +1,21 @@
 import Link from "next/link";
+import type { ModerationAction } from "@features/moderation/components/reason-action-form";
+import { SelectionModerationForm } from "@features/moderation/components/selection-moderation-form";
+import { buildBurstSelectableVisit } from "@features/moderation/lib/selectable-visit";
 import { MODERATION_COPY } from "@features/moderation/lib/moderation-copy";
 import type { FraudAlerts } from "@features/moderation/lib/types";
 import { formatTimeOfDay } from "@shared/lib/date-time";
 
 interface FraudAlertsPanelProps {
   alerts: FraudAlerts;
+  /** Annuls the ticked visits or excludes their visitors (RF-46). */
+  moderateSelection: ModerationAction;
 }
 
 const COPY = MODERATION_COPY.alerts;
 
 /** The two alerts of possible fraud as text (RF-45); each visitor links to its moderation below. */
-export function FraudAlertsPanel({ alerts }: Readonly<FraudAlertsPanelProps>) {
+export function FraudAlertsPanel({ alerts, moderateSelection }: Readonly<FraudAlertsPanelProps>) {
   const { thresholds } = alerts;
 
   return (
@@ -23,13 +28,13 @@ export function FraudAlertsPanel({ alerts }: Readonly<FraudAlertsPanelProps>) {
           {COPY.thresholds(thresholds.topScoreCount, thresholds.windowMinutes, thresholds.singleVisitMax)}
         </p>
       </div>
-      <BurstList bursts={alerts.bursts} />
+      <BurstList bursts={alerts.bursts} action={moderateSelection} />
       <FewStandList visitors={alerts.fewStandVisitors} total={alerts.fewStandVisitorTotal} />
     </section>
   );
 }
 
-function BurstList({ bursts }: Readonly<{ bursts: FraudAlerts["bursts"] }>) {
+function BurstList({ bursts, action }: Readonly<{ bursts: FraudAlerts["bursts"]; action: ModerationAction }>) {
   return (
     <div className="grid gap-3" data-testid="fraud-bursts">
       <h3 className="type-mono">{COPY.burstsHeading}</h3>
@@ -41,6 +46,14 @@ function BurstList({ bursts }: Readonly<{ bursts: FraudAlerts["bursts"] }>) {
             <li key={burst.standId} role="alert" className="border border-danger p-3 text-sm">
               <strong>{COPY.burst(burst.standCode, burst.count)}</strong>{" "}
               {COPY.burstLapse(formatTimeOfDay(burst.startsAt), formatTimeOfDay(burst.endsAt))}
+              <details className="mt-2">
+                <summary className="min-h-11 cursor-pointer content-center">
+                  {COPY.viewVisitors(burst.visits.length)}
+                </summary>
+                <div className="pt-3">
+                  <SelectionModerationForm visits={burst.visits.map(buildBurstSelectableVisit)} action={action} />
+                </div>
+              </details>
             </li>
           ))}
         </ul>

@@ -53,6 +53,19 @@ const ORDERED_PAIRS: readonly { first: InstantField; second: InstantField; messa
   { first: "checkInCutoffAt", second: "raffleStartsAt", message: ERRORS.cutoffBeforeRaffle },
 ];
 
+/**
+ * The fields whose error goes away when `field` is edited: the field itself and, for an ordered pair, the other hour.
+ * An error such as "the cutoff must be before the raffle" sits on one of them, and fixing either one answers it.
+ */
+export function getRelatedFields(field: string): string[] {
+  const partners = ORDERED_PAIRS.filter((pair) => pair.first === field || pair.second === field).flatMap((pair) => [
+    pair.first,
+    pair.second,
+  ]);
+
+  return [field, ...partners];
+}
+
 /** Reads the form of the panel: Cancun wall-clock times, whole-number thresholds and an optional https URL. */
 export function parseEventSettingsInput(form: FormData): ParsedEventSettings {
   const instants = readInstants(form);

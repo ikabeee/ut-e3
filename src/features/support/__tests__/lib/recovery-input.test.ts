@@ -1,41 +1,50 @@
-import { normalizeFullName, parseRecoveryInput } from "@features/support/lib/recovery-input";
+import { normalizeFullName, parseRecoveryTarget, parseSearchInput } from "@features/support/lib/recovery-input";
 import { SUPPORT_COPY } from "@features/support/lib/support-copy";
 
 const ERRORS = SUPPORT_COPY.recovery.errors;
 
-describe("parseRecoveryInput", () => {
-  it("trims both fields", () => {
-    expect(parseRecoveryInput(createForm("  Ana Pérez ", " Neo_01 "))).toEqual({
-      ok: true,
-      value: { fullName: "Ana Pérez", gamertag: "Neo_01" },
-    });
+describe("parseSearchInput", () => {
+  it("trims the query and collapses repeated spaces", () => {
+    expect(parseSearchInput(createForm({ query: "  Ana   Pérez " }))).toEqual({ ok: true, value: "Ana Pérez" });
   });
 
-  it("asks for the full name", () => {
-    expect(parseRecoveryInput(createForm("  ", "Neo_01"))).toEqual({ ok: false, message: ERRORS.fullNameRequired });
+  it("accepts an email, a gamertag or a name without telling them apart", () => {
+    for (const query of ["ana@gmail.com", "Neo_01", "Ana Pérez"]) {
+      expect(parseSearchInput(createForm({ query }))).toEqual({ ok: true, value: query });
+    }
   });
 
-  it("asks for the gamertag", () => {
-    expect(parseRecoveryInput(createForm("Ana Pérez", ""))).toEqual({ ok: false, message: ERRORS.gamertagRequired });
+  it("asks for something to search", () => {
+    expect(parseSearchInput(createForm({ query: "  " }))).toEqual({ ok: false, message: ERRORS.queryRequired });
   });
 
   it("refuses values far longer than a registration allows", () => {
-    expect(parseRecoveryInput(createForm("a".repeat(121), "Neo_01"))).toEqual({
-      ok: false,
-      message: ERRORS.fieldTooLong,
-    });
-    expect(parseRecoveryInput(createForm("Ana Pérez", "n".repeat(41)))).toEqual({
+    expect(parseSearchInput(createForm({ query: "a".repeat(121) }))).toEqual({
       ok: false,
       message: ERRORS.fieldTooLong,
     });
   });
 
   it("treats a field that arrives as a file as empty", () => {
-    const form = createForm("Ana Pérez", "Neo_01");
+    const form = createForm({});
 
-    form.set("gamertag", new File(["x"], "x.txt"));
+    form.set("query", new File(["x"], "x.txt"));
 
-    expect(parseRecoveryInput(form)).toEqual({ ok: false, message: ERRORS.gamertagRequired });
+    expect(parseSearchInput(form)).toEqual({ ok: false, message: ERRORS.queryRequired });
+  });
+});
+
+describe("parseRecoveryTarget", () => {
+  it("takes the id of the chosen passport", () => {
+    expect(parseRecoveryTarget(createForm({ visitorId: " abc-123 " }))).toEqual({ ok: true, value: "abc-123" });
+  });
+
+  it("asks to choose one when it is missing or absurdly long", () => {
+    expect(parseRecoveryTarget(createForm({}))).toEqual({ ok: false, message: ERRORS.targetRequired });
+    expect(parseRecoveryTarget(createForm({ visitorId: "x".repeat(65) }))).toEqual({
+      ok: false,
+      message: ERRORS.targetRequired,
+    });
   });
 });
 
@@ -46,15 +55,14 @@ describe("normalizeFullName", () => {
   });
 
   it("treats composed and decomposed accents as the same name", () => {
-    expect(normalizeFullName("Ana Pérez")).toBe(normalizeFullName("Ana Pérez"));
+    expect(normalizeFullName("Ana Pérez")).toBe(normalizeFullName("Ana Pérez"));
   });
 });
 
-function createForm(fullName: string, gamertag: string): FormData {
+function createForm(fields: Record<string, string>): FormData {
   const form = new FormData();
 
-  form.set("fullName", fullName);
-  form.set("gamertag", gamertag);
+  for (const [name, value] of Object.entries(fields)) form.set(name, value);
 
   return form;
 }

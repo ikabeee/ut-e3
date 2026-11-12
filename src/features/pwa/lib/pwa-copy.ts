@@ -2,6 +2,13 @@ export const PWA_COPY = {
   offline: {
     title: "Sin conexión",
     description: "Tu teléfono no tiene señal. Aquí está lo último que se guardó.",
+    reconnecting: {
+      title: "Reconectando",
+      checking: "Tenemos red. Comprobando que el servidor responda.",
+      unreachable: "Tenemos red pero no llegamos al servidor, reintentando.",
+    },
+    retry: "Reintentar",
+    retryPending: "Comprobando...",
     noCopyTitle: "Aún no hay una copia guardada",
     noCopy: "Esta página no se guardó en tu teléfono. Vuelve a intentarlo cuando tengas señal.",
     retrying: "Esperando señal: la página se actualiza sola al volver la conexión.",

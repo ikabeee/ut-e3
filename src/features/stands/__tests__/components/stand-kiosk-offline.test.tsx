@@ -7,6 +7,9 @@ import { buildPinFilter, mayBeRegisteredPin, type PinFilter } from "@features/st
 import type { QueuedVisit, QueuedVisitResult } from "@features/stands/lib/visit-queue";
 
 // The PINs the downloaded filter knows; "11111" is not one of them and does not pass it (RF-78).
+// Far from now: the registration is open for the whole test.
+const OPEN_UNTIL = "2999-01-01T00:00:00.000Z";
+
 const REGISTERED = ["12345", "22222", "33333", "44444"];
 
 const UNREGISTERED = "11111";
@@ -163,6 +166,7 @@ function renderKiosk(overrides: Partial<KioskActions> = {}) {
     <StandKiosk
       standCode="ZA-S3"
       gameName="Pixel Quest"
+      closesAt={OPEN_UNTIL}
       actions={actions}
       createStatusLoader={() => async () => "waiting"}
       offlineSupport={support}

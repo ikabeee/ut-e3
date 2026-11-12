@@ -6,8 +6,15 @@ import { signOut } from "@features/accounts/lib/accounts-actions";
 import { SUPPORT_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { requireRecoveryAgent } from "@features/accounts/lib/server/current-account";
 import { RecoveryDesk } from "@features/support/components/recovery-desk";
-import { recoverPassportAction } from "@features/support/lib/support-actions";
+import { RegisterDesk } from "@features/support/components/register-desk";
+import {
+  recoverPassportAction,
+  registerVisitorAtDeskAction,
+  searchPassportsAction,
+} from "@features/support/lib/support-actions";
 import { SUPPORT_COPY } from "@features/support/lib/support-copy";
+import { getEntryWindow } from "@features/tournament/lib/entries-rules";
+import { getEntrySchedule } from "@features/tournament/lib/server/entries-queries";
 
 const COPY = SUPPORT_COPY.recovery;
 
@@ -33,11 +40,18 @@ async function RecoveryPanel() {
   await connection();
 
   const account = await requireRecoveryAgent();
+  const canEnrollInTournament = await isOnsiteSignupOpen();
 
   return (
     <>
       <AccountPageHeader title={COPY.title} signedInAs={COPY.signedInAs(account.name)} signOutAction={signOut} />
-      <RecoveryDesk recover={recoverPassportAction} />
+      <RecoveryDesk search={searchPassportsAction} recover={recoverPassportAction} />
+      <RegisterDesk register={registerVisitorAtDeskAction} canEnrollInTournament={canEnrollInTournament} />
     </>
   );
+}
+
+// The option to enter the visitor in the KOF only exists while the on-site sign-up lasts.
+async function isOnsiteSignupOpen(): Promise<boolean> {
+  return getEntryWindow(await getEntrySchedule(), new Date()) === "onsite";
 }

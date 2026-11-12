@@ -95,7 +95,9 @@ El contenedor se niega a arrancar si faltan `NEXT_PUBLIC_SITE_URL` o `PIN_ENCRYP
 Todos los correos (invitaciones de cuenta, el pasaporte de cada registro, la recuperación por correo y el aviso al
 ganador de la rifa) se guardan primero en la tabla `email_outbox` de la base (RNF-03).
 
-- **Con `SMTP_HOST`** (y `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` y `SMTP_FROM`, las cinco son obligatorias juntas): cada
+- **Con `SMTP_HOST`** (y `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` y `SMTP_FROM`, las cinco son obligatorias juntas; si falta
+  alguna, el servidor no arranca y el log dice cuál. El remitente es `SMTP_FROM`, por ejemplo
+  `UT Game Showcase <no-reply@tu-dominio.mx>`; `EMAIL_FROM` no se lee. El puerto 465 usa TLS directo y los demás, STARTTLS): cada
   correo sale justo después de la petición y un temporizador reintenta cada minuto los que fallaron, con retroceso
   exponencial.
 - **Sin `SMTP_HOST`**: nada sale ni se escribe en el log. Los correos se quedan en `email_outbox` y el temporizador de
