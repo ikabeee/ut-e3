@@ -1,15 +1,4 @@
 export const LANDING_COPY = {
-  nav: {
-    label: "Principal",
-    homeLabel: "UTG, inicio",
-    createPassport: "Crear mi pasaporte",
-    links: {
-      home: "Inicio",
-      games: "Juegos",
-      floorPlan: "Croquis",
-      sponsors: "Patrocinadores",
-    },
-  },
   hero: {
     label: "PIXEL & CODE",
     wordmark: "PIXEL & CODE",

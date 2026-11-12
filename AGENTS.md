@@ -85,7 +85,7 @@ src/
 │   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
 │   ├── admin/                # Panel del sysadmin (/admin y sus secciones), estado del servidor y cierre automático del bracket
 │   ├── moderation/           # Alertas de fraude, anular visitas y excluir visitantes (RF-45, RF-46)
-│   ├── site/                 # Páginas del sitio que no son de un dominio: la 404 (src/app/not-found.tsx)
+│   ├── site/                 # Lo que no es de un dominio: la barra de navegación del layout (site-header) y la 404
 │   ├── raffle/               # Rifa: tómbola en vivo (/raffle/live), ganadores (/raffle) y panel (/admin/raffle)
 │   ├── pwa/                  # PWA: manifest, service worker (public/sw.js), /offline, indicador de conexión e instalación
 │   ├── stands/               # Stands: kiosko (/stand/kiosk), equipo (/stand/team) y alta de stands en /admin

@@ -45,6 +45,12 @@ describe("ShowcaseView", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveAccessibleName("PIXEL & CODE");
   });
 
+  it("renders no navbar of its own: the root layout mounts the site navbar", () => {
+    renderShowcase();
+
+    expect(screen.queryByRole("navigation", { name: "Principal" })).not.toBeInTheDocument();
+  });
+
   it("offers the passport and shows the date and the venue of the event", () => {
     renderShowcase();
 

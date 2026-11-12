@@ -4,6 +4,7 @@ import { makeGames } from "@features/games/__tests__/components/game-test-data";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { LandingView, landingPageMetadata } from "@features/landing/pages/landing-page";
 import type { ScheduleItem } from "@features/schedule/lib/types";
+import { getSiteNavigation } from "@features/site/lib/site-navigation";
 import { PIXEL_FORGE } from "@features/sponsors/__tests__/components/sponsor-test-data";
 import type { Sponsor } from "@features/sponsors/lib/types";
 
@@ -91,42 +92,21 @@ describe("LandingView", () => {
     });
   });
 
-  it("links every navigation entry to a section of the page", () => {
+  it("renders no navbar of its own: the root layout mounts the site navbar", () => {
     renderLanding();
 
-    const navigation = screen.getByRole("navigation");
-    const anchors = Array.from(navigation.querySelectorAll("a[href^='#']"));
+    expect(screen.queryByRole("navigation", { name: "Principal" })).not.toBeInTheDocument();
+  });
+
+  it("has the section of every anchor of the site navbar", () => {
+    renderLanding([PIXEL_FORGE]);
+
+    const anchors = [...getSiteNavigation(false).links, ...getSiteNavigation(true).links].flatMap((link) =>
+      link.href.startsWith("/#") ? [link.href] : [],
+    );
 
     expect(anchors.length).toBeGreaterThan(1);
-    anchors.forEach((anchor) => {
-      const id = anchor.getAttribute("href")?.slice(1) ?? "";
-
-      expect(document.getElementById(id)).not.toBeNull();
-    });
-  });
-
-  it("sends Juegos in the navbar to the games catalog", () => {
-    renderLanding();
-
-    expect(within(screen.getByRole("navigation")).getByRole("link", { name: "Juegos" })).toHaveAttribute(
-      "href",
-      "/games",
-    );
-  });
-
-  it("sends Patrocinadores in the navbar to the sponsors page", () => {
-    renderLanding();
-
-    expect(within(screen.getByRole("navigation")).getByRole("link", { name: "Patrocinadores" })).toHaveAttribute(
-      "href",
-      "/sponsors",
-    );
-  });
-
-  it("keeps the logo linked to the top of the landing", () => {
-    renderLanding();
-
-    expect(screen.getByRole("link", { name: "UTG, inicio" })).toHaveAttribute("href", "#top");
+    anchors.forEach((href) => expect(document.getElementById(href.slice("/#".length))).not.toBeNull());
   });
 
   it("points the call to action to Google Calendar for 20 Nov 2026 from 12:00 to 19:00 in Cancun", () => {
@@ -205,20 +185,6 @@ describe("LandingView with only the landing published", () => {
       <LandingView settings={SETTINGS} games={games} scheduleItems={SCHEDULE} sponsors={[]} isLandingOnly />,
     );
   }
-
-  it("links every navigation entry to a section of the same page", () => {
-    renderLandingOnly();
-
-    const links = within(screen.getByRole("navigation")).getAllByRole("link");
-
-    links.forEach((link) => expect(link.getAttribute("href")).toMatch(/^#/));
-  });
-
-  it("leaves the way home to the logo", () => {
-    renderLandingOnly();
-
-    expect(within(screen.getByRole("navigation")).queryByRole("link", { name: "Inicio" })).not.toBeInTheDocument();
-  });
 
   it("leaves out what needs the passport or is not announced yet: rating, marketplace and special guests", () => {
     renderLandingOnly();
