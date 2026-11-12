@@ -37,6 +37,7 @@ const STAND_ACTIONS: StandsAdminActions = {
   inviteAdmin: inviteStandAdminAction,
   resend: ACCOUNT_ACTIONS.resend,
   disable: ACCOUNT_ACTIONS.disable,
+  reactivate: ACCOUNT_ACTIONS.reactivate,
 };
 
 export function AdminPage() {

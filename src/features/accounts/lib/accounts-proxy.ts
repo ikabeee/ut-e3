@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { LOGIN_PATH } from "@features/accounts/lib/accounts-links";
+import { buildPublicUrl } from "@shared/lib/public-url";
 import { SESSION_COOKIE } from "@shared/lib/session-cookie";
 
 // Optimistic check only (no database in the proxy): the page and every Server Action validate the session again.
@@ -8,5 +9,5 @@ export function redirectWithoutSession(request: NextRequest): NextResponse {
     return NextResponse.next();
   }
 
-  return NextResponse.redirect(new URL(LOGIN_PATH, request.nextUrl));
+  return NextResponse.redirect(buildPublicUrl(LOGIN_PATH, request.nextUrl));
 }

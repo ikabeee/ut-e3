@@ -1,7 +1,9 @@
 "use client";
 
 import { useActionState, useCallback, useMemo, useState } from "react";
+import { useNow } from "@shared/hooks/use-now";
 import { useOnlineStatus } from "@shared/hooks/use-online-status";
+import { formatTimeOfDay } from "@shared/lib/date-time";
 import { createVisitStatusLoader, fetchPinFilter, sendQueuedVisits } from "@features/stands/api/stands-api-client";
 import { KioskPinStep } from "@features/stands/components/kiosk-pin-step";
 import { KioskQueueStatus } from "@features/stands/components/kiosk-queue-status";
@@ -39,6 +41,8 @@ export interface KioskOfflineSupport {
 interface StandKioskProps {
   standCode: string;
   gameName: string;
+  /** ISO hour from which the kiosk records no visits: the PIN is not asked for after it. */
+  closesAt: string;
   actions: KioskActions;
   /** Builds the function that asks how a pending visit is going; a function that does not change between renders. */
   createStatusLoader?: (pendingVisitId: string) => () => Promise<VisitStatus>;
@@ -47,6 +51,7 @@ interface StandKioskProps {
 }
 
 interface KioskRoundProps {
+  isClosed: boolean;
   actions: KioskActions;
   createStatusLoader: (pendingVisitId: string) => () => Promise<VisitStatus>;
   offline: OfflineKiosk;
@@ -57,6 +62,8 @@ type Screen = "waiting" | "answerHere" | "answeredByPhone";
 
 const COPY = STANDS_COPY.kiosk;
 
+const CLOSED_CHECK_MS = 5000;
+
 const BROWSER_OFFLINE_SUPPORT: KioskOfflineSupport = {
   createStore: createIndexedDbVisitQueueStore,
   sendBatch: sendQueuedVisits,
@@ -66,6 +73,7 @@ const BROWSER_OFFLINE_SUPPORT: KioskOfflineSupport = {
 export function StandKiosk({
   standCode,
   gameName,
+  closesAt,
   actions,
   createStatusLoader = createVisitStatusLoader,
   offlineSupport = BROWSER_OFFLINE_SUPPORT,
@@ -73,6 +81,7 @@ export function StandKiosk({
   const [round, setRound] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
   const { isOnline, queue, offline } = useKioskOffline(standCode, offlineSupport);
+  const isClosed = useIsPast(closesAt);
 
   const startNextRound = useCallback((nextNotice?: string) => {
     setRound((current) => current + 1);
@@ -88,13 +97,11 @@ export function StandKiosk({
         phase={queue.phase}
         rejected={queue.rejected}
       />
-      {notice ? (
-        <p role="status" className="m-0 border border-border p-4">
-          {notice}
-        </p>
-      ) : null}
+      {isClosed ? <KioskClosedNotice closesAt={closesAt} /> : null}
+      {notice ? <KioskNotice message={notice} /> : null}
       <KioskRound
         key={round}
+        isClosed={isClosed}
         actions={actions}
         createStatusLoader={createStatusLoader}
         offline={offline}
@@ -102,6 +109,29 @@ export function StandKiosk({
       />
     </section>
   );
+}
+
+function KioskNotice({ message }: Readonly<{ message: string }>) {
+  return (
+    <p role="status" className="m-0 border border-border p-4">
+      {message}
+    </p>
+  );
+}
+
+function KioskClosedNotice({ closesAt }: Readonly<{ closesAt: string }>) {
+  return (
+    <p role="status" className="m-0 w-full max-w-sm border border-danger p-4" data-testid="kiosk-closed">
+      {COPY.closedNotice(formatTimeOfDay(closesAt))}
+    </p>
+  );
+}
+
+// The hour is read in the browser and checked every few seconds, so the notice appears at the cutoff without a reload.
+function useIsPast(instant: string): boolean {
+  const now = useNow(CLOSED_CHECK_MS);
+
+  return now > 0 && now >= Date.parse(instant);
 }
 
 // The queue, the filter and the network status, shared by every round of the kiosk.
@@ -117,7 +147,7 @@ function useKioskOffline(standCode: string, support: KioskOfflineSupport) {
 }
 
 // One visitor, from the PIN to the thanks. A new key gives the next visitor empty screens and empty action states.
-function KioskRound({ actions, createStatusLoader, offline, onFinished }: Readonly<KioskRoundProps>) {
+function KioskRound({ isClosed, actions, createStatusLoader, offline, onFinished }: Readonly<KioskRoundProps>) {
   const requestOrOffline = useRequestOrOffline(actions.requestVisit, offline);
   const [requestState, requestVisit, isRequesting] = useActionState(requestOrOffline, null);
 
@@ -126,12 +156,13 @@ function KioskRound({ actions, createStatusLoader, offline, onFinished }: Readon
   }
 
   if (requestState?.status !== "waiting") {
-    return <KioskPinStep state={requestState} action={requestVisit} isPending={isRequesting} />;
+    return <KioskPinStep state={requestState} action={requestVisit} isPending={isRequesting} isDisabled={isClosed} />;
   }
 
   return (
     <KioskVisit
       visit={requestState}
+      isClosed={isClosed}
       actions={actions}
       createStatusLoader={createStatusLoader}
       offline={offline}

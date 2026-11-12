@@ -26,6 +26,9 @@
     "test:e2e:not-found": "node e2e/not-found.e2e.mjs",
     "test:e2e:stand-admin": "node e2e/stand-admin.e2e.mjs",
     "test:e2e:pwa": "node e2e/pwa.e2e.mjs",
+    "test:e2e:reconnect": "node e2e/reconnect.e2e.mjs",
+    "test:e2e:proxy": "node e2e/proxy.e2e.mjs",
+    "test:e2e:demo": "node e2e/demo.e2e.mjs",
     "test:e2e:raffle": "node e2e/raffle.e2e.mjs",
     "test:e2e:offline-kiosk": "node e2e/offline-kiosk.e2e.mjs",
     "test:e2e:sysadmin-tools": "node e2e/sysadmin-tools.e2e.mjs",
@@ -39,6 +42,7 @@
     "db:seed:stands": "tsx --conditions=react-server prisma/seed-stands.ts",
     "db:seed:support": "tsx --conditions=react-server prisma/seed-support.ts",
     "db:seed:raffle": "tsx --conditions=react-server prisma/seed-raffle.ts",
+    "db:seed:demo": "tsx --conditions=react-server prisma/seed-demo.ts",
     "test:load": "node tools/load/landing-load.mjs"
   },
   "dependencies": {

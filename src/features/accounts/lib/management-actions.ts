@@ -7,9 +7,11 @@ import { failManagement, finishManagement } from "@features/accounts/lib/server/
 import {
   disableAccount,
   inviteAccount,
+  reactivateAccount,
   resendInvitation,
   type InviteResult,
   type ManageFailure,
+  type ReactivateResult,
 } from "@features/accounts/lib/server/invitations";
 import { readFormText } from "@shared/lib/form-data";
 
@@ -59,6 +61,31 @@ export async function disableAccountAction(
   return result.status === "disabled"
     ? finishManagement(OUTCOMES.disabled)
     : failManagement(describeManageFailure(result));
+}
+
+export async function reactivateAccountAction(
+  _previous: ManagementActionState | null,
+  form: FormData,
+): Promise<ManagementActionState> {
+  const actor = await requireAccountManager();
+  const result = await reactivateAccount(actor, readFormText(form, "accountId"), new Date());
+
+  return result.status === "reactivated"
+    ? finishManagement(OUTCOMES.reactivated, result.emailId)
+    : failManagement(describeReactivateFailure(result));
+}
+
+function describeReactivateFailure(result: Exclude<ReactivateResult, { status: "reactivated" }>): string {
+  switch (result.status) {
+    case "standFull":
+      return ERRORS.standFull;
+    case "deskTaken":
+      return ERRORS.deskTaken;
+    case "adminTaken":
+      return ERRORS.adminTaken;
+    default:
+      return describeManageFailure(result);
+  }
 }
 
 function describeInviteFailure(result: Exclude<InviteResult, { status: "invited" }>): string {

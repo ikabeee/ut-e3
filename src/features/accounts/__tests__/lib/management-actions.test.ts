@@ -6,6 +6,7 @@ import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import {
   disableAccountAction,
   inviteAccountAction,
+  reactivateAccountAction,
   resendInvitationAction,
 } from "@features/accounts/lib/management-actions";
 import { getPrisma } from "@shared/lib/server/prisma";
@@ -240,6 +241,62 @@ describe("disableAccountAction", () => {
       digest: expect.stringContaining(";/login;"),
     });
     expect((await getPrisma().account.findUniqueOrThrow({ where: { id: accountIds.helpDesk } })).status).toBe("active");
+  });
+});
+
+describe("reactivateAccountAction", () => {
+  it("sends a new invitation to a disabled account, schedules the email and refreshes", async () => {
+    const accountId = await inviteAs("kofAdmin", { name: "Luis", email: mail("luis"), role: "kof_staff", desk: "1" });
+
+    await disableAccountAction(null, createForm({ accountId }));
+    refresh.mockClear();
+    afterStub.restore();
+    afterStub = stubAfter();
+
+    const state = await reactivateAccountAction(null, createForm({ accountId }));
+
+    expect(state).toEqual({ status: "done", message: OUTCOMES.reactivated });
+    expect((await getPrisma().account.findUniqueOrThrow({ where: { id: accountId } })).status).toBe("invited");
+    expect(afterStub.callbacks).toHaveLength(1);
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("explains that the desk is taken and leaves the account disabled", async () => {
+    const first = await inviteAs("kofAdmin", { name: "A", email: mail("a"), role: "kof_staff", desk: "2" });
+
+    await disableAccountAction(null, createForm({ accountId: first }));
+    await inviteAs("kofAdmin", { name: "B", email: mail("b"), role: "kof_staff", desk: "2" });
+
+    expect(await reactivateAccountAction(null, createForm({ accountId: first }))).toEqual({
+      status: "error",
+      message: ERRORS.deskTaken,
+    });
+    expect((await getPrisma().account.findUniqueOrThrow({ where: { id: first } })).status).toBe("disabled");
+  });
+
+  it("refuses an account that is not disabled and one the actor does not manage", async () => {
+    const adminId = await inviteAs("sysadmin", { name: "Ana", email: mail("ana"), role: "kof_admin" });
+
+    expect(await reactivateAccountAction(null, createForm({ accountId: adminId }))).toEqual({
+      status: "error",
+      message: ERRORS.wrongState,
+    });
+
+    await disableAccountAction(null, createForm({ accountId: adminId }));
+    await signInAs("kofAdmin");
+
+    expect(await reactivateAccountAction(null, createForm({ accountId: adminId }))).toEqual({
+      status: "error",
+      message: ERRORS.forbidden,
+    });
+  });
+
+  it("sends an account that manages nobody to /login", async () => {
+    await signInAs("kofStaff");
+
+    await expect(reactivateAccountAction(null, createForm({ accountId: accountIds.helpDesk }))).rejects.toMatchObject({
+      digest: expect.stringContaining(";/login;"),
+    });
   });
 });
 

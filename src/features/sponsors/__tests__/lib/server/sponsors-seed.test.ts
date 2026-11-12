@@ -25,7 +25,7 @@ beforeEach(async () => {
 const E164 = /^\+\d{8,15}$/;
 
 describe("INITIAL_SPONSORS", () => {
-  it("lists the six sponsors with a logo, in the order of the carousel", () => {
+  it("lists the eight sponsors with a logo, in the order of the carousel", () => {
     expect(INITIAL_SPONSORS.map((sponsor) => sponsor.name)).toEqual([
       "Algorix Insights",
       "Bonavida",
@@ -33,6 +33,8 @@ describe("INITIAL_SPONSORS", () => {
       "Nemo Submarine",
       "OpSET",
       "Le Jardin d'Aurore",
+      "Noxy Digital",
+      "Directrix Studio",
     ]);
   });
 
@@ -50,10 +52,16 @@ describe("INITIAL_SPONSORS", () => {
       { name: "Nemo Submarine", websiteUrl: "https://www.nemoisla.com/", phone: "+19038019083" },
       { name: "OpSET", websiteUrl: "", phone: "+529981878194" },
       { name: "Le Jardin d'Aurore", websiteUrl: "https://www.lejardindaurore.com/", phone: "+529981878194" },
+      { name: "Noxy Digital", websiteUrl: "https://www.noxy.digital/", phone: "+529981725547" },
+      {
+        name: "Directrix Studio",
+        websiteUrl: "https://www.facebook.com/GrupoDirectrixAgenciaCreativa/",
+        phone: "+529981268631",
+      },
     ]);
   });
 
-  it("gives an email only to OpSET and Le Jardin d'Aurore, and stores the others as null", () => {
+  it("gives an email only to OpSET, Le Jardin d'Aurore, Noxy Digital and Directrix Studio, and stores the others as null", () => {
     expect(INITIAL_SPONSORS.map(({ name, email }) => ({ name, email }))).toEqual([
       { name: "Algorix Insights", email: null },
       { name: "Bonavida", email: null },
@@ -61,6 +69,8 @@ describe("INITIAL_SPONSORS", () => {
       { name: "Nemo Submarine", email: null },
       { name: "OpSET", email: "ceo@opset.com.mx" },
       { name: "Le Jardin d'Aurore", email: "contacto@lejardindaurore.com" },
+      { name: "Noxy Digital", email: "info@noxy.digital" },
+      { name: "Directrix Studio", email: "directrixstudio@gmail.com" },
     ]);
   });
 
@@ -70,22 +80,25 @@ describe("INITIAL_SPONSORS", () => {
     expect([opset.websiteUrl, opset.services, jardin.services]).toEqual(["", "", ""]);
   });
 
-  it("gives Le Jardin d'Aurore data that the admin validation accepts (https, E.164, email)", () => {
-    const jardin = INITIAL_SPONSORS.find((sponsor) => sponsor.name === "Le Jardin d'Aurore");
+  it.each([
+    ["Le Jardin d'Aurore", "https://www.lejardindaurore.com/", "+529981878194"],
+    ["Noxy Digital", "https://www.noxy.digital/", "+529981725547"],
+    ["Directrix Studio", "https://www.facebook.com/GrupoDirectrixAgenciaCreativa/", "+529981268631"],
+  ])("gives %s data that the admin validation accepts (https, E.164, email)", (name, websiteUrl, phone) => {
+    const sponsor = INITIAL_SPONSORS.find((candidate) => candidate.name === name);
     const form = new FormData();
 
-    for (const [field, value] of Object.entries({ ...jardin, position: String(jardin?.position) }))
+    for (const [field, value] of Object.entries({ ...sponsor, position: String(sponsor?.position) }))
       form.set(field, value === null ? "" : String(value));
 
-    expect(parseSponsorInput(form)).toMatchObject({
-      isValid: true,
-      sponsor: { websiteUrl: "https://www.lejardindaurore.com/", phone: "+529981878194" },
-    });
+    expect(parseSponsorInput(form)).toMatchObject({ isValid: true, sponsor: { websiteUrl, phone } });
   });
 
   it("describes only Algorix Insights, the only sponsor with a services text", () => {
     expect(INITIAL_SPONSORS.map((sponsor) => sponsor.services)).toEqual([
       "Desarrollo web, agentes de IA y software a medida.",
+      "",
+      "",
       "",
       "",
       "",
@@ -127,6 +140,8 @@ describe("seedSponsors", () => {
       null,
       "ceo@opset.com.mx",
       "contacto@lejardindaurore.com",
+      "info@noxy.digital",
+      "directrixstudio@gmail.com",
     ]);
     expect(rows[4]?.phone).toBe("+529981878194");
   });

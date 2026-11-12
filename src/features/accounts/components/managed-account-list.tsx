@@ -11,25 +11,43 @@ interface ManagedAccountListProps {
   accounts: readonly ManagedAccount[];
   resendAction: ManagementAction;
   disableAction: ManagementAction;
+  /** Optional so a list that cannot reactivate (an older caller) simply does not offer it. */
+  reactivateAction?: ManagementAction;
 }
 
-type RowActions = Pick<ManagedAccountListProps, "resendAction" | "disableAction">;
+type RowActions = Pick<ManagedAccountListProps, "resendAction" | "disableAction" | "reactivateAction">;
 
 const COPY = ACCOUNTS_COPY.management.panel;
 
-export function ManagedAccountList({ accounts, resendAction, disableAction }: Readonly<ManagedAccountListProps>) {
+export function ManagedAccountList({
+  accounts,
+  resendAction,
+  disableAction,
+  reactivateAction,
+}: Readonly<ManagedAccountListProps>) {
   if (accounts.length === 0) return <p className="type-mono text-muted">{COPY.empty}</p>;
 
   return (
     <ul className="m-0 grid list-none gap-3 p-0">
       {accounts.map((account) => (
-        <AccountRow key={account.id} account={account} resendAction={resendAction} disableAction={disableAction} />
+        <AccountRow
+          key={account.id}
+          account={account}
+          resendAction={resendAction}
+          disableAction={disableAction}
+          reactivateAction={reactivateAction}
+        />
       ))}
     </ul>
   );
 }
 
-function AccountRow({ account, resendAction, disableAction }: Readonly<RowActions & { account: ManagedAccount }>) {
+function AccountRow({
+  account,
+  resendAction,
+  disableAction,
+  reactivateAction,
+}: Readonly<RowActions & { account: ManagedAccount }>) {
   return (
     <li className="grid gap-3 border border-border p-4">
       <div className="grid gap-1">
@@ -37,10 +55,20 @@ function AccountRow({ account, resendAction, disableAction }: Readonly<RowAction
         <p className="type-tiny text-muted">{account.email}</p>
         <p className="type-tiny text-muted">{describe(account)}</p>
       </div>
-      {account.status === "invited" && <ResendButton accountId={account.id} action={resendAction} />}
+      {account.status === "invited" && (
+        <ActionButton accountId={account.id} action={resendAction} label={COPY.resend} />
+      )}
       {account.status !== "disabled" && (
         <DisableButton accountId={account.id} name={account.name} action={disableAction} />
       )}
+      {account.status === "disabled" && reactivateAction ? (
+        <ActionButton
+          accountId={account.id}
+          action={reactivateAction}
+          label={COPY.reactivate}
+          hint={COPY.reactivateHint}
+        />
+      ) : null}
     </li>
   );
 }
@@ -61,7 +89,16 @@ function toRoleKey(role: string): keyof typeof COPY.roles {
   return "kof_staff";
 }
 
-function ResendButton({ accountId, action }: Readonly<{ accountId: string; action: ManagementAction }>) {
+interface RowButtonProps {
+  accountId: string;
+  action: ManagementAction;
+  label: string;
+  /** A line under the button that says what pressing it does. */
+  hint?: string;
+}
+
+// A button that sends the id of one account and shows what the server answered under it.
+function ActionButton({ accountId, action, label, hint }: Readonly<RowButtonProps>) {
   const [state, formAction, isPending] = useActionState(action, null);
 
   return (
@@ -78,8 +115,9 @@ function ResendButton({ accountId, action }: Readonly<{ accountId: string; actio
         </p>
       )}
       <Button type="submit" variant="outline" className="min-h-11 justify-self-start" isPending={isPending}>
-        {COPY.resend}
+        {label}
       </Button>
+      {hint ? <p className="m-0 type-tiny text-muted">{hint}</p> : null}
     </form>
   );
 }

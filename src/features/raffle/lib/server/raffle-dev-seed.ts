@@ -1,6 +1,7 @@
 import "server-only";
 import { createMissingDevAccounts } from "@features/accounts/lib/server/dev-accounts";
 import { encryptPin, hashPinForLookup } from "@shared/lib/server/pin-cipher";
+import type { DevSeedOptions } from "@shared/lib/server/dev-seed-options";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 export type RaffleDevEnv = Readonly<Record<string, string | undefined>>;
@@ -40,10 +41,14 @@ const MISSING_SETTINGS = "Seed de la rifa: faltan los horarios del evento. Corre
  * tickets, and the start of the raffle moved to `now` when it is still ahead (the cutoff of check-ins moves a minute
  * before it). The tickets are created without visits. Running it again only adds what is missing.
  */
-export async function seedRaffleDev(env: RaffleDevEnv, now: Date): Promise<RaffleDevSeedResult> {
+export async function seedRaffleDev(
+  env: RaffleDevEnv,
+  now: Date,
+  options: DevSeedOptions = { moveHours: true },
+): Promise<RaffleDevSeedResult> {
   if (env.NODE_ENV === "production") throw new Error(PRODUCTION_REFUSED);
 
-  await openRaffle(now);
+  if (options.moveHours) await openRaffle(now);
 
   const password = env.RAFFLE_DEV_PASSWORD?.trim() || RAFFLE_DEV_DEFAULT_PASSWORD;
   const createdAccounts = await createMissingDevAccounts(RAFFLE_DEV_ACCOUNTS, password);

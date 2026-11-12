@@ -27,6 +27,18 @@ export async function getKioskStand(standId: string): Promise<KioskStand> {
 }
 
 /**
+ * The hour from which the kiosk records no visits: the cutoff of the check-ins (RN-04; the table does not allow the
+ * raffle to start before it). Read from the table because the sysadmin can move it.
+ */
+export async function getVisitClosingTime(): Promise<Date> {
+  const settings = await getPrisma().eventSettings.findUnique({ where: { id: 1 }, select: { checkInCutoffAt: true } });
+
+  if (!settings) throw new Error(STANDS_COPY.kiosk.errors.missingSettings);
+
+  return settings.checkInCutoffAt;
+}
+
+/**
  * Whether a PIN may record a visit at the stand right now. The kiosk asks before showing the survey and the server asks
  * again when the survey arrives, because the Server Action is a public endpoint.
  */

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ConnectionIndicator } from "@features/pwa/components/connection-indicator";
+import { OfflineReconnect } from "@features/pwa/components/offline-reconnect";
 import { OFFLINE_PATH } from "@features/pwa/lib/pwa-links";
 import { PWA_COPY } from "@features/pwa/lib/pwa-copy";
 import { GAMES_PATH } from "@features/games/lib/games-links";
@@ -18,16 +18,13 @@ export const offlinePageMetadata: Metadata = {
 
 /**
  * What the service worker shows when a page cannot be loaded and has no saved copy. If the phone saved the passport it
- * appears here, with its age; the page returns by itself to what the visitor wanted when the network comes back.
+ * appears here, with its age. The page asks the server by itself and returns to what the visitor wanted as soon as it
+ * answers, and a button lets the visitor try again.
  */
 export function OfflinePage() {
   return (
     <main className="page-wrap flex min-h-[calc(100svh-var(--nav-height))] flex-col items-center gap-8 py-16">
-      <header className="flex flex-col items-center gap-2 text-center">
-        <h1 className="type-section">{COPY.title}</h1>
-        <p className="text-muted">{COPY.description}</p>
-        <ConnectionIndicator reconnectTo={PASSPORT_PATH} />
-      </header>
+      <OfflineReconnect reconnectTo={PASSPORT_PATH} />
 
       <OfflinePassport fallback={<NoSavedCopy />} />
     </main>

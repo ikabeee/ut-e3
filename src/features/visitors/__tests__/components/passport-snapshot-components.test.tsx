@@ -57,6 +57,15 @@ describe("ClearPassportSnapshot (RF-18, RF-70)", () => {
 });
 
 describe("OfflinePassport (item 3)", () => {
+  // jsdom always reports a network; these tests are about the phone without one, except the last one.
+  beforeEach(() => {
+    jest.spyOn(window.navigator, "onLine", "get").mockReturnValue(false);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("shows the PIN, the gamertag and the progress that were saved, with how old they are", () => {
     savePassportSnapshot({ passport: PASSPORT, visits: VISITS, now: new Date(SAVED_AT.getTime() - 5 * 60_000) });
 
@@ -82,6 +91,16 @@ describe("OfflinePassport (item 3)", () => {
     });
 
     expect(screen.getByRole("status")).toHaveTextContent("Datos de hace 2 min");
+  });
+
+  it("does not say Sin conexión about the data while the phone has a network", () => {
+    jest.spyOn(window.navigator, "onLine", "get").mockReturnValue(true);
+    savePassportSnapshot({ passport: PASSPORT, visits: VISITS, now: new Date(SAVED_AT.getTime() - 5 * 60_000) });
+
+    render(<OfflinePassport fallback={null} />);
+
+    expect(screen.getByRole("status")).toHaveTextContent("Datos guardados hace 5 min");
+    expect(screen.getByRole("status")).not.toHaveTextContent("Sin conexión");
   });
 
   it("shows the fallback without a saved copy, and never the PIN", () => {

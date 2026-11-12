@@ -1,6 +1,7 @@
 "use client";
 
 import { Description, FieldError, Form, Input, Label, TextField } from "@heroui/react";
+import { useDismissibleErrors } from "@features/event-settings/hooks/use-dismissible-errors";
 import type { EventSettingsFormState } from "@features/event-settings/lib/event-settings-actions";
 import { EVENT_SETTINGS_COPY } from "@features/event-settings/lib/event-settings-copy";
 import {
@@ -46,13 +47,14 @@ const THRESHOLDS: readonly ThresholdField[] = ["fraudTopScoreCount", "fraudWindo
 /** The single row of event_settings as a form (RF-43); a refused save keeps what was typed. */
 export function EventSettingsForm({ settings, action }: Readonly<EventSettingsFormProps>) {
   const { state, formAction, isPending, formRef, handleSubmit } = useActionForm(action, { resetOnDone: false });
+  const { visibleState, validationErrors } = useDismissibleErrors(state, formRef);
 
   return (
     <Form
       ref={formRef}
       action={formAction}
       onSubmit={handleSubmit}
-      validationErrors={state?.status === "error" ? state.errors : undefined}
+      validationErrors={validationErrors}
       className="grid gap-8"
     >
       {INSTANT_GROUPS.map((group) => (
@@ -60,7 +62,7 @@ export function EventSettingsForm({ settings, action }: Readonly<EventSettingsFo
       ))}
       <MarketplaceGroup settings={settings} />
       <ThresholdGroup settings={settings} />
-      <ActionFormFooter state={state} isPending={isPending} copy={{ submit: COPY.save, pending: COPY.saving }} />
+      <ActionFormFooter state={visibleState} isPending={isPending} copy={{ submit: COPY.save, pending: COPY.saving }} />
     </Form>
   );
 }

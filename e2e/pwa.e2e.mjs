@@ -13,7 +13,7 @@
 // override with E2E_SCREENSHOTS_DIR). E2E_KEEP_FILES=1 keeps the database and the server log; they are also kept
 // when a check fails.
 import { spawn, spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, openSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, openSync, readFileSync, rmSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -214,6 +214,7 @@ async function runScenario({ browser, databaseFile, screenshots }) {
     await checkOffline({ phone, database, screenshots, pin });
     await checkNothingSavedWithoutCopy(browser);
     await checkReconnectRetries({ phone, pin });
+    await checkReloadedOfflinePageLeavesWithNetwork({ phone, pin });
     await checkStaffIsNeverStored(desk);
     await checkDeviceReplacement({ phone, desk, browser });
   } finally {
@@ -378,6 +379,14 @@ const VENUE_MAP_REGION = "[role=region][aria-label^='Mapa de la ubicación']";
 // RF-07 and the venue map: it draws the Mapbox tiles online (the build needs NEXT_PUBLIC_MAPBOX_TOKEN, from the
 // environment or .env), the worker never stores them (another origin), and the schematic stays underneath as the fallback.
 async function checkVenueMapOnline(page) {
+  const unavailable = await findVenueMapBlocker();
+
+  if (unavailable) {
+    console.log(`SKIP the venue map tiles: ${unavailable}`);
+
+    return;
+  }
+
   await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
   await page.locator("#venue").scrollIntoViewIfNeeded();
 
@@ -414,6 +423,30 @@ async function checkVenueMapOnline(page) {
   );
 }
 
+// The tiles need the public token (in the environment or in .env, as Next reads it at build) and the network. Without
+// either the step is skipped with a notice: any other failure of the script still fails it.
+async function findVenueMapBlocker() {
+  if (!hasMapboxToken()) return "NEXT_PUBLIC_MAPBOX_TOKEN is not set (environment or .env), so the build draws no map";
+
+  try {
+    await fetch("https://api.mapbox.com/", { method: "HEAD", signal: AbortSignal.timeout(5000) });
+  } catch {
+    return "api.mapbox.com is not reachable from this machine";
+  }
+
+  return null;
+}
+
+function hasMapboxToken() {
+  if (process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.startsWith("pk.")) return true;
+
+  try {
+    return /^NEXT_PUBLIC_MAPBOX_TOKEN=["']?pk\./m.test(readFileSync(path.join(ROOT, ".env"), "utf8"));
+  } catch {
+    return false;
+  }
+}
+
 async function checkIosSteps({ browser, context }) {
   const errors = [];
   const iphone = await openPage({ browser, errors, options: { userAgent: SAFARI_IPHONE } });
@@ -440,6 +473,7 @@ async function checkOffline({ phone, database, screenshots, pin }) {
     "the page says there is no connection",
     await page.getByText("Sin conexión", { exact: true }).first().isVisible(),
   );
+  check("the page offers a Reintentar button", await page.getByRole("button", { name: "Reintentar" }).isVisible());
   await page.screenshot({ path: path.join(screenshots, "pwa-offline-passport.png"), fullPage: true });
 
   await checkOfflinePublicPages({ page, database });
@@ -509,6 +543,18 @@ async function checkReconnectRetries({ phone, pin }) {
   check("with the same PIN", (await page.locator("body").innerText()).includes(pin));
 }
 
+// The worker serves /offline from its cache, so a reload with a network never sees an offline -> online change: the
+// page has to ask the server by itself and leave.
+async function checkReloadedOfflinePageLeavesWithNetwork({ phone, pin }) {
+  const { page } = phone;
+
+  await page.goto(`${BASE_URL}/offline`, { waitUntil: "domcontentloaded" });
+  await page.waitForURL(/\/passport$/, { timeout: UI_TIMEOUT_MS });
+  check("reloading /offline with a network ends at /passport", page.url().endsWith("/passport"), page.url());
+  await page.getByText("En línea", { exact: true }).waitFor({ timeout: UI_TIMEOUT_MS });
+  check("with the same PIN", (await page.locator("body").innerText()).includes(pin));
+}
+
 async function checkStaffIsNeverStored(desk) {
   const { page, context } = desk;
 
@@ -559,9 +605,9 @@ async function checkDeviceReplacement({ phone, desk, browser }) {
 
 async function recoverPassport(page) {
   await page.goto(`${BASE_URL}/support/recovery`, { waitUntil: "networkidle" });
-  await page.getByLabel("Nombre completo").fill(FULL_NAME);
-  await page.getByLabel("Gamertag").fill(GAMERTAG);
-  await page.getByRole("button", { name: "Recuperar pasaporte" }).click();
+  await page.getByLabel("Correo, gamertag o nombre completo").fill(GAMERTAG);
+  await page.getByRole("button", { name: "Buscar pasaporte" }).click();
+  await page.getByRole("button", { name: "Recuperar este pasaporte" }).click();
   await page.getByRole("heading", { name: "Pasaporte recuperado" }).waitFor({ timeout: UI_TIMEOUT_MS });
 }
 

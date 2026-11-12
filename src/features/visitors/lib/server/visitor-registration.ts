@@ -19,7 +19,7 @@ export type RandomPinSource = () => number | string;
 export type RegistrationResult =
   | { status: "blocked" }
   | { status: "gamertagTaken" }
-  | { status: "created"; visitorId: string; deviceToken: string; emailId: string };
+  | { status: "created"; visitorId: string; deviceToken: string; emailId: string; pin: string };
 
 export type UniqueViolationTarget = string[] | string | null | undefined;
 
@@ -36,12 +36,25 @@ interface PrismaUniqueError extends Prisma.PrismaClientKnownRequestError {
   meta?: { target?: UniqueViolationTarget };
 }
 
+/** When the passport is created and who creates it: nobody for a visitor that registers by themselves. */
+interface RegistrationContext {
+  now: Date;
+  registeredById: string | null;
+}
+
 type InsertAttemptOutcome = { kind: "completed"; result: RegistrationResult } | { kind: "retry" };
 
+/**
+ * Creates the passport. `registeredById` is the help-desk account that registers a visitor in person; it goes to the
+ * audit log, and a visitor that registers alone leaves it empty.
+ */
 export async function registerVisitorRecord(
   input: ValidRegistrationInput,
   now: Date = new Date(),
+  registeredById: string | null = null,
 ): Promise<RegistrationResult> {
+  const context: RegistrationContext = { now, registeredById };
+
   try {
     return await getPrisma().$transaction(async (tx) => {
       if (await isEmailBlocked(tx, input.email)) {
@@ -52,7 +65,7 @@ export async function registerVisitorRecord(
         return { status: "gamertagTaken" };
       }
 
-      return insertVisitorRegistration(tx, input, now);
+      return insertVisitorRegistration(tx, input, context);
     });
   } catch (cause) {
     if (isPrismaUniqueViolation(cause)) {
@@ -96,10 +109,10 @@ async function isGamertagTaken(tx: Prisma.TransactionClient, gamertag: string): 
 async function insertVisitorRegistration(
   tx: Prisma.TransactionClient,
   input: ValidRegistrationInput,
-  now: Date,
+  context: RegistrationContext,
 ): Promise<RegistrationResult> {
   for (let attempt = 1; attempt <= MAX_PIN_ATTEMPTS; attempt++) {
-    const outcome = await attemptVisitorInsert(tx, input, now);
+    const outcome = await attemptVisitorInsert(tx, input, context);
 
     if (outcome.kind === "retry") {
       continue;
@@ -114,7 +127,7 @@ async function insertVisitorRegistration(
 async function attemptVisitorInsert(
   tx: Prisma.TransactionClient,
   input: ValidRegistrationInput,
-  now: Date,
+  context: RegistrationContext,
 ): Promise<InsertAttemptOutcome> {
   const { pin, pinLookup, encryptedPin } = await generateUniquePin(tx);
 
@@ -126,11 +139,15 @@ async function attemptVisitorInsert(
         email: input.email,
         pin: encryptedPin,
         pinLookup,
-        createdAt: now,
+        createdAt: context.now,
       },
     });
 
-    const result = await finalizeVisitorRegistration(tx, { id: visitor.id, pin }, input);
+    const result = await finalizeVisitorRegistration(tx, {
+      visitor: { id: visitor.id, pin },
+      input,
+      registeredById: context.registeredById,
+    });
 
     return { kind: "completed", result };
   } catch (cause) {
@@ -171,9 +188,9 @@ function defaultRandomPinSource(): number {
 
 async function finalizeVisitorRegistration(
   tx: Prisma.TransactionClient,
-  visitor: { id: string; pin: string },
-  input: ValidRegistrationInput,
+  created: { visitor: { id: string; pin: string }; input: ValidRegistrationInput; registeredById: string | null },
 ): Promise<RegistrationResult> {
+  const { visitor, input, registeredById } = created;
   const deviceToken = await createVisitorDevice(tx, visitor.id);
   const passportUrl = `${siteConfig.url}${PASSPORT_PATH}`;
 
@@ -183,13 +200,14 @@ async function finalizeVisitorRegistration(
     text: VISITORS_COPY.email.body(visitor.pin, input.gamertag, passportUrl),
   });
 
-  await recordVisitorAudit(tx, visitor.id, input.gamertag);
+  await recordVisitorAudit(tx, { visitorId: visitor.id, gamertag: input.gamertag, registeredById });
 
   return {
     status: "created",
     visitorId: visitor.id,
     deviceToken,
     emailId,
+    pin: visitor.pin,
   };
 }
 
@@ -245,7 +263,10 @@ function isPrismaUniqueViolation(cause: unknown): cause is PrismaUniqueError {
   return cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === "P2002";
 }
 
-async function recordVisitorAudit(tx: Prisma.TransactionClient, visitorId: string, gamertag: string): Promise<void> {
+async function recordVisitorAudit(
+  tx: Prisma.TransactionClient,
+  entry: { visitorId: string; gamertag: string; registeredById: string | null },
+): Promise<void> {
   // SAFETY: recordAudit delegates to Prisma where actorId is optional.
   const recordRegistrationAudit = recordAudit as (
     transaction: Prisma.TransactionClient,
@@ -259,10 +280,10 @@ async function recordVisitorAudit(tx: Prisma.TransactionClient, visitorId: strin
   ) => Promise<void>;
 
   await recordRegistrationAudit(tx, {
-    actorId: null,
+    actorId: entry.registeredById,
     action: "visitor.register",
     entityType: "visitor",
-    entityId: visitorId,
-    detail: { gamertag },
+    entityId: entry.visitorId,
+    detail: entry.registeredById ? { gamertag: entry.gamertag, assisted: true } : { gamertag: entry.gamertag },
   });
 }

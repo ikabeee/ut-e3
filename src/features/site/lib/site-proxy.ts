@@ -3,6 +3,7 @@ import { redirectWithoutSession } from "@features/accounts/lib/accounts-proxy";
 import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { decideSiteAccess, READ_METHODS } from "@features/site/lib/site-access";
 import { STAFF_AREAS } from "@features/site/lib/staff-areas";
+import { buildPublicUrl } from "@shared/lib/public-url";
 import { siteMode, type SiteMode } from "@shared/lib/site-mode";
 
 /** The proxy of every request (src/proxy.ts): first the kill switch, then the session check of the staff areas. */
@@ -15,7 +16,7 @@ export function proxySiteRequest(request: NextRequest, mode: SiteMode): NextResp
 
   switch (decideSiteAccess(mode, { method: request.method, pathname })) {
     case "redirectHome":
-      return NextResponse.redirect(new URL(HOME_PATH, request.nextUrl));
+      return NextResponse.redirect(buildPublicUrl(HOME_PATH, request.nextUrl));
     case "notFound":
       return new NextResponse(null, { status: 404 });
     case "methodNotAllowed":

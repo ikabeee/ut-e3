@@ -9,16 +9,21 @@ const database = createTestDatabase();
 
 process.env.DATABASE_URL = database.url;
 
+// The tests set their own mail server: the SMTP_* of the machine (a real .env) must not reach them.
+const SAVED_SMTP = Object.fromEntries(Object.entries(process.env).filter(([name]) => name.startsWith("SMTP_")));
+
 const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
 
 afterAll(async () => {
-  delete process.env.SMTP_HOST;
+  clearSmtpVariables();
+  Object.assign(process.env, SAVED_SMTP);
   await getPrisma().$disconnect();
   database.remove();
 });
 
 beforeEach(async () => {
   // A host without the rest of the variables: the mailer cannot be built and the delivery fails.
+  clearSmtpVariables();
   process.env.SMTP_HOST = "smtp.ejemplo.com";
   consoleError.mockClear();
   await getPrisma().emailOutbox.deleteMany();
@@ -58,3 +63,8 @@ describe("deliverQueuedEmail", () => {
     expect(row.attempts).toBe(0);
   });
 });
+
+function clearSmtpVariables(): void {
+  for (const name of Object.keys(process.env).filter((variable) => variable.startsWith("SMTP_")))
+    delete process.env[name];
+}
