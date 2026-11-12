@@ -10,5 +10,5 @@ export const SPECIAL_GUESTS: readonly SpecialGuest[] = [
       alt: "Retrato de Ing. Ariana Patricia Tzuc Vázquez",
     },
   },
-  // To bring the second card back, restore: { id: "guest-2", name: "Por anunciar", talk: "Plática por anunciar" },
+  { id: "guest-2", name: "Por anunciar", talk: "Plática por anunciar" },
 ];

@@ -1,50 +1,80 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { SpecialGuests } from "@features/landing/components/special-guests";
 import { SPECIAL_GUESTS } from "@features/landing/lib/special-guests";
 
+const FIRST_GUEST_NAME = "Ing. Ariana Patricia Tzuc Vázquez";
+
+const SECOND_GUEST_NAME = "Por anunciar";
+
+function getBadgeName() {
+  return screen.getByRole("heading", { level: 3 });
+}
+
 describe("SpecialGuests", () => {
-  it("lists one card per guest under the section heading", () => {
+  it("shows the section heading and one badge at a time, starting with the first guest", () => {
     render(<SpecialGuests guests={SPECIAL_GUESTS} />);
 
     expect(screen.getByRole("heading", { level: 2, name: "Invitadas especiales" })).toBeInTheDocument();
-    expect(screen.getAllByRole("listitem")).toHaveLength(1);
-    expect(screen.getAllByText("Plática por anunciar")).toHaveLength(1);
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(1);
+    expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
+    expect(screen.getByText("Plática por anunciar")).toBeInTheDocument();
   });
 
-  it("shows the photo of the guest with its alt text, and no decorative block", () => {
-    const { container } = render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+  it("announces the counter politely", () => {
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+
+    expect(screen.getByText("Pase 01 de 02")).toHaveAttribute("aria-live", "polite");
+  });
+
+  it("moves to the next badge and wraps around to the first one", async () => {
+    const user = userEvent.setup();
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+
+    await user.click(screen.getByRole("button", { name: "Pase siguiente" }));
+
+    expect(getBadgeName()).toHaveTextContent(SECOND_GUEST_NAME);
+    expect(screen.getByText("Pase 02 de 02")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Pase siguiente" }));
+
+    expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
+    expect(screen.getByText("Pase 01 de 02")).toBeInTheDocument();
+  });
+
+  it("moves to the previous badge and wraps around to the last one", async () => {
+    const user = userEvent.setup();
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+
+    await user.click(screen.getByRole("button", { name: "Pase anterior" }));
+
+    expect(getBadgeName()).toHaveTextContent(SECOND_GUEST_NAME);
+    expect(screen.getByText("Pase 02 de 02")).toBeInTheDocument();
+  });
+
+  it("shows the photo of a guest that has one, with its alt text", () => {
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
 
     expect(screen.getByRole("img", { name: SPECIAL_GUESTS[0]?.photo?.alt })).toHaveAttribute(
       "src",
       expect.stringContaining("ponente-1.webp"),
     );
-    expect(container.querySelector('[aria-hidden="true"].bg-paper-rule')).toBeNull();
   });
 
-  it("centers a single card in one column and keeps two columns for two cards", () => {
-    const second = { id: "guest-2", name: "Por anunciar", talk: "Plática por anunciar" };
-    const { rerender } = render(<SpecialGuests guests={SPECIAL_GUESTS} />);
-
-    expect(screen.getByRole("list")).toHaveClass("mx-auto", "grid-cols-1");
-
-    rerender(<SpecialGuests guests={[...SPECIAL_GUESTS, second]} />);
-
-    expect(screen.getAllByRole("listitem")).toHaveLength(2);
-    expect(screen.getByRole("list")).toHaveClass("grid-cols-2");
-  });
-
-  it("shows a plain block, not an image, for a guest without photo", () => {
+  it("shows the placeholder, not an image, for a guest without photo", () => {
     const guest = { id: "guest-9", name: "Ana Pérez", talk: "Diseño de niveles" };
-    const { container } = render(<SpecialGuests guests={[guest]} />);
+    render(<SpecialGuests guests={[guest]} />);
 
     expect(screen.queryByRole("img")).toBeNull();
-    expect(container.querySelector('[aria-hidden="true"].bg-paper-rule')).not.toBeNull();
+    expect(screen.getByText("Por anunciar")).toBeInTheDocument();
   });
 
-  it("does not show the provisional role", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+  it("does not show the controls nor the counter with a single guest", () => {
+    const guest = { id: "guest-9", name: "Ana Pérez", talk: "Diseño de niveles" };
+    render(<SpecialGuests guests={[guest]} />);
 
-    expect(screen.queryByText("Ingeniera invitada")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button")).toBeNull();
+    expect(screen.queryByText(/^Pase \d+ de \d+$/)).toBeNull();
   });
 
   it("shows the role of a guest that has one", () => {

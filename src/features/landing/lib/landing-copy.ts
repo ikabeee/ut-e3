@@ -58,6 +58,10 @@ export const LANDING_COPY = {
   },
   guests: {
     heading: "Invitadas especiales",
+    counter: (current: number, total: number) => `Pase ${toTwoDigits(current)} de ${toTwoDigits(total)}`,
+    previous: "Pase anterior",
+    next: "Pase siguiente",
+    photoPending: "Por anunciar",
   },
   venue: {
     heading: "Ubicación",
@@ -95,3 +99,7 @@ export const LANDING_COPY = {
     details: (division: string) => `Showcase de videojuegos de la ${division}. Entrada libre.`,
   },
 } as const;
+
+function toTwoDigits(value: number) {
+  return String(value).padStart(2, "0");
+}
