@@ -84,6 +84,7 @@ export const RAFFLE_COPY = {
     winnersHeading: "Ganadores",
     fullscreen: "Pantalla completa",
     connectionLost: "Reconectando…",
+    backLink: "Volver a los ganadores",
   },
   winners: {
     title: "Ganadores de la rifa",

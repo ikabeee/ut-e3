@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@heroui/react";
 import { RaffleDrum } from "@features/raffle/components/raffle-drum";
 import { RaffleWinnersList } from "@features/raffle/components/raffle-winners-list";
 import { useFullscreen } from "@features/raffle/hooks/use-fullscreen";
 import { useLiveRaffle, type LiveSnapshotLoader } from "@features/raffle/hooks/use-raffle-snapshot";
 import { RAFFLE_COPY } from "@features/raffle/lib/raffle-copy";
+import { RAFFLE_WINNERS_PATH } from "@features/raffle/lib/raffle-links";
 import type { RaffleLiveSnapshot } from "@features/raffle/lib/types";
 
 interface RaffleLiveScreenProps {
@@ -27,6 +29,7 @@ export function RaffleLiveScreen({ initial, load }: Readonly<RaffleLiveScreenPro
         <h1 className="m-0 type-tiny text-muted">{COPY.title}</h1>
         <div className="flex items-center gap-4">
           {hasConnectionError && <span className="text-sm text-danger">{COPY.connectionLost}</span>}
+          <BackLink />
           {!isFullscreen && (
             <Button variant="tertiary" className="min-h-11" onPress={enter}>
               {COPY.fullscreen}
@@ -44,5 +47,17 @@ export function RaffleLiveScreen({ initial, load }: Readonly<RaffleLiveScreenPro
         </aside>
       </div>
     </div>
+  );
+}
+
+// A discreet way out of the projected screen: small text, always underlined so it needs no hover, with a 44 px target.
+function BackLink() {
+  return (
+    <Link
+      href={RAFFLE_WINNERS_PATH}
+      className="inline-flex min-h-11 items-center text-sm text-muted underline underline-offset-4"
+    >
+      {COPY.backLink}
+    </Link>
   );
 }

@@ -10,17 +10,39 @@ import type { PublicBracket, PublicSnapshot } from "@features/tournament/lib/pub
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import { MATCH_AREAS } from "@features/tournament/lib/tournament-rules";
 import type { MatchArea } from "@features/tournament/lib/types";
+import { formatTimeOfDay } from "@shared/lib/date-time";
+
+interface ExitLink {
+  href: string;
+  label: string;
+}
 
 interface PublicBracketViewProps {
   /** What the server rendered; the page keeps it fresh by polling. */
   initial: PublicSnapshot;
   /** Replaces the request to the public endpoint; the tests use it. */
   load?: PublicSnapshotLoader;
+  /** Check-in and bracket hours from `event_settings`; the page reads them and passes ISO instants. */
+  checkInStartsAt?: string;
+  checkInEndsAt?: string;
+  bracketGeneratesAt?: string;
+  /** Built by the page from `getZoneLink("kof")`, prefixed with the landing path. */
+  kofLink?: ExitLink;
+  /** Built by the page from the schedule section id of the landing. */
+  scheduleLink?: ExitLink;
 }
 
 const COPY = TOURNAMENT_COPY.ui;
 
-export function PublicBracketView({ initial, load }: Readonly<PublicBracketViewProps>) {
+export function PublicBracketView({
+  initial,
+  load,
+  checkInStartsAt,
+  checkInEndsAt,
+  bracketGeneratesAt,
+  kofLink,
+  scheduleLink,
+}: Readonly<PublicBracketViewProps>) {
   const { snapshot, hasConnectionError } = usePublicBracket(initial, load);
 
   return (
@@ -33,9 +55,14 @@ export function PublicBracketView({ initial, load }: Readonly<PublicBracketViewP
       {snapshot.state === "open" ? (
         <OpenBracket bracket={snapshot.bracket} />
       ) : (
-        <p role="status" className="type-mono text-muted">
-          {snapshot.state === "closed" ? COPY.publicBracket.closed : COPY.publicBracket.pending}
-        </p>
+        <ClosedBracket
+          state={snapshot.state}
+          checkInStartsAt={checkInStartsAt}
+          checkInEndsAt={checkInEndsAt}
+          bracketGeneratesAt={bracketGeneratesAt}
+          kofLink={kofLink}
+          scheduleLink={scheduleLink}
+        />
       )}
     </div>
   );
@@ -57,6 +84,85 @@ function OpenBracket({ bracket: latest }: Readonly<{ bracket: PublicBracket }>) 
       <TreeView bracket={bracket} showTree={showTree} playback={current} />
       <ListView bracket={bracket} showTree={showTree} />
     </>
+  );
+}
+
+interface ClosedBracketProps {
+  state: "closed" | "pending";
+  checkInStartsAt?: string;
+  checkInEndsAt?: string;
+  bracketGeneratesAt?: string;
+  kofLink?: ExitLink;
+  scheduleLink?: ExitLink;
+}
+
+function ClosedBracket({
+  state,
+  checkInStartsAt,
+  checkInEndsAt,
+  bracketGeneratesAt,
+  kofLink,
+  scheduleLink,
+}: Readonly<ClosedBracketProps>) {
+  return (
+    <>
+      <p role="status" className="type-mono text-muted">
+        {state === "closed" ? COPY.publicBracket.closed : COPY.publicBracket.pending}
+      </p>
+      <UnpublishedSchedule
+        checkInStartsAt={checkInStartsAt}
+        checkInEndsAt={checkInEndsAt}
+        bracketGeneratesAt={bracketGeneratesAt}
+        kofLink={kofLink}
+        scheduleLink={scheduleLink}
+      />
+    </>
+  );
+}
+
+type ScheduleTimes = Pick<ClosedBracketProps, "checkInStartsAt" | "checkInEndsAt" | "bracketGeneratesAt">;
+
+type ScheduleLinks = Pick<ClosedBracketProps, "kofLink" | "scheduleLink">;
+
+function UnpublishedSchedule({
+  checkInStartsAt,
+  checkInEndsAt,
+  bracketGeneratesAt,
+  kofLink,
+  scheduleLink,
+}: Readonly<ScheduleTimes & ScheduleLinks>) {
+  if (!checkInStartsAt && !checkInEndsAt && !bracketGeneratesAt && !kofLink && !scheduleLink) return null;
+
+  return (
+    <div className="grid gap-3">
+      {checkInStartsAt && checkInEndsAt && (
+        <p className="m-0 text-sm">
+          {COPY.publicBracket.unpublished.checkIn(formatTimeOfDay(checkInStartsAt), formatTimeOfDay(checkInEndsAt))}
+        </p>
+      )}
+      {bracketGeneratesAt && (
+        <p className="m-0 text-sm">{COPY.publicBracket.unpublished.bracket(formatTimeOfDay(bracketGeneratesAt))}</p>
+      )}
+      <ScheduleExits kofLink={kofLink} scheduleLink={scheduleLink} />
+    </div>
+  );
+}
+
+function ScheduleExits({ kofLink, scheduleLink }: Readonly<ScheduleLinks>) {
+  const links = [kofLink, scheduleLink].filter((link): link is ExitLink => link !== undefined);
+
+  if (links.length === 0) return null;
+
+  return (
+    <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
+      {links.map((link) => (
+        <li key={link.href}>
+          <a href={link.href} className="inline-flex min-h-11 items-center border border-border px-3 no-underline">
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
   );
 }
 

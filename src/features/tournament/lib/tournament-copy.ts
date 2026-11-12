@@ -89,6 +89,11 @@ export const TOURNAMENT_COPY = {
         invalid: "La operación no es válida.",
       },
       navLabel: "Ir a un tablero",
+      unpublished: {
+        checkIn: (start: string, end: string) => `El check-in es de ${start} a ${end}.`,
+        bracket: (time: string) => `El bracket se genera a las ${time}.`,
+        scheduleLink: "Cronograma",
+      },
       tree: {
         label: "Bracket en forma de árbol",
         rounds: ["Ronda 1", "Ronda 2", "Ronda 3", "Final de tablero", "Semifinal"],

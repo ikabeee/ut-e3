@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
+import { HOME_PATH } from "@features/landing/lib/landing-links";
+import { SCHEDULE_SECTION_ID } from "@features/schedule/lib/schedule-links";
 import { PublicBracketView } from "@features/tournament/components/public-bracket-view";
 import type { PublicSnapshot } from "@features/tournament/lib/public-bracket";
+import { getEntrySchedule } from "@features/tournament/lib/server/entries-queries";
 import { getPublicSnapshot } from "@features/tournament/lib/server/public-bracket-queries";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import { PUBLIC_BRACKET_PATH } from "@features/tournament/lib/tournament-links";
@@ -32,9 +36,32 @@ export function PublicBracketPage() {
 async function PublicBracket() {
   await connection();
 
-  return <PublicBracketView initial={await loadSnapshot()} />;
+  const [snapshot, schedule] = await Promise.all([loadSnapshot(), getEntrySchedule()]);
+
+  return (
+    <PublicBracketView
+      initial={snapshot}
+      checkInStartsAt={schedule.checkInStartsAt.toISOString()}
+      checkInEndsAt={schedule.checkInEndsAt.toISOString()}
+      bracketGeneratesAt={schedule.bracketGeneratesAt.toISOString()}
+      kofLink={buildKofLink()}
+      scheduleLink={buildScheduleLink()}
+    />
+  );
 }
 
 function loadSnapshot(): Promise<PublicSnapshot> {
   return getPublicSnapshot(new Date());
+}
+
+function buildKofLink() {
+  const zone = getZoneLink("kof");
+
+  if (!zone) return undefined;
+
+  return { href: `${HOME_PATH}${zone.href}`, label: zone.label };
+}
+
+function buildScheduleLink() {
+  return { href: `${HOME_PATH}#${SCHEDULE_SECTION_ID}`, label: COPY.unpublished.scheduleLink };
 }
