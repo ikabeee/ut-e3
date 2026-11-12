@@ -18,7 +18,7 @@ export function SponsorTickets({ sponsors }: Readonly<SponsorTicketsProps>) {
   return (
     <section id={SPONSORS_SECTION_ID} aria-labelledby={HEADING_ID} className="bg-background section-block">
       <div className="page-wrap">
-        <h2 id={HEADING_ID} className="type-giant">
+        <h2 id={HEADING_ID} className="type-wide text-[clamp(24px,7vw,104px)] leading-[.92] tracking-tighter">
           {SPONSORS_COPY.heading}
         </h2>
         <p className="mt-4 text-[17px] text-muted min-[761px]:text-xl">{SPONSORS_COPY.tickets.lead}</p>

@@ -1,4 +1,4 @@
-// End-to-end check of the sponsors page /sponsors and the sponsors carousel of the landing in a real browser:
+// End-to-end check of the sponsors page /sponsors and the sponsor tickets of the landing in a real browser:
 // npm run test:e2e:sponsors
 //
 // Creates its own SQLite database in the system temp dir, seeds it (the sponsors of INITIAL_SPONSORS), starts
@@ -176,7 +176,7 @@ async function runScenario(browser, sponsors, screenshots) {
     await checkWebsiteLinks(session);
     await checkPhoneLinks(session);
     await checkEmailLinks(session);
-    await checkLandingCarousel(session);
+    await checkLandingTickets(session);
     await checkViewports(session);
     await checkNavbarToSponsors(session);
   } finally {
@@ -322,22 +322,19 @@ async function checkEmailLinks(session) {
   );
 }
 
-// SP-05: the landing carousel shows the same sponsors and opens on the first one. Autoplay advances every 6.5 s and a
-// cold compile of / can take longer, so reduced motion (which pauses autoplay) keeps the first slide in place.
-async function checkLandingCarousel(session) {
+// SP-05: the landing shows the same sponsors as raffle tickets, in position order, numbered from Nº 001.
+async function checkLandingTickets(session) {
   const { page, sponsors } = session;
 
-  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
-  const carousel = page.locator("#sponsors");
-  const current = await carousel.getByRole("heading", { level: 2 }).textContent();
-  const slides = await carousel.locator('[aria-roledescription="diapositiva"]').count();
+  const section = page.locator("#sponsors");
+  const names = await section.getByRole("heading", { level: 3 }).allTextContents();
+  const expected = sponsors.map((sponsor) => sponsor.name);
 
-  check("SP-05 landing carousel opens on the first sponsor", current === sponsors[0]?.name, `heading=${current}`);
-  check("SP-05 one slide per sponsor", slides === sponsors.length, `slides=${slides}`);
-  await carousel.scrollIntoViewIfNeeded();
-  await carousel.screenshot({ path: screenshotPath(session, "03-landing-carousel/01-sponsors-section") });
-  await page.emulateMedia({ reducedMotion: null });
+  check("SP-05 one landing ticket per sponsor, in order", names.join("|") === expected.join("|"), names.join(", "));
+  check("SP-05 the first ticket is Nº 001", (await section.getByText("Nº 001").count()) === 1);
+  await section.scrollIntoViewIfNeeded();
+  await section.screenshot({ path: screenshotPath(session, "03-landing-tickets/01-sponsors-section") });
 }
 
 // SP-06: no horizontal scroll and 44x44 px touch targets at phone, landscape and desktop widths.

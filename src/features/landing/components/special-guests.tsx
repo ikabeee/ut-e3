@@ -13,7 +13,9 @@ export function SpecialGuests({ guests }: Readonly<SpecialGuestsProps>) {
     <section id={GUESTS_SECTION_ID} className="section-block">
       <div className="page-wrap">
         <div className="grid gap-y-[clamp(28px,4vw,48px)] min-[820px]:grid-cols-12 min-[820px]:gap-x-gutter">
-          <h2 className="type-giant min-[820px]:col-span-5 min-[820px]:self-end">{LANDING_COPY.guests.heading}</h2>
+          <h2 className="type-giant min-[820px]:col-span-5 min-[820px]:self-end min-[820px]:text-[clamp(32px,4vw,60px)]">
+            {LANDING_COPY.guests.heading}
+          </h2>
           <GuestCarousel guests={guests} />
         </div>
       </div>

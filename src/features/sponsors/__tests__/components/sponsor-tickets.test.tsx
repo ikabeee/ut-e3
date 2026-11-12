@@ -59,4 +59,13 @@ describe("SponsorTickets", () => {
     expect(screen.getByRole("link", { name: "Visitar sitio" })).toHaveAttribute("href", PIXEL_FORGE.websiteUrl);
     expect(screen.getByRole("link", { name: "998 123 4567" })).toHaveAttribute("href", "tel:+529981234567");
   });
+
+  it("opens the website of a ticket in a new tab without sharing the opener", () => {
+    render(<SponsorTickets sponsors={[PIXEL_FORGE]} />);
+
+    const website = screen.getByRole("link", { name: "Visitar sitio" });
+
+    expect(website).toHaveAttribute("target", "_blank");
+    expect(website).toHaveAttribute("rel", "noopener noreferrer");
+  });
 });

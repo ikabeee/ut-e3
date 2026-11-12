@@ -27,7 +27,7 @@ export function SponsorTicket({ sponsor, order }: Readonly<SponsorTicketProps>) 
           <h3 className="type-wide text-[11px] leading-[1.15] wrap-break-word @min-[420px]:text-[13px]">
             {sponsor.name}
           </h3>
-          <SponsorContactLinks sponsor={sponsor} className="flex-col items-start gap-y-0" />
+          <SponsorContactLinks sponsor={sponsor} className="flex-col items-start gap-y-0" isCompact />
         </div>
       </div>
     </article>
