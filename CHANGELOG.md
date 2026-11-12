@@ -36,6 +36,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   los 3 staff por stand, la mesa única de KOF y el administrador único por stand) y queda en la bitácora.
 - `npm run db:seed:demo` crea las cuentas de demo (stands, KOF, atención y rifa) con una sola contraseña (`DEMO_PASSWORD`)
   sin mover los horarios del evento; `-- --open-raffle` abre la rifa ahora. Se niega a correr en producción.
+- Patrocinadores Noxy Digital y Directrix Studio en el seed (logo, correo, teléfono y sitio; de Directrix, su página de
+  Facebook). La seed solo llena la tabla vacía: en una base que ya tiene patrocinadores se agregan desde `/admin`.
+- DON'T PET ME tiene portada y portada horizontal en el seed (ya no muestra la portada genérica).
+- Pruebas e2e nuevas (`test:e2e:demo`, `test:e2e:proxy`, `test:e2e:reconnect`) y un workflow que corre los e2e en los
+  PR hacia main sin ser un check requerido.
 
 ### Corregido
 
