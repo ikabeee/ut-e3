@@ -11,6 +11,12 @@
     --utg-white: #ffffff;
     --utg-light: #f4f4f4;
     --utg-acid: #178fdd;
+    --utg-map-ground: #02050b;
+    --utg-map-building: #070a10;
+    --utg-map-zone: #0d1119;
+    --utg-map-street: #0e121a;
+    --utg-map-line: #161616;
+    --utg-copy-dim: #b0b0b0;
     --utg-blue-1: #68b5e6;
     --utg-blue-2: #3ea1e1;
     --utg-blue-4: #0582d4;
@@ -70,6 +76,13 @@
     --utg-light-muted: #737373;
     --utg-yellow: #fcf94e;
 
+    --utg-map-ground: #02050b;
+    --utg-map-building: #070a10;
+    --utg-map-zone: #0d1119;
+    --utg-map-street: #0e121a;
+    --utg-map-line: #161616;
+    --utg-copy-dim: #b0b0b0;
+
     --utg-light-band: #0d0d0d;
     --utg-light-charcoal: #171717;
     --utg-light-coral: #ef6762;
@@ -128,6 +141,12 @@
   --color-copy-strong: #e4e4e4;
   --color-copy-warm: #c9c8c1;
   --color-copy-dim: #bdbdbd;
+  --color-map-ground: var(--utg-map-ground);
+  --color-map-building: var(--utg-map-building);
+  --color-map-zone: var(--utg-map-zone);
+  --color-map-street: var(--utg-map-street);
+  --color-map-line: var(--utg-map-line);
+  --color-map-copy: var(--utg-copy-dim);
   --color-case-border: var(--utg-case-border);
   --color-case-face: var(--utg-case-face);
 

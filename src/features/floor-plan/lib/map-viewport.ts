@@ -78,6 +78,19 @@ export function centerOn(view: MapView, mapPoint: MapPoint, limits: ViewLimits):
   );
 }
 
+/** From this viewport width the detail is a side card that leaves the markers centered. */
+export const SHEET_BREAKPOINT = 1000;
+
+/**
+ * Limits for centering a focused point: below the breakpoint the detail is a
+ * bottom sheet, so the uncovered area above it becomes the centering space.
+ */
+export function focusLimits(limits: ViewLimits, viewportWidth: number, sheetHeight: number): ViewLimits {
+  if (viewportWidth >= SHEET_BREAKPOINT || sheetHeight <= 0) return limits;
+
+  return { ...limits, viewportHeight: Math.max(1, limits.viewportHeight - sheetHeight) };
+}
+
 /** Below this scale the markers turn into dots and the map shows its zoom hint. */
 export function isCompact(scale: number): boolean {
   return scale < COMPACT_SCALE;

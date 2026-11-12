@@ -6,6 +6,7 @@ import {
   MAX_SCALE,
   centerOn,
   fitView,
+  focusLimits,
   panBy,
   zoomAt,
   type MapPoint,
@@ -25,6 +26,7 @@ const WHEEL_ZOOM_SPEED = 0.0015;
 
 interface UseMapViewportOptions {
   variant: MapVariant;
+  detailRef: RefObject<HTMLElement | null>;
 }
 
 interface MapViewportApi {
@@ -37,7 +39,7 @@ interface MapViewportApi {
 }
 
 /** Owns the pan and zoom of the map: the component only renders the view it returns. */
-export function useMapViewport({ variant }: UseMapViewportOptions): MapViewportApi {
+export function useMapViewport({ variant, detailRef }: UseMapViewportOptions): MapViewportApi {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [viewportSize, setViewportSize] = useState<MapSize>(MAP_SIZE);
   const [view, setView] = useState<MapView>(() => fitView(MAP_SIZE, MAP_SIZE));
@@ -64,8 +66,11 @@ export function useMapViewport({ variant }: UseMapViewportOptions): MapViewportA
   const resetView = useCallback(() => setView(fitView(MAP_SIZE, viewportSize)), [viewportSize]);
 
   const focusPoint = useCallback(
-    (point: MapPoint) => setView((current) => focusOnPoint(current, point, viewportSize)),
-    [viewportSize],
+    (point: MapPoint) =>
+      setView((current) =>
+        focusOnPoint(current, point, { size: viewportSize, sheetHeight: readSheetHeight(detailRef) }),
+      ),
+    [viewportSize, detailRef],
   );
 
   return { view, viewportRef, zoomIn, zoomOut, resetView, focusPoint };
@@ -86,11 +91,20 @@ function viewLimits(size: MapSize): ViewLimits {
   };
 }
 
-function focusOnPoint(view: MapView, point: MapPoint, viewportSize: MapSize): MapView {
-  const limits = viewLimits(viewportSize);
-  const zoomed = zoomToFullScale(view, viewportSize, limits);
+interface FocusArea {
+  size: MapSize;
+  sheetHeight: number;
+}
 
-  return centerOn(zoomed, point, limits);
+function readSheetHeight(ref: RefObject<HTMLElement | null>): number {
+  return ref.current?.getBoundingClientRect().height ?? 0;
+}
+
+function focusOnPoint(view: MapView, point: MapPoint, area: FocusArea): MapView {
+  const limits = viewLimits(area.size);
+  const zoomed = zoomToFullScale(view, area.size, limits);
+
+  return centerOn(zoomed, point, focusLimits(limits, area.size.width, area.sheetHeight));
 }
 
 function zoomToFullScale(view: MapView, viewportSize: MapSize, limits: ViewLimits): MapView {
