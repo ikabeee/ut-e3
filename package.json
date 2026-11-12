@@ -39,6 +39,7 @@
     "db:seed:stands": "tsx --conditions=react-server prisma/seed-stands.ts",
     "db:seed:support": "tsx --conditions=react-server prisma/seed-support.ts",
     "db:seed:raffle": "tsx --conditions=react-server prisma/seed-raffle.ts",
+    "db:seed:demo": "tsx --conditions=react-server prisma/seed-demo.ts",
     "test:load": "node tools/load/landing-load.mjs"
   },
   "dependencies": {

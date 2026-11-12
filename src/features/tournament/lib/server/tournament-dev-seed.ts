@@ -3,6 +3,7 @@ import { createMissingDevAccounts } from "@features/accounts/lib/server/dev-acco
 import type { KofDesk } from "@features/accounts/lib/types";
 import { generateTournament } from "@features/tournament/lib/server/tournament-mutations";
 import type { Player } from "@features/tournament/lib/types";
+import type { DevSeedOptions } from "@shared/lib/server/dev-seed-options";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 export type KofDevEnv = Readonly<Record<string, string | undefined>>;
@@ -16,7 +17,8 @@ interface KofDevAccount {
 
 export interface KofDevSeedResult {
   createdAccounts: string[];
-  bracket: "created" | "alreadyGenerated";
+  /** "notYet": the hour of the bracket has not come and the seed did not move it, so no bracket was generated. */
+  bracket: "created" | "alreadyGenerated" | "notYet";
 }
 
 export const KOF_DEV_ACCOUNTS: readonly KofDevAccount[] = [
@@ -40,16 +42,20 @@ const MISSING_SETTINGS = "Seed de KOF: faltan los horarios del evento. Corre npm
  * Prepares the tournament for a manual test (development only): the three KOF accounts, the bracket hour moved to
  * `now` when it is still ahead, and a bracket of fake players. Running it again only adds what is missing.
  */
-export async function seedKofDev(env: KofDevEnv, now: Date): Promise<KofDevSeedResult> {
+export async function seedKofDev(
+  env: KofDevEnv,
+  now: Date,
+  options: DevSeedOptions = { moveHours: true },
+): Promise<KofDevSeedResult> {
   if (env.NODE_ENV === "production") throw new Error(PRODUCTION_REFUSED);
 
   await requireEventSettings();
 
   const createdAccounts = await createMissingAccounts(env.KOF_DEV_PASSWORD?.trim() || KOF_DEV_DEFAULT_PASSWORD);
 
-  await openBracketHour(now);
+  if (options.moveHours) await openBracketHour(now);
 
-  return { createdAccounts, bracket: await generateDevBracket(now) };
+  return { createdAccounts, bracket: await generateDevBracket(now, options) };
 }
 
 async function requireEventSettings(): Promise<void> {
@@ -70,11 +76,15 @@ async function openBracketHour(now: Date): Promise<void> {
   });
 }
 
-async function generateDevBracket(now: Date): Promise<KofDevSeedResult["bracket"]> {
+async function generateDevBracket(now: Date, options: DevSeedOptions): Promise<KofDevSeedResult["bracket"]> {
   const admin = await getPrisma().account.findUniqueOrThrow({ where: { email: KOF_DEV_ACCOUNTS[0].email } });
   const result = await generateTournament(admin.id, createDevPlayers(), now);
 
-  if (result.status === "tooEarly") throw new Error(MISSING_SETTINGS);
+  if (result.status === "tooEarly") {
+    if (options.moveHours) throw new Error(MISSING_SETTINGS);
+
+    return "notYet";
+  }
 
   return result.status;
 }
