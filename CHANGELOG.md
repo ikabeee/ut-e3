@@ -6,6 +6,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.0.0] - 2026-11-11
+
 ### Agregado
 
 - El mapa de la sede usa el estilo oscuro de Mapbox, con su logo y su crédito. El token público se define al construir
