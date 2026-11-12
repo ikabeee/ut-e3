@@ -11,6 +11,7 @@ export const SITE_COPY = {
       tournament: "Torneo",
     },
     passport: "Mi pasaporte",
+    back: "Volver",
     openMenu: "Abrir menú",
     menuTitle: "Menú",
     closeMenu: "Cerrar menú",

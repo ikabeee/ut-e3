@@ -1,5 +1,6 @@
 import { cn } from "@heroui/react";
 import Link from "next/link";
+import { SiteBackButton } from "@features/site/components/site-back-button";
 import { SiteNavMenu } from "@features/site/components/site-nav-menu";
 import { SITE_COPY } from "@features/site/lib/site-copy";
 import {
@@ -8,6 +9,7 @@ import {
   isSiteNavShown,
   type SiteNavLink,
 } from "@features/site/lib/site-navigation";
+import { isBackShown } from "@features/site/lib/site-back";
 import { UtgLogo } from "@shared/components/utg-logo";
 
 interface SiteNavProps {
@@ -28,6 +30,7 @@ export function SiteNav({ pathname, isLandingOnly = false }: Readonly<SiteNavPro
       aria-label={SITE_COPY.nav.label}
       className="sticky top-0 z-40 box-content flex h-nav items-stretch border-b border-separator bg-background pt-[env(safe-area-inset-top,0px)] pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)]"
     >
+      {isBackShown(pathname, isLandingOnly) && <SiteBackButton pathname={pathname} />}
       <HomeLink href={homeHref} />
       <NavLinkList links={links} currentHref={currentHref} hasMenu={!isLandingOnly} />
       {cta && <NavCta link={cta} isCurrent={cta.href === currentHref} />}
