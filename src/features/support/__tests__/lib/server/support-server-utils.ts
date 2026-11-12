@@ -51,6 +51,7 @@ export async function createStand() {
 // Accounts stay: the audit log is insert-only and keeps a reference to the agent of every entry.
 export async function clearTables(): Promise<void> {
   await getPrisma().tournamentEntry.deleteMany();
+  await getPrisma().checkIn.deleteMany();
   await getPrisma().session.deleteMany();
   await getPrisma().rateLimit.deleteMany();
   await getPrisma().visitorDevice.deleteMany();

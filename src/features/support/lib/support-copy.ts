@@ -5,12 +5,22 @@ export const SUPPORT_COPY = {
     loading: "Cargando la mesa de recuperación…",
     signedInAs: (name: string) => `Sesión de ${name}`,
     form: {
-      heading: "Confirma la identidad del visitante",
-      hint: "Escribe su nombre completo y su gamertag tal como los registró. Recuperar cierra el acceso del teléfono anterior.",
-      fullNameLabel: "Nombre completo",
-      gamertagLabel: "Gamertag",
-      submit: "Recuperar pasaporte",
-      pending: "Recuperando…",
+      heading: "Busca el pasaporte del visitante",
+      hint: "Escribe lo que el visitante recuerde: su correo, su gamertag o su nombre completo. Recuperar cierra el acceso del teléfono anterior.",
+      queryLabel: "Correo, gamertag o nombre completo",
+      submit: "Buscar pasaporte",
+      pending: "Buscando…",
+    },
+    candidates: {
+      heading: "Confirma que es el visitante correcto",
+      hint: "Pídele su gamertag y cuántos stands ha visitado, y compáralos con lo que ves aquí antes de recuperar.",
+      count: (total: number) => (total === 1 ? "1 pasaporte coincide" : `${total} pasaportes coinciden`),
+      gamertag: (gamertag: string) => `Gamertag: ${gamertag}`,
+      email: (email: string) => `Correo: ${email}`,
+      registered: (date: string, time: string) => `Registrado el ${date} a las ${time}`,
+      stands: (total: number) => (total === 1 ? "1 stand visitado" : `${total} stands visitados`),
+      recover: "Recuperar este pasaporte",
+      recovering: "Recuperando…",
     },
     result: {
       heading: "Pasaporte recuperado",
@@ -25,11 +35,12 @@ export const SUPPORT_COPY = {
       newRecovery: "Recuperar otro pasaporte",
     },
     errors: {
-      fullNameRequired: "Escribe el nombre completo del visitante.",
-      gamertagRequired: "Escribe el gamertag del visitante.",
+      queryRequired: "Escribe el correo, el gamertag o el nombre completo del visitante.",
+      targetRequired: "Elige el pasaporte que quieres recuperar.",
       fieldTooLong: "Un dato es demasiado largo; revísalo.",
-      // The same text whether the visitor exists or not, so the desk cannot be used to find out who registered.
-      identityMismatch: "El nombre y el gamertag no coinciden con ningún pasaporte. Revísalos con el visitante.",
+      // The same text whether the data exists or not, so the desk cannot be used to find out who registered.
+      notFound:
+        "No hay ningún pasaporte con ese dato. Pregunta al visitante por otro: su correo, su gamertag o su nombre.",
       agentLimit: "Hiciste demasiadas recuperaciones seguidas. Espera unos minutos.",
       visitorLimit: "Este pasaporte ya se recuperó 3 veces en la última hora. Intenta más tarde o avisa al sysadmin.",
     },

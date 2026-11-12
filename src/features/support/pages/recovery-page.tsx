@@ -7,7 +7,11 @@ import { SUPPORT_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { requireRecoveryAgent } from "@features/accounts/lib/server/current-account";
 import { RecoveryDesk } from "@features/support/components/recovery-desk";
 import { RegisterDesk } from "@features/support/components/register-desk";
-import { recoverPassportAction, registerVisitorAtDeskAction } from "@features/support/lib/support-actions";
+import {
+  recoverPassportAction,
+  registerVisitorAtDeskAction,
+  searchPassportsAction,
+} from "@features/support/lib/support-actions";
 import { SUPPORT_COPY } from "@features/support/lib/support-copy";
 import { getEntryWindow } from "@features/tournament/lib/entries-rules";
 import { getEntrySchedule } from "@features/tournament/lib/server/entries-queries";
@@ -41,7 +45,7 @@ async function RecoveryPanel() {
   return (
     <>
       <AccountPageHeader title={COPY.title} signedInAs={COPY.signedInAs(account.name)} signOutAction={signOut} />
-      <RecoveryDesk recover={recoverPassportAction} />
+      <RecoveryDesk search={searchPassportsAction} recover={recoverPassportAction} />
       <RegisterDesk register={registerVisitorAtDeskAction} canEnrollInTournament={canEnrollInTournament} />
     </>
   );

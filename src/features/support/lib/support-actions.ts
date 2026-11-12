@@ -3,14 +3,14 @@
 import { updateTag } from "next/cache";
 import { after } from "next/server";
 import { requireRecoveryAgent } from "@features/accounts/lib/server/current-account";
-import { parseRecoveryInput } from "@features/support/lib/recovery-input";
+import { parseRecoveryTarget, parseSearchInput } from "@features/support/lib/recovery-input";
 import {
   REGISTRATION_AGENT_RULE,
   registerVisitorAtDesk,
   type DeskRegistrationResult,
   type EnrollmentOutcome,
 } from "@features/support/lib/server/desk-registration";
-import { AGENT_RULE, recoverPassport } from "@features/support/lib/server/passport-recovery";
+import { AGENT_RULE, recoverPassport, searchPassports } from "@features/support/lib/server/passport-recovery";
 import { SUPPORT_COPY } from "@features/support/lib/support-copy";
 import { parseRegistrationInput, type ValidRegistrationInput } from "@features/visitors/lib/registration-input";
 import { VISITOR_PINS_CACHE_TAG } from "@features/visitors/lib/visitor-cache-tags";
@@ -30,12 +30,45 @@ export type RecoveryState =
     }
   | { status: "error"; message: string };
 
+/** A passport the agent can pick; dates are ISO text so the state crosses to the browser. */
+export interface CandidateView {
+  visitorId: string;
+  fullName: string;
+  gamertag: string;
+  maskedEmail: string;
+  registeredAt: string;
+  standsVisited: number;
+}
+
+export type SearchState = { status: "found"; candidates: CandidateView[] } | { status: "error"; message: string };
+
 const ERRORS = SUPPORT_COPY.recovery.errors;
 
 // Server Actions are public endpoints: the session is checked before the form is read.
+export async function searchPassportsAction(_previous: SearchState | null, form: FormData): Promise<SearchState> {
+  const agent = await requireRecoveryAgent();
+  const parsed = parseSearchInput(form);
+
+  if (!parsed.ok) return failure(parsed.message);
+
+  if (!(await consumeAttempt(`recovery-agent:${agent.id}`, AGENT_RULE))) return failure(ERRORS.agentLimit);
+
+  const result = await searchPassports(agent.id, parsed.value);
+
+  if (result.status === "notFound") return failure(ERRORS.notFound);
+
+  return {
+    status: "found",
+    candidates: result.candidates.map((candidate) => ({
+      ...candidate,
+      registeredAt: candidate.registeredAt.toISOString(),
+    })),
+  };
+}
+
 export async function recoverPassportAction(_previous: RecoveryState | null, form: FormData): Promise<RecoveryState> {
   const agent = await requireRecoveryAgent();
-  const parsed = parseRecoveryInput(form);
+  const parsed = parseRecoveryTarget(form);
 
   if (!parsed.ok) return failure(parsed.message);
 
@@ -47,11 +80,11 @@ export async function recoverPassportAction(_previous: RecoveryState | null, for
     return { ...result, registeredAt: result.registeredAt.toISOString() };
   }
 
-  return failure(result.status === "visitorLimit" ? ERRORS.visitorLimit : ERRORS.identityMismatch);
+  return failure(result.status === "visitorLimit" ? ERRORS.visitorLimit : ERRORS.notFound);
 }
 
-function failure(message: string): RecoveryState {
-  return { status: "error", message };
+function failure(message: string) {
+  return { status: "error" as const, message };
 }
 
 export type DeskRegistrationState =

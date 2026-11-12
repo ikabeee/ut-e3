@@ -219,7 +219,7 @@ async function runScenario(browser, databaseFile, screenshots) {
     await loginAs(pages.desk, { email: HELP_DESK_EMAIL, password: HELP_DESK_PASSWORD }, /\/support\/recovery$/);
     await checkWrongIdentity(pages.desk, database);
 
-    const link = await recoverPassport(pages.desk, database, screenshots);
+    const link = await recoverPassport({ page: pages.desk, database, screenshots }, pin);
 
     await checkNewPhoneOpensTheLink(pages.newPhone, link, pin);
     await checkOldPhoneLostAccess(pages.oldPhone);
@@ -263,7 +263,7 @@ async function loginAs(page, { email, password }, landing) {
 }
 
 async function checkWrongIdentity(page, database) {
-  await fillIdentity(page, "Otra Persona", GAMERTAG);
+  await searchPassport(page, "Otra Persona");
   // The route announcer of Next is also an alert, so the message is looked up by its own element.
   const alert = page.locator("p[role=alert]");
 
@@ -271,13 +271,35 @@ async function checkWrongIdentity(page, database) {
 
   const message = await alert.textContent();
 
-  check("a wrong name is refused with the generic message", message.includes("no coinciden con ningún pasaporte"));
+  check("data that matches nothing is refused with the generic message", message.includes("No hay ningún pasaporte"));
   check("and nothing was issued", count(database, "audit_logs", "action = 'passport_recovered'") === 0);
   check("the failed attempt is audited", count(database, "audit_logs", "action = 'passport_recovery_failed'") === 1);
 }
 
-async function recoverPassport(page, database, screenshots) {
-  await fillIdentity(page, FULL_NAME, GAMERTAG);
+async function recoverPassport({ page, database, screenshots }, pin) {
+  // The visitor only remembers the email: the desk shows the data to verify before it hands over an access.
+  await searchPassport(page, "E2E-NEO@example.test");
+
+  const card = page.getByTestId("recovery-candidate");
+
+  await card.waitFor({ timeout: UI_TIMEOUT_MS });
+
+  const cardText = await card.innerText();
+
+  check("the desk shows the gamertag to verify", cardText.includes(`Gamertag: ${GAMERTAG}`), cardText);
+  check("and the number of stands visited", cardText.includes("0 stands visitados"));
+  check(
+    "and the email masked, never complete",
+    cardText.includes("e2***@example.test") && !cardText.includes("e2e-neo@"),
+  );
+  check("and the registration time", /Registrado el \d{2}\.\d{2}\.\d{4} a las /.test(cardText));
+  check("and no PIN", !new RegExp(`\\b${pin}\\b`).test(await page.locator("body").innerText()));
+  check(
+    "no link was issued before the agent confirms",
+    count(database, "audit_logs", "action = 'passport_recovered'") === 0,
+  );
+
+  await card.getByRole("button", { name: "Recuperar este pasaporte" }).click();
   await page.getByRole("heading", { name: "Pasaporte recuperado" }).waitFor({ timeout: UI_TIMEOUT_MS });
 
   const link = await page.getByLabel("Enlace de acceso").inputValue();
@@ -373,12 +395,11 @@ async function checkStandAccountIsRedirected(page) {
   check("a stand staff account is sent back to its kiosk", page.url().endsWith("/stand/kiosk"), page.url());
 }
 
-async function fillIdentity(page, fullName, gamertag) {
-  const form = deskForm(page, "Confirma la identidad del visitante");
+async function searchPassport(page, query) {
+  const form = deskForm(page, "Busca el pasaporte del visitante");
 
-  await form.getByLabel("Nombre completo").fill(fullName);
-  await form.getByLabel("Gamertag").fill(gamertag);
-  await form.getByRole("button", { name: "Recuperar pasaporte" }).click();
+  await form.getByLabel("Correo, gamertag o nombre completo").fill(query);
+  await form.getByRole("button", { name: "Buscar pasaporte" }).click();
 }
 
 // The page holds two forms with the same labels: each one is found by its heading.
