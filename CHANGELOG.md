@@ -33,6 +33,12 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   en horizontal: marcadores circulares con la portada del juego, filtros, detalle sobre el mapa, lista y leyenda. La
   ficha del juego y el bracket enlazan a su marcador y la portada enlaza a "Abrir el croquis". La página se guarda para
   usarla sin conexión.
+- Croquis: el mapa iguala el modelo visual A (fondo casi negro, calles, zonas con borde punteado, etiquetas fijas,
+  pin de acento para el stand seleccionado y tarjeta de detalle).
+- Croquis: las etiquetas de bloque flotan sobre la fila superior de stands y seleccionar un stand o zona en vista
+  compacta centra el mapa y acerca a escala 1 para mostrar el pin de acento.
+- Croquis: en pantallas de menos de 1000 px el punto enfocado se centra en la zona visible sobre la ficha inferior, para
+  que el pin del stand seleccionado no quede tapado por ella.
 
 ### Agregado
 

@@ -4,11 +4,13 @@ interface ZoneCopy {
   kind: string;
   title: string;
   description: string;
+  subline: string | null;
 }
 
 const HELP_CENTER: Omit<ZoneCopy, "title"> = {
   kind: "Atención",
   description: "Dudas, uso de la PWA, rifa y orientación.",
+  subline: "Módulo de ayuda",
 };
 
 const ZONES: Record<ZoneId, ZoneCopy> = {
@@ -16,22 +18,26 @@ const ZONES: Record<ZoneId, ZoneCopy> = {
     kind: "Escenario",
     title: "Escenario principal",
     description: "Inauguración, tercer lugar y final de KOF, presentación de ganadores y rifa.",
+    subline: null,
   },
   kof: {
     kind: "Actividades",
     title: "Arena KOF",
     description: "4 tableros de 16 jugadores. El tercer lugar y la final se juegan en el escenario principal.",
+    subline: null,
   },
   "mario-kart": {
     kind: "Actividades",
     title: "Mario Kart",
     description: "Partidas abiertas, solo informativo.",
+    subline: null,
   },
-  restrooms: { kind: "Servicios", title: "Baños", description: "Baños generales y accesibles." },
+  restrooms: { kind: "Servicios", title: "Baños", description: "Baños generales y accesibles.", subline: null },
   marketplace: {
     kind: "Servicios",
     title: "Marketplace central",
     description: "Mercado local frente al Monumento a la Paz.",
+    subline: "Frente al Monumento a la Paz",
   },
   "help-center-1": { ...HELP_CENTER, title: "Centro de atención 1" },
   "help-center-2": { ...HELP_CENTER, title: "Centro de atención 2" },
@@ -71,6 +77,7 @@ export const FLOOR_PLAN_COPY = {
   drawing: {
     zoneLabels: ZONE_DRAWING_LABELS,
     blockLabels: BLOCK_LABELS,
+    exteriorLabel: "EXTERIOR",
     standLabel: (code: string, title?: string) => (title ? `Stand ${code}, ${title}` : `Stand ${code}`),
   },
   standKicker: (code: string, kind: string) => `Stand ${code} · ${kind}`,

@@ -1,5 +1,6 @@
 import { formatStandCode } from "@features/games/lib/stand-code";
 import {
+  BLOCK_LABEL_SPOTS,
   MAP_EXTERIOR_RECT,
   MAP_HEIGHT,
   MAP_WALL,
@@ -84,6 +85,26 @@ describe("map layout", () => {
 
   it("places the 9 zones at their centers", () => {
     expect(ZONE_MARKERS.map((marker) => [marker.id, marker.x, marker.y])).toEqual(EXPECTED_ZONES);
+  });
+
+  it.each(["T", "C", "A", "D", "B"] as const)(
+    "anchors block %s label on its top marker row at its left edge",
+    (zone) => {
+      const block = STAND_MARKERS.filter((marker) => marker.code.startsWith(`Z${zone}-`));
+      const spot = BLOCK_LABEL_SPOTS.find(([name]) => name === zone);
+
+      expect(spot?.[1]).toBe(Math.min(...block.map((marker) => marker.x)));
+      expect(spot?.[2]).toBe(Math.min(...block.map((marker) => marker.y)));
+    },
+  );
+
+  it("keeps block T label anchor inside the T room between the wall and the divider", () => {
+    const spot = BLOCK_LABEL_SPOTS.find(([name]) => name === "T");
+
+    expect(spot?.[1]).toBeGreaterThanOrEqual(10);
+    expect(spot?.[1]).toBeLessThanOrEqual(292);
+    expect(spot?.[2]).toBeGreaterThanOrEqual(10);
+    expect(spot?.[2]).toBeLessThanOrEqual(156);
   });
 
   it("gives every zone a unique id", () => {

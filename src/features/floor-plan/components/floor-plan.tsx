@@ -1,23 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactElement } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactElement } from "react";
 import { MapDetail } from "@features/floor-plan/components/map-detail";
 import { MapFilters, type FilterCounts } from "@features/floor-plan/components/map-filters";
 import { MapLegend } from "@features/floor-plan/components/map-legend";
 import { MapList } from "@features/floor-plan/components/map-list";
-import { MapViewport } from "@features/floor-plan/components/map-viewport";
+import { MapViewport, type FocusSignal } from "@features/floor-plan/components/map-viewport";
 import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
 import { FLOOR_PLAN_SECTION_ID, getItemIdFromHash } from "@features/floor-plan/lib/floor-plan-links";
 import { STAND_MARKERS, ZONE_MARKERS } from "@features/floor-plan/lib/map-layout";
 import {
   buildMapItems,
   countActivities,
+  countBlocks,
   filterMapItems,
   type MapFilter,
   type MapItem,
 } from "@features/floor-plan/lib/plan-items";
-import type { MapPoint, MapVariant } from "@features/floor-plan/lib/map-viewport";
+import type { MapVariant } from "@features/floor-plan/lib/map-viewport";
 import type { FloorPlanStand } from "@features/floor-plan/lib/types";
 
 export interface FloorPlanProps {
@@ -34,7 +35,7 @@ export function FloorPlan({ stands, variant = "embedded", pageHref }: Readonly<F
   const [listOpen, setListOpen] = useState(false);
   const visibleItems = useMemo(() => filterMapItems(items, filter), [items, filter]);
   const selectedItem = visibleItems.find((item) => item.id === selectedId) ?? null;
-  const focusSignal = useFocusSignal(items, filter, setSelectedId);
+  const { focusSignal, selectItem } = useFocusSignal(items, filter, setSelectedId);
 
   const selectFilter = (next: MapFilter): void => {
     setFilter(next);
@@ -52,10 +53,10 @@ export function FloorPlan({ stands, variant = "embedded", pageHref }: Readonly<F
         variant={variant}
         focusSignal={focusSignal}
         pageHref={pageHref}
-        onSelect={setSelectedId}
+        onSelect={selectItem}
         onCloseDetail={() => setSelectedId(null)}
       />
-      <ListArea listOpen={listOpen} items={visibleItems} onToggle={setListOpen} onSelect={setSelectedId} />
+      <ListArea listOpen={listOpen} items={visibleItems} onToggle={setListOpen} onSelect={selectItem} />
       <MapLegend />
     </>
   );
@@ -76,9 +77,19 @@ interface MapHeaderProps {
 }
 
 function MapHeader({ variant, filter, onSelectFilter }: Readonly<MapHeaderProps>): ReactElement {
-  const filters = <MapFilters active={filter} counts={filterCounts()} onChange={onSelectFilter} />;
+  const counts = filterCounts();
+  const filters = <MapFilters active={filter} counts={counts} onChange={onSelectFilter} />;
 
-  if (variant === "page") return filters;
+  if (variant === "page") {
+    return (
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 min-[1000px]:flex-nowrap min-[1000px]:justify-between">
+        {filters}
+        <p className="type-tiny whitespace-nowrap text-muted">
+          {FLOOR_PLAN_COPY.page.summary(STAND_MARKERS.length, countBlocks(), counts.activities)}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -93,7 +104,7 @@ interface MapAreaProps {
   selectedId: string | null;
   selectedItem: MapItem | null;
   variant: MapVariant;
-  focusSignal: { id: string; point: MapPoint } | null;
+  focusSignal: FocusSignal | null;
   pageHref: string | undefined;
   onSelect: (id: string) => void;
   onCloseDetail: () => void;
@@ -109,6 +120,8 @@ function MapArea({
   onSelect,
   onCloseDetail,
 }: Readonly<MapAreaProps>): ReactElement {
+  const detailRef = useRef<HTMLElement | null>(null);
+
   return (
     <>
       <div className="relative mt-6">
@@ -117,9 +130,12 @@ function MapArea({
           selectedId={selectedId}
           variant={variant}
           focusSignal={focusSignal}
+          detailRef={detailRef}
           onSelect={onSelect}
         />
-        {selectedItem ? <MapDetail item={selectedItem} variant={variant} onClose={onCloseDetail} /> : null}
+        {selectedItem ? (
+          <MapDetail item={selectedItem} variant={variant} detailRef={detailRef} onClose={onCloseDetail} />
+        ) : null}
       </div>
       {pageHref ? (
         <Link
@@ -168,12 +184,17 @@ function filterCounts(): FilterCounts {
   return { stands: STAND_MARKERS.length, activities, services: ZONE_MARKERS.length - activities };
 }
 
+interface FocusSignalState {
+  focusSignal: FocusSignal | null;
+  selectItem: (id: string) => void;
+}
+
 function useFocusSignal(
   items: readonly MapItem[],
   filter: MapFilter,
   setSelectedId: (id: string | null) => void,
-): { id: string; point: MapPoint } | null {
-  const [focusSignal, setFocusSignal] = useState<{ id: string; point: MapPoint } | null>(null);
+): FocusSignalState {
+  const [focusSignal, setFocusSignal] = useState<FocusSignal | null>(null);
 
   useEffect(() => {
     const pickFromHash = () => {
@@ -181,7 +202,7 @@ function useFocusSignal(
 
       if (item && filterMapItems(items, filter).some((candidate) => candidate.id === item.id)) {
         setSelectedId(item.id);
-        setFocusSignal({ id: item.id, point: { x: item.x, y: item.y } });
+        setFocusSignal({ id: item.id, point: { x: item.x, y: item.y }, always: true });
       }
     };
 
@@ -191,5 +212,13 @@ function useFocusSignal(
     return () => window.removeEventListener("hashchange", pickFromHash);
   }, [items, filter, setSelectedId]);
 
-  return focusSignal;
+  const selectItem = (id: string): void => {
+    const item = items.find((candidate) => candidate.id === id);
+
+    setSelectedId(id);
+
+    if (item) setFocusSignal({ id, point: { x: item.x, y: item.y }, always: false });
+  };
+
+  return { focusSignal, selectItem };
 }

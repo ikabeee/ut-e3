@@ -36,17 +36,20 @@ function compactDot(item: MapItem, selected: boolean): ReactElement {
 }
 
 function fullMarker(item: MapItem, selected: boolean): ReactElement {
-  const ring = selected ? "ring-2 ring-accent ring-offset-2 ring-offset-background" : "";
-
   return (
     <>
       <span
         aria-hidden="true"
-        className={`flex size-12 items-center justify-center rounded-full bg-foreground text-background ${ring}`}
+        className={`flex size-12 items-center justify-center rounded-full bg-paper text-background shadow-[0_0_0_4px_rgba(0,0,0,0.65)] ${selected ? "ring-2 ring-accent ring-offset-2 ring-offset-background" : ""}`}
       >
         <ZoneIcon id={zoneIdOf(item)} size={24} />
       </span>
-      <span className="mt-1 bg-background px-1 text-center type-tiny text-muted">{item.shortName}</span>
+      <span className="mt-[7px] text-center font-mono text-[11px] leading-[13px] text-paper uppercase">
+        {item.shortName}
+      </span>
+      {item.subline ? (
+        <span className="mt-0.5 text-center font-mono text-[10px]/3 text-muted">{item.subline}</span>
+      ) : null}
     </>
   );
 }

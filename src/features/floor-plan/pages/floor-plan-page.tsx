@@ -4,8 +4,6 @@ import { FloorPlan } from "@features/floor-plan/components/floor-plan";
 import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
 import { FLOOR_PLAN_PATH } from "@features/floor-plan/lib/floor-plan-links";
 import { toFloorPlanStand } from "@features/floor-plan/lib/floor-plan-stands";
-import { STAND_MARKERS } from "@features/floor-plan/lib/map-layout";
-import { countActivities, countBlocks } from "@features/floor-plan/lib/plan-items";
 import type { FloorPlanStand } from "@features/floor-plan/lib/types";
 import { getGames } from "@features/games/lib/server/games-queries";
 import type { EventVenue } from "@features/landing/lib/types";
@@ -54,9 +52,6 @@ export function FloorPlanPageView({
           {FLOOR_PLAN_COPY.heading}
         </h1>
         <p className="mt-4 max-w-[62ch] text-copy">{PAGE_COPY.lead(venue.building)}</p>
-        <p className="mt-2 type-tiny font-mono text-muted">
-          {PAGE_COPY.summary(STAND_MARKERS.length, countBlocks(), countActivities())}
-        </p>
       </div>
       <FloorPlan stands={stands} variant="page" />
     </main>

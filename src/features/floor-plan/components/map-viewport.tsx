@@ -1,21 +1,29 @@
 "use client";
 
-import { useEffect, type CSSProperties, type ReactElement } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactElement, type RefObject } from "react";
 import { MapControls } from "@features/floor-plan/components/map-controls";
 import { MapDrawing } from "@features/floor-plan/components/map-drawing";
 import { StandMarker } from "@features/floor-plan/components/stand-marker";
 import { ZoneMarker } from "@features/floor-plan/components/zone-marker";
 import { useMapViewport } from "@features/floor-plan/hooks/use-map-viewport";
 import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
-import { MAP_HEIGHT, MAP_WIDTH } from "@features/floor-plan/lib/map-layout";
+import { BLOCK_LABEL_SPOTS, EXTERIOR_LABEL_SPOT, MAP_HEIGHT, MAP_WIDTH } from "@features/floor-plan/lib/map-layout";
 import { isCompact, type MapPoint, type MapVariant, type MapView } from "@features/floor-plan/lib/map-viewport";
 import type { MapItem } from "@features/floor-plan/lib/plan-items";
+
+/** A request to center a map point: hash links always apply, selections only when compact. */
+export interface FocusSignal {
+  id: string;
+  point: MapPoint;
+  always: boolean;
+}
 
 interface MapViewportProps {
   items: readonly MapItem[];
   selectedId: string | null;
   variant: MapVariant;
-  focusSignal: { id: string; point: MapPoint } | null;
+  focusSignal: FocusSignal | null;
+  detailRef: RefObject<HTMLElement | null>;
   onSelect: (id: string) => void;
 }
 
@@ -25,21 +33,26 @@ export function MapViewport({
   selectedId,
   variant,
   focusSignal,
+  detailRef,
   onSelect,
 }: Readonly<MapViewportProps>): ReactElement {
-  const { view, viewportRef, zoomIn, zoomOut, resetView, focusPoint } = useMapViewport({ variant });
+  const { view, viewportRef, zoomIn, zoomOut, resetView, focusPoint } = useMapViewport({ variant, detailRef });
+  const scaleRef = useRef(view.scale);
 
   useEffect(() => {
-    if (focusSignal) focusPoint(focusSignal.point);
+    scaleRef.current = view.scale;
+  }, [view.scale]);
+
+  useEffect(() => {
+    if (focusSignal && (focusSignal.always || isCompact(scaleRef.current))) focusPoint(focusSignal.point);
   }, [focusSignal, focusPoint]);
 
   return (
     <div
       ref={viewportRef}
       data-scale={view.scale}
-      className={`relative -ml-(--gutter) h-[clamp(360px,56svh,640px)] w-[calc(100%+var(--gutter)*2)] overflow-hidden bg-surface min-[1000px]:ml-0 min-[1000px]:aspect-940/600 min-[1000px]:h-auto min-[1000px]:max-h-[85svh] min-[1000px]:w-full min-[1000px]:border min-[1000px]:border-border ${variant === "page" ? "touch-none" : "touch-pan-y"}`}
+      className={`relative -ml-(--gutter) h-[clamp(360px,56svh,640px)] w-[calc(100%+var(--gutter)*2)] overflow-hidden bg-map-ground min-[1000px]:ml-0 min-[1000px]:aspect-940/600 min-[1000px]:h-auto min-[1000px]:max-h-[85svh] min-[1000px]:w-full min-[1000px]:border min-[1000px]:border-separator ${variant === "page" ? "touch-none" : "touch-pan-y"}`}
     >
-      <div aria-hidden="true" className="absolute inset-0" style={groundPatternStyle()} />
       <svg
         viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
         role="group"
@@ -49,13 +62,44 @@ export function MapViewport({
       >
         <MapDrawing />
       </svg>
+      <LabelsLayer view={view} />
       <MarkersLayer items={items} view={view} selectedId={selectedId} onSelect={onSelect} />
       {isCompact(view.scale) ? <CompactHint /> : null}
-      <div className="absolute right-3 bottom-3">
+      <div className="absolute top-1/3 right-3 min-[1000px]:top-auto min-[1000px]:right-6 min-[1000px]:bottom-6">
         <MapControls onZoomIn={zoomIn} onZoomOut={zoomOut} onRecenter={resetView} />
       </div>
     </div>
   );
+}
+
+/** Block and exterior labels in fixed screen size, floating over the scaled drawing. */
+function LabelsLayer({ view }: Readonly<{ view: MapView }>): ReactElement {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+      {BLOCK_LABEL_SPOTS.map(([zone, x, y]) => (
+        <span key={zone} style={labelPosition(x, y, view)} className={blockLabelClass()}>
+          {FLOOR_PLAN_COPY.drawing.blockLabels[zone]}
+        </span>
+      ))}
+      <span style={labelPosition(EXTERIOR_LABEL_SPOT[0], EXTERIOR_LABEL_SPOT[1], view)} className={labelClass()}>
+        {FLOOR_PLAN_COPY.drawing.exteriorLabel}
+      </span>
+    </div>
+  );
+}
+
+function blockLabelClass(): string {
+  // Lifts the label bottom 12 px above the marker circle top: 26 px radius + 12 px on
+  // phones, 28 px radius + 12 px from 1000 px up, mirroring the marker sizes.
+  return `${labelClass()} -translate-y-[calc(100%+38px)] min-[1000px]:-translate-y-[calc(100%+40px)]`;
+}
+
+function labelClass(): string {
+  return "absolute font-mono text-[11px] font-medium tracking-[0.18em] text-muted uppercase";
+}
+
+function labelPosition(x: number, y: number, view: MapView): CSSProperties {
+  return { left: x * view.scale + view.x, top: y * view.scale + view.y };
 }
 
 interface MarkersLayerProps {
@@ -115,19 +159,5 @@ function drawingStyle(view: MapView): CSSProperties {
     width: MAP_WIDTH * view.scale,
     height: MAP_HEIGHT * view.scale,
     transform: `translate(${view.x}px, ${view.y}px)`,
-  };
-}
-
-/** Faint street lines over the map ground, reaching past the building like the mockups. */
-function groundPatternStyle(): CSSProperties {
-  const thin = "color-mix(in srgb, var(--border) 55%, transparent)";
-  const avenue = "color-mix(in srgb, var(--border) 85%, transparent)";
-
-  return {
-    backgroundImage: [
-      `repeating-linear-gradient(to right, transparent 0 86px, ${thin} 86px 87px)`,
-      `repeating-linear-gradient(to bottom, transparent 0 86px, ${thin} 86px 87px)`,
-      `repeating-linear-gradient(115deg, transparent 0 298px, ${avenue} 298px 312px)`,
-    ].join(", "),
   };
 }

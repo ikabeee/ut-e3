@@ -17,6 +17,7 @@ export interface MapItem {
   coverSrc: string | null;
   coverAlt: string;
   shortName: string;
+  subline: string | null;
   blockLabel: string | null;
   standNumber: number | null;
   blockSize: number;
@@ -96,12 +97,7 @@ function emptyStandItem(code: string, placement: StandPlacement): MapItem {
     slug: null,
     coverSrc: null,
     coverAlt: "",
-    shortName: code,
-    blockLabel: placement.parsed.blockLabel,
-    standNumber: placement.parsed.number,
-    blockSize: placement.parsed.blockSize,
-    x: placement.position.x,
-    y: placement.position.y,
+    ...sharedStandFields(code, placement),
   };
 }
 
@@ -118,7 +114,25 @@ function gameStandItem(code: string, stand: FloorPlanStand, placement: StandPlac
     slug: stand.slug,
     coverSrc: stand.coverSrc,
     coverAlt: stand.coverAlt,
+    ...sharedStandFields(code, placement),
+  };
+}
+
+interface SharedStandFields {
+  shortName: string;
+  subline: null;
+  blockLabel: string | null;
+  standNumber: number | null;
+  blockSize: number;
+  x: number;
+  y: number;
+}
+
+/** The plan fields every stand cell carries, with or without an assigned game. */
+function sharedStandFields(code: string, placement: StandPlacement): SharedStandFields {
+  return {
     shortName: code,
+    subline: null,
     blockLabel: placement.parsed.blockLabel,
     standNumber: placement.parsed.number,
     blockSize: placement.parsed.blockSize,
@@ -147,6 +161,7 @@ function buildZoneItem(id: string): MapItem {
     coverAlt: "",
     // SAFETY: same zone id as above, a key of the drawing labels.
     shortName: FLOOR_PLAN_COPY.drawing.zoneLabels[id as ZoneId],
+    subline: zone.subline,
     blockLabel: null,
     standNumber: null,
     blockSize: 0,
