@@ -9,7 +9,7 @@ import { StandAdminNav } from "@features/stands/components/stand-admin-nav";
 import { StandKiosk, type KioskActions } from "@features/stands/components/stand-kiosk";
 import { cancelVisitAction, requestVisitAction, submitVisitAction } from "@features/stands/lib/stands-actions";
 import { STANDS_COPY } from "@features/stands/lib/stands-copy";
-import { getKioskStand } from "@features/stands/lib/server/visit-queries";
+import { getKioskStand, getVisitClosingTime } from "@features/stands/lib/server/visit-queries";
 
 const COPY = STANDS_COPY.kiosk;
 
@@ -42,13 +42,19 @@ async function KioskPanel() {
 
   const account = await requireStandAccount();
   const stand = await getKioskStand(account.standId);
+  const closesAt = await getVisitClosingTime();
 
   return (
     <>
       <AccountPageHeader title={COPY.title} signedInAs={COPY.signedInAs(account.name)} signOutAction={signOut} />
       {account.role === "stand_admin" && <StandAdminNav />}
       {stand.gameName ? (
-        <StandKiosk standCode={stand.code} gameName={stand.gameName} actions={KIOSK_ACTIONS} />
+        <StandKiosk
+          standCode={stand.code}
+          gameName={stand.gameName}
+          closesAt={closesAt.toISOString()}
+          actions={KIOSK_ACTIONS}
+        />
       ) : (
         <p role="status" className="m-0 border border-border p-6 text-lg">
           {COPY.noGame}

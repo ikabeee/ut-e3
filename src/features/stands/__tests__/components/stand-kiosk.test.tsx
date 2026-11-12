@@ -3,7 +3,11 @@ import userEvent from "@testing-library/user-event";
 import { createMemoryVisitQueueStore } from "@features/stands/__tests__/lib/visit-queue-utils";
 import { StandKiosk, type KioskActions, type KioskOfflineSupport } from "@features/stands/components/stand-kiosk";
 import type { VisitStatus } from "@features/stands/lib/pending-visit";
+import { formatTimeOfDay } from "@shared/lib/date-time";
 import type { RequestVisitState, VisitActionState } from "@features/stands/lib/stands-actions";
+
+// Far from now: the registration is open for the whole test.
+const OPEN_UNTIL = "2999-01-01T00:00:00.000Z";
 
 const SENT_SURVEYS: FormData[] = [];
 
@@ -23,6 +27,39 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.useRealTimers();
+});
+
+describe("StandKiosk with the registration closed", () => {
+  it("warns at the top with the hour of the cutoff and does not ask for the PIN", () => {
+    renderKiosk({}, new Date(Date.now() - 60_000).toISOString());
+
+    expect(screen.getByTestId("kiosk-closed")).toHaveTextContent(
+      `El registro de visitas cerró a las ${formatTimeOfDay(new Date(Date.now() - 60_000).toISOString())}.`,
+    );
+    expect(screen.getByLabelText("PIN de 5 dígitos")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Continuar" })).toBeDisabled();
+  });
+
+  it("shows no warning and keeps the form usable while the registration is open", () => {
+    renderKiosk();
+
+    expect(screen.queryByTestId("kiosk-closed")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("PIN de 5 dígitos")).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Continuar" })).toBeEnabled();
+  });
+
+  it("closes by itself when the cutoff arrives while the kiosk is open", () => {
+    renderKiosk({}, new Date(Date.now() + 8000).toISOString());
+
+    expect(screen.queryByTestId("kiosk-closed")).not.toBeInTheDocument();
+
+    act(() => {
+      jest.advanceTimersByTime(15_000);
+    });
+
+    expect(screen.getByTestId("kiosk-closed")).toBeInTheDocument();
+    expect(screen.getByLabelText("PIN de 5 dígitos")).toBeDisabled();
+  });
 });
 
 describe("StandKiosk", () => {
@@ -174,7 +211,7 @@ describe("StandKiosk", () => {
   });
 });
 
-function renderKiosk(overrides: Partial<KioskActions> = {}) {
+function renderKiosk(overrides: Partial<KioskActions> = {}, closesAt: string = OPEN_UNTIL) {
   const actions: KioskActions = {
     requestVisit: async (_previous: RequestVisitState | null, form: FormData) => ({
       status: "waiting",
@@ -196,6 +233,7 @@ function renderKiosk(overrides: Partial<KioskActions> = {}) {
     <StandKiosk
       standCode="ZA-S1"
       gameName="Pixel Quest"
+      closesAt={closesAt}
       actions={actions}
       createStatusLoader={createStatusLoader}
       offlineSupport={OFFLINE_SUPPORT}
