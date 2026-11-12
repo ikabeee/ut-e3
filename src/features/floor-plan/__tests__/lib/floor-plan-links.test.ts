@@ -15,9 +15,7 @@ describe("floor plan links", () => {
     ["kof", "Arena KOF"],
     ["mario-kart", "Mario Kart"],
     ["restrooms", "Baños"],
-    ["rear-marketplace", "Marketplace trasero"],
     ["marketplace", "Marketplace central"],
-    ["cafeteria", "Cafetería externa"],
     ["help-center-1", "Centro de atención 1"],
   ])("links the %s zone to its place in the croquis", (zoneId, title) => {
     expect(getZoneLink(zoneId)).toEqual({ href: `#floor-plan-${zoneId}`, label: title });
@@ -32,5 +30,10 @@ describe("floor plan links", () => {
     expect(getZoneLink("entrance")).toBeNull();
     expect(getZoneLink("rest-area")).toBeNull();
     expect(getZoneLink("help-desk")).toBeNull();
+  });
+
+  it("returns null for the rear marketplace and the cafeteria, which left the croquis", () => {
+    expect(getZoneLink("rear-marketplace")).toBeNull();
+    expect(getZoneLink("cafeteria")).toBeNull();
   });
 });

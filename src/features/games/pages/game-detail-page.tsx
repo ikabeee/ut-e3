@@ -13,10 +13,8 @@ import { getRelatedGames } from "@features/games/lib/related-games";
 import { getGameBySlug, getGames } from "@features/games/lib/server/games-queries";
 import { formatStandCode } from "@features/games/lib/stand-code";
 import type { Game, GameDetailLinks, GameEventLabels } from "@features/games/lib/types";
-import { SiteNav } from "@features/landing/components/site-nav";
 import { buildEventCalendarUrl } from "@features/landing/lib/calendar-link";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
-import { HOME_NAV_LINKS } from "@features/landing/lib/home-nav-links";
 import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
 import { buildOpenGraph } from "@shared/lib/metadata";
@@ -57,12 +55,9 @@ function siteShareImages() {
 // slug then streams the not-found page with noindex; its first visit answers 200, later ones 404 (S4, L7).
 export function GameDetailPage({ params }: PageProps<"/games/[slug]">) {
   return (
-    <>
-      <SiteNav homeHref={HOME_PATH} links={HOME_NAV_LINKS} />
-      <Suspense fallback={null}>
-        <GameDetailContent params={params} />
-      </Suspense>
-    </>
+    <Suspense fallback={null}>
+      <GameDetailContent params={params} />
+    </Suspense>
   );
 }
 

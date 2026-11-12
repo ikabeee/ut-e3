@@ -1,5 +1,5 @@
 import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
-import { getStandCells, PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
+import { getStandCells, PLAN_LAYOUT } from "@features/floor-plan/lib/plan-layouts";
 import {
   ZONE_IDS,
   type FloorPlanStand,
@@ -14,9 +14,7 @@ const ZONE_CATEGORIES: Record<ZoneId, PlanCategory> = {
   kof: "act",
   "mario-kart": "act",
   restrooms: "srv",
-  "rear-marketplace": "srv",
   marketplace: "srv",
-  cafeteria: "srv",
   "help-center-1": "info",
   "help-center-2": "info",
   "help-center-3": "info",
@@ -25,7 +23,7 @@ const ZONE_CATEGORIES: Record<ZoneId, PlanCategory> = {
 
 export function buildPlanItems(stands: readonly FloorPlanStand[]): PlanItem[] {
   const standsByCode = new Map(stands.map((stand) => [stand.code, stand]));
-  const cells = PLAN_LAYOUTS.wide.standBlocks.flatMap(getStandCells);
+  const cells = PLAN_LAYOUT.standBlocks.flatMap(getStandCells);
   const standItems = cells.map((cell) => buildTeamItem(cell, standsByCode.get(cell.code)));
 
   return [...standItems, ...ZONE_IDS.map(buildZoneItem)];

@@ -6,6 +6,22 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Cambiado
+
+- Invitadas especiales: cada invitada es un gafete del evento en un carrusel, con cinta, contador "Pase 01 de 02" y
+  botones anterior y siguiente. El gafete cae colgando de la cinta al aparecer, entra columpiándose al cambiar de pase y
+  se mece en reposo; con movimiento reducido no se anima. Vuelve la segunda invitada "Por anunciar".
+- Patrocinadores: en la portada y en `/showcase` cada patrocinador es un boleto de rifa con talón numerado (Nº 001),
+  perforación, el logo a color y sus contactos, con "Gracias a quienes hacen posible el evento." bajo el título. Los
+  logos ocupan la misma área visual aunque tengan proporciones distintas. Se retira el carrusel de patrocinadores.
+- Croquis: es vertical en todas las pantallas; en escritorio el panel queda fijo a su lado. Se quitan el Marketplace
+  trasero y la Cafetería externa.
+- Una sola barra de navegación para todo el sitio público (antes cada página traía la suya y el pasaporte, el registro,
+  la rifa y el torneo no tenían): Inicio, Juegos, Croquis, Patrocinadores, Rifa, Torneo y "Mi pasaporte". En el
+  teléfono los enlaces van en un menú. No aparece en el panel del staff, el kiosco, la mesa de atención ni la tómbola en
+  vivo, y con `SITE_MODE=landing` conserva solo las anclas de la portada.
+- `/sponsors` muestra los mismos boletos de rifa que la portada, con los servicios de cada patrocinador.
+
 ## [1.0.0] - 2026-11-11
 
 ### Agregado

@@ -2,10 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { redirectWithoutSession } from "@features/accounts/lib/accounts-proxy";
 import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { decideSiteAccess, READ_METHODS } from "@features/site/lib/site-access";
+import { STAFF_AREAS } from "@features/site/lib/staff-areas";
 import { siteMode, type SiteMode } from "@shared/lib/site-mode";
-
-// The staff areas: the proxy only checks that a session cookie exists, and the page checks the session itself.
-const STAFF_AREAS = ["/admin", "/stand", "/support"];
 
 /** The proxy of every request (src/proxy.ts): first the kill switch, then the session check of the staff areas. */
 export function proxy(request: NextRequest): NextResponse {

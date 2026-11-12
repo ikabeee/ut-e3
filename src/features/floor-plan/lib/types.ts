@@ -13,9 +13,7 @@ export const ZONE_IDS = [
   "kof",
   "mario-kart",
   "restrooms",
-  "rear-marketplace",
   "marketplace",
-  "cafeteria",
   "help-center-1",
   "help-center-2",
   "help-center-3",
@@ -27,8 +25,6 @@ export type ZoneId = (typeof ZONE_IDS)[number];
 export const PLAN_CATEGORIES = ["team", "info", "act", "srv"] as const;
 
 export type PlanCategory = (typeof PLAN_CATEGORIES)[number];
-
-export type PlanOrientation = "wide" | "tall";
 
 export type PlanRect = readonly [number, number, number, number];
 

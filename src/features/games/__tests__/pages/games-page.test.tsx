@@ -36,13 +36,10 @@ describe("GamesView", () => {
     expect(featured.getByRole("heading", { level: 2 })).toHaveTextContent("Juego 01");
   });
 
-  it("shows the site navbar with Inicio and Juegos", () => {
+  it("renders no navbar of its own: the root layout mounts the site navbar", () => {
     renderView();
 
-    const navigation = within(screen.getByRole("navigation", { name: "Principal" }));
-
-    expect(navigation.getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
-    expect(navigation.getByRole("link", { name: "Juegos" })).toHaveAttribute("href", "/games");
+    expect(screen.queryByRole("navigation", { name: "Principal" })).not.toBeInTheDocument();
   });
 
   it("filters the catalog by the genre of the URL", () => {
