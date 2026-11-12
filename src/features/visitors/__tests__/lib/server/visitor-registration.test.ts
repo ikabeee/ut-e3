@@ -46,6 +46,7 @@ describe("registerVisitorRecord", () => {
       visitorId: expect.any(String),
       deviceToken: expect.any(String),
       emailId: expect.any(String),
+      pin: expect.stringMatching(/^\d{5}$/),
     });
 
     if (result.status !== "created") return;

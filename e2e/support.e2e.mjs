@@ -199,6 +199,7 @@ async function runScenario(browser, databaseFile, screenshots) {
     newPhone: await browser.newContext({ viewport: { width: 360, height: 740 } }),
     desk: await browser.newContext({ viewport: { width: 1024, height: 768 } }),
     stand: await browser.newContext({ viewport: { width: 1024, height: 768 } }),
+    walkIn: await browser.newContext({ viewport: { width: 360, height: 740 } }),
   };
 
   const pages = {};
@@ -222,6 +223,7 @@ async function runScenario(browser, databaseFile, screenshots) {
 
     await checkNewPhoneOpensTheLink(pages.newPhone, link, pin);
     await checkOldPhoneLostAccess(pages.oldPhone);
+    await checkAssistedRegistration({ desk: pages.desk, walkIn: pages.walkIn, database, screenshots });
     await checkStandAccountIsRedirected(pages.stand);
   } finally {
     check("no browser console errors", consoleErrors.length === 0, consoleErrors.slice(0, 5).join(" | ") || "none");
@@ -372,9 +374,122 @@ async function checkStandAccountIsRedirected(page) {
 }
 
 async function fillIdentity(page, fullName, gamertag) {
-  await page.getByLabel("Nombre completo").fill(fullName);
-  await page.getByLabel("Gamertag").fill(gamertag);
-  await page.getByRole("button", { name: "Recuperar pasaporte" }).click();
+  const form = deskForm(page, "Confirma la identidad del visitante");
+
+  await form.getByLabel("Nombre completo").fill(fullName);
+  await form.getByLabel("Gamertag").fill(gamertag);
+  await form.getByRole("button", { name: "Recuperar pasaporte" }).click();
+}
+
+// The page holds two forms with the same labels: each one is found by its heading.
+function deskForm(page, heading) {
+  return page.locator("form", { has: page.getByRole("heading", { name: heading }) });
+}
+
+// A visitor that arrives without a passport is registered at the desk: the agent gets the PIN and the link, the phone
+// of the visitor opens it, and the KOF option only exists during the on-site sign-up (RF-58).
+async function checkAssistedRegistration({ desk, walkIn, database, screenshots }) {
+  const agent = database.prepare("SELECT id FROM accounts WHERE email = ?").get(HELP_DESK_EMAIL);
+
+  await desk.goto(`${BASE_URL}/support/recovery`, { waitUntil: "networkidle" });
+  check(
+    "the KOF option is hidden outside the on-site sign-up",
+    (await desk.getByText("Inscribir también en el torneo de KOF").count()) === 0,
+  );
+
+  const pin = await registerAtDesk(desk, { gamertag: "desk_walkin", email: "e2e-walkin@example.test" });
+
+  const visitor = database.prepare("SELECT id FROM visitors WHERE gamertag = 'desk_walkin'").get();
+
+  const audit = database
+    .prepare("SELECT actor_id AS actor FROM audit_logs WHERE action = 'visitor.register' AND entity_id = ?")
+    .all(visitor.id);
+
+  check("the desk shows a five-digit PIN for the new visitor", /^\d{5}$/.test(pin), pin);
+  check("the registration is audited with the agent", audit.length === 1 && audit[0].actor === agent.id);
+  check("no tournament entry was created", count(database, "tournament_entries") === 0);
+  await desk.screenshot({ path: path.join(screenshots, "support-registered.png"), fullPage: true });
+
+  const link = await desk.getByLabel("Enlace de acceso").inputValue();
+
+  await walkIn.goto(link, { waitUntil: "networkidle" });
+  await walkIn.waitForURL(/\/passport$/, { timeout: UI_TIMEOUT_MS });
+  check(
+    "the phone of the visitor opens the link and sees the same PIN",
+    (await walkIn.locator("p.type-mono").first().textContent()).trim() === pin,
+  );
+
+  await checkAssistedRegistrationRefusals(desk);
+  await checkAssistedRegistrationInTournament({ desk, database });
+}
+
+async function checkAssistedRegistrationRefusals(page) {
+  await page.goto(`${BASE_URL}/support/recovery`, { waitUntil: "networkidle" });
+
+  const form = deskForm(page, "Registrar visitante");
+
+  await fillRegistration(form, { gamertag: "desk_walkin", email: "otro-walkin@example.test" });
+  await form.getByText("Ese gamertag ya está registrado.").waitFor({ timeout: UI_TIMEOUT_MS });
+  check("a taken gamertag is named in the form", true);
+
+  await fillRegistration(form, { gamertag: "desk_other", email: "e2e-walkin@example.test" });
+  await form
+    .locator("p[role=alert]")
+    .getByText("No se pudo registrar este correo.")
+    .waitFor({ timeout: UI_TIMEOUT_MS });
+  check("a used email is refused with the generic message", true);
+}
+
+async function checkAssistedRegistrationInTournament({ desk, database }) {
+  const now = Date.now();
+
+  const { current } = database
+    .prepare("SELECT kof_onsite_signup_starts_at AS current FROM event_settings WHERE id = 1")
+    .get();
+
+  const stored = (milliseconds) =>
+    /^\d+$/.test(String(current)) ? milliseconds : new Date(milliseconds).toISOString();
+
+  database
+    .prepare(
+      "UPDATE event_settings SET kof_registration_opens_at = ?, kof_onsite_signup_starts_at = ?, kof_onsite_signup_ends_at = ? WHERE id = 1",
+    )
+    .run(stored(now - 2 * 3600_000), stored(now - 3600_000), stored(now + 3600_000));
+
+  await desk.goto(`${BASE_URL}/support/recovery`, { waitUntil: "networkidle" });
+  await desk.getByText("Inscribir también en el torneo de KOF").click();
+
+  const pin = await registerAtDesk(desk, { gamertag: "desk_kof", email: "e2e-kof@example.test" });
+
+  const entry = database
+    .prepare(
+      "SELECT e.channel AS channel, e.status AS status FROM tournament_entries e JOIN visitors v ON v.id = e.visitor_id WHERE v.gamertag = 'desk_kof'",
+    )
+    .get();
+
+  check("the second visitor also gets a PIN", /^\d{5}$/.test(pin), pin);
+  check(
+    "and enters the tournament on site, already checked in",
+    entry?.channel === "onsite" && entry?.status === "checked_in",
+  );
+  check("the desk says so", await desk.getByText("También quedó inscrito en el torneo de KOF.").isVisible());
+}
+
+async function registerAtDesk(page, { gamertag, email }) {
+  const form = deskForm(page, "Registrar visitante");
+
+  await fillRegistration(form, { gamertag, email });
+
+  await page.getByRole("heading", { name: "Pasaporte creado" }).waitFor({ timeout: UI_TIMEOUT_MS });
+
+  return (await page.getByTestId("desk-pin").textContent()).trim();
+}
+
+async function fillRegistration(form, { gamertag, email }) {
+  await form.getByLabel("Nombre completo").fill("Visitante de mesa");
+  await form.getByLabel("Gamertag").fill(gamertag);
+  await form.getByLabel("Correo").fill(email);
+  await form.getByRole("button", { name: "Registrar visitante" }).click();
 }
 
 function count(database, table, where = "1 = 1") {
