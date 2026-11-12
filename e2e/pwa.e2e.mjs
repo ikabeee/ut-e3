@@ -13,7 +13,7 @@
 // override with E2E_SCREENSHOTS_DIR). E2E_KEEP_FILES=1 keeps the database and the server log; they are also kept
 // when a check fails.
 import { spawn, spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, openSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, openSync, readFileSync, rmSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -379,6 +379,14 @@ const VENUE_MAP_REGION = "[role=region][aria-label^='Mapa de la ubicación']";
 // RF-07 and the venue map: it draws the Mapbox tiles online (the build needs NEXT_PUBLIC_MAPBOX_TOKEN, from the
 // environment or .env), the worker never stores them (another origin), and the schematic stays underneath as the fallback.
 async function checkVenueMapOnline(page) {
+  const unavailable = await findVenueMapBlocker();
+
+  if (unavailable) {
+    console.log(`SKIP the venue map tiles: ${unavailable}`);
+
+    return;
+  }
+
   await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
   await page.locator("#venue").scrollIntoViewIfNeeded();
 
@@ -413,6 +421,30 @@ async function checkVenueMapOnline(page) {
     origins.every((origin) => origin === BASE_URL),
     origins.join(", "),
   );
+}
+
+// The tiles need the public token (in the environment or in .env, as Next reads it at build) and the network. Without
+// either the step is skipped with a notice: any other failure of the script still fails it.
+async function findVenueMapBlocker() {
+  if (!hasMapboxToken()) return "NEXT_PUBLIC_MAPBOX_TOKEN is not set (environment or .env), so the build draws no map";
+
+  try {
+    await fetch("https://api.mapbox.com/", { method: "HEAD", signal: AbortSignal.timeout(5000) });
+  } catch {
+    return "api.mapbox.com is not reachable from this machine";
+  }
+
+  return null;
+}
+
+function hasMapboxToken() {
+  if (process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.startsWith("pk.")) return true;
+
+  try {
+    return /^NEXT_PUBLIC_MAPBOX_TOKEN=["']?pk\./m.test(readFileSync(path.join(ROOT, ".env"), "utf8"));
+  } catch {
+    return false;
+  }
 }
 
 async function checkIosSteps({ browser, context }) {
