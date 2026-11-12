@@ -11,8 +11,8 @@ const SAVED_AT = new Date("2026-11-20T18:00:00.000Z");
 const VISITS: PassportVisits = {
   visitCount: 9,
   stands: [
-    { code: "ZA-S1", visited: true },
-    { code: "ZA-S2", visited: false },
+    { code: "ZA-S1", visited: true, gameName: null },
+    { code: "ZA-S2", visited: false, gameName: null },
   ],
   tickets: [{ number: 3, milestone: 9 }],
 };
@@ -53,6 +53,14 @@ describe("the saved copy of the passport (RNF-14)", () => {
         savedAt: SAVED_AT.toISOString(),
         passport: PASSPORT,
         visits: { ...VISITS, stands: [{ code: 1 }] },
+      }),
+    ],
+    [
+      "a game name of the wrong shape",
+      JSON.stringify({
+        savedAt: SAVED_AT.toISOString(),
+        passport: PASSPORT,
+        visits: { ...VISITS, stands: [{ code: "ZA-S1", visited: true, gameName: 42 }] },
       }),
     ],
   ])("never shows a broken copy: %s", (_label, raw) => {

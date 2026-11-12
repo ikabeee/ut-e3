@@ -1,7 +1,7 @@
 "use server";
 
 import { updateTag } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { after } from "next/server";
 import { parseRecoveryEmail } from "@features/visitors/lib/email-recovery-input";
 import { parseRegistrationInput } from "@features/visitors/lib/registration-input";
@@ -102,7 +102,8 @@ async function executeRegistration(input: {
     await deliverQueuedEmail(result.emailId);
   });
 
-  redirect(PASSPORT_PATH);
+  // The registration is replaced: Back from the passport leaves it instead of returning to it (H3-1).
+  redirect(PASSPORT_PATH, RedirectType.replace);
 }
 
 /**
@@ -150,5 +151,6 @@ export async function claimRecoveryLink(form: FormData): Promise<void> {
   if (!deviceToken) redirect(RECOVERY_LINK_EXPIRED_PATH);
 
   await setVisitorDeviceCookie(deviceToken);
-  redirect(PASSPORT_PATH);
+  // The confirmation is replaced: Back from the passport leaves it instead of returning to it (H3-1).
+  redirect(PASSPORT_PATH, RedirectType.replace);
 }

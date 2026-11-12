@@ -14,7 +14,7 @@ describe("OfflinePage (RNF-14, item 4)", () => {
   it("shows the passport that the phone saved, with the notice of how old it is", () => {
     savePassportSnapshot({
       passport: { gamertag: "PlayerOne", pin: "12345" },
-      visits: { visitCount: 3, stands: [{ code: "ZA-S1", visited: true }], tickets: [] },
+      visits: { visitCount: 3, stands: [{ code: "ZA-S1", visited: true, gameName: null }], tickets: [] },
       now: new Date(Date.now() - 2 * 60_000),
     });
 

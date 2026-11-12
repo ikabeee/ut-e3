@@ -52,9 +52,9 @@ describe("getPassportVisits", () => {
     const result = await getPassportVisits(visitor.id);
 
     expect(result.stands).toEqual([
-      { code: "ZA-S1", visited: false },
-      { code: "ZA-S2", visited: false },
-      { code: "ZB-S1", visited: true },
+      { code: "ZA-S1", visited: false, gameName: null },
+      { code: "ZA-S2", visited: false, gameName: null },
+      { code: "ZB-S1", visited: true, gameName: null },
     ]);
   });
 
@@ -69,7 +69,7 @@ describe("getPassportVisits", () => {
     const result = await getPassportVisits(visitor.id);
 
     expect(result.visitCount).toBe(0);
-    expect(result.stands).toEqual([{ code: "ZA-S1", visited: false }]);
+    expect(result.stands).toEqual([{ code: "ZA-S1", visited: false, gameName: null }]);
   });
 
   it("returns the tickets of the visitor with their global numbers, in order (RF-22)", async () => {
