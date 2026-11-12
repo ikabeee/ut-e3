@@ -60,7 +60,8 @@ specs and handoffs, reviews tests and diffs, runs the checks and commits.
 | M2 | S4, S5, S6, S7 | Muse agent, parallel | done | `a8c6209`; RED 8; GREEN visitors+pwa 289 |
 | M3 | S8, S9 | Muse agent, parallel | done | `a33e186`; RED 4; GREEN raffle+tournament 419 |
 | M4 | S10, S11, S12 | Muse agent, parallel | done | `bcba99e`; RED 5; GREEN games 225 |
-| P2 | S13-S19 | Muse agent (one unit: the map, its page and the links share the same files) | done | see L7 |
+| P2 | S13-S19 | Muse agent (one unit: the map, its page and the links share the same files) | done | see L7; merged in #150 |
+| P3 | S14, S16 | Muse agent: visual match with the variant A mockups | done | branch `fix/floor-plan-artifact-match`; see L9 |
 
 Process (swarm-workflow two-pack): each Muse agent first writes its tests and shows them failing (RED); Claude reviews
 them against the specs and locks them; then the agent implements until GREEN without editing the reviewed tests;
@@ -107,3 +108,15 @@ Claude reviews the diff, runs the full checks once and commits each unit.
   scale 0.42 on phones (compact dots, hint) and 1.36 at 1440 px (names in one line).
   Pending: real-device check of drag and pinch (not testable in jsdom or headless screenshots); the jscpd clone.
   Next: PR of `feature/nielsen-ux-fixes` to `develop` (user's decision).
+- L8 (2026-11-12, verbatim, with a screenshot of `/floor-plan` at desktop): "no se ve como el artifact". Gaps against
+  `Main.dc.html` and `Phone.dc.html`: gray building fill and thick white wall instead of the near-black ground and thin
+  outline; slash marks instead of the street lines; no dashed zone areas; block labels that scale with the map; boxed
+  names; initials in the wrong type; the selected stand as a ring instead of the accent pin; a heavier detail card.
+  Reopened as P3 on `fix/floor-plan-artifact-match` from `develop`.
+- L9 (P3 result): three Muse rounds. Round 1 matched the mockups (map tokens in `theme.css`, street layer, dashed zone
+  areas and "EXTERIOR", screen-size block labels, unboxed names, Syncopate initials, accent pin, zone second lines, detail
+  card and sheet styles, framed zoom group, summary beside the filters); round 2 moved the block labels clear of the
+  markers and made a selection in compact mode zoom to scale 1 on the item; round 3 centers that focus in the part of
+  the map the phone sheet leaves visible. Checks (exit codes): format, ESLint on `src` and `public`, Oxlint, jscpd
+  (0 clones), typecheck and `npm test` (312 suites, 2318 tests) all 0. Browser at 360, 390 and 1440 px: no horizontal
+  scroll, no console errors. Pending: real-device drag and pinch.
