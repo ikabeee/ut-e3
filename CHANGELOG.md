@@ -8,6 +8,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- Invitadas especiales: la segunda invitada es la ponente de Noxy Digital, Ing. Noelí Rodríguez Morales, con su foto y
+  la plática por anunciar; sustituye al gafete "Por anunciar".
 - Invitadas especiales: cada invitada es un gafete del evento en un carrusel, con cinta, contador "Pase 01 de 02" y
   botones anterior y siguiente. El gafete cae colgando de la cinta al aparecer, entra columpiándose al cambiar de pase y
   se mece en reposo; con movimiento reducido no se anima. Vuelve la segunda invitada "Por anunciar".

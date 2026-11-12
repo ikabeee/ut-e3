@@ -5,7 +5,7 @@ import { SPECIAL_GUESTS } from "@features/landing/lib/special-guests";
 
 const FIRST_GUEST_NAME = "Ing. Ariana Patricia Tzuc Vázquez";
 
-const SECOND_GUEST_NAME = "Por anunciar";
+const SECOND_GUEST_NAME = "Ing. Noelí Rodríguez Morales";
 
 function getBadgeName() {
   return screen.getByRole("heading", { level: 3 });
