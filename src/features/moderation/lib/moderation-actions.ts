@@ -6,7 +6,10 @@ import { MODERATION_COPY } from "@features/moderation/lib/moderation-copy";
 import { parseReason } from "@features/moderation/lib/moderation-input";
 import {
   annulCheckIn,
+  annulCheckIns,
   excludeVisitor,
+  excludeVisitorsOfCheckIns,
+  type BulkResult,
   type AnnulResult,
   type ModerationRequest,
 } from "@features/moderation/lib/server/moderation-mutations";
@@ -49,6 +52,38 @@ export async function excludeVisitorAction(
   refresh();
 
   return { status: "done", message: OUTCOMES.excluded };
+}
+
+/**
+ * The visits ticked in a list of a burst or of a stand: `intent` says whether they are annulled or their visitors
+ * excluded, with one reason for all (RF-46). Each one writes its own audit entry.
+ */
+export async function moderateSelectionAction(
+  _previous: ModerationActionState | null,
+  form: FormData,
+): Promise<ModerationActionState> {
+  const actor = await requireSysadmin();
+  const parsed = parseReason(form);
+  const checkInIds = form.getAll("checkInId").filter((id): id is string => typeof id === "string" && id !== "");
+  const intent = readFormText(form, "intent");
+
+  if (!parsed.isValid) return { status: "error", message: ERRORS.reasonLength };
+
+  if (checkInIds.length === 0) return { status: "error", message: ERRORS.nothingSelected };
+
+  const request = { actorId: actor.id, checkInIds, reason: parsed.reason, now: new Date() };
+  const isExclusion = intent === "exclude";
+  const result = await (isExclusion ? excludeVisitorsOfCheckIns(request) : annulCheckIns(request));
+
+  if (result.done === 0) return { status: "error", message: ERRORS.nothingChanged };
+
+  refresh();
+
+  return { status: "done", message: describeBulk(result, isExclusion) };
+}
+
+function describeBulk(result: BulkResult, isExclusion: boolean): string {
+  return (isExclusion ? OUTCOMES.bulkExcluded : OUTCOMES.bulkAnnulled)(result.done, result.skipped);
 }
 
 // The session first, then the form: who acts, on what, and why. Null when the reason is missing or too long.

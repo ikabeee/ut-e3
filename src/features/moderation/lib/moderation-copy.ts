@@ -12,6 +12,38 @@ export const MODERATION_COPY = {
     fewStandVisitor: (gamertag: string, count: number) => `${gamertag}: ${count} check-in(s)`,
     fewStandMore: (shown: number, total: number) => `Se muestran ${shown} de ${total}.`,
     review: "Revisar",
+    viewVisitors: (count: number) => `Ver visitantes (${count})`,
+  },
+  selection: {
+    legend: "Visitas del intervalo",
+    selectAll: "Seleccionar todas",
+    row: (gamertag: string, email: string, time: string) => `${gamertag} · ${email} · ${time}`,
+    ratings: (game: number, stand: number, art: number) => `Juego ${game} · Stand ${stand} · Arte ${art}`,
+    selected: (count: number) => `${count} seleccionada(s)`,
+    annul: "Anular visitas seleccionadas",
+    exclude: "Excluir a los visitantes seleccionados",
+    reasonHint: "Un motivo para todas, de 5 a 280 caracteres. Queda en la bitácora de cada una.",
+  },
+  byStand: {
+    heading: "Por stand",
+    lead: "Elige un stand para ver todas sus visitas, quién las registró y sus calificaciones.",
+    label: "Stand",
+    placeholder: "Elige un stand",
+    submit: "Ver visitas",
+    empty: "Este stand no tiene visitas.",
+    summary: (count: number) => `${count} visita(s)`,
+    exportCsv: "Exportar CSV",
+    columns: {
+      gamertag: "Gamertag",
+      time: "Hora",
+      recordedBy: "Registró",
+      ratings: "Calificaciones",
+      status: "Estado",
+    },
+    notRecorded: "Sin dato",
+    noVote: "Sin calificar",
+    status: { valid: "Válida", annulled: "Anulada", excluded: "Visitante excluido" },
+    truncated: (limit: number) => `Se muestran las primeras ${limit} visitas.`,
   },
   lookup: {
     heading: "Anular visitas y excluir visitantes",
@@ -52,8 +84,18 @@ export const MODERATION_COPY = {
       `Visita anulada. Boleto(s) del hito ${milestones.join(" y ")} anulado(s).`,
     annulledFrozen: "Visita anulada. La rifa ya empezó, así que los boletos no cambian.",
     excluded: "Visitante excluido. Sus boletos quedan fuera de la rifa.",
+    bulkAnnulled: (done: number, skipped: number) =>
+      skipped > 0
+        ? `${done} visita(s) anulada(s). ${skipped} ya no se podían anular.`
+        : `${done} visita(s) anulada(s).`,
+    bulkExcluded: (done: number, skipped: number) =>
+      skipped > 0
+        ? `${done} visitante(s) excluido(s). ${skipped} ya estaban excluidos.`
+        : `${done} visitante(s) excluido(s).`,
   },
   errors: {
+    nothingSelected: "Marca al menos una visita.",
+    nothingChanged: "Ninguna de las marcadas se pudo cambiar: ya estaban anuladas o excluidas. Recarga la página.",
     reasonLength: "Escribe un motivo de 5 a 280 caracteres, con letras o números.",
     notFound: "Ya no existe. Recarga la página.",
     alreadyAnnulled: "Esa visita ya estaba anulada.",
