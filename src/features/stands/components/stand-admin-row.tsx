@@ -10,6 +10,7 @@ export interface StandAdminActions {
   inviteAdmin: ManagementAction;
   resend: ManagementAction;
   disable: ManagementAction;
+  reactivate: ManagementAction;
 }
 
 interface StandAdminRowProps {
@@ -40,7 +41,12 @@ export function StandAdminRow({ stand, actions }: Readonly<StandAdminRowProps>) 
         </div>
       </details>
       <h3 className="type-mono">{COPY.adminsHeading}</h3>
-      <ManagedAccountList accounts={stand.admins} resendAction={actions.resend} disableAction={actions.disable} />
+      <ManagedAccountList
+        accounts={stand.admins}
+        resendAction={actions.resend}
+        disableAction={actions.disable}
+        reactivateAction={actions.reactivate}
+      />
       {!hasActiveAdmin && <InviteAdmin standId={stand.id} action={actions.inviteAdmin} />}
     </li>
   );

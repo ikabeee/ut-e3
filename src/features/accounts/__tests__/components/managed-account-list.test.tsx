@@ -59,12 +59,16 @@ describe("ManagedAccountList", () => {
     expect(within(rowOf("Ana Pérez")).getByRole("button", { name: "Desactivar" })).toBeInTheDocument();
   });
 
-  it("offers only to disable an active account, and nothing for one that is disabled", () => {
+  it("offers only to disable an active account, and only to reactivate one that is disabled", () => {
     renderList([ACTIVE, DISABLED]);
 
     expect(within(rowOf("Luis Gómez")).queryByRole("button", { name: "Reenviar invitación" })).not.toBeInTheDocument();
     expect(within(rowOf("Luis Gómez")).getByRole("button", { name: "Desactivar" })).toBeInTheDocument();
-    expect(within(rowOf("Eva Ruiz")).queryByRole("button")).not.toBeInTheDocument();
+    expect(
+      within(rowOf("Eva Ruiz"))
+        .getAllByRole("button")
+        .map((button) => button.textContent),
+    ).toEqual(["Reactivar"]);
   });
 
   it("sends the id of the account to resend", async () => {
@@ -103,6 +107,42 @@ describe("ManagedAccountList", () => {
     expect(screen.getByRole("button", { name: "Desactivar" })).toBeInTheDocument();
   });
 
+  it("offers Reactivar only on a disabled account", () => {
+    renderList([INVITED, ACTIVE, DISABLED]);
+
+    expect(within(rowOf("Eva Ruiz")).getByRole("button", { name: "Reactivar" })).toBeInTheDocument();
+    expect(within(rowOf("Ana Pérez")).queryByRole("button", { name: "Reactivar" })).not.toBeInTheDocument();
+    expect(within(rowOf("Luis Gómez")).queryByRole("button", { name: "Reactivar" })).not.toBeInTheDocument();
+  });
+
+  it("sends the id of the disabled account and says what the server answered", async () => {
+    const { calls, ...actions } = recordingActions();
+
+    renderList([DISABLED], actions);
+    await userEvent.click(screen.getByRole("button", { name: "Reactivar" }));
+
+    expect(calls.reactivate[0]?.get("accountId")).toBe("disabled-1");
+    expect(await screen.findByRole("status")).toHaveTextContent("Listo.");
+  });
+
+  it("shows why a reactivation was refused", async () => {
+    const refuse: ManagementAction = async () => ({ status: "error", message: "El stand ya tiene 3 cuentas." });
+
+    renderList([DISABLED], { resend: refuse, disable: refuse, reactivate: refuse });
+    await userEvent.click(screen.getByRole("button", { name: "Reactivar" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("El stand ya tiene 3 cuentas.");
+  });
+
+  it("does not offer Reactivar to a list that has no action for it", () => {
+    renderList([DISABLED], {
+      resend: async () => ({ status: "done", message: "x" }),
+      disable: async () => ({ status: "done", message: "x" }),
+    });
+
+    expect(screen.queryByRole("button", { name: "Reactivar" })).not.toBeInTheDocument();
+  });
+
   it("shows the reason when the server refuses", async () => {
     const refuse: ManagementAction = async () => ({ status: "error", message: "No puedes gestionar esta cuenta." });
 
@@ -116,10 +156,18 @@ describe("ManagedAccountList", () => {
 interface Actions {
   resend: ManagementAction;
   disable: ManagementAction;
+  reactivate?: ManagementAction;
 }
 
 function renderList(accounts: ManagedAccount[], actions: Actions = recordingActions()) {
-  render(<ManagedAccountList accounts={accounts} resendAction={actions.resend} disableAction={actions.disable} />);
+  render(
+    <ManagedAccountList
+      accounts={accounts}
+      resendAction={actions.resend}
+      disableAction={actions.disable}
+      reactivateAction={actions.reactivate}
+    />,
+  );
 }
 
 function rowOf(name: string): HTMLElement {
@@ -131,15 +179,15 @@ function rowOf(name: string): HTMLElement {
 }
 
 function recordingActions() {
-  const calls: Record<"resend" | "disable", FormData[]> = { resend: [], disable: [] };
+  const calls: Record<"resend" | "disable" | "reactivate", FormData[]> = { resend: [], disable: [], reactivate: [] };
 
   const record =
-    (key: "resend" | "disable"): ManagementAction =>
+    (key: "resend" | "disable" | "reactivate"): ManagementAction =>
     async (_previous, form) => {
       calls[key].push(form);
 
       return { status: "done", message: "Listo." };
     };
 
-  return { calls, resend: record("resend"), disable: record("disable") };
+  return { calls, resend: record("resend"), disable: record("disable"), reactivate: record("reactivate") };
 }

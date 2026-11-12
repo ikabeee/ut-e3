@@ -5,7 +5,7 @@ import type { ManagedAccount } from "@features/accounts/lib/types";
 
 const action: ManagementAction = async () => ({ status: "done", message: "ok" });
 
-const ACTIONS = { invite: action, resend: action, disable: action };
+const ACTIONS = { invite: action, resend: action, disable: action, reactivate: action };
 
 const ACCOUNT: ManagedAccount = {
   id: "a-1",
