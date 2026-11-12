@@ -179,6 +179,17 @@ describe("LandingView", () => {
     expect(screen.getByRole("button", { name: "Stand ZA-S3, Juego 03" })).toBeInTheDocument();
   });
 
+  it("shows the sponsors as numbered raffle tickets", () => {
+    renderLanding([PIXEL_FORGE]);
+
+    const sponsors = screen.getByRole("region", { name: "Patrocinadores" });
+
+    expect(within(sponsors).getByText("Gracias a quienes hacen posible el evento.")).toBeInTheDocument();
+    expect(within(sponsors).getByText("Nº 001")).toBeInTheDocument();
+    expect(within(sponsors).getByRole("img", { name: PIXEL_FORGE.name })).toBeInTheDocument();
+    expect(within(sponsors).queryByRole("button", { name: "Patrocinador siguiente" })).not.toBeInTheDocument();
+  });
+
   it("renders the marketplace slot inside the event section", () => {
     renderLanding();
 

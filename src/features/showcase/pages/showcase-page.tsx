@@ -27,7 +27,7 @@ import { splitEventTitle } from "@features/showcase/lib/event-title";
 import { buildMarqueeText } from "@features/showcase/lib/marquee-text";
 import { SHOWCASE_COPY } from "@features/showcase/lib/showcase-copy";
 import { SHOWCASE_PATH } from "@features/showcase/lib/showcase-links";
-import { SponsorsCarousel } from "@features/sponsors/components/sponsors-carousel";
+import { SponsorTickets } from "@features/sponsors/components/sponsor-tickets";
 import { getSponsors } from "@features/sponsors/lib/server/sponsors-queries";
 import type { Sponsor } from "@features/sponsors/lib/types";
 import { REGISTER_PATH } from "@features/visitors/lib/visitors-links";
@@ -92,7 +92,7 @@ export function ShowcaseView({ settings, games, scheduleItems, sponsors }: Reado
           items={scheduleItems}
           zoneLink={getZoneLink}
         />
-        <SponsorsCarousel sponsors={sponsors} />
+        <SponsorTickets sponsors={sponsors} />
         <FloorPlan stands={games.map(toFloorPlanStand)} />
         <VenueLocation venue={EVENT_VENUE} />
       </main>

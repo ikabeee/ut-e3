@@ -1,10 +1,11 @@
 export const SPONSORS_COPY = {
   heading: "Patrocinadores",
-  roleDescription: "carrusel",
-  slideRoleDescription: "diapositiva",
-  previous: "Patrocinador anterior",
-  next: "Patrocinador siguiente",
   website: "Visitar sitio",
+  tickets: {
+    lead: "Gracias a quienes hacen posible el evento.",
+    stubLabel: "Patrocinador",
+    number: (order: number) => `Nº ${String(order).padStart(3, "0")}`,
+  },
   page: {
     pageTitle: "Patrocinadores",
     pageDescription:

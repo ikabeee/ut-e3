@@ -27,7 +27,7 @@ import { EVENT_VENUE } from "@features/landing/lib/venue";
 import { EventSchedule } from "@features/schedule/components/event-schedule";
 import { getScheduleItems } from "@features/schedule/lib/server/schedule-queries";
 import type { ScheduleItem } from "@features/schedule/lib/types";
-import { SponsorsCarousel } from "@features/sponsors/components/sponsors-carousel";
+import { SponsorTickets } from "@features/sponsors/components/sponsor-tickets";
 import { getSponsors } from "@features/sponsors/lib/server/sponsors-queries";
 import { SPONSORS_PATH, SPONSORS_SECTION_ID } from "@features/sponsors/lib/sponsors-links";
 import type { Sponsor } from "@features/sponsors/lib/types";
@@ -120,7 +120,7 @@ export function LandingView({
           marketplace={marketplace}
           isLandingOnly={isLandingOnly}
         />
-        <SponsorsCarousel sponsors={sponsors} />
+        <SponsorTickets sponsors={sponsors} />
         <EventSchedule
           heading={formatEventDate(settings.eventStartsAt, "2-digit")}
           items={scheduleItems}
