@@ -10,7 +10,7 @@ import { ArrowButton } from "@shared/components/arrow-button";
 interface GenreRailProps {
   genres: GenreSummary[];
   selectedGenreSlug: string | null;
-  onSelectGenre: (genreSlug: string) => void;
+  onSelectGenre: (genreSlug: string | null) => void;
 }
 
 const GENRES_PER_STEP = 2;
@@ -40,6 +40,7 @@ export function GenreRail({ genres, selectedGenreSlug, onSelectGenre }: Readonly
           <ArrowButton direction="next" label={GAMES_COPY.catalog.nextGenres} onPress={() => scrollByItems(1)} />
         </div>
       </div>
+      <AllGenresFilter isSelected={selectedGenreSlug === null} onSelect={() => onSelectGenre(null)} />
       <div
         ref={ref}
         className="scrollbar-none grid snap-x snap-mandatory auto-cols-[calc((100%-3*16px)/4)] grid-flow-col gap-4 overflow-x-auto pb-1 max-[1000px]:auto-cols-[calc((100%-2*16px)/3)] max-[760px]:auto-cols-[72%]"
@@ -54,6 +55,21 @@ export function GenreRail({ genres, selectedGenreSlug, onSelectGenre }: Readonly
         ))}
       </div>
     </section>
+  );
+}
+
+interface AllGenresFilterProps {
+  isSelected: boolean;
+  onSelect: () => void;
+}
+
+function AllGenresFilter({ isSelected, onSelect }: Readonly<AllGenresFilterProps>) {
+  return (
+    <div className="mb-4 flex flex-wrap gap-2">
+      <ToggleButton isSelected={isSelected} onChange={onSelect} className="toggle-button--filter min-h-11">
+        {GAMES_COPY.catalog.allGenres}
+      </ToggleButton>
+    </div>
   );
 }
 

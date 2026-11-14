@@ -2,6 +2,7 @@ import "server-only";
 import { createMissingDevAccounts } from "@features/accounts/lib/server/dev-accounts";
 import { formatStandCode } from "@features/games/lib/stand-code";
 import { encryptPin, hashPinForLookup } from "@shared/lib/server/pin-cipher";
+import type { DevSeedOptions } from "@shared/lib/server/dev-seed-options";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 export type StandsDevEnv = Readonly<Record<string, string | undefined>>;
@@ -33,7 +34,11 @@ const MISSING_STANDS = "Seed de stands: faltan los stands de muestra. Corre npm 
  * the first one and fake passports with fixed PINs, and the registration hour moved to `now` when it is still ahead so
  * a real passport can be created. Running it again only adds what is missing.
  */
-export async function seedStandsDev(env: StandsDevEnv, now: Date): Promise<StandsDevSeedResult> {
+export async function seedStandsDev(
+  env: StandsDevEnv,
+  now: Date,
+  options: DevSeedOptions = { moveHours: true },
+): Promise<StandsDevSeedResult> {
   if (env.NODE_ENV === "production") throw new Error(PRODUCTION_REFUSED);
 
   const stands = await getPrisma().stand.findMany({
@@ -48,7 +53,8 @@ export async function seedStandsDev(env: StandsDevEnv, now: Date): Promise<Stand
   const createdAccounts = await createMissingAccounts(stands, password);
   const createdVisitors = await createMissingVisitors();
 
-  await openRegistration(now);
+  if (options.moveHours) await openRegistration(now);
+
   await createPreviousVisits(stands.map((stand) => stand.id).slice(1, 1 + PREVIOUS_VISITS));
 
   return { createdAccounts, createdVisitors };

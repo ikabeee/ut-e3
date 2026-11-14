@@ -53,6 +53,8 @@ npm run db:seed:stands    # solo desarrollo: staff por stand, administrador y 24
 npm run db:seed:support  # solo desarrollo: cuenta de atención help-desk@ejemplo.com (prisma/seed-support.ts)
 npm run db:seed:kof       # solo desarrollo: cuentas de KOF de prueba y un bracket de 40 jugadores (prisma/seed-kof.ts)
 npm run db:seed:raffle    # solo desarrollo: 2 animadores, 30 pasaportes con 40 boletos y la rifa abierta ya (prisma/seed-raffle.ts)
+npm run db:seed:demo      # solo desarrollo y demos: stands, KOF, soporte y rifa con una sola contraseña (DEMO_PASSWORD); no mueve horas, salvo `-- --open-raffle` (prisma/seed-demo.ts)
+npm run db:backfill:genres # en una base con juegos: da a cada juego su género confirmado si aún dice "Por anunciar"; se puede repetir (prisma/backfill-game-genres.ts)
 ```
 
 Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm run lint`,
@@ -80,12 +82,12 @@ src/
 │   ├── games/                # Juegos: coverflow de la portada, catálogo (/games) y ficha (/games/[slug])
 │   ├── floor-plan/           # Croquis interactivo con los stands (ZA-S3) y las zonas
 │   ├── schedule/             # Cronograma de actividades (portada y edición en el panel)
-│   ├── sponsors/             # Banda de patrocinadores
+│   ├── sponsors/             # Patrocinadores: boletos de rifa (portada y /sponsors) y su gestión en /admin
 │   ├── event-settings/       # Horarios y valores configurables del evento
 │   ├── accounts/             # Cuentas del staff: login, cierre de sesión, guard de rol y seed del sysadmin
 │   ├── admin/                # Panel del sysadmin (/admin y sus secciones), estado del servidor y cierre automático del bracket
 │   ├── moderation/           # Alertas de fraude, anular visitas y excluir visitantes (RF-45, RF-46)
-│   ├── site/                 # Páginas del sitio que no son de un dominio: la 404 (src/app/not-found.tsx)
+│   ├── site/                 # Lo que no es de un dominio: la barra de navegación del layout (site-header) y la 404
 │   ├── raffle/               # Rifa: tómbola en vivo (/raffle/live), ganadores (/raffle) y panel (/admin/raffle)
 │   ├── pwa/                  # PWA: manifest, service worker (public/sw.js), /offline, indicador de conexión e instalación
 │   ├── stands/               # Stands: kiosko (/stand/kiosk), equipo (/stand/team) y alta de stands en /admin

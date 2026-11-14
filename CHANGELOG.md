@@ -6,6 +6,80 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Cambiado
+
+- Invitadas especiales: la segunda invitada es la ponente de Noxy Digital, Ing. Noelí Rodríguez Morales, con su foto y
+  la plática por anunciar; sustituye al gafete "Por anunciar".
+- Invitadas especiales: cada invitada es un gafete del evento en un carrusel, con cinta, contador "Pase 01 de 02" y
+  botones anterior y siguiente. El gafete cae colgando de la cinta al aparecer, entra columpiándose al cambiar de pase y
+  se mece en reposo; con movimiento reducido no se anima. Vuelve la segunda invitada "Por anunciar".
+- Patrocinadores: en la portada y en `/showcase` cada patrocinador es un boleto de rifa con talón numerado (Nº 001),
+  perforación, el logo a color y sus contactos, con "Gracias a quienes hacen posible el evento." bajo el título. Los
+  logos ocupan la misma área visual aunque tengan proporciones distintas. Se retira el carrusel de patrocinadores.
+- Croquis: es vertical en todas las pantallas; en escritorio el panel queda fijo a su lado. Se quitan el Marketplace
+  trasero y la Cafetería externa.
+- Una sola barra de navegación para todo el sitio público (antes cada página traía la suya y el pasaporte, el registro,
+  la rifa y el torneo no tenían): Inicio, Juegos, Croquis, Patrocinadores, Rifa, Torneo y "Mi pasaporte". En el
+  teléfono los enlaces van en un menú. No aparece en el panel del staff, el kiosco, la mesa de atención ni la tómbola en
+  vivo, y con `SITE_MODE=landing` conserva solo las anclas de la portada.
+- `/sponsors` muestra los mismos boletos de rifa que la portada, con los servicios de cada patrocinador.
+- La barra muestra "Volver" en todas las páginas menos la portada: regresa a la página anterior del sitio o, si no la
+  hay, a la página padre. Con el menú del teléfono abierto, el gesto de "atrás" lo cierra.
+- Después de registrarte, "atrás" ya no regresa al registro. El pasaporte muestra el nombre del juego de cada stand y
+  el registro muestra sus errores en español. El enlace al aviso de privacidad tiene área táctil de 44 px.
+- La tómbola en vivo tiene un enlace para volver a los ganadores. Mientras el bracket no se publica, `/tournament`
+  dice a qué hora es el check-in y el bracket y enlaza a la Arena KOF del croquis y al cronograma.
+- Catálogo: opción "Todos" para quitar el filtro de género, "atrás" regresa al catálogo sin filtro, el título y el
+  buscador aparecen antes del carrusel destacado y el regreso de la ficha lleva flecha.
+- Croquis: tiene su propia pantalla `/floor-plan` (la entrada "Croquis" de la barra lleva ahí) con el mapa del Edificio B
+  en horizontal: marcadores circulares con la portada del juego, filtros, detalle sobre el mapa, lista y leyenda. La
+  ficha del juego y el bracket enlazan a su marcador y la portada enlaza a "Abrir el croquis". La página se guarda para
+  usarla sin conexión.
+- Croquis: el mapa iguala el modelo visual A (fondo casi negro, calles, zonas con borde punteado, etiquetas fijas,
+  pin de acento para el stand seleccionado y tarjeta de detalle).
+- Croquis: las etiquetas de bloque flotan sobre la fila superior de stands y seleccionar un stand o zona en vista
+  compacta centra el mapa y acerca a escala 1 para mostrar el pin de acento.
+- Croquis: en pantallas de menos de 1000 px el punto enfocado se centra en la zona visible sobre la ficha inferior, para
+  que el pin del stand seleccionado no quede tapado por ella.
+
+### Agregado
+
+- Moderación: cada alerta de calificaciones de 5 tiene "Ver visitantes" con gamertag, correo enmascarado, hora y
+  calificaciones de cada visita, "Revisar" y acciones en bloque (anular visitas o excluir visitantes con un motivo). La
+  vista "Por stand" lista las visitas de un stand, quién las registró y su estado, y las exporta a CSV. Nunca muestra el PIN.
+- Mesa de atención: "Registrar visitante" crea el pasaporte en persona (nombre, gamertag y correo, con las mismas
+  validaciones del registro) y muestra el PIN, el QR y el enlace; durante la inscripción presencial del KOF puede
+  inscribirlo también en el torneo. Límite por agente por hora y bitácora de quién lo creó.
+- Mesa de recuperación: se busca por correo, gamertag o nombre completo y, antes de generar el acceso, muestra el
+  gamertag, los stands visitados, el correo enmascarado y la hora del registro para verificar la identidad.
+- Cuentas: "Reactivar" una cuenta desactivada la regresa a invitación pendiente con un enlace nuevo de 72 horas (respeta
+  los 3 staff por stand, la mesa única de KOF y el administrador único por stand) y queda en la bitácora.
+- `npm run db:seed:demo` crea las cuentas de demo (stands, KOF, atención y rifa) con una sola contraseña (`DEMO_PASSWORD`)
+  sin mover los horarios del evento; `-- --open-raffle` abre la rifa ahora. Se niega a correr en producción.
+- Patrocinadores Noxy Digital y Directrix Studio en el seed (logo, correo, teléfono y sitio; de Directrix, su página de
+  Facebook). La seed solo llena la tabla vacía: en una base que ya tiene patrocinadores se agregan desde `/admin`.
+- DON'T PET ME tiene portada y portada horizontal en el seed (ya no muestra la portada genérica).
+- Pruebas e2e nuevas (`test:e2e:demo`, `test:e2e:proxy`, `test:e2e:reconnect`) y un workflow que corre los e2e en los
+  PR hacia main sin ser un check requerido.
+
+### Corregido
+
+- El hero de /games y la parte de arriba de la ficha de cada juego usan la imagen horizontal (16:9) en vez de la portada
+  vertical recortada; la vertical sigue en el panel lateral, el coverflow y las tarjetas. Un juego sin imagen horizontal
+  (Vaporlock) conserva la vertical. Al compartir una ficha también sale la horizontal.
+- Cada juego tiene su género confirmado en el seed (Acción, Terror, Plataformas, Survival Horror, Sigilo, RPG, Simulación y
+  Roguelike; Make 'em Fall sigue en "Por anunciar"). En una base que ya tiene juegos se aplica con
+  `npm run db:backfill:genres`, que no toca los géneros cambiados a mano.
+
+- `/offline` regresa al pasaporte aunque se recargue ya con red: comprueba que el servidor responda, reintenta cada pocos
+  segundos y con un botón "Reintentar", y dice "Tenemos red pero no llegamos al servidor" en lugar de "Sin conexión".
+- El kiosco avisa en la parte de arriba con la hora del corte cuando el registro de visitas cerró y desactiva el PIN.
+- El error del formulario de Configuración se limpia al editar el campo afectado (o el otro horario de su par).
+- `.env.example` usa `SMTP_FROM` (el código no lee `EMAIL_FROM`) y la guía de despliegue aclara que sin alguna variable
+  SMTP el servidor no arranca.
+- Detrás de un proxy o túnel, las redirecciones del proxy de la app (a `/login` y a la portada) usan el origen público de
+  `NEXT_PUBLIC_SITE_URL` en lugar de `localhost:3000`.
+
 ## [1.0.0] - 2026-11-11
 
 ### Agregado

@@ -15,11 +15,18 @@ describe("SponsorsView", () => {
     render(<SponsorsView sponsors={SPONSORS} />);
 
     expect(screen.getByRole("heading", { level: 1, name: "Patrocinadores" })).toBeInTheDocument();
-    expect(getCards().map((card) => within(card).getByRole("heading", { level: 2 }).textContent)).toEqual([
+    expect(getCards().map((card) => within(card).getByRole("heading", { level: 3 }).textContent)).toEqual([
       "Pixel Forge",
       "North Byte",
       "Code Lab",
     ]);
+  });
+
+  it("shows each sponsor as a numbered raffle ticket, like the landing", () => {
+    render(<SponsorsView sponsors={SPONSORS} />);
+
+    expect(getFirstCard().getByText("Nº 001")).toBeInTheDocument();
+    expect(within(getCards()[2]).getByText("Nº 003")).toBeInTheDocument();
   });
 
   it("shows the logo and the services of each sponsor", () => {
@@ -45,14 +52,10 @@ describe("SponsorsView", () => {
     expect(getFirstCard().getByRole("link", { name: "998 123 4567" })).toHaveAttribute("href", "tel:+529981234567");
   });
 
-  it("shows the site navbar with Inicio, Juegos and Patrocinadores", () => {
+  it("renders no navbar of its own: the root layout mounts the site navbar", () => {
     render(<SponsorsView sponsors={SPONSORS} />);
 
-    const navigation = within(screen.getByRole("navigation", { name: "Principal" }));
-
-    expect(navigation.getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
-    expect(navigation.getByRole("link", { name: "Juegos" })).toHaveAttribute("href", "/games");
-    expect(navigation.getByRole("link", { name: "Patrocinadores" })).toHaveAttribute("href", "/sponsors");
+    expect(screen.queryByRole("navigation", { name: "Principal" })).not.toBeInTheDocument();
   });
 });
 

@@ -35,6 +35,10 @@ export type ResendResult = { status: "sent"; emailId: string } | ManageFailure;
 
 export type DisableResult = { status: "disabled" } | ManageFailure;
 
+type ReactivateRefusal = { status: "standFull" | "deskTaken" | "adminTaken" };
+
+export type ReactivateResult = { status: "reactivated"; emailId: string } | ReactivateRefusal | ManageFailure;
+
 export type InvitationState = { status: "valid"; name: string } | { status: "expired" | "invalid" };
 
 export type ActivationResult = { status: "activated" | "expired" | "invalid" };
@@ -43,6 +47,7 @@ interface ManagedRow {
   id: string;
   role: string;
   standId: string | null;
+  kofDesk: number | null;
   name: string;
   email: string;
   status: string;
@@ -121,6 +126,32 @@ export async function disableAccount(actor: ManagingActor, accountId: string): P
 
     return { status: "disabled" };
   });
+}
+
+/**
+ * Gives a disabled account its place back. The minimum that is safe: it returns to `invited` with a new link of 72
+ * hours, so the person chooses a password again (the old one is erased) and nobody gets in with credentials from before
+ * the account was disabled. It follows the same limits as a new invitation: 3 staff per stand, one staff per KOF desk
+ * and one administrator per stand (the triggers of the table are the safety net if two requests race).
+ */
+export async function reactivateAccount(actor: ManagingActor, accountId: string, now: Date): Promise<ReactivateResult> {
+  const lookup = await findManagedAccount(actor, accountId);
+
+  if (lookup.kind === "refused") return lookup.failure;
+
+  const { account } = lookup;
+
+  if (account.status !== "disabled") return { status: "wrongState" };
+
+  const refusal = await findReactivateRefusal(account);
+
+  if (refusal) return refusal;
+
+  try {
+    return await getPrisma().$transaction((transaction) => restoreAsInvited({ transaction, actor, account, now }));
+  } catch (cause) {
+    return explainReactivateFailure(cause);
+  }
 }
 
 /** Sets the password, activates the account and uses the invitation up; only one of two simultaneous calls wins. */
@@ -205,6 +236,59 @@ export async function listStandAccounts(filter: {
   return rows.flatMap(({ standId, ...row }) =>
     standId ? [{ ...row, standId, status: toStatus(row.status), kofDesk: toKofDesk(row.kofDesk) }] : [],
   );
+}
+
+async function restoreAsInvited(request: {
+  transaction: Prisma.TransactionClient;
+  actor: ManagingActor;
+  account: ManagedRow;
+  now: Date;
+}): Promise<ReactivateResult> {
+  const { transaction, actor, account, now } = request;
+
+  await transaction.account.update({ where: { id: account.id }, data: { status: "invited", password: null } });
+
+  const token = await issueInvitation(transaction, account.id, now);
+  const emailId = await enqueueEmail(transaction, buildInvitationEmail(account.email, account.name, token));
+
+  await recordAudit(transaction, auditOf(actor, "account.reactivate", account.id));
+
+  return { status: "reactivated", emailId };
+}
+
+async function findReactivateRefusal(account: ManagedRow): Promise<ReactivateRefusal | null> {
+  const { role, standId, kofDesk } = account;
+
+  if (role === "stand_staff" && standId && (await countStandStaff(standId)) >= MAX_STAND_STAFF) {
+    return { status: "standFull" };
+  }
+
+  if (role === "stand_admin" && standId && (await hasStandAdmin(standId))) return { status: "adminTaken" };
+
+  return role === "kof_staff" && (kofDesk === 1 || kofDesk === 2) && (await isDeskTaken(kofDesk))
+    ? { status: "deskTaken" }
+    : null;
+}
+
+async function hasStandAdmin(standId: string): Promise<boolean> {
+  const admin = await getPrisma().account.findFirst({
+    where: { role: "stand_admin", standId, status: { not: "disabled" } },
+    select: { id: true },
+  });
+
+  return admin !== null;
+}
+
+function explainReactivateFailure(cause: unknown): ReactivateRefusal {
+  const message = readDatabaseMessage(cause);
+
+  if (message.includes("La mesa ya tiene un staff")) return { status: "deskTaken" };
+
+  if (message.includes("3 cuentas de staff")) return { status: "standFull" };
+
+  if (message.includes("ya tiene un administrador")) return { status: "adminTaken" };
+
+  throw cause;
 }
 
 // A KOF staff member needs a desk and nobody else has one.
@@ -322,7 +406,7 @@ async function isDeskTaken(kofDesk: KofDesk): Promise<boolean> {
 async function findManagedAccount(actor: ManagingActor, accountId: string): Promise<Lookup> {
   const account = await getPrisma().account.findUnique({
     where: { id: accountId },
-    select: { id: true, role: true, name: true, email: true, status: true, standId: true },
+    select: { id: true, role: true, name: true, email: true, status: true, standId: true, kofDesk: true },
   });
 
   if (!account) return { kind: "refused", failure: { status: "notFound" } };

@@ -2,6 +2,8 @@ import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
 
 export const FLOOR_PLAN_SECTION_ID = "floor-plan";
 
+export const FLOOR_PLAN_PATH = "/floor-plan";
+
 const ITEM_HASH_PREFIX = `#${FLOOR_PLAN_SECTION_ID}-`;
 
 export function getZoneLink(zoneId: string) {
@@ -12,6 +14,10 @@ export function getZoneLink(zoneId: string) {
 
 export function floorPlanItemHref(itemId: string) {
   return `${ITEM_HASH_PREFIX}${itemId}`;
+}
+
+export function getFloorPlanItemPath(itemId: string) {
+  return `${FLOOR_PLAN_PATH}${floorPlanItemHref(itemId)}`;
 }
 
 export function getItemIdFromHash(hash: string) {

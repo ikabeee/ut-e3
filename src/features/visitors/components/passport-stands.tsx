@@ -25,6 +25,7 @@ export function PassportStands({ stands }: Readonly<PassportStandsProps>) {
         {stands.map((stand) => (
           <li key={stand.code} className={stand.visited ? VISITED_CLASS : PENDING_CLASS}>
             <span className="type-mono">{stand.code}</span>
+            {stand.gameName ? <span className="type-tiny text-muted">{stand.gameName}</span> : null}
             <span className="type-tiny">{stand.visited ? COPY.visited : COPY.pending}</span>
           </li>
         ))}

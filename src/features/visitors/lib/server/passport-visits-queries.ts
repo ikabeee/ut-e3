@@ -8,7 +8,7 @@ import { getPrisma } from "@shared/lib/server/prisma";
 export async function getPassportVisits(visitorId: string): Promise<PassportVisits> {
   const [stands, checkIns, tickets] = await Promise.all([
     getPrisma().stand.findMany({
-      select: { id: true, zone: true, number: true },
+      select: { id: true, zone: true, number: true, game: { select: { name: true } } },
       orderBy: [{ zone: "asc" }, { number: "asc" }],
     }),
     getPrisma().checkIn.findMany({
@@ -30,6 +30,7 @@ export async function getPassportVisits(visitorId: string): Promise<PassportVisi
     stands: stands.map((stand) => ({
       code: formatStandCode(stand),
       visited: visitedStandIds.has(stand.id),
+      gameName: stand.game?.name ?? null,
     })),
     tickets: tickets.map(toPassportTicket),
   };

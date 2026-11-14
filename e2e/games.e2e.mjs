@@ -356,8 +356,8 @@ function cancunTime(date) {
   }).format(date);
 }
 
-// G-01: tapping the game at the center of the landing coverflow opens its full page, with the navbar ("Inicio" only,
-// S6); the featured game's page shows its data.
+// G-01: tapping the game at the center of the landing coverflow opens its full page, with the shared navbar; the
+// featured game's page shows its data.
 async function checkCatalogToGamePage(session) {
   const { page, fixture } = session;
 
@@ -387,18 +387,43 @@ async function followCoverflowCase(session, game) {
   await screenshot(session, "02-coverflow-to-game/02-game-page");
 }
 
+// The shared navbar of the root layout (S10 of odd/tasks/badges-raffle-tickets-floor-plan.md): six entries, with
+// "Juegos" marked on a game page, and "Mi pasaporte" as the call to action.
 async function checkNavbar(page) {
-  const links = page.getByRole("navigation").getByRole("link");
-  const labels = (await links.allTextContents()).map((label) => label.trim()).filter(Boolean);
-  const inicio = page.getByRole("navigation").getByRole("link", { name: "Inicio", exact: true });
+  const entries = await openSiteNavEntries(page);
+  const labels = (await entries.getByRole("link").allTextContents()).map((label) => label.trim()).filter(Boolean);
+  const inicio = entries.getByRole("link", { name: "Inicio", exact: true });
+  const juegos = entries.getByRole("link", { name: "Juegos", exact: true });
+  const passport = siteNavbar(page).getByRole("link", { name: "Mi pasaporte", exact: true });
 
   check(
-    "G-01 the navbar lists Inicio, Juegos and Patrocinadores",
-    labels.join(",") === "Inicio,Juegos,Patrocinadores",
+    "G-01 the navbar lists Inicio, Juegos, Croquis, Patrocinadores, Rifa and Torneo",
+    labels.join(",") === "Inicio,Juegos,Croquis,Patrocinadores,Rifa,Torneo",
     labels.join(",") || "none",
   );
   check("G-01 Inicio goes to /", (await inicio.getAttribute("href")) === "/");
+  check("G-01 Juegos is the current section", (await juegos.getAttribute("aria-current")) === "page");
+  check("G-01 Mi pasaporte goes to /passport", (await passport.getAttribute("href")) === "/passport");
   check('G-01 no "Volver al catálogo" link', (await page.getByText("Volver al catálogo").count()) === 0);
+  await page.keyboard.press("Escape");
+}
+
+function siteNavbar(page) {
+  return page.getByRole("navigation", { name: "Principal" });
+}
+
+// Below 1024 px the entries of the navbar live in the menu: open it and return it; on desktop return the list of the
+// navbar, without the logo and Mi pasaporte.
+async function openSiteNavEntries(page) {
+  const menuButton = siteNavbar(page).getByRole("button", { name: "Abrir menú" });
+
+  if (!(await menuButton.isVisible())) return siteNavbar(page).getByRole("list");
+
+  await menuButton.click();
+  const menu = page.getByRole("dialog", { name: "Menú" });
+  await menu.waitFor({ timeout: 30_000 });
+
+  return menu;
 }
 
 function escapeRegExp(text) {
@@ -482,7 +507,8 @@ async function checkNavbarToCatalog(session) {
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
-  await page.getByRole("navigation").getByRole("link", { name: "Juegos", exact: true }).click();
+  const entries = await openSiteNavEntries(page);
+  await entries.getByRole("link", { name: "Juegos", exact: true }).click();
   await page.waitForURL((url) => url.pathname === "/games", { timeout: 30_000 });
   await gameGrid(page).waitFor({ timeout: 30_000 });
 
@@ -562,7 +588,7 @@ async function checkCatalogViewports(session) {
     await page.goto(`${BASE_URL}/games`, { waitUntil: "networkidle" });
     const label = `G-13 ${viewport.label}`;
     await checkNoHorizontalScroll(page, label);
-    await checkTouchTarget(page.getByRole("navigation").getByRole("link", { name: "Juegos" }), label, "Juegos");
+    await checkNavbarTouchTarget(page, label, "Juegos");
     await checkTouchTarget(page.getByRole("button", { name: "Juego siguiente" }), label, "Juego siguiente");
     await checkTouchTarget(page.getByRole("button", { name: "Más géneros" }), label, "Más géneros");
     await screenshot(session, `12-catalog-viewports/${String(index + 1).padStart(2, "0")}-${viewport.label}`);
@@ -681,14 +707,19 @@ async function checkViewports(session) {
     await openGamePage(page, FEATURED_SLUG);
     const label = `G-08 ${viewport.label}`;
     await checkNoHorizontalScroll(page, label);
-    await checkTouchTarget(
-      page.getByRole("navigation").getByRole("link", { name: "Inicio", exact: true }),
-      label,
-      "Inicio",
-    );
+    await checkNavbarTouchTarget(page, label, "Inicio");
     await checkTouchTarget(page.getByRole("link", { name: "Jugar en itch.io" }), label, "Jugar en itch.io");
     await screenshot(session, `08-viewports/${String(index + 1).padStart(2, "0")}-${viewport.label}`);
   }
+}
+
+// The navbar touch target at this width: the menu button on a phone, the entry itself on desktop.
+async function checkNavbarTouchTarget(page, label, name) {
+  const menuButton = siteNavbar(page).getByRole("button", { name: "Abrir menú" });
+  const isPhone = await menuButton.isVisible();
+  const target = isPhone ? menuButton : siteNavbar(page).getByRole("link", { name, exact: true });
+
+  await checkTouchTarget(target, label, isPhone ? "Abrir menú" : name);
 }
 
 async function checkNoHorizontalScroll(page, label) {

@@ -1,14 +1,26 @@
 import "server-only";
 import { formatAdminStandCode } from "@features/games/lib/stand-code";
 import { findFewStandVisitors, findTopScoreBursts } from "@features/moderation/lib/fraud-alerts";
-import type { FraudAlerts, FraudThresholds, ModerationVisitor } from "@features/moderation/lib/types";
+import type {
+  BurstVisit,
+  FraudAlerts,
+  FraudThresholds,
+  ModerationStand,
+  ModerationVisitor,
+  StandBurst,
+  StandVisit,
+} from "@features/moderation/lib/types";
 import { VALID_CHECK_IN_WHERE } from "@features/visitors/lib/server/milestone-tickets";
 import type { Prisma } from "@generated/prisma/client";
+import { maskEmail } from "@shared/lib/mask-email";
 import { hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 /** How many visitors the alert of few stands lists; the total is shown apart. */
 export const FEW_STAND_VISITOR_LIMIT = 50;
+
+/** The most visits of one stand that the view and its CSV list. */
+export const STAND_VISIT_LIMIT = 5000;
 
 const PIN_PATTERN = /^\d{5}$/;
 
@@ -66,10 +78,51 @@ export async function getFraudAlerts(): Promise<FraudAlerts> {
 
   return {
     thresholds,
-    bursts: bursts.map((burst) => ({ ...burst, standCode: codes.get(burst.standId) ?? burst.standId })),
+    bursts: await describeBursts(bursts, codes),
     fewStandVisitors: await describeVisitors(fewStand.slice(0, FEW_STAND_VISITOR_LIMIT), codes),
     fewStandVisitorTotal: fewStand.length,
   };
+}
+
+/** The stands of the "Por stand" view, in the order of the floor plan. */
+export async function listModerationStands(): Promise<ModerationStand[]> {
+  const stands = await getPrisma().stand.findMany({
+    orderBy: [{ zone: "asc" }, { number: "asc" }],
+    select: { id: true, ...STAND_CODE_FIELDS },
+  });
+
+  return stands.map((stand) => ({ id: stand.id, code: formatAdminStandCode(stand) }));
+}
+
+/**
+ * Every visit of a stand, also the annulled ones and those of excluded visitors, with who recorded it and what it rated
+ * (RF-45). Never the PIN or the email.
+ */
+export async function getStandVisits(standId: string): Promise<StandVisit[]> {
+  const rows = await getPrisma().checkIn.findMany({
+    where: { standId },
+    orderBy: { checkedInAt: "asc" },
+    take: STAND_VISIT_LIMIT,
+    select: {
+      id: true,
+      visitorId: true,
+      checkedInAt: true,
+      annulledAt: true,
+      scannedBy: { select: { name: true } },
+      visitor: { select: { gamertag: true, excludedAt: true } },
+      vote: { select: { gameRating: true, standRating: true, artRating: true } },
+    },
+  });
+
+  return rows.map((row) => ({
+    checkInId: row.id,
+    visitorId: row.visitorId,
+    gamertag: row.visitor.gamertag,
+    at: row.checkedInAt.toISOString(),
+    recordedBy: row.scannedBy?.name ?? null,
+    ratings: row.vote ? { game: row.vote.gameRating, stand: row.vote.standRating, art: row.vote.artRating } : null,
+    status: toStandVisitStatus(row),
+  }));
 }
 
 /** A passport by its PIN, gamertag or email, with every visit (also the annulled ones) and its tickets. */
@@ -145,4 +198,58 @@ function toModerationVisitor(visitor: VisitorRow): ModerationVisitor {
     checkIns,
     tickets: visitor.raffleTickets,
   };
+}
+
+function toStandVisitStatus(row: {
+  annulledAt: Date | null;
+  visitor: { excludedAt: Date | null };
+}): StandVisit["status"] {
+  if (row.annulledAt) return "annulled";
+
+  return row.visitor.excludedAt ? "excluded" : "valid";
+}
+
+// The visits of each burst: the perfect votes that fell inside its lapse, with who gave them.
+async function describeBursts(
+  bursts: readonly StandBurst[],
+  codes: ReadonlyMap<string, string>,
+): Promise<FraudAlerts["bursts"]> {
+  return Promise.all(
+    bursts.map(async (burst) => ({
+      ...burst,
+      standCode: codes.get(burst.standId) ?? burst.standId,
+      visits: await getBurstVisits(burst),
+    })),
+  );
+}
+
+async function getBurstVisits(burst: StandBurst): Promise<BurstVisit[]> {
+  const votes = await getPrisma().vote.findMany({
+    where: {
+      standId: burst.standId,
+      gameRating: 5,
+      standRating: 5,
+      artRating: 5,
+      checkIn: COUNTED_CHECK_IN,
+      createdAt: { gte: new Date(burst.startsAt), lte: new Date(burst.endsAt) },
+    },
+    orderBy: { createdAt: "asc" },
+    select: {
+      checkInId: true,
+      createdAt: true,
+      gameRating: true,
+      standRating: true,
+      artRating: true,
+      visitor: { select: { id: true, gamertag: true, email: true } },
+    },
+  });
+
+  return votes.map((vote) => ({
+    checkInId: vote.checkInId,
+    visitorId: vote.visitor.id,
+    gamertag: vote.visitor.gamertag,
+    maskedEmail: maskEmail(vote.visitor.email),
+    at: vote.createdAt.toISOString(),
+    ratings: { game: vote.gameRating, stand: vote.standRating, art: vote.artRating },
+  }));
 }

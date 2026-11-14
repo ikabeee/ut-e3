@@ -32,7 +32,7 @@ export function parseSnapshot(raw: string | null): PassportSnapshot | null {
   try {
     const value = JSON.parse(raw);
 
-    return isSnapshot(value) ? value : null;
+    return isSnapshot(value) ? fillStandNames(value) : null;
   } catch {
     return null;
   }
@@ -96,8 +96,24 @@ function isStand(value: unknown): value is PassportStand {
     "code" in value &&
     typeof value.code === "string" &&
     "visited" in value &&
-    typeof value.visited === "boolean"
+    typeof value.visited === "boolean" &&
+    (!("gameName" in value) || value.gameName === null || typeof value.gameName === "string")
   );
+}
+
+// Copies saved before the game names existed carry no name: they read as stands without a game.
+function fillStandNames(snapshot: PassportSnapshot): PassportSnapshot {
+  return {
+    ...snapshot,
+    visits: {
+      ...snapshot.visits,
+      stands: snapshot.visits.stands.map(fillStandName),
+    },
+  };
+}
+
+function fillStandName(stand: PassportStand): PassportStand {
+  return { ...stand, gameName: stand.gameName ?? null };
 }
 
 function isTicket(value: unknown): value is PassportTicket {

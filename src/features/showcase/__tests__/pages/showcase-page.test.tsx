@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import type { EventSettings } from "@features/event-settings/lib/types";
 import { makeGames } from "@features/games/__tests__/components/game-test-data";
 import type { ScheduleItem } from "@features/schedule/lib/types";
@@ -45,6 +45,12 @@ describe("ShowcaseView", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveAccessibleName("PIXEL & CODE");
   });
 
+  it("renders no navbar of its own: the root layout mounts the site navbar", () => {
+    renderShowcase();
+
+    expect(screen.queryByRole("navigation", { name: "Principal" })).not.toBeInTheDocument();
+  });
+
   it("offers the passport and shows the date and the venue of the event", () => {
     renderShowcase();
 
@@ -58,6 +64,16 @@ describe("ShowcaseView", () => {
     expect(screen.getByRole("region", { name: "Juegos del showcase" })).toBeInTheDocument();
     expect(screen.getByText("Rifa")).toBeInTheDocument();
     expect(screen.getByText("Pixel Forge")).toBeInTheDocument();
+  });
+
+  it("shows the sponsors as numbered raffle tickets like the landing", () => {
+    renderShowcase();
+
+    const sponsors = screen.getByRole("region", { name: "Patrocinadores" });
+
+    expect(within(sponsors).getByText("Gracias a quienes hacen posible el evento.")).toBeInTheDocument();
+    expect(within(sponsors).getByText("Nº 003")).toBeInTheDocument();
+    expect(within(sponsors).getByRole("img", { name: "Code Lab" })).toBeInTheDocument();
   });
 
   it("shows the talks, the floor plan and the venue like the landing", () => {

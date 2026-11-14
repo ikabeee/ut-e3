@@ -6,6 +6,7 @@ export const STANDS_COPY = {
     signedInAs: (name: string) => `Sesión de ${name}`,
     standLabel: (code: string, gameName: string) => `Stand ${code} · ${gameName}`,
     noGame: "Registra tu juego para empezar a recibir visitas",
+    closedNotice: (time: string) => `El registro de visitas cerró a las ${time}. Este kiosko ya no recibe PIN.`,
     pin: {
       heading: "Escribe tu PIN",
       hint: "Es el PIN de 5 dígitos de tu pasaporte.",

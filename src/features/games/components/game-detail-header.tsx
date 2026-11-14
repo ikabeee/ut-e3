@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import type { Game } from "@features/games/lib/types";
+import { ArrowGlyph } from "@shared/components/arrow-glyph";
 
 interface GameDetailHeaderProps {
   game: Game;
@@ -12,8 +13,9 @@ export function GameDetailHeader({ game, catalogHref }: Readonly<GameDetailHeade
     <header className="flex flex-col gap-2.5">
       <Link
         href={catalogHref}
-        className="touch-target relative mb-2 self-start type-tiny text-muted no-underline hover:text-accent"
+        className="touch-target relative mb-2 inline-flex min-h-11 items-center gap-1.5 self-start type-tiny text-foreground no-underline hover:text-accent"
       >
+        <ArrowGlyph direction="w" />
         {GAMES_COPY.detail.backToCatalog}
       </Link>
       <h1 className="type-wide text-[clamp(28px,4.4vw,60px)] leading-[.95] tracking-[-.035em] wrap-break-word">

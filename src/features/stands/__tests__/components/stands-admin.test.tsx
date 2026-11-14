@@ -143,7 +143,14 @@ function findRow(code: string): HTMLElement {
 type ActionName = keyof StandsAdminActions;
 
 function recordingActions() {
-  const received: Record<ActionName, FormData[]> = { create: [], update: [], inviteAdmin: [], resend: [], disable: [] };
+  const received: Record<ActionName, FormData[]> = {
+    create: [],
+    update: [],
+    inviteAdmin: [],
+    resend: [],
+    disable: [],
+    reactivate: [],
+  };
 
   const record =
     (name: ActionName): ManagementAction =>
@@ -159,6 +166,7 @@ function recordingActions() {
     inviteAdmin: record("inviteAdmin"),
     resend: record("resend"),
     disable: record("disable"),
+    reactivate: record("reactivate"),
   };
 
   return { actions, received };

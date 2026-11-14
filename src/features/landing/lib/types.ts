@@ -25,7 +25,7 @@ export interface SpecialGuest {
   name: string;
   role?: string;
   talk: string;
-  /** A photo from public/, shown in 4:3. Without it the card shows a plain block. */
+  /** A photo from public/, shown in 4:5. Without it the badge shows a placeholder. */
   photo?: { src: string; alt: string };
 }
 

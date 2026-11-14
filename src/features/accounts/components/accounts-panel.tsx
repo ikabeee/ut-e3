@@ -8,6 +8,7 @@ export interface AccountsPanelActions {
   invite: ManagementAction;
   resend: ManagementAction;
   disable: ManagementAction;
+  reactivate: ManagementAction;
 }
 
 interface AccountsPanelProps {
@@ -40,7 +41,12 @@ export function AccountsPanel({ heading, actorRole, accounts, actions }: Readonl
           />
         </div>
       </details>
-      <ManagedAccountList accounts={accounts} resendAction={actions.resend} disableAction={actions.disable} />
+      <ManagedAccountList
+        accounts={accounts}
+        resendAction={actions.resend}
+        disableAction={actions.disable}
+        reactivateAction={actions.reactivate}
+      />
     </section>
   );
 }

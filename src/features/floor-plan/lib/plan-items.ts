@@ -1,83 +1,191 @@
 import { FLOOR_PLAN_COPY } from "@features/floor-plan/lib/floor-plan-copy";
-import { getStandCells, PLAN_LAYOUTS } from "@features/floor-plan/lib/plan-layouts";
-import {
-  ZONE_IDS,
-  type FloorPlanStand,
-  type PlanCategory,
-  type PlanItem,
-  type StandCell,
-  type ZoneId,
-} from "@features/floor-plan/lib/types";
+import { STAND_MARKERS, ZONE_MARKERS } from "@features/floor-plan/lib/map-layout";
+import type { FloorPlanStand, StandZone, ZoneId } from "@features/floor-plan/lib/types";
 
-const ZONE_CATEGORIES: Record<ZoneId, PlanCategory> = {
-  stage: "act",
-  kof: "act",
-  "mario-kart": "act",
-  restrooms: "srv",
-  "rear-marketplace": "srv",
-  marketplace: "srv",
-  cafeteria: "srv",
-  "help-center-1": "info",
-  "help-center-2": "info",
-  "help-center-3": "info",
-  "help-center-4": "info",
+export type MapItemKind = "stand" | "activity" | "service";
+
+export interface MapItem {
+  id: string;
+  kind: MapItemKind;
+  label: string;
+  kicker: string;
+  title: string;
+  description: string;
+  code: string;
+  gameName: string | null;
+  slug: string | null;
+  coverSrc: string | null;
+  coverAlt: string;
+  shortName: string;
+  subline: string | null;
+  blockLabel: string | null;
+  standNumber: number | null;
+  blockSize: number;
+  x: number;
+  y: number;
+}
+
+const ZONE_KINDS: Record<ZoneId, MapItemKind> = {
+  stage: "activity",
+  kof: "activity",
+  "mario-kart": "activity",
+  restrooms: "service",
+  marketplace: "service",
+  "help-center-1": "service",
+  "help-center-2": "service",
+  "help-center-3": "service",
+  "help-center-4": "service",
 };
 
-export function buildPlanItems(stands: readonly FloorPlanStand[]): PlanItem[] {
+/** Every marker of the map in plan order: the 18 stand cells first, then the 9 zones. */
+export function buildMapItems(stands: readonly FloorPlanStand[]): MapItem[] {
   const standsByCode = new Map(stands.map((stand) => [stand.code, stand]));
-  const cells = PLAN_LAYOUTS.wide.standBlocks.flatMap(getStandCells);
-  const standItems = cells.map((cell) => buildTeamItem(cell, standsByCode.get(cell.code)));
+  const standItems = STAND_MARKERS.map((marker) => buildStandItem(marker.code, standsByCode.get(marker.code)));
+  const zoneItems = ZONE_MARKERS.map((marker) => buildZoneItem(marker.id));
 
-  return [...standItems, ...ZONE_IDS.map(buildZoneItem)];
+  return [...standItems, ...zoneItems];
 }
 
-export function splitStandName(name: string): [string, string] {
-  const words = name.toUpperCase().split(" ");
-  const half = Math.ceil(words.length / 2);
+export type MapFilter = "all" | MapItemKind;
 
-  return [words.slice(0, half).join(" "), words.slice(half).join(" ")];
+/** The visible markers of one filter chip: every item for "all", only its kind otherwise. */
+export function filterMapItems(items: readonly MapItem[], filter: MapFilter): MapItem[] {
+  if (filter === "all") return [...items];
+
+  return items.filter((item) => item.kind === filter);
 }
 
-function buildTeamItem({ code }: StandCell, stand: FloorPlanStand | undefined): PlanItem {
-  if (!stand) {
-    return {
-      id: code,
-      category: "team",
-      label: FLOOR_PLAN_COPY.drawing.standLabel(code),
-      kicker: FLOOR_PLAN_COPY.unassignedKicker(code),
-      title: FLOOR_PLAN_COPY.unassignedTitle,
-      description: FLOOR_PLAN_COPY.unassignedDescription,
-      code,
-      drawingName: "",
-      cover: null,
-    };
-  }
+/** How many blocks the stands belong to: T, C, A, D and B. */
+export function countBlocks(): number {
+  return new Set(STAND_MARKERS.map((marker) => marker.code.charAt(1))).size;
+}
 
+/** How many zones are activities: the stage, the KOF arena and Mario Kart. */
+export function countActivities(): number {
+  // SAFETY: every zone marker id is a key of the zone copy and its kinds.
+  return ZONE_MARKERS.filter((marker) => ZONE_KINDS[marker.id as ZoneId] === "activity").length;
+}
+
+function buildStandItem(code: string, stand: FloorPlanStand | undefined): MapItem {
+  const marker = STAND_MARKERS.find((candidate) => candidate.code === code);
+
+  const placement = {
+    parsed: parseStandCode(code),
+    position: { x: marker?.x ?? 0, y: marker?.y ?? 0 },
+  };
+
+  if (!stand) return emptyStandItem(code, placement);
+
+  return gameStandItem(code, stand, placement);
+}
+
+interface StandPlacement {
+  parsed: ParsedStandCode;
+  position: { x: number; y: number };
+}
+
+function emptyStandItem(code: string, placement: StandPlacement): MapItem {
   return {
     id: code,
-    category: "team",
+    kind: "stand",
+    label: FLOOR_PLAN_COPY.drawing.standLabel(code),
+    kicker: FLOOR_PLAN_COPY.unassignedKicker(code),
+    title: FLOOR_PLAN_COPY.unassignedTitle,
+    description: FLOOR_PLAN_COPY.unassignedDescription,
+    code,
+    gameName: null,
+    slug: null,
+    coverSrc: null,
+    coverAlt: "",
+    ...sharedStandFields(code, placement),
+  };
+}
+
+function gameStandItem(code: string, stand: FloorPlanStand, placement: StandPlacement): MapItem {
+  return {
+    id: code,
+    kind: "stand",
     label: FLOOR_PLAN_COPY.drawing.standLabel(code, stand.name),
     kicker: FLOOR_PLAN_COPY.standKicker(code, stand.genre),
     title: stand.name,
     description: stand.synopsis,
     code,
-    drawingName: stand.name,
-    cover: { src: stand.coverSrc, alt: stand.coverAlt },
+    gameName: stand.name,
+    slug: stand.slug,
+    coverSrc: stand.coverSrc,
+    coverAlt: stand.coverAlt,
+    ...sharedStandFields(code, placement),
   };
 }
 
-function buildZoneItem(id: ZoneId): PlanItem {
-  const zone = FLOOR_PLAN_COPY.zones[id];
+interface SharedStandFields {
+  shortName: string;
+  subline: null;
+  blockLabel: string | null;
+  standNumber: number | null;
+  blockSize: number;
+  x: number;
+  y: number;
+}
+
+/** The plan fields every stand cell carries, with or without an assigned game. */
+function sharedStandFields(code: string, placement: StandPlacement): SharedStandFields {
+  return {
+    shortName: code,
+    subline: null,
+    blockLabel: placement.parsed.blockLabel,
+    standNumber: placement.parsed.number,
+    blockSize: placement.parsed.blockSize,
+    x: placement.position.x,
+    y: placement.position.y,
+  };
+}
+
+function buildZoneItem(id: string): MapItem {
+  // SAFETY: every zone marker id comes from ZONE_MARKERS, whose ids are the keys of the zone copy.
+  const zone = FLOOR_PLAN_COPY.zones[id as ZoneId];
+  const marker = ZONE_MARKERS.find((candidate) => candidate.id === id);
 
   return {
     id,
-    category: ZONE_CATEGORIES[id],
+    // SAFETY: same zone id as above, a key of the zone copy and its kinds.
+    kind: ZONE_KINDS[id as ZoneId],
     label: zone.title,
     kicker: zone.kind,
     title: zone.title,
     description: zone.description,
     code: "",
-    drawingName: FLOOR_PLAN_COPY.drawing.zoneLabels[id],
-    cover: null,
+    gameName: null,
+    slug: null,
+    coverSrc: null,
+    coverAlt: "",
+    // SAFETY: same zone id as above, a key of the drawing labels.
+    shortName: FLOOR_PLAN_COPY.drawing.zoneLabels[id as ZoneId],
+    subline: zone.subline,
+    blockLabel: null,
+    standNumber: null,
+    blockSize: 0,
+    x: marker?.x ?? 0,
+    y: marker?.y ?? 0,
+  };
+}
+
+interface ParsedStandCode {
+  blockLabel: string | null;
+  number: number | null;
+  blockSize: number;
+}
+
+function parseStandCode(code: string): ParsedStandCode {
+  // SAFETY: every stand code comes from formatStandCode as `Z<zone>-S<number>`, so the second char is its zone.
+  const zone = code.charAt(1) as StandZone;
+  const number = Number.parseInt(code.slice(code.indexOf("-S") + 2), 10);
+  const blockLabel = FLOOR_PLAN_COPY.drawing.blockLabels[zone] ?? null;
+  const blockSize = STAND_MARKERS.filter((marker) => marker.code.charAt(1) === code.charAt(1)).length;
+
+  return {
+    blockLabel,
+    number: Number.isInteger(number) ? number : null,
+    blockSize,
   };
 }

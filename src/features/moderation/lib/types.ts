@@ -24,7 +24,7 @@ export interface VisitorVisitCount {
 
 export interface FraudAlerts {
   thresholds: FraudThresholds;
-  bursts: (StandBurst & { standCode: string })[];
+  bursts: (StandBurst & { standCode: string; visits: BurstVisit[] })[];
   fewStandVisitors: { visitorId: string; gamertag: string; visitCount: number; standCodes: string[] }[];
   /** How many visitors match in total; the list shows only the most recent ones. */
   fewStandVisitorTotal: number;
@@ -51,4 +51,39 @@ export interface ModerationVisitor {
   exclusion: { at: string; reason: string } | null;
   checkIns: ModerationCheckIn[];
   tickets: ModerationTicket[];
+}
+
+export interface VoteRatings {
+  game: number;
+  stand: number;
+  art: number;
+}
+
+/** A visit inside the lapse of a burst: who was it, when and what it rated. There is never a PIN here. */
+export interface BurstVisit {
+  checkInId: string;
+  visitorId: string;
+  gamertag: string;
+  maskedEmail: string;
+  at: string;
+  ratings: VoteRatings;
+}
+
+export type StandVisitStatus = "valid" | "annulled" | "excluded";
+
+/** A row of the "Por stand" view and of its CSV. */
+export interface StandVisit {
+  checkInId: string;
+  visitorId: string;
+  gamertag: string;
+  at: string;
+  /** The staff account that had the kiosk open, if it was recorded. */
+  recordedBy: string | null;
+  ratings: VoteRatings | null;
+  status: StandVisitStatus;
+}
+
+export interface ModerationStand {
+  id: string;
+  code: string;
 }

@@ -17,7 +17,7 @@ export const privacyPageMetadata: Metadata = {
 
 export function PrivacyPage() {
   return (
-    <main className="page-wrap flex min-h-svh flex-col items-center justify-center gap-6 py-16 text-center">
+    <main className="page-wrap flex min-h-[calc(100svh-var(--nav-height))] flex-col items-center justify-center gap-6 py-16 text-center">
       <h1 className="type-section">{VISITORS_COPY.privacy.title}</h1>
       <p className="max-w-md text-muted">{VISITORS_COPY.privacy.pendingNotice}</p>
     </main>

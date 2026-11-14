@@ -10,5 +10,13 @@ export const SPECIAL_GUESTS: readonly SpecialGuest[] = [
       alt: "Retrato de Ing. Ariana Patricia Tzuc Vázquez",
     },
   },
-  // To bring the second card back, restore: { id: "guest-2", name: "Por anunciar", talk: "Plática por anunciar" },
+  {
+    id: "guest-noxy",
+    name: "Ing. Noelí Rodríguez Morales",
+    talk: "Plática por anunciar",
+    photo: {
+      src: "/speakers/ponente-noxy.webp",
+      alt: "Retrato de Ing. Noelí Rodríguez Morales",
+    },
+  },
 ];

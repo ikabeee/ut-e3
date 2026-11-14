@@ -5,9 +5,9 @@ import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 const COPY = VISITORS_COPY.passport.stands;
 
 const STANDS = [
-  { code: "ZA-S1", visited: true },
-  { code: "ZA-S2", visited: false },
-  { code: "ZB-S1", visited: false },
+  { code: "ZA-S1", visited: true, gameName: null },
+  { code: "ZA-S2", visited: false, gameName: null },
+  { code: "ZB-S1", visited: false, gameName: null },
 ];
 
 describe("PassportStands", () => {

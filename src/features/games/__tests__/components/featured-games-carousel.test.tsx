@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { makeGames } from "@features/games/__tests__/components/game-test-data";
+import { makeGame, makeGames } from "@features/games/__tests__/components/game-test-data";
 import { FeaturedGamesCarousel } from "@features/games/components/featured-games-carousel";
 
 const AUTOPLAY_MS = 6500;
@@ -111,5 +111,21 @@ describe("FeaturedGamesCarousel", () => {
     fireEvent.touchEnd(slide, { changedTouches: [{ clientX: 100 }] });
 
     expect(currentTitle()).toHaveTextContent("Juego 02");
+  });
+
+  it("shows the landscape image of a game as the hero and the vertical cover when it has none", () => {
+    const landscape = { path: "/games/a-portada.jpg", alt: "Portada horizontal de A", position: 2, isCover: false };
+    const withLandscape = makeGame({ id: "a", name: "A" });
+    const withoutLandscape = makeGame({ id: "b", name: "B" });
+
+    render(
+      <FeaturedGamesCarousel
+        games={[{ ...withLandscape, images: [...withLandscape.images, landscape] }, withoutLandscape]}
+      />,
+    );
+
+    expect(screen.getByAltText("Portada horizontal de A")).toBeInTheDocument();
+    expect(screen.queryByAltText("Portada de A")).not.toBeInTheDocument();
+    expect(screen.getByAltText("Portada de B")).toBeInTheDocument();
   });
 });

@@ -6,6 +6,18 @@ import { proxySiteRequest } from "@features/site/lib/site-proxy";
 
 const SITE = "https://utg.example";
 
+const originalSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
+// The tests of the fallback must not depend on the .env of whoever runs them.
+beforeEach(() => {
+  delete process.env.NEXT_PUBLIC_SITE_URL;
+});
+
+afterEach(() => {
+  if (originalSiteUrl === undefined) delete process.env.NEXT_PUBLIC_SITE_URL;
+  else process.env.NEXT_PUBLIC_SITE_URL = originalSiteUrl;
+});
+
 function request(pathname: string, init?: ConstructorParameters<typeof NextRequest>[1]) {
   return new NextRequest(`${SITE}${pathname}`, init);
 }
@@ -66,5 +78,31 @@ describe("proxySiteRequest in full mode", () => {
 
   it("does not treat a path that only starts like a staff page as one", () => {
     expect(proxySiteRequest(request("/standings"), "full").headers.get("x-middleware-next")).toBe("1");
+  });
+});
+
+describe("proxySiteRequest behind a proxy or a tunnel", () => {
+  const PUBLIC_SITE = "https://showcase.example.com";
+
+  it("sends a blocked page back to the landing on the public origin, not on the internal one", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = PUBLIC_SITE;
+
+    const response = proxySiteRequest(new NextRequest("http://localhost:3000/passport"), "landing");
+
+    expect(response.headers.get("location")).toBe(`${PUBLIC_SITE}/`);
+  });
+
+  it("sends a staff page without a session to /login on the public origin", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = PUBLIC_SITE;
+
+    const response = proxySiteRequest(new NextRequest("http://localhost:3000/admin"), "full");
+
+    expect(response.headers.get("location")).toBe(`${PUBLIC_SITE}/login`);
+  });
+
+  it("keeps the origin of the request when NEXT_PUBLIC_SITE_URL is not defined", () => {
+    const response = proxySiteRequest(new NextRequest("http://localhost:3000/admin"), "full");
+
+    expect(response.headers.get("location")).toBe("http://localhost:3000/login");
   });
 });

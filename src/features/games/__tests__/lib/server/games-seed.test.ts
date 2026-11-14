@@ -4,6 +4,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { INITIAL_GAMES, INITIAL_STANDS, seedGames } from "@features/games/lib/server/games-seed";
+import { buildGameSlug } from "@features/games/lib/game-slug";
 import { formatAdminStandCode } from "@features/games/lib/stand-code";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
@@ -31,7 +32,29 @@ const GAMES = [
 ] as const;
 
 // They have no artwork yet: the pages show a generic cover with their name.
-const GAMES_WITHOUT_COVER = ["make-em-fall", "one-mind", "sombra-del-mictlan", "don-t-pet-me"];
+const GAMES_WITHOUT_COVER = ["make-em-fall", "one-mind", "sombra-del-mictlan"];
+
+// The genre of every game, as the organizers confirmed it. Make 'em Fall has none yet.
+const CONFIRMED_GENRES = {
+  "make-em-fall": "Por anunciar",
+  "true-hero": "Plataformas",
+  "laboratorio-4": "Roguelike",
+  "abby-s-tower": "Acción",
+  "one-mind": "Acción",
+  vaporlock: "Acción",
+  "unknown-game": "Plataformas",
+  "sombra-del-mictlan": "RPG",
+  "don-t-pet-me": "Plataformas 3D",
+  "turno-rosso": "Simulación",
+  "reencarnacion-express": "RPG",
+  astrolabio: "Plataformas",
+  echoscrap: "Roguelike",
+  "after-light": "Roguelike",
+  "dark-mutant": "Survival Horror",
+  "saatan-paal": "Sigilo",
+  carencia: "Terror",
+  "identity-dissolution": "Survival Horror",
+} satisfies Record<string, string>;
 
 const database = createTestDatabase();
 
@@ -59,28 +82,46 @@ describe("INITIAL_GAMES", () => {
     expect(codes.filter((code) => code.startsWith("ZC-S3-"))).toEqual(["ZC-S3-E5-101"]);
   });
 
-  it("holds DON'T PET ME in ZC-S3 as a platformer with no artwork, synopsis or genre text beyond its name", () => {
+  it("holds DON'T PET ME in ZC-S3 as a platformer with its cover and landscape image, and no synopsis", () => {
     const game = INITIAL_GAMES.find((candidate) => candidate.stand.zone === "C" && candidate.stand.number === 3);
 
     expect(game).toMatchObject({
       slug: "don-t-pet-me",
       name: "DON'T PET ME",
       synopsis: "",
-      images: [],
+      images: [
+        { path: "/games/don-t-pet-me.jpg", isCover: true },
+        { path: "/games/don-t-pet-me-portada.jpg", isCover: false },
+      ],
       genre: { id: "plataformas-3d", name: "Plataformas 3D", slug: "plataformas-3d" },
     });
   });
 
-  it("announces the genre of every game but DON'T PET ME, and no synopsis, because the sources do not give them", () => {
-    for (const game of INITIAL_GAMES) {
-      const expected =
-        game.slug === "don-t-pet-me"
-          ? { id: "plataformas-3d", name: "Plataformas 3D", slug: "plataformas-3d" }
-          : { id: "por-anunciar", name: "Por anunciar", slug: "por-anunciar" };
+  it("gives every game the genre the organizers confirmed, and Por anunciar only to Make 'em Fall", () => {
+    expect(Object.fromEntries(INITIAL_GAMES.map((game) => [game.slug, game.genre.name]))).toEqual(CONFIRMED_GENRES);
+  });
 
-      expect(game.genre).toEqual(expected);
-      expect(game.synopsis).toBe("");
-    }
+  it("has no synopsis yet, because the sources do not give them", () => {
+    for (const game of INITIAL_GAMES) expect(game.synopsis).toBe("");
+  });
+
+  it("writes one name per genre (Plataformas, RPG), and the slug that the admin builds from it", () => {
+    const genres = new Map(INITIAL_GAMES.map((game) => [game.genre.slug, game.genre]));
+
+    for (const { name, slug } of genres.values()) expect(buildGameSlug(name)).toBe(slug);
+
+    expect([...genres.keys()].toSorted()).toEqual([
+      "accion",
+      "plataformas",
+      "plataformas-3d",
+      "por-anunciar",
+      "roguelike",
+      "rpg",
+      "sigilo",
+      "simulacion",
+      "survival-horror",
+      "terror",
+    ]);
   });
 
   it("uses the portrait cover as the main image, and a landscape one second except for Vaporlock", () => {
@@ -127,15 +168,15 @@ describe("seedGames", () => {
     expect(stands.map(formatAdminStandCode).toSorted()).toEqual(GAMES.map(([code]) => code).toSorted());
   });
 
-  it("writes the Por anunciar genre once for its games, and the Plataformas 3D genre for DON'T PET ME", async () => {
+  it("writes each genre once and links every game to its own", async () => {
     await seedGames(getPrisma());
 
     const genres = await getPrisma().genre.findMany({ orderBy: { slug: "asc" } });
+    const games = await getPrisma().game.findMany({ include: { genre: true } });
 
-    expect(genres).toEqual([
-      expect.objectContaining({ name: "Plataformas 3D", slug: "plataformas-3d" }),
-      expect.objectContaining({ name: "Por anunciar", slug: "por-anunciar" }),
-    ]);
+    expect(genres.map((genre) => genre.slug)).toEqual([...new Set(genres.map((genre) => genre.slug))]);
+    expect(genres).toHaveLength(10);
+    expect(Object.fromEntries(games.map((game) => [game.slug, game.genre.name]))).toEqual(CONFIRMED_GENRES);
   });
 
   it("writes every game with an empty synopsis and its cover at position 1 when it has one", async () => {

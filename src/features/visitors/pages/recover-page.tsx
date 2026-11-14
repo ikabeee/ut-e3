@@ -62,7 +62,7 @@ function RecoverLayout({
   children,
 }: Readonly<{ title: string; description: string; children: ReactNode }>) {
   return (
-    <main className="page-wrap flex min-h-svh flex-col items-center justify-center gap-8 py-16">
+    <main className="page-wrap flex min-h-[calc(100svh-var(--nav-height))] flex-col items-center justify-center gap-8 py-16">
       <header className="flex max-w-md flex-col items-center gap-2 text-center">
         <h1 className="type-section">{title}</h1>
         <p className="text-muted">{description}</p>

@@ -3,11 +3,44 @@ import type { AdminStandLocation, StandLocation } from "@features/games/lib/stan
 import type { Game, GameImage, Genre } from "@features/games/lib/types";
 import type { Prisma, PrismaClient } from "@generated/prisma/client";
 
-// The sources give no synopsis yet and, except for DON'T PET ME, no genre, so most games share this placeholder genre.
-// A genre is required by the model, so the games that were just added use it too.
-const TO_BE_ANNOUNCED: Genre = { id: "por-anunciar", name: "Por anunciar", slug: "por-anunciar" };
+// The sources give no synopsis yet. A genre is required by the model, so a game whose genre is not confirmed (Make 'em
+// Fall) and the ones that are added later use this placeholder genre.
+export const TO_BE_ANNOUNCED: Genre = { id: "por-anunciar", name: "Por anunciar", slug: "por-anunciar" };
 
 const PLATFORMS_3D: Genre = { id: "plataformas-3d", name: "Plataformas 3D", slug: "plataformas-3d" };
+
+// One name per genre: "Plataformas" (not "Plataforma") and "RPG" (not "Rol (RPG)"). The slug is the one that the admin
+// builds from the name, so the sysadmin's own genres with the same name are reused.
+const GENRES = {
+  action: { id: "accion", name: "Acción", slug: "accion" },
+  horror: { id: "terror", name: "Terror", slug: "terror" },
+  platforms: { id: "plataformas", name: "Plataformas", slug: "plataformas" },
+  survivalHorror: { id: "survival-horror", name: "Survival Horror", slug: "survival-horror" },
+  stealth: { id: "sigilo", name: "Sigilo", slug: "sigilo" },
+  rpg: { id: "rpg", name: "RPG", slug: "rpg" },
+  simulation: { id: "simulacion", name: "Simulación", slug: "simulacion" },
+  roguelike: { id: "roguelike", name: "Roguelike", slug: "roguelike" },
+} satisfies Record<string, Genre>;
+
+// The genre of each game, as the organizers confirmed it. DON'T PET ME keeps its own (Plataformas 3D) in SEED_GAMES.
+const GENRE_BY_SLUG = new Map<string, Genre>([
+  ["abby-s-tower", GENRES.action],
+  ["carencia", GENRES.horror],
+  ["true-hero", GENRES.platforms],
+  ["unknown-game", GENRES.platforms],
+  ["astrolabio", GENRES.platforms],
+  ["identity-dissolution", GENRES.survivalHorror],
+  ["dark-mutant", GENRES.survivalHorror],
+  ["saatan-paal", GENRES.stealth],
+  ["one-mind", GENRES.action],
+  ["vaporlock", GENRES.action],
+  ["sombra-del-mictlan", GENRES.rpg],
+  ["reencarnacion-express", GENRES.rpg],
+  ["turno-rosso", GENRES.simulation],
+  ["after-light", GENRES.roguelike],
+  ["echoscrap", GENRES.roguelike],
+  ["laboratorio-4", GENRES.roguelike],
+]);
 
 interface SeedGame {
   slug: string;
@@ -19,7 +52,7 @@ interface SeedGame {
   hasCover?: boolean;
   /** False for the games whose only artwork is the portrait cover. */
   hasLandscapeImage?: boolean;
-  /** Defaults to the placeholder genre, which the sources still give for most games. */
+  /** Overrides GENRE_BY_SLUG; without either, the placeholder genre. */
   genre?: Genre;
 }
 
@@ -60,7 +93,6 @@ const SEED_GAMES: SeedGame[] = [
     stand: { zone: "C", number: 3 },
     studio: 5,
     groupCode: "101",
-    hasCover: false,
     genre: PLATFORMS_3D,
   },
   { slug: "turno-rosso", name: "Turno Rosso", stand: { zone: "D", number: 1 }, studio: 2, groupCode: "102" },
@@ -98,8 +130,8 @@ export const INITIAL_STANDS: AdminStandLocation[] = SEED_GAMES.map(({ stand, stu
 function buildGame({
   hasCover = true,
   hasLandscapeImage = true,
-  genre = TO_BE_ANNOUNCED,
   slug,
+  genre = GENRE_BY_SLUG.get(slug) ?? TO_BE_ANNOUNCED,
   name,
   stand,
 }: SeedGame): Game {

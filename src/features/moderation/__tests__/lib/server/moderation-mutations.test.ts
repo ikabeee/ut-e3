@@ -1,7 +1,12 @@
 /**
  * @jest-environment node
  */
-import { annulCheckIn, excludeVisitor } from "@features/moderation/lib/server/moderation-mutations";
+import {
+  annulCheckIn,
+  annulCheckIns,
+  excludeVisitor,
+  excludeVisitorsOfCheckIns,
+} from "@features/moderation/lib/server/moderation-mutations";
 import { findModerationVisitor } from "@features/moderation/lib/server/moderation-queries";
 import {
   AFTER_RAFFLE,
@@ -210,5 +215,53 @@ describe("excludeVisitor (RF-46)", () => {
     await expect(
       excludeVisitor({ actorId: sysadminId, targetId: visitor.id, reason: "Otra vez", now: BEFORE_RAFFLE }),
     ).resolves.toEqual({ status: "alreadyExcluded" });
+  });
+});
+
+describe("bulk moderation of ticked visits (RF-46)", () => {
+  async function checkInIdsOf(visitorIds: string[]) {
+    const rows = await getPrisma().checkIn.findMany({ where: { visitorId: { in: visitorIds } }, select: { id: true } });
+
+    return rows.map((row) => row.id);
+  }
+
+  it("annuls each visit once, skips the ones already annulled and audits every one", async () => {
+    const first = await visitorWithVisits(1);
+    const second = await visitorWithVisits(1);
+    const ids = await checkInIdsOf([first.id, second.id]);
+
+    await annulCheckIn({ actorId: sysadminId, targetId: ids[0], reason: "Voto inflado", now: BEFORE_RAFFLE });
+
+    const result = await annulCheckIns({
+      actorId: sysadminId,
+      checkInIds: [...ids, ids[1]],
+      reason: "Revisión en bloque",
+      now: BEFORE_RAFFLE,
+    });
+
+    expect(result).toEqual({ done: 1, skipped: 1 });
+    await expect(
+      getPrisma().auditLog.count({ where: { action: "check_in.annul", entityId: { in: ids } } }),
+    ).resolves.toBe(2);
+  });
+
+  it("excludes each visitor once even when several of their visits are ticked", async () => {
+    const visitor = await visitorWithVisits(3);
+    const ids = await checkInIdsOf([visitor.id]);
+
+    const result = await excludeVisitorsOfCheckIns({
+      actorId: sysadminId,
+      checkInIds: ids,
+      reason: "Trampa confirmada",
+      now: BEFORE_RAFFLE,
+    });
+
+    expect(result).toEqual({ done: 1, skipped: 0 });
+    await expect(getPrisma().visitor.findUniqueOrThrow({ where: { id: visitor.id } })).resolves.toMatchObject({
+      excludedReason: "Trampa confirmada",
+    });
+    await expect(
+      getPrisma().auditLog.count({ where: { action: "visitor.exclude", entityId: visitor.id } }),
+    ).resolves.toBe(1);
   });
 });

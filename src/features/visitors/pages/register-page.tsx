@@ -59,7 +59,7 @@ function checkRegistrationOpen(registrationOpensAt: string): boolean {
 
 export function RegisterView({ isOpen, registrationOpensAt }: Readonly<RegisterViewProps>) {
   return (
-    <main className="page-wrap flex min-h-svh flex-col items-center justify-center gap-8 py-16">
+    <main className="page-wrap flex min-h-[calc(100svh-var(--nav-height))] flex-col items-center justify-center gap-8 py-16">
       {/* A phone that reaches the registration has no active passport: its offline copy is deleted. */}
       <ClearPassportSnapshot />
       <header className="flex flex-col items-center gap-2 text-center">
