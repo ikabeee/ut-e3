@@ -19,7 +19,7 @@ export function getGalleryImages(game: Game): GameImage[] {
 }
 
 /** The cover of a game, or null while it has no artwork (a generic cover with its title stands in for it). */
-export function getCoverImage(game: Game): GameImage | null {
+export function getCoverImage(game: Pick<Game, "images">): GameImage | null {
   return game.images.find((image) => image.isCover) ?? null;
 }
 
@@ -29,9 +29,12 @@ export function getCoverImage(game: Game): GameImage | null {
  * the vertical cover, and one without artwork has none.
  */
 export function getHeroImage(game: Game): GameImage | null {
-  const landscape = game.images.filter((image) => !image.isCover).toSorted(byPosition)[0];
+  return getLandscapeImage(game) ?? getCoverImage(game);
+}
 
-  return landscape ?? getCoverImage(game);
+/** The horizontal (16:9) image of a game: the first one after the vertical cover, or null while it has none. */
+export function getLandscapeImage(game: Pick<Game, "images">): GameImage | null {
+  return game.images.filter((image) => !image.isCover).toSorted(byPosition)[0] ?? null;
 }
 
 function isImage(image: GameImage | null): image is GameImage {

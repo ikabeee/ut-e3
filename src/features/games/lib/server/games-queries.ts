@@ -1,10 +1,14 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
+import { isGameReady } from "@features/games/lib/game-readiness";
 import type { Game } from "@features/games/lib/types";
 import type { Prisma } from "@generated/prisma/client";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 export const GAMES_CACHE_TAG = "games";
+
+// These are the public reads: a game without its vertical cover and its horizontal image is not shown (isGameReady).
+// The staff screens read the games on their own (stand-game-queries.ts and the admin pages) and still see them all.
 
 // Selects exactly the fields of the Game domain type, so a row needs no mapping. The itch.io link is not one of
 // them: it stays on the server until the activation time (RF-10, lib/server/itch-queries.ts).
@@ -25,7 +29,7 @@ export async function getGames(): Promise<Game[]> {
 
   const games = await getPrisma().game.findMany({ select: GAME_FIELDS });
 
-  return games.toSorted(compareByStand);
+  return games.filter(isGameReady).toSorted(compareByStand);
 }
 
 export async function getGameBySlug(slug: string): Promise<Game | null> {
@@ -33,7 +37,9 @@ export async function getGameBySlug(slug: string): Promise<Game | null> {
   cacheLife("hours");
   cacheTag(GAMES_CACHE_TAG);
 
-  return getPrisma().game.findUnique({ where: { slug }, select: GAME_FIELDS });
+  const game = await getPrisma().game.findUnique({ where: { slug }, select: GAME_FIELDS });
+
+  return game && isGameReady(game) ? game : null;
 }
 
 function compareByStand(first: Game, second: Game): number {

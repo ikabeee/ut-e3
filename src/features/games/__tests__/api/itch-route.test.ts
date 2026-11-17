@@ -5,7 +5,7 @@ import type * as NextCache from "next/cache";
 import type * as NextServer from "next/server";
 import { GET } from "@features/games/api/itch-route";
 import { getGames } from "@features/games/lib/server/games-queries";
-import { INITIAL_GAMES, seedGames } from "@features/games/lib/server/games-seed";
+import { seedGames } from "@features/games/lib/server/games-seed";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
@@ -26,7 +26,8 @@ process.env.DATABASE_URL = database.url;
 
 const ITCH_URL = "https://utg.itch.io/ceniza-protocol";
 
-const SLUG = INITIAL_GAMES[0].slug;
+// The first games of the seed lack artwork and are not public, so these are ones with their cover and landscape image.
+const SLUG = "true-hero";
 
 const OPENS_AT = new Date("2026-11-20T21:30:00.000Z");
 
@@ -63,11 +64,21 @@ describe("GET /api/games/<slug>/itch (RF-10)", () => {
   });
 
   it("says there is no link for a game that has none", async () => {
-    const other = INITIAL_GAMES[1].slug;
+    const other = "laboratorio-4";
 
     jest.useFakeTimers({ now: new Date(OPENS_AT.getTime() + 1000), doNotFake: ["nextTick", "setImmediate"] });
 
     expect(await (await call(other)).json()).toEqual({ link: { status: "hidden" } });
+  });
+
+  it("answers 404 for a game that lacks its artwork, as the public page does (S3)", async () => {
+    jest.useFakeTimers({ now: new Date(OPENS_AT.getTime() + 1000), doNotFake: ["nextTick", "setImmediate"] });
+    await getPrisma().game.update({ where: { slug: "vaporlock" }, data: { itchUrl: ITCH_URL } });
+
+    const response = await call("vaporlock");
+
+    expect(response.status).toBe(404);
+    expect(await response.text()).not.toContain("itch.io");
   });
 
   it("answers 404 for a game that does not exist", async () => {
