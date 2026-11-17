@@ -97,8 +97,11 @@ body:
   - type: textarea
     id: media
     attributes:
-      label: Portada y capturas
-      description: Arrastra aquí la portada (16:9 recomendado) y hasta 4 capturas.
+      label: Arte del juego
+      description: >-
+        Arrastra aquí la tarjeta vertical 3:4 (`<slug>.jpg`, 810×1080), la portada horizontal 16:9
+        (`<slug>-portada.jpg`, 1920×1080) y hasta 4 capturas 16:9 (`<slug>-captura-01.jpg`…, 1920×1080), en JPG.
+        La guía https://github.com/ikabeee/utg-cover-grid las recorta y las nombra por ti.
 
   - type: checkboxes
     id: confirmation
