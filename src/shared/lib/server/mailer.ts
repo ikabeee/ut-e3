@@ -43,7 +43,7 @@ function readSmtpConfig(env: EnvironmentSource): SmtpConfig {
   const port = parseSmtpPort(env);
   const user = requireEnvVariable(env, "SMTP_USER");
   const pass = requireEnvVariable(env, "SMTP_PASSWORD");
-  const from = requireEnvVariable(env, "SMTP_FROM");
+  const from = parseSmtpFrom(env);
 
   return { host, port, user, pass, from };
 }
@@ -62,6 +62,19 @@ function parseSmtpPort(env: EnvironmentSource): number {
   }
 
   return port;
+}
+
+function parseSmtpFrom(env: EnvironmentSource): string {
+  const from = requireEnvVariable(env, "SMTP_FROM");
+  const hasAddress = /^[^\s<>@]+@[^\s<>@]+$/.test(from) || /<[^\s<>@]+@[^\s<>@]+>$/.test(from);
+
+  if (!hasAddress) {
+    throw new Error(
+      'La variable de entorno SMTP_FROM debe incluir una dirección de correo, por ejemplo "UT Game Showcase <no-reply@tu-dominio.mx>".',
+    );
+  }
+
+  return from;
 }
 
 function requireEnvVariable(env: EnvironmentSource, name: string): string {
