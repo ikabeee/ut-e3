@@ -8,6 +8,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- Despliegue continuo: cada merge a `main` que pasa CI construye la imagen en GitHub Actions, la publica en GHCR y la
+  despliega en Coolify (`docs/deploy.md`, "Despliegue continuo").
 - Invitadas especiales: la segunda invitada es la ponente de Noxy Digital, Ing. Noelí Rodríguez Morales, con su foto y
   la plática por anunciar; sustituye al gafete "Por anunciar".
 - Invitadas especiales: cada invitada es un gafete del evento en un carrusel, con cinta, contador "Pase 01 de 02" y
