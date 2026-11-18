@@ -66,6 +66,10 @@ es una tarea.
 - S39: "El search bar no muestra los resultados desde la landing". Reproducido: desde `/` el buscador lleva a
   `/games?q=true` y muestra "Resultados para «true»", pero el carrusel y los géneros siguen mostrando los 14 juegos.
 
+- S40: "no pasa el ci del e2e de la aplicacion": `npm run test:e2e:pwa` falla en CI con `locator.fill: Timeout 30000ms
+  exceeded. waiting for getByLabel('Nombre completo')` en `registerVisitor` (`e2e/pwa.e2e.mjs:285`), aunque el seed dice
+  "El registro de pasaportes quedó abierto (/register)".
+
 ## Tasks
 
 | ID | Specs | Ruta | Commit |
@@ -81,6 +85,7 @@ es una tarea.
 | T10 | S27, S34, S35 | worker portada y croquis | lote 3 |
 | T11 | S38 | inline | lote 3 |
 | T12 | S39 | worker juegos | lote 3 |
+| T13 | S40 | worker | `test(pwa): ...` |
 | T6 | S5, S6 | worker torneo | `feat(tournament): información...` |
 
 ## Log
@@ -95,3 +100,5 @@ es una tarea.
   posiciones", título de carteles, quitar el selector de invitadas, eliminar /showcase, sysadmin enviado al login en
   "Torneo de KOF". Preguntas: "Donde esta el formulario de preinscripcion al torneo?", "Como puedo probar lops demas
   roles?".
+- L6: El usuario pegó el log de CI de `npm run test:e2e:pwa` (falla en `registerVisitor`) y "no pasa el ci del e2e de la
+  aplicacion".
