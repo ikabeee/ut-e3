@@ -4,10 +4,10 @@
 import { signIn, signOut } from "@features/accounts/lib/accounts-actions";
 import { seedSysadmin } from "@features/accounts/lib/server/sysadmin-seed";
 import { SESSION_COOKIE } from "@shared/lib/session-cookie";
-import { hashPassword } from "@shared/lib/server/password";
+import { createSession } from "@shared/lib/server/session";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
-import { stubHeaders } from "@shared/__tests__/lib/server/headers-stub";
+import { stubAfter, stubHeaders } from "@shared/__tests__/lib/server/headers-stub";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
 const PASSWORD = "correct horse battery staple";
@@ -20,15 +20,21 @@ const database = createTestDatabase();
 
 process.env.DATABASE_URL = database.url;
 
+let accountId = "";
+
+let afterStub = stubAfter();
+
 beforeAll(async () => {
   await seedSysadmin(getPrisma(), {
     SYSADMIN_EMAIL: "admin@ut.mx",
     SYSADMIN_NAME: "Coordinación E3",
     SYSADMIN_PASSWORD: PASSWORD,
   });
+  accountId = (await getPrisma().account.findFirstOrThrow({ where: { email: "admin@ut.mx" } })).id;
 });
 
 afterAll(async () => {
+  afterStub.restore();
   await getPrisma().$disconnect();
   database.remove();
 });
@@ -37,7 +43,10 @@ beforeEach(async () => {
   jar = createCookieJar();
   stubCookies(jar);
   stubHeaders({ "x-forwarded-for": "203.0.113.10" });
+  afterStub.restore();
+  afterStub = stubAfter();
   await getPrisma().session.deleteMany();
+  await getPrisma().loginChallenge.deleteMany();
   await getPrisma().rateLimit.deleteMany();
   await getPrisma().account.updateMany({ data: { status: "active" } });
 });
@@ -50,36 +59,13 @@ describe("signIn", () => {
     });
   });
 
-  it("opens a session for the right email and password and goes to /admin", async () => {
+  it("opens no session for the right email and password: it goes to /login/verify for the emailed code", async () => {
     await expect(signIn(null, credentials(" Admin@UT.mx ", PASSWORD))).rejects.toMatchObject({
-      digest: expect.stringContaining(";/admin;"),
+      digest: expect.stringContaining(";/login/verify;"),
     });
 
-    expect(await getPrisma().session.count()).toBe(1);
-    expect(jar.get(SESSION_COOKIE)?.value).toBeTruthy();
-  });
-
-  it.each([
-    ["kof_admin", null],
-    ["kof_staff", 1],
-  ] as const)("sends a %s to the KOF page instead of /admin", async (role, kofDesk) => {
-    await getPrisma().account.create({
-      data: {
-        email: "kof@ut.mx",
-        name: "KOF",
-        role,
-        status: "active",
-        password: await hashPassword(PASSWORD),
-        kofDesk,
-      },
-    });
-
-    await expect(signIn(null, credentials("kof@ut.mx", PASSWORD))).rejects.toMatchObject({
-      digest: expect.stringContaining(";/admin/kof;"),
-    });
-
-    await getPrisma().session.deleteMany();
-    await getPrisma().account.deleteMany({ where: { email: "kof@ut.mx" } });
+    expect(await getPrisma().session.count()).toBe(0);
+    expect(jar.has(SESSION_COOKIE)).toBe(false);
   });
 
   it.each([
@@ -125,7 +111,7 @@ describe("signIn", () => {
     stubHeaders({ "x-forwarded-for": "1.2.3.4, 203.0.113.20" });
 
     await expect(signIn(null, credentials("admin@ut.mx", PASSWORD))).rejects.toMatchObject({
-      digest: expect.stringContaining(";/admin;"),
+      digest: expect.stringContaining(";/login/verify;"),
     });
   });
 
@@ -158,13 +144,13 @@ describe("signIn", () => {
     await signIn(null, credentials("admin@ut.mx", "wrong-2"));
     await signIn(null, credentials("admin@ut.mx", PASSWORD)).catch(() => undefined);
 
-    expect(await getPrisma().rateLimit.count()).toBe(0);
+    expect(await getPrisma().rateLimit.count({ where: { key: { startsWith: "login:" } } })).toBe(0);
   });
 });
 
 describe("signOut", () => {
   it("closes the session, expires the cookie and goes to /login", async () => {
-    await signIn(null, credentials("admin@ut.mx", PASSWORD)).catch(() => undefined);
+    await createSession(accountId);
 
     await expect(signOut()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
 
