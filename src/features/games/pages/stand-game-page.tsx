@@ -4,12 +4,15 @@ import { Suspense } from "react";
 import { AccountPageHeader } from "@features/accounts/components/account-page-header";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { requireStandAdmin } from "@features/accounts/lib/server/current-account";
+import { StandGameDelete } from "@features/games/components/stand-game-delete";
 import { StandGameForm } from "@features/games/components/stand-game-form";
+import { StandGameImages } from "@features/games/components/stand-game-images";
 import { STAND_GAME_PATH } from "@features/games/lib/games-links";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
-import { saveStandGameAction } from "@features/games/lib/stand-game-actions";
+import { deleteStandGameAction, saveStandGameAction } from "@features/games/lib/stand-game-actions";
+import { deleteGameImageAction, uploadGameImageAction } from "@features/games/lib/stand-game-image-actions";
 import { StandAdminNav } from "@features/stands/components/stand-admin-nav";
-import { getStandGame, listGenres } from "@features/games/lib/server/stand-game-queries";
+import { getStandGame, getStandGameImages, listGenres } from "@features/games/lib/server/stand-game-queries";
 
 const COPY = GAMES_COPY.standGame;
 
@@ -35,13 +38,20 @@ async function StandGamePanel() {
   await connection();
 
   const account = await requireStandAdmin();
-  const [game, genres] = await Promise.all([getStandGame(account.standId), listGenres()]);
+
+  const [game, gameImages, genres] = await Promise.all([
+    getStandGame(account.standId),
+    getStandGameImages(account.standId),
+    listGenres(),
+  ]);
 
   return (
     <>
       <AccountPageHeader title={COPY.title} signedInAs={COPY.signedInAs(account.name)} signOutAction={signOut} />
       <StandAdminNav />
       <StandGameForm game={game} genres={genres} action={saveStandGameAction} />
+      <StandGameImages game={gameImages} uploadAction={uploadGameImageAction} deleteAction={deleteGameImageAction} />
+      {game ? <StandGameDelete gameName={game.name} action={deleteStandGameAction} /> : null}
     </>
   );
 }

@@ -2,6 +2,7 @@ import "server-only";
 import { GENERIC_COVER_PATH } from "@features/games/lib/game-cover";
 import type { StandGameInput } from "@features/games/lib/game-input";
 import { buildGameSlug, pickFreeSlug } from "@features/games/lib/game-slug";
+import { removeUnreferencedFiles } from "@features/games/lib/server/stand-game-image-mutations";
 import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { isUniqueViolation } from "@shared/lib/server/database-errors";
@@ -9,6 +10,10 @@ import { getPrisma } from "@shared/lib/server/prisma";
 
 export interface SaveStandGameResult {
   status: "created" | "updated" | "invalidGenre" | "conflict";
+}
+
+export interface DeleteStandGameResult {
+  status: "deleted" | "noGame";
 }
 
 interface SaveStandGameRequest {
@@ -20,7 +25,7 @@ interface SaveStandGameRequest {
 /**
  * Registers the game of the stand of the actor, or updates it (RF-31, RF-34). A stand has one game, found by the stand
  * of the actor and not by an id from the form, so nobody can change the game of another stand. A new game gets the
- * generic cover; the images belong to the sysadmin.
+ * generic cover; the images are loaded one by one (`stand-game-image-mutations.ts`).
  */
 export async function saveStandGame({ actor, input }: SaveStandGameRequest): Promise<SaveStandGameResult> {
   try {
@@ -30,6 +35,34 @@ export async function saveStandGame({ actor, input }: SaveStandGameRequest): Pro
 
     throw cause;
   }
+}
+
+/**
+ * Deletes the game of the stand of the actor with its image rows and the files that only it used (S27). The game is
+ * found by the stand of the session, so only the administrator of the stand that owns it can delete it.
+ */
+export async function deleteStandGame(actor: SaveStandGameRequest["actor"]): Promise<DeleteStandGameResult> {
+  const game = await getPrisma().game.findUnique({
+    where: { standId: actor.standId },
+    select: { id: true, images: { select: { path: true } } },
+  });
+
+  if (!game) return { status: "noGame" };
+
+  await getPrisma().$transaction(async (transaction) => {
+    await transaction.gameImage.deleteMany({ where: { gameId: game.id } });
+    await transaction.game.delete({ where: { id: game.id } });
+    await recordAudit(transaction, {
+      actorId: actor.id,
+      action: "game.delete",
+      entityType: "game",
+      entityId: game.id,
+      detail: { standId: actor.standId },
+    });
+  });
+  await removeUnreferencedFiles(game.images.map((image) => image.path));
+
+  return { status: "deleted" };
 }
 
 async function saveInTransaction(

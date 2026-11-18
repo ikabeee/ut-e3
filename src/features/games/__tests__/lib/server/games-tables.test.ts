@@ -112,14 +112,14 @@ describe("games table", () => {
 });
 
 describe("game_images table", () => {
-  it("accepts positions 1 to 5 and rejects a sixth image or a repeated position", async () => {
+  it("accepts positions 1 to 6 (card, cover and four screenshots) and rejects a seventh image or a repeated position", async () => {
     const gameId = await createSampleGame();
 
-    for (let position = 1; position <= 5; position++) await createImage(gameId, position, position === 1);
+    for (let position = 1; position <= 6; position++) await createImage(gameId, position, position === 1);
 
-    await expect(createImage(gameId, 6, false)).rejects.toThrow();
+    await expect(createImage(gameId, 7, false)).rejects.toThrow();
     await expect(createImage(gameId, 3, false)).rejects.toThrow();
-    expect(await prisma.gameImage.count()).toBe(5);
+    expect(await prisma.gameImage.count()).toBe(6);
   });
 
   it("rejects position 0 and keeps the images unchanged", async () => {
