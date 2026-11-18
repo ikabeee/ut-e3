@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import type * as NextCache from "next/cache";
+import type * as NextServer from "next/server";
 import {
   addEntryAction,
   checkInEntryAction,
@@ -19,6 +20,11 @@ import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 const nextCache = jest.requireActual<typeof NextCache>("next/cache");
 
 const refresh = jest.spyOn(nextCache, "refresh").mockImplementation(() => undefined);
+
+const nextServer = jest.requireActual<typeof NextServer>("next/server");
+
+// The confirmation email of an entry (S8) leaves after the response; there is no request here.
+jest.spyOn(nextServer, "after").mockImplementation(() => undefined);
 
 const database = createTestDatabase();
 
