@@ -6,6 +6,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Corregido
+
+- /reset-password/[token] ya no muestra "Algo salió mal": el formulario recibe una variante en lugar de un objeto de textos con funciones, que no puede pasar de servidor a cliente.
+
 ### Cambiado
 
 - Portadas verticales (810x1080) y horizontales (1920x1080) de los juegos actualizadas desde la carpeta "portadas" de Drive; One Mind y Vaporlock ya tienen portada y imagen horizontal, y One Mind e Identity Dissolution suman 3 capturas en la galería (la base admite 5 imágenes por juego).
