@@ -1,7 +1,7 @@
 import { cn } from "@heroui/react";
 import Link from "next/link";
-import { SiteBackButton } from "@features/site/components/site-back-button";
 import { SiteNavMenu } from "@features/site/components/site-nav-menu";
+import { SiteSearchForm } from "@features/site/components/site-search-form";
 import { SITE_COPY } from "@features/site/lib/site-copy";
 import {
   getCurrentNavHref,
@@ -9,7 +9,6 @@ import {
   isSiteNavShown,
   type SiteNavLink,
 } from "@features/site/lib/site-navigation";
-import { isBackShown } from "@features/site/lib/site-back";
 import { UtgLogo } from "@shared/components/utg-logo";
 
 interface SiteNavProps {
@@ -30,9 +29,9 @@ export function SiteNav({ pathname, isLandingOnly = false }: Readonly<SiteNavPro
       aria-label={SITE_COPY.nav.label}
       className="sticky top-0 z-40 box-content flex h-nav items-stretch border-b border-separator bg-background pt-[env(safe-area-inset-top,0px)] pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)]"
     >
-      {isBackShown(pathname, isLandingOnly) && <SiteBackButton pathname={pathname} />}
       <HomeLink href={homeHref} />
       <NavLinkList links={links} currentHref={currentHref} hasMenu={!isLandingOnly} />
+      {isLandingOnly ? null : <SiteSearchForm className="my-auto mr-4 w-36 max-lg:hidden xl:w-56" />}
       {cta && <NavCta link={cta} isCurrent={cta.href === currentHref} />}
       {isLandingOnly ? null : <SiteNavMenu links={links} currentHref={currentHref} />}
     </nav>
@@ -80,7 +79,7 @@ function NavLinkList({ links, currentHref, hasMenu }: Readonly<NavLinkListProps>
           <Link
             href={link.href}
             aria-current={link.href === currentHref ? "page" : undefined}
-            className="touch-target relative link-wipe whitespace-nowrap no-underline"
+            className="touch-target relative link-wipe whitespace-nowrap no-underline aria-[current=page]:bg-size-[100%_1px] aria-[current=page]:text-accent"
           >
             {link.label}
           </Link>

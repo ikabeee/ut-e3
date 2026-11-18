@@ -2,6 +2,7 @@
 
 import { Button, Drawer } from "@heroui/react";
 import Link from "next/link";
+import { SiteSearchForm } from "@features/site/components/site-search-form";
 import { useMenuHistory } from "@features/site/hooks/use-menu-history";
 import { SITE_COPY } from "@features/site/lib/site-copy";
 import type { SiteNavLink } from "@features/site/lib/site-navigation";
@@ -34,6 +35,7 @@ export function SiteNavMenu({ links, currentHref }: Readonly<SiteNavMenuProps>) 
                 <Drawer.Heading className="type-mono">{SITE_COPY.nav.menuTitle}</Drawer.Heading>
               </Drawer.Header>
               <Drawer.Body>
+                <SiteSearchForm onSubmit={handleChoose} className="mb-4" />
                 <MenuLinks links={links} currentHref={currentHref} onChoose={handleChoose} />
               </Drawer.Body>
             </Drawer.Dialog>

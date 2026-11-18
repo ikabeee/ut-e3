@@ -21,6 +21,11 @@ export interface SiteNavigation {
   cta?: SiteNavLink;
 }
 
+/** The catalog reads the search from `/games?q=<text>`: the navbar form sends it with GET (S24). */
+export const GAMES_SEARCH_ACTION = GAMES_PATH;
+
+export const GAMES_SEARCH_PARAM = "q";
+
 const { links: LABELS } = SITE_COPY.nav;
 
 // The staff areas, their login and activation, and the screen projected on stage.
