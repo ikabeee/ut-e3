@@ -116,7 +116,7 @@ jobs:
       - name: Pedir el despliegue a Coolify
         id: deploy
         run: |
-          if ! response=$(curl --fail-with-body -sS -G "$COOLIFY_URL/api/v1/deploy" \
+          if ! response=$(curl --fail-with-body -sS -X POST -G "$COOLIFY_URL/api/v1/deploy" \
             --data-urlencode "uuid=$COOLIFY_APP_UUID" \
             -H "Authorization: Bearer $COOLIFY_API_TOKEN"); then
             echo "::error::Coolify rechazó el despliegue: $response"
