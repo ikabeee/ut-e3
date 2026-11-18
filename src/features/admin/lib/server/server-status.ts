@@ -28,6 +28,7 @@ export async function getServerStatus(now: number = Date.now()): Promise<ServerS
     processRssBytes: process.memoryUsage().rss,
     uptimeMinutes: Math.floor(process.uptime() / 60),
     overload: describeOverload(samples, now),
+    history: [...getLoadSamples()],
     bracket: { ...getPublicBracketAudience(now), publicBracketEnabled },
     outbox,
     undelivered,

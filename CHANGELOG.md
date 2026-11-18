@@ -13,6 +13,17 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   ya lo visitaste) aparece en el detalle.
 ### Agregado
 
+- `/admin/server` muestra gráficas de la CPU y la memoria de los últimos minutos, con la línea del 85% del cierre
+  automático del bracket, y se actualiza sola cada 10 s.
+- `/admin/kof` tiene un bloque "En vivo": combates terminados, conteo por estado (incluidos los pendientes) y los
+  combates en juego o congelados con sus jugadores, tablero y mesa.
+- El sysadmin ve la lista de participantes del torneo en `/admin/kof` (solo consulta, se actualiza sola), igual que el
+  administrador de KOF. `GET /api/tournament/entries` la entrega solo a esas dos cuentas.
+
+### Cambiado
+
+- `/admin/kof` usa el mismo marco que las demás secciones del panel; el sysadmin ve además la navegación entre
+  secciones.
 - Verificación en dos pasos del staff: tras la contraseña, `/login/verify` pide el código de 6 dígitos que llega por
   correo (vence en 10 minutos, 5 intentos, reenvío limitado). Sin SMTP el código queda en `email_outbox`.
 - "Olvidé mi contraseña" en el inicio de sesión: `/forgot-password` envía un enlace de un solo uso (1 hora) a

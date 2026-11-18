@@ -1,7 +1,12 @@
 /**
  * @jest-environment node
  */
-import { fetchTournament, TOURNAMENT_API_PATH } from "@features/tournament/api/tournament-api-client";
+import {
+  ENTRIES_API_PATH,
+  fetchEntries,
+  fetchTournament,
+  TOURNAMENT_API_PATH,
+} from "@features/tournament/api/tournament-api-client";
 import { createTestTournament } from "@features/tournament/__tests__/tournament-test-utils";
 
 afterEach(() => {
@@ -33,5 +38,37 @@ describe("fetchTournament", () => {
     jest.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ tournament: { phase: "running" } }));
 
     await expect(fetchTournament()).rejects.toThrow();
+  });
+});
+
+describe("fetchEntries", () => {
+  const entries = [
+    {
+      id: "entry-1",
+      visitorId: "visitor-1",
+      gamertag: "Jugador1",
+      channel: "pre",
+      status: "registered",
+      checkedInAt: null,
+    },
+  ];
+
+  it("asks the Route Handler without using the browser cache and returns the participants (S26)", async () => {
+    const fetchSpy = jest.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ entries }));
+
+    expect(await fetchEntries()).toEqual(entries);
+    expect(fetchSpy).toHaveBeenCalledWith(ENTRIES_API_PATH, { cache: "no-store" });
+  });
+
+  it("fails when the server refuses the account", async () => {
+    jest.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ error: "forbidden" }, { status: 403 }));
+
+    await expect(fetchEntries()).rejects.toThrow("403");
+  });
+
+  it("fails when the answer is not a list of participants", async () => {
+    jest.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ entries: [{ gamertag: 7 }] }));
+
+    await expect(fetchEntries()).rejects.toThrow("La respuesta del servidor no es una lista de participantes.");
   });
 });

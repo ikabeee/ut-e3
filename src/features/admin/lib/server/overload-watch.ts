@@ -1,12 +1,14 @@
 import "server-only";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
-import { findSustainedOverload, formatShare, PUBLIC_BRACKET_OVERLOAD_RULE } from "@features/admin/lib/overload-rule";
+import {
+  findSustainedOverload,
+  formatShare,
+  PUBLIC_BRACKET_OVERLOAD_RULE,
+  SAMPLE_INTERVAL_MS,
+} from "@features/admin/lib/overload-rule";
 import { setPublicBracketEnabled } from "@features/tournament/lib/server/public-bracket-mutations";
 import { sendEmergencyAlert } from "@shared/lib/server/emergency-alert";
 import { clearLoadSamples, getLoadSamples, takeLoadSample, type LoadSample } from "@shared/lib/server/system-load";
-
-/** One sample every 10 seconds: 12 of them cover the 2 minutes of the rule (RF-74). */
-export const SAMPLE_INTERVAL_MS = 10_000;
 
 /** What checkOverload uses from outside: how it reads the machine and how it closes the bracket. */
 export interface OverloadWatchDependencies {
