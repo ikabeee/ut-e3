@@ -47,6 +47,25 @@ es una tarea.
 - S26: "Las correcciones de la landing van en / no va en \"showcase\"": `/showcase` se ve y se comporta como en
   `origin/develop`; las correcciones de la portada (S2, S4, S7-S9, S11-S16, S20-S21) solo aplican en `/`.
 
+- S27: "Sigue sin mostrar el hover click en algunos elementos de la aplicacion" (captura: lista del croquis sin hover).
+- S28: "En la tombola debe estar el layout de la aplicacion" (captura: `/raffle/live` sin la barra del sitio).
+- S29: "Quta el boton de pantalla completa y tombola en vivo [...] y el underline de volver a los ganadores".
+- S30: "Los botones de crear mi pasaporte o ver mi pasaporte dependera si el usuario tiene pasaporte o uno general"
+  (captura: /tournament, "Crear mi pasaporte" y "Ver mi pasaporte").
+- S31: "Esto deberia mostrar fechas faciles de leer para los usuarios ademas de dividirlos por fechas" (captura: bloque
+  "Cuándo" con 20.11.2026, 13.11.2026 y horas).
+- S32: "Debe ir centrado" (captura: /tournament, encabezado y bloques Cuándo, Cómo, Cuántos).
+- S33: "La seccion del torneo debe llamarse Tabla de posiciones".
+- S34: "Este titulo esta gigante a comparacion de otras secciones o las proporciones de landing no son las correctas"
+  (captura: "Carteles del evento").
+- S35: "Esto no debe existir" (captura: "← PASE 02 DE 02 →" y "Desliza o toca el pase para ver el siguiente").
+- S36: "Debes eliminar /showcase".
+- S37: "Al momento de ingresar al la seccion de "TORNEO DE KOF" me regresa al login a pesar que soy sysadmin".
+
+- S38: "Quita del mapa de sitio el staff" (captura: grupo "Staff" con "Acceso del staff" y "Panel de administración").
+- S39: "El search bar no muestra los resultados desde la landing". Reproducido: desde `/` el buscador lleva a
+  `/games?q=true` y muestra "Resultados para «true»", pero el carrusel y los géneros siguen mostrando los 14 juegos.
+
 ## Tasks
 
 | ID | Specs | Ruta | Commit |
@@ -57,6 +76,11 @@ es una tarea.
 | T4 | S3, S18, S24 (catálogo) | worker juegos | `fix(games): coverflow...` |
 | T5 | S7, S17, S24 (barra), S25 | worker barra y patrocinadores | `feat(site): buscador...` |
 | T7 | S26 | worker | `fix(showcase): conservar...` |
+| T8 | S27-S29, S33 (barra), S36 | worker rifa, barra y /showcase + borrado inline | lote 3 |
+| T9 | S30-S33, S37 | worker torneo + gentle-ai-verify (S37 met) | lote 3 |
+| T10 | S27, S34, S35 | worker portada y croquis | lote 3 |
+| T11 | S38 | inline | lote 3 |
+| T12 | S39 | worker juegos | lote 3 |
 | T6 | S5, S6 | worker torneo | `feat(tournament): información...` |
 
 ## Log
@@ -67,3 +91,7 @@ es una tarea.
   de la barra envía GET /games?q=<texto> y /games filtra por `q`.
 - L4: "Las correcciones de la landing van en / no va en "showcase", solamente es esa correccion y haces PRS y mandas a
   Develop"
+- L5: Tercer lote: hover, tómbola con layout, botones según pasaporte, fechas legibles, centrado, "Tabla de
+  posiciones", título de carteles, quitar el selector de invitadas, eliminar /showcase, sysadmin enviado al login en
+  "Torneo de KOF". Preguntas: "Donde esta el formulario de preinscripcion al torneo?", "Como puedo probar lops demas
+  roles?".

@@ -8,6 +8,18 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- Se elimina la página `/showcase`.
+- /tournament se llama "Tabla de posiciones" (también en la barra), va centrada, agrupa las fechas por día con nombres
+  legibles ("Viernes 20 de noviembre") y muestra "Crear mi pasaporte" o "Ver mi pasaporte" según si el teléfono ya tiene
+  uno.
+- El sysadmin puede abrir `/admin/kof` en modo solo consulta (antes lo mandaba al login); los comandos siguen siendo del
+  administrador y del staff de KOF.
+- La tómbola en vivo (`/raffle/live`) lleva la barra del sitio y ya no tiene "Pantalla completa" ni la etiqueta
+  "Tómbola en vivo".
+- Portada: sin el selector de pases de las invitadas (el gafete se cambia tocándolo, deslizándolo o con las flechas del
+  teclado), títulos de sección del mismo tamaño y mapa del sitio sin el acceso del staff.
+- Hover, foco y pulsación visibles en la lista y los controles del croquis, la barra, el pie y los patrocinadores.
+- El buscador de la barra filtra todo /games: carrusel, géneros y portadas.
 - Portada: sin el botón de reproducir del video, sin la fecha en la franja final, con los flyers del torneo y de la feria,
   y con un mapa del sitio en el pie (incluye el acceso del staff). La sede dice solo "Edificio B" y el mapa, "UT Cancún".
 - Invitadas especiales: el selector de pases va junto al gafete y es discreto; el gafete se cambia tocándolo o
