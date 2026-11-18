@@ -11,7 +11,7 @@ describe("buildFooterSitemap", () => {
 
     expect(buildFooterSitemap(false).map((group) => group.label)).toEqual(["Evento", "Páginas"]);
     expect(hrefOf("Juegos")).toBe("/#games");
-    expect(hrefOf("Invitadas especiales")).toBe("/#guests");
+    expect(hrefOf("Invitados especiales")).toBe("/#guests");
     expect(hrefOf("Cronograma")).toBe("/#schedule");
     expect(hrefOf("Ubicación")).toBe("/#venue");
     expect(hrefOf("Catálogo de juegos")).toBe("/games");

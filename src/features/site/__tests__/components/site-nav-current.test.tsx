@@ -9,10 +9,10 @@ const SECTIONS = [
   ["/floor-plan", "Croquis"],
   ["/sponsors", "Patrocinadores"],
   ["/raffle", "Rifa"],
-  ["/tournament", "Tabla de posiciones"],
+  ["/tournament", "KOF"],
 ];
 
-const LABELS = ["Inicio", "Juegos", "Croquis", "Patrocinadores", "Rifa", "Tabla de posiciones"];
+const LABELS = ["Inicio", "Juegos", "Croquis", "Patrocinadores", "Rifa", "KOF"];
 
 function navbar() {
   return within(screen.getByRole("navigation", { name: "Principal" }));

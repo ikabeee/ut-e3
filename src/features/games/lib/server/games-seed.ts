@@ -107,7 +107,7 @@ const SEED_GAMES: SeedGame[] = [
   { slug: "echoscrap", name: "EchoScrap", stand: { zone: "T", number: 1 }, studio: 6, groupCode: "102" },
   { slug: "after-light", name: "After Light", stand: { zone: "T", number: 2 }, studio: 1, groupCode: "102" },
   { slug: "dark-mutant", name: "Dark Mutant", stand: { zone: "T", number: 3 }, studio: 4, groupCode: "102" },
-  { slug: "saatan-paal", name: "Saatan Paal", stand: { zone: "T", number: 4 }, studio: 3, groupCode: "102" },
+  { slug: "saatan-paal", name: "Saatal Paal", stand: { zone: "T", number: 4 }, studio: 3, groupCode: "102" },
   { slug: "carencia", name: "Carencia", stand: { zone: "T", number: 5 }, studio: 3, groupCode: "101" },
   {
     slug: "identity-dissolution",

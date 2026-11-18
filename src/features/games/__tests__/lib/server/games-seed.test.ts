@@ -26,7 +26,7 @@ const GAMES = [
   ["ZT-S1-E6-102", "EchoScrap"],
   ["ZT-S2-E1-102", "After Light"],
   ["ZT-S3-E4-102", "Dark Mutant"],
-  ["ZT-S4-E3-102", "Saatan Paal"],
+  ["ZT-S4-E3-102", "Saatal Paal"],
   ["ZT-S5-E3-101", "Carencia"],
   ["ZT-S6-E2-101", "Identity Dissolution"],
 ] as const;
@@ -94,6 +94,18 @@ describe("INITIAL_GAMES", () => {
         { path: "/games/don-t-pet-me-portada.jpg", isCover: false },
       ],
       genre: { id: "plataformas-3d", name: "Plataformas 3D", slug: "plataformas-3d" },
+    });
+  });
+
+  it("names ZT-S4 Saatal Paal and keeps its slug and artwork paths (S15)", () => {
+    const game = INITIAL_GAMES.find((candidate) => candidate.slug === "saatan-paal");
+
+    expect(game).toMatchObject({
+      name: "Saatal Paal",
+      images: [
+        { path: "/games/saatan-paal.jpg", alt: "Portada de Saatal Paal" },
+        { path: "/games/saatan-paal-portada.jpg", alt: "Portada horizontal de Saatal Paal" },
+      ],
     });
   });
 

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { BracketTree } from "@features/tournament/components/bracket-tree";
 import { ConnectionToast } from "@features/tournament/components/connection-toast";
 import { PublicMatchCard } from "@features/tournament/components/public-match-card";
+import { WaitingHourglassIcon } from "@features/tournament/components/waiting-hourglass-icon";
 import { useBracketPlayback, type CurrentPlayback } from "@features/tournament/hooks/use-bracket-playback";
 import { usePublicBracket, type PublicSnapshotLoader } from "@features/tournament/hooks/use-public-bracket";
 import type { PublicBracket, PublicSnapshot } from "@features/tournament/lib/public-bracket";
@@ -55,11 +56,15 @@ function OpenBracket({ bracket: latest }: Readonly<{ bracket: PublicBracket }>) 
   );
 }
 
+// Closed or not generated yet, the visitor waits for the bracket: the hourglass says so before the text.
 function ClosedBracket({ state }: Readonly<{ state: "closed" | "pending" }>) {
   return (
-    <p role="status" className="type-mono text-muted">
-      {state === "closed" ? COPY.publicBracket.closed : COPY.publicBracket.pending}
-    </p>
+    <div className="grid justify-items-start gap-4">
+      <WaitingHourglassIcon className="text-accent" />
+      <p role="status" className="m-0 type-mono text-muted">
+        {state === "closed" ? COPY.publicBracket.closed : COPY.publicBracket.pending}
+      </p>
+    </div>
   );
 }
 

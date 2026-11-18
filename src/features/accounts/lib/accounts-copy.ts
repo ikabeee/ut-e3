@@ -76,6 +76,10 @@ ${link}
 Si no lo pediste, ignora este correo: tu contraseña no cambia.`,
   },
   signOut: "Cerrar sesión",
+  passwordVisibility: {
+    show: "Mostrar contraseña",
+    hide: "Ocultar contraseña",
+  },
   activate: {
     title: "Activa tu cuenta",
     greeting: (name: string) => `Hola, ${name}. Elige una contraseña para entrar al panel del evento.`,
