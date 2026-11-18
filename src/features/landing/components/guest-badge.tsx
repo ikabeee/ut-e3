@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
+import { GUEST_PHOTO_SIZES } from "@features/landing/lib/special-guests";
 import type { SpecialGuest } from "@features/landing/lib/types";
 import { cn } from "@heroui/react";
 import { PaperCard } from "@shared/components/paper-card";
@@ -45,7 +46,10 @@ function GuestPhoto({ photo }: Readonly<{ photo: SpecialGuest["photo"] }>) {
         src={photo.src}
         alt={photo.alt}
         fill
-        sizes="(min-width: 820px) 440px, 320px"
+        sizes={GUEST_PHOTO_SIZES}
+        // Only the badge that is shown is ever rendered, so its photo does not wait for the lazy loader.
+        loading="eager"
+        draggable={false}
         className="object-cover object-top"
       />
     </div>

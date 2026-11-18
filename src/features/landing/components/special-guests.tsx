@@ -7,7 +7,7 @@ interface SpecialGuestsProps {
   guests: readonly SpecialGuest[];
 }
 
-/** Phones: heading, badge and controls. From 820px: heading and controls on the left, the badge on the right. */
+/** Phones: heading, badge and its pager below. From 820px: the heading on the left, the badge with its pager on the right. */
 export function SpecialGuests({ guests }: Readonly<SpecialGuestsProps>) {
   return (
     <section id={GUESTS_SECTION_ID} className="section-block">

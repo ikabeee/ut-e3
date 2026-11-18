@@ -7,3 +7,5 @@ export const EVENT_SECTION_ID = "event";
 export const GUESTS_SECTION_ID = "guests";
 
 export const VENUE_SECTION_ID = "venue";
+
+export const FLYERS_SECTION_ID = "flyers";

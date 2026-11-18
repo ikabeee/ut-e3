@@ -6,7 +6,6 @@ import type { EventVenue } from "@features/landing/lib/types";
 import { formatCopyableAddress, formatVenueAddress } from "@features/landing/lib/venue";
 import { ActionLink } from "@shared/components/action-link";
 import { PaperCard } from "@shared/components/paper-card";
-import { siteConfig } from "@shared/lib/site-config";
 
 const MONO = "var(--font-mono)";
 
@@ -24,7 +23,6 @@ export function VenueLocation({ venue }: Readonly<VenueLocationProps>) {
   return (
     <section id={VENUE_SECTION_ID} className="section-block">
       <div className="page-wrap">
-        <p className="mb-[18px] type-tiny">{venue.landmark}</p>
         <h2 className="type-giant">{LANDING_COPY.venue.heading}</h2>
         <div className="mt-[clamp(36px,5vw,64px)] grid grid-cols-[.85fr_1.15fr] gap-gutter max-[860px]:grid-cols-1">
           <VenueDetails venue={venue} />
@@ -41,9 +39,8 @@ function VenueDetails({ venue }: Readonly<VenueLocationProps>) {
   return (
     <article className="flex min-w-0 flex-col">
       <PaperCard className="flex-1 gap-3 px-[22px] pt-[22px] pb-7">
-        <span className="type-tiny">{LANDING_COPY.venue.kicker}</span>
         <h3 className="type-wide text-[clamp(22px,2.8vw,38px)] leading-[.95] tracking-[-.03em]">{venue.name}</h3>
-        <p className="m-0 type-tiny">{LANDING_COPY.venue.building(venue.building)}</p>
+        <p className="m-0 type-tiny">{venue.building}</p>
         <p className="m-0 max-w-[40ch] text-lg leading-[1.2]">{formatVenueAddress(venue)}</p>
       </PaperCard>
       <div className="flex flex-wrap justify-end">
@@ -108,20 +105,19 @@ function SchematicRoad() {
 function SchematicCampus({ venue }: Readonly<VenueLocationProps>) {
   return (
     <>
-      <rect x={262} y={142} width={100} height={70} fill="var(--accent)" />
+      <rect x={232} y={168} width={136} height={44} fill="var(--accent)" />
       <text
-        x={274}
-        y={178}
-        fontSize={24}
+        x={300}
+        y={197}
+        fontSize={15}
         fontWeight={900}
+        textAnchor="middle"
         fill="var(--background)"
         style={{ fontFamily: WIDE, fontVariationSettings: "'wdth' 125" }}
       >
-        {siteConfig.name}
+        {venue.shortName.toLocaleUpperCase("es")}
       </text>
-      <SchematicLabel x={274} y={200} size={10} fill="var(--background)" text={venue.shortName} />
       <line x1={300} y1={212} x2={300} y2={248} stroke="var(--accent)" strokeWidth={2} />
-      <SchematicLabel x={56} y={282} size={11} fill="var(--accent)" text={venue.landmark} />
     </>
   );
 }

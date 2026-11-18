@@ -1,4 +1,4 @@
-import type { Ref } from "react";
+import type { HTMLAttributes, Ref } from "react";
 import { GuestBadge } from "@features/landing/components/guest-badge";
 import type { SwingDirection } from "@features/landing/hooks/use-guest-carousel";
 import type { SpecialGuest } from "@features/landing/lib/types";
@@ -31,6 +31,8 @@ interface GuestBadgeStageProps {
   ref: Ref<HTMLDivElement>;
   guest: SpecialGuest;
   swing: BadgeSwing;
+  /** Pointer handlers that make the badge itself the control (swipe or tap); without them the badge is inert. */
+  gestures?: HTMLAttributes<HTMLDivElement>;
   className?: string;
 }
 
@@ -38,20 +40,12 @@ interface GuestBadgeStageProps {
  * The badge hangs from its strap: it drops the first time it is seen, swings in on every move and then sways.
  * The swinging block is remounted on every move (`key`) so its animation starts again.
  */
-export function GuestBadgeStage({ ref, guest, swing, className }: Readonly<GuestBadgeStageProps>) {
+export function GuestBadgeStage({ ref, guest, swing, gestures, className }: Readonly<GuestBadgeStageProps>) {
   const parity = swing.index % 2 === 0 ? "even" : "odd";
   const hasMoved = swing.moveCount > 0;
 
   return (
-    <div
-      ref={ref}
-      className={cn(
-        "grid justify-items-center px-3",
-        TILT_CLASSES[parity],
-        DIRECTION_CLASSES[swing.direction],
-        className,
-      )}
-    >
+    <div ref={ref} {...gestures} className={cn(getStageClasses(parity, swing.direction, Boolean(gestures)), className)}>
       <div
         aria-hidden="true"
         className={cn(
@@ -76,6 +70,15 @@ export function GuestBadgeStage({ ref, guest, swing, className }: Readonly<Guest
         </div>
       </div>
     </div>
+  );
+}
+
+function getStageClasses(parity: "even" | "odd", direction: SwingDirection, isInteractive: boolean) {
+  return cn(
+    "grid justify-items-center px-3",
+    isInteractive && "cursor-grab touch-pan-y select-none active:cursor-grabbing",
+    TILT_CLASSES[parity],
+    DIRECTION_CLASSES[direction],
   );
 }
 

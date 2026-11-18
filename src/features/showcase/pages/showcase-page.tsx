@@ -15,6 +15,7 @@ import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { SPECIAL_GUESTS } from "@features/landing/lib/special-guests";
 import { EVENT_VENUE } from "@features/landing/lib/venue";
+import { buildFooterSitemap } from "@features/landing/pages/landing-sitemap";
 import { EventSchedule } from "@features/schedule/components/event-schedule";
 import { getScheduleItems } from "@features/schedule/lib/server/schedule-queries";
 import type { ScheduleItem } from "@features/schedule/lib/types";
@@ -104,7 +105,7 @@ export function ShowcaseView({ settings, games, scheduleItems, sponsors }: Reado
         <VenueLocation venue={EVENT_VENUE} />
       </main>
       <ShowcaseClosing marquee={CLOSING_MARQUEE} links={CLOSING_LINKS} />
-      <SiteFooter />
+      <SiteFooter sitemap={buildFooterSitemap(false)} />
     </>
   );
 }

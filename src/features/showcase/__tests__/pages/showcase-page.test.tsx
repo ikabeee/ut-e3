@@ -83,8 +83,17 @@ describe("ShowcaseView", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Croquis" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "Ubicación" })).toBeInTheDocument();
     expect(screen.getByText(/Carretera Cancún–Aeropuerto, Km 11.5/)).toBeInTheDocument();
-    expect(screen.getByText("Edificio B · Lobby y áreas externas")).toBeInTheDocument();
+    expect(screen.getByText("Edificio B")).toBeInTheDocument();
     expect(screen.getByLabelText("Mapa de la ubicación del evento: Edificio B, UT Cancún")).toBeInTheDocument();
+  });
+
+  it("shows the site map in the footer, with the way to the admin panel", () => {
+    renderShowcase();
+
+    const sitemap = screen.getByRole("navigation", { name: "Mapa del sitio" });
+
+    expect(within(sitemap).getByRole("link", { name: "Panel de administración" })).toHaveAttribute("href", "/admin");
+    expect(within(sitemap).getByRole("link", { name: "Juegos" })).toHaveAttribute("href", "/#games");
   });
 
   it("has no contact form, quotes or studio disciplines", () => {

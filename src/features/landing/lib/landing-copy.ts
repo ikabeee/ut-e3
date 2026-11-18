@@ -7,7 +7,6 @@ export const LANDING_COPY = {
       `Juegos creados por la ${division}. Pruébalos, compite en los torneos y participa en la rifa.`,
     callToAction: "Agregar al calendario",
     createPassport: "Crear mi pasaporte",
-    playVideo: "Reproducir video",
   },
   acts: {
     heading: "Cómo participar",
@@ -51,11 +50,17 @@ export const LANDING_COPY = {
     previous: "Pase anterior",
     next: "Pase siguiente",
     photoPending: "Por anunciar",
+    hint: "Desliza o toca el pase para ver el siguiente",
+  },
+  flyers: {
+    heading: "Carteles del evento",
+    alt: {
+      fair: "Cartel de la feria de exhibición de videojuegos, con acceso gratuito",
+      tournament: "Cartel del torneo de videojuegos de The King of Fighters",
+    },
   },
   venue: {
     heading: "Ubicación",
-    kicker: "Sede",
-    building: (building: string) => `${building} · Lobby y áreas externas`,
     openMaps: "Abrir en Google Maps",
     copyAddress: {
       idle: "Copiar dirección",
@@ -83,6 +88,26 @@ export const LANDING_COPY = {
     credit: "Desarrollado y diseñado por",
     creditName: "Algorix Insights",
     creditUrl: "https://algorixinsights.com/",
+    sitemap: {
+      label: "Mapa del sitio",
+      groups: { event: "Evento", pages: "Páginas", staff: "Staff" },
+      links: {
+        games: "Juegos",
+        activities: "Actividades",
+        guests: "Invitadas especiales",
+        sponsors: "Patrocinadores",
+        schedule: "Cronograma",
+        floorPlan: "Croquis",
+        venue: "Ubicación",
+        gamesCatalog: "Catálogo de juegos",
+        floorPlanPage: "Croquis completo",
+        raffle: "Ganadores de la rifa",
+        tournament: "Torneo de KOF",
+        passport: "Mi pasaporte",
+        login: "Acceso del staff",
+        admin: "Panel de administración",
+      },
+    },
   },
   calendar: {
     details: (division: string) => `Showcase de videojuegos de la ${division}. Entrada libre.`,
