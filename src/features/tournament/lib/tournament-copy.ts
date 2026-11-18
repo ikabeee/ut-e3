@@ -46,7 +46,22 @@ export const TOURNAMENT_COPY = {
     noDesk: "Tu cuenta todavía no tiene una mesa asignada. Pide al administrador de KOF que te la asigne.",
     connectionLost: "Sin conexión. Se muestra el último estado recibido.",
     summaryLabel: "Resumen",
-    summary: { ready: "Listos", active: "En juego", frozen: "Congelados", finished: "Terminados" },
+    summary: {
+      pending: "Pendientes",
+      ready: "Listos",
+      active: "En juego",
+      frozen: "Congelados",
+      finished: "Terminados",
+    },
+    monitor: {
+      heading: "En vivo",
+      refresh: (seconds: number) => `Se actualiza cada ${seconds} s, sin recargar.`,
+      progress: (finished: number, total: number) => `${finished} de ${total} combates terminados`,
+      liveLabel: "Combates en juego y congelados",
+      empty: "Ningún combate en juego ahora. Los listos esperan a que su mesa los inicie.",
+      versus: (first: string, second: string) => `${first} vs ${second}`,
+      where: (area: string, desk: number) => `${area} · Mesa ${desk}`,
+    },
     champion: (tag: string) => `Campeón: ${tag}`,
     noChampion: "El torneo terminó sin campeón.",
     match: {

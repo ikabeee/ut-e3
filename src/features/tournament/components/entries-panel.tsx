@@ -23,7 +23,8 @@ interface EntriesPanelProps {
   entries: readonly EntryView[];
   /** Once the bracket exists the list is read-only: nobody can be added or checked in anymore. */
   hasBracket: boolean;
-  actions: EntriesActions;
+  /** The KOF administrator works the list; without actions (the sysadmin) the panel only shows it (S26). */
+  actions?: EntriesActions;
 }
 
 interface EntryField {
@@ -48,18 +49,23 @@ export function EntriesPanel({ entries, hasBracket, actions }: Readonly<EntriesP
         {COPY.heading}
       </h2>
       <EntryCountList counts={getEntryCounts(entries)} />
-      {!hasBracket && (
-        <>
-          <div className="grid gap-6 md:grid-cols-2">
-            <EntryForm field={ADD_FIELD} action={actions.add} />
-            <EntryForm field={CHECK_IN_FIELD} action={actions.checkIn} />
-          </div>
-          <GenerateForm action={actions.generate} />
-        </>
-      )}
-      {hasBracket && <ResetForm action={actions.reset} />}
+      {actions && <EntryActions actions={actions} hasBracket={hasBracket} />}
       <EntryList entries={entries} />
     </section>
+  );
+}
+
+function EntryActions({ actions, hasBracket }: Readonly<{ actions: EntriesActions; hasBracket: boolean }>) {
+  if (hasBracket) return <ResetForm action={actions.reset} />;
+
+  return (
+    <>
+      <div className="grid gap-6 md:grid-cols-2">
+        <EntryForm field={ADD_FIELD} action={actions.add} />
+        <EntryForm field={CHECK_IN_FIELD} action={actions.checkIn} />
+      </div>
+      <GenerateForm action={actions.generate} />
+    </>
   );
 }
 

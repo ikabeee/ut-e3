@@ -6,6 +6,20 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- `/admin/server` muestra gráficas de la CPU y la memoria de los últimos minutos, con la línea del 85% del cierre
+  automático del bracket, y se actualiza sola cada 10 s.
+- `/admin/kof` tiene un bloque "En vivo": combates terminados, conteo por estado (incluidos los pendientes) y los
+  combates en juego o congelados con sus jugadores, tablero y mesa.
+- El sysadmin ve la lista de participantes del torneo en `/admin/kof` (solo consulta, se actualiza sola), igual que el
+  administrador de KOF. `GET /api/tournament/entries` la entrega solo a esas dos cuentas.
+
+### Cambiado
+
+- `/admin/kof` usa el mismo marco que las demás secciones del panel; el sysadmin ve además la navegación entre
+  secciones.
+
 ## [1.1.0] - 2026-11-18
 
 ### Cambiado

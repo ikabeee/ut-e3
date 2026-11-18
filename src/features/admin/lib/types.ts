@@ -1,4 +1,4 @@
-import type { OverloadMetric } from "@features/admin/lib/overload-rule";
+import type { OverloadMetric, OverloadSample } from "@features/admin/lib/overload-rule";
 
 export interface UndeliveredEmailRow {
   id: string;
@@ -18,6 +18,8 @@ export interface ServerStatus {
   processRssBytes: number;
   uptimeMinutes: number;
   overload: { metric: OverloadMetric; seconds: number } | null;
+  /** The readings of the last minutes, oldest first, for the charts of the panel (S4). */
+  history: OverloadSample[];
   bracket: { viewers: number; requestsPerMinute: number; publicBracketEnabled: boolean };
   outbox: { sent: number; pending: number; failed: number };
   undelivered: UndeliveredEmailRow[];

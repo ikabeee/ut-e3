@@ -1,6 +1,7 @@
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import {
   getChampionTag,
+  getLiveMatches,
   getMatchPlayers,
   getSections,
   getStatusCounts,
@@ -102,9 +103,9 @@ describe("getStatusCounts", () => {
     const played = playMatches(tournament, [1, 2]);
     const frozen = freezeAndDisqualify(played, 3, [0]);
 
-    expect(getStatusCounts(tournament.matches)).toEqual({ ready: 32, active: 0, finished: 0, frozen: 0 });
-    expect(getStatusCounts(played.matches)).toEqual({ ready: 31, active: 0, finished: 2, frozen: 0 });
-    expect(getStatusCounts(frozen.matches)).toEqual({ ready: 30, active: 0, finished: 3, frozen: 0 });
+    expect(getStatusCounts(tournament.matches)).toEqual({ pending: 31, ready: 32, active: 0, finished: 0, frozen: 0 });
+    expect(getStatusCounts(played.matches)).toEqual({ pending: 30, ready: 31, active: 0, finished: 2, frozen: 0 });
+    expect(getStatusCounts(frozen.matches)).toEqual({ pending: 30, ready: 30, active: 0, finished: 3, frozen: 0 });
 
     const busy = applyCommand(
       applyCommand(played, { type: "start_match", matchId: getMatch(played, 4).id }, NOW),
@@ -112,7 +113,30 @@ describe("getStatusCounts", () => {
       NOW,
     );
 
-    expect(getStatusCounts(busy.matches)).toEqual({ ready: 29, active: 1, finished: 2, frozen: 1 });
+    expect(getStatusCounts(busy.matches)).toEqual({ pending: 30, ready: 29, active: 1, finished: 2, frozen: 1 });
+  });
+});
+
+// S11: what the monitor shows first, the matches being played and the ones the administrator stopped.
+describe("getLiveMatches", () => {
+  it("is empty while nobody plays", () => {
+    expect(getLiveMatches(createTestTournament().matches)).toEqual([]);
+  });
+
+  it("puts the matches in play first and the frozen ones after, each group in bracket order", () => {
+    const played = playMatches(createTestTournament(), [1, 2]);
+    const frozen = applyCommand(played, { type: "freeze_match", matchId: getMatch(played, 5).id }, NOW);
+
+    const busy = [6, 4].reduce(
+      (current, number) => applyCommand(current, { type: "start_match", matchId: getMatch(current, number).id }, NOW),
+      frozen,
+    );
+
+    expect(getLiveMatches(busy.matches).map((match) => [match.number, match.status])).toEqual([
+      [4, "active"],
+      [6, "active"],
+      [5, "frozen"],
+    ]);
   });
 });
 
