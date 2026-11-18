@@ -10,7 +10,7 @@ import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
 // The seed leaves Make 'em Fall, One Mind and Sombra del Mictlán without images and Vaporlock with only the cover.
-const UNREADY_SLUGS = ["make-em-fall", "one-mind", "sombra-del-mictlan", "vaporlock"];
+const UNREADY_SLUGS = ["one-mind", "sombra-del-mictlan", "vaporlock"];
 
 const READY_GAMES = INITIAL_GAMES.filter((game) => !UNREADY_SLUGS.includes(game.slug));
 

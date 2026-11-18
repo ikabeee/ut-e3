@@ -3,8 +3,8 @@ import type { AdminStandLocation, StandLocation } from "@features/games/lib/stan
 import type { Game, GameImage, Genre } from "@features/games/lib/types";
 import type { Prisma, PrismaClient } from "@generated/prisma/client";
 
-// The sources give no synopsis yet. A genre is required by the model, so a game whose genre is not confirmed (Make 'em
-// Fall) and the ones that are added later use this placeholder genre.
+// The sources give no synopsis yet. A genre is required by the model, so a game whose genre is not confirmed and the
+// ones that are added later use this placeholder genre.
 export const TO_BE_ANNOUNCED: Genre = { id: "por-anunciar", name: "Por anunciar", slug: "por-anunciar" };
 
 const PLATFORMS_3D: Genre = { id: "plataformas-3d", name: "Plataformas 3D", slug: "plataformas-3d" };
@@ -40,6 +40,7 @@ const GENRE_BY_SLUG = new Map<string, Genre>([
   ["after-light", GENRES.roguelike],
   ["echoscrap", GENRES.roguelike],
   ["laboratorio-4", GENRES.roguelike],
+  ["make-em-fall", GENRES.roguelike],
 ]);
 
 interface SeedGame {
@@ -64,7 +65,6 @@ const SEED_GAMES: SeedGame[] = [
     stand: { zone: "A", number: 1 },
     studio: 6,
     groupCode: "101",
-    hasCover: false,
   },
   { slug: "true-hero", name: "True Hero", stand: { zone: "A", number: 2 }, studio: 5, groupCode: "102" },
   { slug: "laboratorio-4", name: "Laboratorio 4", stand: { zone: "A", number: 3 }, studio: 4, groupCode: "103" },
