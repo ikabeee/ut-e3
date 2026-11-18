@@ -16,6 +16,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { chromium } from "playwright-core";
+import { setLoginDatabase, submitLoginCode } from "./lib/e2e-harness.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -183,6 +184,8 @@ async function launchBrowser() {
 
 async function runScenario(browser, databaseFile, screenshots) {
   const database = new DatabaseSync(databaseFile);
+
+  setLoginDatabase(databaseFile);
   const consoleErrors = [];
   const phone = await browser.newContext({ viewport: { width: 360, height: 740 } });
   const tablet = await browser.newContext({ viewport: { width: 1024, height: 768 } });
@@ -226,6 +229,7 @@ async function loginAsStaff(page) {
   await page.getByLabel("Correo").fill(STAFF_EMAIL);
   await page.getByLabel("Contraseña").fill(STAFF_PASSWORD);
   await page.getByRole("button", { name: "Entrar" }).click();
+  await submitLoginCode(page, STAFF_EMAIL);
   await page.waitForURL(/\/stand\/kiosk$/, { timeout: UI_TIMEOUT_MS });
   await page.getByRole("heading", { name: "Escribe tu PIN" }).waitFor({ timeout: UI_TIMEOUT_MS });
   check("staff login -> /stand/kiosk with the PIN screen", true, page.url());

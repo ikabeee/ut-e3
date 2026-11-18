@@ -21,6 +21,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { chromium } from "playwright-core";
+import { setLoginDatabase, submitLoginCode } from "./lib/e2e-harness.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -196,6 +197,8 @@ async function launchBrowser() {
 
 async function runScenario(browser, databaseFile, screenshots) {
   const database = new DatabaseSync(databaseFile);
+
+  setLoginDatabase(databaseFile);
   const consoleErrors = [];
 
   const contexts = {
@@ -301,6 +304,7 @@ async function loginAs(page, { email, password }) {
   await page.getByLabel("Correo").fill(email);
   await page.getByLabel("Contraseña").fill(password);
   await page.getByRole("button", { name: "Entrar" }).click();
+  await submitLoginCode(page, email);
   await page.waitForURL(/\/admin\/raffle$/, { timeout: UI_TIMEOUT_MS });
   await page.getByRole("button", { name: "Girar" }).waitFor({ timeout: UI_TIMEOUT_MS });
   check(`${email} signs in at /login and lands on /admin/raffle`, true, page.url());
