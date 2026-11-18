@@ -143,13 +143,16 @@ describe("LandingView", () => {
     expect(within(flyers).getAllByRole("img")).toHaveLength(2);
   });
 
-  it("shows the site map in the footer with the way to the admin panel", () => {
+  it("shows the site map in the footer without the staff access", () => {
     renderLanding();
 
     const footer = screen.getByRole("contentinfo");
 
-    expect(within(footer).getByRole("link", { name: "Panel de administración" })).toHaveAttribute("href", "/admin");
-    expect(within(footer).getByRole("link", { name: "Acceso del staff" })).toHaveAttribute("href", "/login");
+    expect(within(footer).getByRole("link", { name: "Catálogo de juegos" })).toHaveAttribute("href", "/games");
+    expect(
+      within(footer).queryByRole("link", { name: /Panel de administración|Acceso del staff/ }),
+    ).not.toBeInTheDocument();
+    expect(within(footer).queryByText("Staff")).not.toBeInTheDocument();
   });
 
   it("shows the KOF check-in and on-site signup ranges and the raffle times from the event settings", () => {
@@ -204,6 +207,14 @@ describe("LandingView", () => {
     expect(within(sponsors).getByText("Nº 001")).toBeInTheDocument();
     expect(within(sponsors).getByRole("img", { name: PIXEL_FORGE.name })).toBeInTheDocument();
     expect(within(sponsors).queryByRole("button", { name: "Patrocinador siguiente" })).not.toBeInTheDocument();
+  });
+
+  it("gives the titles of the landing sections the same size (S34)", () => {
+    renderLanding([PIXEL_FORGE]);
+
+    ["Invitadas especiales", "Carteles del evento", "Patrocinadores", "Croquis", "Ubicación"].forEach((name) => {
+      expect(screen.getByRole("heading", { level: 2, name })).toHaveClass("text-[clamp(24px,4.6vw,68px)]");
+    });
   });
 
   it("renders the marketplace slot inside the event section", () => {

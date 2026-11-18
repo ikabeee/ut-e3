@@ -5,20 +5,20 @@ function getLinks(isLandingOnly: boolean) {
 }
 
 describe("buildFooterSitemap", () => {
-  it("lists the sections of the landing, the public pages and the staff access", () => {
+  it("lists the sections of the landing and the public pages, with no staff access", () => {
     const links = getLinks(false);
     const hrefOf = (label: string) => links.find((link) => link.label === label)?.href;
 
-    expect(buildFooterSitemap(false).map((group) => group.label)).toEqual(["Evento", "Páginas", "Staff"]);
+    expect(buildFooterSitemap(false).map((group) => group.label)).toEqual(["Evento", "Páginas"]);
     expect(hrefOf("Juegos")).toBe("/#games");
     expect(hrefOf("Invitadas especiales")).toBe("/#guests");
     expect(hrefOf("Cronograma")).toBe("/#schedule");
     expect(hrefOf("Ubicación")).toBe("/#venue");
     expect(hrefOf("Catálogo de juegos")).toBe("/games");
     expect(hrefOf("Ganadores de la rifa")).toBe("/raffle");
-    expect(hrefOf("Torneo de KOF")).toBe("/tournament");
-    expect(hrefOf("Acceso del staff")).toBe("/login");
-    expect(hrefOf("Panel de administración")).toBe("/admin");
+    expect(hrefOf("Tabla de posiciones")).toBe("/tournament");
+    expect(links.map((link) => link.href)).not.toContain("/login");
+    expect(links.map((link) => link.href)).not.toContain("/admin");
   });
 
   it("holds only anchors of the same page, with no staff nor guests, while only the landing is published", () => {

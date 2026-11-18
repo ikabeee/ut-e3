@@ -100,14 +100,14 @@ export function LandingView({
           isLandingOnly={isLandingOnly}
         />
         <EventFlyers />
-        <SponsorTickets sponsors={sponsors} isLanding />
+        <SponsorTickets sponsors={sponsors} />
         <EventSchedule
           heading={formatEventDate(settings.eventStartsAt, "2-digit")}
           items={scheduleItems}
           zoneLink={getZoneLink}
         />
-        <FloorPlan stands={games.map(toFloorPlanStand)} isLanding />
-        <VenueLocation venue={EVENT_VENUE} isLanding />
+        <FloorPlan stands={games.map(toFloorPlanStand)} />
+        <VenueLocation venue={EVENT_VENUE} />
         <ClosingBand />
       </main>
       <SiteFooter sitemap={buildFooterSitemap(isLandingOnly)} />
@@ -134,7 +134,7 @@ function LandingEvent({ settings, gamesCount, marketplace, isLandingOnly }: Read
         marketplace={marketplace}
         isLandingOnly={isLandingOnly}
       />
-      {isLandingOnly ? null : <SpecialGuests guests={SPECIAL_GUESTS} isLanding />}
+      {isLandingOnly ? null : <SpecialGuests guests={SPECIAL_GUESTS} />}
     </>
   );
 }

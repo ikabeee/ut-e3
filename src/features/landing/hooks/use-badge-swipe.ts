@@ -1,4 +1,4 @@
-import { useRef, type PointerEvent } from "react";
+import { useRef, type KeyboardEvent, type PointerEvent } from "react";
 
 /** Horizontal distance, in px, from which a drag counts as a swipe. */
 const SWIPE_DISTANCE = 40;
@@ -17,8 +17,9 @@ interface Point {
 }
 
 /**
- * Pointer handlers that make the badge itself the control: a swipe to the left (or a tap) shows the next guest and a
- * swipe to the right the previous one. The surface must be `touch-pan-y`, so the page keeps scrolling vertically.
+ * Handlers that make the badge itself the control: a swipe to the left (or a tap) shows the next guest and a swipe to
+ * the right the previous one; with the keyboard, the left and right arrows do the same and Enter or Space show the
+ * next one. The surface must be `touch-pan-y`, so the page keeps scrolling vertically, and focusable.
  */
 export function useBadgeSwipe({ onPrevious, onNext }: BadgeSwipeActions) {
   const start = useRef<Point | null>(null);
@@ -39,7 +40,21 @@ export function useBadgeSwipe({ onPrevious, onNext }: BadgeSwipeActions) {
     onPointerCancel() {
       start.current = null;
     },
+    onKeyDown(event: KeyboardEvent) {
+      const action = getKeyAction(event.key, { onPrevious, onNext });
+
+      if (action && event.target === event.currentTarget) {
+        event.preventDefault();
+        action();
+      }
+    },
   };
+}
+
+function getKeyAction(key: string, { onPrevious, onNext }: BadgeSwipeActions): (() => void) | undefined {
+  if (key === "ArrowLeft") return onPrevious;
+
+  return key === "ArrowRight" || key === "Enter" || key === " " ? onNext : undefined;
 }
 
 function applyGesture(dx: number, dy: number, { onPrevious, onNext }: BadgeSwipeActions) {

@@ -1,4 +1,3 @@
-import { LOGIN_PATH, SYSADMIN_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { FLOOR_PLAN_PATH, FLOOR_PLAN_SECTION_ID } from "@features/floor-plan/lib/floor-plan-links";
 import { GAMES_PATH, GAMES_SECTION_ID } from "@features/games/lib/games-links";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
@@ -13,7 +12,7 @@ import { PASSPORT_PATH } from "@features/visitors/lib/visitors-links";
 const { groups, links: LABELS } = LANDING_COPY.footer.sitemap;
 
 /**
- * The site map of the footer: the sections of the landing, the public pages and the staff access. While only the
+ * The site map of the footer: the sections of the landing, and the public pages. While only the
  * landing is published (SITE_MODE=landing) it holds just the sections that exist there, as anchors of the same page:
  * every other path is redirected to the landing by the kill switch.
  */
@@ -24,11 +23,7 @@ export function buildFooterSitemap(isLandingOnly: boolean): FooterLinkGroup[] {
     return [event];
   }
 
-  return [
-    event,
-    { id: "pages", label: groups.pages, links: PAGE_LINKS },
-    { id: "staff", label: groups.staff, links: STAFF_LINKS },
-  ];
+  return [event, { id: "pages", label: groups.pages, links: PAGE_LINKS }];
 }
 
 // The special guests are not announced while only the landing is published, so their section is not there.
@@ -49,11 +44,6 @@ const PAGE_LINKS: FooterLink[] = [
   { href: RAFFLE_WINNERS_PATH, label: LABELS.raffle },
   { href: PUBLIC_BRACKET_PATH, label: LABELS.tournament },
   { href: PASSPORT_PATH, label: LABELS.passport },
-];
-
-const STAFF_LINKS: FooterLink[] = [
-  { href: LOGIN_PATH, label: LABELS.login },
-  { href: SYSADMIN_HOME_PATH, label: LABELS.admin },
 ];
 
 function getSectionLinks(isLandingOnly: boolean): FooterLink[] {

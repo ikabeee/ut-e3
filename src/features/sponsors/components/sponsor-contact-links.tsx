@@ -13,7 +13,8 @@ interface SponsorContactLinksProps {
   isCompact?: boolean;
 }
 
-const TEXT_LINK = "inline-flex min-h-11 items-center type-mono text-copy underline";
+const TEXT_LINK =
+  "inline-flex min-h-11 items-center type-mono text-copy underline transition-colors hover:text-accent focus-visible:text-accent active:text-foreground";
 
 export function SponsorContactLinks({ sponsor, className, isCompact = false }: Readonly<SponsorContactLinksProps>) {
   const hasWebsite = sponsor.websiteUrl !== "";

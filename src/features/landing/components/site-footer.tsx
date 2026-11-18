@@ -4,7 +4,7 @@ import type { FooterLinkGroup } from "@features/landing/lib/types";
 import { siteConfig } from "@shared/lib/site-config";
 
 const LINK_CLASS =
-  "inline-flex min-h-8 items-center text-muted no-underline hover:text-foreground pointer-coarse:min-h-11";
+  "inline-flex min-h-8 items-center text-muted no-underline transition-colors hover:text-accent hover:underline focus-visible:text-accent focus-visible:underline active:text-foreground pointer-coarse:min-h-11";
 
 interface SiteFooterProps {
   /** The site map: the links of each group. Without it only the credits are shown. */
@@ -26,7 +26,7 @@ export function SiteFooter({ sitemap }: Readonly<SiteFooterProps>) {
             href={footer.creditUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="touch-target relative text-muted underline underline-offset-2 hover:text-foreground"
+            className="touch-target relative text-muted underline underline-offset-2 transition-colors hover:text-accent focus-visible:text-accent active:text-foreground"
           >
             {footer.creditName}
           </a>

@@ -11,8 +11,6 @@ export interface EventVenue {
   coordinates: VenueCoordinates;
   /** Zoom of the venue map; the pin sits at `coordinates`. */
   mapZoom: number;
-  /** The road and kilometer of the campus (the venue label of /showcase). */
-  landmark: string;
   streetAddress: string;
   locality: string;
   region: string;

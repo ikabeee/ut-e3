@@ -32,6 +32,6 @@ export function MapList({ items, selectedId, onSelect }: Readonly<MapListProps>)
 
 function listEntryClass(selected: boolean): string {
   return selected
-    ? "min-h-11 w-full border border-accent bg-accent px-4 text-left font-mono text-xs text-accent-foreground uppercase"
-    : "min-h-11 w-full border border-border px-4 text-left font-mono text-xs text-foreground uppercase transition-colors hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent";
+    ? "min-h-11 w-full cursor-pointer border border-accent bg-accent px-4 text-left font-mono text-xs text-accent-foreground uppercase transition-colors hover:bg-foreground hover:text-background active:opacity-80"
+    : "min-h-11 w-full cursor-pointer border border-border px-4 text-left font-mono text-xs text-foreground uppercase transition-colors hover:border-accent hover:bg-accent hover:text-accent-foreground focus-visible:border-accent focus-visible:bg-accent focus-visible:text-accent-foreground active:opacity-80";
 }

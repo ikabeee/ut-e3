@@ -34,37 +34,6 @@ describe("SpecialGuests", () => {
     expect(screen.getByText("Plática por anunciar")).toBeInTheDocument();
   });
 
-  it("announces the counter politely", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
-
-    expect(screen.getByText("Pase 01 de 02")).toHaveAttribute("aria-live", "polite");
-  });
-
-  it("moves to the next badge and wraps around to the first one", async () => {
-    const user = userEvent.setup();
-    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
-
-    await user.click(screen.getByRole("button", { name: "Pase siguiente" }));
-
-    expect(getBadgeName()).toHaveTextContent(SECOND_GUEST_NAME);
-    expect(screen.getByText("Pase 02 de 02")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Pase siguiente" }));
-
-    expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
-    expect(screen.getByText("Pase 01 de 02")).toBeInTheDocument();
-  });
-
-  it("moves to the previous badge and wraps around to the last one", async () => {
-    const user = userEvent.setup();
-    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
-
-    await user.click(screen.getByRole("button", { name: "Pase anterior" }));
-
-    expect(getBadgeName()).toHaveTextContent(SECOND_GUEST_NAME);
-    expect(screen.getByText("Pase 02 de 02")).toBeInTheDocument();
-  });
-
   it("shows the photo of a guest that has one, with its alt text", () => {
     render(<SpecialGuests guests={SPECIAL_GUESTS} />);
 
@@ -82,14 +51,6 @@ describe("SpecialGuests", () => {
     expect(screen.getByText("Por anunciar")).toBeInTheDocument();
   });
 
-  it("does not show the controls nor the counter with a single guest", () => {
-    const guest = { id: "guest-9", name: "Ana Pérez", talk: "Diseño de niveles" };
-    render(<SpecialGuests guests={[guest]} />);
-
-    expect(screen.queryByRole("button")).toBeNull();
-    expect(screen.queryByText(/^Pase \d+ de \d+$/)).toBeNull();
-  });
-
   it("shows the role of a guest that has one", () => {
     const guest = { id: "guest-1", name: "Ana Pérez", role: "Ingeniera de software", talk: "Diseño de niveles" };
 
@@ -98,60 +59,8 @@ describe("SpecialGuests", () => {
     expect(screen.getByText("Ingeniera de software")).toBeInTheDocument();
   });
 
-  it("keeps the pager beside the badge, not under the heading", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} isLanding />);
-
-    const heading = screen.getByRole("heading", { level: 2, name: "Invitadas especiales" });
-    const next = screen.getByRole("button", { name: "Pase siguiente" });
-    const surface = getBadgeSurface();
-
-    expect(surface.parentElement).toContainElement(next);
-    expect(surface.parentElement).not.toContainElement(heading);
-  });
-
-  it("hints that the badge can be moved", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} isLanding />);
-
-    expect(screen.getByText("Desliza o toca el pase para ver el siguiente")).toBeInTheDocument();
-  });
-
-  it("moves to the next badge with a tap on it", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} isLanding />);
-
-    swipe(getBadgeSurface(), { x: 100, y: 100 }, { x: 102, y: 101 });
-
-    expect(getBadgeName()).toHaveTextContent(SECOND_GUEST_NAME);
-  });
-
-  it("moves to the next badge with a swipe to the left and to the previous one with a swipe to the right", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} isLanding />);
-
-    swipe(getBadgeSurface(), { x: 200, y: 100 }, { x: 80, y: 105 });
-    expect(getBadgeName()).toHaveTextContent(SECOND_GUEST_NAME);
-
-    swipe(getBadgeSurface(), { x: 80, y: 100 }, { x: 200, y: 98 });
-    expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
-    expect(screen.getByText("Pase 01 de 02")).toBeInTheDocument();
-  });
-
-  it("does not move with a mostly vertical drag, which is the page scrolling", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} isLanding />);
-
-    swipe(getBadgeSurface(), { x: 100, y: 100 }, { x: 60, y: 300 });
-
-    expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
-  });
-
-  it("is not a swipe surface with a single guest", () => {
-    const guest = { id: "guest-9", name: "Ana Pérez", talk: "Diseño de niveles" };
-    render(<SpecialGuests guests={[guest]} isLanding />);
-
-    expect(document.querySelector("[class*='touch-pan-y']")).toBeNull();
-    expect(screen.queryByText(/Desliza o toca/)).toBeNull();
-  });
-
   it("loads the shown photo eagerly and with the sizes of its slot, not the full file", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} isLanding />);
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
 
     const photo = screen.getByRole("img", { name: SPECIAL_GUESTS[0]?.photo?.alt });
 
@@ -160,36 +69,108 @@ describe("SpecialGuests", () => {
   });
 });
 
-describe("SpecialGuests without isLanding (/showcase, S26)", () => {
-  it("keeps the controls under the heading, with no hint and a plain badge", () => {
+describe("SpecialGuests without a pager (S35)", () => {
+  it("has no pager: no buttons, no visible counter and no hint about swiping", () => {
     render(<SpecialGuests guests={SPECIAL_GUESTS} />);
 
-    const heading = screen.getByRole("heading", { level: 2, name: "Invitadas especiales" });
-    const next = screen.getByRole("button", { name: "Pase siguiente" });
-
-    expect(heading.parentElement).toContainElement(next);
-    expect(screen.queryByText(/Desliza o toca/)).not.toBeInTheDocument();
-    expect(document.querySelector("[class*='touch-pan-y']")).toBeNull();
+    expect(screen.queryByRole("button")).toBeNull();
+    expect(screen.queryByText(/Desliza o toca/)).toBeNull();
+    expect(screen.queryByText("Pase 01 de 02")).toBeNull();
+    expect(screen.queryByText("←")).toBeNull();
   });
 
-  it("does not move with a tap on the badge", () => {
+  it("moves to the next badge with a tap on it and wraps around", () => {
     render(<SpecialGuests guests={SPECIAL_GUESTS} />);
 
-    const surface = getBadgeName().closest("[class*='grid']");
+    swipe(getBadgeSurface(), { x: 100, y: 100 }, { x: 102, y: 101 });
+    expect(getBadgeName()).toHaveTextContent(SECOND_GUEST_NAME);
 
-    if (!(surface instanceof HTMLElement)) throw new Error("The badge has no stage");
+    swipe(getBadgeSurface(), { x: 100, y: 100 }, { x: 102, y: 101 });
+    expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
+  });
 
-    swipe(surface, { x: 100, y: 100 }, { x: 101, y: 100 });
+  it("moves to the next badge with a swipe to the left and to the previous one with a swipe to the right", () => {
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+
+    swipe(getBadgeSurface(), { x: 200, y: 100 }, { x: 80, y: 105 });
+    expect(getBadgeName()).toHaveTextContent(SECOND_GUEST_NAME);
+
+    swipe(getBadgeSurface(), { x: 80, y: 100 }, { x: 200, y: 98 });
+    expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
+  });
+
+  it("does not move with a mostly vertical drag, which is the page scrolling", () => {
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+
+    swipe(getBadgeSurface(), { x: 100, y: 100 }, { x: 60, y: 300 });
 
     expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
   });
 
-  it("loads the photo with the sizes of the whole badge and without the eager loading", () => {
+  it("makes the badge reachable with the keyboard, with a name for assistive technology", async () => {
+    const user = userEvent.setup();
     render(<SpecialGuests guests={SPECIAL_GUESTS} />);
 
-    const photo = screen.getByRole("img", { name: SPECIAL_GUESTS[0]?.photo?.alt });
+    await user.tab();
 
-    expect(photo).toHaveAttribute("sizes", "(min-width: 820px) 440px, 320px");
-    expect(photo).not.toHaveAttribute("loading", "eager");
+    const carousel = screen.getByRole("group", { name: /Invitadas especiales: usa las flechas/ });
+
+    expect(carousel).toHaveFocus();
+    expect(carousel).toBe(getBadgeSurface());
+  });
+
+  it("changes the badge with the arrow keys, wrapping around in both directions", async () => {
+    const user = userEvent.setup();
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+
+    await user.tab();
+    await user.keyboard("{ArrowRight}");
+    expect(getBadgeName()).toHaveTextContent(SECOND_GUEST_NAME);
+
+    await user.keyboard("{ArrowRight}");
+    expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
+
+    await user.keyboard("{ArrowLeft}");
+    expect(getBadgeName()).toHaveTextContent(SECOND_GUEST_NAME);
+  });
+
+  it("shows the next badge with Enter or Space and ignores other keys", async () => {
+    const user = userEvent.setup();
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+
+    await user.tab();
+    await user.keyboard("a");
+    expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
+
+    await user.keyboard("{Enter}");
+    expect(getBadgeName()).toHaveTextContent(SECOND_GUEST_NAME);
+
+    await user.keyboard(" ");
+    expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
+  });
+
+  it("announces the badge that is shown politely, only to assistive technology", async () => {
+    const user = userEvent.setup();
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+
+    const live = screen.getByText(`Pase 01 de 02: ${FIRST_GUEST_NAME}`);
+
+    expect(live).toHaveAttribute("aria-live", "polite");
+    expect(live).toHaveClass("sr-only");
+
+    await user.tab();
+    await user.keyboard("{ArrowRight}");
+
+    expect(screen.getByText(`Pase 02 de 02: ${SECOND_GUEST_NAME}`)).toHaveAttribute("aria-live", "polite");
+  });
+
+  it("is not a control, and announces nothing, with a single guest", () => {
+    const guest = { id: "guest-9", name: "Ana Pérez", talk: "Diseño de niveles" };
+    render(<SpecialGuests guests={[guest]} />);
+
+    expect(document.querySelector("[class*='touch-pan-y']")).toBeNull();
+    expect(screen.queryByRole("group")).toBeNull();
+    expect(document.querySelector("[aria-live]")).toBeNull();
+    expect(screen.queryByRole("button")).toBeNull();
   });
 });

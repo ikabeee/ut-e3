@@ -15,7 +15,7 @@ export function MapListToggle({ listOpen, onToggle }: Readonly<MapListToggleProp
       type="button"
       aria-pressed={listOpen}
       onClick={() => onToggle(!listOpen)}
-      className="inline-flex min-h-11 items-center gap-2 border border-border px-4 font-mono text-xs text-foreground uppercase transition-colors hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent"
+      className="inline-flex min-h-11 cursor-pointer items-center gap-2 border border-border px-4 font-mono text-xs text-foreground uppercase transition-colors hover:border-accent hover:bg-accent hover:text-accent-foreground focus-visible:border-accent focus-visible:bg-accent focus-visible:text-accent-foreground active:opacity-80"
     >
       <ListToggleIcon hidden={listOpen} />
       {listOpen ? FLOOR_PLAN_COPY.list.hide : FLOOR_PLAN_COPY.list.show}

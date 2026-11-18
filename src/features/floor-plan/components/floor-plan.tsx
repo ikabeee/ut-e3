@@ -23,16 +23,11 @@ import type { FloorPlanStand } from "@features/floor-plan/lib/types";
 export interface FloorPlanProps {
   stands: readonly FloorPlanStand[];
   variant?: MapVariant;
-  /**
-   * The landing corrections of the embedded map: the kicker of a stand has no code and the list, once opened, stays.
-   * The page variant has them always.
-   */
-  isLanding?: boolean;
 }
 
 /** The event map: markers, filters, detail, list and legend over the pannable drawing. */
-export function FloorPlan({ stands, variant = "embedded", isLanding = false }: Readonly<FloorPlanProps>): ReactElement {
-  const items = useMapItems(stands, isLanding || variant === "page");
+export function FloorPlan({ stands, variant = "embedded" }: Readonly<FloorPlanProps>): ReactElement {
+  const items = useMemo(() => buildMapItems(stands), [stands]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { filter, selectFilter } = useFilterSelection(items, selectedId, setSelectedId);
   const [listOpen, setListOpen] = useState(false);
@@ -55,7 +50,7 @@ export function FloorPlan({ stands, variant = "embedded", isLanding = false }: R
         onCloseDetail={() => setSelectedId(null)}
       />
       <ListArea
-        canHide={!isLanding || variant === "page"}
+        canHide={variant === "page"}
         listOpen={listOpen}
         items={visibleItems}
         selectedId={selectedId}
@@ -95,7 +90,7 @@ function MapHeader({ variant, filter, onSelectFilter }: Readonly<MapHeaderProps>
 
   return (
     <>
-      <h2 className="type-giant">{FLOOR_PLAN_COPY.heading}</h2>
+      <h2 className="type-giant text-[clamp(24px,4.6vw,68px)]">{FLOOR_PLAN_COPY.heading}</h2>
       <div className="mt-[clamp(36px,5vw,64px)]">{filters}</div>
     </>
   );
@@ -151,7 +146,7 @@ interface ListAreaProps {
 }
 
 function ListArea({ canHide, listOpen, items, selectedId, onToggle, onSelect }: Readonly<ListAreaProps>): ReactElement {
-  // On the landing the list stays once opened; everywhere else the button also hides it again.
+  // On the landing (embedded map) the list stays once opened; on the page the button also hides it again.
   const canToggle = canHide || !listOpen;
 
   return (
@@ -174,11 +169,6 @@ function filterCounts(): FilterCounts {
   const activities = countActivities();
 
   return { stands: STAND_MARKERS.length, activities, services: ZONE_MARKERS.length - activities };
-}
-
-/** The markers of the map; the kicker of a stand carries its code unless the landing corrections apply. */
-function useMapItems(stands: readonly FloorPlanStand[], hasLandingFixes: boolean): MapItem[] {
-  return useMemo(() => buildMapItems(stands, { hasStandCodeKicker: !hasLandingFixes }), [stands, hasLandingFixes]);
 }
 
 interface FilterSelection {

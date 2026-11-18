@@ -27,7 +27,7 @@ export function MapMarkerButton({
       aria-pressed={selected}
       onClick={() => onSelect(item.id)}
       style={{ left: point.x, top: point.y }}
-      className="touch-target absolute flex -translate-1/2 flex-col items-center"
+      className="touch-target absolute flex -translate-1/2 cursor-pointer flex-col items-center transition-transform hover:scale-110 focus-visible:scale-110 active:scale-95 motion-reduce:transition-none"
     >
       {children}
     </button>

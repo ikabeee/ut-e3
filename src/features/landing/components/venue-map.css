@@ -75,40 +75,6 @@
   align-items: center;
 }
 
-/* The pin of /showcase: two lines (the event name and the venue), aligned to the left. */
-.venue-pin--stacked {
-  align-items: flex-start;
-}
-
-.venue-pin__name,
-.venue-pin__place {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-  background: var(--accent);
-  color: var(--background);
-  white-space: nowrap;
-}
-
-.venue-pin__name {
-  padding: 6px 8px 0;
-  font-family: var(--font-wide);
-  font-size: 16px;
-  font-variation-settings: "wdth" 125;
-  font-weight: 900;
-  line-height: 1;
-}
-
-.venue-pin__place {
-  padding: 4px 8px 6px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
 .venue-pin__label {
   display: block;
   box-sizing: border-box;

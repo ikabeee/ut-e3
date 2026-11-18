@@ -11,7 +11,7 @@ const SITEMAP: FooterLinkGroup[] = [
       { href: "/#venue", label: "Ubicación" },
     ],
   },
-  { id: "staff", label: "Staff", links: [{ href: "/admin", label: "Panel de administración" }] },
+  { id: "pages", label: "Páginas", links: [{ href: "/games", label: "Catálogo de juegos" }] },
 ];
 
 describe("SiteFooter", () => {
@@ -48,8 +48,8 @@ describe("SiteFooter", () => {
 
     expect(within(events).getByRole("link", { name: "Juegos" })).toHaveAttribute("href", "/#games");
     expect(within(events).getByRole("link", { name: "Ubicación" })).toHaveAttribute("href", "/#venue");
-    expect(within(sitemap).getByRole("list", { name: "Staff" })).toBeInTheDocument();
-    expect(within(sitemap).getByRole("link", { name: "Panel de administración" })).toHaveAttribute("href", "/admin");
+    expect(within(sitemap).getByRole("list", { name: "Páginas" })).toBeInTheDocument();
+    expect(within(sitemap).getByRole("link", { name: "Catálogo de juegos" })).toHaveAttribute("href", "/games");
   });
 
   it("keeps the credits next to the site map", () => {

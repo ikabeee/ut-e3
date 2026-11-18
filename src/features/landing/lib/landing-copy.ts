@@ -46,11 +46,10 @@ export const LANDING_COPY = {
   },
   guests: {
     heading: "Invitadas especiales",
-    counter: (current: number, total: number) => `Pase ${toTwoDigits(current)} de ${toTwoDigits(total)}`,
-    previous: "Pase anterior",
-    next: "Pase siguiente",
+    carouselLabel: "Invitadas especiales: usa las flechas del teclado para cambiar de pase",
+    announcement: (current: number, total: number, name: string) =>
+      `Pase ${toTwoDigits(current)} de ${toTwoDigits(total)}: ${name}`,
     photoPending: "Por anunciar",
-    hint: "Desliza o toca el pase para ver el siguiente",
   },
   flyers: {
     heading: "Carteles del evento",
@@ -61,8 +60,6 @@ export const LANDING_COPY = {
   },
   venue: {
     heading: "Ubicación",
-    kicker: "Sede",
-    building: (building: string) => `${building} · Lobby y áreas externas`,
     openMaps: "Abrir en Google Maps",
     copyAddress: {
       idle: "Copiar dirección",
@@ -92,7 +89,7 @@ export const LANDING_COPY = {
     creditUrl: "https://algorixinsights.com/",
     sitemap: {
       label: "Mapa del sitio",
-      groups: { event: "Evento", pages: "Páginas", staff: "Staff" },
+      groups: { event: "Evento", pages: "Páginas" },
       links: {
         games: "Juegos",
         activities: "Actividades",
@@ -104,10 +101,8 @@ export const LANDING_COPY = {
         gamesCatalog: "Catálogo de juegos",
         floorPlanPage: "Croquis completo",
         raffle: "Ganadores de la rifa",
-        tournament: "Torneo de KOF",
+        tournament: "Tabla de posiciones",
         passport: "Mi pasaporte",
-        login: "Acceso del staff",
-        admin: "Panel de administración",
       },
     },
   },

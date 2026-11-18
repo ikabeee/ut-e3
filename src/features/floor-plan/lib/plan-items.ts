@@ -37,19 +37,10 @@ const ZONE_KINDS: Record<ZoneId, MapItemKind> = {
   "help-center-4": "service",
 };
 
-export interface MapItemsOptions {
-  /** The kicker of a stand starts with its code ("Stand ZT-S6 · Genre", as on /showcase), not only its genre. */
-  hasStandCodeKicker?: boolean;
-}
-
 /** Every marker of the map in plan order: the 18 stand cells first, then the 9 zones. */
-export function buildMapItems(stands: readonly FloorPlanStand[], options: MapItemsOptions = {}): MapItem[] {
+export function buildMapItems(stands: readonly FloorPlanStand[]): MapItem[] {
   const standsByCode = new Map(stands.map((stand) => [stand.code, stand]));
-  const hasCodeKicker = options.hasStandCodeKicker === true;
-
-  const standItems = STAND_MARKERS.map((marker) =>
-    buildStandItem(marker.code, standsByCode.get(marker.code), hasCodeKicker),
-  );
+  const standItems = STAND_MARKERS.map((marker) => buildStandItem(marker.code, standsByCode.get(marker.code)));
 
   const zoneItems = ZONE_MARKERS.map((marker) => buildZoneItem(marker.id));
 
@@ -71,13 +62,12 @@ export function countActivities(): number {
   return ZONE_MARKERS.filter((marker) => ZONE_KINDS[marker.id as ZoneId] === "activity").length;
 }
 
-function buildStandItem(code: string, stand: FloorPlanStand | undefined, hasCodeKicker: boolean): MapItem {
+function buildStandItem(code: string, stand: FloorPlanStand | undefined): MapItem {
   const marker = STAND_MARKERS.find((candidate) => candidate.code === code);
 
   const placement = {
     parsed: parseStandCode(code),
     position: { x: marker?.x ?? 0, y: marker?.y ?? 0 },
-    hasCodeKicker,
   };
 
   if (!stand) return emptyStandItem(code, placement);
@@ -88,7 +78,6 @@ function buildStandItem(code: string, stand: FloorPlanStand | undefined, hasCode
 interface StandPlacement {
   parsed: ParsedStandCode;
   position: { x: number; y: number };
-  hasCodeKicker: boolean;
 }
 
 function emptyStandItem(code: string, placement: StandPlacement): MapItem {
@@ -96,7 +85,7 @@ function emptyStandItem(code: string, placement: StandPlacement): MapItem {
     id: code,
     kind: "stand",
     label: FLOOR_PLAN_COPY.drawing.standLabel(code),
-    kicker: placement.hasCodeKicker ? FLOOR_PLAN_COPY.unassignedKicker(code) : "",
+    kicker: "",
     title: FLOOR_PLAN_COPY.unassignedTitle,
     description: FLOOR_PLAN_COPY.unassignedDescription,
     code,
@@ -113,7 +102,7 @@ function gameStandItem(code: string, stand: FloorPlanStand, placement: StandPlac
     id: code,
     kind: "stand",
     label: FLOOR_PLAN_COPY.drawing.standLabel(code, stand.name),
-    kicker: placement.hasCodeKicker ? FLOOR_PLAN_COPY.standKicker(code, stand.genre) : stand.genre,
+    kicker: stand.genre,
     title: stand.name,
     description: stand.synopsis,
     code,

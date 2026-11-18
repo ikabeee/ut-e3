@@ -101,7 +101,7 @@ function DetailActions({ item, onClose }: Readonly<{ item: MapItem; onClose: () 
         <button
           type="button"
           onClick={onClose}
-          className="h-12 w-full border border-border px-4 font-mono text-xs text-foreground uppercase"
+          className="h-12 w-full cursor-pointer border border-border px-4 font-mono text-xs text-foreground uppercase transition-colors hover:border-accent hover:bg-accent hover:text-accent-foreground active:opacity-80"
         >
           {FLOOR_PLAN_COPY.detail.dismiss}
         </button>
@@ -113,7 +113,7 @@ function DetailActions({ item, onClose }: Readonly<{ item: MapItem; onClose: () 
     <div className="flex gap-2">
       <Link
         href={getGamePath(item.slug)}
-        className="flex min-h-12 flex-1 items-center justify-center gap-2 bg-accent px-4 font-mono text-xs text-accent-foreground uppercase min-[1000px]:min-h-11 min-[1000px]:w-full"
+        className="flex min-h-12 flex-1 items-center justify-center gap-2 bg-accent px-4 font-mono text-xs text-accent-foreground uppercase transition-colors hover:bg-foreground hover:text-background focus-visible:bg-foreground focus-visible:text-background active:opacity-80 min-[1000px]:min-h-11 min-[1000px]:w-full"
       >
         {FLOOR_PLAN_COPY.detail.gameLink}
         <ArrowGlyph direction="e" />
@@ -121,7 +121,7 @@ function DetailActions({ item, onClose }: Readonly<{ item: MapItem; onClose: () 
       <button
         type="button"
         onClick={onClose}
-        className="h-12 shrink-0 border border-border px-4 font-mono text-xs text-foreground uppercase min-[1000px]:hidden"
+        className="h-12 shrink-0 cursor-pointer border border-border px-4 font-mono text-xs text-foreground uppercase transition-colors hover:border-accent hover:bg-accent hover:text-accent-foreground active:opacity-80 min-[1000px]:hidden"
       >
         {FLOOR_PLAN_COPY.detail.dismiss}
       </button>
@@ -135,7 +135,7 @@ function CloseDetailButton({ onClose }: Readonly<{ onClose: () => void }>): Reac
       type="button"
       aria-label={FLOOR_PLAN_COPY.detail.close}
       onClick={onClose}
-      className="touch-target relative flex size-11 shrink-0 items-center justify-center text-muted"
+      className="touch-target relative flex size-11 shrink-0 cursor-pointer items-center justify-center text-muted transition-colors hover:text-foreground focus-visible:text-foreground active:text-accent"
     >
       <svg
         width={20}

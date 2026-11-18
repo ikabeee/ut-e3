@@ -10,7 +10,7 @@ export function EventFlyers() {
   return (
     <section id={FLYERS_SECTION_ID} aria-labelledby="flyers-heading" className="section-block">
       <div className="page-wrap">
-        <h2 id="flyers-heading" className="type-giant">
+        <h2 id="flyers-heading" className="type-giant text-[clamp(24px,4.6vw,68px)]">
           {flyers.heading}
         </h2>
         <ul className="m-0 mt-[clamp(28px,4vw,56px)] grid list-none grid-cols-1 justify-items-center gap-gutter p-0 min-[640px]:grid-cols-2">

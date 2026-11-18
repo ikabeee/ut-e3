@@ -43,7 +43,7 @@ function ControlButton({ label, onPress, divided, children }: Readonly<ControlBu
       type="button"
       aria-label={label}
       onClick={onPress}
-      className={`touch-target relative flex size-11 items-center justify-center text-foreground ${divided ? "border-b border-border" : ""}`}
+      className={`touch-target relative flex size-11 cursor-pointer items-center justify-center text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground active:opacity-80 ${divided ? "border-b border-border" : ""}`}
     >
       <svg
         width={18}
