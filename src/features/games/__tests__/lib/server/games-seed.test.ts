@@ -3,6 +3,7 @@
  */
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { backfillGameImages } from "@features/games/lib/server/game-image-backfill";
 import { INITIAL_GAMES, INITIAL_STANDS, seedGames } from "@features/games/lib/server/games-seed";
 import { buildGameSlug } from "@features/games/lib/game-slug";
 import { formatAdminStandCode } from "@features/games/lib/stand-code";
@@ -32,7 +33,13 @@ const GAMES = [
 ] as const;
 
 // They have no artwork yet: the pages show a generic cover with their name.
-const GAMES_WITHOUT_COVER = ["one-mind", "sombra-del-mictlan"];
+const GAMES_WITHOUT_COVER = ["sombra-del-mictlan"];
+
+// Games with screenshots (`<slug>-captura-NN.jpg`) after the cover and the landscape image.
+const SCREENSHOTS = new Map([
+  ["one-mind", 3],
+  ["identity-dissolution", 3],
+]);
 
 // The genre of every game, as the organizers confirmed it.
 const CONFIRMED_GENRES = {
@@ -135,12 +142,12 @@ describe("INITIAL_GAMES", () => {
     ]);
   });
 
-  it("uses the portrait cover as the main image, and a landscape one second except for Vaporlock", () => {
+  it("uses the portrait cover as the main image, the landscape one second and the screenshots from position 3", () => {
     for (const game of INITIAL_GAMES.filter((candidate) => !GAMES_WITHOUT_COVER.includes(candidate.slug))) {
-      const expectedPaths =
-        game.slug === "vaporlock"
-          ? [`/games/${game.slug}.jpg`]
-          : [`/games/${game.slug}.jpg`, `/games/${game.slug}-portada.jpg`];
+      const expectedPaths = [`/games/${game.slug}.jpg`, `/games/${game.slug}-portada.jpg`];
+
+      for (let number = 1; number <= (SCREENSHOTS.get(game.slug) ?? 0); number++)
+        expectedPaths.push(`/games/${game.slug}-captura-0${number}.jpg`);
 
       expect(game.images.map((image) => image.path)).toEqual(expectedPaths);
       expect(game.images[0]).toMatchObject({ position: 1, isCover: true, alt: `Portada de ${game.name}` });
@@ -204,7 +211,7 @@ describe("seedGames", () => {
     });
   });
 
-  it("writes the landscape image of each game at position 2, except Vaporlock which has none, and no images for the games without artwork", async () => {
+  it("writes the landscape image of each game at position 2, its screenshots from 3, and no images for the games without artwork", async () => {
     await seedGames(getPrisma());
 
     const games = await getPrisma().game.findMany({ include: { images: { orderBy: { position: "asc" } } } });
@@ -300,5 +307,40 @@ async function readCatalog() {
 function expectedPositions(slug: string): string[] {
   if (GAMES_WITHOUT_COVER.includes(slug)) return [];
 
-  return slug === "vaporlock" ? ["1:true"] : ["1:true", "2:false"];
+  const screenshots = Array.from({ length: SCREENSHOTS.get(slug) ?? 0 }, (_, index) => `${index + 3}:false`);
+
+  return ["1:true", "2:false", ...screenshots];
 }
+
+describe("backfillGameImages", () => {
+  beforeEach(async () => {
+    const prisma = getPrisma();
+
+    await prisma.gameImage.deleteMany();
+    await prisma.game.deleteMany();
+    await prisma.stand.deleteMany();
+    await prisma.genre.deleteMany();
+  });
+
+  it("adds the missing images at their positions, keeps the existing ones and is safe to repeat", async () => {
+    await seedGames(getPrisma());
+    const game = await getPrisma().game.findUniqueOrThrow({ where: { slug: "one-mind" } });
+
+    await getPrisma().gameImage.deleteMany({ where: { gameId: game.id, position: { in: [2, 3] } } });
+    await getPrisma().gameImage.update({
+      where: { gameId_position: { gameId: game.id, position: 1 } },
+      data: { alt: "Editada" },
+    });
+
+    expect(await backfillGameImages(getPrisma())).toEqual([
+      "/games/one-mind-portada.jpg",
+      "/games/one-mind-captura-01.jpg",
+    ]);
+    expect(await backfillGameImages(getPrisma())).toEqual([]);
+
+    const images = await getPrisma().gameImage.findMany({ where: { gameId: game.id }, orderBy: { position: "asc" } });
+
+    expect(images.map((image) => image.position)).toEqual([1, 2, 3, 4, 5]);
+    expect(images[0].alt).toBe("Editada");
+  });
+});

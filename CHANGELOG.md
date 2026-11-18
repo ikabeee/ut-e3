@@ -6,6 +6,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Cambiado
+
+- Portadas verticales (810x1080) y horizontales (1920x1080) de los juegos actualizadas desde la carpeta "portadas" de Drive; One Mind y Vaporlock ya tienen portada y imagen horizontal, y One Mind e Identity Dissolution suman 3 capturas en la galería (la base admite 5 imágenes por juego).
 ### Seguridad
 
 - Next.js se actualiza de 16.4.2 a 16.4.6 por un aviso de seguridad publicado (junto con `@next/env` y `eslint-config-next`).

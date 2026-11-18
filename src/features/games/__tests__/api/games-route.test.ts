@@ -42,6 +42,6 @@ describe("GET /api/games (S21)", () => {
   it("leaves out the games that are not public yet", async () => {
     const body = await (await GET()).json();
 
-    expect(body.games.map((game: { slug: string }) => game.slug)).not.toContain("one-mind");
+    expect(body.games.map((game: { slug: string }) => game.slug)).not.toContain("sombra-del-mictlan");
   });
 });
