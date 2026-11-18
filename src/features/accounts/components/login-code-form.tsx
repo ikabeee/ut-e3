@@ -1,10 +1,12 @@
 "use client";
 
-import { Button, FieldError, Form, Input, Label, TextField } from "@heroui/react";
+import { FieldError, Form, Input, Label, TextField } from "@heroui/react";
 import { useActionState } from "react";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import type { LoginCodeState } from "@features/accounts/lib/login-code-actions";
 import { FormSubmit } from "@shared/components/form-submit";
+import { PendingButton } from "@shared/components/pending-button";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 import { useSubmitKeepingValues } from "@shared/hooks/use-submit-keeping-values";
 
 interface LoginCodeFormProps {
@@ -36,17 +38,14 @@ export function LoginCodeForm({ verifyAction, resendAction }: Readonly<LoginCode
 function ResendCode({ resendAction }: Readonly<Pick<LoginCodeFormProps, "resendAction">>) {
   const [state, formAction, isPending] = useActionState(resendAction, null);
 
+  useErrorToast(state?.error, state);
+
   return (
     <form action={formAction} className="flex flex-col gap-3">
       {state?.notice ? <p role="status">{state.notice}</p> : null}
-      {state?.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
-      <Button type="submit" variant="outline" className="min-h-11" isPending={isPending}>
+      <PendingButton type="submit" variant="outline" className="min-h-11" isPending={isPending}>
         {COPY.resend}
-      </Button>
+      </PendingButton>
     </form>
   );
 }

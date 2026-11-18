@@ -1,11 +1,13 @@
 "use client";
 
-import { Button, Input, Label, TextField } from "@heroui/react";
+import { Input, Label, TextField } from "@heroui/react";
 import { useActionState, useEffect } from "react";
 import type { RaffleAction } from "@features/raffle/components/draw-decision-dialog";
 import { RAFFLE_COPY } from "@features/raffle/lib/raffle-copy";
 import { MAX_PRIZE_NAME } from "@features/raffle/lib/raffle-input";
 import type { AdminWinner } from "@features/raffle/lib/types";
+import { PendingButton } from "@shared/components/pending-button";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 import { formatTimeOfDay } from "@shared/lib/date-time";
 
 interface AdminWinnersProps {
@@ -69,6 +71,8 @@ interface PrizeFormProps {
 function PrizeForm({ drawId, registerPrize, onChanged }: Readonly<PrizeFormProps>) {
   const [state, formAction, isPending] = useActionState(registerPrize, null);
 
+  useErrorToast(state?.status === "error" ? state.message : null, state);
+
   useEffect(() => {
     if (state?.status === "done") onChanged();
   }, [state, onChanged]);
@@ -80,14 +84,9 @@ function PrizeForm({ drawId, registerPrize, onChanged }: Readonly<PrizeFormProps
         <Label>{COPY.prizeLabel}</Label>
         <Input className="min-h-11 text-base" maxLength={MAX_PRIZE_NAME} autoComplete="off" />
       </TextField>
-      <Button type="submit" variant="outline" className="min-h-11" isPending={isPending}>
+      <PendingButton type="submit" variant="outline" className="min-h-11" isPending={isPending}>
         {isPending ? COPY.prizePending : COPY.prizeSubmit}
-      </Button>
-      {state?.status === "error" && (
-        <p role="alert" className="m-0 basis-full text-sm text-danger">
-          {state.message}
-        </p>
-      )}
+      </PendingButton>
     </form>
   );
 }

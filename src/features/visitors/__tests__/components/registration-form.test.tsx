@@ -1,14 +1,15 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RegistrationForm } from "@features/visitors/components/registration-form";
 import type { RegistrationState } from "@features/visitors/lib/visitors-actions";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 const COPY = VISITORS_COPY.form;
 
 describe("RegistrationForm", () => {
   it("renders inputs with min-h-11 and text-base classes and accessible labels", () => {
-    render(<RegistrationForm action={async () => ({})} />);
+    renderWithToasts(<RegistrationForm action={async () => ({})} />);
 
     const nameInput = screen.getByLabelText(COPY.fullNameLabel);
     const gamertagInput = screen.getByLabelText(COPY.gamertagLabel);
@@ -36,7 +37,7 @@ describe("RegistrationForm", () => {
       };
     };
 
-    render(<RegistrationForm action={action} />);
+    renderWithToasts(<RegistrationForm action={action} />);
     await userEvent.type(screen.getByLabelText(COPY.fullNameLabel), "Thomas Anderson");
     await userEvent.type(screen.getByLabelText(COPY.gamertagLabel), "Neo");
     await userEvent.type(screen.getByLabelText(COPY.emailLabel), "neo@matrix.org");

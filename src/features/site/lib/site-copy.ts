@@ -42,6 +42,9 @@ export const SITE_COPY = {
       schedule: { label: "Cronograma", description: "Actividades y horarios del evento." },
     },
   },
+  toasts: {
+    label: "Avisos",
+  },
   error: {
     // Error boundaries take no `metadata`, so the view sets the tab title itself.
     documentTitle: (siteName: string) => `Algo salió mal · ${siteName}`,

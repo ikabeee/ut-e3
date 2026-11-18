@@ -13,6 +13,7 @@ import { PUBLIC_BRACKET_PATH } from "@features/tournament/lib/tournament-links";
 import type { TournamentInfoSchedule } from "@features/tournament/lib/tournament-when";
 import { PASSPORT_SNAPSHOT_KEY } from "@features/visitors/lib/passport-snapshot";
 import { PASSPORT_PATH, REGISTER_PATH } from "@features/visitors/lib/visitors-links";
+import { LoadingState } from "@shared/components/loading-state";
 
 const COPY = TOURNAMENT_COPY.ui.publicBracket;
 
@@ -28,7 +29,7 @@ export function PublicBracketPage() {
   return (
     <main className="page-wrap grid gap-10 py-12">
       <TournamentHeading />
-      <Suspense fallback={<p className="type-mono text-muted">{COPY.loading}</p>}>
+      <Suspense fallback={<LoadingState label={COPY.loading} />}>
         <PublicBracket />
       </Suspense>
     </main>

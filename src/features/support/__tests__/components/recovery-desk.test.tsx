@@ -1,9 +1,10 @@
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RecoveryDesk } from "@features/support/components/recovery-desk";
 import type { CandidateView, RecoveryState, SearchState } from "@features/support/lib/support-actions";
 import { encodeWithQuietZone, readMatrixFromPath } from "@shared/__tests__/lib/qr-test-utils";
 import { buildQrCode } from "@shared/lib/qr-code";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 const SEARCHED: FormData[] = [];
 
@@ -183,7 +184,7 @@ async function recoverFirstCandidate() {
 }
 
 function renderDesk({ search, recover }: DeskActions = {}) {
-  return render(
+  return renderWithToasts(
     <RecoveryDesk
       search={async (_previous, form) => {
         SEARCHED.push(form);

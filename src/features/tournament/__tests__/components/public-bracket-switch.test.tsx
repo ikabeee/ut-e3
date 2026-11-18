@@ -1,14 +1,17 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   PublicBracketSwitch,
   type PublicBracketSwitchAction,
 } from "@features/tournament/components/public-bracket-switch";
 import type { PublicBracketActionState } from "@features/tournament/lib/public-bracket-actions";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 describe("PublicBracketSwitch", () => {
   it("says the bracket is open, links to the public page and offers to close it", () => {
-    render(<PublicBracketSwitch isEnabled action={recordingAction({ status: "done", message: "ok" }).action} />);
+    renderWithToasts(
+      <PublicBracketSwitch isEnabled action={recordingAction({ status: "done", message: "ok" }).action} />,
+    );
 
     expect(screen.getByText("Cualquiera puede ver el bracket en /tournament.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ver la página pública" })).toHaveAttribute("href", "/tournament");
@@ -16,7 +19,7 @@ describe("PublicBracketSwitch", () => {
   });
 
   it("says the bracket is closed and offers to reopen it", () => {
-    render(
+    renderWithToasts(
       <PublicBracketSwitch isEnabled={false} action={recordingAction({ status: "done", message: "ok" }).action} />,
     );
 
@@ -27,7 +30,7 @@ describe("PublicBracketSwitch", () => {
   it("sends the opposite of the current value", async () => {
     const { received, action } = recordingAction({ status: "done", message: "Bracket público cerrado." });
 
-    render(<PublicBracketSwitch isEnabled action={action} />);
+    renderWithToasts(<PublicBracketSwitch isEnabled action={action} />);
     await userEvent.click(screen.getByRole("button", { name: "Cerrar al público" }));
 
     await waitFor(() => expect(received).toHaveLength(1));
@@ -38,7 +41,7 @@ describe("PublicBracketSwitch", () => {
   it("sends true when it is closed", async () => {
     const { received, action } = recordingAction({ status: "done", message: "Bracket público abierto." });
 
-    render(<PublicBracketSwitch isEnabled={false} action={action} />);
+    renderWithToasts(<PublicBracketSwitch isEnabled={false} action={action} />);
     await userEvent.click(screen.getByRole("button", { name: "Abrir al público" }));
 
     await waitFor(() => expect(received).toHaveLength(1));
@@ -48,7 +51,7 @@ describe("PublicBracketSwitch", () => {
   it("shows why the server refused", async () => {
     const { action } = recordingAction({ status: "error", message: "No se pudo." });
 
-    render(<PublicBracketSwitch isEnabled action={action} />);
+    renderWithToasts(<PublicBracketSwitch isEnabled action={action} />);
     await userEvent.click(screen.getByRole("button", { name: "Cerrar al público" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo.");

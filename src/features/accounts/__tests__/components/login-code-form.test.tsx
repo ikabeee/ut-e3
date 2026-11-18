@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LoginCodeForm } from "@features/accounts/components/login-code-form";
 import type { LoginCodeState } from "@features/accounts/lib/login-code-actions";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 describe("LoginCodeForm", () => {
   it("labels a 16 px one-time-code field and sends the typed code", async () => {
@@ -13,7 +14,9 @@ describe("LoginCodeForm", () => {
       return { error: "El código es incorrecto o venció. Pide uno nuevo.", notice: "" };
     };
 
-    render(<LoginCodeForm verifyAction={verifyAction} resendAction={async () => ({ error: "", notice: "" })} />);
+    renderWithToasts(
+      <LoginCodeForm verifyAction={verifyAction} resendAction={async () => ({ error: "", notice: "" })} />,
+    );
 
     expect(screen.getByLabelText("Código de 6 dígitos")).toHaveAttribute("autocomplete", "one-time-code");
     expect(screen.getByLabelText("Código de 6 dígitos")).toHaveClass("text-base", "min-h-11");
@@ -28,7 +31,9 @@ describe("LoginCodeForm", () => {
   it("shows what the resend answers", async () => {
     const resendAction = async () => ({ error: "", notice: "Te enviamos un código nuevo." });
 
-    render(<LoginCodeForm verifyAction={async () => ({ error: "", notice: "" })} resendAction={resendAction} />);
+    renderWithToasts(
+      <LoginCodeForm verifyAction={async () => ({ error: "", notice: "" })} resendAction={resendAction} />,
+    );
     await userEvent.click(screen.getByRole("button", { name: "Reenviar código" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent("Te enviamos un código nuevo.");

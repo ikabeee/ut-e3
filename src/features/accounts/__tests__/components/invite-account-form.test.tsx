@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { InviteAccountForm, type ManagementAction } from "@features/accounts/components/invite-account-form";
 import type { ManagementActionState } from "@features/accounts/lib/management-actions";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 const ADMIN_ROLES = [
   { value: "kof_admin", label: "Administrador de KOF" },
@@ -15,7 +16,7 @@ describe("InviteAccountForm", () => {
   it("sends the name, the email and the first role of the list", async () => {
     const { received, action } = recordingAction({ status: "done", message: "Invitación enviada." });
 
-    render(<InviteAccountForm roles={ADMIN_ROLES} showDesk={false} action={action} />);
+    renderWithToasts(<InviteAccountForm roles={ADMIN_ROLES} showDesk={false} action={action} />);
     await userEvent.type(screen.getByLabelText("Nombre"), "Ana Pérez");
     await userEvent.type(screen.getByLabelText("Correo"), "ana@ut.mx");
     await userEvent.click(screen.getByRole("button", { name: "Enviar invitación" }));
@@ -30,7 +31,7 @@ describe("InviteAccountForm", () => {
   it("sends the only role without asking for it, and the desk, for the staff of the desks", async () => {
     const { received, action } = recordingAction({ status: "done", message: "Invitación enviada." });
 
-    render(<InviteAccountForm roles={STAFF_ROLES} showDesk action={action} />);
+    renderWithToasts(<InviteAccountForm roles={STAFF_ROLES} showDesk action={action} />);
     await userEvent.type(screen.getByLabelText("Nombre"), "Luis");
     await userEvent.type(screen.getByLabelText("Correo"), "luis@ut.mx");
     await userEvent.click(screen.getByRole("button", { name: "Enviar invitación" }));
@@ -44,7 +45,7 @@ describe("InviteAccountForm", () => {
   it("confirms what the server did and clears the fields", async () => {
     const { action } = recordingAction({ status: "done", message: "Invitación enviada." });
 
-    render(<InviteAccountForm roles={ADMIN_ROLES} showDesk={false} action={action} />);
+    renderWithToasts(<InviteAccountForm roles={ADMIN_ROLES} showDesk={false} action={action} />);
     await userEvent.type(screen.getByLabelText("Nombre"), "Ana");
     await userEvent.type(screen.getByLabelText("Correo"), "ana@ut.mx");
     await userEvent.click(screen.getByRole("button", { name: "Enviar invitación" }));
@@ -56,7 +57,7 @@ describe("InviteAccountForm", () => {
   it("shows why the server refused and keeps what was typed", async () => {
     const { action } = recordingAction({ status: "error", message: "Ese correo ya tiene una cuenta." });
 
-    render(<InviteAccountForm roles={ADMIN_ROLES} showDesk={false} action={action} />);
+    renderWithToasts(<InviteAccountForm roles={ADMIN_ROLES} showDesk={false} action={action} />);
     await userEvent.type(screen.getByLabelText("Nombre"), "Ana");
     await userEvent.type(screen.getByLabelText("Correo"), "ana@ut.mx");
     await userEvent.click(screen.getByRole("button", { name: "Enviar invitación" }));

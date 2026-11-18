@@ -7,6 +7,7 @@ import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import { FORGOT_PASSWORD_PATH, LOGIN_PATH } from "@features/accounts/lib/accounts-links";
 import { resetPasswordAction } from "@features/accounts/lib/password-reset-actions";
 import { getResetLinkState, type ResetLinkState } from "@features/accounts/lib/server/password-reset";
+import { LoadingState } from "@shared/components/loading-state";
 
 const COPY = ACCOUNTS_COPY.resetPassword;
 
@@ -19,7 +20,7 @@ export const resetPasswordPageMetadata: Metadata = {
 
 export function ResetPasswordPage({ params }: PageProps<"/reset-password/[token]">) {
   return (
-    <Suspense>
+    <Suspense fallback={<LoadingState label={COPY.loading} className="justify-center py-24" />}>
       <ResetGate params={params} />
     </Suspense>
   );

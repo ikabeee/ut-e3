@@ -1,9 +1,11 @@
 "use client";
 
-import { Button, FieldError, Form, Input, Label, TextField } from "@heroui/react";
+import { FieldError, Form, Input, Label, TextField } from "@heroui/react";
 import { useActionState } from "react";
 import type { RecoveryRequestState } from "@features/visitors/lib/visitors-actions";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
+import { PendingButton } from "@shared/components/pending-button";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 import { useSubmitKeepingValues } from "@shared/hooks/use-submit-keeping-values";
 
 interface RecoveryRequestFormProps {
@@ -18,6 +20,8 @@ export function RecoveryRequestForm({ action }: Readonly<RecoveryRequestFormProp
   const handleSubmit = useSubmitKeepingValues(formAction);
   const invalid = state?.status === "invalid" ? state : null;
 
+  useErrorToast(invalid?.error, state);
+
   return (
     <Form
       action={formAction}
@@ -31,9 +35,9 @@ export function RecoveryRequestForm({ action }: Readonly<RecoveryRequestFormProp
         <FieldError />
       </TextField>
 
-      <Button type="submit" variant="primary" className="min-h-11" isPending={isPending}>
+      <PendingButton type="submit" variant="primary" className="min-h-11" isPending={isPending}>
         {isPending ? COPY.pending : COPY.submit}
-      </Button>
+      </PendingButton>
 
       {state?.status === "sent" ? (
         <p role="status" className="text-sm text-foreground">

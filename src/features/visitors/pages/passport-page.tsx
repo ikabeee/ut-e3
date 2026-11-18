@@ -22,6 +22,7 @@ import { getPassportVisits } from "@features/visitors/lib/server/passport-visits
 import type { Passport, PassportVisits } from "@features/visitors/lib/types";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 import { PASSPORT_PATH, REGISTER_PATH } from "@features/visitors/lib/visitors-links";
+import { LoadingState } from "@shared/components/loading-state";
 import { getDeviceVisitorId } from "@shared/lib/server/visitor-device";
 
 export const passportPageMetadata: Metadata = {
@@ -42,7 +43,7 @@ interface PassportViewProps {
 
 export function PassportPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<LoadingState label={VISITORS_COPY.loading.passport} className="justify-center py-24" />}>
       <PassportGate />
     </Suspense>
   );

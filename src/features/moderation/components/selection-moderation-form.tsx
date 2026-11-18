@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Description, FieldError, Label, TextArea, TextField } from "@heroui/react";
+import { Description, FieldError, Label, TextArea, TextField } from "@heroui/react";
 import Link from "next/link";
 import { startTransition, useActionState, useRef, type FormEvent } from "react";
 import type { ModerationAction } from "@features/moderation/components/reason-action-form";
@@ -9,6 +9,7 @@ import { REASON_MAX_LENGTH, REASON_MIN_LENGTH } from "@features/moderation/lib/m
 import { useVisitSelection } from "@features/moderation/hooks/use-visit-selection";
 import type { SelectableVisit } from "@features/moderation/lib/selectable-visit";
 import { FormFeedback } from "@shared/components/form-feedback";
+import { PendingButton } from "@shared/components/pending-button";
 
 interface SelectionModerationFormProps {
   visits: readonly SelectableVisit[];
@@ -65,7 +66,7 @@ export function SelectionModerationForm({ visits, action }: Readonly<SelectionMo
 function SubmitButtons({ onChoose, isPending }: Readonly<{ onChoose: (choice: string) => void; isPending: boolean }>) {
   return (
     <div className="flex flex-wrap gap-3">
-      <Button
+      <PendingButton
         type="submit"
         variant="primary"
         className="min-h-11"
@@ -73,8 +74,8 @@ function SubmitButtons({ onChoose, isPending }: Readonly<{ onChoose: (choice: st
         onPress={() => onChoose("annul")}
       >
         {COPY.annul}
-      </Button>
-      <Button
+      </PendingButton>
+      <PendingButton
         type="submit"
         variant="outline"
         className="min-h-11"
@@ -82,7 +83,7 @@ function SubmitButtons({ onChoose, isPending }: Readonly<{ onChoose: (choice: st
         onPress={() => onChoose("exclude")}
       >
         {COPY.exclude}
-      </Button>
+      </PendingButton>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import { LOGIN_PATH, LOGIN_VERIFY_PATH } from "@features/accounts/lib/accounts-links";
 import { resendLoginCodeAction, verifyLoginCodeAction } from "@features/accounts/lib/login-code-actions";
 import { readLoginChallengeToken } from "@features/accounts/lib/server/login-challenge-cookie";
+import { LoadingState } from "@shared/components/loading-state";
 
 const COPY = ACCOUNTS_COPY.verifyCode;
 
@@ -18,7 +19,7 @@ export const loginVerifyPageMetadata: Metadata = {
 
 export function LoginVerifyPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<LoadingState label={COPY.loading} className="justify-center py-24" />}>
       <LoginVerifyGate />
     </Suspense>
   );

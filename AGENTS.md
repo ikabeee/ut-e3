@@ -273,6 +273,7 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | Estado del servidor (RF-73) y cierre automático del bracket público (RF-74) | `admin/lib/server/server-status.ts`, `admin/lib/overload-rule.ts` (85% durante 2 min) y `admin/lib/server/overload-watch.ts`, que arranca `src/instrumentation.ts` |
 | Plantilla HTML de todos los correos (S1): la aplica `createSmtpSender()` al enviar | `src/shared/lib/server/email-template.ts` |
 | Correo de confirmación de la inscripción al KOF (S8) | `buildEntryEmail()` en `tournament/lib/entry-email.ts`; se encola en `insertEntry()` de `entries-mutations.ts` |
+| Spinners, skeletons de los paneles y toasts de error (S6, S7, S12) | `LoadingState`, `PanelSkeleton` y `PendingButton` en `src/shared/components/`, `useErrorToast` en `src/shared/hooks/`; la región de toasts es `site/components/site-toasts.tsx` (ver `docs/design-system.md`) |
 | Avisos de emergencia por correo a `EMERGENCY_MAIL` (S20): ventana de 15 min por aviso y tope de 10 por hora | `src/shared/lib/server/emergency-alert.ts`; los disparan `onRequestError` de `src/instrumentation.ts`, `overload-watch.ts` y `health-route.ts` |
 
 - Un stand tiene un administrador activo y hasta 3 cuentas `stand_staff` invitadas o activas (RF-32, RF-39); lo hacen

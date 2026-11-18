@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@heroui/react";
 import type { ManagementActionState } from "@features/accounts/lib/management-actions";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import type { ServerStatus, UndeliveredEmailRow } from "@features/admin/lib/types";
 import { FormFeedback } from "@shared/components/form-feedback";
 import { useActionForm } from "@shared/hooks/use-action-form";
+import { PendingButton } from "@shared/components/pending-button";
 
 export type OutboxAction = (previous: ManagementActionState | null, form: FormData) => Promise<ManagementActionState>;
 
@@ -52,9 +52,9 @@ function OutboxRow({ email, resendAction }: Readonly<{ email: UndeliveredEmailRo
       {email.canResend ? (
         <form ref={formRef} action={formAction} onSubmit={handleSubmit} className="grid justify-items-start gap-2">
           <input type="hidden" name="emailId" value={email.id} />
-          <Button type="submit" variant="outline" className="min-h-11" isPending={isPending}>
+          <PendingButton type="submit" variant="outline" className="min-h-11" isPending={isPending}>
             {isPending ? COPY.resending : COPY.resend}
-          </Button>
+          </PendingButton>
           <FormFeedback state={state} />
         </form>
       ) : (

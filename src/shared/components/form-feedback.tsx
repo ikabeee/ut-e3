@@ -1,24 +1,20 @@
+"use client";
+
+import { useErrorToast } from "@shared/hooks/use-error-toast";
+
 interface FormFeedbackProps {
   state: { status: "done" | "error"; message: string } | null;
 }
 
-/** What a Server Action answered, announced to assistive technology: a status when it worked, an alert when it did not. */
+/** What a Server Action answered: a status under the form when it worked, a toast when it did not (S7). */
 export function FormFeedback({ state }: Readonly<FormFeedbackProps>) {
-  if (state?.status === "done") {
-    return (
-      <p role="status" className="text-sm text-success">
-        {state.message}
-      </p>
-    );
-  }
+  useErrorToast(state?.status === "error" ? state.message : null, state);
 
-  if (state?.status === "error") {
-    return (
-      <p role="alert" className="text-sm text-danger">
-        {state.message}
-      </p>
-    );
-  }
+  if (state?.status !== "done") return null;
 
-  return null;
+  return (
+    <p role="status" className="text-sm text-success">
+      {state.message}
+    </p>
+  );
 }

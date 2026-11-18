@@ -1,4 +1,4 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import type { TournamentSnapshot } from "@features/tournament/api/tournament-api-client";
 import type { TournamentAction } from "@features/tournament/components/command-button";
 import { TournamentDashboard } from "@features/tournament/components/tournament-dashboard";
@@ -7,22 +7,20 @@ import { applyCommand } from "@features/tournament/lib/tournament-engine";
 import { getMatchPlayers } from "@features/tournament/lib/tournament-view";
 import type { Tournament } from "@features/tournament/lib/types";
 import {
-  clearToasts,
   createTestTournament,
   getMatch,
   NOW,
   playUntilFinished,
 } from "@features/tournament/__tests__/tournament-test-utils";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 type Viewer = Parameters<typeof TournamentDashboard>[0]["viewer"];
 
 function renderDashboard(initial: Tournament | null, viewer: Viewer, load?: () => Promise<TournamentSnapshot>) {
-  return render(<TournamentDashboard initial={initial} viewer={viewer} action={action} load={load} />);
+  return renderWithToasts(<TournamentDashboard initial={initial} viewer={viewer} action={action} load={load} />);
 }
 
 const action: TournamentAction = async () => ({ status: "applied" });
-
-afterEach(clearToasts);
 
 describe("TournamentDashboard", () => {
   it("explains that the bracket does not exist yet", () => {

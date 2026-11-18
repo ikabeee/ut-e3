@@ -10,6 +10,7 @@ import { StandKiosk, type KioskActions } from "@features/stands/components/stand
 import { cancelVisitAction, requestVisitAction, submitVisitAction } from "@features/stands/lib/stands-actions";
 import { STANDS_COPY } from "@features/stands/lib/stands-copy";
 import { getKioskStand, getVisitClosingTime } from "@features/stands/lib/server/visit-queries";
+import { LoadingState } from "@shared/components/loading-state";
 
 const COPY = STANDS_COPY.kiosk;
 
@@ -29,7 +30,7 @@ export const kioskPageMetadata: Metadata = {
 export function KioskPage() {
   return (
     <main className="page-wrap grid grid-cols-1 gap-10 py-12">
-      <Suspense fallback={<p className="type-mono text-muted">{COPY.loading}</p>}>
+      <Suspense fallback={<LoadingState label={COPY.loading} />}>
         <KioskPanel />
       </Suspense>
     </main>

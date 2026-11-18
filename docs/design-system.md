@@ -50,6 +50,30 @@ márgenes), `section-block` (espacio entre secciones) y `scrollbar-none`.
 | Buscador | `SearchField` de HeroUI |
 | Barra de controles | `Toolbar` de HeroUI |
 | Insignia | `Chip` de HeroUI |
+| Botón que envía (con spinner mientras espera) | `PendingButton` (`@shared/components/pending-button`) o `FormSubmit` al final de un formulario |
+| Carga fuera de los paneles | `LoadingState` (`@shared/components/loading-state`): `Spinner` de HeroUI con el texto de la feature |
+| Carga de un panel de cualquier rol | `PanelSkeleton` (`@shared/components/panel-skeleton`): `Skeleton` de HeroUI con la forma del panel (`layout="form"` para un formulario) |
+| Mensaje de error | `useErrorToast` (`@shared/hooks/use-error-toast`): toast de HeroUI |
+
+## Estados de carga y errores
+
+- **Fuera de los paneles** (portada, pasaporte, registro, kiosko, login y sus pasos, bracket público, rifa) la carga
+  es un spinner (`LoadingState`) que dice qué se carga. Un botón que envía muestra el spinner dentro mientras espera
+  (`PendingButton`, que usa `isPending` del `Button` de HeroUI).
+- **En los paneles** (`/admin` y sus secciones, `/admin/kof`, `/admin/raffle`, `/stand/game`, `/stand/team`,
+  `/support/recovery`) la carga son barras con la forma del contenido (`PanelSkeleton`); los botones que envían
+  conservan su spinner.
+- **Errores**: todos salen en un toast. `SiteToasts` (`site/components/site-toasts.tsx`) monta la única región de
+  toasts en el layout raíz (y en `global-error`); se anuncian como `alert`. Un componente no pinta el error: llama
+  `useErrorToast(mensaje, estado)`. El toast se repite cuando una respuesta nueva trae el mismo mensaje y se va cuando
+  el error desaparece. `FormSubmit`, `FormFeedback`, `ActionFormFooter` y `ConfirmActionForm` ya lo hacen.
+- Los errores por campo (`FieldError` junto al campo, `aria-invalid`) se quedan; si los devuelve el servidor, también
+  salen juntos en el toast (`joinFieldErrors` de `@shared/lib/field-errors`).
+- No son mensajes de error y siguen en la página: un enlace vencido o inválido (es todo el contenido de la página), los
+  avisos de visitas rechazadas del pasaporte y del kiosko (son registros con instrucciones) y las alertas de fraude o
+  de sobrecarga (son datos del panel).
+- En las pruebas, `renderWithToasts` (`src/shared/__tests__/components/toast-test-utils.tsx`) monta una región junto al
+  componente y vacía la cola después de cada prueba.
 
 ## Variantes
 

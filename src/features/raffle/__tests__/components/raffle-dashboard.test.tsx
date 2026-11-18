@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RaffleDashboard, type RaffleDashboardActions } from "@features/raffle/components/raffle-dashboard";
 import type { RaffleAdminSnapshot } from "@features/raffle/lib/types";
@@ -7,6 +7,7 @@ import {
   createPendingDraw,
   DRAW_ID,
 } from "@features/raffle/__tests__/components/raffle-test-snapshots";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 describe("RaffleDashboard", () => {
   it("does not let anyone spin before the raffle starts", () => {
@@ -121,7 +122,7 @@ describe("RaffleDashboard", () => {
 });
 
 function renderDashboard(initial: RaffleAdminSnapshot, actions = createActions(), load = jest.fn(async () => initial)) {
-  render(<RaffleDashboard initial={initial} viewerId="admin-1" actions={actions} load={load} />);
+  renderWithToasts(<RaffleDashboard initial={initial} viewerId="admin-1" actions={actions} load={load} />);
 
   return { actions, load };
 }
