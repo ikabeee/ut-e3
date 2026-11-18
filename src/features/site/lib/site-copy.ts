@@ -1,4 +1,9 @@
 export const SITE_COPY = {
+  emergency: {
+    lowDiskSubject: "Disco de la base casi lleno",
+    lowDiskDetail: (freeMegabytes: number) =>
+      `Al volumen de la base le quedan ${freeMegabytes} MB y GET /api/health responde 503. Con el disco lleno SQLite falla (SQLITE_FULL) y los kioscos dejan de registrar visitas.`,
+  },
   nav: {
     label: "Principal",
     homeLabel: "UTG, inicio",
