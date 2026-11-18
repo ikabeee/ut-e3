@@ -24,3 +24,22 @@ export interface ServerStatus {
   outbox: { sent: number; pending: number; failed: number };
   undelivered: UndeliveredEmailRow[];
 }
+
+/** One cell of a result: null and blobs are marked so they are never mistaken for the text "NULL". */
+export interface SqlCell {
+  kind: "value" | "null" | "blob";
+  text: string;
+}
+
+export interface SqlReadResult {
+  columns: string[];
+  rows: SqlCell[][];
+  isTruncated: boolean;
+}
+
+/** What the console answers: an error for the toast, a read, the review of a write, or the write done. */
+export type SqlConsoleState =
+  | { status: "error"; message: string }
+  | { status: "read"; message: string; result: SqlReadResult }
+  | { status: "review"; message: string; statement: string; affectedRows: number }
+  | { status: "done"; message: string; affectedRows: number };

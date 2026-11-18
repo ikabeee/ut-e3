@@ -356,6 +356,25 @@ El reinicio automático (`restart: unless-stopped`) levanta el contenedor si el 
 (RNF-17). Docker no lo levanta tras una parada manual: `docker compose stop`, `docker stop` y también `docker kill`
 (aunque sea con `-s KILL`) lo dejan detenido hasta un `docker compose up -d`. Para un cambio de `.env` sin cambio de `NEXT_PUBLIC_SITE_URL`, basta `docker compose up -d`.
 
+## Consola SQL (`/admin/sql`)
+
+El sysadmin puede consultar y modificar la base real desde el panel. Antes de usarla en producción:
+
+- **Respalda antes de escribir** (ver "Respaldos"): una escritura confirmada se aplica de inmediato y no se puede deshacer.
+- **Es síncrona.** SQLite corre en el mismo hilo del servidor: una consulta lenta (un `JOIN` sin índice sobre tablas
+  grandes, un producto cartesiano) bloquea todas las solicitudes mientras dura y nada puede interrumpirla. Las
+  lecturas se cortan a 500 filas y un `WITH RECURSIVE` sin `LIMIT` se rechaza, pero eso no frena una consulta que
+  tarda antes de devolver la primera fila. Evita usarla durante el evento o con el bracket público abierto.
+- **Una sentencia por vez**, solo `SELECT`, `WITH`, `EXPLAIN`, `INSERT`, `UPDATE` y `DELETE`. Se rechazan `ATTACH`,
+  `DETACH`, `PRAGMA`, `VACUUM`, `load_extension`, `CREATE`, `DROP` y `ALTER`, y escribir en `_prisma_migrations`,
+  `audit_logs` y las tablas `sqlite_*`. Los cambios de esquema siguen siendo migraciones.
+- **Las lecturas ven todo**, incluidos datos personales y los hashes de las cuentas. Solo el sysadmin con sesión y
+  verificación en dos pasos entra, y cada sentencia queda en la bitácora (`admin.sql.read`, `admin.sql.review` y `admin.sql.write`) con su
+  texto y, en las escrituras, las filas cambiadas; nunca el resultado. No pegues contraseñas ni datos personales en la
+  sentencia: el texto se guarda tal cual.
+- Una escritura exitosa refresca las cachés de la portada (eventos, juegos, cronograma, patrocinadores y PIN de visitantes).
+  No toca el bracket de KOF en memoria ni lo que ya esté guardado en el navegador.
+
 ## Despliegue continuo (GitHub Actions y Coolify)
 
 El servidor de producción corre en Coolify y no compila (RNF-15). `.github/workflows/deploy.yml` hace el trabajo:
