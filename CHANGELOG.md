@@ -6,6 +6,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.1.0] - 2026-11-18
+
 ### Cambiado
 
 - Se elimina la página `/showcase`.
