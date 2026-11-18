@@ -34,9 +34,9 @@ const GAMES = [
 // They have no artwork yet: the pages show a generic cover with their name.
 const GAMES_WITHOUT_COVER = ["one-mind", "sombra-del-mictlan"];
 
-// The genre of every game, as the organizers confirmed it. Make 'em Fall has none yet.
+// The genre of every game, as the organizers confirmed it.
 const CONFIRMED_GENRES = {
-  "make-em-fall": "Por anunciar",
+  "make-em-fall": "Roguelike",
   "true-hero": "Plataformas",
   "laboratorio-4": "Roguelike",
   "abby-s-tower": "Acción",
@@ -97,7 +97,7 @@ describe("INITIAL_GAMES", () => {
     });
   });
 
-  it("gives every game the genre the organizers confirmed, and Por anunciar only to Make 'em Fall", () => {
+  it("gives every game the genre the organizers confirmed", () => {
     expect(Object.fromEntries(INITIAL_GAMES.map((game) => [game.slug, game.genre.name]))).toEqual(CONFIRMED_GENRES);
   });
 
@@ -114,7 +114,6 @@ describe("INITIAL_GAMES", () => {
       "accion",
       "plataformas",
       "plataformas-3d",
-      "por-anunciar",
       "roguelike",
       "rpg",
       "sigilo",
@@ -175,7 +174,7 @@ describe("seedGames", () => {
     const games = await getPrisma().game.findMany({ include: { genre: true } });
 
     expect(genres.map((genre) => genre.slug)).toEqual([...new Set(genres.map((genre) => genre.slug))]);
-    expect(genres).toHaveLength(10);
+    expect(genres).toHaveLength(9);
     expect(Object.fromEntries(games.map((game) => [game.slug, game.genre.name]))).toEqual(CONFIRMED_GENRES);
   });
 

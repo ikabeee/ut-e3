@@ -8,7 +8,7 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
-- Make 'em Fall: ya tiene su tarjeta vertical y su portada; deja de mostrar la portada genérica.
+- Make 'em Fall: ya tiene su tarjeta vertical y su portada (deja de mostrar la genérica) y su género, Roguelike.
 - Despliegue continuo: cada merge a `main` que pasa CI construye la imagen en GitHub Actions, la publica en GHCR y la
   despliega en Coolify (`docs/deploy.md`, "Despliegue continuo").
 - Invitadas especiales: la segunda invitada es la ponente de Noxy Digital, Ing. Noelí Rodríguez Morales, con su foto y
