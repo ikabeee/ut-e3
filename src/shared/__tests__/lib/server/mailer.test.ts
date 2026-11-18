@@ -23,4 +23,21 @@ describe("createSmtpSender environment validation", () => {
   it("throws a Spanish error naming a missing SMTP variable when called with an empty environment", () => {
     expect(() => createSmtpSender({})).toThrow(/SMTP_/);
   });
+
+  it.each(["UT Game Showcase", "UT Game Showcase <>", "UT Game Showcase <showcase>"])(
+    "rejects an SMTP_FROM without an email address: %s",
+    (from) => {
+      expect(() => createSmtpSender({ ...COMPLETE_ENV, SMTP_FROM: from })).toThrow(
+        'La variable de entorno SMTP_FROM debe incluir una dirección de correo, por ejemplo "UT Game Showcase <no-reply@tu-dominio.mx>".',
+      );
+    },
+  );
+
+  it.each([
+    "UT Game Showcase <info@pixelandcode.click>",
+    '"UT Game Showcase" <info@pixelandcode.click>',
+    "info@pixelandcode.click",
+  ])("accepts an SMTP_FROM with an email address: %s", (from) => {
+    expect(() => createSmtpSender({ ...COMPLETE_ENV, SMTP_FROM: from })).not.toThrow();
+  });
 });

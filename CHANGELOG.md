@@ -69,6 +69,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- El servidor no arranca si `SMTP_FROM` no lleva una dirección de correo (por ejemplo, solo `UT Game Showcase`); antes
+  el correo salía sin remitente válido y Gmail lo descartaba o lo mandaba a spam.
 - El hero de /games y la parte de arriba de la ficha de cada juego usan la imagen horizontal (16:9) en vez de la portada
   vertical recortada; la vertical sigue en el panel lateral, el coverflow y las tarjetas. Un juego sin imagen horizontal
   (Vaporlock) conserva la vertical. Al compartir una ficha también sale la horizontal.
