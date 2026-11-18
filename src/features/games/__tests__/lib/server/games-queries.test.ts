@@ -9,6 +9,15 @@ import type { Game } from "@features/games/lib/types";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
+// The seed leaves Make 'em Fall, One Mind and Sombra del Mictlán without images and Vaporlock with only the cover.
+const UNREADY_SLUGS = ["make-em-fall", "one-mind", "sombra-del-mictlan", "vaporlock"];
+
+const READY_GAMES = INITIAL_GAMES.filter((game) => !UNREADY_SLUGS.includes(game.slug));
+
+const VERTICAL = { path: "/games/x.jpg", alt: "Portada", position: 1, isCover: true };
+
+const HORIZONTAL = { path: "/games/x-portada.jpg", alt: "Portada horizontal", position: 2, isCover: false };
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 // cacheLife and cacheTag only run inside Next; the spies replace them on the module object the query reads.
@@ -38,10 +47,50 @@ beforeEach(async () => {
 
 describe("getGames", () => {
   // INITIAL_GAMES is written in stand order (ZA-S1 to ZT-S2), so it is also the expected order.
-  it("returns the seeded games ordered by stand, with UUID ids", async () => {
+  it("returns the seeded games with their full artwork ordered by stand, with UUID ids", async () => {
     await seedGames(getPrisma());
 
-    expect(await getGames()).toEqual(INITIAL_GAMES.map(withUuids));
+    expect(await getGames()).toEqual(READY_GAMES.map(withUuids));
+  });
+
+  it("hides the games without their vertical cover and their horizontal image (S2)", async () => {
+    await seedGames(getPrisma());
+
+    const slugs = (await getGames()).map((game) => game.slug);
+
+    for (const slug of UNREADY_SLUGS) expect(slugs).not.toContain(slug);
+
+    expect(slugs).toHaveLength(INITIAL_GAMES.length - UNREADY_SLUGS.length);
+  });
+
+  it("hides a game with only its vertical cover or only a horizontal image, and shows it once it has both", async () => {
+    const genre = await getPrisma().genre.create({ data: { name: "Acción", slug: "accion" } });
+
+    await createGameAt({ genreId: genre.id, location: { zone: "A", number: 1 }, slug: "sin-arte", images: [] });
+    await createGameAt({
+      genreId: genre.id,
+      location: { zone: "A", number: 2 },
+      slug: "solo-vertical",
+      images: [VERTICAL],
+    });
+    await createGameAt({
+      genreId: genre.id,
+      location: { zone: "A", number: 3 },
+      slug: "solo-horizontal",
+      images: [HORIZONTAL],
+    });
+    await createGameAt({
+      genreId: genre.id,
+      location: { zone: "A", number: 4 },
+      slug: "completo",
+      images: [VERTICAL, HORIZONTAL],
+    });
+
+    expect((await getGames()).map((game) => game.slug)).toEqual(["completo"]);
+
+    await getPrisma().gameImage.create({ data: { ...HORIZONTAL, game: { connect: { slug: "solo-vertical" } } } });
+
+    expect((await getGames()).map((game) => game.slug)).toEqual(["solo-vertical", "completo"]);
   });
 
   it("puts Abby's Tower at ZB-S1 with its portrait cover first and its landscape artwork second", async () => {
@@ -75,9 +124,9 @@ describe("getGames", () => {
   it("orders the games by stand even when they are stored out of order", async () => {
     const genre = await getPrisma().genre.create({ data: { name: "Acción", slug: "accion" } });
 
-    await createGameAt(genre.id, { zone: "T", number: 6 }, "sexto");
-    await createGameAt(genre.id, { zone: "A", number: 2 }, "segundo");
-    await createGameAt(genre.id, { zone: "A", number: 1 }, "primero");
+    await createGameAt({ genreId: genre.id, location: { zone: "T", number: 6 }, slug: "sexto" });
+    await createGameAt({ genreId: genre.id, location: { zone: "A", number: 2 }, slug: "segundo" });
+    await createGameAt({ genreId: genre.id, location: { zone: "A", number: 1 }, slug: "primero" });
 
     expect((await getGames()).map((game) => game.slug)).toEqual(["primero", "segundo", "sexto"]);
   });
@@ -97,6 +146,12 @@ describe("getGameBySlug", () => {
     const expected = INITIAL_GAMES.find((game) => game.slug === "abby-s-tower");
 
     expect(await getGameBySlug("abby-s-tower")).toEqual(expected && withUuids(expected));
+  });
+
+  it.each(UNREADY_SLUGS)("returns null for %s, which lacks its artwork (S3)", async (slug) => {
+    await seedGames(getPrisma());
+
+    expect(await getGameBySlug(slug)).toBeNull();
   });
 
   it("returns null for a slug no game has", async () => {
@@ -121,10 +176,17 @@ function withUuids(game: Game) {
   };
 }
 
-async function createGameAt(genreId: string, location: StandLocation, slug: string) {
+interface TestGame {
+  genreId: string;
+  location: StandLocation;
+  slug: string;
+  images?: { path: string; alt: string; position: number; isCover: boolean }[];
+}
+
+async function createGameAt({ genreId, location, slug, images = [VERTICAL, HORIZONTAL] }: TestGame) {
   const stand = await getPrisma().stand.create({ data: { ...location, studio: 4, groupCode: "103" } });
 
   await getPrisma().game.create({
-    data: { slug, name: slug, synopsis: "Juego de prueba.", genreId, standId: stand.id },
+    data: { slug, name: slug, synopsis: "Juego de prueba.", genreId, standId: stand.id, images: { create: images } },
   });
 }

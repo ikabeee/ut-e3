@@ -3,6 +3,7 @@
  */
 import type * as NextCache from "next/cache";
 import type * as NextServer from "next/server";
+import { isGameReady } from "@features/games/lib/game-readiness";
 import { INITIAL_GAMES, seedGames } from "@features/games/lib/server/games-seed";
 import { GET } from "@features/pwa/api/precache-route";
 import { getPrisma } from "@shared/lib/server/prisma";
@@ -36,11 +37,12 @@ describe("GET /api/pwa/precache (RNF-14)", () => {
   it("lists the public pages and one page for each game of the catalog", async () => {
     const response = await GET();
     const body = await response.json();
+    const readyGames = INITIAL_GAMES.filter(isGameReady);
 
     expect(response.status).toBe(200);
     expect(body.paths.slice(0, 5)).toEqual(["/", "/games", "/sponsors", "/privacy", "/offline"]);
-    expect(body.paths).toHaveLength(5 + INITIAL_GAMES.length);
-    expect(body.paths).toContain(`/games/${INITIAL_GAMES[0].slug}`);
+    expect(body.paths).toHaveLength(5 + readyGames.length);
+    expect(body.paths).toContain(`/games/${readyGames[0].slug}`);
   });
 
   it("answers at request time and is never cached, so a game that a stand registers is included", async () => {

@@ -8,6 +8,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- /raffle (ganadores de la rifa) va centrada y lleva un boleto de rifa como emblema sobre el título.
+- Un juego sin su portada vertical y su imagen horizontal ya no aparece en el sitio público (portada, /games, su ficha,
+  /showcase y el panel del croquis; el stand sigue en el croquis). El panel del staff los sigue viendo para completarlos.
 - Despliegue continuo: cada merge a `main` que pasa CI construye la imagen en GitHub Actions, la publica en GHCR y la
   despliega en Coolify (`docs/deploy.md`, "Despliegue continuo").
 - Invitadas especiales: la segunda invitada es la ponente de Noxy Digital, Ing. Noelí Rodríguez Morales, con su foto y
