@@ -11,13 +11,30 @@ export interface EventVenue {
   coordinates: VenueCoordinates;
   /** Zoom of the venue map; the pin sits at `coordinates`. */
   mapZoom: number;
-  landmark: string;
   streetAddress: string;
   locality: string;
   region: string;
   postalCode: string;
   country: string;
   mapsUrl: string;
+}
+
+export interface FooterLink {
+  href: string;
+  label: string;
+}
+
+export interface FooterLinkGroup {
+  id: string;
+  label: string;
+  links: readonly FooterLink[];
+}
+
+export interface EventFlyer {
+  id: "fair" | "tournament";
+  src: string;
+  width: number;
+  height: number;
 }
 
 export interface SpecialGuest {

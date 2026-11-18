@@ -4,7 +4,11 @@ import type { TournamentAction } from "@features/tournament/components/command-b
 import { TournamentDashboard } from "@features/tournament/components/tournament-dashboard";
 import { POLL_INTERVAL_MS } from "@features/tournament/hooks/use-tournament";
 import type { Tournament } from "@features/tournament/lib/types";
-import { createTestTournament, playUntilFinished } from "@features/tournament/__tests__/tournament-test-utils";
+import {
+  createTestTournament,
+  playUntilFinished,
+  clearToasts,
+} from "@features/tournament/__tests__/tournament-test-utils";
 
 type Viewer = Parameters<typeof TournamentDashboard>[0]["viewer"];
 
@@ -13,6 +17,8 @@ function renderDashboard(initial: Tournament | null, viewer: Viewer, load?: () =
 }
 
 const action: TournamentAction = async () => ({ status: "applied" });
+
+afterEach(clearToasts);
 
 describe("TournamentDashboard", () => {
   it("explains that the bracket does not exist yet", () => {
@@ -59,6 +65,17 @@ describe("TournamentDashboard", () => {
     );
   });
 
+  it("shows the sysadmin the whole bracket to watch, with no controls and no log (S37)", () => {
+    renderDashboard(createTestTournament(), { role: "sysadmin", desk: null });
+
+    ["Tablero 1", "Tablero 2", "Tablero 3", "Tablero 4", "Semifinal 1", "Semifinal 2", "Final"].forEach((name) => {
+      expect(screen.getByRole("heading", { name })).toBeInTheDocument();
+    });
+    expect(screen.queryByRole("heading", { name: "Bitácora" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/todavía no tiene una mesa asignada/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
   it("counts the matches that the viewer can see", () => {
     renderDashboard(createTestTournament(), { role: "kof_staff", desk: 1 });
 
@@ -97,7 +114,7 @@ describe("TournamentDashboard", () => {
     }
   });
 
-  it("warns when the connection is lost but keeps the bracket on screen", async () => {
+  it("warns with a toast when the connection is lost but keeps the bracket on screen", async () => {
     jest.useFakeTimers();
 
     try {
@@ -108,7 +125,7 @@ describe("TournamentDashboard", () => {
         await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
       });
 
-      expect(screen.getByText("Sin conexión. Se muestra el último estado recibido.")).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent("Sin conexión. Se muestra el último estado recibido.");
       expect(screen.getByRole("heading", { name: "Tablero 1" })).toBeInTheDocument();
     } finally {
       jest.useRealTimers();

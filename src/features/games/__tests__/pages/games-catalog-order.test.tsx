@@ -20,15 +20,14 @@ function appearsBefore(first: Node, second: Node): boolean {
 }
 
 describe("GamesView catalog order", () => {
-  it("renders the catalog title and the search before the featured hero", () => {
+  it("renders the featured hero and the covers without the catalog header", () => {
     renderCatalog();
 
-    const title = screen.getByRole("heading", { level: 1, name: "Catálogo de juegos" });
-    const search = screen.getByRole("searchbox", { name: "Buscar juegos" });
     const hero = screen.getByRole("region", { name: "Juegos del showcase" });
+    const grid = screen.getByRole("list", { name: "Todos los juegos" });
 
-    expect(appearsBefore(title, hero)).toBe(true);
-    expect(appearsBefore(search, hero)).toBe(true);
+    expect(appearsBefore(hero, grid)).toBe(true);
+    expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
   });
 
   it("keeps the featured hero and every game of the catalog on the page", () => {

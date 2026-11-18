@@ -19,7 +19,7 @@ export function EventSchedule({ heading, items, zoneLink }: Readonly<EventSchedu
   return (
     <section id={SCHEDULE_SECTION_ID} className="section-block">
       <div className="page-wrap">
-        <h2 className="type-giant">{heading}</h2>
+        <h2 className="type-giant text-[clamp(24px,4.6vw,68px)]">{heading}</h2>
         {items.length === 0 ? <EmptySchedule /> : <ScheduleList items={items} zoneLink={zoneLink} />}
       </div>
     </section>

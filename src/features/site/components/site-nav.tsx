@@ -1,7 +1,7 @@
 import { cn } from "@heroui/react";
 import Link from "next/link";
-import { SiteBackButton } from "@features/site/components/site-back-button";
 import { SiteNavMenu } from "@features/site/components/site-nav-menu";
+import { SiteSearchForm } from "@features/site/components/site-search-form";
 import { SITE_COPY } from "@features/site/lib/site-copy";
 import {
   getCurrentNavHref,
@@ -9,7 +9,6 @@ import {
   isSiteNavShown,
   type SiteNavLink,
 } from "@features/site/lib/site-navigation";
-import { isBackShown } from "@features/site/lib/site-back";
 import { UtgLogo } from "@shared/components/utg-logo";
 
 interface SiteNavProps {
@@ -30,9 +29,9 @@ export function SiteNav({ pathname, isLandingOnly = false }: Readonly<SiteNavPro
       aria-label={SITE_COPY.nav.label}
       className="sticky top-0 z-40 box-content flex h-nav items-stretch border-b border-separator bg-background pt-[env(safe-area-inset-top,0px)] pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)]"
     >
-      {isBackShown(pathname, isLandingOnly) && <SiteBackButton pathname={pathname} />}
       <HomeLink href={homeHref} />
       <NavLinkList links={links} currentHref={currentHref} hasMenu={!isLandingOnly} />
+      {isLandingOnly ? null : <SiteSearchForm className="my-auto mr-4 w-36 max-lg:hidden xl:w-56" />}
       {cta && <NavCta link={cta} isCurrent={cta.href === currentHref} />}
       {isLandingOnly ? null : <SiteNavMenu links={links} currentHref={currentHref} />}
     </nav>
@@ -48,11 +47,11 @@ function HomeLink({ href }: Readonly<{ href: string }>) {
     <Link
       href={href}
       aria-label={SITE_COPY.nav.homeLabel}
-      className="group relative grid flex-none place-items-center border-r border-separator bg-background px-[18px] max-[420px]:px-3"
+      className="group relative grid flex-none place-items-center border-r border-separator bg-background px-[18px] focus-visible:bg-surface active:opacity-80 max-[420px]:px-3"
     >
       <UtgLogo
         variant="extruded"
-        className="block h-[34px] w-auto transition-transform duration-250 group-hover:-translate-x-px group-hover:translate-y-[-2px]"
+        className="block h-[34px] w-auto transition-transform duration-250 group-hover:-translate-x-px group-hover:translate-y-[-2px] group-focus-visible:-translate-x-px group-focus-visible:translate-y-[-2px]"
       />
     </Link>
   );
@@ -80,7 +79,7 @@ function NavLinkList({ links, currentHref, hasMenu }: Readonly<NavLinkListProps>
           <Link
             href={link.href}
             aria-current={link.href === currentHref ? "page" : undefined}
-            className="touch-target relative link-wipe whitespace-nowrap no-underline"
+            className="touch-target relative link-wipe whitespace-nowrap no-underline focus-visible:bg-size-[100%_1px] focus-visible:text-accent active:opacity-70 aria-[current=page]:bg-size-[100%_1px] aria-[current=page]:text-accent"
           >
             {link.label}
           </Link>
@@ -95,7 +94,7 @@ function NavCta({ link, isCurrent }: Readonly<{ link: SiteNavLink; isCurrent: bo
     <Link
       href={link.href}
       aria-current={isCurrent ? "page" : undefined}
-      className="touch-target relative ml-auto flex flex-none items-center bg-accent px-4 font-nav text-[11px] leading-[1.3] font-bold tracking-[.02em] whitespace-nowrap text-background uppercase no-underline sm:px-6 sm:text-[13px]"
+      className="touch-target relative ml-auto flex flex-none items-center bg-accent px-4 font-nav text-[11px] leading-[1.3] font-bold tracking-[.02em] whitespace-nowrap text-background uppercase no-underline transition-colors hover:bg-accent-hi focus-visible:bg-accent-hi active:opacity-80 sm:px-6 sm:text-[13px]"
     >
       {link.label}
     </Link>

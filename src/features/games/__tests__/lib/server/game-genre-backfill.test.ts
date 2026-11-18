@@ -10,8 +10,8 @@ const database = createTestDatabase();
 
 process.env.DATABASE_URL = database.url;
 
-// 18 games, 17 with a confirmed genre: Make 'em Fall has none yet.
-const CONFIRMED_GAMES = 17;
+// 18 games, all with a confirmed genre.
+const CONFIRMED_GAMES = 18;
 
 beforeEach(async () => {
   await resetToAnOldCatalog();
@@ -36,7 +36,7 @@ describe("backfillGameGenres", () => {
       "saatan-paal": "Sigilo",
       "turno-rosso": "Simulación",
       "after-light": "Roguelike",
-      "make-em-fall": "Por anunciar",
+      "make-em-fall": "Roguelike",
     });
   });
 
@@ -53,13 +53,12 @@ describe("backfillGameGenres", () => {
     expect(names.map(({ name }) => name)).not.toContain("RPG");
   });
 
-  it("does not overwrite a genre that the sysadmin changed, and does not touch the game without a confirmed genre", async () => {
+  it("does not overwrite a genre that the sysadmin changed", async () => {
     const result = await backfillGameGenres(getPrisma());
     const genres = await readGenres();
 
     expect(result.keptByHand).toEqual(["true-hero"]);
     expect(genres["true-hero"]).toBe("Arcade");
-    expect(genres["make-em-fall"]).toBe("Por anunciar");
   });
 
   it("is idempotent: a second run changes nothing and audits nothing new", async () => {
@@ -92,7 +91,7 @@ describe("backfillGameGenres", () => {
 });
 
 // The catalog of a database seeded before the genres were confirmed: every game says "Por anunciar", the sysadmin
-// created "Plataforma" and "Rol (RPG)" by hand, changed True Hero to "Arcade". Make 'em Fall has no confirmed genre, so it is outside the list.
+// created "Plataforma" and "Rol (RPG)" by hand, changed True Hero to "Arcade".
 async function resetToAnOldCatalog(): Promise<void> {
   const prisma = getPrisma();
 
@@ -102,7 +101,7 @@ async function resetToAnOldCatalog(): Promise<void> {
   await prisma.stand.deleteMany();
   await seedGames(prisma);
 
-  const placeholder = await prisma.genre.findUniqueOrThrow({ where: { slug: "por-anunciar" } });
+  const placeholder = await prisma.genre.create({ data: { name: "Por anunciar", slug: "por-anunciar" } });
 
   await prisma.game.updateMany({ data: { genreId: placeholder.id } });
   await prisma.genre.deleteMany({ where: { slug: { not: "por-anunciar" } } });

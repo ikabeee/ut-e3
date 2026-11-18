@@ -3,7 +3,6 @@ import { EVENT_VENUE, formatCopyableAddress, formatVenueAddress } from "@feature
 describe("venue", () => {
   it("is the Universidad Tecnológica de Cancún on the Cancún–Aeropuerto highway", () => {
     expect(EVENT_VENUE.name).toBe("Universidad Tecnológica de Cancún");
-    expect(EVENT_VENUE.landmark).toBe("Carretera Cancún–Aeropuerto · Km 11.5");
     expect(new URL(EVENT_VENUE.mapsUrl).hostname).toBe("www.google.com");
   });
 

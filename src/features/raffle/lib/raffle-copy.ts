@@ -82,7 +82,6 @@ export const RAFFLE_COPY = {
     closed: "La rifa terminó. ¡Gracias por participar!",
     outcomes: OUTCOME_LABELS,
     winnersHeading: "Ganadores",
-    fullscreen: "Pantalla completa",
     connectionLost: "Reconectando…",
     backLink: "Volver a los ganadores",
   },

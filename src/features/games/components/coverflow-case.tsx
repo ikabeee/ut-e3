@@ -73,7 +73,6 @@ function CoverflowCover({ game, isCurrent, isReflection = false }: Readonly<Cove
       <span
         className={cn(
           "absolute inset-0 isolate flex flex-col overflow-hidden border-2 border-case-border bg-case-face",
-          isCurrent && "coverflow-glow",
           isCurrent && !isReflection && "border-foreground",
         )}
       >

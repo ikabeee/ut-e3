@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { SPECIAL_GUESTS } from "@features/landing/lib/special-guests";
+import { getNeighborGuests, SPECIAL_GUESTS } from "@features/landing/lib/special-guests";
 
 describe("SPECIAL_GUESTS", () => {
   it("lists the two guests with their names and the talk still to be announced", () => {
@@ -36,5 +36,24 @@ describe("SPECIAL_GUESTS", () => {
     for (const guest of SPECIAL_GUESTS) {
       expect(guest.role).toBeUndefined();
     }
+  });
+});
+
+describe("getNeighborGuests", () => {
+  const guests = [
+    { id: "a", name: "A", talk: "t", photo: { src: "/a.webp", alt: "a" } },
+    { id: "b", name: "B", talk: "t", photo: { src: "/b.webp", alt: "b" } },
+    { id: "c", name: "C", talk: "t" },
+    { id: "d", name: "D", talk: "t", photo: { src: "/d.webp", alt: "d" } },
+  ];
+
+  it("returns the next and the previous guest that have a photo, wrapping around", () => {
+    expect(getNeighborGuests(guests, 0).map((guest) => guest.id)).toEqual(["b", "d"]);
+    expect(getNeighborGuests(guests, 3).map((guest) => guest.id)).toEqual(["a"]);
+  });
+
+  it("never returns the current guest and returns each neighbor once", () => {
+    expect(getNeighborGuests(guests.slice(0, 2), 0).map((guest) => guest.id)).toEqual(["b"]);
+    expect(getNeighborGuests(guests.slice(0, 1), 0)).toEqual([]);
   });
 });

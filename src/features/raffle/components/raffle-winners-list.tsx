@@ -13,7 +13,7 @@ const COPY = RAFFLE_COPY.winners;
 
 /** Confirmed winners with gamertag, prize and hour (RF-56); a prize not handed over yet says so. */
 export function RaffleWinnersList({ winners, size = "page" }: Readonly<RaffleWinnersListProps>) {
-  if (winners.length === 0) return <p className="m-0 text-muted">{COPY.empty}</p>;
+  if (winners.length === 0) return <p className="m-0 text-center text-muted">{COPY.empty}</p>;
 
   return (
     <ol className="grid gap-2">

@@ -38,7 +38,8 @@ export const ADMIN_ONLY_COMMANDS: readonly TournamentCommandType[] = [
 ];
 
 export interface KofActor {
-  role: "kof_admin" | "kof_staff";
+  /** The sysadmin only watches /admin/kof: it has no desk, so it runs no command (S37). */
+  role: "kof_admin" | "kof_staff" | "sysadmin";
   /** The desk of a staff member; the administrator has none and captures everything. */
   desk: Desk | null;
 }

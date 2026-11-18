@@ -9,7 +9,6 @@ import { useVisibleOnce } from "@features/landing/hooks/use-visible-once";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import type { EventVenue } from "@features/landing/lib/types";
 import { MAPBOX_ACCESS_TOKEN } from "@features/landing/lib/venue-map";
-import { siteConfig } from "@shared/lib/site-config";
 
 interface VenueMapProps {
   venue: EventVenue;
@@ -26,7 +25,11 @@ export function VenueMap({ venue, fallback }: Readonly<VenueMapProps>) {
   const [sectionRef, isVisible] = useVisibleOnce<HTMLDivElement>();
 
   const labels = useMemo(
-    () => ({ zoomIn: map.zoomIn, zoomOut: map.zoomOut, pinName: siteConfig.name, pinPlace: venue.shortName }),
+    () => ({
+      zoomIn: map.zoomIn,
+      zoomOut: map.zoomOut,
+      pinLabel: venue.shortName,
+    }),
     [map.zoomIn, map.zoomOut, venue.shortName],
   );
 

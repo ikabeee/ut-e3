@@ -2,8 +2,7 @@ import type { ReactNode } from "react";
 import { GameCoverImage } from "@features/games/components/game-cover-image";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { formatStandCode } from "@features/games/lib/stand-code";
-import type { Game, GameDetailLinks } from "@features/games/lib/types";
-import { ActionLink } from "@shared/components/action-link";
+import type { Game } from "@features/games/lib/types";
 
 const COVER_SIZES = "320px";
 
@@ -11,11 +10,10 @@ interface GameSidebarProps {
   game: Game;
   itchLink: ReactNode;
   eventDateLabel: string;
-  links: GameDetailLinks;
 }
 
 // The cover and the facts repeat the page on a phone, so they only show beside the main column.
-export function GameSidebar({ game, itchLink, eventDateLabel, links }: Readonly<GameSidebarProps>) {
+export function GameSidebar({ game, itchLink, eventDateLabel }: Readonly<GameSidebarProps>) {
   return (
     <aside
       aria-label={GAMES_COPY.sidebar.label(game.name)}
@@ -25,12 +23,6 @@ export function GameSidebar({ game, itchLink, eventDateLabel, links }: Readonly<
         <GameCoverImage game={game} sizes={COVER_SIZES} />
       </div>
       {itchLink}
-      <ActionLink href={links.floorPlan} variant="primary" arrow="ne" fullWidth>
-        {GAMES_COPY.sidebar.viewOnMap}
-      </ActionLink>
-      <ActionLink href={links.calendar} arrow="ne" isExternal fullWidth>
-        {GAMES_COPY.sidebar.attend}
-      </ActionLink>
       <GameFacts game={game} eventDateLabel={eventDateLabel} />
     </aside>
   );

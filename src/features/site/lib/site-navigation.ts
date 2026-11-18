@@ -2,7 +2,7 @@ import { LOGIN_PATH, ACTIVATE_PATH } from "@features/accounts/lib/accounts-links
 import { FLOOR_PLAN_PATH, FLOOR_PLAN_SECTION_ID } from "@features/floor-plan/lib/floor-plan-links";
 import { GAMES_PATH, GAMES_SECTION_ID } from "@features/games/lib/games-links";
 import { HOME_PATH, TOP_SECTION_ID } from "@features/landing/lib/landing-links";
-import { RAFFLE_LIVE_PATH, RAFFLE_WINNERS_PATH } from "@features/raffle/lib/raffle-links";
+import { RAFFLE_WINNERS_PATH } from "@features/raffle/lib/raffle-links";
 import { SITE_COPY } from "@features/site/lib/site-copy";
 import { STAFF_AREAS } from "@features/site/lib/staff-areas";
 import { SPONSORS_PATH, SPONSORS_SECTION_ID } from "@features/sponsors/lib/sponsors-links";
@@ -21,10 +21,15 @@ export interface SiteNavigation {
   cta?: SiteNavLink;
 }
 
+/** The catalog reads the search from `/games?q=<text>`: the navbar form sends it with GET (S24). */
+export const GAMES_SEARCH_ACTION = GAMES_PATH;
+
+export const GAMES_SEARCH_PARAM = "q";
+
 const { links: LABELS } = SITE_COPY.nav;
 
-// The staff areas, their login and activation, and the screen projected on stage.
-const HIDDEN_AREAS = [...STAFF_AREAS, LOGIN_PATH, ACTIVATE_PATH, RAFFLE_LIVE_PATH];
+// The staff areas, their login and activation. The stage raffle (/raffle/live) keeps the navbar (S28).
+const HIDDEN_AREAS = [...STAFF_AREAS, LOGIN_PATH, ACTIVATE_PATH];
 
 // `/passport` opens the registration when the phone has no passport yet, so one entry serves both.
 const FULL_NAVIGATION: SiteNavigation = {
@@ -51,7 +56,7 @@ const LANDING_ONLY_NAVIGATION: SiteNavigation = {
   ],
 };
 
-/** Whether the public navbar goes on this page: staff and projection screens have their own frame. */
+/** Whether the public navbar goes on this page: staff screens have their own frame. */
 export function isSiteNavShown(pathname: string): boolean {
   return !HIDDEN_AREAS.some((area) => isInside(pathname, area));
 }

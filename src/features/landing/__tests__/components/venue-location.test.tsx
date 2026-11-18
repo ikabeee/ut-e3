@@ -21,10 +21,30 @@ describe("VenueLocation", () => {
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  it("names the Edificio B in the card", () => {
+  it("names only the Edificio B in the card, with no Sede label nor Lobby y áreas externas", () => {
+    const { container } = render(<VenueLocation venue={EVENT_VENUE} />);
+
+    expect(screen.getByText("Edificio B")).toBeInTheDocument();
+    expect(screen.queryByText("Sede")).not.toBeInTheDocument();
+    expect(container).not.toHaveTextContent("Lobby");
+    expect(container).not.toHaveTextContent("áreas externas");
+  });
+
+  it("has no road subtitle above the heading", () => {
     render(<VenueLocation venue={EVENT_VENUE} />);
 
-    expect(screen.getByText("Edificio B · Lobby y áreas externas")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Ubicación" }).previousElementSibling).toBeNull();
+  });
+
+  it("shows only UT Cancún on the sign of the schematic, with no PIXEL nor road label", () => {
+    const { container } = render(<VenueLocation venue={EVENT_VENUE} />);
+    const schematic = screen.getByRole("img", { name: /entre el centro y el aeropuerto/ });
+    const labels = Array.from(schematic.querySelectorAll("text")).map((label) => label.textContent);
+
+    expect(labels).toContain("UT CANCÚN");
+    expect(labels).not.toContain("PIXEL & CODE");
+    expect(labels.join(" ")).not.toMatch(/PIXEL|KM 11|CARRETERA/);
+    expect(container.querySelectorAll("svg text")).toHaveLength(labels.length);
   });
 
   it("labels the map region and shows the schematic until the map is ready", () => {

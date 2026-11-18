@@ -2,6 +2,7 @@
 
 import type { TournamentAction } from "@features/tournament/components/command-button";
 import { BracketSection } from "@features/tournament/components/bracket-section";
+import { ConnectionToast } from "@features/tournament/components/connection-toast";
 import { TournamentLog } from "@features/tournament/components/tournament-log";
 import { useTournament, type SnapshotLoader } from "@features/tournament/hooks/use-tournament";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
@@ -39,11 +40,7 @@ export function TournamentDashboard({ initial, viewer, action, load }: Readonly<
 
   return (
     <div className="grid gap-8">
-      {hasConnectionError && (
-        <p role="status" className="border border-danger p-3 text-sm text-danger">
-          {COPY.connectionLost}
-        </p>
-      )}
+      <ConnectionToast isLost={hasConnectionError} />
       {tournament ? (
         <BracketBoard tournament={tournament} viewer={viewer} action={action} onApplied={refresh} />
       ) : (
@@ -55,9 +52,10 @@ export function TournamentDashboard({ initial, viewer, action, load }: Readonly<
 
 function BracketBoard({ tournament, viewer, action, onApplied }: Readonly<BracketBoardProps>) {
   const isAdmin = viewer.role === "kof_admin";
-  const sections = getSections(tournament, { isAdmin, desk: viewer.desk });
+  // The sysadmin watches every area, like the administrator, but captures nothing and has no log (S37).
+  const sections = getSections(tournament, { isAdmin: viewer.role !== "kof_staff", desk: viewer.desk });
 
-  if (!isAdmin && viewer.desk === null) return <p className="type-mono text-muted">{COPY.noDesk}</p>;
+  if (viewer.role === "kof_staff" && viewer.desk === null) return <p className="type-mono text-muted">{COPY.noDesk}</p>;
 
   return (
     <>

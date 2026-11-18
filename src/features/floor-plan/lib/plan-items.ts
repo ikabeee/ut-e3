@@ -41,6 +41,7 @@ const ZONE_KINDS: Record<ZoneId, MapItemKind> = {
 export function buildMapItems(stands: readonly FloorPlanStand[]): MapItem[] {
   const standsByCode = new Map(stands.map((stand) => [stand.code, stand]));
   const standItems = STAND_MARKERS.map((marker) => buildStandItem(marker.code, standsByCode.get(marker.code)));
+
   const zoneItems = ZONE_MARKERS.map((marker) => buildZoneItem(marker.id));
 
   return [...standItems, ...zoneItems];
@@ -53,11 +54,6 @@ export function filterMapItems(items: readonly MapItem[], filter: MapFilter): Ma
   if (filter === "all") return [...items];
 
   return items.filter((item) => item.kind === filter);
-}
-
-/** How many blocks the stands belong to: T, C, A, D and B. */
-export function countBlocks(): number {
-  return new Set(STAND_MARKERS.map((marker) => marker.code.charAt(1))).size;
 }
 
 /** How many zones are activities: the stage, the KOF arena and Mario Kart. */
@@ -89,7 +85,7 @@ function emptyStandItem(code: string, placement: StandPlacement): MapItem {
     id: code,
     kind: "stand",
     label: FLOOR_PLAN_COPY.drawing.standLabel(code),
-    kicker: FLOOR_PLAN_COPY.unassignedKicker(code),
+    kicker: "",
     title: FLOOR_PLAN_COPY.unassignedTitle,
     description: FLOOR_PLAN_COPY.unassignedDescription,
     code,
@@ -106,7 +102,7 @@ function gameStandItem(code: string, stand: FloorPlanStand, placement: StandPlac
     id: code,
     kind: "stand",
     label: FLOOR_PLAN_COPY.drawing.standLabel(code, stand.name),
-    kicker: FLOOR_PLAN_COPY.standKicker(code, stand.genre),
+    kicker: stand.genre,
     title: stand.name,
     description: stand.synopsis,
     code,

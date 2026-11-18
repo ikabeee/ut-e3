@@ -38,6 +38,7 @@ export const TOURNAMENT_COPY = {
     loading: "Cargando el torneo...",
     signedInAs: (name: string, role: string) => `Sesión de ${name} · ${role}`,
     roles: {
+      sysadmin: "Sysadmin · Solo consulta",
       kof_admin: "Administrador de KOF",
       kof_staff: (desk: number | null) => (desk === null ? "Staff de KOF" : `Staff de KOF · Mesa ${desk}`),
     },
@@ -70,7 +71,7 @@ export const TOURNAMENT_COPY = {
     },
     staffHeading: "Staff de las mesas",
     publicBracket: {
-      title: "Bracket del torneo de KOF",
+      title: "Tabla de posiciones",
       description: "Sigue los combates y los resultados del torneo de KOF.",
       loading: "Cargando el bracket...",
       closed: "El bracket está disponible en la pantalla del torneo.",
@@ -89,10 +90,52 @@ export const TOURNAMENT_COPY = {
         invalid: "La operación no es válida.",
       },
       navLabel: "Ir a un tablero",
-      unpublished: {
-        checkIn: (start: string, end: string) => `El check-in es de ${start} a ${end}.`,
-        bracket: (time: string) => `El bracket se genera a las ${time}.`,
-        scheduleLink: "Cronograma",
+      info: {
+        heading: "Información del torneo",
+        weekdays: ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"],
+        months: [
+          "enero",
+          "febrero",
+          "marzo",
+          "abril",
+          "mayo",
+          "junio",
+          "julio",
+          "agosto",
+          "septiembre",
+          "octubre",
+          "noviembre",
+          "diciembre",
+        ],
+        longDate: (weekday: string, day: number, month: string) => `${weekday} ${day} de ${month}`,
+        when: {
+          heading: "Cuándo",
+          registrationOpens: "Abre la inscripción",
+          checkIn: (start: string, end: string) => `Check-in de ${start} a ${end}`,
+          onsite: (start: string, end: string) => `Inscripción en el lugar de ${start} a ${end}`,
+          bracket: (time: string) => `El bracket se genera a las ${time}`,
+        },
+        how: {
+          heading: "Cómo",
+          format: (boards: number, perBoard: number, matches: number) =>
+            `Eliminación directa: ${boards} tableros de ${perBoard} jugadores, dos semifinales y la final (${matches} combates).`,
+          stepsLabel: "Cómo inscribirte",
+          steps: {
+            passport: "Crea tu pasaporte con tu gamertag.",
+            list: "Pide al administrador de KOF que te agregue a la lista con ese gamertag.",
+            checkIn: (start: string, end: string) =>
+              `El día del torneo, haz tu check-in con el PIN de tu pasaporte en el área de KOF, de ${start} a ${end}.`,
+          },
+          register: "Crear mi pasaporte",
+          passport: "Ver mi pasaporte",
+        },
+        howMany: {
+          heading: "Cuántos",
+          cap: (max: number) => `El torneo tiene lugar para ${max} jugadores.`,
+          minimum: (min: number) => `El bracket se genera con al menos ${min} jugadores con check-in.`,
+          preList: (limit: number) =>
+            `La lista previa admite hasta ${limit}; el resto de los lugares se llena el día del torneo.`,
+        },
       },
       tree: {
         label: "Bracket en forma de árbol",

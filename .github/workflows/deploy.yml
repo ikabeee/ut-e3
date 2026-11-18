@@ -1,0 +1,156 @@
+name: Deploy
+
+# Despliegue continuo (RNF-15): cuando "CI" termina bien en un push a main, Actions construye la imagen, la publica en
+# GHCR y le pide a Coolify que la despliegue. El VPS no compila. También se puede lanzar a mano desde main.
+# Variables y secretos que usa: ver "Despliegue continuo" en docs/deploy.md.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+# Un despliegue a la vez y sin cancelar el que ya empezó.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  image:
+    # Solo un CI exitoso de un push (no el de un PR hacia main), o un lanzamiento manual sobre main.
+    if: >-
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: read
+      packages: write
+    outputs:
+      sha: ${{ steps.commit.outputs.sha }}
+
+    steps:
+      - id: commit
+        run: echo "sha=${{ github.event.workflow_run.head_sha || github.sha }}" >> "$GITHUB_OUTPUT"
+
+      # Un lanzamiento manual tampoco publica un commit cuyo CI no pasó.
+      - name: Revisar que CI pasó en el commit
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          passed=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --commit "$SHA" --event push \
+            --status success --json databaseId --jq 'length')
+          if [ "$passed" = "0" ]; then echo "::error::CI no ha pasado en $SHA; no se publica"; exit 1; fi
+
+      - name: Revisar las variables del repositorio
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+          SITE_MODE: ${{ vars.SITE_MODE }}
+        run: |
+          missing=0
+          for name in NEXT_PUBLIC_SITE_URL SITE_MODE; do
+            if [ -z "${!name}" ]; then echo "::error::Falta la variable del repositorio $name"; missing=1; fi
+          done
+          exit "$missing"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.commit.outputs.sha }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # La etiqueta "main" es la que sigue Coolify; la del commit sirve para volver a una versión anterior.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:main
+            ${{ env.IMAGE }}:${{ steps.commit.outputs.sha }}
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
+            SITE_MODE=${{ vars.SITE_MODE }}
+            NEXT_PUBLIC_MAPBOX_TOKEN=${{ vars.NEXT_PUBLIC_MAPBOX_TOKEN }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: image
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+
+    env:
+      COOLIFY_URL: ${{ vars.COOLIFY_URL }}
+      COOLIFY_APP_UUID: ${{ vars.COOLIFY_APP_UUID }}
+      COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
+      SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+
+    steps:
+      - name: Revisar la configuración de Coolify
+        run: |
+          missing=0
+          for name in COOLIFY_URL COOLIFY_APP_UUID COOLIFY_API_TOKEN; do
+            if [ -z "${!name}" ]; then echo "::error::Falta $name (variable o secreto del repositorio)"; missing=1; fi
+          done
+          exit "$missing"
+
+      - name: Pedir el despliegue a Coolify
+        id: deploy
+        run: |
+          if ! response=$(curl --fail-with-body -sS -G "$COOLIFY_URL/api/v1/deploy" \
+            --data-urlencode "uuid=$COOLIFY_APP_UUID" \
+            -H "Authorization: Bearer $COOLIFY_API_TOKEN"); then
+            echo "::error::Coolify rechazó el despliegue: $response"
+            exit 1
+          fi
+          echo "$response"
+          deployment=$(echo "$response" | jq -r '.deployments[0].deployment_uuid // empty')
+          if [ -z "$deployment" ]; then echo "::error::Coolify no devolvió un despliegue"; exit 1; fi
+          echo "uuid=$deployment" >> "$GITHUB_OUTPUT"
+
+      # Espera a que Coolify termine: el job falla si el despliegue falla, se cancela o tarda más de 15 minutos. Un error
+      # pasajero al consultar (un 502) no lo detiene: se vuelve a preguntar.
+      - name: Esperar a que Coolify termine
+        env:
+          DEPLOYMENT_UUID: ${{ steps.deploy.outputs.uuid }}
+        run: |
+          for _ in $(seq 1 90); do
+            status=$(curl --fail -sS "$COOLIFY_URL/api/v1/deployments/$DEPLOYMENT_UUID" \
+              -H "Authorization: Bearer $COOLIFY_API_TOKEN" | jq -r '.status') || status=unreachable
+            echo "Estado: $status"
+            case "$status" in
+              finished) exit 0 ;;
+              failed | cancelled*) echo "::error::El despliegue terminó como $status"; exit 1 ;;
+            esac
+            sleep 10
+          done
+          echo "::error::El despliegue no terminó en 15 minutos"
+          exit 1
+
+      - name: Revisar la salud del sitio
+        run: |
+          for _ in $(seq 1 12); do
+            if curl --fail -sS "$SITE_URL/api/health"; then exit 0; fi
+            sleep 10
+          done
+          echo "::error::$SITE_URL/api/health no respondió bien"
+          exit 1

@@ -9,10 +9,13 @@ import {
   NOW,
   playUntilFinished,
   startAndFinish,
+  clearToasts,
 } from "@features/tournament/__tests__/tournament-test-utils";
 import { applyCommand } from "@features/tournament/lib/tournament-engine";
 
 const CLOSED: PublicSnapshot = { state: "closed", serverNow: 1 };
+
+afterEach(clearToasts);
 
 describe("PublicBracketView", () => {
   it("tells where to follow the tournament when the bracket is closed (S4)", () => {
@@ -125,7 +128,7 @@ describe("PublicBracketView", () => {
     }
   });
 
-  it("warns when the connection is lost and keeps the bracket", async () => {
+  it("warns with a toast when the connection is lost and keeps the bracket", async () => {
     jest.useFakeTimers();
 
     try {
@@ -136,7 +139,7 @@ describe("PublicBracketView", () => {
         await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
       });
 
-      expect(screen.getByText("Sin conexión. Se muestra el último estado recibido.")).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent("Sin conexión. Se muestra el último estado recibido.");
       expect(screen.getByRole("heading", { name: "Tablero 1" })).toBeInTheDocument();
     } finally {
       jest.useRealTimers();

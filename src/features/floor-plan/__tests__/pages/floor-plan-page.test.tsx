@@ -33,7 +33,7 @@ describe("floorPlanPageMetadata", () => {
 });
 
 describe("FloorPlanPageView", () => {
-  it("shows the Croquis heading with its kicker, lead and summary", () => {
+  it("shows the Croquis heading with its kicker, and lead, without a redundant summary", () => {
     renderPageView([]);
 
     expect(screen.getByRole("heading", { level: 1, name: "Croquis" })).toBeInTheDocument();
@@ -43,7 +43,7 @@ describe("FloorPlanPageView", () => {
         "Ubica cada stand, las actividades y los servicios del Edificio B. Toca un marcador para ver el juego.",
       ),
     ).toBeInTheDocument();
-    expect(screen.getByText("18 stands · 5 bloques · 3 actividades")).toBeInTheDocument();
+    expect(screen.queryByText(/bloques/)).not.toBeInTheDocument();
   });
 
   it("shows the event map below the summary", () => {

@@ -2,7 +2,6 @@ import { render, screen, within } from "@testing-library/react";
 import type { EventSettings } from "@features/event-settings/lib/types";
 import { makeGames } from "@features/games/__tests__/components/game-test-data";
 import { GameDetailView } from "@features/games/pages/game-detail-page";
-import { buildEventCalendarUrl } from "@features/landing/lib/calendar-link";
 
 const SETTINGS: EventSettings = {
   eventStartsAt: "2026-11-20T17:00:00.000Z",
@@ -44,21 +43,11 @@ describe("GameDetailView", () => {
     expect(definitionOf(where, "Horario")).toBe("12:00 a 19:00");
   });
 
-  it("links the stand to its item on the floor plan page", () => {
+  it("offers neither the floor plan nor the calendar buttons (S18)", () => {
     renderView();
 
-    expect(screen.getByRole("link", { name: /Ver en el croquis/ })).toHaveAttribute(
-      "href",
-      "/floor-plan#floor-plan-ZA-S4",
-    );
-  });
-
-  it("adds the event to the calendar with the same event the landing uses", () => {
-    renderView();
-
-    const expected = buildEventCalendarUrl({ startsAt: SETTINGS.eventStartsAt, endsAt: SETTINGS.eventEndsAt });
-
-    expect(screen.getByRole("link", { name: /Quiero asistir/ })).toHaveAttribute("href", expected);
+    expect(screen.queryByRole("link", { name: /Ver en el croquis/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Quiero asistir/ })).not.toBeInTheDocument();
   });
 
   it("sends Todos los juegos and Ver todos to the games catalog", () => {

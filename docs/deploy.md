@@ -97,7 +97,7 @@ ganador de la rifa) se guardan primero en la tabla `email_outbox` de la base (RN
 
 - **Con `SMTP_HOST`** (y `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` y `SMTP_FROM`, las cinco son obligatorias juntas; si falta
   alguna, el servidor no arranca y el log dice cuál. El remitente es `SMTP_FROM`, por ejemplo
-  `UT Game Showcase <no-reply@tu-dominio.mx>`; `EMAIL_FROM` no se lee. El puerto 465 usa TLS directo y los demás, STARTTLS): cada
+  `UT Game Showcase <no-reply@tu-dominio.mx>`; debe llevar la dirección (solo el nombre no arranca) y `EMAIL_FROM` no se lee. El puerto 465 usa TLS directo y los demás, STARTTLS): cada
   correo sale justo después de la petición y un temporizador reintenta cada minuto los que fallaron, con retroceso
   exponencial.
 - **Sin `SMTP_HOST`**: nada sale ni se escribe en el log. Los correos se quedan en `email_outbox` y el temporizador de
@@ -320,8 +320,39 @@ El reinicio automático (`restart: unless-stopped`) levanta el contenedor si el 
 (RNF-17). Docker no lo levanta tras una parada manual: `docker compose stop`, `docker stop` y también `docker kill`
 (aunque sea con `-s KILL`) lo dejan detenido hasta un `docker compose up -d`. Para un cambio de `.env` sin cambio de `NEXT_PUBLIC_SITE_URL`, basta `docker compose up -d`.
 
+## Despliegue continuo (GitHub Actions y Coolify)
+
+El servidor de producción corre en Coolify y no compila (RNF-15). `.github/workflows/deploy.yml` hace el trabajo:
+
+1. Espera a que el workflow `CI` termine bien en un push a `main` (un merge de `develop`). Un CI fallido, o el de un
+   PR, no despliega. También se lanza a mano desde la pestaña Actions ("Run workflow" sobre `main`); así solo publica
+   si CI ya pasó en ese commit.
+2. Construye la imagen con el `Dockerfile` y la publica en GHCR como `ghcr.io/ikabeee/ut-e3:main` y
+   `ghcr.io/ikabeee/ut-e3:<commit>`.
+3. Pide a Coolify que despliegue la aplicación, espera a que termine y revisa `GET /api/health` del sitio. Si algo
+   falla, el job queda en rojo.
+
+La aplicación de Coolify es del tipo "Docker Image" con la imagen `ghcr.io/ikabeee/ut-e3` y la etiqueta `main`, el
+volumen persistente en `/data` y las variables de ejecución de "Variables" (`DATABASE_URL=file:/data/app.db`,
+`NEXT_PUBLIC_SITE_URL`, `PIN_ENCRYPTION_KEY`, `SYSADMIN_*`, `SMTP_*` y el mismo `SITE_MODE` con el que se construyó la imagen: si no coinciden,
+el contenedor no arranca).
+
+Configuración en GitHub (Settings, "Secrets and variables", Actions):
+
+| Nombre | Tipo | Valor |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | Variable | URL pública sin `/` final. Se incrusta al construir. |
+| `SITE_MODE` | Variable | `landing` o `full`. Cambiarlo exige cambiar también `SITE_MODE` en Coolify. |
+| `NEXT_PUBLIC_MAPBOX_TOKEN` | Variable (opcional) | Token público de Mapbox (`pk.`). |
+| `COOLIFY_URL` | Variable | URL del panel de Coolify, sin `/` final. |
+| `COOLIFY_APP_UUID` | Variable | UUID de la aplicación en Coolify. |
+| `COOLIFY_API_TOKEN` | Secreto | Token de API de Coolify con permiso `deploy` (Keys & Tokens, API tokens). |
+
+Volver a una versión anterior: en Coolify, cambia la etiqueta de la imagen por el commit que quieres (las etiquetas
+viejas siguen en GHCR) y despliega, o usa "Rollback". Las migraciones no se deshacen: restaura un respaldo si la
+versión nueva cambió la base.
+
 ## Qué no cubre esta guía
 
-- **Imagen construida en GitHub Actions** (RNF-15): hoy la imagen se construye en el VPS con `docker compose build`.
 - **Respaldo horario automático** (RNF-16) y la copia fuera del VPS: solo está el comando.
 - **Prueba de carga en el VPS** antes del 13 de noviembre (RNF-18).

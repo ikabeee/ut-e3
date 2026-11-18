@@ -1,3 +1,4 @@
+import { cn } from "@heroui/react";
 import { BalancedLogo } from "@features/sponsors/components/balanced-logo";
 import { SponsorContactLinks } from "@features/sponsors/components/sponsor-contact-links";
 import { SPONSORS_COPY } from "@features/sponsors/lib/sponsors-copy";
@@ -6,6 +7,7 @@ import type { Sponsor } from "@features/sponsors/lib/types";
 interface SponsorTicketProps {
   sponsor: Sponsor;
   order: number;
+  className?: string;
 }
 
 // Reads bottom to top, like the stub of a printed ticket.
@@ -16,9 +18,14 @@ const VERTICAL_TEXT = "rotate-180 [writing-mode:vertical-rl]";
  * `@min-[420px]` sizes answer to the width of the ticket (its list item is the container), not to the viewport: two
  * columns on a tablet are as narrow as one on a phone.
  */
-export function SponsorTicket({ sponsor, order }: Readonly<SponsorTicketProps>) {
+export function SponsorTicket({ sponsor, order, className }: Readonly<SponsorTicketProps>) {
   return (
-    <article className="flex h-full overflow-hidden border border-border bg-background transition-transform duration-200 hover:-translate-y-1 hover:rotate-[-0.6deg] motion-reduce:transition-none motion-reduce:hover:translate-none motion-reduce:hover:rotate-none">
+    <article
+      className={cn(
+        "flex h-full overflow-hidden border border-border bg-background transition-transform duration-200 hover:-translate-y-1 hover:rotate-[-0.6deg] motion-reduce:transition-none motion-reduce:hover:translate-none motion-reduce:hover:rotate-none",
+        className,
+      )}
+    >
       <TicketStub order={order} />
       <TicketPerforation />
       <div className="flex min-w-0 flex-1 items-center gap-3 p-3 @min-[420px]:gap-4 @min-[420px]:p-4">

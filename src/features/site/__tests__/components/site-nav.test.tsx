@@ -8,7 +8,7 @@ const APP_LINKS = [
   ["Croquis", "/floor-plan"],
   ["Patrocinadores", "/sponsors"],
   ["Rifa", "/raffle"],
-  ["Torneo", "/tournament"],
+  ["Tabla de posiciones", "/tournament"],
 ];
 
 function navbar() {
@@ -116,8 +116,51 @@ describe("SiteNav with only the landing published", () => {
   });
 });
 
-describe("SiteNav on staff and projection screens", () => {
-  it.each(["/admin/kof", "/raffle/live", "/login"])("renders nothing on %s", (pathname) => {
+describe("SiteNav on the stage raffle (S28)", () => {
+  it("shows the navbar with Rifa as the current section on /raffle/live", () => {
+    render(<SiteNav pathname="/raffle/live" />);
+
+    expect(navbar().getByRole("link", { name: "UTG, inicio" })).toHaveAttribute("href", "/");
+    expect(navbar().getByRole("link", { name: "Rifa" })).toHaveAttribute("aria-current", "page");
+  });
+});
+
+describe("SiteNav hover and focus feedback (S27)", () => {
+  it("gives the call to action and the logo a hover, focus and pressed state", () => {
+    render(<SiteNav pathname="/privacy" />);
+
+    expect(navbar().getByRole("link", { name: "Mi pasaporte" })).toHaveClass(
+      "hover:bg-accent-hi",
+      "focus-visible:bg-accent-hi",
+      "active:opacity-80",
+    );
+    expect(navbar().getByRole("link", { name: "UTG, inicio" })).toHaveClass("focus-visible:bg-surface");
+  });
+
+  it("gives the links of the bar a focus state next to their hover wipe", () => {
+    render(<SiteNav pathname="/privacy" />);
+
+    expect(navbar().getByRole("link", { name: "Juegos" })).toHaveClass(
+      "link-wipe",
+      "focus-visible:text-accent",
+      "active:opacity-70",
+    );
+  });
+
+  it("gives the links of the phone menu a hover and focus state", async () => {
+    const user = userEvent.setup();
+    render(<SiteNav pathname="/privacy" />);
+
+    await user.click(navbar().getByRole("button", { name: "Abrir menú" }));
+
+    const menu = within(await screen.findByRole("dialog", { name: "Menú" }));
+
+    expect(menu.getByRole("link", { name: "Juegos" })).toHaveClass("hover:text-accent", "focus-visible:text-accent");
+  });
+});
+
+describe("SiteNav on staff screens", () => {
+  it.each(["/admin/kof", "/admin/raffle", "/login"])("renders nothing on %s", (pathname) => {
     render(<SiteNav pathname={pathname} />);
 
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();

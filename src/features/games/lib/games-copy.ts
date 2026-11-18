@@ -19,11 +19,8 @@ export const GAMES_COPY = {
     nextGenres: "Más géneros",
     gameCount: (count: number) => `${count} ${count === 1 ? "juego" : "juegos"}`,
     allGames: "Todos los juegos",
-    searchLabel: "Buscar juegos",
-    searchPlaceholder: "Busca un juego",
-    // "4 de 18 juegos" or "2 de 18 juegos · Puzle".
-    results: (visible: number, total: number, genreName: string | null) =>
-      [`${visible} de ${total} juegos`, genreName].filter(Boolean).join(" · "),
+    searchingFor: (keyword: string) => `Resultados para «${keyword}»`,
+    clearSearch: "Limpiar búsqueda",
     empty: "Ningún juego coincide con tu búsqueda.",
     showAll: "Ver todos los juegos",
   },
@@ -59,8 +56,6 @@ export const GAMES_COPY = {
   },
   sidebar: {
     label: (name: string) => `Ficha de ${name}`,
-    viewOnMap: "Ver en el croquis",
-    attend: "Quiero asistir",
   },
   related: {
     heading: "Más juegos",
