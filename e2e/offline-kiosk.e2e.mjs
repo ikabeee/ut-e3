@@ -250,7 +250,7 @@ async function loginAsStaff(page) {
   await page.goto(`${BASE_URL}/stand/kiosk`, { waitUntil: "networkidle" });
   await page.waitForURL(/\/login/, { timeout: UI_TIMEOUT_MS });
   await page.getByLabel("Correo").fill(STAFF_EMAIL);
-  await page.getByLabel("Contraseña").fill(STAFF_PASSWORD);
+  await page.getByLabel("Contraseña", { exact: true }).fill(STAFF_PASSWORD);
 
   const filterDownload = page.waitForResponse((response) => response.url().endsWith("/api/stand/pin-filter"), {
     timeout: 60_000,

@@ -73,7 +73,7 @@ export function storedDate(database, column, milliseconds) {
 export async function signIn(page, { baseUrl, email, password }) {
   await page.goto(`${baseUrl}/login`, { waitUntil: "networkidle" });
   await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña").fill(password);
+  await page.getByLabel("Contraseña", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Entrar" }).click();
   await submitLoginCode(page, email);
 }
