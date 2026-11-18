@@ -6,6 +6,9 @@ export interface OverloadSample {
 
 export type OverloadMetric = "cpu" | "memory";
 
+/** One sample every 10 seconds: 12 of them cover the 2 minutes of the rule (RF-74), and the panel redraws as often. */
+export const SAMPLE_INTERVAL_MS = 10_000;
+
 export interface OverloadRule {
   /** A share from 0 to 1; the rule needs every sample strictly above it. */
   threshold: number;

@@ -63,7 +63,7 @@ function invalid(message: string): ParsedInviteInput {
 }
 
 // One at sign with something before it, and a dot inside the domain; the mailer is the real validation.
-function looksLikeEmail(email: string): boolean {
+export function looksLikeEmail(email: string): boolean {
   const parts = email.split("@");
 
   if (email.length > EMAIL_MAX_LENGTH || parts.length !== 2 || /\s/.test(email)) return false;

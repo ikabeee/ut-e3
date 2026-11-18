@@ -1,5 +1,10 @@
 import { buildBracket } from "@features/tournament/lib/bracket-layout";
-import { ADMIN_ONLY_COMMANDS, canRunCommand, getMatchDesk } from "@features/tournament/lib/tournament-rules";
+import {
+  ADMIN_ONLY_COMMANDS,
+  canRunCommand,
+  canViewEntries,
+  getMatchDesk,
+} from "@features/tournament/lib/tournament-rules";
 import type { TournamentCommandType } from "@features/tournament/lib/types";
 import { range } from "@features/tournament/__tests__/tournament-test-utils";
 
@@ -17,6 +22,20 @@ describe("getMatchDesk", () => {
 
     expect(desk2).toEqual([...range(31, 60), 62]);
   });
+});
+
+// S26: the list of participants is for the sysadmin and the KOF administrator only.
+describe("canViewEntries", () => {
+  it.each(["sysadmin", "kof_admin"])("lets %s see the participants", (role) => {
+    expect(canViewEntries(role)).toBe(true);
+  });
+
+  it.each(["kof_staff", "stand_admin", "stand_staff", "raffle_admin", "help_desk", ""])(
+    "keeps the participants from %p",
+    (role) => {
+      expect(canViewEntries(role)).toBe(false);
+    },
+  );
 });
 
 describe("ADMIN_ONLY_COMMANDS", () => {

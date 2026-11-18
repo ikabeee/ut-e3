@@ -24,8 +24,24 @@ El equipo opera con dos staffs para los cuatro tableros (RF-62, SRS 2.4):
 
 El staff inicia el combate, marca al perdedor y marca "No se presentó". El sysadmin no tiene comandos del torneo, pero
 sí puede abrir `/admin/kof` (el panel lo enlaza como "Torneo de KOF") para ver todos los tableros en solo consulta: sin
-botones, sin inscripciones y sin bitácora (`requireKofViewer()` y `GET /api/tournament`). Cada Server Action valida la
+botones y sin bitácora (`requireKofViewer()` y `GET /api/tournament`). Cada Server Action valida la
 sesión, el rol y la mesa del combate con `requireKofAccount()`, que sigue rechazando al sysadmin; la interfaz solo esconde botones.
+
+`/admin/kof` usa el mismo marco que las demás secciones del panel (`AdminHeader`): título, sesión, cerrar sesión y, para
+el sysadmin, la navegación entre secciones. Las cuentas de KOF no la ven porque no pueden abrir las otras secciones.
+
+## Monitor en vivo y participantes
+
+- El bloque "En vivo" está arriba de los tableros: combates terminados de los 63, conteo por estado (pendientes, listos,
+  en juego, congelados y terminados) y los combates en juego y después los congelados, con jugadores, tablero y mesa
+  (`getLiveMatches()` en `lib/tournament-view.ts`). Cada cuenta lo ve solo de las áreas que le tocan. Se refresca con la
+  misma consulta cada 3 segundos del bracket: la página es dinámica (`connection()`) y el navegador pide
+  `GET /api/tournament` con `no-store`, así que no hay nada cacheado que invalidar.
+- La lista de participantes la ven el sysadmin y el administrador de KOF (`canViewEntries()` en
+  `lib/tournament-rules.ts`). El administrador la trabaja en el panel `Inscripciones`; el sysadmin ve el mismo panel sin
+  formularios y lo mantiene al día `GET /api/tournament/entries` cada 3 segundos (`hooks/use-entries.ts`). Esa ruta
+  responde 401 sin sesión o a una cuenta que no es de KOF ni el sysadmin, y 403 al staff de las mesas. La vista del
+  sysadmin solo lee: el cierre del check-in sigue corriendo cuando el administrador trabaja la lista.
 
 ## Estados del combate
 
@@ -64,7 +80,7 @@ de `event_settings`; ninguna está escrita en el código.
 
 ## Bracket público
 
-Cualquiera puede seguir el bracket en `/tournament` (RF-67), sin sesión. La página se llama "Tabla de posiciones", va centrada y
+Cualquiera puede seguir el bracket en `/tournament` (RF-67), sin sesión. La página se llama "Tabla de posiciones" (en la barra, "KOF"), va centrada y
 muestra la información del torneo: "Cuándo" (fechas legibles agrupadas por día, calculadas de `event_settings` en America/Cancun),
 "Cómo" y "Cuántos". Ofrece un solo botón: "Ver mi pasaporte" si el teléfono guarda la copia del pasaporte
 (`localStorage`, `ute3.passport.v1`) y "Crear mi pasaporte" si no; el servidor no lee cookies y el botón se decide en el navegador. La página y `GET /api/tournament/public` entregan
@@ -73,8 +89,8 @@ solo los gamertags y los resultados: ningún id, correo ni PIN. La consulta es c
 | Estado | Qué ve el público |
 | --- | --- |
 | `open` | El bracket como árbol con llaves (dos mitades en espejo que se juntan en la final), con los combates en juego arriba |
-| `pending` | "El bracket todavía no está listo." |
-| `closed` | "El bracket está disponible en la pantalla del torneo." La API no devuelve el bracket |
+| `pending` | "El bracket todavía no está listo.", con un reloj de arena |
+| `closed` | "El bracket estará disponible en la pantalla del torneo.", con un reloj de arena. La API no devuelve el bracket |
 
 En pantallas de 900 px o más el árbol es la vista principal. En un teléfono arranca la lista por tablero y el botón "Ver el
 árbol completo" muestra el árbol, que se desplaza hacia los lados dentro de su caja sin mover la página. Las posiciones se
@@ -100,8 +116,9 @@ lib/tournament-actions.ts     Server Action submitTournamentCommand
 lib/entries-rules.ts          Qué significa agregar a alguien según la hora (lista previa, presencial, cerrado)
 lib/entries-actions.ts        Server Actions del administrador: agregar, check-in y generar
 lib/server/                   Consultas, mutaciones con versión y bitácora, inscripciones y el seed de desarrollo
-api/                          GET /api/tournament (cuentas de KOF y sysadmin, solo lectura) y su cliente
-hooks/use-tournament.ts       Polling cada 3 segundos
+api/                          GET /api/tournament (cuentas de KOF y sysadmin, solo lectura), GET /api/tournament/entries
+                              (sysadmin y administrador de KOF) y su cliente
+hooks/use-tournament.ts       Polling cada 3 segundos (use-entries.ts hace lo mismo con los participantes)
 components/                   Panel, secciones, tarjetas de combate y botones con confirmación
 pages/kof-page.tsx            Contenedor de /admin/kof
 ```

@@ -6,13 +6,80 @@ export const ACCOUNTS_COPY = {
     credentialLabel: "Contraseña",
     submit: "Entrar",
     pending: "Entrando...",
+    forgotPassword: "Olvidé mi contraseña",
     errors: {
       missingFields: "Escribe tu correo y tu contraseña.",
       invalidCredentials: "Correo o contraseña incorrectos",
       tooManyAttempts: "Demasiados intentos. Intenta de nuevo más tarde.",
     },
   },
+  verifyCode: {
+    title: "Verifica tu identidad",
+    description: "Te enviamos un código de 6 dígitos a tu correo. Vence en 10 minutos.",
+    codeLabel: "Código de 6 dígitos",
+    submit: "Verificar",
+    pending: "Verificando...",
+    resend: "Reenviar código",
+    resent: "Te enviamos un código nuevo.",
+    backToLogin: "Volver a iniciar sesión",
+    errors: {
+      invalidFormat: "Escribe los 6 dígitos del código.",
+      invalidCode: "El código es incorrecto o venció. Pide uno nuevo.",
+      tooManyCodes: "Pediste demasiados códigos. Intenta de nuevo más tarde.",
+      expiredChallenge: "Este intento de inicio de sesión venció. Vuelve a iniciar sesión.",
+    },
+  },
+  loginCodeEmail: {
+    subject: "Tu código para entrar al panel del evento",
+    body: (name: string, code: string) =>
+      `Hola, ${name}.
+
+Tu código para entrar al panel del evento es: ${code}
+
+Vence en 10 minutos y solo sirve una vez. Si no intentaste entrar, ignora este correo y cambia tu contraseña.`,
+  },
+  forgotPassword: {
+    title: "Recupera tu contraseña",
+    description: "Escribe el correo de tu cuenta del staff y te enviaremos un enlace para elegir una contraseña nueva.",
+    emailLabel: "Correo",
+    submit: "Enviar enlace",
+    pending: "Enviando...",
+    sent: "Si el correo pertenece a una cuenta activa, te enviamos un enlace que vence en 1 hora.",
+    backToLogin: "Volver a iniciar sesión",
+    errors: { emailInvalid: "Escribe un correo válido." },
+  },
+  resetPassword: {
+    title: "Elige una contraseña nueva",
+    greeting: (name: string) => `Hola, ${name}. Elige una contraseña nueva; se cerrarán tus sesiones abiertas.`,
+    passwordLabel: "Contraseña nueva",
+    confirmationLabel: "Repite la contraseña",
+    hint: (minimum: number) => `Mínimo ${minimum} caracteres.`,
+    submit: "Cambiar contraseña",
+    pending: "Cambiando...",
+    goToLogin: "Ir a iniciar sesión",
+    requestAnother: "Pedir otro enlace",
+    errors: {
+      tooShort: (minimum: number) => `La contraseña necesita al menos ${minimum} caracteres.`,
+      mismatch: "Las contraseñas no coinciden.",
+      invalid: "Este enlace no es válido o ya se usó. Pide otro desde el inicio de sesión.",
+      expired: "Este enlace venció. Pide otro desde el inicio de sesión.",
+    },
+  },
+  passwordResetEmail: {
+    subject: "Cambia tu contraseña del panel del evento",
+    body: (name: string, link: string) =>
+      `Hola, ${name}.
+
+Pediste cambiar tu contraseña del panel del evento. Elige una nueva con este enlace antes de que pase 1 hora:
+${link}
+
+Si no lo pediste, ignora este correo: tu contraseña no cambia.`,
+  },
   signOut: "Cerrar sesión",
+  passwordVisibility: {
+    show: "Mostrar contraseña",
+    hide: "Ocultar contraseña",
+  },
   activate: {
     title: "Activa tu cuenta",
     greeting: (name: string) => `Hola, ${name}. Elige una contraseña para entrar al panel del evento.`,

@@ -34,6 +34,15 @@ describe("EntriesPanel", () => {
     expect(screen.getByText("Jugador4").closest("li")).toHaveTextContent("No se presentó");
   });
 
+  it("only shows the counts and the list to the sysadmin, who has no actions (S26)", () => {
+    render(<EntriesPanel entries={ENTRIES} hasBracket={false} />);
+
+    expect(screen.getByRole("list", { name: "Conteo de inscripciones" })).toBeInTheDocument();
+    expect(screen.getByText("Jugador1")).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
   it("says so when nobody has signed up", () => {
     renderPanel({ entries: [], hasBracket: false });
 

@@ -212,7 +212,7 @@ describe("LandingView", () => {
   it("gives the titles of the landing sections the same size (S34)", () => {
     renderLanding([PIXEL_FORGE]);
 
-    ["Invitadas especiales", "Carteles del evento", "Patrocinadores", "Croquis", "Ubicación"].forEach((name) => {
+    ["Invitados especiales", "Carteles del evento", "Patrocinadores", "Croquis", "Ubicación"].forEach((name) => {
       expect(screen.getByRole("heading", { level: 2, name })).toHaveClass("text-[clamp(24px,4.6vw,68px)]");
     });
   });

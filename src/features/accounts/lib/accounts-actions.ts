@@ -1,14 +1,18 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
-import { getHomePath, LOGIN_PATH } from "@features/accounts/lib/accounts-links";
+import { LOGIN_PATH, LOGIN_VERIFY_PATH } from "@features/accounts/lib/accounts-links";
 import { findSignInAccount } from "@features/accounts/lib/server/account-queries";
+import { startLoginChallenge, type ChallengeAccount } from "@features/accounts/lib/server/login-challenge";
+import { setLoginChallengeCookie } from "@features/accounts/lib/server/login-challenge-cookie";
 import { readFormText, type ServerActionForm } from "@shared/lib/form-data";
 import { resolveClientIp } from "@shared/lib/server/client-ip";
+import { deliverQueuedEmail } from "@shared/lib/server/email-delivery";
 import { hashPassword, verifyPassword } from "@shared/lib/server/password";
 import { clearAttempts, consumeAttempt } from "@shared/lib/server/rate-limit";
-import { createSession, deleteSession } from "@shared/lib/server/session";
+import { deleteSession } from "@shared/lib/server/session";
 
 export interface SignInState {
   error: string;
@@ -18,6 +22,9 @@ const SIGN_IN_LIMIT = { limit: 3, windowMs: 60 * 60 * 1000 };
 
 const { errors } = ACCOUNTS_COPY.signIn;
 
+const CODE_ERRORS = ACCOUNTS_COPY.verifyCode.errors;
+
+// The password alone opens no session: it starts the second step, the 6-digit code that is sent by email (S2).
 // Server Actions are public endpoints: the form fields are untrusted until checked here.
 export async function signIn(_previous: SignInState | null, form: ServerActionForm): Promise<SignInState> {
   const email = readFormText(form, "email").trim().toLowerCase();
@@ -35,8 +42,14 @@ export async function signIn(_previous: SignInState | null, form: ServerActionFo
   if (!account) return { error: errors.invalidCredentials };
 
   await clearAttempts(attemptKey);
-  await createSession(account.id);
-  redirect(getHomePath(account.role));
+
+  const challenge = await startLoginChallenge(account, new Date());
+
+  if (challenge.status === "rateLimited") return { error: CODE_ERRORS.tooManyCodes };
+
+  await setLoginChallengeCookie(challenge.token);
+  after(() => deliverQueuedEmail(challenge.emailId));
+  redirect(LOGIN_VERIFY_PATH);
 }
 
 export async function signOut(): Promise<void> {
@@ -45,11 +58,11 @@ export async function signOut(): Promise<void> {
 }
 
 // An unknown email still pays for one scrypt run, so the response time does not reveal which accounts exist.
-async function authenticate(email: string, password: string): Promise<{ id: string; role: string } | null> {
+async function authenticate(email: string, password: string): Promise<ChallengeAccount | null> {
   const account = await findSignInAccount(email);
   const isValid = await verifyPassword(password, account?.password ?? (await getDecoyHash()));
 
-  return account && isValid ? { id: account.id, role: account.role } : null;
+  return account && isValid ? { id: account.id, email: account.email, name: account.name } : null;
 }
 
 let decoyHash: Promise<string> | undefined;

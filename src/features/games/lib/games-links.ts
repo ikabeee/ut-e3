@@ -18,6 +18,9 @@ export function getGenrePath(genreSlug: string): string {
 // The stand administrator registers the game of its stand here (RF-31); the page belongs to this feature.
 export const STAND_GAME_PATH = "/stand/game";
 
+// The public games the navbar search suggests while typing (S21).
+export const GAMES_API_PATH = "/api/games";
+
 // The itch.io link of a game is decided by the clock of the server (RF-10) and read from here, never from the page.
 export function getItchApiPath(slug: string): string {
   return `/api/games/${slug}/itch`;

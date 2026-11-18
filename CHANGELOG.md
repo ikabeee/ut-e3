@@ -9,6 +9,55 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 ### Cambiado
 
 - Portadas verticales (810x1080) y horizontales (1920x1080) de los juegos actualizadas desde la carpeta "portadas" de Drive; One Mind y Vaporlock ya tienen portada y imagen horizontal, y One Mind e Identity Dissolution suman 3 capturas en la galería (la base admite 5 imágenes por juego).
+### Seguridad
+
+- Next.js se actualiza de 16.4.2 a 16.4.6 por un aviso de seguridad publicado (junto con `@next/env` y `eslint-config-next`).
+### Cambiado
+
+- La barra de navegación dice "KOF" en lugar de "Tabla de posiciones".
+- /raffle muestra "La rifa empieza" con la fecha y la hora de la rifa (America/Cancun), tomadas de los horarios del evento.
+- El login tiene un botón con ícono de ojo para mostrar u ocultar la contraseña (también al activar una cuenta).
+- /tournament cerrado dice "El bracket estará disponible en la pantalla del torneo." con un reloj de arena; la lista de
+  ganadores vacía de la rifa muestra un podio vacío.
+- El croquis ya no muestra "PIXEL & CODE · Edificio B, UT Cancún" sobre el título.
+- El juego del stand ZT-S4 se llama "Saatal Paal" (la dirección `/games/saatan-paal` no cambia). La migración
+  `rename_saatal_paal` corrige el nombre y los textos alternativos de sus imágenes en las bases ya sembradas.
+- El buscador de la barra sugiere juegos mientras escribes (flechas, Enter y Escape) y tolera letras de más o de menos:
+  "san" encuentra Saatal Paal. /games?q= usa la misma búsqueda.
+- La portada dice "Invitados especiales" y el cronograma muestra el lugar de cada actividad como texto, sin enlace ni flecha.
+
+### Corregido
+
+- `next dev` ya no avisa "Failed to find font override values for font `LINE Seed JP`".
+- Mi pasaporte (`/passport`): en el teléfono se apilan el pasaporte, el croquis y el detalle del juego; desde 1000 px el
+  pasaporte va en una columna junto a un panel con el croquis y el detalle. Al tocar un stand en el croquis, su juego (y si
+  ya lo visitaste) aparece en el detalle.
+### Agregado
+
+- El administrador de cada stand carga las imágenes de su juego en `/stand/game` con las reglas del grid de portadas:
+  tarjeta (810x1080), portada (1920x1080) y hasta cuatro capturas (1920x1080), solo JPG real de máximo 5 MB. Ve qué
+  imágenes faltan, una vista previa y puede reemplazarlas o quitar capturas. Las imágenes viven en `UPLOADS_DIR`
+  (`/data/uploads` en Docker) y se sirven por `/api/media/games/`.
+- El administrador del stand puede borrar su juego (con confirmación) además de crearlo y editarlo.
+- `/admin/server` muestra gráficas de la CPU y la memoria de los últimos minutos, con la línea del 85% del cierre
+  automático del bracket, y se actualiza sola cada 10 s.
+- `/admin/kof` tiene un bloque "En vivo": combates terminados, conteo por estado (incluidos los pendientes) y los
+  combates en juego o congelados con sus jugadores, tablero y mesa.
+- El sysadmin ve la lista de participantes del torneo en `/admin/kof` (solo consulta, se actualiza sola), igual que el
+  administrador de KOF. `GET /api/tournament/entries` la entrega solo a esas dos cuentas.
+
+### Cambiado
+
+- `/admin/kof` usa el mismo marco que las demás secciones del panel; el sysadmin ve además la navegación entre
+  secciones.
+- Verificación en dos pasos del staff: tras la contraseña, `/login/verify` pide el código de 6 dígitos que llega por
+  correo (vence en 10 minutos, 5 intentos, reenvío limitado). Sin SMTP el código queda en `email_outbox`.
+- "Olvidé mi contraseña" en el inicio de sesión: `/forgot-password` envía un enlace de un solo uso (1 hora) a
+  `/reset-password/<token>`, que cambia la contraseña y cierra las sesiones abiertas.
+- Los correos (invitaciones, pasaporte, recuperación y rifa) salen con una plantilla HTML con la estética del sitio y su
+  texto plano como alternativa.
+- Al inscribir a alguien en el torneo de KOF le llega un correo de confirmación con el horario de su check-in.
+- Avisos de emergencia de producción por correo a `EMERGENCY_MAIL`: errores del servidor, saturación y disco casi lleno.
 
 ## [1.1.0] - 2026-11-18
 
