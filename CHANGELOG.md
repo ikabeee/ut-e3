@@ -6,6 +6,13 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- Verificación en dos pasos del staff: tras la contraseña, `/login/verify` pide el código de 6 dígitos que llega por
+  correo (vence en 10 minutos, 5 intentos, reenvío limitado). Sin SMTP el código queda en `email_outbox`.
+- "Olvidé mi contraseña" en el inicio de sesión: `/forgot-password` envía un enlace de un solo uso (1 hora) a
+  `/reset-password/<token>`, que cambia la contraseña y cierra las sesiones abiertas.
+
 ## [1.1.0] - 2026-11-18
 
 ### Cambiado

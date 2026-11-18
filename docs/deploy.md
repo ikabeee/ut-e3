@@ -115,6 +115,11 @@ for (const row of db.prepare('SELECT to_address, text FROM email_outbox WHERE se
 
 El enlace de invitación vale 72 horas y solo se guarda su hash (RNF-09): este comando es la única forma de verlo.
 
+Cada inicio de sesión del staff pide un código de 6 dígitos que se envía por correo (vence en 10 minutos). Sin
+`SMTP_HOST` nadie del staff puede entrar: ese código y los enlaces de "Olvidé mi contraseña" (vencen en 1 hora) también se
+quedan en `email_outbox`. Para leer el código en una emergencia usa `SELECT to_address, text FROM email_outbox` en el
+comando de arriba y busca el último correo "Tu código para entrar al panel del evento".
+
 ## Contenido inicial
 
 El primer arranque ejecuta el seed del repositorio (`prisma/seed.ts`), que **solo llena tablas vacías**: horarios del

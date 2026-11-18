@@ -1,5 +1,13 @@
 export const LOGIN_PATH = "/login";
 
+// The second step of the sign-in: the 6-digit code that was sent by email.
+export const LOGIN_VERIFY_PATH = "/login/verify";
+
+// "Olvidé mi contraseña": the request page, and the reset link `${RESET_PASSWORD_PATH}/<token>`.
+export const FORGOT_PASSWORD_PATH = "/forgot-password";
+
+export const RESET_PASSWORD_PATH = "/reset-password";
+
 export const SYSADMIN_HOME_PATH = "/admin";
 
 // The activation link of an invitation is `${ACTIVATE_PATH}/<token>`.

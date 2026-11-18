@@ -16,6 +16,12 @@ describe("LoginForm", () => {
     expect(screen.getByRole("button", { name: "Entrar" })).toBeInTheDocument();
   });
 
+  it("links to the password reset page", () => {
+    render(<LoginForm action={async () => ({ error: "" })} />);
+
+    expect(screen.getByRole("link", { name: "Olvidé mi contraseña" })).toHaveAttribute("href", "/forgot-password");
+  });
+
   it("sends the typed email and password and shows the error the action returns", async () => {
     const received: FormData[] = [];
 
