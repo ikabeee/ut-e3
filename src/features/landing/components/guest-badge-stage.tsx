@@ -33,6 +33,8 @@ interface GuestBadgeStageProps {
   swing: BadgeSwing;
   /** Pointer handlers that make the badge itself the control (swipe or tap); without them the badge is inert. */
   gestures?: HTMLAttributes<HTMLDivElement>;
+  /** The landing corrections of the badge photo. */
+  isLanding?: boolean;
   className?: string;
 }
 
@@ -40,7 +42,7 @@ interface GuestBadgeStageProps {
  * The badge hangs from its strap: it drops the first time it is seen, swings in on every move and then sways.
  * The swinging block is remounted on every move (`key`) so its animation starts again.
  */
-export function GuestBadgeStage({ ref, guest, swing, gestures, className }: Readonly<GuestBadgeStageProps>) {
+export function GuestBadgeStage({ ref, guest, swing, gestures, isLanding, className }: Readonly<GuestBadgeStageProps>) {
   const parity = swing.index % 2 === 0 ? "even" : "odd";
   const hasMoved = swing.moveCount > 0;
 
@@ -66,7 +68,11 @@ export function GuestBadgeStage({ ref, guest, swing, gestures, className }: Read
           className={cn("flex pendulum flex-col items-center perspective-[1400px]", getSwingAnimation(swing))}
         >
           <span aria-hidden="true" className="h-14 w-8 bg-accent min-[820px]:h-27.5 min-[820px]:w-10" />
-          <GuestBadge guest={guest} className={hasMoved ? "animate-pendulum-twist motion-reduce:animate-none" : ""} />
+          <GuestBadge
+            guest={guest}
+            isLanding={isLanding}
+            className={hasMoved ? "animate-pendulum-twist motion-reduce:animate-none" : ""}
+          />
         </div>
       </div>
     </div>

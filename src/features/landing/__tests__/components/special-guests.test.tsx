@@ -99,7 +99,7 @@ describe("SpecialGuests", () => {
   });
 
   it("keeps the pager beside the badge, not under the heading", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+    render(<SpecialGuests guests={SPECIAL_GUESTS} isLanding />);
 
     const heading = screen.getByRole("heading", { level: 2, name: "Invitadas especiales" });
     const next = screen.getByRole("button", { name: "Pase siguiente" });
@@ -110,13 +110,13 @@ describe("SpecialGuests", () => {
   });
 
   it("hints that the badge can be moved", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+    render(<SpecialGuests guests={SPECIAL_GUESTS} isLanding />);
 
     expect(screen.getByText("Desliza o toca el pase para ver el siguiente")).toBeInTheDocument();
   });
 
   it("moves to the next badge with a tap on it", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+    render(<SpecialGuests guests={SPECIAL_GUESTS} isLanding />);
 
     swipe(getBadgeSurface(), { x: 100, y: 100 }, { x: 102, y: 101 });
 
@@ -124,7 +124,7 @@ describe("SpecialGuests", () => {
   });
 
   it("moves to the next badge with a swipe to the left and to the previous one with a swipe to the right", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+    render(<SpecialGuests guests={SPECIAL_GUESTS} isLanding />);
 
     swipe(getBadgeSurface(), { x: 200, y: 100 }, { x: 80, y: 105 });
     expect(getBadgeName()).toHaveTextContent(SECOND_GUEST_NAME);
@@ -135,7 +135,7 @@ describe("SpecialGuests", () => {
   });
 
   it("does not move with a mostly vertical drag, which is the page scrolling", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+    render(<SpecialGuests guests={SPECIAL_GUESTS} isLanding />);
 
     swipe(getBadgeSurface(), { x: 100, y: 100 }, { x: 60, y: 300 });
 
@@ -144,18 +144,52 @@ describe("SpecialGuests", () => {
 
   it("is not a swipe surface with a single guest", () => {
     const guest = { id: "guest-9", name: "Ana Pérez", talk: "Diseño de niveles" };
-    render(<SpecialGuests guests={[guest]} />);
+    render(<SpecialGuests guests={[guest]} isLanding />);
 
     expect(document.querySelector("[class*='touch-pan-y']")).toBeNull();
     expect(screen.queryByText(/Desliza o toca/)).toBeNull();
   });
 
   it("loads the shown photo eagerly and with the sizes of its slot, not the full file", () => {
-    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+    render(<SpecialGuests guests={SPECIAL_GUESTS} isLanding />);
 
     const photo = screen.getByRole("img", { name: SPECIAL_GUESTS[0]?.photo?.alt });
 
     expect(photo).toHaveAttribute("loading", "eager");
     expect(photo).toHaveAttribute("sizes", "(min-width: 820px) 384px, 280px");
+  });
+});
+
+describe("SpecialGuests without isLanding (/showcase, S26)", () => {
+  it("keeps the controls under the heading, with no hint and a plain badge", () => {
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+
+    const heading = screen.getByRole("heading", { level: 2, name: "Invitadas especiales" });
+    const next = screen.getByRole("button", { name: "Pase siguiente" });
+
+    expect(heading.parentElement).toContainElement(next);
+    expect(screen.queryByText(/Desliza o toca/)).not.toBeInTheDocument();
+    expect(document.querySelector("[class*='touch-pan-y']")).toBeNull();
+  });
+
+  it("does not move with a tap on the badge", () => {
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+
+    const surface = getBadgeName().closest("[class*='grid']");
+
+    if (!(surface instanceof HTMLElement)) throw new Error("The badge has no stage");
+
+    swipe(surface, { x: 100, y: 100 }, { x: 101, y: 100 });
+
+    expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
+  });
+
+  it("loads the photo with the sizes of the whole badge and without the eager loading", () => {
+    render(<SpecialGuests guests={SPECIAL_GUESTS} />);
+
+    const photo = screen.getByRole("img", { name: SPECIAL_GUESTS[0]?.photo?.alt });
+
+    expect(photo).toHaveAttribute("sizes", "(min-width: 820px) 440px, 320px");
+    expect(photo).not.toHaveAttribute("loading", "eager");
   });
 });

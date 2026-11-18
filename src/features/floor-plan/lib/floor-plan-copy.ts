@@ -79,6 +79,8 @@ export const FLOOR_PLAN_COPY = {
     exteriorLabel: "EXTERIOR",
     standLabel: (code: string, title?: string) => (title ? `Stand ${code}, ${title}` : `Stand ${code}`),
   },
+  standKicker: (code: string, kind: string) => `Stand ${code} · ${kind}`,
+  unassignedKicker: (code: string) => `Stand ${code}`,
   blockLine: (blockLabel: string, number: number, size: number) => `${blockLabel} · stand ${number} de ${size}`,
   filters: {
     groupLabel: "Filtrar marcadores",

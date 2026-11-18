@@ -5,10 +5,15 @@ import type { SpecialGuest } from "@features/landing/lib/types";
 
 interface SpecialGuestsProps {
   guests: readonly SpecialGuest[];
+  /** The landing corrections of the carousel (swipeable badge, side pager, preloaded photos). */
+  isLanding?: boolean;
 }
 
-/** Phones: heading, badge and its pager below. From 820px: the heading on the left, the badge with its pager on the right. */
-export function SpecialGuests({ guests }: Readonly<SpecialGuestsProps>) {
+/**
+ * Phones: heading, badge and its controls. From 820px: heading and controls on the left, the badge on the right.
+ * On the landing (`isLanding`) the pager sits beside the badge instead, which can also be swiped.
+ */
+export function SpecialGuests({ guests, isLanding = false }: Readonly<SpecialGuestsProps>) {
   return (
     <section id={GUESTS_SECTION_ID} className="section-block">
       <div className="page-wrap">
@@ -16,7 +21,7 @@ export function SpecialGuests({ guests }: Readonly<SpecialGuestsProps>) {
           <h2 className="type-giant min-[820px]:col-span-5 min-[820px]:self-end min-[820px]:text-[clamp(32px,4vw,60px)]">
             {LANDING_COPY.guests.heading}
           </h2>
-          <GuestCarousel guests={guests} />
+          <GuestCarousel guests={guests} isLanding={isLanding} />
         </div>
       </div>
     </section>

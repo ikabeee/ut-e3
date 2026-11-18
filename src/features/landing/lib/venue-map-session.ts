@@ -10,8 +10,10 @@ import {
 export interface VenueMapLabels {
   zoomIn: string;
   zoomOut: string;
-  /** The only text of the pin: the short name of the venue. */
+  /** The text of the pin: the short name of the venue on the landing, the event name on /showcase. */
   pinLabel: string;
+  /** The second line of the pin of /showcase (the venue); without it the pin is the single label of the landing. */
+  pinPlace?: string;
 }
 
 export interface TileCounts {
@@ -112,15 +114,20 @@ function addVenuePin(leaflet: typeof Leaflet, map: Leaflet.Map, { venue, labels 
     .addTo(map);
 }
 
-function buildPinElement({ pinLabel }: VenueMapLabels): HTMLElement {
+function buildPinElement({ pinLabel, pinPlace }: VenueMapLabels): HTMLElement {
   const pin = document.createElement("div");
 
   const parts = [
-    ["venue-pin__label", pinLabel],
+    ...(pinPlace === undefined
+      ? [["venue-pin__label", pinLabel]]
+      : [
+          ["venue-pin__name", pinLabel],
+          ["venue-pin__place", pinPlace],
+        ]),
     ["venue-pin__line", ""],
   ];
 
-  pin.className = "venue-pin";
+  pin.className = pinPlace === undefined ? "venue-pin" : "venue-pin venue-pin--stacked";
   parts.forEach(([className, text]) => {
     const part = document.createElement("span");
 

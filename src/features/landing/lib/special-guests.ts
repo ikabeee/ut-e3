@@ -25,6 +25,9 @@ export const SPECIAL_GUESTS: readonly SpecialGuest[] = [
  * The `sizes` of a badge photo: the badge is 320px wide on a phone and 440px from 820px, minus the padding of the card
  * (40px and 56px). Next only asks the optimizer for the widths that this slot can use, not for the full file.
  */
+/** The `sizes` of a badge photo on /showcase: the badge width, not the slot of the photo inside its card. */
+export const CLASSIC_GUEST_PHOTO_SIZES = "(min-width: 820px) 440px, 320px";
+
 export const GUEST_PHOTO_SIZES = "(min-width: 820px) 384px, 280px";
 
 /** The guests the visitor can reach with one move (next or previous), without the current one, that have a photo. */

@@ -61,6 +61,8 @@ export const LANDING_COPY = {
   },
   venue: {
     heading: "Ubicación",
+    kicker: "Sede",
+    building: (building: string) => `${building} · Lobby y áreas externas`,
     openMaps: "Abrir en Google Maps",
     copyAddress: {
       idle: "Copiar dirección",

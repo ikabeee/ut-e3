@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { EventSettings } from "@features/event-settings/lib/types";
 import { makeGames } from "@features/games/__tests__/components/game-test-data";
 import type { ScheduleItem } from "@features/schedule/lib/types";
@@ -83,17 +84,41 @@ describe("ShowcaseView", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Croquis" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "Ubicación" })).toBeInTheDocument();
     expect(screen.getByText(/Carretera Cancún–Aeropuerto, Km 11.5/)).toBeInTheDocument();
-    expect(screen.getByText("Edificio B")).toBeInTheDocument();
+    expect(screen.getByText("Edificio B · Lobby y áreas externas")).toBeInTheDocument();
     expect(screen.getByLabelText("Mapa de la ubicación del evento: Edificio B, UT Cancún")).toBeInTheDocument();
   });
 
-  it("shows the site map in the footer, with the way to the admin panel", () => {
+  it("keeps the corrections of the landing out of the page (S26)", () => {
     renderShowcase();
 
-    const sitemap = screen.getByRole("navigation", { name: "Mapa del sitio" });
+    expect(screen.queryByRole("navigation", { name: "Mapa del sitio" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Patrocinadores siguientes" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Desliza o toca el pase para ver el siguiente")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 2, name: "Carteles del evento" })).not.toBeInTheDocument();
+    expect(screen.getByText("Carretera Cancún–Aeropuerto · Km 11.5")).toBeInTheDocument();
+    expect(screen.getByText("Sede")).toBeInTheDocument();
+  });
 
-    expect(within(sitemap).getByRole("link", { name: "Panel de administración" })).toHaveAttribute("href", "/admin");
-    expect(within(sitemap).getByRole("link", { name: "Juegos" })).toHaveAttribute("href", "/#games");
+  it("keeps the guest controls under the heading, with the counter between the arrows", () => {
+    renderShowcase();
+
+    const heading = screen.getByRole("heading", { level: 2, name: "Invitadas especiales" });
+    const next = screen.getByRole("button", { name: "Pase siguiente" });
+    const grid = heading.parentElement;
+
+    expect(screen.getByText("Pase 01 de 02")).toBeInTheDocument();
+    expect(grid).toContainElement(next);
+    expect(next.closest("div")?.parentElement).toBe(grid);
+  });
+
+  it("lets the floor plan list be shown and hidden again", async () => {
+    const user = userEvent.setup();
+
+    renderShowcase();
+    await user.click(screen.getByRole("button", { name: "Ver como lista" }));
+
+    expect(screen.getByRole("button", { name: "Ocultar lista" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Abrir el croquis/ })).not.toBeInTheDocument();
   });
 
   it("has no contact form, quotes or studio disciplines", () => {

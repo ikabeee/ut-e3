@@ -245,7 +245,7 @@ describe("FloorPlan detail", () => {
   it("selecting a stand shows its detail with title, kicker, block line and game link", async () => {
     const user = userEvent.setup();
 
-    render(<FloorPlan stands={STAND_FIXTURES} />);
+    render(<FloorPlan stands={STAND_FIXTURES} isLanding />);
 
     await user.click(screen.getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" }));
 
@@ -325,10 +325,39 @@ describe("FloorPlan detail", () => {
     expect(within(detail).queryByRole("img")).not.toBeInTheDocument();
   });
 
-  it("shows an empty stand as unassigned with no game link or cover", async () => {
+  it("keeps the code of the stand in its kicker without isLanding (/showcase, S26)", async () => {
     const user = userEvent.setup();
 
     render(<FloorPlan stands={STAND_FIXTURES} />);
+
+    await user.click(screen.getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" }));
+    expect(
+      within(screen.getByRole("region", { name: "Detalle del croquis" })).getByText("Stand ZA-S1 · Acción"),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Stand ZT-S6" }));
+    expect(
+      within(screen.getByRole("region", { name: "Detalle del croquis" })).getByText("Stand ZT-S6"),
+    ).toBeInTheDocument();
+  });
+
+  it("drops the code of the stand from the kicker on the page variant", async () => {
+    const user = userEvent.setup();
+
+    render(<FloorPlan stands={STAND_FIXTURES} variant="page" />);
+
+    await user.click(screen.getByRole("button", { name: "Stand ZA-S1, Ceniza Protocol" }));
+
+    const detail = screen.getByRole("region", { name: "Detalle del croquis" });
+
+    expect(within(detail).getByText("Acción")).toBeInTheDocument();
+    expect(within(detail).queryByText(/Stand ZA-S1/)).not.toBeInTheDocument();
+  });
+
+  it("shows an empty stand as unassigned with no game link or cover", async () => {
+    const user = userEvent.setup();
+
+    render(<FloorPlan stands={STAND_FIXTURES} isLanding />);
 
     await user.click(screen.getByRole("button", { name: "Stand ZT-S6" }));
 
@@ -581,15 +610,26 @@ describe("FloorPlan list and legend", () => {
     expect(hideIcon?.innerHTML).not.toBe(showIconMarkup);
   });
 
-  it("never offers to hide the list on the embedded variant", async () => {
+  it("never offers to hide the list on the embedded variant of the landing", async () => {
     const user = userEvent.setup();
 
-    render(<FloorPlan stands={STAND_FIXTURES} />);
+    render(<FloorPlan stands={STAND_FIXTURES} isLanding />);
     await user.click(screen.getByRole("button", { name: "Ver como lista" }));
 
     expect(itemList()).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Ocultar lista" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Ver como lista" })).not.toBeInTheDocument();
+  });
+
+  it("offers to hide the list again without isLanding (/showcase, S26)", async () => {
+    const user = userEvent.setup();
+
+    render(<FloorPlan stands={STAND_FIXTURES} />);
+    await user.click(screen.getByRole("button", { name: "Ver como lista" }));
+    await user.click(screen.getByRole("button", { name: "Ocultar lista" }));
+
+    expect(document.querySelector("ul:not([aria-label])")).toBeNull();
+    expect(screen.getByRole("button", { name: "Ver como lista" })).toBeInTheDocument();
   });
 
   it("has no link to the floor plan page on the embedded variant", () => {

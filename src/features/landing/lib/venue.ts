@@ -7,6 +7,7 @@ export const EVENT_VENUE: EventVenue = {
   building: "Edificio B",
   coordinates: { latitude: 21.04958, longitude: -86.84682 },
   mapZoom: 17,
+  landmark: "Carretera Cancún–Aeropuerto · Km 11.5",
   streetAddress: "Carretera Cancún–Aeropuerto, Km 11.5, S.M. 299, Mz. 5, Lt. 1",
   locality: "Cancún",
   region: "Quintana Roo",

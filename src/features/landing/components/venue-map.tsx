@@ -9,24 +9,31 @@ import { useVisibleOnce } from "@features/landing/hooks/use-visible-once";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import type { EventVenue } from "@features/landing/lib/types";
 import { MAPBOX_ACCESS_TOKEN } from "@features/landing/lib/venue-map";
+import { siteConfig } from "@shared/lib/site-config";
 
 interface VenueMapProps {
   venue: EventVenue;
   /** The schematic: it is what shows before the map loads, and without a connection. */
   fallback: ReactNode;
+  /** The landing corrections: the pin carries only the short name of the venue. */
+  isLanding?: boolean;
 }
 
 /**
  * The venue map of Leaflet over the schematic. The map is requested only when the section is about to be seen, and
  * never without a Mapbox token: then the schematic stays.
  */
-export function VenueMap({ venue, fallback }: Readonly<VenueMapProps>) {
+export function VenueMap({ venue, fallback, isLanding = false }: Readonly<VenueMapProps>) {
   const { map } = LANDING_COPY.venue;
   const [sectionRef, isVisible] = useVisibleOnce<HTMLDivElement>();
 
   const labels = useMemo(
-    () => ({ zoomIn: map.zoomIn, zoomOut: map.zoomOut, pinLabel: venue.shortName }),
-    [map.zoomIn, map.zoomOut, venue.shortName],
+    () => ({
+      zoomIn: map.zoomIn,
+      zoomOut: map.zoomOut,
+      ...(isLanding ? { pinLabel: venue.shortName } : { pinLabel: siteConfig.name, pinPlace: venue.shortName }),
+    }),
+    [isLanding, map.zoomIn, map.zoomOut, venue.shortName],
   );
 
   const [mapRef, { isReady }] = useVenueMap({

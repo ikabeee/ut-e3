@@ -44,6 +44,8 @@ es una tarea.
 - S24: "El search bar debe estar en el navbar y quita esa seccion solo deberia quedar el carrusel de juegos y los covers"
   (captura: encabezado de /games con "Catálogo de juegos", descripción, buscador y "18 de 18 juegos").
 - S25: "El navbar no muestra el estado de donde esta posicionado el usuario" (captura: /games sin marcar "Juegos").
+- S26: "Las correcciones de la landing van en / no va en \"showcase\"": `/showcase` se ve y se comporta como en
+  `origin/develop`; las correcciones de la portada (S2, S4, S7-S9, S11-S16, S20-S21) solo aplican en `/`.
 
 ## Tasks
 
@@ -54,6 +56,7 @@ es una tarea.
 | T3 | S10, S11, S19-S23 | worker croquis | `fix(floor-plan): hover...` |
 | T4 | S3, S18, S24 (catálogo) | worker juegos | `fix(games): coverflow...` |
 | T5 | S7, S17, S24 (barra), S25 | worker barra y patrocinadores | `feat(site): buscador...` |
+| T7 | S26 | worker | `fix(showcase): conservar...` |
 | T6 | S5, S6 | worker torneo | `feat(tournament): información...` |
 
 ## Log
@@ -62,3 +65,5 @@ es una tarea.
 - L2: "[captura de localhost:3000/raffle] -> Debe ir centrado y con algo alusion a la rifa como icono o logo"
 - L3: Segundo lote de capturas (S2-S25) con "Orquestra a 5 agentes en simultaneo". Contrato entre T4 y T5: el buscador
   de la barra envía GET /games?q=<texto> y /games filtra por `q`.
+- L4: "Las correcciones de la landing van en / no va en "showcase", solamente es esa correccion y haces PRS y mandas a
+  Develop"

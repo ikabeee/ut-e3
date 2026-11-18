@@ -22,7 +22,7 @@ describe("VenueLocation", () => {
   });
 
   it("names only the Edificio B in the card, with no Sede label nor Lobby y áreas externas", () => {
-    const { container } = render(<VenueLocation venue={EVENT_VENUE} />);
+    const { container } = render(<VenueLocation venue={EVENT_VENUE} isLanding />);
 
     expect(screen.getByText("Edificio B")).toBeInTheDocument();
     expect(screen.queryByText("Sede")).not.toBeInTheDocument();
@@ -31,13 +31,13 @@ describe("VenueLocation", () => {
   });
 
   it("has no road subtitle above the heading", () => {
-    render(<VenueLocation venue={EVENT_VENUE} />);
+    render(<VenueLocation venue={EVENT_VENUE} isLanding />);
 
     expect(screen.getByRole("heading", { level: 2, name: "Ubicación" }).previousElementSibling).toBeNull();
   });
 
   it("shows only UT Cancún on the sign of the schematic, with no PIXEL nor road label", () => {
-    const { container } = render(<VenueLocation venue={EVENT_VENUE} />);
+    const { container } = render(<VenueLocation venue={EVENT_VENUE} isLanding />);
     const schematic = screen.getByRole("img", { name: /entre el centro y el aeropuerto/ });
     const labels = Array.from(schematic.querySelectorAll("text")).map((label) => label.textContent);
 
@@ -60,5 +60,28 @@ describe("VenueLocation", () => {
     render(<VenueLocation venue={EVENT_VENUE} />);
 
     expect(screen.getByRole("img", { name: /entre el centro y el aeropuerto/ })).toBeInTheDocument();
+  });
+});
+
+describe("VenueLocation without isLanding (/showcase, S26)", () => {
+  it("shows the road above the heading and the Sede label with the building and its areas in the card", () => {
+    render(<VenueLocation venue={EVENT_VENUE} />);
+
+    const heading = screen.getByRole("heading", { level: 2, name: "Ubicación" });
+
+    expect(heading.previousElementSibling).toHaveTextContent("Carretera Cancún–Aeropuerto · Km 11.5");
+    expect(screen.getByText("Sede")).toBeInTheDocument();
+    expect(screen.getByText("Edificio B · Lobby y áreas externas")).toBeInTheDocument();
+  });
+
+  it("shows the event name, the venue and the road on the sign of the schematic", () => {
+    render(<VenueLocation venue={EVENT_VENUE} />);
+
+    const schematic = screen.getByRole("img", { name: /entre el centro y el aeropuerto/ });
+    const labels = Array.from(schematic.querySelectorAll("text")).map((label) => label.textContent);
+
+    expect(labels).toEqual(
+      expect.arrayContaining(["PIXEL & CODE", "UT CANCÚN", "CARRETERA CANCÚN–AEROPUERTO · KM 11.5"]),
+    );
   });
 });

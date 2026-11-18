@@ -6,6 +6,7 @@ import type { EventVenue } from "@features/landing/lib/types";
 import { formatCopyableAddress, formatVenueAddress } from "@features/landing/lib/venue";
 import { ActionLink } from "@shared/components/action-link";
 import { PaperCard } from "@shared/components/paper-card";
+import { siteConfig } from "@shared/lib/site-config";
 
 const MONO = "var(--font-mono)";
 
@@ -17,17 +18,24 @@ const DOT_STEP = 24;
 
 interface VenueLocationProps {
   venue: EventVenue;
+  /** The landing corrections: no road subtitle, no "Sede" label and only the short name on the sign and the pin. */
+  isLanding?: boolean;
 }
 
-export function VenueLocation({ venue }: Readonly<VenueLocationProps>) {
+export function VenueLocation({ venue, isLanding = false }: Readonly<VenueLocationProps>) {
   return (
     <section id={VENUE_SECTION_ID} className="section-block">
       <div className="page-wrap">
+        {isLanding ? null : <p className="mb-[18px] type-tiny">{venue.landmark}</p>}
         <h2 className="type-giant">{LANDING_COPY.venue.heading}</h2>
         <div className="mt-[clamp(36px,5vw,64px)] grid grid-cols-[.85fr_1.15fr] gap-gutter max-[860px]:grid-cols-1">
-          <VenueDetails venue={venue} />
+          <VenueDetails venue={venue} isLanding={isLanding} />
           <div className="min-w-0 overflow-hidden border border-border bg-background">
-            <VenueMap venue={venue} fallback={<VenueSchematic venue={venue} />} />
+            <VenueMap
+              venue={venue}
+              isLanding={isLanding}
+              fallback={<VenueSchematic venue={venue} isLanding={isLanding} />}
+            />
           </div>
         </div>
       </div>
@@ -35,12 +43,13 @@ export function VenueLocation({ venue }: Readonly<VenueLocationProps>) {
   );
 }
 
-function VenueDetails({ venue }: Readonly<VenueLocationProps>) {
+function VenueDetails({ venue, isLanding }: Readonly<VenueLocationProps>) {
   return (
     <article className="flex min-w-0 flex-col">
       <PaperCard className="flex-1 gap-3 px-[22px] pt-[22px] pb-7">
+        {isLanding ? null : <span className="type-tiny">{LANDING_COPY.venue.kicker}</span>}
         <h3 className="type-wide text-[clamp(22px,2.8vw,38px)] leading-[.95] tracking-[-.03em]">{venue.name}</h3>
-        <p className="m-0 type-tiny">{venue.building}</p>
+        <p className="m-0 type-tiny">{isLanding ? venue.building : LANDING_COPY.venue.building(venue.building)}</p>
         <p className="m-0 max-w-[40ch] text-lg leading-[1.2]">{formatVenueAddress(venue)}</p>
       </PaperCard>
       <div className="flex flex-wrap justify-end">
@@ -53,7 +62,7 @@ function VenueDetails({ venue }: Readonly<VenueLocationProps>) {
   );
 }
 
-function VenueSchematic({ venue }: Readonly<VenueLocationProps>) {
+function VenueSchematic({ venue, isLanding }: Readonly<VenueLocationProps>) {
   return (
     <svg
       viewBox="0 0 600 400"
@@ -63,7 +72,7 @@ function VenueSchematic({ venue }: Readonly<VenueLocationProps>) {
     >
       <SchematicBackdrop />
       <SchematicRoad />
-      <SchematicCampus venue={venue} />
+      {isLanding ? <LandingCampusSign venue={venue} /> : <ClassicCampusSign venue={venue} />}
     </svg>
   );
 }
@@ -102,7 +111,30 @@ function SchematicRoad() {
   );
 }
 
-function SchematicCampus({ venue }: Readonly<VenueLocationProps>) {
+/** The sign of the campus on /showcase: the event name over the venue, and the road under the pin. */
+function ClassicCampusSign({ venue }: Readonly<{ venue: EventVenue }>) {
+  return (
+    <>
+      <rect x={262} y={142} width={100} height={70} fill="var(--accent)" />
+      <text
+        x={274}
+        y={178}
+        fontSize={24}
+        fontWeight={900}
+        fill="var(--background)"
+        style={{ fontFamily: WIDE, fontVariationSettings: "'wdth' 125" }}
+      >
+        {siteConfig.name}
+      </text>
+      <SchematicLabel x={274} y={200} size={10} fill="var(--background)" text={venue.shortName} />
+      <line x1={300} y1={212} x2={300} y2={248} stroke="var(--accent)" strokeWidth={2} />
+      <SchematicLabel x={56} y={282} size={11} fill="var(--accent)" text={venue.landmark} />
+    </>
+  );
+}
+
+/** The sign of the campus on the landing: only the short name of the venue. */
+function LandingCampusSign({ venue }: Readonly<{ venue: EventVenue }>) {
   return (
     <>
       <rect x={232} y={168} width={136} height={44} fill="var(--accent)" />
