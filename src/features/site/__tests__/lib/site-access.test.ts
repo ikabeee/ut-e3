@@ -30,7 +30,6 @@ describe("decideSiteAccess in landing mode", () => {
     "/support/recovery",
     "/raffle/live",
     "/tournament",
-    "/showcase",
     "/offline",
   ])("sends the page %s back to the landing", (pathname) => {
     expect(decideSiteAccess("landing", { method: "GET", pathname })).toBe("redirectHome");

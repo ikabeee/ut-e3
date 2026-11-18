@@ -6,7 +6,7 @@ La rifa final del evento (SRS v2, RF-49 a RF-56 y RF-25). Vive en la feature `sr
 
 | Ruta | Quién | Qué hace |
 | --- | --- | --- |
-| `/raffle/live` | Público (se proyecta en el escenario) | Tómbola de solo visualización: anuncia la hora de inicio, gira unos 3 s cuando sale un boleto y luego muestra el número, el gamertag y si está pendiente, ganó o se descartó. A la derecha, los ganadores confirmados. Botón "Pantalla completa". Se actualiza sola cada 2 s (`GET /api/raffle/live`). |
+| `/raffle/live` | Público (se proyecta en el escenario) | Tómbola de solo visualización: anuncia la hora de inicio, gira unos 3 s cuando sale un boleto y luego muestra el número, el gamertag y si está pendiente, ganó o se descartó. A la derecha, los ganadores confirmados. Se ve bajo la barra del sitio, con un enlace "Volver a los ganadores". Se actualiza sola cada 2 s (`GET /api/raffle/live`). |
 | `/raffle` | Público | Ganadores confirmados con gamertag, premio (o "Premio por entregar") y hora (RF-56). |
 | `/admin/raffle` | `raffle_admin` (entra por `/login`) | Estado, "Girar", modal "Ganador" / "Descartado", ganadores con "Registrar premio" y "Cerrar la rifa". Se actualiza cada 2 s (`GET /api/raffle`, 401 sin sesión de rifa). |
 | `/passport` | Visitante | "Ganaste" con su número de boleto y, cuando se registra, el premio (RF-25). |

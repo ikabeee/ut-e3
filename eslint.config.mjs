@@ -19,7 +19,6 @@ const FEATURE_DEPENDENCIES = {
   visitors: ["accounts", "games"],
   moderation: ["accounts", "games", "visitors"],
   admin: ["accounts", "raffle", "stands", "support", "tournament"],
-  showcase: ["landing"],
   site: ["accounts", "floor-plan", "games", "landing", "raffle", "sponsors", "tournament", "visitors"],
 };
 

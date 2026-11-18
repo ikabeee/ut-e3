@@ -91,7 +91,6 @@ src/
 │   ├── raffle/               # Rifa: tómbola en vivo (/raffle/live), ganadores (/raffle) y panel (/admin/raffle)
 │   ├── pwa/                  # PWA: manifest, service worker (public/sw.js), /offline, indicador de conexión e instalación
 │   ├── stands/               # Stands: kiosko (/stand/kiosk), equipo (/stand/team) y alta de stands en /admin
-│   ├── showcase/             # Vitrina del evento (/showcase, sin enlace en el menú): hero LED, video y las secciones de la portada (juegos, invitadas, agenda, patrocinadores, croquis y sede)
 │   ├── support/              # Mesa de recuperación (/support/recovery): atención recupera pasaportes (RF-69, RF-70)
 │   └── tournament/           # Torneo de KOF (/admin/kof): bracket, permisos por mesa y bitácora
 └── shared/                   # Código transversal SIN reglas de negocio

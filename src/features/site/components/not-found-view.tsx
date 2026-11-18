@@ -78,7 +78,7 @@ function ExitCard({ exit }: Readonly<{ exit: NotFoundExit }>) {
   return (
     <Link
       href={exit.href}
-      className="group flex min-h-11 flex-col gap-1 border border-border bg-surface p-4 no-underline hover:border-accent focus-visible:border-accent"
+      className="group flex min-h-11 flex-col gap-1 border border-border bg-surface p-4 no-underline hover:border-accent focus-visible:border-accent active:bg-background"
     >
       <span className="flex items-center justify-between gap-3 type-wide text-sm text-foreground">
         {exit.label}

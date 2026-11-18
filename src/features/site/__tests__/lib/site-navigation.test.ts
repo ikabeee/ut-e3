@@ -6,8 +6,8 @@ describe("isSiteNavShown", () => {
     "/games",
     "/games/abby-s-tower",
     "/sponsors",
-    "/showcase",
     "/raffle",
+    "/raffle/live",
     "/tournament",
     "/floor-plan",
     "/passport",
@@ -28,14 +28,13 @@ describe("isSiteNavShown", () => {
     "/support/recovery",
     "/login",
     "/activate/invitation-token",
-    "/raffle/live",
-  ])("hides the navbar on the staff or projection screen %s", (pathname) => {
+  ])("hides the navbar on the staff screen %s", (pathname) => {
     expect(isSiteNavShown(pathname)).toBe(false);
   });
 
   it("hides a whole area, not every path that starts with the same letters", () => {
     expect(isSiteNavShown("/standings")).toBe(true);
-    expect(isSiteNavShown("/raffle/livestream")).toBe(true);
+    expect(isSiteNavShown("/admin2")).toBe(true);
   });
 });
 
@@ -50,7 +49,7 @@ describe("getSiteNavigation", () => {
       { href: "/floor-plan", label: "Croquis" },
       { href: "/sponsors", label: "Patrocinadores" },
       { href: "/raffle", label: "Rifa" },
-      { href: "/tournament", label: "Torneo" },
+      { href: "/tournament", label: "Tabla de posiciones" },
     ]);
     expect(navigation.cta).toEqual({ href: "/passport", label: "Mi pasaporte" });
   });

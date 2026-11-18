@@ -8,7 +8,7 @@ export const SITE_COPY = {
       floorPlan: "Croquis",
       sponsors: "Patrocinadores",
       raffle: "Rifa",
-      tournament: "Torneo",
+      tournament: "Tabla de posiciones",
     },
     passport: "Mi pasaporte",
     search: {
