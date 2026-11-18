@@ -13,19 +13,12 @@ interface ActivateFormProps {
   /** The token of the link; it goes back to the server in a hidden field, where it is checked. */
   token: string;
   action: (previous: ActivationState | null, form: FormData) => Promise<ActivationState>;
-  /** The labels and buttons; the activation of an account by default, the reset of a password otherwise. */
-  copy?: PasswordFormCopy;
+  /** Which labels and buttons to use. A key, not the copy: functions cannot cross from the server to a client. */
+  variant?: "activate" | "resetPassword";
 }
 
-interface PasswordFormCopy {
-  passwordLabel: string;
-  confirmationLabel: string;
-  hint: (minimum: number) => string;
-  submit: string;
-  pending: string;
-}
-
-export function ActivateForm({ token, action, copy = ACCOUNTS_COPY.activate }: Readonly<ActivateFormProps>) {
+export function ActivateForm({ token, action, variant = "activate" }: Readonly<ActivateFormProps>) {
+  const copy = ACCOUNTS_COPY[variant];
   const [state, formAction, isPending] = useActionState(action, null);
   const handleSubmit = useSubmitKeepingValues(formAction);
 

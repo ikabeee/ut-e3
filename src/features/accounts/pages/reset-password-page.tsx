@@ -33,12 +33,16 @@ async function ResetGate({ params }: Readonly<Pick<PageProps<"/reset-password/[t
   const { token } = await params;
   const state = await resolveState(token);
 
+  return <ResetView state={state} token={token} />;
+}
+
+export function ResetView({ state, token }: Readonly<{ state: ResetLinkState; token: string }>) {
   return (
     <CenteredPage title={COPY.title}>
       {state.status === "valid" ? (
         <>
           <p className="max-w-sm text-center text-muted">{COPY.greeting(state.name)}</p>
-          <ActivateForm token={token} action={resetPasswordAction} copy={COPY} />
+          <ActivateForm token={token} action={resetPasswordAction} variant="resetPassword" />
         </>
       ) : (
         <UnusableLink status={state.status} />
