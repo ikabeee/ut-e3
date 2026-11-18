@@ -14,6 +14,7 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- Los correos se envían saludando al servidor SMTP con un dominio real (`SMTP_EHLO_NAME` o el de `NEXT_PUBLIC_SITE_URL`), no con el nombre del contenedor; el relay de Google Workspace los rechazaba con `421 4.7.0`.
 - El seed crea la cuenta sysadmin de `SYSADMIN_EMAIL` aunque ya exista otro sysadmin; antes la variable se ignoraba en silencio después del primer despliegue.
 
 ### Cambiado

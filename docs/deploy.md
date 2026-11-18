@@ -100,6 +100,7 @@ Todas viven en `.env` (nunca se versiona). `.env.production.example` las lista c
 | `APP_PORT` | No | Puerto en `127.0.0.1` para el proxy. Por defecto `3000`. |
 | `APP_TAG` | No | Etiqueta de la imagen. Por defecto `latest`. |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | No | Ver "Correo". |
+| `SMTP_EHLO_NAME` | No | Nombre con el que el servidor saluda al SMTP (EHLO), por ejemplo `pixelandcode.tu-dominio.mx`. Sin él se usa el dominio de `NEXT_PUBLIC_SITE_URL`. El relay de Google Workspace (`smtp-relay.gmail.com`) cierra la conexión con `421 4.7.0` si el saludo no es un dominio real. |
 | `EMERGENCY_MAIL` | No | Dirección que recibe los avisos de emergencia de producción. Sin ella no se envía ninguno; ver "Avisos de emergencia". |
 
 El contenedor se niega a arrancar si faltan `NEXT_PUBLIC_SITE_URL` o `PIN_ENCRYPTION_KEY` y lo dice en el log.
