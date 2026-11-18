@@ -588,7 +588,7 @@ function timestamp(minute) {
 async function signIn(page, { email, password }) {
   await page.goto(`${BASE_URL}/login`, { waitUntil: "networkidle" });
   await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña").fill(password);
+  await page.getByLabel("Contraseña", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Entrar" }).click();
   await submitLoginCode(page, email);
 }

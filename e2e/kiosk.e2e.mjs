@@ -227,7 +227,7 @@ async function checkKioskNeedsLogin(page) {
 
 async function loginAsStaff(page) {
   await page.getByLabel("Correo").fill(STAFF_EMAIL);
-  await page.getByLabel("Contraseña").fill(STAFF_PASSWORD);
+  await page.getByLabel("Contraseña", { exact: true }).fill(STAFF_PASSWORD);
   await page.getByRole("button", { name: "Entrar" }).click();
   await submitLoginCode(page, STAFF_EMAIL);
   await page.waitForURL(/\/stand\/kiosk$/, { timeout: UI_TIMEOUT_MS });

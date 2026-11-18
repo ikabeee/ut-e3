@@ -259,7 +259,7 @@ async function registerVisitor(page) {
 async function loginAs(page, { email, password }, landing) {
   await page.goto(`${BASE_URL}/login`, { waitUntil: "networkidle" });
   await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña").fill(password);
+  await page.getByLabel("Contraseña", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Entrar" }).click();
   await submitLoginCode(page, email);
   await page.waitForURL(landing, { timeout: UI_TIMEOUT_MS });
