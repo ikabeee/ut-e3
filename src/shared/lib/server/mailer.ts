@@ -2,6 +2,7 @@ import "server-only";
 
 import { createTransport } from "nodemailer";
 import type { SendEmail } from "@shared/lib/server/email-outbox";
+import { renderEmailHtml } from "@shared/lib/server/email-template";
 
 interface SmtpConfig {
   host: string;
@@ -28,12 +29,14 @@ export function createSmtpSender(env: EnvironmentSource = process.env): SendEmai
     },
   });
 
+  // Every email leaves with the template of the site (S1) and its plain text as the alternative part.
   return async function sendEmail({ to, subject, text }) {
     await transporter.sendMail({
       from: config.from,
       to,
       subject,
       text,
+      html: renderEmailHtml({ subject, text }),
     });
   };
 }
