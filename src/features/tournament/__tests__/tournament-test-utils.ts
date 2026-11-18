@@ -1,3 +1,5 @@
+import { toast } from "@heroui/react";
+import { act } from "@testing-library/react";
 import { generateBracket } from "@features/tournament/lib/bracket-generation";
 import { applyCommand } from "@features/tournament/lib/tournament-engine";
 import type { Match, Player, SlotIndex, Tournament } from "@features/tournament/lib/types";
@@ -62,4 +64,13 @@ export function createSeededRandomInt(seed: number) {
 
 export function range(first: number, last: number): number[] {
   return Array.from({ length: last - first + 1 }, (_, index) => first + index);
+}
+
+// The toast queue is global and a closed toast stays mounted for its exit animation (300 ms), so every test that shows
+// one empties the queue and waits for the animation before the next test starts.
+export async function clearToasts(): Promise<void> {
+  await act(async () => {
+    toast.clear();
+    await new Promise((resolve) => setTimeout(resolve, 350));
+  });
 }

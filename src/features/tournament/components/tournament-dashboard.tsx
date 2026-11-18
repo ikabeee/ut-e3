@@ -2,6 +2,7 @@
 
 import type { TournamentAction } from "@features/tournament/components/command-button";
 import { BracketSection } from "@features/tournament/components/bracket-section";
+import { ConnectionToast } from "@features/tournament/components/connection-toast";
 import { TournamentLog } from "@features/tournament/components/tournament-log";
 import { useTournament, type SnapshotLoader } from "@features/tournament/hooks/use-tournament";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
@@ -39,11 +40,7 @@ export function TournamentDashboard({ initial, viewer, action, load }: Readonly<
 
   return (
     <div className="grid gap-8">
-      {hasConnectionError && (
-        <p role="status" className="border border-danger p-3 text-sm text-danger">
-          {COPY.connectionLost}
-        </p>
-      )}
+      <ConnectionToast isLost={hasConnectionError} />
       {tournament ? (
         <BracketBoard tournament={tournament} viewer={viewer} action={action} onApplied={refresh} />
       ) : (
