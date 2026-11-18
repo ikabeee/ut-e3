@@ -1,6 +1,7 @@
 "use server";
 
 import { refresh } from "next/cache";
+import { after } from "next/server";
 import { requireKofAccount } from "@features/accounts/lib/server/current-account";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import { TournamentRuleError } from "@features/tournament/lib/tournament-rule-error";
@@ -15,6 +16,7 @@ import { resetTournament, type GenerateResult } from "@features/tournament/lib/s
 import { RESET_CONFIRMATION } from "@features/tournament/lib/tournament-rules";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
 import { readFormText } from "@shared/lib/form-data";
+import { deliverQueuedEmail } from "@shared/lib/server/email-delivery";
 
 export type EntriesActionState = { status: "done"; message: string } | { status: "error"; message: string };
 
@@ -38,7 +40,11 @@ export async function addEntryAction(
 
   if (!gamertag) return failure(COPY.errors.gamertagRequired);
 
-  return finish(describeAdd(await addEntry(actor.id, gamertag, new Date())));
+  const result = await addEntry(actor.id, gamertag, new Date());
+
+  if (result.status === "added") after(() => deliverQueuedEmail(result.emailId));
+
+  return finish(describeAdd(result));
 }
 
 export async function checkInEntryAction(

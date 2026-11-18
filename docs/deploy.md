@@ -96,13 +96,16 @@ Todas viven en `.env` (nunca se versiona). `.env.production.example` las lista c
 | `APP_PORT` | No | Puerto en `127.0.0.1` para el proxy. Por defecto `3000`. |
 | `APP_TAG` | No | Etiqueta de la imagen. Por defecto `latest`. |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | No | Ver "Correo". |
+| `EMERGENCY_MAIL` | No | Dirección que recibe los avisos de emergencia de producción. Sin ella no se envía ninguno; ver "Avisos de emergencia". |
 
 El contenedor se niega a arrancar si faltan `NEXT_PUBLIC_SITE_URL` o `PIN_ENCRYPTION_KEY` y lo dice en el log.
 
 ### Correo (SMTP opcional)
 
-Todos los correos (invitaciones de cuenta, el pasaporte de cada registro, la recuperación por correo y el aviso al
-ganador de la rifa) se guardan primero en la tabla `email_outbox` de la base (RNF-03).
+Todos los correos (invitaciones de cuenta, el pasaporte de cada registro, la recuperación por correo, la inscripción al
+torneo de KOF, el aviso al ganador de la rifa y los avisos de emergencia) se guardan primero en la tabla `email_outbox`
+de la base (RNF-03). Salen con la plantilla del sitio (fondo negro, acento azul, sin esquinas redondeadas;
+`src/shared/lib/server/email-template.ts`) y su texto plano como alternativa.
 
 - **Con `SMTP_HOST`** (y `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` y `SMTP_FROM`, las cinco son obligatorias juntas; si falta
   alguna, el servidor no arranca y el log dice cuál. El remitente es `SMTP_FROM`, por ejemplo
@@ -123,6 +126,21 @@ for (const row of db.prepare('SELECT to_address, text FROM email_outbox WHERE se
 ```
 
 El enlace de invitación vale 72 horas y solo se guarda su hash (RNF-09): este comando es la única forma de verlo.
+
+### Avisos de emergencia
+
+Con `EMERGENCY_MAIL=guardia@tu-dominio.mx` en `.env`, el servidor manda un correo a esa dirección cuando:
+
+- Next.js atrapa un error en una petición (página, Route Handler, Server Action o proxy; `onRequestError` de
+  `src/instrumentation.ts`). El correo nombra el archivo de la ruta (`/activate/[token]`), no la URL visitada, para que
+  un token nunca viaje en el aviso.
+- La CPU o la memoria pasan de 85 % durante 2 minutos y el bracket público se cierra solo, o falla la vigilancia de
+  carga.
+- `GET /api/health` responde 503 porque al volumen de la base le quedan menos de 64 MB.
+
+El mismo aviso no se repite durante 15 minutos y salen como máximo 10 avisos por hora, así que una avalancha de errores
+no llena el buzón. Los avisos pasan por `email_outbox`; si la base misma falla, se intenta el envío directo por SMTP. Sin
+`SMTP_HOST` se quedan en la bandeja como los demás correos. Sin `EMERGENCY_MAIL` no se envía ninguno.
 
 ## Contenido inicial
 

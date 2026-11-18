@@ -1,3 +1,4 @@
+import type { Instrumentation } from "next";
 import type { SendEmail } from "@shared/lib/server/email-outbox";
 
 type DeliverPendingEmails = (send: SendEmail) => Promise<number>;
@@ -30,6 +31,15 @@ export async function register(): Promise<void> {
 
   timer.unref();
 }
+
+// An error that Next.js caught in a request becomes a production emergency email (S20), when EMERGENCY_MAIL is set.
+export const onRequestError: Instrumentation.onRequestError = async (error, request, context) => {
+  if (process.env.NEXT_RUNTIME !== "nodejs") return;
+
+  const { describeRequestError, sendEmergencyAlert } = await import("@shared/lib/server/emergency-alert");
+
+  await sendEmergencyAlert(describeRequestError(error, request, context));
+};
 
 async function processOutbox(deliverPendingEmails: DeliverPendingEmails, send: SendEmail): Promise<void> {
   try {
