@@ -3,13 +3,14 @@ import { Suspense, type ReactNode } from "react";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
 import type { EventSettings } from "@features/event-settings/lib/types";
 import { FloorPlan } from "@features/floor-plan/components/floor-plan";
-import { FLOOR_PLAN_PATH, getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
+import { getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
 import { toFloorPlanStand } from "@features/floor-plan/lib/floor-plan-stands";
 import { GameCatalog } from "@features/games/components/game-catalog";
 import { getGames } from "@features/games/lib/server/games-queries";
 import type { Game } from "@features/games/lib/types";
 import { ClosingBand } from "@features/landing/components/closing-band";
 import { EventActs } from "@features/landing/components/event-acts";
+import { EventFlyers } from "@features/landing/components/event-flyers";
 import { MarketplaceCard } from "@features/landing/components/marketplace-card";
 import { SiteFooter } from "@features/landing/components/site-footer";
 import { SpecialGuests } from "@features/landing/components/special-guests";
@@ -19,6 +20,7 @@ import { buildEventCalendarUrl } from "@features/landing/lib/calendar-link";
 import { buildEventStructuredData } from "@features/landing/lib/event-structured-data";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
 import { HOME_PATH } from "@features/landing/lib/landing-links";
+import { buildFooterSitemap } from "@features/landing/pages/landing-sitemap";
 import { getCurrentMarketplaceRegistration } from "@features/landing/lib/server/marketplace-queries";
 import { SPECIAL_GUESTS } from "@features/landing/lib/special-guests";
 import { EVENT_VENUE } from "@features/landing/lib/venue";
@@ -83,8 +85,6 @@ export function LandingView({
   marketplace,
   isLandingOnly = false,
 }: Readonly<LandingViewProps>) {
-  const eventDate = formatEventDate(settings.eventStartsAt, "numeric");
-
   return (
     <>
       <main>
@@ -99,17 +99,18 @@ export function LandingView({
           marketplace={marketplace}
           isLandingOnly={isLandingOnly}
         />
+        <EventFlyers />
         <SponsorTickets sponsors={sponsors} />
         <EventSchedule
           heading={formatEventDate(settings.eventStartsAt, "2-digit")}
           items={scheduleItems}
           zoneLink={getZoneLink}
         />
-        <FloorPlan stands={games.map(toFloorPlanStand)} pageHref={isLandingOnly ? undefined : FLOOR_PLAN_PATH} />
+        <FloorPlan stands={games.map(toFloorPlanStand)} />
         <VenueLocation venue={EVENT_VENUE} />
-        <ClosingBand dateLabel={eventDate} />
+        <ClosingBand />
       </main>
-      <SiteFooter />
+      <SiteFooter sitemap={buildFooterSitemap(isLandingOnly)} />
       <JsonLd data={buildLandingStructuredData(settings)} />
     </>
   );

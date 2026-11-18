@@ -1,12 +1,9 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { act, render, screen, within } from "@testing-library/react";
 import { VideoHero } from "@features/landing/components/video-hero";
 
 const CALENDAR_URL = "https://calendar.google.com/calendar/render?action=TEMPLATE";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-
-const PLAY_BUTTON_NAME = "Reproducir video";
 
 interface BrowserConditions {
   prefersSaveData?: boolean;
@@ -26,8 +23,6 @@ class IntersectionObserverMock {
 
 let play: jest.SpyInstance;
 
-let pause: jest.SpyInstance;
-
 beforeEach(() => {
   intersectionCallbacks = [];
   Object.defineProperty(window, "IntersectionObserver", {
@@ -36,7 +31,7 @@ beforeEach(() => {
     value: IntersectionObserverMock,
   });
   play = jest.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
-  pause = jest.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
+  jest.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
 });
 
 afterEach(() => {
@@ -147,25 +142,25 @@ describe("VideoHero", () => {
     expect(getVideo(container).querySelectorAll("source")).toHaveLength(0);
   });
 
-  it("toggles aria-pressed as the video plays and pauses from the button", async () => {
+  it("has no play or pause button over the video, with or without autoplay", () => {
     simulateBrowser({});
-    const user = userEvent.setup();
+    renderHero();
+
+    showLoop();
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/reproducir|pausar/i)).not.toBeInTheDocument();
+  });
+
+  it("keeps the poster, with no button to start it, when the user prefers reduced motion", () => {
+    simulateBrowser({ prefersReducedMotion: true });
     const { container } = renderHero();
-    const video = getVideo(container);
-    const button = screen.getByRole("button", { name: PLAY_BUTTON_NAME });
 
-    expect(button).toHaveAttribute("aria-pressed", "false");
+    showLoop();
 
-    await user.click(button);
-    expect(play).toHaveBeenCalledTimes(1);
-    fireEvent.play(video);
-    expect(screen.getByRole("button", { name: PLAY_BUTTON_NAME })).toHaveAttribute("aria-pressed", "true");
-
-    Object.defineProperty(video, "paused", { configurable: true, value: false });
-    await user.click(screen.getByRole("button", { name: PLAY_BUTTON_NAME }));
-    expect(pause).toHaveBeenCalled();
-    fireEvent.pause(video);
-    expect(screen.getByRole("button", { name: PLAY_BUTTON_NAME })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(play).not.toHaveBeenCalled();
+    expect(getVideo(container)).toHaveAttribute("poster", "/media/hero-loop-poster.jpg");
   });
 });
 

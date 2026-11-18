@@ -75,8 +75,8 @@ describe("SiteNav existing behavior (guards)", () => {
     expect(navbar().getByRole("link", { name: "Juegos" })).toHaveAttribute("aria-current", "page");
   });
 
-  it("still renders nothing on staff and projection screens", () => {
-    render(<SiteNav pathname="/raffle/live" />);
+  it("still renders nothing on staff screens", () => {
+    render(<SiteNav pathname="/admin/raffle" />);
 
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
     expect(backControl()).not.toBeInTheDocument();

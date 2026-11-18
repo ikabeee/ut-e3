@@ -7,7 +7,7 @@ import type { AccountRole, KofDesk } from "@features/accounts/lib/types";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { getSessionAccount, type SessionAccount } from "@shared/lib/server/session";
 
-const SYSADMIN_ROLE: AccountRole = "sysadmin";
+const SYSADMIN_ROLE = "sysadmin" satisfies AccountRole;
 
 // Every sysadmin page and Server Action calls this: proxy.ts only checks that a cookie exists.
 export async function requireSysadmin(): Promise<SessionAccount> {
@@ -26,7 +26,7 @@ export interface KofAccount extends SessionAccount {
   kofDesk: KofDesk | null;
 }
 
-// Every KOF page and Server Action calls this; the sysadmin has no tournament commands, only the KOF accounts do.
+// Every KOF Server Action calls this; the sysadmin has no tournament commands, only the KOF accounts do.
 export async function requireKofAccount(): Promise<KofAccount> {
   const account = await getKofAccount();
 
@@ -39,7 +39,37 @@ export async function requireKofAccount(): Promise<KofAccount> {
 
 // For Route Handlers, which answer 401 instead of redirecting.
 export async function getKofAccount(): Promise<KofAccount | null> {
+  return toKofAccount(await getSessionAccount());
+}
+
+/** Who may open /admin/kof: the KOF accounts operate it and the sysadmin only watches it (it has no desk). */
+export interface KofViewer extends SessionAccount {
+  role: KofAccount["role"] | "sysadmin";
+  kofDesk: KofDesk | null;
+}
+
+// The pages of the KOF section that only show data (S37): the admin panel links the sysadmin to /admin/kof, so it must
+// get in. Every Server Action keeps requireKofAccount, so the sysadmin still runs no tournament command.
+export async function requireKofViewer(): Promise<KofViewer> {
+  const viewer = await getKofViewer();
+
+  if (!viewer) {
+    redirect(LOGIN_PATH);
+  }
+
+  return viewer;
+}
+
+// For Route Handlers that only read, which answer 401 instead of redirecting.
+export async function getKofViewer(): Promise<KofViewer | null> {
   const account = await getSessionAccount();
+
+  if (account?.role === SYSADMIN_ROLE) return { ...account, role: SYSADMIN_ROLE, kofDesk: null };
+
+  return toKofAccount(account);
+}
+
+async function toKofAccount(account: SessionAccount | null): Promise<KofAccount | null> {
   const role = account ? toKofRole(account.role) : null;
 
   if (!account || !role) return null;

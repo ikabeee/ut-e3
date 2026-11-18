@@ -37,7 +37,7 @@ const SCHEDULE: ScheduleItem[] = [
   },
 ];
 
-const SECTION_ORDER = ["top", "games", "event", "guests", "sponsors", "schedule", "floor-plan", "venue"];
+const SECTION_ORDER = ["top", "games", "event", "guests", "flyers", "sponsors", "schedule", "floor-plan", "venue"];
 
 const games = makeGames(18);
 
@@ -72,7 +72,8 @@ describe("LandingView", () => {
   it("shows the venue in the Edificio B with its map region", () => {
     renderLanding();
 
-    expect(screen.getByText("Edificio B · Lobby y áreas externas")).toBeInTheDocument();
+    expect(screen.getByText("Edificio B")).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent("Lobby y áreas externas");
     expect(screen.getByLabelText("Mapa de la ubicación del evento: Edificio B, UT Cancún")).toBeInTheDocument();
   });
 
@@ -119,11 +120,39 @@ describe("LandingView", () => {
     expect(url.searchParams.get("dates")).toBe("20261120T170000Z/20261121T000000Z");
   });
 
-  it("shows the event date in the closing band and in the schedule heading", () => {
+  it("shows the event date in the schedule heading but not as a label with the venue", () => {
     renderLanding();
 
-    expect(screen.getAllByText(/20\.11\.2026/).length).toBeGreaterThan(0);
     expect(screen.getByRole("heading", { name: "20.11.26" })).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent("20.11.2026 · UT Cancún");
+  });
+
+  it("has no play or pause button over the hero video", () => {
+    renderLanding();
+
+    expect(screen.queryByRole("button", { name: /reproducir|pausar/i })).not.toBeInTheDocument();
+  });
+
+  it("shows both flyers in their own section", () => {
+    renderLanding();
+
+    const flyers = document.getElementById("flyers");
+
+    if (!flyers) throw new Error("The flyers section is missing");
+
+    expect(within(flyers).getAllByRole("img")).toHaveLength(2);
+  });
+
+  it("shows the site map in the footer without the staff access", () => {
+    renderLanding();
+
+    const footer = screen.getByRole("contentinfo");
+
+    expect(within(footer).getByRole("link", { name: "Catálogo de juegos" })).toHaveAttribute("href", "/games");
+    expect(
+      within(footer).queryByRole("link", { name: /Panel de administración|Acceso del staff/ }),
+    ).not.toBeInTheDocument();
+    expect(within(footer).queryByText("Staff")).not.toBeInTheDocument();
   });
 
   it("shows the KOF check-in and on-site signup ranges and the raffle times from the event settings", () => {
@@ -159,14 +188,14 @@ describe("LandingView", () => {
     expect(screen.getByRole("button", { name: "Stand ZA-S3, Juego 03" })).toBeInTheDocument();
   });
 
-  it("links under the map to the floor plan page", () => {
+  it("has no button to open the floor plan page under the map", () => {
     renderLanding();
 
     const section = document.getElementById("floor-plan");
 
     if (!section) throw new Error("The floor plan section is missing");
 
-    expect(within(section).getByRole("link", { name: /Abrir el croquis/ })).toHaveAttribute("href", "/floor-plan");
+    expect(within(section).queryByRole("link", { name: /Abrir el croquis/ })).not.toBeInTheDocument();
   });
 
   it("shows the sponsors as numbered raffle tickets", () => {
@@ -178,6 +207,14 @@ describe("LandingView", () => {
     expect(within(sponsors).getByText("Nº 001")).toBeInTheDocument();
     expect(within(sponsors).getByRole("img", { name: PIXEL_FORGE.name })).toBeInTheDocument();
     expect(within(sponsors).queryByRole("button", { name: "Patrocinador siguiente" })).not.toBeInTheDocument();
+  });
+
+  it("gives the titles of the landing sections the same size (S34)", () => {
+    renderLanding([PIXEL_FORGE]);
+
+    ["Invitadas especiales", "Carteles del evento", "Patrocinadores", "Croquis", "Ubicación"].forEach((name) => {
+      expect(screen.getByRole("heading", { level: 2, name })).toHaveClass("text-[clamp(24px,4.6vw,68px)]");
+    });
   });
 
   it("renders the marketplace slot inside the event section", () => {
@@ -218,6 +255,16 @@ describe("LandingView with only the landing published", () => {
     );
 
     expect(internalLinks).toEqual([]);
+  });
+
+  it("keeps the footer site map on anchors of the landing, with no link to the admin panel", () => {
+    renderLandingOnly();
+
+    const footer = screen.getByRole("contentinfo");
+    const hrefs = Array.from(footer.querySelectorAll("a"), (link) => link.getAttribute("href"));
+
+    expect(hrefs.filter((href) => href?.startsWith("#"))).toContain("#venue");
+    expect(within(footer).queryByRole("link", { name: /Panel de administración/ })).not.toBeInTheDocument();
   });
 
   it("keeps the games of the coverflow without a link to their page", () => {

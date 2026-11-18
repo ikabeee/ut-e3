@@ -67,7 +67,7 @@ function MenuLinks({ links, currentHref, onChoose }: Readonly<MenuLinksProps>) {
             href={link.href}
             aria-current={link.href === currentHref ? "page" : undefined}
             onClick={onChoose}
-            className="flex min-h-12 items-center no-underline aria-[current=page]:text-accent"
+            className="flex min-h-12 items-center no-underline transition-colors hover:text-accent focus-visible:text-accent active:opacity-70 aria-[current=page]:text-accent"
           >
             {link.label}
           </Link>

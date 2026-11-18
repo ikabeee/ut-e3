@@ -9,7 +9,7 @@ interface ZoneCopy {
 
 const HELP_CENTER: Omit<ZoneCopy, "title"> = {
   kind: "Atención",
-  description: "Dudas, uso de la PWA, rifa y orientación.",
+  description: "Dudas, uso del sitio, rifa y orientación.",
   subline: "Módulo de ayuda",
 };
 
@@ -70,7 +70,6 @@ export const FLOOR_PLAN_COPY = {
   mapLabel: "Croquis del Edificio B con zonas y stands",
   detailLabel: "Detalle del croquis",
   compactHint: "Pellizca o toca + para ver los juegos",
-  sectionLink: "Abrir el croquis",
   zones: ZONES,
   unassignedTitle: "Stand por asignar",
   unassignedDescription: "Este stand todavía no tiene un juego asignado.",
@@ -80,8 +79,6 @@ export const FLOOR_PLAN_COPY = {
     exteriorLabel: "EXTERIOR",
     standLabel: (code: string, title?: string) => (title ? `Stand ${code}, ${title}` : `Stand ${code}`),
   },
-  standKicker: (code: string, kind: string) => `Stand ${code} · ${kind}`,
-  unassignedKicker: (code: string) => `Stand ${code}`,
   blockLine: (blockLabel: string, number: number, size: number) => `${blockLabel} · stand ${number} de ${size}`,
   filters: {
     groupLabel: "Filtrar marcadores",
@@ -114,8 +111,6 @@ export const FLOOR_PLAN_COPY = {
     kicker: (siteName: string, building: string, shortName: string) => `${siteName} · ${building}, ${shortName}`,
     lead: (building: string) =>
       `Ubica cada stand, las actividades y los servicios del ${building}. Toca un marcador para ver el juego.`,
-    summary: (stands: number, blocks: number, activities: number) =>
-      `${stands} stands · ${blocks} bloques · ${activities} actividades`,
     description: (building: string) =>
       `Mapa del ${building} con los stands, las actividades y los servicios del evento.`,
   },

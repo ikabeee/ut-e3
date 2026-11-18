@@ -3,10 +3,12 @@
  */
 import {
   getKofAccount,
+  getKofViewer,
   getRaffleAdmin,
   requireAccountManager,
   requireStandAdmin,
   requireKofAccount,
+  requireKofViewer,
   requireRaffleAdmin,
   requireRecoveryAgent,
   requireSysadmin,
@@ -139,7 +141,7 @@ describe("requireKofAccount", () => {
     expect(await requireKofAccount()).toMatchObject({ role: "kof_staff", kofDesk: null });
   });
 
-  it.each(["sysadmin", "help_desk", "raffle_admin"])("sends a %s to /login", async (role) => {
+  it.each(["sysadmin", "help_desk", "raffle_admin", "stand_staff"])("sends a %s to /login", async (role) => {
     const account = await createAccount(role);
 
     await createSession(account.id);
@@ -280,3 +282,68 @@ function createAccount(role: string, kofDesk?: number) {
     },
   });
 }
+
+describe("requireKofViewer (S37)", () => {
+  it("lets a sysadmin in to see the KOF section, with no desk", async () => {
+    const account = await createAccount("sysadmin");
+
+    await createSession(account.id);
+
+    expect(await requireKofViewer()).toEqual({
+      id: account.id,
+      email: "cuenta@ut.mx",
+      name: "Cuenta",
+      role: "sysadmin",
+      kofDesk: null,
+    });
+  });
+
+  it("returns a KOF administrator, as requireKofAccount does", async () => {
+    const admin = await createAccount("kof_admin");
+
+    await createSession(admin.id);
+
+    expect(await requireKofViewer()).toMatchObject({ id: admin.id, role: "kof_admin", kofDesk: null });
+  });
+
+  it("returns a KOF staff member with its desk, as requireKofAccount does", async () => {
+    const staff = await createAccount("kof_staff", 2);
+
+    await createSession(staff.id);
+
+    expect(await requireKofViewer()).toMatchObject({ id: staff.id, role: "kof_staff", kofDesk: 2 });
+  });
+
+  it.each(["help_desk", "raffle_admin", "stand_admin", "stand_staff"])("sends a %s to /login", async (role) => {
+    await createSession((await createAccount(role)).id);
+
+    await expect(requireKofViewer()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+
+  it("sends a visitor without a session to /login", async () => {
+    await expect(requireKofViewer()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+
+  it("sends a disabled sysadmin to /login", async () => {
+    const account = await createAccount("sysadmin");
+
+    await createSession(account.id);
+    await getPrisma().account.update({ where: { id: account.id }, data: { status: "disabled" } });
+
+    await expect(requireKofViewer()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+
+  it("answers null in a Route Handler for a visitor, and the account for a sysadmin", async () => {
+    expect(await getKofViewer()).toBeNull();
+
+    await createSession((await createAccount("sysadmin")).id);
+
+    expect(await getKofViewer()).toMatchObject({ role: "sysadmin", kofDesk: null });
+  });
+
+  it("keeps requireKofAccount closed to the sysadmin: it has no tournament commands", async () => {
+    await createSession((await createAccount("sysadmin")).id);
+
+    await expect(requireKofAccount()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+});

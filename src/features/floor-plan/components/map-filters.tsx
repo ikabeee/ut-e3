@@ -52,6 +52,6 @@ function chipLabel(label: string, count: number): string {
 
 function chipClass(pressed: boolean): string {
   return pressed
-    ? "min-h-11 shrink-0 bg-foreground px-4 font-mono text-xs font-bold text-background uppercase"
-    : "min-h-11 shrink-0 border border-border px-4 font-mono text-xs text-muted uppercase";
+    ? "min-h-11 shrink-0 cursor-pointer bg-foreground px-4 font-mono text-xs font-bold text-background uppercase transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground active:opacity-80"
+    : "min-h-11 shrink-0 cursor-pointer border border-border px-4 font-mono text-xs text-muted uppercase transition-colors hover:border-accent hover:bg-accent hover:text-accent-foreground focus-visible:border-accent focus-visible:bg-accent focus-visible:text-accent-foreground active:opacity-80";
 }

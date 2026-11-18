@@ -397,8 +397,8 @@ async function checkNavbar(page) {
   const passport = siteNavbar(page).getByRole("link", { name: "Mi pasaporte", exact: true });
 
   check(
-    "G-01 the navbar lists Inicio, Juegos, Croquis, Patrocinadores, Rifa and Torneo",
-    labels.join(",") === "Inicio,Juegos,Croquis,Patrocinadores,Rifa,Torneo",
+    "G-01 the navbar lists Inicio, Juegos, Croquis, Patrocinadores, Rifa and Tabla de posiciones",
+    labels.join(",") === "Inicio,Juegos,Croquis,Patrocinadores,Rifa,Tabla de posiciones",
     labels.join(",") || "none",
   );
   check("G-01 Inicio goes to /", (await inicio.getAttribute("href")) === "/");

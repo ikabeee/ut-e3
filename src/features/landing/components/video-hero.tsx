@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, type ReactNode, type RefObject } from "react";
-import { ToggleButton } from "@heroui/react";
+import { useRef, type RefObject } from "react";
+import { HeroLoopSources } from "@features/landing/components/hero-loop-sources";
 import { LedWordmark } from "@features/landing/components/led-wordmark";
 import { useVideoPlayback } from "@features/landing/hooks/use-video-playback";
 import { HERO_LOOP } from "@features/landing/lib/hero-loop";
@@ -28,7 +28,7 @@ interface VideoHeroProps {
 
 export function VideoHero({ calendarUrl, registerHref }: Readonly<VideoHeroProps>) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { isPlaying, hasSource, togglePlayback } = useVideoPlayback(videoRef);
+  const { hasSource } = useVideoPlayback(videoRef);
 
   return (
     <header
@@ -38,9 +38,7 @@ export function VideoHero({ calendarUrl, registerHref }: Readonly<VideoHeroProps
     >
       <div className="page-wrap grid w-full items-center gap-[clamp(24px,4vw,56px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         <HeroContent calendarUrl={calendarUrl} registerHref={registerHref} />
-        <LoopPanel videoRef={videoRef} hasSource={hasSource}>
-          <PlaybackToggle isPlaying={isPlaying} onToggle={togglePlayback} />
-        </LoopPanel>
+        <LoopPanel videoRef={videoRef} hasSource={hasSource} />
       </div>
     </header>
   );
@@ -49,10 +47,9 @@ export function VideoHero({ calendarUrl, registerHref }: Readonly<VideoHeroProps
 interface LoopPanelProps {
   videoRef: RefObject<HTMLVideoElement | null>;
   hasSource: boolean;
-  children: ReactNode;
 }
 
-function LoopPanel({ videoRef, hasSource, children }: Readonly<LoopPanelProps>) {
+function LoopPanel({ videoRef, hasSource }: Readonly<LoopPanelProps>) {
   return (
     <div className="relative order-first aspect-968/648 w-full lg:order-0">
       <video
@@ -65,10 +62,8 @@ function LoopPanel({ videoRef, hasSource, children }: Readonly<LoopPanelProps>) 
         aria-hidden="true"
         className="absolute inset-0 size-full object-cover"
       >
-        {hasSource &&
-          HERO_LOOP.sources.map((source) => <source key={source.src} src={source.src} type={source.type} />)}
+        <HeroLoopSources hasSource={hasSource} />
       </video>
-      {children}
     </div>
   );
 }
@@ -136,41 +131,5 @@ function GlitchArrow() {
         {ARROW_GLYPH}
       </span>
     </span>
-  );
-}
-
-interface PlaybackToggleProps {
-  isPlaying: boolean;
-  onToggle: () => void;
-}
-
-function PlaybackToggle({ isPlaying, onToggle }: Readonly<PlaybackToggleProps>) {
-  return (
-    <ToggleButton
-      isSelected={isPlaying}
-      onChange={onToggle}
-      aria-label={LANDING_COPY.hero.playVideo}
-      className="toggle-button--overlay group absolute right-4 bottom-4 size-11"
-    >
-      <PlaybackIcon isPlaying={isPlaying} />
-    </ToggleButton>
-  );
-}
-
-function PlaybackIcon({ isPlaying }: Readonly<{ isPlaying: boolean }>) {
-  if (isPlaying) {
-    return (
-      <span
-        aria-hidden="true"
-        className="block h-3 w-2.5 border-x-[3px] border-foreground group-hover:border-background"
-      />
-    );
-  }
-
-  return (
-    <span
-      aria-hidden="true"
-      className="block size-0 border-y-[7px] border-l-11 border-y-transparent border-l-foreground group-hover:border-l-background"
-    />
   );
 }

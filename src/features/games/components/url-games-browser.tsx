@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, type ReactNode } from "react";
+import { Suspense } from "react";
 import { GamesBrowser } from "@features/games/components/games-browser";
 import { useGenreSearchParam } from "@features/games/hooks/use-genre-search-param";
 import { useKeywordSearchParam } from "@features/games/hooks/use-keyword-search-param";
@@ -8,12 +8,12 @@ import type { Game } from "@features/games/lib/types";
 
 interface UrlGamesBrowserProps {
   games: Game[];
-  hero?: ReactNode;
+  withFeatured?: boolean;
 }
 
 // useSearchParams has no value while prerendering, so the whole catalog is prerendered unfiltered and the genre and
 // the search of the URL apply on hydration (use-search-params.md "Prerendering").
-export function UrlGamesBrowser({ games, hero }: Readonly<UrlGamesBrowserProps>) {
+export function UrlGamesBrowser({ games, withFeatured }: Readonly<UrlGamesBrowserProps>) {
   return (
     <Suspense
       fallback={
@@ -24,16 +24,16 @@ export function UrlGamesBrowser({ games, hero }: Readonly<UrlGamesBrowserProps>)
           onSelectGenre={ignore}
           onClearKeyword={ignore}
           onShowAll={ignore}
-          hero={hero}
+          withFeatured={withFeatured}
         />
       }
     >
-      <GamesBrowserWithUrlFilters games={games} hero={hero} />
+      <GamesBrowserWithUrlFilters games={games} withFeatured={withFeatured} />
     </Suspense>
   );
 }
 
-function GamesBrowserWithUrlFilters({ games, hero }: Readonly<UrlGamesBrowserProps>) {
+function GamesBrowserWithUrlFilters({ games, withFeatured }: Readonly<UrlGamesBrowserProps>) {
   const [genreSlug, setGenreSlug] = useGenreSearchParam();
   const [keyword, clearKeyword] = useKeywordSearchParam();
 
@@ -50,7 +50,7 @@ function GamesBrowserWithUrlFilters({ games, hero }: Readonly<UrlGamesBrowserPro
       onSelectGenre={setGenreSlug}
       onClearKeyword={clearKeyword}
       onShowAll={showAll}
-      hero={hero}
+      withFeatured={withFeatured}
     />
   );
 }

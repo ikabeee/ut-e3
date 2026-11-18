@@ -85,6 +85,50 @@ describe("GamesView", () => {
   });
 });
 
+function carouselThumbnails() {
+  const carousel = within(screen.getByRole("region", { name: "Juegos del showcase" }));
+
+  return carousel.getAllByRole("button", { name: /^Juego \d+$/ }).map((button) => button.getAttribute("aria-label"));
+}
+
+function genreTiles() {
+  const shelves = within(screen.getByRole("region", { name: "Géneros" }));
+
+  return shelves.getAllByRole("button", { name: /juegos?$/ }).map((tile) => tile.textContent);
+}
+
+describe("GamesView with q (S39)", () => {
+  it("shows only the matching games in the carousel, the covers and the genre shelves", () => {
+    renderView("?q=accion");
+
+    expect(carouselThumbnails()).toEqual(["Juego 01", "Juego 04"]);
+    expect(gridNames()).toEqual(["Juego 01", "Juego 04"]);
+    expect(genreTiles()).toEqual([expect.stringMatching(/Acción.*2 juegos/)]);
+  });
+
+  it("counts a genre by its matching games only", () => {
+    renderView("?q=juego 02");
+
+    expect(carouselThumbnails()).toEqual(["Juego 02"]);
+    expect(genreTiles()).toEqual([expect.stringMatching(/Puzle.*1 juego$/)]);
+  });
+
+  it("shows the empty state with no carousel and no genre shelves when nothing matches", () => {
+    renderView("?q=zzz");
+
+    expect(screen.getByText("Ningún juego coincide con tu búsqueda.")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Juegos del showcase" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Géneros" })).not.toBeInTheDocument();
+  });
+
+  it("shows the whole catalog in the carousel and the shelves without q", () => {
+    renderView();
+
+    expect(carouselThumbnails()).toHaveLength(6);
+    expect(genreTiles()).toHaveLength(3);
+  });
+});
+
 describe("gamesPageMetadata", () => {
   it("has its own title, description and canonical URL", () => {
     expect(gamesPageMetadata.title).toBe("Catálogo de juegos");

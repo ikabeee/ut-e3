@@ -52,9 +52,10 @@ export function TournamentDashboard({ initial, viewer, action, load }: Readonly<
 
 function BracketBoard({ tournament, viewer, action, onApplied }: Readonly<BracketBoardProps>) {
   const isAdmin = viewer.role === "kof_admin";
-  const sections = getSections(tournament, { isAdmin, desk: viewer.desk });
+  // The sysadmin watches every area, like the administrator, but captures nothing and has no log (S37).
+  const sections = getSections(tournament, { isAdmin: viewer.role !== "kof_staff", desk: viewer.desk });
 
-  if (!isAdmin && viewer.desk === null) return <p className="type-mono text-muted">{COPY.noDesk}</p>;
+  if (viewer.role === "kof_staff" && viewer.desk === null) return <p className="type-mono text-muted">{COPY.noDesk}</p>;
 
   return (
     <>

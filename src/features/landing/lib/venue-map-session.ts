@@ -10,9 +10,8 @@ import {
 export interface VenueMapLabels {
   zoomIn: string;
   zoomOut: string;
-  /** The two lines of the pin: the event name and the venue. */
-  pinName: string;
-  pinPlace: string;
+  /** The text of the pin: the short name of the venue. */
+  pinLabel: string;
 }
 
 export interface TileCounts {
@@ -113,12 +112,11 @@ function addVenuePin(leaflet: typeof Leaflet, map: Leaflet.Map, { venue, labels 
     .addTo(map);
 }
 
-function buildPinElement({ pinName, pinPlace }: VenueMapLabels): HTMLElement {
+function buildPinElement({ pinLabel }: VenueMapLabels): HTMLElement {
   const pin = document.createElement("div");
 
   const parts = [
-    ["venue-pin__name", pinName],
-    ["venue-pin__place", pinPlace],
+    ["venue-pin__label", pinLabel],
     ["venue-pin__line", ""],
   ];
 

@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { Button } from "@heroui/react";
+import { FeaturedGamesCarousel } from "@features/games/components/featured-games-carousel";
 import { GameGrid } from "@features/games/components/game-grid";
 import { GamesEmptyState } from "@features/games/components/games-empty-state";
 import { GenreRail } from "@features/games/components/genre-rail";
@@ -20,8 +20,8 @@ interface GamesBrowserProps {
   onClearKeyword: () => void;
   /** Drops the genre and the search together. */
   onShowAll: () => void;
-  /** Rendered first, so the featured games open the page on a phone. */
-  hero?: ReactNode;
+  /** Opens the page with the featured games carousel, so they are the first thing on a phone. */
+  withFeatured?: boolean;
 }
 
 export function GamesBrowser({
@@ -31,11 +31,16 @@ export function GamesBrowser({
   onSelectGenre,
   onClearKeyword,
   onShowAll,
-  hero,
+  withFeatured = false,
 }: Readonly<GamesBrowserProps>) {
   const genre = findGenre(games, selectedGenreSlug);
   const searchText = keyword.trim();
-  const visibleGames = filterGames(games, { genreSlug: genre?.slug ?? null, keyword: searchText });
+
+  // The carousel and the genre shelves follow the search; the genre only narrows the covers.
+  const searchedGames = filterGames(games, { genreSlug: null, keyword: searchText });
+
+  const visibleGames =
+    genre === null ? searchedGames : filterGames(searchedGames, { genreSlug: genre.slug, keyword: "" });
 
   function selectGenre(genreSlug: string | null) {
     onSelectGenre(genreSlug === null ? null : toggleGenre(genre?.slug ?? null, genreSlug));
@@ -45,13 +50,15 @@ export function GamesBrowser({
     <>
       <h1 className="sr-only">{GAMES_COPY.catalog.pageTitle}</h1>
       {searchText === "" ? null : <SearchNote searchText={searchText} onClear={onClearKeyword} />}
-      {hero}
+      {withFeatured ? <FeaturedGamesCarousel key={searchText} games={searchedGames} /> : null}
       <div className="page-wrap pt-[clamp(40px,6vw,72px)] pb-[clamp(56px,8vw,112px)]">
-        <GenreRail
-          genres={summarizeGenres(games)}
-          selectedGenreSlug={genre?.slug ?? null}
-          onSelectGenre={selectGenre}
-        />
+        {searchedGames.length > 0 ? (
+          <GenreRail
+            genres={summarizeGenres(searchedGames)}
+            selectedGenreSlug={genre?.slug ?? null}
+            onSelectGenre={selectGenre}
+          />
+        ) : null}
         <section aria-label={GAMES_COPY.catalog.allGames} className="mt-[clamp(40px,6vw,72px)]">
           {visibleGames.length > 0 ? <GameGrid games={visibleGames} /> : <GamesEmptyState onReset={onShowAll} />}
         </section>
