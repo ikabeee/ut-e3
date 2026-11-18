@@ -42,6 +42,8 @@ export async function runE2e({ name, port, mode = "dev", seeds = [], siteUrl, en
   prepareApp({ mode, seeds, appEnv });
 
   const server = startServer({ mode, port, appEnv, logFile: path.join(workdir, "server.log") });
+  setLoginDatabase(databaseFile);
+
   const context = { baseUrl, databaseFile, screenshots, check: createCheck(results) };
   let browser;
 
@@ -73,6 +75,44 @@ export async function signIn(page, { baseUrl, email, password }) {
   await page.getByLabel("Correo").fill(email);
   await page.getByLabel("Contraseña").fill(password);
   await page.getByRole("button", { name: "Entrar" }).click();
+  await submitLoginCode(page, email);
+}
+
+let loginDatabaseFile = "";
+
+/** Tells `submitLoginCode` which database holds the emails of the app under test. */
+export function setLoginDatabase(databaseFile) {
+  loginDatabaseFile = databaseFile;
+}
+
+/**
+ * The second step of the staff sign-in: the 6-digit code goes by email and is stored hashed, so the script reads it from
+ * the body of the newest code email in email_outbox (the outbox keeps it because the SMTP port of the scripts is closed).
+ */
+export async function submitLoginCode(page, email) {
+  await page.waitForURL(/\/login\/verify$/, { timeout: UI_TIMEOUT_MS });
+  await page.getByLabel("Código de 6 dígitos").fill(readLoginCode(email));
+  await page.getByRole("button", { name: "Verificar" }).click();
+}
+
+function readLoginCode(email) {
+  const database = new DatabaseSync(loginDatabaseFile, { readOnly: true });
+
+  try {
+    const row = database
+      .prepare(
+        "SELECT text FROM email_outbox WHERE to_address = ? AND subject LIKE 'Tu código%' ORDER BY created_at DESC",
+      )
+      .get(email);
+
+    const code = /: (\d{6})\b/.exec(row?.text ?? "")?.[1];
+
+    if (!code) throw new Error(`No login code email for ${email}`);
+
+    return code;
+  } finally {
+    database.close();
+  }
 }
 
 function createCheck(results) {

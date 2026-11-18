@@ -8,6 +8,6 @@ const ACTIVE: AccountStatus = "active";
 export function findSignInAccount(email: string) {
   return getPrisma().account.findFirst({
     where: { email, status: ACTIVE },
-    select: { id: true, password: true, role: true },
+    select: { id: true, password: true, role: true, email: true, name: true },
   });
 }

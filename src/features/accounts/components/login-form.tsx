@@ -1,9 +1,11 @@
 "use client";
 
-import { FieldError, Form, Input, Label, TextField } from "@heroui/react";
+import { Form } from "@heroui/react";
 import { useActionState } from "react";
+import { EmailField } from "@features/accounts/components/email-field";
 import { PasswordField } from "@features/accounts/components/password-field";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
+import { FORGOT_PASSWORD_PATH } from "@features/accounts/lib/accounts-links";
 import type { SignInState } from "@features/accounts/lib/accounts-actions";
 import { FormSubmit } from "@shared/components/form-submit";
 import { useSubmitKeepingValues } from "@shared/hooks/use-submit-keeping-values";
@@ -20,13 +22,12 @@ export function LoginForm({ action }: Readonly<LoginFormProps>) {
 
   return (
     <Form action={formAction} onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-5">
-      <TextField name="email" type="email" autoComplete="username" isRequired>
-        <Label>{COPY.emailLabel}</Label>
-        <Input className="min-h-11 text-base" />
-        <FieldError />
-      </TextField>
+      <EmailField label={COPY.emailLabel} />
       <PasswordField name="password" label={COPY.credentialLabel} autoComplete="current-password" />
       <FormSubmit error={state?.error} isPending={isPending} copy={COPY} />
+      <a href={FORGOT_PASSWORD_PATH} className="touch-target relative self-start link-wipe no-underline">
+        {COPY.forgotPassword}
+      </a>
     </Form>
   );
 }
