@@ -108,7 +108,6 @@ export const FLOOR_PLAN_COPY = {
     gameLink: "Ver ficha del juego",
   },
   page: {
-    kicker: (siteName: string, building: string, shortName: string) => `${siteName} · ${building}, ${shortName}`,
     lead: (building: string) =>
       `Ubica cada stand, las actividades y los servicios del ${building}. Toca un marcador para ver el juego.`,
     description: (building: string) =>

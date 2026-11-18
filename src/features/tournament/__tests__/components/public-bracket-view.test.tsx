@@ -21,8 +21,18 @@ describe("PublicBracketView", () => {
   it("tells where to follow the tournament when the bracket is closed (S4)", () => {
     render(<PublicBracketView initial={CLOSED} />);
 
-    expect(screen.getByRole("status")).toHaveTextContent("El bracket está disponible en la pantalla del torneo.");
+    expect(screen.getByRole("status")).toHaveTextContent("El bracket estará disponible en la pantalla del torneo.");
     expect(screen.queryByRole("heading", { name: "Tablero 1" })).not.toBeInTheDocument();
+  });
+
+  it("shows a decorative hourglass that only moves without reduced motion while the bracket is closed (S13)", () => {
+    render(<PublicBracketView initial={CLOSED} />);
+
+    const hourglass = screen.getByTestId("waiting-hourglass-icon");
+
+    expect(hourglass).toHaveAttribute("aria-hidden", "true");
+    expect(hourglass).toHaveClass("text-accent");
+    expect(hourglass.innerHTML).toContain("motion-safe:animate-pulse");
   });
 
   it("says the bracket is not ready while it does not exist", () => {
@@ -122,7 +132,7 @@ describe("PublicBracketView", () => {
       });
 
       expect(screen.queryByRole("heading", { name: "Tablero 1" })).not.toBeInTheDocument();
-      expect(screen.getByRole("status")).toHaveTextContent("El bracket está disponible en la pantalla del torneo.");
+      expect(screen.getByRole("status")).toHaveTextContent("El bracket estará disponible en la pantalla del torneo.");
     } finally {
       jest.useRealTimers();
     }

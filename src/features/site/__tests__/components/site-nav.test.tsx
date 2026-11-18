@@ -8,7 +8,7 @@ const APP_LINKS = [
   ["Croquis", "/floor-plan"],
   ["Patrocinadores", "/sponsors"],
   ["Rifa", "/raffle"],
-  ["Tabla de posiciones", "/tournament"],
+  ["KOF", "/tournament"],
 ];
 
 function navbar() {

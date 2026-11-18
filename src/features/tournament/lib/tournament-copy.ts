@@ -74,7 +74,7 @@ export const TOURNAMENT_COPY = {
       title: "Tabla de posiciones",
       description: "Sigue los combates y los resultados del torneo de KOF.",
       loading: "Cargando el bracket...",
-      closed: "El bracket está disponible en la pantalla del torneo.",
+      closed: "El bracket estará disponible en la pantalla del torneo.",
       pending: "El bracket todavía no está listo.",
       admin: {
         heading: "Bracket público",

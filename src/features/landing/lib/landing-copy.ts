@@ -45,8 +45,8 @@ export const LANDING_COPY = {
     marketplaceClosed: "Registro de vendedores cerrado",
   },
   guests: {
-    heading: "Invitadas especiales",
-    carouselLabel: "Invitadas especiales: usa las flechas del teclado para cambiar de pase",
+    heading: "Invitados especiales",
+    carouselLabel: "Invitados especiales: usa las flechas del teclado para cambiar de pase",
     announcement: (current: number, total: number, name: string) =>
       `Pase ${toTwoDigits(current)} de ${toTwoDigits(total)}: ${name}`,
     photoPending: "Por anunciar",
@@ -93,7 +93,7 @@ export const LANDING_COPY = {
       links: {
         games: "Juegos",
         activities: "Actividades",
-        guests: "Invitadas especiales",
+        guests: "Invitados especiales",
         sponsors: "Patrocinadores",
         schedule: "Cronograma",
         floorPlan: "Croquis",

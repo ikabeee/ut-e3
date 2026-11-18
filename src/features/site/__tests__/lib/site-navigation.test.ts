@@ -49,7 +49,7 @@ describe("getSiteNavigation", () => {
       { href: "/floor-plan", label: "Croquis" },
       { href: "/sponsors", label: "Patrocinadores" },
       { href: "/raffle", label: "Rifa" },
-      { href: "/tournament", label: "Tabla de posiciones" },
+      { href: "/tournament", label: "KOF" },
     ]);
     expect(navigation.cta).toEqual({ href: "/passport", label: "Mi pasaporte" });
   });
