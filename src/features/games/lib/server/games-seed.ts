@@ -64,7 +64,6 @@ const SEED_GAMES: SeedGame[] = [
     stand: { zone: "A", number: 1 },
     studio: 6,
     groupCode: "101",
-    hasCover: false,
   },
   { slug: "true-hero", name: "True Hero", stand: { zone: "A", number: 2 }, studio: 5, groupCode: "102" },
   { slug: "laboratorio-4", name: "Laboratorio 4", stand: { zone: "A", number: 3 }, studio: 4, groupCode: "103" },

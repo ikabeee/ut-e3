@@ -32,7 +32,7 @@ const GAMES = [
 ] as const;
 
 // They have no artwork yet: the pages show a generic cover with their name.
-const GAMES_WITHOUT_COVER = ["make-em-fall", "one-mind", "sombra-del-mictlan"];
+const GAMES_WITHOUT_COVER = ["one-mind", "sombra-del-mictlan"];
 
 // The genre of every game, as the organizers confirmed it. Make 'em Fall has none yet.
 const CONFIRMED_GENRES = {
