@@ -6,7 +6,7 @@ import { SignOutButton } from "@features/accounts/components/sign-out-button";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { KOF_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
-import { requireKofAccount, type KofAccount } from "@features/accounts/lib/server/current-account";
+import { requireKofViewer, type KofViewer } from "@features/accounts/lib/server/current-account";
 import { listManagedAccounts } from "@features/accounts/lib/server/invitations";
 import { EntriesPanel } from "@features/tournament/components/entries-panel";
 import { PublicBracketSwitch } from "@features/tournament/components/public-bracket-switch";
@@ -49,7 +49,7 @@ export function KofPage() {
 async function KofPanel() {
   await connection();
 
-  const account = await requireKofAccount();
+  const account = await requireKofViewer();
   const tournament = await getTournament();
 
   return (
@@ -73,7 +73,9 @@ async function KofPanel() {
   );
 }
 
-function getRoleLabel(account: KofAccount): string {
+function getRoleLabel(account: KofViewer): string {
+  if (account.role === "sysadmin") return COPY.roles.sysadmin;
+
   return account.role === "kof_admin" ? COPY.roles.kof_admin : COPY.roles.kof_staff(account.kofDesk);
 }
 

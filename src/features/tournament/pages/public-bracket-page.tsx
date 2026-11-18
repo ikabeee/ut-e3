@@ -3,13 +3,15 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { PublicBracketView } from "@features/tournament/components/public-bracket-view";
 import { TournamentHeading } from "@features/tournament/components/tournament-heading";
-import { TournamentInfo, type TournamentInfoSchedule } from "@features/tournament/components/tournament-info";
+import { TournamentInfo } from "@features/tournament/components/tournament-info";
 import type { EntrySchedule } from "@features/tournament/lib/entries-rules";
 import type { PublicSnapshot } from "@features/tournament/lib/public-bracket";
 import { getEntrySchedule } from "@features/tournament/lib/server/entries-queries";
 import { getPublicSnapshot } from "@features/tournament/lib/server/public-bracket-queries";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import { PUBLIC_BRACKET_PATH } from "@features/tournament/lib/tournament-links";
+import type { TournamentInfoSchedule } from "@features/tournament/lib/tournament-when";
+import { PASSPORT_SNAPSHOT_KEY } from "@features/visitors/lib/passport-snapshot";
 import { PASSPORT_PATH, REGISTER_PATH } from "@features/visitors/lib/visitors-links";
 
 const COPY = TOURNAMENT_COPY.ui.publicBracket;
@@ -41,7 +43,12 @@ async function PublicBracket() {
 
   return (
     <>
-      <TournamentInfo schedule={toInfoSchedule(schedule)} registerHref={REGISTER_PATH} passportHref={PASSPORT_PATH} />
+      <TournamentInfo
+        schedule={toInfoSchedule(schedule)}
+        registerHref={REGISTER_PATH}
+        passportHref={PASSPORT_PATH}
+        passportSnapshotKey={PASSPORT_SNAPSHOT_KEY}
+      />
       <PublicBracketView initial={snapshot} />
     </>
   );

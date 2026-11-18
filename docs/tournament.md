@@ -22,8 +22,10 @@ El equipo opera con dos staffs para los cuatro tableros (RF-62, SRS 2.4):
 | Staff de la mesa 2 (`kof_staff`, `kofDesk = 2`) | Tableros 3 y 4 y semifinal 2 |
 | Administrador de KOF (`kof_admin`) | Cualquier combate, y además congelar, descongelar, descalificar y revertir |
 
-El staff inicia el combate, marca al perdedor y marca "No se presentó". El sysadmin no tiene comandos del torneo.
-Cada Server Action valida la sesión, el rol y la mesa del combate; la interfaz solo esconde botones.
+El staff inicia el combate, marca al perdedor y marca "No se presentó". El sysadmin no tiene comandos del torneo, pero
+sí puede abrir `/admin/kof` (el panel lo enlaza como "Torneo de KOF") para ver todos los tableros en solo consulta: sin
+botones, sin inscripciones y sin bitácora (`requireKofViewer()` y `GET /api/tournament`). Cada Server Action valida la
+sesión, el rol y la mesa del combate con `requireKofAccount()`, que sigue rechazando al sysadmin; la interfaz solo esconde botones.
 
 ## Estados del combate
 
@@ -62,7 +64,10 @@ de `event_settings`; ninguna está escrita en el código.
 
 ## Bracket público
 
-Cualquiera puede seguir el bracket en `/tournament` (RF-67), sin sesión. La página y `GET /api/tournament/public` entregan
+Cualquiera puede seguir el bracket en `/tournament` (RF-67), sin sesión. La página se llama "Tabla de posiciones", va centrada y
+muestra la información del torneo: "Cuándo" (fechas legibles agrupadas por día, calculadas de `event_settings` en America/Cancun),
+"Cómo" y "Cuántos". Ofrece un solo botón: "Ver mi pasaporte" si el teléfono guarda la copia del pasaporte
+(`localStorage`, `ute3.passport.v1`) y "Crear mi pasaporte" si no; el servidor no lee cookies y el botón se decide en el navegador. La página y `GET /api/tournament/public` entregan
 solo los gamertags y los resultados: ningún id, correo ni PIN. La consulta es cada 3 segundos, igual que el panel.
 
 | Estado | Qué ve el público |
@@ -95,7 +100,7 @@ lib/tournament-actions.ts     Server Action submitTournamentCommand
 lib/entries-rules.ts          Qué significa agregar a alguien según la hora (lista previa, presencial, cerrado)
 lib/entries-actions.ts        Server Actions del administrador: agregar, check-in y generar
 lib/server/                   Consultas, mutaciones con versión y bitácora, inscripciones y el seed de desarrollo
-api/                          GET /api/tournament (solo cuentas de KOF) y su cliente
+api/                          GET /api/tournament (cuentas de KOF y sysadmin, solo lectura) y su cliente
 hooks/use-tournament.ts       Polling cada 3 segundos
 components/                   Panel, secciones, tarjetas de combate y botones con confirmación
 pages/kof-page.tsx            Contenedor de /admin/kof

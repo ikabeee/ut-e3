@@ -65,6 +65,17 @@ describe("TournamentDashboard", () => {
     );
   });
 
+  it("shows the sysadmin the whole bracket to watch, with no controls and no log (S37)", () => {
+    renderDashboard(createTestTournament(), { role: "sysadmin", desk: null });
+
+    ["Tablero 1", "Tablero 2", "Tablero 3", "Tablero 4", "Semifinal 1", "Semifinal 2", "Final"].forEach((name) => {
+      expect(screen.getByRole("heading", { name })).toBeInTheDocument();
+    });
+    expect(screen.queryByRole("heading", { name: "Bitácora" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/todavía no tiene una mesa asignada/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
   it("counts the matches that the viewer can see", () => {
     renderDashboard(createTestTournament(), { role: "kof_staff", desk: 1 });
 

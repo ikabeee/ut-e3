@@ -21,6 +21,7 @@ beforeAll(async () => {
   await createAccount("admin", "kof_admin");
   await createAccount("desk1", "kof_staff", 1);
   await createAccount("sysadmin", "sysadmin");
+  await createAccount("helpdesk", "help_desk");
 });
 
 afterAll(async () => {
@@ -41,8 +42,8 @@ describe("GET /api/tournament", () => {
     expect(response.status).toBe(401);
   });
 
-  it("answers 401 to an account that is not from KOF", async () => {
-    await signInAs("sysadmin");
+  it("answers 401 to an account that is neither from KOF nor the sysadmin", async () => {
+    await signInAs("helpdesk");
 
     expect((await GET()).status).toBe(401);
   });
@@ -58,7 +59,7 @@ describe("GET /api/tournament", () => {
     expect(body.serverNow).toEqual(expect.any(Number));
   });
 
-  it.each(["admin", "desk1"])("sends the bracket to %s and never lets it be cached", async (key) => {
+  it.each(["admin", "desk1", "sysadmin"])("sends the bracket to %s and never lets it be cached", async (key) => {
     await generateTournament(accountIds.admin, createPlayers(64), GENERATES_AT);
     await signInAs(key);
 

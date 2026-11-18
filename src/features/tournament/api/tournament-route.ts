@@ -1,12 +1,12 @@
 import "server-only";
-import { getKofAccount } from "@features/accounts/lib/server/current-account";
+import { getKofViewer } from "@features/accounts/lib/server/current-account";
 import { getTournament } from "@features/tournament/lib/server/tournament-queries";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
-// Only the KOF accounts read the bracket until the public view exists (RF-67); everyone else gets 401, not a redirect.
+// The KOF accounts and the sysadmin, who watches /admin/kof, read the whole bracket; everyone else gets 401, not a redirect.
 export async function GET(): Promise<Response> {
-  if (!(await getKofAccount())) {
+  if (!(await getKofViewer())) {
     return Response.json({ error: "unauthorized" }, { status: 401, headers: NO_STORE });
   }
 
