@@ -6,6 +6,12 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- `/admin/sql`: consola SQL solo para el sysadmin. Ejecuta una sentencia (`SELECT`, `WITH`, `EXPLAIN`, `INSERT`, `UPDATE`
+  o `DELETE`); las lecturas muestran hasta 500 filas y las escrituras se revisan primero (cuántas filas cambiarían, sin
+  aplicar nada) y se aplican al escribir CONFIRMAR. Cada sentencia, también la revisión de una escritura, queda en la bitácora de auditoría.
+
 ## [1.2.0] - 2026-11-18
 
 ### Agregado

@@ -7,6 +7,7 @@ import {
   ADMIN_MODERATION_PATH,
   ADMIN_SERVER_PATH,
   ADMIN_SETTINGS_PATH,
+  ADMIN_SQL_PATH,
 } from "@features/admin/lib/admin-links";
 
 const COPY = ADMIN_COPY.nav;
@@ -17,6 +18,7 @@ const LINKS = [
   { href: ADMIN_MODERATION_PATH, label: COPY.moderation },
   { href: ADMIN_CATALOG_PATH, label: COPY.catalog },
   { href: ADMIN_SERVER_PATH, label: COPY.server },
+  { href: ADMIN_SQL_PATH, label: COPY.sql },
   { href: KOF_HOME_PATH, label: COPY.kof },
 ];
 

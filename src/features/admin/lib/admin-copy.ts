@@ -17,6 +17,7 @@ export const ADMIN_COPY = {
     moderation: "Moderación",
     catalog: "Catálogos",
     server: "Servidor",
+    sql: "Consola SQL",
     kof: "Torneo de KOF",
   },
   pages: {
@@ -24,6 +25,44 @@ export const ADMIN_COPY = {
     moderation: { title: "Moderación", description: "Alertas de fraude, visitas anuladas y visitantes excluidos." },
     catalog: { title: "Catálogos", description: "Géneros, patrocinadores y lista negra de correos." },
     server: { title: "Estado del servidor", description: "Memoria, CPU, bracket en vivo y bandeja de salida." },
+    sql: { title: "Consola SQL", description: "Consultas y cambios directos a la base de datos del evento." },
+  },
+  sql: {
+    heading: "Consola SQL",
+    warning:
+      "Esto es la base de datos real. Una consulta lenta bloquea el servidor mientras corre y una escritura no se puede deshacer: haz un respaldo antes de cambiar datos. Cada sentencia queda en la bitácora de auditoría.",
+    lead: "Escribe una sola sentencia: SELECT, WITH, EXPLAIN, INSERT, UPDATE o DELETE. Las lecturas se ejecutan al momento y muestran hasta 500 filas; las escrituras se revisan primero.",
+    label: "Sentencia SQL",
+    run: "Ejecutar",
+    resultHeading: "Resultado",
+    rows: (count: number) => (count === 1 ? "1 fila." : `${count} filas.`),
+    truncated: (limit: number) => `Se muestran solo las primeras ${limit} filas; el resultado tiene más.`,
+    noRows: "La consulta no devolvió filas.",
+    reviewHeading: "Revisión de la escritura",
+    review: (count: number) =>
+      count === 1
+        ? "Esta sentencia modificará datos y cambiaría 1 fila. Todavía no se aplicó nada."
+        : `Esta sentencia modificará datos y cambiaría ${count} filas. Todavía no se aplicó nada.`,
+    confirmationLabel: "Escribe CONFIRMAR para aplicar el cambio",
+    confirmationWord: "CONFIRMAR",
+    confirm: "Aplicar escritura",
+    done: (count: number) => (count === 1 ? "Listo: se cambió 1 fila." : `Listo: se cambiaron ${count} filas.`),
+    nullValue: "NULL",
+    blobValue: (bytes: number) => `[BLOB ${bytes} bytes]`,
+    errors: {
+      empty: "Escribe una sentencia SQL.",
+      multiple: "Solo se permite una sentencia a la vez. Quita los puntos y coma que sobren.",
+      forbidden: (keyword: string) => `${keyword} no está permitido en la consola.`,
+      notAllowed: "Solo se permiten SELECT, WITH, EXPLAIN, INSERT, UPDATE y DELETE.",
+      loadExtension: "load_extension no está permitido en la consola.",
+      protectedTable:
+        "No se puede escribir en _prisma_migrations, audit_logs ni en las tablas sqlite_*: son el historial del esquema y la bitácora.",
+      recursiveWithoutLimit: "Una consulta WITH RECURSIVE necesita LIMIT para no quedarse ejecutando sin fin.",
+      tooLong: "La sentencia es demasiado larga (máximo 10 000 caracteres).",
+      confirmation: "Escribe CONFIRMAR, en mayúsculas, para aplicar la escritura.",
+      sqlite: (detail: string) => `SQLite respondió: ${detail}`,
+      unknown: "No se pudo ejecutar la sentencia.",
+    },
   },
   server: {
     heading: "Estado del servidor",
