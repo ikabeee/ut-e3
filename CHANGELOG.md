@@ -8,6 +8,19 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- Portada: sin el botón de reproducir del video, sin la fecha en la franja final, con los flyers del torneo y de la feria,
+  y con un mapa del sitio en el pie (incluye el acceso del staff). La sede dice solo "Edificio B" y el mapa, "UT Cancún".
+- Invitadas especiales: el selector de pases va junto al gafete y es discreto; el gafete se cambia tocándolo o
+  deslizándolo, y las fotos cargan más rápido.
+- Patrocinadores en la portada: una sola tira con forma de boleto largo de feria que se recorre como carrusel.
+- Croquis: los filtros tienen hover; la lista es interactiva (al tocar un elemento se muestra en el mapa) y "Ocultar
+  lista" tiene ícono. Se quitan el resumen de stands, el número de stand de la tarjeta y, en la portada, "Abrir el
+  croquis" y "Ocultar lista".
+- Juegos: el coverflow ya no tiene resplandor, la ficha ya no tiene "Ver en el croquis" ni "Quiero asistir" y /games
+  muestra solo el carrusel y las portadas. El buscador vive en la barra de navegación (/games?q=).
+- La barra de navegación marca la sección en la que estás.
+- /tournament: emblema del torneo, información de cuándo, cómo y cuántos jugadores, y enlaces para crear o ver tu
+  pasaporte; se quitan "Arena KOF" y "Cronograma". La pérdida de conexión se avisa con un toast.
 - /raffle (ganadores de la rifa) va centrada y lleva un boleto de rifa como emblema sobre el título.
 - Un juego sin su portada vertical y su imagen horizontal ya no aparece en el sitio público (portada, /games, su ficha,
   /showcase y el panel del croquis; el stand sigue en el croquis). El panel del staff los sigue viendo para completarlos.
@@ -69,6 +82,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Corregido
 
+- /floor-plan ya no tiene scroll horizontal a 390 px: la fila de filtros ensanchaba la página y cortaba los botones
+  de zoom del croquis.
+- La barra de navegación ya no muestra "Volver": el logo de UTG ya lleva al inicio y, con él, la barra no cabía en un
+  teléfono de 360 px.
 - El hero de /games y la parte de arriba de la ficha de cada juego usan la imagen horizontal (16:9) en vez de la portada
   vertical recortada; la vertical sigue en el panel lateral, el coverflow y las tarjetas. Un juego sin imagen horizontal
   (Vaporlock) conserva la vertical. Al compartir una ficha también sale la horizontal.
