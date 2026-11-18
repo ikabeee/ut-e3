@@ -61,7 +61,7 @@ async function SysadminPanel() {
     <>
       <AdminHeader
         title={ADMIN_COPY.title}
-        accountName={account.name}
+        signedInAs={ADMIN_COPY.signedInAs(account.name)}
         currentPath={SYSADMIN_HOME_PATH}
         signOutAction={signOut}
       />

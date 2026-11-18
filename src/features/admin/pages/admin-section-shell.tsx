@@ -42,7 +42,12 @@ async function AdminSectionContent({ title, path, renderContent }: Readonly<Admi
 
   return (
     <>
-      <AdminHeader title={title} accountName={account.name} currentPath={path} signOutAction={signOut} />
+      <AdminHeader
+        title={title}
+        signedInAs={ADMIN_COPY.signedInAs(account.name)}
+        currentPath={path}
+        signOutAction={signOut}
+      />
       {await renderContent()}
     </>
   );

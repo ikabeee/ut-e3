@@ -53,6 +53,13 @@ export function canRunCommand(actor: KofActor, type: TournamentCommandType, matc
   return actor.desk !== null && actor.desk === getMatchDesk(match);
 }
 
+/** Who sees the list of participants (S26): the sysadmin and the KOF administrator; the desks only see the bracket. */
+const ENTRIES_VIEWER_ROLES: readonly string[] = ["sysadmin", "kof_admin"];
+
+export function canViewEntries(role: string): boolean {
+  return ENTRIES_VIEWER_ROLES.includes(role);
+}
+
 /** Desk 1: boards 1 and 2, semifinal 1 and the final. Desk 2: boards 3 and 4 and semifinal 2 (RF-62). */
 export function getMatchDesk(match: Pick<Match, "area">): Desk {
   switch (match.area) {

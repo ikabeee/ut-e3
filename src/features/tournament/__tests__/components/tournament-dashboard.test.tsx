@@ -3,11 +3,15 @@ import type { TournamentSnapshot } from "@features/tournament/api/tournament-api
 import type { TournamentAction } from "@features/tournament/components/command-button";
 import { TournamentDashboard } from "@features/tournament/components/tournament-dashboard";
 import { POLL_INTERVAL_MS } from "@features/tournament/hooks/use-tournament";
+import { applyCommand } from "@features/tournament/lib/tournament-engine";
+import { getMatchPlayers } from "@features/tournament/lib/tournament-view";
 import type { Tournament } from "@features/tournament/lib/types";
 import {
-  createTestTournament,
-  playUntilFinished,
   clearToasts,
+  createTestTournament,
+  getMatch,
+  NOW,
+  playUntilFinished,
 } from "@features/tournament/__tests__/tournament-test-utils";
 
 type Viewer = Parameters<typeof TournamentDashboard>[0]["viewer"];
@@ -82,6 +86,31 @@ describe("TournamentDashboard", () => {
     const summary = screen.getByRole("list", { name: "Resumen" });
 
     expect(within(summary).getByText("Listos").parentElement).toHaveTextContent("16");
+  });
+
+  it("monitors the progress and says when no match is being played (S11)", () => {
+    renderDashboard(createTestTournament(), { role: "sysadmin", desk: null });
+
+    const monitor = screen.getByRole("region", { name: "En vivo" });
+
+    expect(within(monitor).getByText("0 de 63 combates terminados")).toBeInTheDocument();
+    expect(within(monitor).getByText("Pendientes").parentElement).toHaveTextContent("31");
+    expect(within(monitor).getByText(/Ningún combate en juego ahora/)).toBeInTheDocument();
+  });
+
+  it("lists the matches in play with their players, area and desk (S11)", () => {
+    const initial = createTestTournament();
+    const busy = applyCommand(initial, { type: "start_match", matchId: getMatch(initial, 33).id }, NOW);
+    const [first, second] = getMatchPlayers(busy, getMatch(busy, 33));
+
+    renderDashboard(busy, { role: "sysadmin", desk: null });
+
+    const live = screen.getByRole("list", { name: "Combates en juego y congelados" });
+
+    expect(within(live).getAllByRole("listitem")).toHaveLength(1);
+    expect(within(live).getByText("Combate #33")).toBeInTheDocument();
+    expect(within(live).getByText(`${first.tag} vs ${second.tag}`)).toBeInTheDocument();
+    expect(within(live).getByText("Tablero 3 · Mesa 2")).toBeInTheDocument();
   });
 
   it("announces the champion when the tournament is over", () => {

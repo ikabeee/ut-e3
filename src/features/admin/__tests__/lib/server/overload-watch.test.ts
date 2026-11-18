@@ -116,3 +116,18 @@ describe("the automatic close in the database (UT-AD-09)", () => {
     expect(status.outbox).toEqual({ sent: 0, pending: 0, failed: 0 });
   });
 });
+
+// S4: the charts of the panel draw the same readings the automatic close looks at, oldest first.
+describe("getServerStatus history", () => {
+  it("hands over the readings kept in memory", async () => {
+    recordLoadSample({ at: 1_000, cpu: 0.2, memory: 0.4 });
+    recordLoadSample({ at: 11_000, cpu: 0.3, memory: 0.5 });
+
+    const status = await getServerStatus(12_000);
+
+    expect(status.history).toEqual([
+      { at: 1_000, cpu: 0.2, memory: 0.4 },
+      { at: 11_000, cpu: 0.3, memory: 0.5 },
+    ]);
+  });
+});
