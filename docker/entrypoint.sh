@@ -1,6 +1,5 @@
 #!/bin/sh
-# Arranque del contenedor: migra la base, carga el contenido inicial y la cuenta del sysadmin, y deja el servidor como
-# proceso principal para que reciba la senal de apagado (docker stop) y cierre con orden.
+# Arranque del contenedor: migra la base y deja el servidor como proceso principal para que reciba la senal de apagado (docker stop) y cierre con orden.
 set -eu
 
 : "${NEXT_PUBLIC_SITE_URL:?Falta NEXT_PUBLIC_SITE_URL en el .env}"
@@ -17,8 +16,7 @@ fi
 # Aplica solo las migraciones pendientes; con la base al dia no hace nada.
 prisma migrate deploy
 
-# Llena las tablas vacias y crea al sysadmin si todavia no hay uno (SYSADMIN_EMAIL, SYSADMIN_NAME, SYSADMIN_PASSWORD).
-# Una base con datos no se toca, asi que repetirlo en cada arranque es seguro.
-prisma db seed
+# El seed no corre al arrancar: produccion ya tiene sus datos. En una base nueva se corre una vez a mano
+# (docs/deploy.md, "Primer despliegue").
 
 exec node server.js
