@@ -51,8 +51,8 @@ interface SeedGame {
   groupCode: string;
   /** False for the games that have no artwork yet: they show a generic cover with their name. */
   hasCover?: boolean;
-  /** False for the games whose only artwork is the portrait cover. */
-  hasLandscapeImage?: boolean;
+  /** Screenshots of the game (`<slug>-captura-NN.jpg`), at most 3 because `game_images.position` is limited to 1..5, after the cover and the landscape image. */
+  screenshots?: number;
   /** Overrides GENRE_BY_SLUG; without either, the placeholder genre. */
   genre?: Genre;
 }
@@ -69,14 +69,13 @@ const SEED_GAMES: SeedGame[] = [
   { slug: "true-hero", name: "True Hero", stand: { zone: "A", number: 2 }, studio: 5, groupCode: "102" },
   { slug: "laboratorio-4", name: "Laboratorio 4", stand: { zone: "A", number: 3 }, studio: 4, groupCode: "103" },
   { slug: "abby-s-tower", name: "Abby's Tower", stand: { zone: "B", number: 1 }, studio: 2, groupCode: "103" },
-  { slug: "one-mind", name: "One Mind", stand: { zone: "B", number: 2 }, studio: 4, groupCode: "101", hasCover: false },
+  { slug: "one-mind", name: "One Mind", stand: { zone: "B", number: 2 }, studio: 4, groupCode: "101", screenshots: 3 },
   {
     slug: "vaporlock",
     name: "Vaporlock",
     stand: { zone: "B", number: 3 },
     studio: 3,
     groupCode: "103",
-    hasLandscapeImage: false,
   },
   { slug: "unknown-game", name: "Unknown Game", stand: { zone: "C", number: 1 }, studio: 6, groupCode: "103" },
   {
@@ -107,7 +106,7 @@ const SEED_GAMES: SeedGame[] = [
   { slug: "echoscrap", name: "EchoScrap", stand: { zone: "T", number: 1 }, studio: 6, groupCode: "102" },
   { slug: "after-light", name: "After Light", stand: { zone: "T", number: 2 }, studio: 1, groupCode: "102" },
   { slug: "dark-mutant", name: "Dark Mutant", stand: { zone: "T", number: 3 }, studio: 4, groupCode: "102" },
-  { slug: "saatan-paal", name: "Saatan Paal", stand: { zone: "T", number: 4 }, studio: 3, groupCode: "102" },
+  { slug: "saatan-paal", name: "Saatal Paal", stand: { zone: "T", number: 4 }, studio: 3, groupCode: "102" },
   { slug: "carencia", name: "Carencia", stand: { zone: "T", number: 5 }, studio: 3, groupCode: "101" },
   {
     slug: "identity-dissolution",
@@ -115,6 +114,7 @@ const SEED_GAMES: SeedGame[] = [
     stand: { zone: "T", number: 6 },
     studio: 2,
     groupCode: "101",
+    screenshots: 3,
   },
 ];
 
@@ -129,7 +129,7 @@ export const INITIAL_STANDS: AdminStandLocation[] = SEED_GAMES.map(({ stand, stu
 
 function buildGame({
   hasCover = true,
-  hasLandscapeImage = true,
+  screenshots = 0,
   slug,
   genre = GENRE_BY_SLUG.get(slug) ?? TO_BE_ANNOUNCED,
   name,
@@ -156,12 +156,18 @@ function buildGame({
     stand,
     genre,
     synopsis: "",
-    images: [hasCover ? cover : null, hasCover && hasLandscapeImage ? landscape : null].filter(isImage),
+    images: hasCover ? [cover, landscape, ...buildScreenshots(slug, name, screenshots)] : [],
   };
 }
 
-function isImage(image: GameImage | null): image is GameImage {
-  return image !== null;
+// Screenshots go after the cover (1) and the landscape image (2), from position 3, as the grid names them.
+function buildScreenshots(slug: string, name: string, count: number): GameImage[] {
+  return Array.from({ length: count }, (_, index) => ({
+    path: `/games/${slug}-captura-${String(index + 1).padStart(2, "0")}.jpg`,
+    alt: `Captura ${index + 1} de ${name}`,
+    position: index + 3,
+    isCover: false,
+  }));
 }
 
 // Fills the catalog only while it has no games: once the sysadmin edits or deletes a game, a new seed leaves the

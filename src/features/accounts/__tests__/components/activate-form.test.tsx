@@ -1,13 +1,14 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ActivateForm } from "@features/accounts/components/activate-form";
 import type { ActivationState } from "@features/accounts/lib/activation-actions";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 describe("ActivateForm", () => {
   it("sends the token, the password and its confirmation", async () => {
     const { received, action } = recordingAction({ error: "" });
 
-    render(<ActivateForm token="the-token" action={action} />);
+    renderWithToasts(<ActivateForm token="the-token" action={action} />);
     await userEvent.type(screen.getByLabelText("Contraseña nueva"), "a long enough password");
     await userEvent.type(screen.getByLabelText("Repite la contraseña"), "a long enough password");
     await userEvent.click(screen.getByRole("button", { name: "Activar cuenta" }));
@@ -21,7 +22,7 @@ describe("ActivateForm", () => {
   it("shows what the server answered and keeps what was typed", async () => {
     const { action } = recordingAction({ error: "Las contraseñas no coinciden." });
 
-    render(<ActivateForm token="the-token" action={action} />);
+    renderWithToasts(<ActivateForm token="the-token" action={action} />);
     await userEvent.type(screen.getByLabelText("Contraseña nueva"), "a long enough password");
     await userEvent.type(screen.getByLabelText("Repite la contraseña"), "another long password");
     await userEvent.click(screen.getByRole("button", { name: "Activar cuenta" }));
@@ -31,7 +32,7 @@ describe("ActivateForm", () => {
   });
 
   it("tells the minimum length before the person types", () => {
-    render(<ActivateForm token="the-token" action={recordingAction({ error: "" }).action} />);
+    renderWithToasts(<ActivateForm token="the-token" action={recordingAction({ error: "" }).action} />);
 
     expect(screen.getByText("Mínimo 12 caracteres.")).toBeInTheDocument();
   });

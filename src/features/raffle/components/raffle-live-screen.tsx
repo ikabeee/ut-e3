@@ -7,6 +7,7 @@ import { useLiveRaffle, type LiveSnapshotLoader } from "@features/raffle/hooks/u
 import { RAFFLE_COPY } from "@features/raffle/lib/raffle-copy";
 import { RAFFLE_WINNERS_PATH } from "@features/raffle/lib/raffle-links";
 import type { RaffleLiveSnapshot } from "@features/raffle/lib/types";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 
 interface RaffleLiveScreenProps {
   initial: RaffleLiveSnapshot;
@@ -20,11 +21,12 @@ const COPY = RAFFLE_COPY.live;
 export function RaffleLiveScreen({ initial, load }: Readonly<RaffleLiveScreenProps>) {
   const { value: snapshot, hasConnectionError } = useLiveRaffle(initial, load);
 
+  useErrorToast(hasConnectionError ? COPY.connectionLost : null);
+
   return (
     <div className="grid min-h-[calc(100svh-var(--nav-height))] grid-rows-[auto_1fr] gap-6 bg-background p-4 sm:p-8">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <BackLink />
-        {hasConnectionError && <span className="text-sm text-danger">{COPY.connectionLost}</span>}
       </header>
       <div className="grid gap-8 lg:grid-cols-[1fr_minmax(18rem,26rem)]">
         <RaffleDrum snapshot={snapshot} />

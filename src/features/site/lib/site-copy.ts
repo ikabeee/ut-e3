@@ -1,4 +1,9 @@
 export const SITE_COPY = {
+  emergency: {
+    lowDiskSubject: "Disco de la base casi lleno",
+    lowDiskDetail: (freeMegabytes: number) =>
+      `Al volumen de la base le quedan ${freeMegabytes} MB y GET /api/health responde 503. Con el disco lleno SQLite falla (SQLITE_FULL) y los kioscos dejan de registrar visitas.`,
+  },
   nav: {
     label: "Principal",
     homeLabel: "UTG, inicio",
@@ -8,13 +13,16 @@ export const SITE_COPY = {
       floorPlan: "Croquis",
       sponsors: "Patrocinadores",
       raffle: "Rifa",
-      tournament: "Tabla de posiciones",
+      tournament: "KOF",
     },
     passport: "Mi pasaporte",
     search: {
       formLabel: "Buscar juegos",
       label: "Busca un juego",
       submit: "Buscar",
+      suggestionsLabel: "Juegos sugeridos",
+      noMatches: "Ningún juego coincide. Presiona Buscar para ver el catálogo.",
+      resultCount: (count: number) => (count === 1 ? "1 juego" : `${count} juegos`),
     },
     openMenu: "Abrir menú",
     menuTitle: "Menú",
@@ -33,6 +41,9 @@ export const SITE_COPY = {
       floorPlan: { label: "Croquis", description: "Dónde está cada stand en la sede." },
       schedule: { label: "Cronograma", description: "Actividades y horarios del evento." },
     },
+  },
+  toasts: {
+    label: "Avisos",
   },
   error: {
     // Error boundaries take no `metadata`, so the view sets the tab title itself.

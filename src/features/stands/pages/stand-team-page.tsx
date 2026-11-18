@@ -10,6 +10,7 @@ import { listStandAccounts } from "@features/accounts/lib/server/invitations";
 import { StandAdminNav } from "@features/stands/components/stand-admin-nav";
 import { STAND_TEAM_PATH } from "@features/stands/lib/stands-links";
 import { STANDS_COPY } from "@features/stands/lib/stands-copy";
+import { PanelSkeleton } from "@shared/components/panel-skeleton";
 
 const COPY = STANDS_COPY.team;
 
@@ -23,7 +24,7 @@ export const standTeamPageMetadata: Metadata = {
 export function StandTeamPage() {
   return (
     <main className="page-wrap grid gap-10 py-12">
-      <Suspense fallback={<p className="type-mono text-muted">{COPY.loading}</p>}>
+      <Suspense fallback={<PanelSkeleton label={COPY.loading} />}>
         <StandTeamPanel />
       </Suspense>
     </main>

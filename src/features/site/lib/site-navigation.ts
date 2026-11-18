@@ -1,4 +1,9 @@
-import { LOGIN_PATH, ACTIVATE_PATH } from "@features/accounts/lib/accounts-links";
+import {
+  ACTIVATE_PATH,
+  FORGOT_PASSWORD_PATH,
+  LOGIN_PATH,
+  RESET_PASSWORD_PATH,
+} from "@features/accounts/lib/accounts-links";
 import { FLOOR_PLAN_PATH, FLOOR_PLAN_SECTION_ID } from "@features/floor-plan/lib/floor-plan-links";
 import { GAMES_PATH, GAMES_SECTION_ID } from "@features/games/lib/games-links";
 import { HOME_PATH, TOP_SECTION_ID } from "@features/landing/lib/landing-links";
@@ -29,7 +34,7 @@ export const GAMES_SEARCH_PARAM = "q";
 const { links: LABELS } = SITE_COPY.nav;
 
 // The staff areas, their login and activation. The stage raffle (/raffle/live) keeps the navbar (S28).
-const HIDDEN_AREAS = [...STAFF_AREAS, LOGIN_PATH, ACTIVATE_PATH];
+const HIDDEN_AREAS = [...STAFF_AREAS, LOGIN_PATH, ACTIVATE_PATH, FORGOT_PASSWORD_PATH, RESET_PASSWORD_PATH];
 
 // `/passport` opens the registration when the phone has no passport yet, so one entry serves both.
 const FULL_NAVIGATION: SiteNavigation = {

@@ -13,6 +13,10 @@ export const VISITORS_COPY = {
     emailInvalid: "Ingresa un correo electrónico válido.",
     closed: "El registro de visitantes aún no está abierto.",
   },
+  loading: {
+    register: "Cargando el registro...",
+    passport: "Cargando tu pasaporte...",
+  },
   form: {
     title: "Registro de visitantes",
     subtitle: "Crea tu pasaporte digital para el evento.",
@@ -91,6 +95,14 @@ export const VISITORS_COPY = {
       ticket: (number: number) => `Boleto #${number}`,
       milestone: (milestone: number) => `Al llegar a ${milestone} visitas`,
       voided: "Anulado: vuelve a llegar al hito para reactivarlo",
+    },
+    explorer: {
+      passportLabel: "Tu pasaporte",
+      label: "Croquis y juegos",
+      mapTitle: "Croquis",
+      detailTitle: "Detalle del juego",
+      empty: "Toca un stand del croquis para ver aquí su juego y si ya lo visitaste.",
+      gameLink: "Ver ficha del juego",
     },
   },
   blocklist: {

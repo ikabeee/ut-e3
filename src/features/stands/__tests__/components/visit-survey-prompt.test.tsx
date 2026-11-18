@@ -1,9 +1,10 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AppRouterContext, type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { VisitSurveyPrompt } from "@features/stands/components/visit-survey-prompt";
 import type { PendingVisitView } from "@features/stands/lib/pending-visit";
 import type { VisitActionState } from "@features/stands/lib/stands-actions";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 const refresh = jest.fn();
 
@@ -117,7 +118,7 @@ function renderPrompt(failure?: { message: string }) {
     return { status: "done", message: "¡Gracias! Tu visita quedó registrada." };
   };
 
-  return render(
+  return renderWithToasts(
     <AppRouterContext.Provider value={ROUTER}>
       <VisitSurveyPrompt answerVisit={answerVisit} loadPending={async () => pending} />
     </AppRouterContext.Provider>,

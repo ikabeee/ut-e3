@@ -33,6 +33,15 @@ describe("filterGames", () => {
     expect(namesOf(filterGames(catalog, { genreSlug: null, keyword: "accion" }))).toEqual(["Cenote", "Ruta 9"]);
   });
 
+  it('uses the tolerant search of the navbar: "san" finds Saatal Paal by its slug (S21)', () => {
+    const catalog = [
+      makeGame({ id: "turno-rosso", name: "Turno Rosso" }),
+      makeGame({ id: "saatan-paal", name: "Saatal Paal", synopsis: "" }),
+    ];
+
+    expect(namesOf(filterGames(catalog, { genreSlug: null, keyword: "san" }))).toEqual(["Saatal Paal"]);
+  });
+
   it("applies the genre and the keyword together", () => {
     expect(namesOf(filterGames(games, { genreSlug: "puzzle", keyword: "05" }))).toEqual(["Juego 05"]);
     expect(filterGames(games, { genreSlug: "racing", keyword: "05" })).toEqual([]);

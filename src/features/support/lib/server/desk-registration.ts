@@ -18,8 +18,17 @@ export type DeskRegistrationResult =
       claimPath: string;
       emailId: string;
       enrollment: EnrollmentOutcome;
+      /** The confirmation of the KOF entry (S8), when the visitor was enrolled. */
+      tournamentEmailId: string | null;
     }
   | { status: "closed" | "blocked" | "gamertagTaken" };
+
+interface Enrollment {
+  enrollment: EnrollmentOutcome;
+  tournamentEmailId: string | null;
+}
+
+const NOT_ENROLLED: Enrollment = { enrollment: "none", tournamentEmailId: null };
 
 export interface DeskRegistrationRequest {
   agentId: string;
@@ -46,22 +55,30 @@ export async function registerVisitorAtDesk(request: DeskRegistrationRequest): P
 
   if (result.status !== "created") return { status: result.status };
 
+  const { enrollment, tournamentEmailId } = wantsTournament
+    ? await enrollOnsite({ agentId, gamertag: input.gamertag, now })
+    : NOT_ENROLLED;
+
   return {
     status: "created",
     pin: result.pin,
     claimPath: getClaimPath(result.deviceToken),
     emailId: result.emailId,
-    enrollment: wantsTournament ? await enrollOnsite({ agentId, gamertag: input.gamertag, now }) : "none",
+    enrollment,
+    tournamentEmailId,
   };
 }
 
 // The checkbox only shows during the on-site sign-up, but the form can arrive late or forged: the hour is checked here.
-async function enrollOnsite(request: { agentId: string; gamertag: string; now: Date }): Promise<EnrollmentOutcome> {
+async function enrollOnsite(request: { agentId: string; gamertag: string; now: Date }): Promise<Enrollment> {
   const { agentId, gamertag, now } = request;
 
-  if (getEntryWindow(await getEntrySchedule(), now) !== "onsite") return "notOnsite";
+  if (getEntryWindow(await getEntrySchedule(), now) !== "onsite")
+    return { enrollment: "notOnsite", tournamentEmailId: null };
 
   const result = await addEntry(agentId, gamertag, now);
 
-  return result.status === "added" ? "enrolled" : "refused";
+  if (result.status !== "added") return { enrollment: "refused", tournamentEmailId: null };
+
+  return { enrollment: "enrolled", tournamentEmailId: result.emailId };
 }

@@ -1,8 +1,9 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ManagementAction } from "@features/accounts/components/invite-account-form";
 import { ManagedAccountList } from "@features/accounts/components/managed-account-list";
 import type { ManagedAccount } from "@features/accounts/lib/types";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 const INVITED: ManagedAccount = {
   id: "invited-1",
@@ -160,7 +161,7 @@ interface Actions {
 }
 
 function renderList(accounts: ManagedAccount[], actions: Actions = recordingActions()) {
-  render(
+  renderWithToasts(
     <ManagedAccountList
       accounts={accounts}
       resendAction={actions.resend}

@@ -15,6 +15,7 @@ import {
 import { RAFFLE_COPY } from "@features/raffle/lib/raffle-copy";
 import { RAFFLE_LIVE_PATH } from "@features/raffle/lib/raffle-links";
 import { getRaffleAdminSnapshot } from "@features/raffle/lib/server/raffle-queries";
+import { PanelSkeleton } from "@shared/components/panel-skeleton";
 import { ActionLink } from "@shared/components/action-link";
 
 const COPY = RAFFLE_COPY.admin;
@@ -36,7 +37,7 @@ const ACTIONS: RaffleDashboardActions = {
 export function RaffleAdminPage() {
   return (
     <main className="page-wrap grid gap-10 py-12">
-      <Suspense fallback={<p className="type-mono text-muted">{COPY.loading}</p>}>
+      <Suspense fallback={<PanelSkeleton label={COPY.loading} />}>
         <RafflePanel />
       </Suspense>
     </main>

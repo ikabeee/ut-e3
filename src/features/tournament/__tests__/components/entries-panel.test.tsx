@@ -1,8 +1,9 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EntriesPanel, type EntriesAction } from "@features/tournament/components/entries-panel";
 import type { EntriesActionState } from "@features/tournament/lib/entries-actions";
 import type { EntryView } from "@features/tournament/lib/types";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 const ENTRIES: EntryView[] = [
   entry(1, "pre", "registered"),
@@ -32,6 +33,15 @@ describe("EntriesPanel", () => {
     expect(row).toHaveTextContent("Presencial");
     expect(row).toHaveTextContent("Con check-in");
     expect(screen.getByText("Jugador4").closest("li")).toHaveTextContent("No se presentó");
+  });
+
+  it("only shows the counts and the list to the sysadmin, who has no actions (S26)", () => {
+    renderWithToasts(<EntriesPanel entries={ENTRIES} hasBracket={false} />);
+
+    expect(screen.getByRole("list", { name: "Conteo de inscripciones" })).toBeInTheDocument();
+    expect(screen.getByText("Jugador1")).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 
   it("says so when nobody has signed up", () => {
@@ -96,7 +106,7 @@ const OK: EntriesActionState = { status: "done", message: "ok" };
 
 describe("EntriesPanel reset", () => {
   it("offers to reset only once the bracket exists", () => {
-    const { rerender } = render(
+    const { rerender } = renderWithToasts(
       <EntriesPanel entries={ENTRIES} hasBracket={false} actions={recordingActions(OK).actions} />,
     );
 
@@ -150,7 +160,7 @@ function renderPanel({
   hasBracket,
   actions = recordingActions({ status: "done", message: "ok" }).actions,
 }: PanelOptions) {
-  render(<EntriesPanel entries={entries} hasBracket={hasBracket} actions={actions} />);
+  renderWithToasts(<EntriesPanel entries={entries} hasBracket={hasBracket} actions={actions} />);
 }
 
 function recordingActions(result: EntriesActionState) {

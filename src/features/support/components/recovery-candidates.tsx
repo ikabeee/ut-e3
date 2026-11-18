@@ -1,14 +1,12 @@
-import { Button } from "@heroui/react";
 import type { CandidateView } from "@features/support/lib/support-actions";
 import { SUPPORT_COPY } from "@features/support/lib/support-copy";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
+import { PendingButton } from "@shared/components/pending-button";
 
 interface RecoveryCandidatesProps {
   candidates: readonly CandidateView[];
   recoverAction: (form: FormData) => void;
   isRecovering: boolean;
-  /** Why the last recovery was refused, if it was. */
-  error: string | null;
 }
 
 const COPY = SUPPORT_COPY.recovery.candidates;
@@ -17,12 +15,7 @@ const COPY = SUPPORT_COPY.recovery.candidates;
  * The passports that match the search, with what the agent compares with the visitor before handing over an access: the
  * gamertag and the number of stands visited. The email is masked and the PIN is never here.
  */
-export function RecoveryCandidates({
-  candidates,
-  recoverAction,
-  isRecovering,
-  error,
-}: Readonly<RecoveryCandidatesProps>) {
+export function RecoveryCandidates({ candidates, recoverAction, isRecovering }: Readonly<RecoveryCandidatesProps>) {
   return (
     <section aria-labelledby="recovery-candidates-heading" className="grid gap-4">
       <h2 id="recovery-candidates-heading" className="type-section">
@@ -30,11 +23,6 @@ export function RecoveryCandidates({
       </h2>
       <p className="m-0 text-sm text-muted">{COPY.hint}</p>
       <p className="m-0 type-tiny">{COPY.count(candidates.length)}</p>
-      {error ? (
-        <p role="alert" className="m-0 text-sm text-danger">
-          {error}
-        </p>
-      ) : null}
       <ul className="m-0 grid list-none gap-3 p-0">
         {candidates.map((candidate) => (
           <li key={candidate.visitorId} className="border border-border p-4" data-testid="recovery-candidate">
@@ -65,9 +53,9 @@ function CandidateCard({ candidate, recoverAction, isRecovering }: Readonly<Cand
           {COPY.registered(formatEventDate(candidate.registeredAt, "numeric"), formatTimeOfDay(candidate.registeredAt))}
         </p>
       </div>
-      <Button type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isRecovering}>
+      <PendingButton type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isRecovering}>
         {isRecovering ? COPY.recovering : COPY.recover}
-      </Button>
+      </PendingButton>
     </form>
   );
 }

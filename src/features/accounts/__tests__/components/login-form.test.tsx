@@ -1,11 +1,12 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LoginForm } from "@features/accounts/components/login-form";
 import type { SignInState } from "@features/accounts/lib/accounts-actions";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 describe("LoginForm", () => {
   it("labels the email and password fields and their 16 px inputs", () => {
-    render(<LoginForm action={async () => ({ error: "" })} />);
+    renderWithToasts(<LoginForm action={async () => ({ error: "" })} />);
 
     expect(screen.getByLabelText("Correo")).toHaveAttribute("type", "email");
     expect(screen.getByLabelText("Correo")).toHaveAttribute("autocomplete", "username");
@@ -14,6 +15,12 @@ describe("LoginForm", () => {
     expect(screen.getByLabelText("Correo")).toHaveClass("text-base", "min-h-11");
     expect(screen.getByLabelText("Contraseña")).toHaveClass("text-base", "min-h-11");
     expect(screen.getByRole("button", { name: "Entrar" })).toBeInTheDocument();
+  });
+
+  it("links to the password reset page", () => {
+    renderWithToasts(<LoginForm action={async () => ({ error: "" })} />);
+
+    expect(screen.getByRole("link", { name: "Olvidé mi contraseña" })).toHaveAttribute("href", "/forgot-password");
   });
 
   it("sends the typed email and password and shows the error the action returns", async () => {
@@ -25,7 +32,7 @@ describe("LoginForm", () => {
       return { error: "Correo o contraseña incorrectos" };
     };
 
-    render(<LoginForm action={action} />);
+    renderWithToasts(<LoginForm action={action} />);
     await userEvent.type(screen.getByLabelText("Correo"), "admin@ut.mx");
     await userEvent.type(screen.getByLabelText("Contraseña"), "secreta");
     await userEvent.click(screen.getByRole("button", { name: "Entrar" }));
@@ -33,5 +40,23 @@ describe("LoginForm", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Correo o contraseña incorrectos");
     expect(screen.getByLabelText("Correo")).toHaveValue("admin@ut.mx");
     expect(received.map((form) => [form.get("email"), form.get("password")])).toEqual([["admin@ut.mx", "secreta"]]);
+  });
+
+  it("shows and hides the typed password with an icon button, without sending the form (S9)", async () => {
+    const action = jest.fn(async () => ({ error: "" }));
+
+    renderWithToasts(<LoginForm action={action} />);
+    await userEvent.type(screen.getByLabelText("Contraseña"), "secreta");
+
+    const reveal = screen.getByRole("button", { name: "Mostrar contraseña" });
+
+    expect(reveal).toHaveClass("size-11");
+    await userEvent.click(reveal);
+    expect(screen.getByLabelText("Contraseña")).toHaveAttribute("type", "text");
+    expect(screen.getByLabelText("Contraseña")).toHaveValue("secreta");
+
+    await userEvent.click(screen.getByRole("button", { name: "Ocultar contraseña" }));
+    expect(screen.getByLabelText("Contraseña")).toHaveAttribute("type", "password");
+    expect(action).not.toHaveBeenCalled();
   });
 });

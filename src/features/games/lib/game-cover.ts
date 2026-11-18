@@ -1,13 +1,13 @@
 import type { Game, GameImage } from "@features/games/lib/types";
 
-// The cover of a game that the stand administrator registered; the sysadmin replaces it with the real one.
+// The cover of a game that the stand administrator registered; the administrator replaces it with the real card.
 export const GENERIC_COVER_PATH = "/games/generic-cover.jpg";
 
 /**
  * The images of the gallery: the hero image first, then the vertical cover and the rest in position order. A game
  * without a cover has none: the pages show a generic cover. The stored order and positions are not touched.
  */
-export function getGalleryImages(game: Game): GameImage[] {
+export function getGalleryImages(game: Pick<Game, "images">): GameImage[] {
   const cover = getCoverImage(game);
 
   if (!cover) return [];
@@ -28,7 +28,7 @@ export function getCoverImage(game: Pick<Game, "images">): GameImage | null {
  * By convention it is the first image after the vertical cover (`<slug>-portada.jpg`, 16:9); a game without it keeps
  * the vertical cover, and one without artwork has none.
  */
-export function getHeroImage(game: Game): GameImage | null {
+export function getHeroImage(game: Pick<Game, "images">): GameImage | null {
   return getLandscapeImage(game) ?? getCoverImage(game);
 }
 

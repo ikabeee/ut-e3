@@ -32,6 +32,13 @@ export const TOURNAMENT_COPY = {
   status: STATUS_LABELS,
   areas: AREA_LABELS,
   outcomes: OUTCOME_LABELS,
+  entryEmail: {
+    subject: "Tu inscripción al torneo de KOF",
+    pre: (gamertag: string, { date, start, end }: { date: string; start: string; end: string }) =>
+      `¡Hola, ${gamertag}!\n\nQuedaste inscrito en el torneo de KOF.\n\nEl ${date}, de ${start} a ${end}, haz tu check-in con el PIN de tu pasaporte en el área de KOF del Edificio B. Si no lo haces a tiempo, quedas fuera del torneo.`,
+    onsite: (gamertag: string) =>
+      `¡Hola, ${gamertag}!\n\nQuedaste inscrito en el torneo de KOF y tu check-in ya está hecho: entras al bracket.\n\nQuédate cerca del área de KOF del Edificio B para cuando llamen tu combate.`,
+  },
   ui: {
     title: "Torneo de KOF",
     description: "Captura y seguimiento del bracket del torneo de KOF.",
@@ -46,7 +53,22 @@ export const TOURNAMENT_COPY = {
     noDesk: "Tu cuenta todavía no tiene una mesa asignada. Pide al administrador de KOF que te la asigne.",
     connectionLost: "Sin conexión. Se muestra el último estado recibido.",
     summaryLabel: "Resumen",
-    summary: { ready: "Listos", active: "En juego", frozen: "Congelados", finished: "Terminados" },
+    summary: {
+      pending: "Pendientes",
+      ready: "Listos",
+      active: "En juego",
+      frozen: "Congelados",
+      finished: "Terminados",
+    },
+    monitor: {
+      heading: "En vivo",
+      refresh: (seconds: number) => `Se actualiza cada ${seconds} s, sin recargar.`,
+      progress: (finished: number, total: number) => `${finished} de ${total} combates terminados`,
+      liveLabel: "Combates en juego y congelados",
+      empty: "Ningún combate en juego ahora. Los listos esperan a que su mesa los inicie.",
+      versus: (first: string, second: string) => `${first} vs ${second}`,
+      where: (area: string, desk: number) => `${area} · Mesa ${desk}`,
+    },
     champion: (tag: string) => `Campeón: ${tag}`,
     noChampion: "El torneo terminó sin campeón.",
     match: {
@@ -74,7 +96,7 @@ export const TOURNAMENT_COPY = {
       title: "Tabla de posiciones",
       description: "Sigue los combates y los resultados del torneo de KOF.",
       loading: "Cargando el bracket...",
-      closed: "El bracket está disponible en la pantalla del torneo.",
+      closed: "El bracket estará disponible en la pantalla del torneo.",
       pending: "El bracket todavía no está listo.",
       admin: {
         heading: "Bracket público",

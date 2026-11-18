@@ -1,10 +1,11 @@
 "use client";
 
-import { Button } from "@heroui/react";
 import { startTransition, useActionState, useEffect, useRef } from "react";
 import type { SpinActionState } from "@features/raffle/lib/raffle-actions";
 import { RAFFLE_COPY } from "@features/raffle/lib/raffle-copy";
 import type { PendingDraw } from "@features/raffle/lib/types";
+import { PendingButton } from "@shared/components/pending-button";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 
 export type SpinAction = (previous: SpinActionState | null, form: FormData) => Promise<SpinActionState>;
 
@@ -25,6 +26,8 @@ export function SpinButton({ spin, isDisabled, onDrawn }: Readonly<SpinButtonPro
   const [state, dispatch, isPending] = useActionState(spin, null);
   const requestId = useRef<string | null>(null);
   const handledState = useRef<SpinActionState | null>(null);
+
+  useErrorToast(state?.status === "error" ? state.message : null, state);
 
   // Each answer is handled once: `onDrawn` changes with every poll, and a ticket already decided must not come back.
   useEffect(() => {
@@ -47,7 +50,7 @@ export function SpinButton({ spin, isDisabled, onDrawn }: Readonly<SpinButtonPro
 
   return (
     <div className="grid justify-items-start gap-3">
-      <Button
+      <PendingButton
         variant="primary"
         size="lg"
         className="min-h-16 min-w-48 text-xl"
@@ -56,12 +59,7 @@ export function SpinButton({ spin, isDisabled, onDrawn }: Readonly<SpinButtonPro
         onPress={press}
       >
         {isPending ? COPY.pending : COPY.label}
-      </Button>
-      {state?.status === "error" && (
-        <p role="alert" className="m-0 text-sm text-danger">
-          {state.message}
-        </p>
-      )}
+      </PendingButton>
     </div>
   );
 }

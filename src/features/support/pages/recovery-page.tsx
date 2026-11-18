@@ -15,6 +15,7 @@ import {
 import { SUPPORT_COPY } from "@features/support/lib/support-copy";
 import { getEntryWindow } from "@features/tournament/lib/entries-rules";
 import { getEntrySchedule } from "@features/tournament/lib/server/entries-queries";
+import { PanelSkeleton } from "@shared/components/panel-skeleton";
 
 const COPY = SUPPORT_COPY.recovery;
 
@@ -28,7 +29,7 @@ export const recoveryPageMetadata: Metadata = {
 export function RecoveryPage() {
   return (
     <main className="page-wrap grid gap-10 py-12">
-      <Suspense fallback={<p className="type-mono text-muted">{COPY.loading}</p>}>
+      <Suspense fallback={<PanelSkeleton label={COPY.loading} layout="form" />}>
         <RecoveryPanel />
       </Suspense>
     </main>

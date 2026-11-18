@@ -20,6 +20,7 @@ export interface PlayerView {
 }
 
 export interface StatusCounts {
+  pending: number;
   ready: number;
   active: number;
   frozen: number;
@@ -54,11 +55,22 @@ export function getChampionTag(tournament: Tournament): string | null {
 
 export function getStatusCounts(matches: readonly Match[]): StatusCounts {
   return {
+    pending: countStatus(matches, "pending"),
     ready: countStatus(matches, "ready"),
     active: countStatus(matches, "active"),
     frozen: countStatus(matches, "frozen"),
     finished: countStatus(matches, "finished"),
   };
+}
+
+/** What the monitor shows first (S11): the matches being played, then the ones frozen, each in bracket order. */
+export function getLiveMatches(matches: readonly Match[]): Match[] {
+  const byNumber = matches.toSorted((first, second) => first.number - second.number);
+
+  return [
+    ...byNumber.filter((match) => match.status === "active"),
+    ...byNumber.filter((match) => match.status === "frozen"),
+  ];
 }
 
 function toPlayerView(tournament: Tournament, match: Match, slot: SlotIndex): PlayerView {

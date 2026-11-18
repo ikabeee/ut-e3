@@ -19,6 +19,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { chromium } from "playwright-core";
+import { setLoginDatabase, submitLoginCode } from "./lib/e2e-harness.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -188,6 +189,8 @@ async function launchBrowser() {
 
 async function runScenario({ browser, databaseFile, screenshots }) {
   const database = new DatabaseSync(databaseFile);
+
+  setLoginDatabase(databaseFile);
   const consoleErrors = [];
   const pages = {};
 
@@ -427,7 +430,10 @@ async function manageGenres({ page, database }) {
 
   await used.getByRole("button", { name: "Borrar" }).click();
   await used.getByRole("button", { name: "Sí, borrar" }).click();
-  await used.getByText("Ese género tiene juegos asignados").waitFor({ timeout: UI_TIMEOUT_MS });
+  await page
+    .getByRole("alert")
+    .filter({ hasText: "Ese género tiene juegos asignados" })
+    .waitFor({ timeout: UI_TIMEOUT_MS });
   check("a genre with games cannot be deleted", count(database, "genres") === genresWithParty);
 
   const party = page.getByTestId("genres-admin").getByRole("listitem").filter({ hasText: "Party" });
@@ -585,8 +591,9 @@ function timestamp(minute) {
 async function signIn(page, { email, password }) {
   await page.goto(`${BASE_URL}/login`, { waitUntil: "networkidle" });
   await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña").fill(password);
+  await page.getByLabel("Contraseña", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Entrar" }).click();
+  await submitLoginCode(page, email);
 }
 
 function count(database, table, where = "1 = 1") {

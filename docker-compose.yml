@@ -19,6 +19,8 @@ services:
     env_file: ${ENV_FILE:-.env}
     environment:
       DATABASE_URL: file:/data/app.db
+      # Imagenes que suben los administradores de stand (docs/deploy.md): en el mismo volumen que la base.
+      UPLOADS_DIR: /data/uploads
       SITE_MODE: ${SITE_MODE:-landing}
     ports:
       - "127.0.0.1:${APP_PORT:-3000}:3000"

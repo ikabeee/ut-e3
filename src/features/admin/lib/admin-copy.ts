@@ -1,4 +1,10 @@
 export const ADMIN_COPY = {
+  emergency: {
+    overloadSubject: (metric: string) => `Servidor saturado (${metric})`,
+    overloadDetail: (metric: string, threshold: string) =>
+      `La métrica ${metric} pasó de ${threshold} durante 2 minutos y el bracket público se cerró solo (RF-74). Revisa /admin/server.`,
+    watchFailedSubject: "Falló la vigilancia de carga del servidor",
+  },
   title: "Panel del sysadmin",
   description: "Administración del evento PIXEL & CODE.",
   accountsHeading: "Cuentas del evento",
@@ -22,6 +28,18 @@ export const ADMIN_COPY = {
   server: {
     heading: "Estado del servidor",
     refresh: "Actualizar",
+    autoRefresh: (seconds: number) => `La página se actualiza sola cada ${seconds} s mientras está abierta.`,
+    charts: {
+      heading: "Historial de carga",
+      lead: (seconds: number) =>
+        `Una lectura cada ${seconds} s desde que arrancó el proceso. La línea punteada es el límite del cierre automático.`,
+      titles: { cpu: "CPU ocupada", memory: "Memoria en uso" },
+      summary: (latest: string, peak: string) => `Ahora: ${latest}. Máximo del periodo: ${peak}.`,
+      empty: "Todavía no hay dos lecturas para trazar la línea. Llegan solas mientras la página está abierta.",
+      threshold: (share: string) => `${share}: cierre automático`,
+      description: (metric: string, period: { from: string; to: string }, threshold: string) =>
+        `${metric} de las ${period.from} a las ${period.to}, contra el límite de ${threshold}.`,
+    },
     takenAt: (time: string) => `Lectura de las ${time} (hora de Cancún).`,
     memory: (used: string, total: string, share: string) => `Memoria: ${used} de ${total} (${share}).`,
     memorySource: { cgroup: "Medida contra el límite del contenedor.", host: "Medida contra toda la máquina." },

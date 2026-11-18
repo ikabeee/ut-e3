@@ -73,9 +73,9 @@ describe("GET /api/games/<slug>/itch (RF-10)", () => {
 
   it("answers 404 for a game that lacks its artwork, as the public page does (S3)", async () => {
     jest.useFakeTimers({ now: new Date(OPENS_AT.getTime() + 1000), doNotFake: ["nextTick", "setImmediate"] });
-    await getPrisma().game.update({ where: { slug: "vaporlock" }, data: { itchUrl: ITCH_URL } });
+    await getPrisma().game.update({ where: { slug: "sombra-del-mictlan" }, data: { itchUrl: ITCH_URL } });
 
-    const response = await call("vaporlock");
+    const response = await call("sombra-del-mictlan");
 
     expect(response.status).toBe(404);
     expect(await response.text()).not.toContain("itch.io");

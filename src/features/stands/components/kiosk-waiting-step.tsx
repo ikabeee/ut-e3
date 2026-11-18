@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { Button } from "@heroui/react";
+import { Button, Spinner } from "@heroui/react";
 import { STANDS_COPY } from "@features/stands/lib/stands-copy";
 import type { VisitStatus } from "@features/stands/lib/pending-visit";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 import { usePolledValue } from "@shared/hooks/use-polled-value";
 
 interface KioskWaitingStepProps {
@@ -37,6 +38,8 @@ export function KioskWaitingStep({
     intervalMs: POLL_INTERVAL_MS,
   });
 
+  useErrorToast(hasConnectionError ? COPY.connectionError : null);
+
   useEffect(() => {
     if (status === "answered") onAnswered();
 
@@ -45,9 +48,11 @@ export function KioskWaitingStep({
 
   return (
     <div role="status" className="grid w-full max-w-xl gap-5 border border-border p-8">
-      <h2 className="type-section">{COPY.heading}</h2>
+      <div className="flex items-center gap-4">
+        <Spinner aria-hidden="true" color="current" />
+        <h2 className="type-section">{COPY.heading}</h2>
+      </div>
       <p className="m-0">{COPY.message}</p>
-      {hasConnectionError ? <p className="m-0 type-tiny text-muted">{COPY.connectionError}</p> : null}
       <div className="flex flex-wrap gap-3">
         <Button variant="secondary" className="min-h-11" onPress={onAnswerHere}>
           {COPY.answerHere}

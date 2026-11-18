@@ -5,6 +5,8 @@ import { useActionState, useEffect, useState } from "react";
 import type { TournamentActionState } from "@features/tournament/lib/tournament-actions";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import type { SlotIndex, TournamentCommandType } from "@features/tournament/lib/types";
+import { PendingButton } from "@shared/components/pending-button";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 
 export type TournamentAction = (
   previous: TournamentActionState | null,
@@ -52,6 +54,8 @@ export function CommandButton({
   const [isConfirming, setIsConfirming] = useState(false);
   const [state, formAction, isPending] = useActionState(action, null);
 
+  useErrorToast(state?.status === "error" ? state.message : null, state);
+
   useEffect(() => {
     if (state?.status === "applied") onApplied();
   }, [state, onApplied]);
@@ -67,7 +71,7 @@ export function CommandButton({
   return (
     <form action={formAction} className="grid gap-2">
       <CommandInputs command={command} />
-      <FormFeedback needsConfirmation={needsConfirmation} state={state} />
+      {needsConfirmation && <p className="text-sm">{COPY.confirmQuestion}</p>}
       <SubmitRow
         label={label}
         variant={variant}
@@ -91,28 +95,12 @@ function CommandInputs({ command }: Readonly<{ command: CommandFields }>) {
   );
 }
 
-function FormFeedback({
-  needsConfirmation,
-  state,
-}: Readonly<{ needsConfirmation: boolean; state: TournamentActionState | null }>) {
-  return (
-    <>
-      {needsConfirmation && <p className="text-sm">{COPY.confirmQuestion}</p>}
-      {state?.status === "error" && (
-        <p role="alert" className="text-sm text-danger">
-          {state.message}
-        </p>
-      )}
-    </>
-  );
-}
-
 function SubmitRow({ label, variant, needsConfirmation, isPending, onCancel }: Readonly<SubmitRowProps>) {
   return (
     <div className="flex flex-wrap gap-2">
-      <Button type="submit" variant={variant} className="min-h-11" isPending={isPending}>
+      <PendingButton type="submit" variant={variant} className="min-h-11" isPending={isPending}>
         {needsConfirmation ? `${COPY.confirm}: ${label}` : label}
-      </Button>
+      </PendingButton>
       {needsConfirmation && (
         <Button variant="tertiary" className="min-h-11" onPress={onCancel}>
           {COPY.cancel}

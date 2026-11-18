@@ -104,7 +104,7 @@ export function LandingView({
         <EventSchedule
           heading={formatEventDate(settings.eventStartsAt, "2-digit")}
           items={scheduleItems}
-          zoneLink={getZoneLink}
+          zoneLabel={getZoneLabel}
         />
         <FloorPlan stands={games.map(toFloorPlanStand)} />
         <VenueLocation venue={EVENT_VENUE} />
@@ -177,6 +177,11 @@ function kofLabels(settings: EventSettings) {
 
 function formatTimeRange(startsAt: string, endsAt: string) {
   return LANDING_COPY.acts.timeRange(formatTimeOfDay(startsAt), formatTimeOfDay(endsAt));
+}
+
+// The schedule names the place of an activity as plain text: it does not send to the floor plan (S24).
+function getZoneLabel(zone: string): string | null {
+  return getZoneLink(zone)?.label ?? null;
 }
 
 function buildLandingStructuredData(settings: EventSettings) {

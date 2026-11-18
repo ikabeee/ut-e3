@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import { LOGIN_PATH } from "@features/accounts/lib/accounts-links";
-import { MIN_PASSWORD_LENGTH, validateNewPassword } from "@features/accounts/lib/invitation-rules";
+import { findPasswordProblem } from "@features/accounts/lib/password-form";
 import { activateAccount } from "@features/accounts/lib/server/invitations";
 import { readFormText } from "@shared/lib/form-data";
 
@@ -19,12 +19,11 @@ export async function activateAccountAction(
   _previous: ActivationState | null,
   form: FormData,
 ): Promise<ActivationState> {
-  const password = readFormText(form, "password");
-  const problem = validateNewPassword(password, readFormText(form, "confirmation"));
+  const problem = findPasswordProblem(form, ERRORS);
 
-  if (problem) return { error: problem === "tooShort" ? ERRORS.tooShort(MIN_PASSWORD_LENGTH) : ERRORS.mismatch };
+  if (problem) return { error: problem };
 
-  const result = await activateAccount(readFormText(form, "token"), password, new Date());
+  const result = await activateAccount(readFormText(form, "token"), readFormText(form, "password"), new Date());
 
   if (result.status === "activated") redirect(LOGIN_PATH);
 

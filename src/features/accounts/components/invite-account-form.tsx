@@ -1,10 +1,11 @@
 "use client";
 
-import { Button, FieldError, Form, Input, Label, ListBox, Select, TextField } from "@heroui/react";
+import { FieldError, Form, Input, Label, ListBox, Select, TextField } from "@heroui/react";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import type { ManagementActionState } from "@features/accounts/lib/management-actions";
 import { FormFeedback } from "@shared/components/form-feedback";
 import { useActionForm } from "@shared/hooks/use-action-form";
+import { PendingButton } from "@shared/components/pending-button";
 
 export type ManagementAction = (
   previous: ManagementActionState | null,
@@ -46,9 +47,9 @@ export function InviteAccountForm({ roles, showDesk, action }: Readonly<InviteAc
       <RoleField roles={roles} />
       {showDesk && <DeskField />}
       <FormFeedback state={state} />
-      <Button type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isPending}>
+      <PendingButton type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isPending}>
         {isPending ? COPY.sending : COPY.submit}
-      </Button>
+      </PendingButton>
     </Form>
   );
 }

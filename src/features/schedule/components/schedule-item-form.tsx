@@ -1,24 +1,16 @@
 "use client";
 
-import {
-  Button,
-  Description,
-  FieldError,
-  Form,
-  Input,
-  Label,
-  ListBox,
-  Select,
-  TextArea,
-  TextField,
-} from "@heroui/react";
+import { Description, FieldError, Form, Input, Label, ListBox, Select, TextArea, TextField } from "@heroui/react";
 import { useActionState, useEffect, useRef } from "react";
 import type { ScheduleFormState } from "@features/schedule/lib/schedule-actions";
 import { SCHEDULE_COPY } from "@features/schedule/lib/schedule-copy";
 import { DESCRIPTION_MAX_LENGTH, NO_ZONE, TITLE_MAX_LENGTH } from "@features/schedule/lib/schedule-item-input";
 import type { ScheduleItem, ZoneOption } from "@features/schedule/lib/types";
+import { PendingButton } from "@shared/components/pending-button";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 import { useSubmitKeepingValues } from "@shared/hooks/use-submit-keeping-values";
 import { formatCancunDateTimeInput } from "@shared/lib/date-time";
+import { joinFieldErrors } from "@shared/lib/field-errors";
 
 export type ScheduleAction = (previous: ScheduleFormState | null, form: FormData) => Promise<ScheduleFormState>;
 
@@ -65,9 +57,9 @@ export function ScheduleItemForm({ item, zones, action }: Readonly<ScheduleItemF
       </div>
       <ZoneSelect zones={zones} defaultZone={item?.zone ?? NO_ZONE} />
       <FormFeedback state={state} isNew={!item} />
-      <Button type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isPending}>
+      <PendingButton type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isPending}>
         {submitLabel(isPending, !item)}
-      </Button>
+      </PendingButton>
     </Form>
   );
 }
@@ -111,24 +103,23 @@ function ZoneSelect({ zones, defaultZone }: Readonly<{ zones: readonly ZoneOptio
   );
 }
 
+// The save shows under the form; a refusal, whether of the fields or of the server, goes to a toast (S7).
 function FormFeedback({ state, isNew }: Readonly<{ state: ScheduleFormState | null; isNew: boolean }>) {
-  if (state?.status === "saved") {
-    return (
-      <p role="status" className="text-sm text-success">
-        {isNew ? COPY.created : COPY.updated}
-      </p>
-    );
-  }
+  useErrorToast(describeError(state), state);
 
-  if (state?.status === "error") {
-    return (
-      <p role="alert" className="text-sm text-danger">
-        {state.message}
-      </p>
-    );
-  }
+  if (state?.status !== "saved") return null;
 
-  return null;
+  return (
+    <p role="status" className="text-sm text-success">
+      {isNew ? COPY.created : COPY.updated}
+    </p>
+  );
+}
+
+function describeError(state: ScheduleFormState | null): string | null {
+  if (state?.status === "error") return state.message;
+
+  return state?.status === "invalid" ? joinFieldErrors(state.errors) : null;
 }
 
 function submitLabel(isPending: boolean, isNew: boolean): string {

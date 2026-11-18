@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@heroui/react";
 import { useFormStatus } from "react-dom";
 import { useRecoveryLinkToken } from "@features/visitors/hooks/use-recovery-link-token";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
+import { PendingButton } from "@shared/components/pending-button";
 
 interface RecoveryConfirmFormProps {
   action: (form: FormData) => Promise<void>;
@@ -35,8 +35,8 @@ function ConfirmButton({ isDisabled }: Readonly<{ isDisabled: boolean }>) {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" variant="primary" className="min-h-11" isDisabled={isDisabled} isPending={pending}>
+    <PendingButton type="submit" variant="primary" className="min-h-11" isDisabled={isDisabled} isPending={pending}>
       {pending ? COPY.confirmPending : COPY.confirmSubmit}
-    </Button>
+    </PendingButton>
   );
 }

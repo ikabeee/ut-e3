@@ -16,6 +16,15 @@ el `Dockerfile` y el `docker-compose.yml`; el proxy (Nginx o Caddy) lo pones tú
 La base vive en `/data/app.db` dentro del contenedor, en el volumen `app-data`. Está en modo WAL con `busy_timeout`
 (RNF-08); el código lo configura al abrir cada conexión.
 
+Las imágenes de los juegos que suben los administradores de stand (`/stand/game`) se guardan en `UPLOADS_DIR`, que en la
+imagen es `/data/uploads` (el mismo volumen `app-data`; en desarrollo, `data/uploads` dentro del proyecto). Se sirven por
+`GET /api/media/games/<archivo>.jpg`, con caché inmutable porque el nombre lleva un hash del contenido. Solo se aceptan
+JPG reales, de máximo 5 MB, con el tamaño exacto del grid de portadas (tarjeta 810x1080; portada y hasta cuatro capturas
+1920x1080). El respaldo de la base (abajo) no incluye las imágenes: copia también `/data/uploads`
+(`docker compose cp app:/data/uploads ./uploads-<fecha>`). El límite de cuerpo de las Server Actions es de 6 MB
+(`experimental.serverActions.bodySizeLimit` en `next.config.ts`); si pones un proxy con límite menor
+(`client_max_body_size` en Nginx), súbelo a 6 MB o la carga falla antes de llegar a la app.
+
 ## Primer despliegue
 
 Requisitos en el VPS: Docker con el plugin Compose y acceso a internet para construir (npm y GitHub).
@@ -87,13 +96,16 @@ Todas viven en `.env` (nunca se versiona). `.env.production.example` las lista c
 | `APP_PORT` | No | Puerto en `127.0.0.1` para el proxy. Por defecto `3000`. |
 | `APP_TAG` | No | Etiqueta de la imagen. Por defecto `latest`. |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | No | Ver "Correo". |
+| `EMERGENCY_MAIL` | No | Dirección que recibe los avisos de emergencia de producción. Sin ella no se envía ninguno; ver "Avisos de emergencia". |
 
 El contenedor se niega a arrancar si faltan `NEXT_PUBLIC_SITE_URL` o `PIN_ENCRYPTION_KEY` y lo dice en el log.
 
 ### Correo (SMTP opcional)
 
-Todos los correos (invitaciones de cuenta, el pasaporte de cada registro, la recuperación por correo y el aviso al
-ganador de la rifa) se guardan primero en la tabla `email_outbox` de la base (RNF-03).
+Todos los correos (invitaciones de cuenta, el pasaporte de cada registro, la recuperación por correo, la inscripción al
+torneo de KOF, el aviso al ganador de la rifa y los avisos de emergencia) se guardan primero en la tabla `email_outbox`
+de la base (RNF-03). Salen con la plantilla del sitio (fondo negro, acento azul, sin esquinas redondeadas;
+`src/shared/lib/server/email-template.ts`) y su texto plano como alternativa.
 
 - **Con `SMTP_HOST`** (y `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` y `SMTP_FROM`, las cinco son obligatorias juntas; si falta
   alguna, el servidor no arranca y el log dice cuál. El remitente es `SMTP_FROM`, por ejemplo
@@ -114,6 +126,26 @@ for (const row of db.prepare('SELECT to_address, text FROM email_outbox WHERE se
 ```
 
 El enlace de invitación vale 72 horas y solo se guarda su hash (RNF-09): este comando es la única forma de verlo.
+
+Cada inicio de sesión del staff pide un código de 6 dígitos que se envía por correo (vence en 10 minutos). Sin
+`SMTP_HOST` nadie del staff puede entrar: ese código y los enlaces de "Olvidé mi contraseña" (vencen en 1 hora) también se
+quedan en `email_outbox`. Para leer el código en una emergencia usa `SELECT to_address, text FROM email_outbox` en el
+comando de arriba y busca el último correo "Tu código para entrar al panel del evento".
+
+### Avisos de emergencia
+
+Con `EMERGENCY_MAIL=guardia@tu-dominio.mx` en `.env`, el servidor manda un correo a esa dirección cuando:
+
+- Next.js atrapa un error en una petición (página, Route Handler, Server Action o proxy; `onRequestError` de
+  `src/instrumentation.ts`). El correo nombra el archivo de la ruta (`/activate/[token]`), no la URL visitada, para que
+  un token nunca viaje en el aviso.
+- La CPU o la memoria pasan de 85 % durante 2 minutos y el bracket público se cierra solo, o falla la vigilancia de
+  carga.
+- `GET /api/health` responde 503 porque al volumen de la base le quedan menos de 64 MB.
+
+El mismo aviso no se repite durante 15 minutos y salen como máximo 10 avisos por hora, así que una avalancha de errores
+no llena el buzón. Los avisos pasan por `email_outbox`; si la base misma falla, se intenta el envío directo por SMTP. Sin
+`SMTP_HOST` se quedan en la bandeja como los demás correos. Sin `EMERGENCY_MAIL` no se envía ninguno.
 
 ## Contenido inicial
 

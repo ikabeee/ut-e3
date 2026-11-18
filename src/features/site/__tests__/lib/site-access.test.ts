@@ -9,6 +9,16 @@ describe("decideSiteAccess in landing mode", () => {
     expect(decideSiteAccess("landing", { method: "HEAD", pathname: "/" })).toBe("allow");
   });
 
+  it("serves the images that stand administrators upload, and nothing else under /api/media", () => {
+    expect(decideSiteAccess("landing", { method: "GET", pathname: "/api/media/games/ruta-9-abcd1234.jpg" })).toBe(
+      "allow",
+    );
+    expect(decideSiteAccess("landing", { method: "GET", pathname: "/api/media/other.jpg" })).toBe("notFound");
+    expect(decideSiteAccess("landing", { method: "POST", pathname: "/api/media/games/ruta-9-abcd1234.jpg" })).toBe(
+      "methodNotAllowed",
+    );
+  });
+
   it.each(["/games/abby-s-tower.jpg", "/sponsors/bonavida.svg", "/media/hero-loop.mp4", "/icons/icon-192.png"])(
     "serves the public file %s",
     (pathname) => {

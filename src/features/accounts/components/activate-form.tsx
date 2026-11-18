@@ -13,11 +13,12 @@ interface ActivateFormProps {
   /** The token of the link; it goes back to the server in a hidden field, where it is checked. */
   token: string;
   action: (previous: ActivationState | null, form: FormData) => Promise<ActivationState>;
+  /** Which labels and buttons to use. A key, not the copy: functions cannot cross from the server to a client. */
+  variant?: "activate" | "resetPassword";
 }
 
-const COPY = ACCOUNTS_COPY.activate;
-
-export function ActivateForm({ token, action }: Readonly<ActivateFormProps>) {
+export function ActivateForm({ token, action, variant = "activate" }: Readonly<ActivateFormProps>) {
+  const copy = ACCOUNTS_COPY[variant];
   const [state, formAction, isPending] = useActionState(action, null);
   const handleSubmit = useSubmitKeepingValues(formAction);
 
@@ -26,12 +27,12 @@ export function ActivateForm({ token, action }: Readonly<ActivateFormProps>) {
       <input type="hidden" name="token" value={token} />
       <PasswordField
         name="password"
-        label={COPY.passwordLabel}
+        label={copy.passwordLabel}
         autoComplete="new-password"
-        hint={COPY.hint(MIN_PASSWORD_LENGTH)}
+        hint={copy.hint(MIN_PASSWORD_LENGTH)}
       />
-      <PasswordField name="confirmation" label={COPY.confirmationLabel} autoComplete="new-password" />
-      <FormSubmit error={state?.error} isPending={isPending} copy={COPY} />
+      <PasswordField name="confirmation" label={copy.confirmationLabel} autoComplete="new-password" />
+      <FormSubmit error={state?.error} isPending={isPending} copy={copy} />
     </Form>
   );
 }

@@ -5,6 +5,7 @@ import { signOut } from "@features/accounts/lib/accounts-actions";
 import { requireSysadmin } from "@features/accounts/lib/server/current-account";
 import { AdminHeader } from "@features/admin/components/admin-header";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
+import { PanelSkeleton } from "@shared/components/panel-skeleton";
 
 interface AdminSectionShellProps {
   title: string;
@@ -27,7 +28,7 @@ export function buildAdminSectionMetadata(page: { title: string; description: st
 export function AdminSectionShell(props: Readonly<AdminSectionShellProps>) {
   return (
     <main className="page-wrap grid gap-12 py-12">
-      <Suspense fallback={<p className="type-mono text-muted">{ADMIN_COPY.loading}</p>}>
+      <Suspense fallback={<PanelSkeleton label={ADMIN_COPY.loading} />}>
         <AdminSectionContent {...props} />
       </Suspense>
     </main>
@@ -42,7 +43,12 @@ async function AdminSectionContent({ title, path, renderContent }: Readonly<Admi
 
   return (
     <>
-      <AdminHeader title={title} accountName={account.name} currentPath={path} signOutAction={signOut} />
+      <AdminHeader
+        title={title}
+        signedInAs={ADMIN_COPY.signedInAs(account.name)}
+        currentPath={path}
+        signOutAction={signOut}
+      />
       {await renderContent()}
     </>
   );

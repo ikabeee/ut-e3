@@ -10,6 +10,7 @@ import { RegistrationForm } from "@features/visitors/components/registration-for
 import { registerVisitor } from "@features/visitors/lib/visitors-actions";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 import { PASSPORT_PATH, REGISTER_PATH } from "@features/visitors/lib/visitors-links";
+import { LoadingState } from "@shared/components/loading-state";
 import { formatEventDate } from "@shared/lib/date-time";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
@@ -33,7 +34,7 @@ interface RegisterViewProps {
 
 export function RegisterPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<LoadingState label={VISITORS_COPY.loading.register} className="justify-center py-24" />}>
       <RegistrationGate />
     </Suspense>
   );

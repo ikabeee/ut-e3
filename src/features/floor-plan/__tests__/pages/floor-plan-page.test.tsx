@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import { EVENT_VENUE } from "@features/landing/lib/venue";
 import { FloorPlanPageView, floorPlanPageMetadata } from "@features/floor-plan/pages/floor-plan-page";
 import type { FloorPlanStand } from "@features/floor-plan/lib/types";
-import { siteConfig } from "@shared/lib/site-config";
 
 const STANDS: FloorPlanStand[] = [
   {
@@ -17,7 +16,7 @@ const STANDS: FloorPlanStand[] = [
 ];
 
 function renderPageView(stands: FloorPlanStand[] = STANDS) {
-  return render(<FloorPlanPageView stands={stands} siteConfig={siteConfig} venue={EVENT_VENUE} />);
+  return render(<FloorPlanPageView stands={stands} venue={EVENT_VENUE} />);
 }
 
 describe("floorPlanPageMetadata", () => {
@@ -33,11 +32,11 @@ describe("floorPlanPageMetadata", () => {
 });
 
 describe("FloorPlanPageView", () => {
-  it("shows the Croquis heading with its kicker, and lead, without a redundant summary", () => {
+  it("shows the Croquis heading and lead, without the event kicker (S14) nor a redundant summary", () => {
     renderPageView([]);
 
     expect(screen.getByRole("heading", { level: 1, name: "Croquis" })).toBeInTheDocument();
-    expect(screen.getByText("PIXEL & CODE · Edificio B, UT Cancún")).toBeInTheDocument();
+    expect(screen.queryByText(/PIXEL & CODE/)).not.toBeInTheDocument();
     expect(
       screen.getByText(
         "Ubica cada stand, las actividades y los servicios del Edificio B. Toca un marcador para ver el juego.",

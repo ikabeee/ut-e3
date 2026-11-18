@@ -6,6 +6,7 @@ import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import { LOGIN_PATH } from "@features/accounts/lib/accounts-links";
 import { activateAccountAction, type ActivationState } from "@features/accounts/lib/activation-actions";
 import { getInvitationState, type InvitationState } from "@features/accounts/lib/server/invitations";
+import { LoadingState } from "@shared/components/loading-state";
 
 interface ActivateViewProps {
   state: InvitationState;
@@ -24,7 +25,7 @@ export const activatePageMetadata: Metadata = {
 
 export function ActivatePage({ params }: PageProps<"/activate/[token]">) {
   return (
-    <Suspense>
+    <Suspense fallback={<LoadingState label={COPY.loading} className="justify-center py-24" />}>
       <ActivateGate params={params} />
     </Suspense>
   );

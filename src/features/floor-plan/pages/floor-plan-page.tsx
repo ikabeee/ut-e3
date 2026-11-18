@@ -28,27 +28,21 @@ export const floorPlanPageMetadata: Metadata = {
 
 interface FloorPlanPageViewProps {
   stands: readonly FloorPlanStand[];
-  siteConfig: typeof siteConfig;
   venue: EventVenue;
 }
 
-/** The Croquis page: kicker, title and lead over the event map in its page variant. */
+/** The Croquis page: title and lead over the event map in its page variant. */
 export async function FloorPlanPage(): Promise<ReactElement> {
   const games = await getGames();
 
-  return <FloorPlanPageView stands={games.map(toFloorPlanStand)} siteConfig={siteConfig} venue={EVENT_VENUE} />;
+  return <FloorPlanPageView stands={games.map(toFloorPlanStand)} venue={EVENT_VENUE} />;
 }
 
-export function FloorPlanPageView({
-  stands,
-  siteConfig: config,
-  venue,
-}: Readonly<FloorPlanPageViewProps>): ReactElement {
+export function FloorPlanPageView({ stands, venue }: Readonly<FloorPlanPageViewProps>): ReactElement {
   return (
     <main className="page-wrap grid grid-cols-[minmax(0,1fr)] gap-6 py-12 min-[1000px]:gap-8">
       <div>
-        <p className="type-tiny text-muted">{PAGE_COPY.kicker(config.name, venue.building, venue.shortName)}</p>
-        <h1 className="mt-2 type-wide text-[clamp(28px,4.4vw,60px)] leading-[.95] tracking-[-.035em] wrap-break-word">
+        <h1 className="type-wide text-[clamp(28px,4.4vw,60px)] leading-[.95] tracking-[-.035em] wrap-break-word">
           {FLOOR_PLAN_COPY.heading}
         </h1>
         <p className="mt-4 max-w-[62ch] text-copy">{PAGE_COPY.lead(venue.building)}</p>

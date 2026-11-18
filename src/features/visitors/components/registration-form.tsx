@@ -1,11 +1,14 @@
 "use client";
 
-import { Button, FieldError, Form, Input, Label, TextField } from "@heroui/react";
+import { FieldError, Form, Input, Label, TextField } from "@heroui/react";
 import { useActionState, useState, type FormEvent } from "react";
 import type { RegistrationState } from "@features/visitors/lib/visitors-actions";
 import { parseRegistrationInput, type RegistrationFieldErrors } from "@features/visitors/lib/registration-input";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
+import { PendingButton } from "@shared/components/pending-button";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 import { useSubmitKeepingValues } from "@shared/hooks/use-submit-keeping-values";
+import { joinFieldErrors } from "@shared/lib/field-errors";
 
 interface RegistrationFormProps {
   action: (previous: RegistrationState | null, form: FormData) => Promise<RegistrationState>;
@@ -17,6 +20,9 @@ export function RegistrationForm({ action }: Readonly<RegistrationFormProps>) {
   const [state, formAction, isPending] = useActionState(action, null);
   const { clientErrors, handleSubmit } = useSpanishValidation(formAction);
 
+  useErrorToast(state?.error ?? joinFieldErrors(state?.fieldErrors), state);
+  useErrorToast(joinFieldErrors(clientErrors), clientErrors);
+
   return (
     <Form
       action={formAction}
@@ -27,15 +33,9 @@ export function RegistrationForm({ action }: Readonly<RegistrationFormProps>) {
     >
       <RegistrationFields values={state?.values} />
 
-      {state?.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
-
-      <Button type="submit" variant="primary" className="min-h-11" isPending={isPending}>
+      <PendingButton type="submit" variant="primary" className="min-h-11" isPending={isPending}>
         {isPending ? COPY.pending : COPY.submit}
-      </Button>
+      </PendingButton>
     </Form>
   );
 }

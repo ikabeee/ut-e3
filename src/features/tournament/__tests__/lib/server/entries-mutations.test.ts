@@ -71,6 +71,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await getPrisma().kofTournament.deleteMany();
   await getPrisma().tournamentEntry.deleteMany();
+  await getPrisma().emailOutbox.deleteMany();
 });
 
 describe("addEntry", () => {
@@ -85,7 +86,7 @@ describe("addEntry", () => {
     const result = await addEntry(actorId, "Jugador1", REGISTRATION_OPENS);
     const entry = await getPrisma().tournamentEntry.findFirstOrThrow();
 
-    expect(result).toEqual({ status: "added", channel: "pre" });
+    expect(result).toEqual({ status: "added", channel: "pre", emailId: expect.any(String) });
     expect(entry).toMatchObject({
       visitorId: visitors[0].id,
       channel: "pre",
@@ -127,7 +128,11 @@ describe("addEntry", () => {
   });
 
   it("still registers as pre-registration, without a check-in, one minute before noon (UT-TO-36)", async () => {
-    expect(await addEntry(actorId, "Jugador1", AT_11_59)).toEqual({ status: "added", channel: "pre" });
+    expect(await addEntry(actorId, "Jugador1", AT_11_59)).toEqual({
+      status: "added",
+      channel: "pre",
+      emailId: expect.any(String),
+    });
     expect((await getPrisma().tournamentEntry.findFirstOrThrow()).status).toBe("registered");
   });
 
@@ -135,8 +140,40 @@ describe("addEntry", () => {
     const result = await addEntry(actorId, "Jugador1", AT_12_00);
     const entry = await getPrisma().tournamentEntry.findFirstOrThrow();
 
-    expect(result).toEqual({ status: "added", channel: "onsite" });
+    expect(result).toEqual({ status: "added", channel: "onsite", emailId: expect.any(String) });
     expect(entry).toMatchObject({ channel: "onsite", status: "checked_in", checkedInAt: AT_12_00 });
+  });
+
+  it("queues the confirmation email of a pre-registration to the visitor, with the hours of the check-in (S8)", async () => {
+    const result = await addEntry(actorId, "Jugador1", REGISTRATION_OPENS);
+    const email = await getPrisma().emailOutbox.findFirstOrThrow();
+
+    expect(result).toMatchObject({ emailId: email.id });
+    expect(email.to).toBe("jugador1@example.com");
+    expect(email.subject).toBe("Tu inscripción al torneo de KOF");
+    expect(email.text).toBe(
+      "¡Hola, Jugador1!\n\nQuedaste inscrito en el torneo de KOF.\n\nEl 20.11.2026, de 12:00 a 12:45, haz tu check-in con el PIN de tu pasaporte en el área de KOF del Edificio B. Si no lo haces a tiempo, quedas fuera del torneo.",
+    );
+  });
+
+  it("queues the confirmation email of an on-site sign-up, already checked in (S8)", async () => {
+    await addEntry(actorId, "Jugador1", AT_12_00);
+
+    const email = await getPrisma().emailOutbox.findFirstOrThrow();
+
+    expect(email.to).toBe("jugador1@example.com");
+    expect(email.text).toBe(
+      "¡Hola, Jugador1!\n\nQuedaste inscrito en el torneo de KOF y tu check-in ya está hecho: entras al bracket.\n\nQuédate cerca del área de KOF del Edificio B para cuando llamen tu combate.",
+    );
+  });
+
+  it("queues no email when the entry is refused (S8)", async () => {
+    await addEntry(actorId, "Jugador1", REGISTRATION_OPENS);
+    await addEntry(actorId, "Jugador1", AT_11_59);
+    await addEntry(actorId, "NoExiste", AT_11_59);
+    await addEntry(actorId, "Jugador2", AT_12_46);
+
+    expect(await getPrisma().emailOutbox.count()).toBe(1);
   });
 
   it("closes the sign-up at 12:45 (UT-TO-39)", async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, FieldError, Form, Input, Label, TextField } from "@heroui/react";
+import { FieldError, Form, Input, Label, TextField } from "@heroui/react";
 import { useActionState } from "react";
 import type { EntriesActionState } from "@features/tournament/lib/entries-actions";
 import { getEntryCounts, type EntryCounts } from "@features/tournament/lib/entries-view";
@@ -9,6 +9,7 @@ import { MAX_ENTRANTS, PRE_LIST_LIMIT } from "@features/tournament/lib/tournamen
 import type { EntryView } from "@features/tournament/lib/types";
 import { FormFeedback } from "@shared/components/form-feedback";
 import { useActionForm } from "@shared/hooks/use-action-form";
+import { PendingButton } from "@shared/components/pending-button";
 
 export type EntriesAction = (previous: EntriesActionState | null, form: FormData) => Promise<EntriesActionState>;
 
@@ -23,7 +24,8 @@ interface EntriesPanelProps {
   entries: readonly EntryView[];
   /** Once the bracket exists the list is read-only: nobody can be added or checked in anymore. */
   hasBracket: boolean;
-  actions: EntriesActions;
+  /** The KOF administrator works the list; without actions (the sysadmin) the panel only shows it (S26). */
+  actions?: EntriesActions;
 }
 
 interface EntryField {
@@ -48,18 +50,23 @@ export function EntriesPanel({ entries, hasBracket, actions }: Readonly<EntriesP
         {COPY.heading}
       </h2>
       <EntryCountList counts={getEntryCounts(entries)} />
-      {!hasBracket && (
-        <>
-          <div className="grid gap-6 md:grid-cols-2">
-            <EntryForm field={ADD_FIELD} action={actions.add} />
-            <EntryForm field={CHECK_IN_FIELD} action={actions.checkIn} />
-          </div>
-          <GenerateForm action={actions.generate} />
-        </>
-      )}
-      {hasBracket && <ResetForm action={actions.reset} />}
+      {actions && <EntryActions actions={actions} hasBracket={hasBracket} />}
       <EntryList entries={entries} />
     </section>
+  );
+}
+
+function EntryActions({ actions, hasBracket }: Readonly<{ actions: EntriesActions; hasBracket: boolean }>) {
+  if (hasBracket) return <ResetForm action={actions.reset} />;
+
+  return (
+    <>
+      <div className="grid gap-6 md:grid-cols-2">
+        <EntryForm field={ADD_FIELD} action={actions.add} />
+        <EntryForm field={CHECK_IN_FIELD} action={actions.checkIn} />
+      </div>
+      <GenerateForm action={actions.generate} />
+    </>
   );
 }
 
@@ -100,9 +107,9 @@ function EntryForm({ field, action }: Readonly<{ field: EntryField; action: Entr
         <FieldError />
       </TextField>
       <FormFeedback state={state} />
-      <Button type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isPending}>
+      <PendingButton type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isPending}>
         {isPending ? field.sending : field.submit}
-      </Button>
+      </PendingButton>
     </Form>
   );
 }
@@ -115,9 +122,9 @@ function GenerateForm({ action }: Readonly<{ action: EntriesAction }>) {
       <h3 className="type-mono font-bold">{COPY.generate.heading}</h3>
       <p className="text-sm text-muted">{COPY.generate.hint}</p>
       <FormFeedback state={state} />
-      <Button type="submit" variant="outline" className="min-h-11 justify-self-start" isPending={isPending}>
+      <PendingButton type="submit" variant="outline" className="min-h-11 justify-self-start" isPending={isPending}>
         {isPending ? COPY.generate.sending : COPY.generate.submit}
-      </Button>
+      </PendingButton>
     </form>
   );
 }
@@ -140,9 +147,9 @@ function ResetForm({ action }: Readonly<{ action: EntriesAction }>) {
         <FieldError />
       </TextField>
       <FormFeedback state={state} />
-      <Button type="submit" variant="danger" className="min-h-11 justify-self-start" isPending={isPending}>
+      <PendingButton type="submit" variant="danger" className="min-h-11 justify-self-start" isPending={isPending}>
         {isPending ? COPY.reset.sending : COPY.reset.submit}
-      </Button>
+      </PendingButton>
     </Form>
   );
 }

@@ -19,6 +19,7 @@ import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { encode } from "uqr";
 import { chromium } from "playwright-core";
+import { setLoginDatabase, submitLoginCode } from "./lib/e2e-harness.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -192,6 +193,8 @@ async function launchBrowser() {
 
 async function runScenario(browser, databaseFile, screenshots) {
   const database = new DatabaseSync(databaseFile);
+
+  setLoginDatabase(databaseFile);
   const consoleErrors = [];
 
   const contexts = {
@@ -256,16 +259,17 @@ async function registerVisitor(page) {
 async function loginAs(page, { email, password }, landing) {
   await page.goto(`${BASE_URL}/login`, { waitUntil: "networkidle" });
   await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña").fill(password);
+  await page.getByLabel("Contraseña", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Entrar" }).click();
+  await submitLoginCode(page, email);
   await page.waitForURL(landing, { timeout: UI_TIMEOUT_MS });
   check(`${email} signs in and lands on ${landing}`, true, page.url());
 }
 
 async function checkWrongIdentity(page, database) {
   await searchPassport(page, "Otra Persona");
-  // The route announcer of Next is also an alert, so the message is looked up by its own element.
-  const alert = page.locator("p[role=alert]");
+  // Errors go to a toast; the route announcer of Next is also an alert, so the message is looked up by its text.
+  const alert = page.getByRole("alert").filter({ hasText: "No hay ningún pasaporte" });
 
   await alert.waitFor({ timeout: UI_TIMEOUT_MS });
 
@@ -454,9 +458,9 @@ async function checkAssistedRegistrationRefusals(page) {
   check("a taken gamertag is named in the form", true);
 
   await fillRegistration(form, { gamertag: "desk_other", email: "e2e-walkin@example.test" });
-  await form
-    .locator("p[role=alert]")
-    .getByText("No se pudo registrar este correo.")
+  await page
+    .getByRole("alert")
+    .filter({ hasText: "No se pudo registrar este correo." })
     .waitFor({ timeout: UI_TIMEOUT_MS });
   check("a used email is refused with the generic message", true);
 }

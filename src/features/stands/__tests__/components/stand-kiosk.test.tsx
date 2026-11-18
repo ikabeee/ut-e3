@@ -1,10 +1,11 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryVisitQueueStore } from "@features/stands/__tests__/lib/visit-queue-utils";
 import { StandKiosk, type KioskActions, type KioskOfflineSupport } from "@features/stands/components/stand-kiosk";
 import type { VisitStatus } from "@features/stands/lib/pending-visit";
 import { formatTimeOfDay } from "@shared/lib/date-time";
 import type { RequestVisitState, VisitActionState } from "@features/stands/lib/stands-actions";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 // Far from now: the registration is open for the whole test.
 const OPEN_UNTIL = "2999-01-01T00:00:00.000Z";
@@ -229,7 +230,7 @@ function renderKiosk(overrides: Partial<KioskActions> = {}, closesAt: string = O
     ...overrides,
   };
 
-  return render(
+  return renderWithToasts(
     <StandKiosk
       standCode="ZA-S1"
       gameName="Pixel Quest"

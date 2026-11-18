@@ -156,7 +156,7 @@ reversión, campeón). Es de solo inserción: no se edita ni se borra.
 ### Abrir y cerrar la vista pública
 
 El administrador de KOF usa el botón "Cerrar al público" (o "Abrir al público") en `/admin/kof`. Cerrada, el público ve "El
-bracket está disponible en la pantalla del torneo." y la API no entrega el bracket. No afecta al staff. Cada cambio queda en la
+bracket estará disponible en la pantalla del torneo." y la API no entrega el bracket. No afecta al staff. Cada cambio queda en la
 bitácora. Antes de generar el bracket, el público ve "El bracket todavía no está listo."
 
 ## 6. Reiniciar el torneo y otros imprevistos

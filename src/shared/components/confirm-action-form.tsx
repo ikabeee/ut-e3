@@ -2,8 +2,10 @@
 
 import { Button } from "@heroui/react";
 import { useActionState, useState } from "react";
+import { PendingButton } from "@shared/components/pending-button";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 
-/** What an action answers: a status and, when it failed, the message to show. */
+/** What an action answers: a status and, when it failed, the message for the toast. */
 type ActionState = { status: string; message?: string };
 
 interface ConfirmActionFormProps<State extends ActionState> {
@@ -23,7 +25,8 @@ export function ConfirmActionForm<State extends ActionState>({
 }: Readonly<ConfirmActionFormProps<State>>) {
   const [isConfirming, setIsConfirming] = useState(false);
   const [state, formAction, isPending] = useActionState(action, null);
-  const error = state?.status === "error" ? state.message : null;
+
+  useErrorToast(state?.status === "error" ? state.message : null, state);
 
   if (!isConfirming) {
     return (
@@ -37,15 +40,10 @@ export function ConfirmActionForm<State extends ActionState>({
     <form action={formAction} className="grid gap-3">
       <input type="hidden" name={field.name} value={field.value} />
       <p className="text-sm">{labels.prompt}</p>
-      {error ? (
-        <p role="alert" className="text-sm text-danger">
-          {error}
-        </p>
-      ) : null}
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" variant="danger" className="min-h-11" isPending={isPending}>
+        <PendingButton type="submit" variant="danger" className="min-h-11" isPending={isPending}>
           {labels.confirm}
-        </Button>
+        </PendingButton>
         <Button variant="tertiary" className="min-h-11" onPress={() => setIsConfirming(false)}>
           {labels.cancel}
         </Button>

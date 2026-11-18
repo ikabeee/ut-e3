@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Description, FieldError, Form, Input, Label, TextArea, TextField } from "@heroui/react";
+import { Description, FieldError, Form, Input, Label, TextArea, TextField } from "@heroui/react";
 import { OptionSelect } from "@features/accounts/components/invite-account-form";
 import { GAME_NAME_MAX_LENGTH, GAME_SYNOPSIS_MAX_LENGTH } from "@features/games/lib/game-input";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
@@ -8,6 +8,7 @@ import type { StandGameActionState } from "@features/games/lib/stand-game-action
 import type { Genre, StandGame } from "@features/games/lib/types";
 import { FormFeedback } from "@shared/components/form-feedback";
 import { useActionForm } from "@shared/hooks/use-action-form";
+import { PendingButton } from "@shared/components/pending-button";
 
 export type StandGameAction = (previous: StandGameActionState | null, form: FormData) => Promise<StandGameActionState>;
 
@@ -20,7 +21,7 @@ interface StandGameFormProps {
 
 const COPY = GAMES_COPY.standGame;
 
-/** The data of the game of the stand (RF-31). There is no field for images or for the stand: neither is the form's. */
+/** The data of the game of the stand (RF-31). The images have their own forms and the stand is the one of the session. */
 export function StandGameForm({ game, genres, action }: Readonly<StandGameFormProps>) {
   const { state, formAction, isPending, formRef, handleSubmit } = useActionForm(action, { resetOnDone: false });
   const genreOptions = genres.map((genre) => ({ value: genre.id, label: genre.name }));
@@ -44,11 +45,10 @@ export function StandGameForm({ game, genres, action }: Readonly<StandGameFormPr
         <Description>{COPY.itchHint}</Description>
         <FieldError />
       </TextField>
-      <p className="type-tiny text-muted">{COPY.coverNote}</p>
       <FormFeedback state={state} />
-      <Button type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isPending}>
+      <PendingButton type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isPending}>
         {isPending ? COPY.pending : COPY.submit}
-      </Button>
+      </PendingButton>
     </Form>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { ServiceWorkerRegistration } from "@features/pwa/components/service-worker-registration";
 import { SiteHeader } from "@features/site/components/site-header";
+import { SiteToasts } from "@features/site/components/site-toasts";
 import { fontVariables } from "@shared/lib/fonts";
 import { buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="bg-background text-foreground">
         <SiteHeader isLandingOnly={siteMode === "landing"} />
         {children}
+        <SiteToasts />
         {/* With only the landing published there is no offline app to install (SITE_MODE=landing). */}
         {siteMode === "full" && <ServiceWorkerRegistration />}
       </body>
