@@ -134,4 +134,16 @@ describe("GameCatalog", () => {
 
     expect(isNotPrevented).toBe(false);
   });
+
+  it("marks the case at the center without a glow, only with its border", () => {
+    const { container } = render(<GameCatalog games={games} />);
+
+    const activeFace = caseLink("Juego 09").firstElementChild;
+    const sideFace = caseLink("Juego 12").firstElementChild;
+
+    expect(activeFace).toHaveClass("border-foreground");
+    expect(sideFace).not.toHaveClass("border-foreground");
+    expect(container.querySelector("[class*='glow']")).toBeNull();
+    expect(container.querySelector("[class*='shadow']")).toBeNull();
+  });
 });

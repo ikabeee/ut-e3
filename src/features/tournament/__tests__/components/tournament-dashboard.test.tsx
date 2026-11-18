@@ -4,7 +4,11 @@ import type { TournamentAction } from "@features/tournament/components/command-b
 import { TournamentDashboard } from "@features/tournament/components/tournament-dashboard";
 import { POLL_INTERVAL_MS } from "@features/tournament/hooks/use-tournament";
 import type { Tournament } from "@features/tournament/lib/types";
-import { createTestTournament, playUntilFinished } from "@features/tournament/__tests__/tournament-test-utils";
+import {
+  createTestTournament,
+  playUntilFinished,
+  clearToasts,
+} from "@features/tournament/__tests__/tournament-test-utils";
 
 type Viewer = Parameters<typeof TournamentDashboard>[0]["viewer"];
 
@@ -13,6 +17,8 @@ function renderDashboard(initial: Tournament | null, viewer: Viewer, load?: () =
 }
 
 const action: TournamentAction = async () => ({ status: "applied" });
+
+afterEach(clearToasts);
 
 describe("TournamentDashboard", () => {
   it("explains that the bracket does not exist yet", () => {
@@ -97,7 +103,7 @@ describe("TournamentDashboard", () => {
     }
   });
 
-  it("warns when the connection is lost but keeps the bracket on screen", async () => {
+  it("warns with a toast when the connection is lost but keeps the bracket on screen", async () => {
     jest.useFakeTimers();
 
     try {
@@ -108,7 +114,7 @@ describe("TournamentDashboard", () => {
         await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
       });
 
-      expect(screen.getByText("Sin conexión. Se muestra el último estado recibido.")).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent("Sin conexión. Se muestra el último estado recibido.");
       expect(screen.getByRole("heading", { name: "Tablero 1" })).toBeInTheDocument();
     } finally {
       jest.useRealTimers();

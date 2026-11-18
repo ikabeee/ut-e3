@@ -3,6 +3,7 @@
 import { Button } from "@heroui/react";
 import { useState } from "react";
 import { BracketTree } from "@features/tournament/components/bracket-tree";
+import { ConnectionToast } from "@features/tournament/components/connection-toast";
 import { PublicMatchCard } from "@features/tournament/components/public-match-card";
 import { useBracketPlayback, type CurrentPlayback } from "@features/tournament/hooks/use-bracket-playback";
 import { usePublicBracket, type PublicSnapshotLoader } from "@features/tournament/hooks/use-public-bracket";
@@ -10,59 +11,26 @@ import type { PublicBracket, PublicSnapshot } from "@features/tournament/lib/pub
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import { MATCH_AREAS } from "@features/tournament/lib/tournament-rules";
 import type { MatchArea } from "@features/tournament/lib/types";
-import { formatTimeOfDay } from "@shared/lib/date-time";
-
-interface ExitLink {
-  href: string;
-  label: string;
-}
 
 interface PublicBracketViewProps {
   /** What the server rendered; the page keeps it fresh by polling. */
   initial: PublicSnapshot;
   /** Replaces the request to the public endpoint; the tests use it. */
   load?: PublicSnapshotLoader;
-  /** Check-in and bracket hours from `event_settings`; the page reads them and passes ISO instants. */
-  checkInStartsAt?: string;
-  checkInEndsAt?: string;
-  bracketGeneratesAt?: string;
-  /** Built by the page from `getFloorPlanItemPath("kof")`. */
-  kofLink?: ExitLink;
-  /** Built by the page from the schedule section id of the landing. */
-  scheduleLink?: ExitLink;
 }
 
 const COPY = TOURNAMENT_COPY.ui;
 
-export function PublicBracketView({
-  initial,
-  load,
-  checkInStartsAt,
-  checkInEndsAt,
-  bracketGeneratesAt,
-  kofLink,
-  scheduleLink,
-}: Readonly<PublicBracketViewProps>) {
+export function PublicBracketView({ initial, load }: Readonly<PublicBracketViewProps>) {
   const { snapshot, hasConnectionError } = usePublicBracket(initial, load);
 
   return (
     <div className="grid min-w-0 gap-8">
-      {hasConnectionError && (
-        <p role="alert" className="border border-danger p-3 text-sm text-danger">
-          {COPY.connectionLost}
-        </p>
-      )}
+      <ConnectionToast isLost={hasConnectionError} />
       {snapshot.state === "open" ? (
         <OpenBracket bracket={snapshot.bracket} />
       ) : (
-        <ClosedBracket
-          state={snapshot.state}
-          checkInStartsAt={checkInStartsAt}
-          checkInEndsAt={checkInEndsAt}
-          bracketGeneratesAt={bracketGeneratesAt}
-          kofLink={kofLink}
-          scheduleLink={scheduleLink}
-        />
+        <ClosedBracket state={snapshot.state} />
       )}
     </div>
   );
@@ -87,82 +55,11 @@ function OpenBracket({ bracket: latest }: Readonly<{ bracket: PublicBracket }>) 
   );
 }
 
-interface ClosedBracketProps {
-  state: "closed" | "pending";
-  checkInStartsAt?: string;
-  checkInEndsAt?: string;
-  bracketGeneratesAt?: string;
-  kofLink?: ExitLink;
-  scheduleLink?: ExitLink;
-}
-
-function ClosedBracket({
-  state,
-  checkInStartsAt,
-  checkInEndsAt,
-  bracketGeneratesAt,
-  kofLink,
-  scheduleLink,
-}: Readonly<ClosedBracketProps>) {
+function ClosedBracket({ state }: Readonly<{ state: "closed" | "pending" }>) {
   return (
-    <>
-      <p role="status" className="type-mono text-muted">
-        {state === "closed" ? COPY.publicBracket.closed : COPY.publicBracket.pending}
-      </p>
-      <UnpublishedSchedule
-        checkInStartsAt={checkInStartsAt}
-        checkInEndsAt={checkInEndsAt}
-        bracketGeneratesAt={bracketGeneratesAt}
-        kofLink={kofLink}
-        scheduleLink={scheduleLink}
-      />
-    </>
-  );
-}
-
-type ScheduleTimes = Pick<ClosedBracketProps, "checkInStartsAt" | "checkInEndsAt" | "bracketGeneratesAt">;
-
-type ScheduleLinks = Pick<ClosedBracketProps, "kofLink" | "scheduleLink">;
-
-function UnpublishedSchedule({
-  checkInStartsAt,
-  checkInEndsAt,
-  bracketGeneratesAt,
-  kofLink,
-  scheduleLink,
-}: Readonly<ScheduleTimes & ScheduleLinks>) {
-  if (!checkInStartsAt && !checkInEndsAt && !bracketGeneratesAt && !kofLink && !scheduleLink) return null;
-
-  return (
-    <div className="grid gap-3">
-      {checkInStartsAt && checkInEndsAt && (
-        <p className="m-0 text-sm">
-          {COPY.publicBracket.unpublished.checkIn(formatTimeOfDay(checkInStartsAt), formatTimeOfDay(checkInEndsAt))}
-        </p>
-      )}
-      {bracketGeneratesAt && (
-        <p className="m-0 text-sm">{COPY.publicBracket.unpublished.bracket(formatTimeOfDay(bracketGeneratesAt))}</p>
-      )}
-      <ScheduleExits kofLink={kofLink} scheduleLink={scheduleLink} />
-    </div>
-  );
-}
-
-function ScheduleExits({ kofLink, scheduleLink }: Readonly<ScheduleLinks>) {
-  const links = [kofLink, scheduleLink].filter((link): link is ExitLink => link !== undefined);
-
-  if (links.length === 0) return null;
-
-  return (
-    <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-      {links.map((link) => (
-        <li key={link.href}>
-          <a href={link.href} className="inline-flex min-h-11 items-center border border-border px-3 no-underline">
-            {link.label}
-          </a>
-        </li>
-      ))}
-    </ul>
+    <p role="status" className="type-mono text-muted">
+      {state === "closed" ? COPY.publicBracket.closed : COPY.publicBracket.pending}
+    </p>
   );
 }
 

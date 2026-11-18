@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { getFloorPlanItemPath, getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
-import { HOME_PATH } from "@features/landing/lib/landing-links";
-import { SCHEDULE_SECTION_ID } from "@features/schedule/lib/schedule-links";
 import { PublicBracketView } from "@features/tournament/components/public-bracket-view";
+import { TournamentHeading } from "@features/tournament/components/tournament-heading";
+import { TournamentInfo, type TournamentInfoSchedule } from "@features/tournament/components/tournament-info";
+import type { EntrySchedule } from "@features/tournament/lib/entries-rules";
 import type { PublicSnapshot } from "@features/tournament/lib/public-bracket";
 import { getEntrySchedule } from "@features/tournament/lib/server/entries-queries";
 import { getPublicSnapshot } from "@features/tournament/lib/server/public-bracket-queries";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import { PUBLIC_BRACKET_PATH } from "@features/tournament/lib/tournament-links";
+import { PASSPORT_PATH, REGISTER_PATH } from "@features/visitors/lib/visitors-links";
 
 const COPY = TOURNAMENT_COPY.ui.publicBracket;
 
@@ -24,7 +25,7 @@ export const publicBracketPageMetadata: Metadata = {
 export function PublicBracketPage() {
   return (
     <main className="page-wrap grid gap-10 py-12">
-      <h1 className="type-section">{COPY.title}</h1>
+      <TournamentHeading />
       <Suspense fallback={<p className="type-mono text-muted">{COPY.loading}</p>}>
         <PublicBracket />
       </Suspense>
@@ -39,14 +40,10 @@ async function PublicBracket() {
   const [snapshot, schedule] = await Promise.all([loadSnapshot(), getEntrySchedule()]);
 
   return (
-    <PublicBracketView
-      initial={snapshot}
-      checkInStartsAt={schedule.checkInStartsAt.toISOString()}
-      checkInEndsAt={schedule.checkInEndsAt.toISOString()}
-      bracketGeneratesAt={schedule.bracketGeneratesAt.toISOString()}
-      kofLink={buildKofLink()}
-      scheduleLink={buildScheduleLink()}
-    />
+    <>
+      <TournamentInfo schedule={toInfoSchedule(schedule)} registerHref={REGISTER_PATH} passportHref={PASSPORT_PATH} />
+      <PublicBracketView initial={snapshot} />
+    </>
   );
 }
 
@@ -54,14 +51,13 @@ function loadSnapshot(): Promise<PublicSnapshot> {
   return getPublicSnapshot(new Date());
 }
 
-function buildKofLink() {
-  const zone = getZoneLink("kof");
-
-  if (!zone) return undefined;
-
-  return { href: getFloorPlanItemPath("kof"), label: zone.label };
-}
-
-function buildScheduleLink() {
-  return { href: `${HOME_PATH}#${SCHEDULE_SECTION_ID}`, label: COPY.unpublished.scheduleLink };
+function toInfoSchedule(schedule: EntrySchedule): TournamentInfoSchedule {
+  return {
+    registrationOpensAt: schedule.registrationOpensAt.toISOString(),
+    checkInStartsAt: schedule.checkInStartsAt.toISOString(),
+    checkInEndsAt: schedule.checkInEndsAt.toISOString(),
+    onsiteStartsAt: schedule.onsiteStartsAt.toISOString(),
+    onsiteEndsAt: schedule.onsiteEndsAt.toISOString(),
+    bracketGeneratesAt: schedule.bracketGeneratesAt.toISOString(),
+  };
 }

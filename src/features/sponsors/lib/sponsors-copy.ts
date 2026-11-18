@@ -6,6 +6,10 @@ export const SPONSORS_COPY = {
     stubLabel: "Patrocinador",
     number: (order: number) => `Nº ${String(order).padStart(3, "0")}`,
   },
+  strip: {
+    previous: "Patrocinadores anteriores",
+    next: "Patrocinadores siguientes",
+  },
   page: {
     pageTitle: "Patrocinadores",
     pageDescription:

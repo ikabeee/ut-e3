@@ -269,13 +269,6 @@
     radial-gradient(70% 60% at 50% 38%, var(--utg-rack-top) 0%, var(--utg-rack-bottom) 55%, var(--utg-black) 100%);
 }
 
-@utility coverflow-glow {
-  box-shadow:
-    0 0 0 1px var(--utg-white),
-    0 0 28px color-mix(in srgb, var(--utg-white) 35%, transparent),
-    0 30px 70px -20px color-mix(in srgb, var(--utg-white) 25%, transparent);
-}
-
 /* The faint reflection's opacity lives in the mask (22% at 90% opacity): an opacity on top of the mask made the
    browser draw each reflection through one more offscreen surface (#128). */
 @utility coverflow-reflection {

@@ -6,8 +6,6 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-// The back control is a link or a button named "Volver": the tests accept
-// either element so round 2 can choose it, but the accessible name is fixed.
 function backControl() {
   return screen.queryByRole("link", { name: "Volver" }) ?? screen.queryByRole("button", { name: "Volver" });
 }
@@ -23,42 +21,14 @@ function navbar() {
   return within(screen.getByRole("navigation", { name: "Principal" }));
 }
 
-describe("SiteNav back control (S1)", () => {
-  it.each(["/games", "/raffle", "/games/abby-s-tower"])("shows a Volver control on %s", (pathname) => {
+// The UTG logo already leads home, so the navbar has no Volver control: it repeated the logo and pushed the navbar
+// past a 360 px screen.
+describe("SiteNav without a back control", () => {
+  it.each(["/", "/games", "/raffle", "/games/abby-s-tower"])("shows no Volver control on %s", (pathname) => {
     render(<SiteNav pathname={pathname} />);
 
-    expect(backControl()).toBeInTheDocument();
-  });
-
-  it("hides the Volver control on the landing", () => {
-    render(<SiteNav pathname="/" />);
-
     expect(backControl()).not.toBeInTheDocument();
-  });
-
-  it("hides the Volver control while only the landing is published", () => {
-    render(<SiteNav pathname="/games" isLandingOnly />);
-
-    expect(backControl()).not.toBeInTheDocument();
-  });
-
-  it("names the back control Volver for assistive technology", () => {
-    render(<SiteNav pathname="/games" />);
-
-    expect(
-      screen.queryByRole("link", { name: "Volver" }) ?? screen.getByRole("button", { name: "Volver" }),
-    ).toBeInTheDocument();
-  });
-
-  it("gives the Volver control a touch target of at least 44 px", () => {
-    render(<SiteNav pathname="/games" />);
-
-    const control = backControl();
-    expect(control).toBeInTheDocument();
-    // JSDOM has no layout, so the 44 px guarantee is read from the class:
-    // size-11 is 44 px square and touch-target extends smaller elements to
-    // 44 px (AGENTS.md, movil primero).
-    expect(control?.className ?? "").toMatch(/touch-target|size-11|min-h-1[12]|min-w-11/);
+    expect(navbar().getByRole("link", { name: "UTG, inicio" })).toBeInTheDocument();
   });
 });
 
@@ -98,7 +68,7 @@ describe("SiteNav phone menu and the Back gesture (S2)", () => {
   });
 });
 
-describe("SiteNav existing behavior with the back control (guards)", () => {
+describe("SiteNav existing behavior (guards)", () => {
   it("keeps marking the current section on a game page", () => {
     render(<SiteNav pathname="/games/abby-s-tower" />);
 

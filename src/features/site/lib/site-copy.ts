@@ -11,7 +11,11 @@ export const SITE_COPY = {
       tournament: "Torneo",
     },
     passport: "Mi pasaporte",
-    back: "Volver",
+    search: {
+      formLabel: "Buscar juegos",
+      label: "Busca un juego",
+      submit: "Buscar",
+    },
     openMenu: "Abrir menú",
     menuTitle: "Menú",
     closeMenu: "Cerrar menú",

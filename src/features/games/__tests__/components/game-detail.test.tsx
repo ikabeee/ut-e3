@@ -18,11 +18,7 @@ const game = makeGame({
 
 const relatedGames = [makeGame({ id: "cenote", name: "Cenote" }), makeGame({ id: "eco-nulo", name: "Eco Nulo" })];
 
-const LINKS = {
-  catalog: "/#games",
-  floorPlan: "/#floor-plan-ZA-S3",
-  calendar: "https://calendar.google.com/calendar/render?action=TEMPLATE",
-};
+const LINKS = { catalog: "/#games" };
 
 function renderDetail(related = relatedGames) {
   render(
@@ -94,21 +90,26 @@ describe("GameDetail", () => {
     expect(definitionOf(where, "Horario")).toBe("12:00 a 19:00");
   });
 
-  it("puts the cover, the itch.io slot, the floor plan and calendar links and the facts in the sidebar", () => {
+  it("puts the cover, the itch.io slot and the facts in the sidebar", () => {
     renderDetail();
 
     const sidebar = screen.getByRole("complementary", { name: "Ficha de Ruta 9" });
-    const attend = within(sidebar).getByRole("link", { name: /Quiero asistir/ });
 
     expect(within(sidebar).getByRole("img", { name: "Portada de Ruta 9" })).toBeInTheDocument();
     expect(within(sidebar).getByText("itch slot")).toBeInTheDocument();
-    expect(within(sidebar).getByRole("link", { name: /Ver en el croquis/ })).toHaveAttribute("href", LINKS.floorPlan);
-    expect(attend).toHaveAttribute("href", LINKS.calendar);
-    expect(attend).toHaveAttribute("target", "_blank");
-    expect(attend).toHaveAttribute("rel", "noopener noreferrer");
     expect(definitionOf(sidebar, "Género")).toBe("Carreras");
     expect(definitionOf(sidebar, "Stand")).toBe("ZA-S3");
     expect(definitionOf(sidebar, "Evento")).toBe("20.11.2026");
+  });
+
+  it("has no floor plan or attend buttons (S18)", () => {
+    renderDetail();
+
+    expect(screen.queryByRole("link", { name: /Ver en el croquis/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Quiero asistir/ })).not.toBeInTheDocument();
+    expect(within(screen.getByRole("complementary", { name: "Ficha de Ruta 9" })).queryAllByRole("link")).toHaveLength(
+      0,
+    );
   });
 
   it("shows only the short stand code", () => {

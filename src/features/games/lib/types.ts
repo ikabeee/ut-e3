@@ -35,8 +35,6 @@ export interface GameEventLabels {
 
 export interface GameDetailLinks {
   catalog: string;
-  floorPlan: string;
-  calendar: string;
 }
 
 export interface GenreSummary {

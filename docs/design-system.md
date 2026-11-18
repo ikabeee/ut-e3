@@ -80,7 +80,7 @@ Utilidades de `components.css` para leer texto sobre imágenes y para el exhibid
 | Utilidad | Uso |
 | --- | --- |
 | `shade-cover` | Portada de una caja del exhibidor. |
-| `coverflow-rack`, `coverflow-glow`, `coverflow-reflection` | Fondo del rack, brillo de la caja al frente y reflejo tenue. Las cajas de los lados se oscurecen con una capa negra, no con `filter`: un filtro por caja hace que el navegador redibuje cada una como superficie aparte al hacer scroll (#128). |
+| `coverflow-rack`, `coverflow-reflection` | Fondo del rack y reflejo tenue. Las cajas de los lados se oscurecen con una capa negra, no con `filter`: un filtro por caja hace que el navegador redibuje cada una como superficie aparte al hacer scroll (#128). |
 
 ## Efectos
 
