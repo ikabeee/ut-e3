@@ -1,4 +1,10 @@
 export const ADMIN_COPY = {
+  emergency: {
+    overloadSubject: (metric: string) => `Servidor saturado (${metric})`,
+    overloadDetail: (metric: string, threshold: string) =>
+      `La métrica ${metric} pasó de ${threshold} durante 2 minutos y el bracket público se cerró solo (RF-74). Revisa /admin/server.`,
+    watchFailedSubject: "Falló la vigilancia de carga del servidor",
+  },
   title: "Panel del sysadmin",
   description: "Administración del evento PIXEL & CODE.",
   accountsHeading: "Cuentas del evento",

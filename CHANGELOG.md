@@ -19,6 +19,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 - `/admin/kof` usa el mismo marco que las demás secciones del panel; el sysadmin ve además la navegación entre
   secciones.
+- Los correos (invitaciones, pasaporte, recuperación y rifa) salen con una plantilla HTML con la estética del sitio y su
+  texto plano como alternativa.
+- Al inscribir a alguien en el torneo de KOF le llega un correo de confirmación con el horario de su check-in.
+- Avisos de emergencia de producción por correo a `EMERGENCY_MAIL`: errores del servidor, saturación y disco casi lleno.
 
 ## [1.1.0] - 2026-11-18
 

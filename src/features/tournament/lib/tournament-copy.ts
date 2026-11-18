@@ -32,6 +32,13 @@ export const TOURNAMENT_COPY = {
   status: STATUS_LABELS,
   areas: AREA_LABELS,
   outcomes: OUTCOME_LABELS,
+  entryEmail: {
+    subject: "Tu inscripción al torneo de KOF",
+    pre: (gamertag: string, { date, start, end }: { date: string; start: string; end: string }) =>
+      `¡Hola, ${gamertag}!\n\nQuedaste inscrito en el torneo de KOF.\n\nEl ${date}, de ${start} a ${end}, haz tu check-in con el PIN de tu pasaporte en el área de KOF del Edificio B. Si no lo haces a tiempo, quedas fuera del torneo.`,
+    onsite: (gamertag: string) =>
+      `¡Hola, ${gamertag}!\n\nQuedaste inscrito en el torneo de KOF y tu check-in ya está hecho: entras al bracket.\n\nQuédate cerca del área de KOF del Edificio B para cuando llamen tu combate.`,
+  },
   ui: {
     title: "Torneo de KOF",
     description: "Captura y seguimiento del bracket del torneo de KOF.",
