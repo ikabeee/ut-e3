@@ -96,6 +96,9 @@ function buildEnvironment(workdir) {
   return {
     ...process.env,
     NODE_ENV: "production",
+    // Without it a production build falls back to the kill switch ("landing": only `/`, src/shared/lib/site-mode.ts),
+    // which redirects /register to the landing. A local .env with SITE_MODE=full hid this; CI has no .env.
+    SITE_MODE: "full",
     DATABASE_URL: `file:${path.join(workdir, "e2e.db")}`,
     PIN_ENCRYPTION_KEY: randomBytes(32).toString("base64"),
     NEXT_PUBLIC_SITE_URL: BASE_URL,
@@ -311,10 +314,7 @@ async function checkWorkerAndSnapshot({ page, pin }) {
 }
 
 async function checkPublicPagesAreSaved({ page, database }) {
-  const slugs = database
-    .prepare("SELECT slug FROM games ORDER BY slug")
-    .all()
-    .map((row) => row.slug);
+  const slugs = listPublicGames(database).map((game) => game.slug);
 
   const expected = ["/", "/games", "/offline", ...slugs.map((slug) => `/games/${slug}`)];
   let saved = [];
@@ -335,6 +335,19 @@ async function checkPublicPagesAreSaved({ page, database }) {
     missing.length === 0,
     missing.join(", "),
   );
+}
+
+// The public site hides a game until it has its vertical cover and its horizontal image (isGameReady, games-queries.ts),
+// and so does the list of pages the worker saves ahead of time: the seeds leave some games without artwork.
+function listPublicGames(database) {
+  return database
+    .prepare(
+      `SELECT slug, name FROM games
+       WHERE EXISTS (SELECT 1 FROM game_images WHERE game_id = games.id AND is_cover = 1)
+         AND EXISTS (SELECT 1 FROM game_images WHERE game_id = games.id AND is_cover = 0)
+       ORDER BY slug`,
+    )
+    .all();
 }
 
 // RF-10: before the activation time the page, its copy in the cache and the API answer carry no itch.io URL.
@@ -480,7 +493,7 @@ async function checkOffline({ phone, database, screenshots, pin }) {
 }
 
 async function checkOfflinePublicPages({ page, database }) {
-  const game = database.prepare("SELECT slug, name FROM games ORDER BY slug LIMIT 1").get();
+  const game = listPublicGames(database)[0];
 
   await page.goto(`${BASE_URL}/`, { waitUntil: "domcontentloaded" });
   check("offline, the landing opens", await page.getByRole("heading", { level: 1, name: "PIXEL & CODE" }).isVisible());
