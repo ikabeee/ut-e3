@@ -430,7 +430,10 @@ async function manageGenres({ page, database }) {
 
   await used.getByRole("button", { name: "Borrar" }).click();
   await used.getByRole("button", { name: "Sí, borrar" }).click();
-  await used.getByText("Ese género tiene juegos asignados").waitFor({ timeout: UI_TIMEOUT_MS });
+  await page
+    .getByRole("alert")
+    .filter({ hasText: "Ese género tiene juegos asignados" })
+    .waitFor({ timeout: UI_TIMEOUT_MS });
   check("a genre with games cannot be deleted", count(database, "genres") === genresWithParty);
 
   const party = page.getByTestId("genres-admin").getByRole("listitem").filter({ hasText: "Party" });
