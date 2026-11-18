@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { FeaturedGamesCarousel } from "@features/games/components/featured-games-carousel";
 import { UrlGamesBrowser } from "@features/games/components/url-games-browser";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { GAMES_PATH } from "@features/games/lib/games-links";
@@ -28,7 +27,7 @@ export async function GamesPage() {
 export function GamesView({ games }: Readonly<{ games: Game[] }>) {
   return (
     <main>
-      <UrlGamesBrowser games={games} hero={<FeaturedGamesCarousel games={games} />} />
+      <UrlGamesBrowser games={games} withFeatured />
     </main>
   );
 }
