@@ -39,13 +39,29 @@ describe("seedSysadmin", () => {
     expect(await verifyPassword("correct horse battery staple", accounts[0].password ?? "")).toBe(true);
   });
 
-  it("leaves an existing sysadmin and its password as they are", async () => {
+  it("leaves the sysadmin of SYSADMIN_EMAIL and its password as they are on a second run", async () => {
     await seedSysadmin(prisma, SYSADMIN_ENV);
     const [before] = await prisma.account.findMany();
 
-    await seedSysadmin(prisma, { ...SYSADMIN_ENV, SYSADMIN_EMAIL: "otro@ut.mx", SYSADMIN_PASSWORD: "otra" });
+    await seedSysadmin(prisma, { ...SYSADMIN_ENV, SYSADMIN_NAME: "Otro nombre", SYSADMIN_PASSWORD: "otra" });
 
     expect(await prisma.account.findMany()).toEqual([before]);
+    expect(await verifyPassword("correct horse battery staple", before.password ?? "")).toBe(true);
+  });
+
+  it("creates the sysadmin of SYSADMIN_EMAIL when another sysadmin already exists, and leaves that one as it is", async () => {
+    await seedSysadmin(prisma, { ...SYSADMIN_ENV, SYSADMIN_EMAIL: "primero@ut.mx" });
+    const [first] = await prisma.account.findMany();
+
+    await seedSysadmin(prisma, SYSADMIN_ENV);
+
+    const accounts = await prisma.account.findMany({ orderBy: { email: "asc" } });
+
+    expect(accounts).toEqual([
+      expect.objectContaining({ email: "admin@ut.mx", role: "sysadmin", status: "active" }),
+      first,
+    ]);
+    expect(await verifyPassword("correct horse battery staple", accounts[0].password ?? "")).toBe(true);
   });
 
   it("skips the account and says why when the email already belongs to another account", async () => {

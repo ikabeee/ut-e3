@@ -8,7 +8,7 @@ el `Dockerfile` y el `docker-compose.yml`; el proxy (Nginx o Caddy) lo pones tú
 | Archivo | Para qué |
 | --- | --- |
 | `Dockerfile` | Imagen en tres etapas con Node 22: compila (`prisma generate` y `next build`), arma las dependencias de arranque y deja una imagen final sin compiladores. Corre como el usuario `node` (no root). |
-| `docker/entrypoint.sh` | Al arrancar aplica las migraciones pendientes (`prisma migrate deploy`), carga el contenido inicial y la cuenta del sysadmin (`prisma db seed`) y deja `node server.js` como proceso principal. |
+| `docker/entrypoint.sh` | Al arrancar aplica las migraciones pendientes (`prisma migrate deploy`), y deja `node server.js` como proceso principal. |
 | `docker-compose.yml` | Un servicio `app`, volumen `app-data` con la base SQLite, reinicio automático y `stop_grace_period: 30s`. Publica solo en `127.0.0.1`. |
 | `.env.production.example` | Plantilla de variables. Se copia a `.env` en el VPS. |
 | `GET /api/health` | Ruta ligera que usa el `HEALTHCHECK` de la imagen. No consulta la base: responde 503 (`low-disk`) si al volumen de la base le quedan menos de 64 MB, y `docker compose ps` lo muestra como `unhealthy`. No la uses como chequeo activo del proxy (ver "Caddy"). |
@@ -38,9 +38,13 @@ nano .env                # llena los valores; ver "Variables"
 
 docker compose build
 docker compose up -d
-docker compose ps        # espera el estado "healthy" (el primer arranque tarda por las migraciones y el seed)
+docker compose ps        # espera el estado "healthy" (el primer arranque tarda por las migraciones)
 curl -s http://127.0.0.1:3000/api/health
+docker compose exec app prisma db seed   # solo la primera vez: contenido inicial y cuenta del sysadmin
 ```
+
+El contenedor no corre el seed al arrancar, para no tocar una base que ya tiene sus datos. Córrelo a mano solo en
+una base nueva.
 
 Después configura el proxy inverso (ver más abajo). Entra a `https://<tu-dominio>/login` con `SYSADMIN_EMAIL` y
 `SYSADMIN_PASSWORD` (solo en un entorno con `SITE_MODE=full`; ver "Kill switch").
@@ -89,7 +93,7 @@ Todas viven en `.env` (nunca se versiona). `.env.production.example` las lista c
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Sí | URL pública sin `/` final. **Se incrusta al construir**: si cambia, `docker compose build` de nuevo. |
 | `PIN_ENCRYPTION_KEY` | Sí | 32 bytes en base64: `openssl rand -base64 32`. Guárdala fuera del VPS; sin ella no se pueden leer los PIN guardados. |
-| `SYSADMIN_EMAIL`, `SYSADMIN_NAME`, `SYSADMIN_PASSWORD` | Sí, la primera vez | Crean la cuenta del sysadmin solo si todavía no existe uno. Si ya existe, se ignoran: cambiar la contraseña aquí no la cambia. |
+| `SYSADMIN_EMAIL`, `SYSADMIN_NAME`, `SYSADMIN_PASSWORD` | Solo para el seed | Las usa `prisma db seed` (a mano, en una base nueva): crea la cuenta sysadmin de `SYSADMIN_EMAIL` si no existe una cuenta con ese correo, aunque ya haya otro sysadmin. Nunca modifican una cuenta existente: cambiar la contraseña aquí no la cambia. |
 | `NEXT_PUBLIC_MAPBOX_TOKEN` | No | Token **público** de Mapbox (`pk.`) del mapa de la sede. **Se incrusta al construir.** Sin él, o con un token secreto (`sk.`), la portada muestra el esquema de la sede en lugar del mapa. En el panel de Mapbox restríngelo a la URL del sitio. |
 | `SITE_MODE` | No | `landing` (por defecto) o `full`. **Se incrusta al construir**; ver "Kill switch". |
 | `ENV_FILE` | No | Archivo de variables del contenedor. Por defecto `.env`; ver "Dos entornos". |

@@ -6,6 +6,14 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Corregido
+
+- El seed crea la cuenta sysadmin de `SYSADMIN_EMAIL` aunque ya exista otro sysadmin; antes la variable se ignoraba en silencio después del primer despliegue.
+
+### Cambiado
+
+- El contenedor ya no corre el seed al arrancar; en una base nueva se corre una vez con `docker compose exec app prisma db seed`.
+
 ## [1.2.0] - 2026-11-18
 
 ### Agregado
