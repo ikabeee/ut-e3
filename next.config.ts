@@ -20,6 +20,9 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["192.168.*.*"],
   experimental: {
     agentUpgrade: "security",
+    // The stand administrators upload JPEGs of up to 5 MB (GAME_IMAGE_MAX_BYTES) through a Server Action; the default
+    // limit of 1 MB would cut them, so this leaves room for the multipart overhead.
+    serverActions: { bodySizeLimit: "6mb" },
   },
   images: {
     // Only WebP: AVIF takes several times the CPU to encode, and the first wave of phones at the event would make the

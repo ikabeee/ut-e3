@@ -6,6 +6,14 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- El administrador de cada stand carga las imágenes de su juego en `/stand/game` con las reglas del grid de portadas:
+  tarjeta (810x1080), portada (1920x1080) y hasta cuatro capturas (1920x1080), solo JPG real de máximo 5 MB. Ve qué
+  imágenes faltan, una vista previa y puede reemplazarlas o quitar capturas. Las imágenes viven en `UPLOADS_DIR`
+  (`/data/uploads` en Docker) y se sirven por `/api/media/games/`.
+- El administrador del stand puede borrar su juego (con confirmación) además de crearlo y editarlo.
+
 ## [1.1.0] - 2026-11-18
 
 ### Cambiado
