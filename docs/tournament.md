@@ -80,7 +80,7 @@ de `event_settings`; ninguna está escrita en el código.
 
 ## Bracket público
 
-Cualquiera puede seguir el bracket en `/tournament` (RF-67), sin sesión. La página se llama "Tabla de posiciones", va centrada y
+Cualquiera puede seguir el bracket en `/tournament` (RF-67), sin sesión. La página se llama "Tabla de posiciones" (en la barra, "KOF"), va centrada y
 muestra la información del torneo: "Cuándo" (fechas legibles agrupadas por día, calculadas de `event_settings` en America/Cancun),
 "Cómo" y "Cuántos". Ofrece un solo botón: "Ver mi pasaporte" si el teléfono guarda la copia del pasaporte
 (`localStorage`, `ute3.passport.v1`) y "Crear mi pasaporte" si no; el servidor no lee cookies y el botón se decide en el navegador. La página y `GET /api/tournament/public` entregan
@@ -89,8 +89,8 @@ solo los gamertags y los resultados: ningún id, correo ni PIN. La consulta es c
 | Estado | Qué ve el público |
 | --- | --- |
 | `open` | El bracket como árbol con llaves (dos mitades en espejo que se juntan en la final), con los combates en juego arriba |
-| `pending` | "El bracket todavía no está listo." |
-| `closed` | "El bracket está disponible en la pantalla del torneo." La API no devuelve el bracket |
+| `pending` | "El bracket todavía no está listo.", con un reloj de arena |
+| `closed` | "El bracket estará disponible en la pantalla del torneo.", con un reloj de arena. La API no devuelve el bracket |
 
 En pantallas de 900 px o más el árbol es la vista principal. En un teléfono arranca la lista por tablero y el botón "Ver el
 árbol completo" muestra el árbol, que se desplaza hacia los lados dentro de su caja sin mover la página. Las posiciones se

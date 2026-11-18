@@ -6,8 +6,26 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Seguridad
+
+- Next.js se actualiza de 16.4.2 a 16.4.6 por un aviso de seguridad publicado (junto con `@next/env` y `eslint-config-next`).
 ### Cambiado
 
+- La barra de navegación dice "KOF" en lugar de "Tabla de posiciones".
+- /raffle muestra "La rifa empieza" con la fecha y la hora de la rifa (America/Cancun), tomadas de los horarios del evento.
+- El login tiene un botón con ícono de ojo para mostrar u ocultar la contraseña (también al activar una cuenta).
+- /tournament cerrado dice "El bracket estará disponible en la pantalla del torneo." con un reloj de arena; la lista de
+  ganadores vacía de la rifa muestra un podio vacío.
+- El croquis ya no muestra "PIXEL & CODE · Edificio B, UT Cancún" sobre el título.
+- El juego del stand ZT-S4 se llama "Saatal Paal" (la dirección `/games/saatan-paal` no cambia). La migración
+  `rename_saatal_paal` corrige el nombre y los textos alternativos de sus imágenes en las bases ya sembradas.
+- El buscador de la barra sugiere juegos mientras escribes (flechas, Enter y Escape) y tolera letras de más o de menos:
+  "san" encuentra Saatal Paal. /games?q= usa la misma búsqueda.
+- La portada dice "Invitados especiales" y el cronograma muestra el lugar de cada actividad como texto, sin enlace ni flecha.
+
+### Corregido
+
+- `next dev` ya no avisa "Failed to find font override values for font `LINE Seed JP`".
 - Mi pasaporte (`/passport`): en el teléfono se apilan el pasaporte, el croquis y el detalle del juego; desde 1000 px el
   pasaporte va en una columna junto a un panel con el croquis y el detalle. Al tocar un stand en el croquis, su juego (y si
   ya lo visitaste) aparece en el detalle.

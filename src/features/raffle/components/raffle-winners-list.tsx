@@ -1,3 +1,4 @@
+import { NoWinnersIcon } from "@features/raffle/components/no-winners-icon";
 import { RAFFLE_COPY } from "@features/raffle/lib/raffle-copy";
 import type { RaffleWinner } from "@features/raffle/lib/types";
 import { cn } from "@heroui/react";
@@ -13,7 +14,7 @@ const COPY = RAFFLE_COPY.winners;
 
 /** Confirmed winners with gamertag, prize and hour (RF-56); a prize not handed over yet says so. */
 export function RaffleWinnersList({ winners, size = "page" }: Readonly<RaffleWinnersListProps>) {
-  if (winners.length === 0) return <p className="m-0 text-center text-muted">{COPY.empty}</p>;
+  if (winners.length === 0) return <NoWinners />;
 
   return (
     <ol className="grid gap-2">
@@ -36,5 +37,14 @@ export function RaffleWinnersList({ winners, size = "page" }: Readonly<RaffleWin
         </li>
       ))}
     </ol>
+  );
+}
+
+function NoWinners() {
+  return (
+    <div className="grid justify-items-center gap-3">
+      <NoWinnersIcon className="text-muted" />
+      <p className="m-0 text-center text-muted">{COPY.empty}</p>
+    </div>
   );
 }

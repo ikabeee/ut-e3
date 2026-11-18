@@ -28,7 +28,7 @@ describe("SpecialGuests", () => {
   it("shows the section heading and one badge at a time, starting with the first guest", () => {
     render(<SpecialGuests guests={SPECIAL_GUESTS} />);
 
-    expect(screen.getByRole("heading", { level: 2, name: "Invitadas especiales" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Invitados especiales" })).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(1);
     expect(getBadgeName()).toHaveTextContent(FIRST_GUEST_NAME);
     expect(screen.getByText("Plática por anunciar")).toBeInTheDocument();
@@ -113,7 +113,7 @@ describe("SpecialGuests without a pager (S35)", () => {
 
     await user.tab();
 
-    const carousel = screen.getByRole("group", { name: /Invitadas especiales: usa las flechas/ });
+    const carousel = screen.getByRole("group", { name: /Invitados especiales: usa las flechas/ });
 
     expect(carousel).toHaveFocus();
     expect(carousel).toBe(getBadgeSurface());

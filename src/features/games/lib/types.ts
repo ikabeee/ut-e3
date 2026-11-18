@@ -28,6 +28,13 @@ export interface Game {
   images: GameImage[];
 }
 
+/** What the navbar search needs of a public game to suggest it (S21). */
+export interface GameSuggestion {
+  slug: string;
+  name: string;
+  genreName: string;
+}
+
 export interface GameEventLabels {
   dateLabel: string;
   hoursLabel: string;

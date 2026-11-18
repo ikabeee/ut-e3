@@ -89,6 +89,10 @@ export const RAFFLE_COPY = {
     title: "Ganadores de la rifa",
     description: "Los ganadores confirmados de la rifa final del UT Game Showcase: gamertag, premio y hora.",
     loading: "Cargando los ganadores…",
+    startsAt: {
+      label: "La rifa empieza",
+      when: (date: string, time: string) => `${date} · ${time}`,
+    },
     empty: "Todavía no hay ganadores confirmados.",
     prizePending: "Premio por entregar",
     columns: { ticket: "Boleto", gamertag: "Gamertag", prize: "Premio", time: "Hora" },

@@ -3,9 +3,11 @@ import { RaffleWinnersHeader } from "@features/raffle/components/raffle-winners-
 import { RaffleWinnersList } from "@features/raffle/components/raffle-winners-list";
 import { RAFFLE_LIVE_PATH } from "@features/raffle/lib/raffle-links";
 
+const RAFFLE_START = { at: "2026-11-20T23:00:00.000Z", label: "Viernes 20 de noviembre · 17:00" };
+
 describe("RaffleWinnersHeader (S1)", () => {
   it("centers the title, the description and the link to the live drum", () => {
-    render(<RaffleWinnersHeader />);
+    render(<RaffleWinnersHeader raffleStart={RAFFLE_START} />);
 
     const header = screen.getByRole("banner");
 
@@ -15,7 +17,7 @@ describe("RaffleWinnersHeader (S1)", () => {
   });
 
   it("shows the raffle ticket emblem as a decorative accent-colored icon", () => {
-    render(<RaffleWinnersHeader />);
+    render(<RaffleWinnersHeader raffleStart={RAFFLE_START} />);
 
     const icon = screen.getByTestId("raffle-ticket-icon");
 
@@ -24,11 +26,34 @@ describe("RaffleWinnersHeader (S1)", () => {
   });
 });
 
+describe("RaffleWinnersHeader raffle start (S5)", () => {
+  it("says when the raffle starts with the date and the hour it receives", () => {
+    render(<RaffleWinnersHeader raffleStart={RAFFLE_START} />);
+
+    const start = screen.getByText("La rifa empieza").closest("p");
+
+    expect(start).toHaveTextContent("La rifa empieza Viernes 20 de noviembre · 17:00");
+    expect(screen.getByText("Viernes 20 de noviembre · 17:00").closest("time")).toHaveAttribute(
+      "datetime",
+      RAFFLE_START.at,
+    );
+  });
+});
+
 describe("RaffleWinnersList empty state (S1)", () => {
   it("centers the message when there are no winners", () => {
     render(<RaffleWinnersList winners={[]} />);
 
     expect(screen.getByText("Todavía no hay ganadores confirmados.")).toHaveClass("text-center");
+  });
+
+  it("shows a decorative empty podium above the message (S28)", () => {
+    render(<RaffleWinnersList winners={[]} />);
+
+    const podium = screen.getByTestId("no-winners-icon");
+
+    expect(podium).toHaveAttribute("aria-hidden", "true");
+    expect(podium).toHaveClass("text-muted");
   });
 
   it("keeps listing each winner with ticket, gamertag and prize", () => {
