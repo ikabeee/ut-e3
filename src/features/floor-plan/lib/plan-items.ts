@@ -55,11 +55,6 @@ export function filterMapItems(items: readonly MapItem[], filter: MapFilter): Ma
   return items.filter((item) => item.kind === filter);
 }
 
-/** How many blocks the stands belong to: T, C, A, D and B. */
-export function countBlocks(): number {
-  return new Set(STAND_MARKERS.map((marker) => marker.code.charAt(1))).size;
-}
-
 /** How many zones are activities: the stage, the KOF arena and Mario Kart. */
 export function countActivities(): number {
   // SAFETY: every zone marker id is a key of the zone copy and its kinds.
@@ -89,7 +84,7 @@ function emptyStandItem(code: string, placement: StandPlacement): MapItem {
     id: code,
     kind: "stand",
     label: FLOOR_PLAN_COPY.drawing.standLabel(code),
-    kicker: FLOOR_PLAN_COPY.unassignedKicker(code),
+    kicker: "",
     title: FLOOR_PLAN_COPY.unassignedTitle,
     description: FLOOR_PLAN_COPY.unassignedDescription,
     code,
@@ -106,7 +101,7 @@ function gameStandItem(code: string, stand: FloorPlanStand, placement: StandPlac
     id: code,
     kind: "stand",
     label: FLOOR_PLAN_COPY.drawing.standLabel(code, stand.name),
-    kicker: FLOOR_PLAN_COPY.standKicker(code, stand.genre),
+    kicker: stand.genre,
     title: stand.name,
     description: stand.synopsis,
     code,

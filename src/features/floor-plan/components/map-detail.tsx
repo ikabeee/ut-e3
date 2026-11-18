@@ -36,10 +36,8 @@ export function MapDetail({ item, variant, detailRef, onClose }: Readonly<MapDet
       <div className="flex items-start gap-4">
         <DetailThumbnail item={item} />
         <div className="min-w-0 flex-1">
-          <p className="type-tiny tracking-[0.12em] text-accent">{item.kicker}</p>
-          <Title className="mt-2 type-wide text-[22px] leading-[1.1] tracking-[-0.02em] text-foreground">
-            {item.title}
-          </Title>
+          {item.kicker ? <p className="mb-2 type-tiny tracking-[0.12em] text-accent">{item.kicker}</p> : null}
+          <Title className="type-wide text-[22px] leading-[1.1] tracking-[-0.02em] text-foreground">{item.title}</Title>
           <p className="mt-2 line-clamp-3 text-sm/6 text-map-copy">{item.description}</p>
           {detailBlockLine(item)}
         </div>

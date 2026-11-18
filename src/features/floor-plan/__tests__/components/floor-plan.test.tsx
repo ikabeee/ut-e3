@@ -51,6 +51,8 @@ beforeEach(() => {
 
 afterEach(() => {
   window.history.replaceState(null, "", "/");
+  // @ts-expect-error jsdom has no scrollIntoView: tests that stub it remove it again here.
+  delete Element.prototype.scrollIntoView;
 });
 
 describe("FloorPlan markers", () => {
@@ -251,7 +253,8 @@ describe("FloorPlan detail", () => {
 
     expect(detail).toHaveAttribute("aria-live", "polite");
     expect(within(detail).getByRole("heading", { name: "Ceniza Protocol" })).toBeInTheDocument();
-    expect(within(detail).getByText("Stand ZA-S1 · Acción")).toBeInTheDocument();
+    expect(within(detail).getByText("Acción")).toBeInTheDocument();
+    expect(within(detail).queryByText(/Stand ZA-S1/)).not.toBeInTheDocument();
     expect(
       within(detail).getByText("Shooter de extracción en una ciudad sepultada por ceniza volcánica."),
     ).toBeInTheDocument();
@@ -332,6 +335,7 @@ describe("FloorPlan detail", () => {
     const detail = screen.getByRole("region", { name: "Detalle del croquis" });
 
     expect(within(detail).getByText("Stand por asignar")).toBeInTheDocument();
+    expect(within(detail).queryByText(/Stand ZT-S6/)).not.toBeInTheDocument();
     expect(within(detail).queryByRole("link", { name: /Ver ficha del juego/ })).not.toBeInTheDocument();
     expect(within(detail).queryByRole("img")).not.toBeInTheDocument();
   });
@@ -535,10 +539,10 @@ describe("FloorPlan variants", () => {
 });
 
 describe("FloorPlan list and legend", () => {
-  it("toggles the list of every filtered item in plan order", async () => {
+  it("toggles the list of every filtered item in plan order on the page variant", async () => {
     const user = userEvent.setup();
 
-    render(<FloorPlan stands={STAND_FIXTURES} />);
+    render(<FloorPlan stands={STAND_FIXTURES} variant="page" />);
 
     expect(screen.getByRole("button", { name: "Ver como lista" })).toHaveAttribute("aria-pressed", "false");
 
@@ -557,6 +561,65 @@ describe("FloorPlan list and legend", () => {
 
     expect(screen.getByRole("button", { name: "Ver como lista" })).toBeInTheDocument();
     expect(document.querySelector("ul:not([aria-label])")).toBeNull();
+  });
+
+  it("shows an aria-hidden eye icon in the list toggle, a different one for each state", async () => {
+    const user = userEvent.setup();
+
+    render(<FloorPlan stands={STAND_FIXTURES} variant="page" />);
+
+    const showIcon = screen.getByRole("button", { name: "Ver como lista" }).querySelector("svg");
+    const showIconMarkup = showIcon?.innerHTML;
+
+    expect(showIcon).toHaveAttribute("aria-hidden", "true");
+
+    await user.click(screen.getByRole("button", { name: "Ver como lista" }));
+
+    const hideIcon = screen.getByRole("button", { name: "Ocultar lista" }).querySelector("svg");
+
+    expect(hideIcon).toHaveAttribute("aria-hidden", "true");
+    expect(hideIcon?.innerHTML).not.toBe(showIconMarkup);
+  });
+
+  it("never offers to hide the list on the embedded variant", async () => {
+    const user = userEvent.setup();
+
+    render(<FloorPlan stands={STAND_FIXTURES} />);
+    await user.click(screen.getByRole("button", { name: "Ver como lista" }));
+
+    expect(itemList()).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Ocultar lista" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Ver como lista" })).not.toBeInTheDocument();
+  });
+
+  it("has no link to the floor plan page on the embedded variant", () => {
+    render(<FloorPlan stands={STAND_FIXTURES} />);
+
+    expect(screen.queryByRole("link", { name: /Abrir el croquis/ })).not.toBeInTheDocument();
+  });
+
+  it("highlights the clicked list entry and its marker, and brings the map into view", async () => {
+    const user = userEvent.setup();
+    const scrollIntoView = stubScrollIntoView();
+
+    render(<FloorPlan stands={STAND_FIXTURES} />);
+    await user.click(screen.getByRole("button", { name: "Ver como lista" }));
+
+    const entry = within(itemList()).getByRole("button", { name: "Stand ZB-S2, Kaiju Mercado" });
+
+    expect(entry).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(entry);
+
+    expect(entry).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen
+        .getAllByRole("button", { name: "Stand ZB-S2, Kaiju Mercado" })
+        .filter((button) => !itemList().contains(button)),
+    ).toHaveLength(1);
+    expect(screen.getByRole("region", { name: "Detalle del croquis" })).toHaveTextContent("Kaiju Mercado");
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView.mock.contexts[0]).toBe(document.querySelector("[data-scale]")?.parentElement);
   });
 
   it("lists only the filtered items", async () => {
@@ -617,6 +680,14 @@ function viewportScale(): number {
   if (Number.isNaN(scale)) throw new Error("The map viewport scale is not a number");
 
   return scale;
+}
+
+function stubScrollIntoView() {
+  const scrollIntoView = jest.fn();
+
+  Element.prototype.scrollIntoView = scrollIntoView;
+
+  return scrollIntoView;
 }
 
 function itemList() {
