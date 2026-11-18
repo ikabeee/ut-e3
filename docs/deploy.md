@@ -16,6 +16,15 @@ el `Dockerfile` y el `docker-compose.yml`; el proxy (Nginx o Caddy) lo pones tú
 La base vive en `/data/app.db` dentro del contenedor, en el volumen `app-data`. Está en modo WAL con `busy_timeout`
 (RNF-08); el código lo configura al abrir cada conexión.
 
+Las imágenes de los juegos que suben los administradores de stand (`/stand/game`) se guardan en `UPLOADS_DIR`, que en la
+imagen es `/data/uploads` (el mismo volumen `app-data`; en desarrollo, `data/uploads` dentro del proyecto). Se sirven por
+`GET /api/media/games/<archivo>.jpg`, con caché inmutable porque el nombre lleva un hash del contenido. Solo se aceptan
+JPG reales, de máximo 5 MB, con el tamaño exacto del grid de portadas (tarjeta 810x1080; portada y hasta cuatro capturas
+1920x1080). El respaldo de la base (abajo) no incluye las imágenes: copia también `/data/uploads`
+(`docker compose cp app:/data/uploads ./uploads-<fecha>`). El límite de cuerpo de las Server Actions es de 6 MB
+(`experimental.serverActions.bodySizeLimit` en `next.config.ts`); si pones un proxy con límite menor
+(`client_max_body_size` en Nginx), súbelo a 6 MB o la carga falla antes de llegar a la app.
+
 ## Primer despliegue
 
 Requisitos en el VPS: Docker con el plugin Compose y acceso a internet para construir (npm y GitHub).

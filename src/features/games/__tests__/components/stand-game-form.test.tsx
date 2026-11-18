@@ -29,14 +29,13 @@ describe("StandGameForm", () => {
     expect(screen.getByLabelText(COPY.fields.itchUrl)).toHaveValue("https://a.itch.io/ruta");
   });
 
-  it("has no field for images or for the stand, and says who loads the images", () => {
+  it("has no field for images or for the stand: the images have their own forms", () => {
     const { container } = renderWithToasts(
       <StandGameForm game={null} genres={GENRES} action={recordingAction([]).action} />,
     );
 
     expect(container.querySelector("input[type=file]")).toBeNull();
     expect(container.querySelector("[name=standId]")).toBeNull();
-    expect(screen.getByText(COPY.coverNote)).toBeInTheDocument();
   });
 
   it("posts the fields and keeps what was typed after the server accepted them", async () => {

@@ -21,7 +21,7 @@ interface StandGameFormProps {
 
 const COPY = GAMES_COPY.standGame;
 
-/** The data of the game of the stand (RF-31). There is no field for images or for the stand: neither is the form's. */
+/** The data of the game of the stand (RF-31). The images have their own forms and the stand is the one of the session. */
 export function StandGameForm({ game, genres, action }: Readonly<StandGameFormProps>) {
   const { state, formAction, isPending, formRef, handleSubmit } = useActionForm(action, { resetOnDone: false });
   const genreOptions = genres.map((genre) => ({ value: genre.id, label: genre.name }));
@@ -45,7 +45,6 @@ export function StandGameForm({ game, genres, action }: Readonly<StandGameFormPr
         <Description>{COPY.itchHint}</Description>
         <FieldError />
       </TextField>
-      <p className="type-tiny text-muted">{COPY.coverNote}</p>
       <FormFeedback state={state} />
       <PendingButton type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isPending}>
         {isPending ? COPY.pending : COPY.submit}

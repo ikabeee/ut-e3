@@ -279,7 +279,18 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 - Un stand tiene un administrador activo y hasta 3 cuentas `stand_staff` invitadas o activas (RF-32, RF-39); lo hacen
   cumplir `invitations.ts` y los triggers de la migración `*_stand_accounts`. El staff y el técnico usan el mismo rol
   `stand_staff`. Solo el sysadmin crea stands y administradores; el staff lo da de alta el administrador de su stand.
-  Las imágenes y la portada de un juego no las edita el administrador del stand.
+  El administrador del stand que posee el juego lo gestiona completo (CRUD, S27): crea y edita sus datos, carga sus
+  imágenes y lo borra (con confirmación). Siempre actúa sobre el juego del stand de su sesión, nunca por un id del
+  formulario (`deleteStandGame()` en `stand-game-mutations.ts`).
+- Imágenes del juego (S16): `/stand/game` pide solo las del grid de portadas (`game-image-slots.ts`): tarjeta 810x1080
+  (posición 1, `isCover`), portada 1920x1080 (posición 2) y hasta 4 capturas 1920x1080 (posiciones 3 a 6), JPG real
+  (SOI/EOI, sin dependencias: `jpeg-info.ts`), RGB, de máximo 5 MB (`game-image-validation.ts`). El servidor asigna el
+  nombre canónico del grid más un hash del contenido (`<slug>-portada-<hash>.jpg`), valida todo antes de escribir, guarda
+  el archivo y luego la fila en una transacción (si la BD falla borra el archivo) y audita (`game.image.save`,
+  `game.image.delete`, `game.delete`) en `stand-game-image-mutations.ts`. Los archivos viven en `UPLOADS_DIR`
+  (`/data/uploads` en Docker, `data/uploads` en desarrollo) y se sirven por `GET /api/media/games/<archivo>.jpg`
+  (`game-media-route.ts`, caché inmutable; el kill switch `landing` lo deja pasar). El límite de cuerpo de las Server
+  Actions es de 6 MB (`next.config.ts`). El orden de la galería sale de `getGalleryImages` (portada, tarjeta, capturas).
 - Toda Server Action del panel empieza con `await requireSysadmin()` y, tras escribir, llama `updateTag` con el
   tag de la consulta que cambió para que la portada lo muestre.
 - Los CHECKs de `accounts` y los triggers que hacen la bitácora de sólo inserción viven en el SQL de la migración

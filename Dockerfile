@@ -82,6 +82,7 @@ ENV NODE_ENV=production \
     HOSTNAME=0.0.0.0 \
     PORT=3000 \
     DATABASE_URL=file:/data/app.db \
+    UPLOADS_DIR=/data/uploads \
     PATH=/app/node_modules/.bin:$PATH
 
 WORKDIR /app
