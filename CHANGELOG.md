@@ -6,6 +6,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Seguridad
+
+- Next.js se actualiza de 16.4.2 a 16.4.6 por un aviso de seguridad publicado (junto con `@next/env` y `eslint-config-next`).
 ### Cambiado
 
 - Mi pasaporte (`/passport`): en el teléfono se apilan el pasaporte, el croquis y el detalle del juego; desde 1000 px el
