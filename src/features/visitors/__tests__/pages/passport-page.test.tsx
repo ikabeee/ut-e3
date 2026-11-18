@@ -9,20 +9,20 @@ const VISITS = { visitCount: 0, stands: [], tickets: [] };
 
 describe("PassportView", () => {
   it("shows the gamertag and the PIN", () => {
-    renderView(<PassportView passport={PASSPORT} visits={VISITS} />);
+    renderView(<PassportView passport={PASSPORT} visits={VISITS} games={[]} />);
 
     expect(screen.getByText("Neo")).toBeInTheDocument();
     expect(screen.getByText("04217")).toBeInTheDocument();
   });
 
   it("shows what the page composes under the card, such as the tournament notice", () => {
-    renderView(<PassportView passport={PASSPORT} visits={VISITS} extra={<p>Aviso del torneo</p>} />);
+    renderView(<PassportView passport={PASSPORT} visits={VISITS} games={[]} extra={<p>Aviso del torneo</p>} />);
 
     expect(screen.getByText("Aviso del torneo")).toBeInTheDocument();
   });
 
   it("shows nothing extra when the page has nothing to add", () => {
-    renderView(<PassportView passport={PASSPORT} visits={VISITS} />);
+    renderView(<PassportView passport={PASSPORT} visits={VISITS} games={[]} />);
 
     expect(screen.queryByText("Aviso del torneo")).not.toBeInTheDocument();
   });

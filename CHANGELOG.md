@@ -6,6 +6,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Cambiado
+
+- Mi pasaporte (`/passport`): en el teléfono se apilan el pasaporte, el croquis y el detalle del juego; desde 1000 px el
+  pasaporte va en una columna junto a un panel con el croquis y el detalle. Al tocar un stand en el croquis, su juego (y si
+  ya lo visitaste) aparece en el detalle.
 ### Agregado
 
 - Los correos (invitaciones, pasaporte, recuperación y rifa) salen con una plantilla HTML con la estética del sitio y su

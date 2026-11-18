@@ -16,7 +16,7 @@ const FEATURE_DEPENDENCIES = {
   stands: ["accounts", "games", "pwa", "visitors"],
   support: ["accounts", "tournament", "visitors"],
   tournament: ["accounts"],
-  visitors: ["accounts", "games"],
+  visitors: ["accounts", "floor-plan", "games"],
   moderation: ["accounts", "games", "visitors"],
   admin: ["accounts", "raffle", "stands", "support", "tournament"],
   site: ["accounts", "floor-plan", "games", "landing", "raffle", "sponsors", "tournament", "visitors"],

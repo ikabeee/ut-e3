@@ -1,4 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { makeGame } from "@features/games/__tests__/components/game-test-data";
 import { createRouter, withRouter } from "@features/pwa/__tests__/components/router-test-utils";
 import { PASSPORT_SNAPSHOT_KEY } from "@features/visitors/lib/passport-snapshot";
 import { PassportView } from "@features/visitors/pages/passport-page";
@@ -10,7 +12,10 @@ describe("PassportView", () => {
 
     expect(screen.getByText("12345")).toBeInTheDocument();
     expect(screen.getByText(VISITORS_COPY.passport.progress.remaining(9))).toBeInTheDocument();
-    expect(screen.getByText("ZA-S2")).toBeInTheDocument();
+    // The map also shows the stand codes: the passport column is where the visits are.
+    const passport = screen.getByRole("region", { name: VISITORS_COPY.passport.explorer.passportLabel });
+
+    expect(within(passport).getByText("ZA-S2")).toBeInTheDocument();
     expect(screen.getByText(VISITORS_COPY.passport.tickets.ticket(3))).toBeInTheDocument();
   });
 
@@ -21,6 +26,21 @@ describe("PassportView", () => {
 
     expect(screen.getByRole("status", { name: "Estado de la conexión" })).toHaveTextContent("En línea");
     expect(window.localStorage.getItem(PASSPORT_SNAPSHOT_KEY)).toContain("12345");
+  });
+
+  it("puts the map and the game detail beside the passport, and a stand tapped on it fills the detail (S18)", async () => {
+    renderView();
+
+    const passport = screen.getByRole("region", { name: VISITORS_COPY.passport.explorer.passportLabel });
+    const detail = screen.getByRole("region", { name: VISITORS_COPY.passport.explorer.detailTitle });
+
+    expect(within(passport).getByText("12345")).toBeInTheDocument();
+    expect(detail).toHaveTextContent(VISITORS_COPY.passport.explorer.empty);
+
+    await userEvent.click(screen.getByRole("button", { name: "Stand ZA-S2, Ceniza Protocol" }));
+
+    expect(within(detail).getByRole("heading", { name: "Ceniza Protocol" })).toBeInTheDocument();
+    expect(detail).toHaveTextContent(VISITORS_COPY.passport.stands.pending);
   });
 });
 
@@ -38,6 +58,7 @@ function renderView() {
           ],
           tickets: [{ number: 3, milestone: 9 }],
         }}
+        games={[makeGame({ id: "ceniza-protocol", name: "Ceniza Protocol", stand: { zone: "A", number: 2 } })]}
       />,
     ),
   );
