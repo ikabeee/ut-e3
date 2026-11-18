@@ -1,14 +1,13 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import { PublicBracketView } from "@features/tournament/components/public-bracket-view";
 import { POLL_INTERVAL_MS } from "@features/tournament/hooks/use-tournament";
 import { toPublicBracket } from "@features/tournament/lib/public-bracket";
-import { createTestTournament, clearToasts } from "@features/tournament/__tests__/tournament-test-utils";
-
-afterEach(clearToasts);
+import { createTestTournament } from "@features/tournament/__tests__/tournament-test-utils";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 describe("PublicBracketView while the bracket is not published (S5)", () => {
   it.each(["closed", "pending"] as const)("does not show the arena or schedule buttons when it is %s", (state) => {
-    render(<PublicBracketView initial={{ state, serverNow: 1 }} />);
+    renderWithToasts(<PublicBracketView initial={{ state, serverNow: 1 }} />);
 
     expect(screen.queryByRole("link", { name: "Arena KOF" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Cronograma" })).not.toBeInTheDocument();
@@ -16,7 +15,7 @@ describe("PublicBracketView while the bracket is not published (S5)", () => {
   });
 
   it("leaves the published bracket view unchanged", () => {
-    render(
+    renderWithToasts(
       <PublicBracketView initial={{ state: "open", bracket: toPublicBracket(createTestTournament()), serverNow: 1 }} />,
     );
 
@@ -31,7 +30,10 @@ describe("PublicBracketView connection error (S6)", () => {
     try {
       const load = jest.fn().mockRejectedValue(new Error("offline"));
 
-      const { container } = render(<PublicBracketView initial={{ state: "closed", serverNow: 1 }} load={load} />);
+      const { container } = renderWithToasts(
+        <PublicBracketView initial={{ state: "closed", serverNow: 1 }} load={load} />,
+      );
+
       await act(async () => {
         await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
       });

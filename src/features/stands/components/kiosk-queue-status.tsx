@@ -1,3 +1,4 @@
+import { Spinner } from "@heroui/react";
 import type { VisitQueuePhase } from "@features/stands/hooks/use-visit-queue";
 import { STANDS_COPY } from "@features/stands/lib/stands-copy";
 import type { RejectedQueuedVisit } from "@features/stands/lib/visit-queue";
@@ -18,13 +19,15 @@ const COPY = STANDS_COPY.kiosk.queue;
  */
 export function KioskQueueStatus({ isOnline, pendingCount, phase, rejected }: Readonly<KioskQueueStatusProps>) {
   const line = describeQueue({ isOnline, pendingCount, phase });
+  const isSending = isOnline && pendingCount > 0;
 
   if (!line && rejected.length === 0) return null;
 
   return (
     <section aria-label={COPY.label} className="grid w-full max-w-xl gap-4">
       {line ? (
-        <p role="status" className="m-0 border border-border p-4 type-mono">
+        <p role="status" className="m-0 flex items-center gap-3 border border-border p-4 type-mono">
+          {isSending ? <Spinner aria-hidden="true" size="sm" color="current" /> : null}
           {line}
         </p>
       ) : null}

@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@heroui/react";
 import { ConnectionBadge } from "@features/pwa/components/connection-indicator";
 import { useOfflineReconnect, type Navigate } from "@features/pwa/hooks/use-offline-reconnect";
 import { PWA_COPY } from "@features/pwa/lib/pwa-copy";
+import { PendingButton } from "@shared/components/pending-button";
 
 const COPY = PWA_COPY.offline;
 
@@ -20,9 +20,14 @@ export function OfflineReconnect({ reconnectTo, navigate }: Readonly<{ reconnect
       <h1 className="type-section">{state === "offline" ? COPY.title : COPY.reconnecting.title}</h1>
       <p className="max-w-[44ch] text-muted">{message}</p>
       <ConnectionBadge isOnline={state !== "offline"} />
-      <Button variant="outline" className="touch-target relative min-h-11" isDisabled={isRetrying} onPress={retry}>
+      <PendingButton
+        variant="outline"
+        className="touch-target relative min-h-11"
+        isPending={isRetrying}
+        onPress={retry}
+      >
         {isRetrying ? COPY.retryPending : COPY.retry}
-      </Button>
+      </PendingButton>
     </header>
   );
 }

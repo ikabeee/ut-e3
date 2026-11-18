@@ -1,12 +1,13 @@
 "use client";
 
-import { Button, Form } from "@heroui/react";
+import { Form } from "@heroui/react";
 import type { ReactNode } from "react";
 import type { ManagementAction } from "@features/accounts/components/invite-account-form";
 import type { ManagementActionState } from "@features/accounts/lib/management-actions";
 import { STANDS_COPY } from "@features/stands/lib/stands-copy";
 import { FormFeedback } from "@shared/components/form-feedback";
 import { useActionForm } from "@shared/hooks/use-action-form";
+import { PendingButton } from "@shared/components/pending-button";
 
 interface StandAdminFormProps {
   action: ManagementAction;
@@ -28,9 +29,9 @@ export function StandAdminForm({ action, submitLabel, clearsWhenDone, children }
     <Form ref={formRef} action={formAction} onSubmit={handleSubmit} className="grid gap-4">
       {children}
       <FormFeedback state={state} />
-      <Button type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isPending}>
+      <PendingButton type="submit" variant="primary" className="min-h-11 justify-self-start" isPending={isPending}>
         {isPending ? COPY.pending : submitLabel}
-      </Button>
+      </PendingButton>
     </Form>
   );
 }

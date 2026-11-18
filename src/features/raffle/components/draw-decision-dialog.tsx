@@ -1,11 +1,13 @@
 "use client";
 
-import { AlertDialog, Button } from "@heroui/react";
+import { AlertDialog } from "@heroui/react";
 import { useActionState, useEffect, useRef } from "react";
 import type { DecisionOutcome } from "@features/raffle/lib/raffle-input";
 import type { RaffleActionState } from "@features/raffle/lib/raffle-actions";
 import { RAFFLE_COPY } from "@features/raffle/lib/raffle-copy";
 import type { PendingDraw } from "@features/raffle/lib/types";
+import { PendingButton } from "@shared/components/pending-button";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 
 export type RaffleAction = (previous: RaffleActionState | null, form: FormData) => Promise<RaffleActionState>;
 
@@ -52,6 +54,8 @@ function DecisionForm({ draw, outcome, decide, onDecided }: Readonly<DecisionFor
   const [state, formAction, isPending] = useActionState(decide, null);
   const handledState = useRef<RaffleActionState | null>(null);
 
+  useErrorToast(state?.status === "error" ? state.message : null, state);
+
   // Each answer is handled once, although `onDecided` changes with every poll.
   useEffect(() => {
     if (state?.status !== "done" || handledState.current === state) return;
@@ -64,19 +68,14 @@ function DecisionForm({ draw, outcome, decide, onDecided }: Readonly<DecisionFor
     <form action={formAction} className="grid gap-2">
       <input type="hidden" name="drawId" value={draw.id} />
       <input type="hidden" name="outcome" value={outcome} />
-      <Button
+      <PendingButton
         type="submit"
         variant={outcome === "winner" ? "primary" : "outline"}
         className="min-h-12 min-w-36"
         isPending={isPending}
       >
         {outcome === "winner" ? COPY.winner : COPY.discarded}
-      </Button>
-      {state?.status === "error" && (
-        <p role="alert" className="m-0 text-sm text-danger">
-          {state.message}
-        </p>
-      )}
+      </PendingButton>
     </form>
   );
 }

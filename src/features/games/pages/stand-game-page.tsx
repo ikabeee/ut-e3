@@ -13,6 +13,7 @@ import { deleteStandGameAction, saveStandGameAction } from "@features/games/lib/
 import { deleteGameImageAction, uploadGameImageAction } from "@features/games/lib/stand-game-image-actions";
 import { StandAdminNav } from "@features/stands/components/stand-admin-nav";
 import { getStandGame, getStandGameImages, listGenres } from "@features/games/lib/server/stand-game-queries";
+import { PanelSkeleton } from "@shared/components/panel-skeleton";
 
 const COPY = GAMES_COPY.standGame;
 
@@ -26,7 +27,7 @@ export const standGamePageMetadata: Metadata = {
 export function StandGamePage() {
   return (
     <main className="page-wrap grid gap-10 py-12">
-      <Suspense fallback={<p className="type-mono text-muted">{COPY.loading}</p>}>
+      <Suspense fallback={<PanelSkeleton label={COPY.loading} layout="form" />}>
         <StandGamePanel />
       </Suspense>
     </main>

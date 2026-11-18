@@ -26,6 +26,7 @@ import { closeCheckInIfDue } from "@features/tournament/lib/server/entries-mutat
 import { getEntries } from "@features/tournament/lib/server/entries-queries";
 import { getPublicBracketEnabled } from "@features/tournament/lib/server/public-bracket-queries";
 import { getTournament } from "@features/tournament/lib/server/tournament-queries";
+import { PanelSkeleton } from "@shared/components/panel-skeleton";
 
 const COPY = TOURNAMENT_COPY.ui;
 
@@ -40,7 +41,7 @@ export const kofPageMetadata: Metadata = {
 export function KofPage() {
   return (
     <main className="page-wrap grid gap-12 py-12">
-      <Suspense fallback={<p className="type-mono text-muted">{COPY.loading}</p>}>
+      <Suspense fallback={<PanelSkeleton label={COPY.loading} />}>
         <KofPanel />
       </Suspense>
     </main>

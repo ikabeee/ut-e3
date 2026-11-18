@@ -13,6 +13,10 @@ export const VISITORS_COPY = {
     emailInvalid: "Ingresa un correo electrónico válido.",
     closed: "El registro de visitantes aún no está abierto.",
   },
+  loading: {
+    register: "Cargando el registro...",
+    passport: "Cargando tu pasaporte...",
+  },
   form: {
     title: "Registro de visitantes",
     subtitle: "Crea tu pasaporte digital para el evento.",

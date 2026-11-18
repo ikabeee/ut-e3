@@ -8,6 +8,7 @@ import { RAFFLE_WINNERS_PATH } from "@features/raffle/lib/raffle-links";
 import { listPublicRaffleWinners } from "@features/raffle/lib/server/raffle-queries";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
 import { formatLongEventDate } from "@features/tournament/lib/tournament-when";
+import { LoadingState } from "@shared/components/loading-state";
 import { formatTimeOfDay } from "@shared/lib/date-time";
 import { buildOpenGraph } from "@shared/lib/metadata";
 
@@ -27,7 +28,7 @@ export async function RaffleWinnersPage() {
   return (
     <main className="page-wrap grid max-w-3xl gap-8 py-12">
       <RaffleWinnersHeader raffleStart={getRaffleStart(raffleStartsAt)} />
-      <Suspense fallback={<p className="m-0 text-center type-mono text-muted">{COPY.loading}</p>}>
+      <Suspense fallback={<LoadingState label={COPY.loading} className="justify-center" />}>
         <Winners />
       </Suspense>
     </main>

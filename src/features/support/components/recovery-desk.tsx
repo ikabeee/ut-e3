@@ -7,6 +7,7 @@ import { RecoveryResult } from "@features/support/components/recovery-result";
 import type { RecoveryState, SearchState } from "@features/support/lib/support-actions";
 import { SUPPORT_COPY } from "@features/support/lib/support-copy";
 import { FormSubmit } from "@shared/components/form-submit";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 import { useSubmitKeepingValues } from "@shared/hooks/use-submit-keeping-values";
 
 export interface RecoveryDeskProps {
@@ -31,6 +32,8 @@ function RecoveryRound({ search, recover, onFinished }: Readonly<RecoveryDeskPro
   const [searchState, searchAction, isSearching] = useActionState(search, null);
   const [recoverState, recoverAction, isRecovering] = useActionState(recover, null);
 
+  useErrorToast(recoverState?.status === "error" ? recoverState.message : null, recoverState);
+
   if (recoverState?.status === "recovered") {
     return (
       <div className="grid max-w-xl gap-6">
@@ -54,7 +57,6 @@ function RecoveryRound({ search, recover, onFinished }: Readonly<RecoveryDeskPro
           candidates={searchState.candidates}
           recoverAction={recoverAction}
           isRecovering={isRecovering}
-          error={recoverState?.status === "error" ? recoverState.message : null}
         />
       ) : null}
     </div>

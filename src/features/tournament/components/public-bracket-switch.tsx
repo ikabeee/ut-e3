@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@heroui/react";
 import type { PublicBracketActionState } from "@features/tournament/lib/public-bracket-actions";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import { PUBLIC_BRACKET_PATH } from "@features/tournament/lib/tournament-links";
 import { FormFeedback } from "@shared/components/form-feedback";
 import { useActionForm } from "@shared/hooks/use-action-form";
+import { PendingButton } from "@shared/components/pending-button";
 
 export type PublicBracketSwitchAction = (
   previous: PublicBracketActionState | null,
@@ -32,9 +32,14 @@ export function PublicBracketSwitch({ isEnabled, action }: Readonly<PublicBracke
       <form ref={formRef} action={formAction} onSubmit={handleSubmit} className="grid justify-items-start gap-3">
         <input type="hidden" name="enabled" value={String(!isEnabled)} />
         <FormFeedback state={state} />
-        <Button type="submit" variant={isEnabled ? "outline" : "primary"} className="min-h-11" isPending={isPending}>
+        <PendingButton
+          type="submit"
+          variant={isEnabled ? "outline" : "primary"}
+          className="min-h-11"
+          isPending={isPending}
+        >
           {getLabel(isPending, isEnabled)}
-        </Button>
+        </PendingButton>
       </form>
       <a href={PUBLIC_BRACKET_PATH} className="touch-target relative w-fit link-wipe no-underline">
         {COPY.viewLink}

@@ -1,11 +1,12 @@
 "use client";
 
-import { Button } from "@heroui/react";
 import { useActionState } from "react";
 import type { ManagementAction } from "@features/accounts/components/invite-account-form";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import type { ManagedAccount } from "@features/accounts/lib/types";
 import { ConfirmActionForm } from "@shared/components/confirm-action-form";
+import { PendingButton } from "@shared/components/pending-button";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 
 interface ManagedAccountListProps {
   accounts: readonly ManagedAccount[];
@@ -97,26 +98,23 @@ interface RowButtonProps {
   hint?: string;
 }
 
-// A button that sends the id of one account and shows what the server answered under it.
+// A button that sends the id of one account: what the server answered shows under it, or in a toast when it failed.
 function ActionButton({ accountId, action, label, hint }: Readonly<RowButtonProps>) {
   const [state, formAction, isPending] = useActionState(action, null);
+
+  useErrorToast(state?.status === "error" ? state.message : null, state);
 
   return (
     <form action={formAction} className="grid gap-2">
       <input type="hidden" name="accountId" value={accountId} />
-      {state?.status === "error" && (
-        <p role="alert" className="text-sm text-danger">
-          {state.message}
-        </p>
-      )}
       {state?.status === "done" && (
         <p role="status" className="text-sm text-success">
           {state.message}
         </p>
       )}
-      <Button type="submit" variant="outline" className="min-h-11 justify-self-start" isPending={isPending}>
+      <PendingButton type="submit" variant="outline" className="min-h-11 justify-self-start" isPending={isPending}>
         {label}
-      </Button>
+      </PendingButton>
       {hint ? <p className="m-0 type-tiny text-muted">{hint}</p> : null}
     </form>
   );

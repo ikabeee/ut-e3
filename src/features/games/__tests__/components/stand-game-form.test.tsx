@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { StandGameForm, type StandGameAction } from "@features/games/components/stand-game-form";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 const COPY = GAMES_COPY.standGame;
 
@@ -12,7 +13,7 @@ const GENRES = [
 
 describe("StandGameForm", () => {
   it("starts empty while the stand has no game", () => {
-    render(<StandGameForm game={null} genres={GENRES} action={recordingAction([]).action} />);
+    renderWithToasts(<StandGameForm game={null} genres={GENRES} action={recordingAction([]).action} />);
 
     expect(screen.getByLabelText(COPY.fields.name)).toHaveValue("");
     expect(screen.getByLabelText(COPY.fields.synopsis)).toHaveValue("");
@@ -21,7 +22,7 @@ describe("StandGameForm", () => {
   it("starts with the registered game", () => {
     const game = { name: "Ruta 9", synopsis: "Carreras.", genreId: "genre-2", itchUrl: "https://a.itch.io/ruta" };
 
-    render(<StandGameForm game={game} genres={GENRES} action={recordingAction([]).action} />);
+    renderWithToasts(<StandGameForm game={game} genres={GENRES} action={recordingAction([]).action} />);
 
     expect(screen.getByLabelText(COPY.fields.name)).toHaveValue("Ruta 9");
     expect(screen.getByLabelText(COPY.fields.synopsis)).toHaveValue("Carreras.");
@@ -29,7 +30,9 @@ describe("StandGameForm", () => {
   });
 
   it("has no field for images or for the stand: the images have their own forms", () => {
-    const { container } = render(<StandGameForm game={null} genres={GENRES} action={recordingAction([]).action} />);
+    const { container } = renderWithToasts(
+      <StandGameForm game={null} genres={GENRES} action={recordingAction([]).action} />,
+    );
 
     expect(container.querySelector("input[type=file]")).toBeNull();
     expect(container.querySelector("[name=standId]")).toBeNull();
@@ -38,7 +41,7 @@ describe("StandGameForm", () => {
   it("posts the fields and keeps what was typed after the server accepted them", async () => {
     const { received, action } = recordingAction([{ status: "done", message: COPY.outcomes.created }]);
 
-    render(<StandGameForm game={null} genres={GENRES} action={action} />);
+    renderWithToasts(<StandGameForm game={null} genres={GENRES} action={action} />);
     await userEvent.type(screen.getByLabelText(COPY.fields.name), "Ruta 9");
     await userEvent.type(screen.getByLabelText(COPY.fields.synopsis), "Carreras.");
     await userEvent.click(screen.getByRole("button", { name: COPY.submit }));
@@ -54,7 +57,7 @@ describe("StandGameForm", () => {
   it("shows what the server refused", async () => {
     const { action } = recordingAction([{ status: "error", message: COPY.errors.itchInvalid }]);
 
-    render(<StandGameForm game={null} genres={GENRES} action={action} />);
+    renderWithToasts(<StandGameForm game={null} genres={GENRES} action={action} />);
     await userEvent.type(screen.getByLabelText(COPY.fields.name), "Ruta 9");
     await userEvent.type(screen.getByLabelText(COPY.fields.synopsis), "Carreras.");
     await userEvent.click(screen.getByRole("button", { name: COPY.submit }));

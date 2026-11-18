@@ -1,7 +1,8 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { StandGameImages } from "@features/games/components/stand-game-images";
 import { GENERIC_COVER_PATH } from "@features/games/lib/game-cover";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 const COPY = GAMES_COPY.standGame.images;
 
@@ -76,5 +77,32 @@ describe("StandGameImages", () => {
     expect(within(items[2]).getByRole("button", { name: COPY.remove })).toBeInTheDocument();
     expect(within(items[2]).getByRole("button", { name: COPY.replace })).toBeInTheDocument();
     expect(within(items[2]).getByRole("img")).toBeInTheDocument();
+  });
+
+  it("tells a refused upload in a toast and shows a spinner in the button while it is sent (S6, S7)", async () => {
+    const game = { name: "Ruta 9", slug: "ruta-9", images: [] };
+    const message = "La imagen debe medir 810x1080.";
+    let finish: () => void = () => undefined;
+
+    const refuse = () =>
+      new Promise<{ status: "error"; message: string }>((resolve) => {
+        finish = () => resolve({ status: "error", message });
+      });
+
+    renderWithToasts(<StandGameImages game={game} uploadAction={refuse} deleteAction={action} />);
+
+    const item = screen.getAllByRole("listitem")[0];
+
+    // jsdom has no file picker: the form is sent as it is, and the action decides.
+    fireEvent.submit(within(item).getByRole("button", { name: COPY.upload }).closest("form") ?? item);
+
+    const pending = await within(item).findByRole("button", { name: COPY.uploading });
+
+    expect(pending.querySelector('[data-slot="spinner"]')).toBeInTheDocument();
+
+    finish();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(message);
+    expect(item).not.toHaveTextContent(message);
   });
 });

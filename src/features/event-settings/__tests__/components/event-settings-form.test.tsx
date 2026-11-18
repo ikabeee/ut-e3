@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EventSettingsForm, type EventSettingsAction } from "@features/event-settings/components/event-settings-form";
 import type { EditableEventSettings } from "@features/event-settings/lib/event-settings-input";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 const SETTINGS: EditableEventSettings = {
   eventStartsAt: "2026-11-20T17:00:00.000Z",
@@ -34,7 +35,7 @@ const REFUSED: EventSettingsAction = async () => ({
 });
 
 describe("EventSettingsForm errors", () => {
-  it("shows the error of the pair and the summary after a refused save", async () => {
+  it("shows the error of the pair and the summary in a toast after a refused save", async () => {
     renderForm(REFUSED);
 
     await save();
@@ -51,7 +52,7 @@ describe("EventSettingsForm errors", () => {
     await userEvent.type(screen.getByLabelText("Corte de check-ins"), "1");
 
     expect(screen.queryByText(CUTOFF_ERROR)).not.toBeInTheDocument();
-    expect(screen.queryByText(SUMMARY)).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText(SUMMARY)).not.toBeInTheDocument());
   });
 
   it("keeps the error while the visitor edits an unrelated field", async () => {
@@ -73,7 +74,7 @@ describe("EventSettingsForm errors", () => {
     await save();
 
     expect(await screen.findByText(CUTOFF_ERROR)).toBeInTheDocument();
-    expect(screen.getByText(SUMMARY)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(SUMMARY));
   });
 
   it("clears the message of a save that was refused without a field", async () => {
@@ -83,12 +84,12 @@ describe("EventSettingsForm errors", () => {
 
     await userEvent.type(screen.getByLabelText("Corte de check-ins"), "1");
 
-    expect(screen.queryByText("No se pudo guardar.")).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText("No se pudo guardar.")).not.toBeInTheDocument());
   });
 });
 
 function renderForm(action: EventSettingsAction) {
-  return render(<EventSettingsForm settings={SETTINGS} action={action} />);
+  return renderWithToasts(<EventSettingsForm settings={SETTINGS} action={action} />);
 }
 
 // A whole valid value: the field is required, so a half-typed one would stop the next save before it is sent.

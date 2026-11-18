@@ -1,10 +1,11 @@
 import { webcrypto } from "node:crypto";
-import { act, render, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryVisitQueueStore } from "@features/stands/__tests__/lib/visit-queue-utils";
 import { StandKiosk, type KioskActions, type KioskOfflineSupport } from "@features/stands/components/stand-kiosk";
 import { buildPinFilter, mayBeRegisteredPin, type PinFilter } from "@features/stands/lib/pin-filter";
 import type { QueuedVisit, QueuedVisitResult } from "@features/stands/lib/visit-queue";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 // The PINs the downloaded filter knows; "11111" is not one of them and does not pass it (RF-78).
 // Far from now: the registration is open for the whole test.
@@ -162,7 +163,7 @@ function renderKiosk(overrides: Partial<KioskActions> = {}) {
     loadPinFilter: async () => filter,
   };
 
-  return render(
+  return renderWithToasts(
     <StandKiosk
       standCode="ZA-S3"
       gameName="Pixel Quest"

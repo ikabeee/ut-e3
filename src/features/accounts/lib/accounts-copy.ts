@@ -15,6 +15,7 @@ export const ACCOUNTS_COPY = {
   },
   verifyCode: {
     title: "Verifica tu identidad",
+    loading: "Cargando la verificación...",
     description: "Te enviamos un código de 6 dígitos a tu correo. Vence en 10 minutos.",
     codeLabel: "Código de 6 dígitos",
     submit: "Verificar",
@@ -50,6 +51,7 @@ Vence en 10 minutos y solo sirve una vez. Si no intentaste entrar, ignora este c
   },
   resetPassword: {
     title: "Elige una contraseña nueva",
+    loading: "Revisando el enlace...",
     greeting: (name: string) => `Hola, ${name}. Elige una contraseña nueva; se cerrarán tus sesiones abiertas.`,
     passwordLabel: "Contraseña nueva",
     confirmationLabel: "Repite la contraseña",
@@ -82,6 +84,7 @@ Si no lo pediste, ignora este correo: tu contraseña no cambia.`,
   },
   activate: {
     title: "Activa tu cuenta",
+    loading: "Revisando la invitación...",
     greeting: (name: string) => `Hola, ${name}. Elige una contraseña para entrar al panel del evento.`,
     passwordLabel: "Contraseña nueva",
     confirmationLabel: "Repite la contraseña",

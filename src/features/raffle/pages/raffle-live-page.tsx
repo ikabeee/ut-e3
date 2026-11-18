@@ -5,6 +5,7 @@ import { RaffleLiveScreen } from "@features/raffle/components/raffle-live-screen
 import { RAFFLE_COPY } from "@features/raffle/lib/raffle-copy";
 import { RAFFLE_LIVE_PATH } from "@features/raffle/lib/raffle-links";
 import { getRaffleLiveSnapshot } from "@features/raffle/lib/server/raffle-queries";
+import { LoadingState } from "@shared/components/loading-state";
 
 const COPY = RAFFLE_COPY.live;
 
@@ -19,7 +20,7 @@ export const raffleLivePageMetadata: Metadata = {
 export function RaffleLivePage() {
   return (
     <main>
-      <Suspense fallback={<p className="p-8 type-mono text-muted">{COPY.loading}</p>}>
+      <Suspense fallback={<LoadingState label={COPY.loading} className="p-8" />}>
         <LiveRaffle />
       </Suspense>
     </main>

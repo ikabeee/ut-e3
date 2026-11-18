@@ -24,6 +24,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   `rename_saatal_paal` corrige el nombre y los textos alternativos de sus imágenes en las bases ya sembradas.
 - El buscador de la barra sugiere juegos mientras escribes (flechas, Enter y Escape) y tolera letras de más o de menos:
   "san" encuentra Saatal Paal. /games?q= usa la misma búsqueda.
+- Las cargas fuera de los paneles muestran un spinner con lo que se carga (registro, pasaporte, kiosko, login, bracket
+  público y rifa), y los botones muestran un spinner mientras envían.
+- Las cargas de los paneles de cualquier rol (`/admin`, `/admin/kof`, `/admin/raffle`, `/stand/game`, `/stand/team` y
+  `/support/recovery`) muestran barras con la forma del contenido.
+- Todos los mensajes de error salen en un toast: formularios, acciones, conexión perdida, kiosko y la página de error.
 - La portada dice "Invitados especiales" y el cronograma muestra el lugar de cada actividad como texto, sin enlace ni flecha.
 
 ### Corregido

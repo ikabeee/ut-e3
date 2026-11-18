@@ -1,14 +1,15 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CommandButton, type TournamentAction } from "@features/tournament/components/command-button";
 import type { TournamentActionState } from "@features/tournament/lib/tournament-actions";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 describe("CommandButton", () => {
   it("sends the command in the form and tells the screen to refresh when it was applied", async () => {
     const { received, action } = recordingAction({ status: "applied" });
     const onApplied = jest.fn();
 
-    render(
+    renderWithToasts(
       <CommandButton
         action={action}
         onApplied={onApplied}
@@ -28,7 +29,7 @@ describe("CommandButton", () => {
   it("sends one slot field for each player named by the command", async () => {
     const { received, action } = recordingAction({ status: "applied" });
 
-    render(
+    renderWithToasts(
       <CommandButton
         action={action}
         onApplied={jest.fn()}
@@ -45,7 +46,7 @@ describe("CommandButton", () => {
   it("asks before sending a command that cannot be undone", async () => {
     const { received, action } = recordingAction({ status: "applied" });
 
-    render(
+    renderWithToasts(
       <CommandButton
         action={action}
         onApplied={jest.fn()}
@@ -68,7 +69,7 @@ describe("CommandButton", () => {
   it("lets the person back out of the confirmation", async () => {
     const { received, action } = recordingAction({ status: "applied" });
 
-    render(
+    renderWithToasts(
       <CommandButton
         action={action}
         onApplied={jest.fn()}
@@ -88,7 +89,7 @@ describe("CommandButton", () => {
     const { action } = recordingAction({ status: "error", message: "No puedes capturar este combate." });
     const onApplied = jest.fn();
 
-    render(
+    renderWithToasts(
       <CommandButton
         action={action}
         onApplied={onApplied}

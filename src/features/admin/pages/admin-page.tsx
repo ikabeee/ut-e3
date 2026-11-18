@@ -21,6 +21,7 @@ import {
   inviteStandAdminAction,
   updateStandAction,
 } from "@features/stands/lib/stands-admin-actions";
+import { PanelSkeleton } from "@shared/components/panel-skeleton";
 
 export const adminPageMetadata: Metadata = {
   title: ADMIN_COPY.title,
@@ -43,7 +44,7 @@ const STAND_ACTIONS: StandsAdminActions = {
 export function AdminPage() {
   return (
     <main className="page-wrap grid gap-10 py-12">
-      <Suspense fallback={<p className="type-mono text-muted">{ADMIN_COPY.loading}</p>}>
+      <Suspense fallback={<PanelSkeleton label={ADMIN_COPY.loading} />}>
         <SysadminPanel />
       </Suspense>
     </main>

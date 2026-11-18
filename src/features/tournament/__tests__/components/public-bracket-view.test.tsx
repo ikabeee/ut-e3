@@ -1,4 +1,4 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PublicBracketView } from "@features/tournament/components/public-bracket-view";
 import { POLL_INTERVAL_MS } from "@features/tournament/hooks/use-tournament";
@@ -9,24 +9,22 @@ import {
   NOW,
   playUntilFinished,
   startAndFinish,
-  clearToasts,
 } from "@features/tournament/__tests__/tournament-test-utils";
 import { applyCommand } from "@features/tournament/lib/tournament-engine";
+import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
 const CLOSED: PublicSnapshot = { state: "closed", serverNow: 1 };
 
-afterEach(clearToasts);
-
 describe("PublicBracketView", () => {
   it("tells where to follow the tournament when the bracket is closed (S4)", () => {
-    render(<PublicBracketView initial={CLOSED} />);
+    renderWithToasts(<PublicBracketView initial={CLOSED} />);
 
     expect(screen.getByRole("status")).toHaveTextContent("El bracket estará disponible en la pantalla del torneo.");
     expect(screen.queryByRole("heading", { name: "Tablero 1" })).not.toBeInTheDocument();
   });
 
   it("shows a decorative hourglass that only moves without reduced motion while the bracket is closed (S13)", () => {
-    render(<PublicBracketView initial={CLOSED} />);
+    renderWithToasts(<PublicBracketView initial={CLOSED} />);
 
     const hourglass = screen.getByTestId("waiting-hourglass-icon");
 
@@ -36,13 +34,13 @@ describe("PublicBracketView", () => {
   });
 
   it("says the bracket is not ready while it does not exist", () => {
-    render(<PublicBracketView initial={{ state: "pending", serverNow: 1 }} />);
+    renderWithToasts(<PublicBracketView initial={{ state: "pending", serverNow: 1 }} />);
 
     expect(screen.getByRole("status")).toHaveTextContent("El bracket todavía no está listo.");
   });
 
   it("shows the seven areas with their matches and the players", () => {
-    render(<PublicBracketView initial={openOf(createTestTournament())} />);
+    renderWithToasts(<PublicBracketView initial={openOf(createTestTournament())} />);
 
     ["Tablero 1", "Tablero 2", "Tablero 3", "Tablero 4", "Semifinal 1", "Semifinal 2", "Final"].forEach((name) => {
       expect(screen.getByRole("heading", { name })).toBeInTheDocument();
@@ -52,7 +50,7 @@ describe("PublicBracketView", () => {
   });
 
   it("links to each area so a phone can jump to it (S6)", () => {
-    render(<PublicBracketView initial={openOf(createTestTournament())} />);
+    renderWithToasts(<PublicBracketView initial={openOf(createTestTournament())} />);
 
     const nav = screen.getByRole("navigation", { name: "Ir a un tablero" });
 
@@ -64,7 +62,7 @@ describe("PublicBracketView", () => {
     const base = createTestTournament();
     const started = applyCommand(base, { type: "start_match", matchId: getMatch(base, 5).id }, NOW);
 
-    render(<PublicBracketView initial={openOf(started)} />);
+    renderWithToasts(<PublicBracketView initial={openOf(started)} />);
 
     const live = screen.getByRole("region", { name: "En juego ahora" });
 
@@ -73,7 +71,7 @@ describe("PublicBracketView", () => {
   });
 
   it("says so when no match is being played", () => {
-    render(<PublicBracketView initial={openOf(createTestTournament())} />);
+    renderWithToasts(<PublicBracketView initial={openOf(createTestTournament())} />);
 
     expect(
       within(screen.getByRole("region", { name: "En juego ahora" })).getByText("Ningún combate en juego."),
@@ -81,7 +79,7 @@ describe("PublicBracketView", () => {
   });
 
   it("marks the winner of a match that finished", () => {
-    render(<PublicBracketView initial={openOf(startAndFinish(createTestTournament(), 1, 1))} />);
+    renderWithToasts(<PublicBracketView initial={openOf(startAndFinish(createTestTournament(), 1, 1))} />);
 
     const card = screen.getAllByRole("heading", { name: "Combate #1" })[0].closest("li");
 
@@ -90,13 +88,13 @@ describe("PublicBracketView", () => {
   });
 
   it("announces the champion when the tournament is over", () => {
-    render(<PublicBracketView initial={openOf(playUntilFinished(createTestTournament()))} />);
+    renderWithToasts(<PublicBracketView initial={openOf(playUntilFinished(createTestTournament()))} />);
 
     expect(screen.getByRole("status")).toHaveTextContent(/Campeón: Tag\d+/);
   });
 
   it("draws the tree and keeps the list, and a button on small screens switches between them (S7)", async () => {
-    render(<PublicBracketView initial={openOf(createTestTournament())} />);
+    renderWithToasts(<PublicBracketView initial={openOf(createTestTournament())} />);
 
     expect(screen.getByRole("group", { name: "Bracket en forma de árbol" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Ir a un tablero" })).toBeInTheDocument();
@@ -112,7 +110,7 @@ describe("PublicBracketView", () => {
   });
 
   it("never shows an identifier, only gamertags", () => {
-    const { container } = render(<PublicBracketView initial={openOf(createTestTournament())} />);
+    const { container } = renderWithToasts(<PublicBracketView initial={openOf(createTestTournament())} />);
 
     expect(container.textContent).not.toContain("player-");
     expect(container.innerHTML).not.toContain("match-");
@@ -124,7 +122,7 @@ describe("PublicBracketView", () => {
     try {
       const load = jest.fn().mockResolvedValue(CLOSED);
 
-      render(<PublicBracketView initial={openOf(createTestTournament())} load={load} />);
+      renderWithToasts(<PublicBracketView initial={openOf(createTestTournament())} load={load} />);
       expect(screen.getByRole("heading", { name: "Tablero 1" })).toBeInTheDocument();
 
       await act(async () => {
@@ -144,7 +142,7 @@ describe("PublicBracketView", () => {
     try {
       const load = jest.fn().mockRejectedValue(new Error("offline"));
 
-      render(<PublicBracketView initial={openOf(createTestTournament())} load={load} />);
+      renderWithToasts(<PublicBracketView initial={openOf(createTestTournament())} load={load} />);
       await act(async () => {
         await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
       });

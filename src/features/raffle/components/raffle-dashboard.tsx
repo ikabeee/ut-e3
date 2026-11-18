@@ -10,6 +10,7 @@ import type { AdminSnapshotLoader } from "@features/raffle/hooks/use-raffle-snap
 import { RAFFLE_COPY } from "@features/raffle/lib/raffle-copy";
 import type { PendingDraw, RaffleAdminSnapshot } from "@features/raffle/lib/types";
 import { ConfirmActionForm } from "@shared/components/confirm-action-form";
+import { useErrorToast } from "@shared/hooks/use-error-toast";
 
 export interface RaffleDashboardActions {
   spin: SpinAction;
@@ -33,13 +34,10 @@ export function RaffleDashboard({ initial, viewerId, actions, load }: Readonly<R
   const state = useRaffleDashboard({ initial, viewerId, load });
   const { snapshot, pending, decidesPending } = state;
 
+  useErrorToast(state.hasConnectionError ? COPY.connectionLost : null);
+
   return (
     <div className="grid gap-10">
-      {state.hasConnectionError && (
-        <p role="status" className="m-0 text-sm text-danger">
-          {COPY.connectionLost}
-        </p>
-      )}
       <RaffleStatus snapshot={snapshot} />
       <section aria-label={COPY.spin.label} className="grid gap-4">
         <SpinButton
