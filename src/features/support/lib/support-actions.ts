@@ -155,6 +155,8 @@ function describeRegistration(result: DeskRegistrationResult, input: ValidRegist
   updateTag(VISITOR_PINS_CACHE_TAG);
   after(async () => {
     await deliverQueuedEmail(result.emailId);
+
+    if (result.tournamentEmailId) await deliverQueuedEmail(result.tournamentEmailId);
   });
 
   const { fullName, gamertag } = input;
