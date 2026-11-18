@@ -26,7 +26,7 @@ export function GameDetail({ game, itchLink, event, links, relatedGames }: Reado
       <GameDetailHeader game={game} catalogHref={links.catalog} />
       <div className="grid items-start gap-[clamp(24px,4vw,56px)] detail:grid-cols-[minmax(0,1fr)_320px]">
         <GameOverview game={game} event={event} />
-        <GameSidebar game={game} itchLink={itchLink} eventDateLabel={event.dateLabel} links={links} />
+        <GameSidebar game={game} itchLink={itchLink} eventDateLabel={event.dateLabel} />
       </div>
       <RelatedGames games={relatedGames} catalogHref={links.catalog} />
     </main>

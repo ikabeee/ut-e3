@@ -4,6 +4,9 @@ export const GAMES_PATH = "/games";
 
 export const GENRE_SEARCH_PARAM = "genre";
 
+// The site navbar submits its search as GET /games?q=<text>; the catalog filters its covers by it.
+export const KEYWORD_SEARCH_PARAM = "q";
+
 export function getGamePath(slug: string): string {
   return `${GAMES_PATH}/${slug}`;
 }

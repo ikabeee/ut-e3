@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { getEventSettings } from "@features/event-settings/lib/server/event-settings-queries";
 import type { EventSettings } from "@features/event-settings/lib/types";
-import { getFloorPlanItemPath } from "@features/floor-plan/lib/floor-plan-links";
 import { GameDetail } from "@features/games/components/game-detail";
 import { LiveItchLink } from "@features/games/components/live-itch-link";
 import { getHeroImage } from "@features/games/lib/game-cover";
@@ -11,9 +10,7 @@ import { isGameSlug } from "@features/games/lib/game-slug";
 import { GAMES_PATH, getGamePath } from "@features/games/lib/games-links";
 import { getRelatedGames } from "@features/games/lib/related-games";
 import { getGameBySlug, getGames } from "@features/games/lib/server/games-queries";
-import { formatStandCode } from "@features/games/lib/stand-code";
-import type { Game, GameDetailLinks, GameEventLabels } from "@features/games/lib/types";
-import { buildEventCalendarUrl } from "@features/landing/lib/calendar-link";
+import type { Game, GameEventLabels } from "@features/games/lib/types";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
 import { buildOpenGraph } from "@shared/lib/metadata";
@@ -79,7 +76,7 @@ export function GameDetailView({ game, games, settings, itchLink }: Readonly<Gam
       game={game}
       itchLink={itchLink}
       event={buildEventLabels(settings)}
-      links={buildDetailLinks(game, settings)}
+      links={{ catalog: GAMES_PATH }}
       relatedGames={getRelatedGames(games, game)}
     />
   );
@@ -92,14 +89,6 @@ function buildEventLabels(settings: EventSettings): GameEventLabels {
       formatTimeOfDay(settings.eventStartsAt),
       formatTimeOfDay(settings.eventEndsAt),
     ),
-  };
-}
-
-function buildDetailLinks(game: Game, settings: EventSettings): GameDetailLinks {
-  return {
-    catalog: GAMES_PATH,
-    floorPlan: getFloorPlanItemPath(formatStandCode(game.stand)),
-    calendar: buildEventCalendarUrl({ startsAt: settings.eventStartsAt, endsAt: settings.eventEndsAt }),
   };
 }
 

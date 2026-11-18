@@ -10,7 +10,16 @@ const games = makeGames(6);
 function BrowserWithGenreState({ initialGenre = null }: Readonly<{ initialGenre?: string | null }>) {
   const [genreSlug, setGenreSlug] = useState(initialGenre);
 
-  return <GamesBrowser games={games} selectedGenreSlug={genreSlug} onSelectGenre={setGenreSlug} />;
+  return (
+    <GamesBrowser
+      games={games}
+      selectedGenreSlug={genreSlug}
+      keyword=""
+      onSelectGenre={setGenreSlug}
+      onClearKeyword={() => {}}
+      onShowAll={() => setGenreSlug(null)}
+    />
+  );
 }
 
 function gridNames() {
