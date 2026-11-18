@@ -9,6 +9,21 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 ### Seguridad
 
 - Next.js se actualiza de 16.4.2 a 16.4.6 por un aviso de seguridad publicado (junto con `@next/env` y `eslint-config-next`).
+### Cambiado
+
+- Mi pasaporte (`/passport`): en el teléfono se apilan el pasaporte, el croquis y el detalle del juego; desde 1000 px el
+  pasaporte va en una columna junto a un panel con el croquis y el detalle. Al tocar un stand en el croquis, su juego (y si
+  ya lo visitaste) aparece en el detalle.
+### Agregado
+
+- Verificación en dos pasos del staff: tras la contraseña, `/login/verify` pide el código de 6 dígitos que llega por
+  correo (vence en 10 minutos, 5 intentos, reenvío limitado). Sin SMTP el código queda en `email_outbox`.
+- "Olvidé mi contraseña" en el inicio de sesión: `/forgot-password` envía un enlace de un solo uso (1 hora) a
+  `/reset-password/<token>`, que cambia la contraseña y cierra las sesiones abiertas.
+- Los correos (invitaciones, pasaporte, recuperación y rifa) salen con una plantilla HTML con la estética del sitio y su
+  texto plano como alternativa.
+- Al inscribir a alguien en el torneo de KOF le llega un correo de confirmación con el horario de su check-in.
+- Avisos de emergencia de producción por correo a `EMERGENCY_MAIL`: errores del servidor, saturación y disco casi lleno.
 
 ## [1.1.0] - 2026-11-18
 

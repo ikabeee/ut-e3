@@ -60,6 +60,8 @@ model Account {
   auditLogs         AuditLog[]
   registeredEntries TournamentEntry[]
   invitations       AccountInvitation[]
+  loginChallenges   LoginChallenge[]
+  passwordResets    PasswordResetToken[]
   recoveryTokens    RecoveryToken[]
   scannedCheckIns   CheckIn[]           @relation("ScannedCheckIns")
   annulledCheckIns  CheckIn[]           @relation("AnnulledCheckIns")
@@ -293,6 +295,38 @@ model AccountInvitation {
   createdAt DateTime  @default(now()) @map("created_at")
 
   @@map("account_invitations")
+}
+
+/// A sign-in that passed the password and waits for the 6-digit code sent by email (two-factor, S2).
+model LoginChallenge {
+  id        String    @id @default(uuid())
+  accountId String    @map("account_id")
+  account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  /// SHA-256 of the token in the challenge cookie.
+  token     String    @unique @map("token_sha256")
+  /// SHA-256 of the challenge id and the code; the code itself only travels by email.
+  codeHash  String    @map("code_sha256")
+  /// Wrong codes typed since the code was sent; at the maximum the challenge no longer accepts any code.
+  attempts  Int       @default(0)
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("login_challenges")
+}
+
+/// The single-use link of "Olvidé mi contraseña" (S17).
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  accountId String    @map("account_id")
+  account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  /// SHA-256 of the token in the reset link (shared/lib/server/token-hash.ts); the token itself only travels by email.
+  token     String    @unique @map("token_sha256")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("password_reset_tokens")
 }
 
 model CheckIn {

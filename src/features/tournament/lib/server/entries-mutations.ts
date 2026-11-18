@@ -1,5 +1,6 @@
 import "server-only";
-import { getEntryWindow } from "@features/tournament/lib/entries-rules";
+import { buildEntryEmail } from "@features/tournament/lib/entry-email";
+import { getEntryWindow, type EntrySchedule } from "@features/tournament/lib/entries-rules";
 import { getEntrySchedule } from "@features/tournament/lib/server/entries-queries";
 import { generateTournament, type GenerateResult } from "@features/tournament/lib/server/tournament-mutations";
 import { MAX_ENTRANTS, PRE_LIST_LIMIT } from "@features/tournament/lib/tournament-rules";
@@ -7,6 +8,7 @@ import type { EntryChannel, Player } from "@features/tournament/lib/types";
 import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { isUniqueViolation, readDatabaseMessage } from "@shared/lib/server/database-errors";
+import { enqueueEmail } from "@shared/lib/server/email-outbox";
 import { hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 
@@ -15,7 +17,7 @@ const ENTITY_TYPE = "tournament_entry";
 const PIN_FORMAT = /^\d{5}$/;
 
 export type AddEntryResult =
-  | { status: "added"; channel: EntryChannel }
+  | { status: "added"; channel: EntryChannel; emailId: string }
   | { status: "notOpen"; opensAt: Date }
   | { status: "closed" }
   | { status: "unknownGamertag" }
@@ -34,6 +36,7 @@ export type CheckInResult =
 interface NewEntry {
   visitorId: string;
   gamertag: string;
+  email: string;
   channel: EntryChannel;
 }
 
@@ -41,7 +44,8 @@ type Refusal = Extract<AddEntryResult, { status: "alreadyEntered" | "preListFull
 
 /**
  * Adds a visitor by gamertag. The hour decides the channel: a pre-registration until noon and an on-site entry, already
- * checked in, from noon to 12:45 (RF-58, RF-77). The table triggers are the safety net when two requests race.
+ * checked in, from noon to 12:45 (RF-58, RF-77). The table triggers are the safety net when two requests race. The
+ * confirmation email (S8) is queued in the same transaction; the caller delivers `emailId` after the response.
  */
 export async function addEntry(actorId: string, gamertag: string, now: Date): Promise<AddEntryResult> {
   const schedule = await getEntrySchedule();
@@ -53,12 +57,14 @@ export async function addEntry(actorId: string, gamertag: string, now: Date): Pr
 
   const visitor = await getPrisma().visitor.findFirst({
     where: { gamertag: gamertag.trim() },
-    select: { id: true, gamertag: true },
+    select: { id: true, gamertag: true, email: true },
   });
 
   if (!visitor) return { status: "unknownGamertag" };
 
-  return insertEntry(actorId, { visitorId: visitor.id, gamertag: visitor.gamertag, channel: window }, now);
+  const entry = { visitorId: visitor.id, gamertag: visitor.gamertag, email: visitor.email, channel: window };
+
+  return insertEntry(actorId, { entry, schedule }, now);
 }
 
 /** The administrator types the PIN of a pre-registered player; the player enters the bracket (RF-75). */
@@ -129,7 +135,11 @@ export async function closeCheckInIfDue(actorId: string, now: Date): Promise<num
   });
 }
 
-async function insertEntry(actorId: string, entry: NewEntry, now: Date): Promise<AddEntryResult> {
+async function insertEntry(
+  actorId: string,
+  { entry, schedule }: { entry: NewEntry; schedule: EntrySchedule },
+  now: Date,
+): Promise<AddEntryResult> {
   try {
     return await getPrisma().$transaction(async (transaction) => {
       const refusal = await findRefusal(transaction, entry);
@@ -156,7 +166,12 @@ async function insertEntry(actorId: string, entry: NewEntry, now: Date): Promise
         detail: { visitorId: entry.visitorId, gamertag: entry.gamertag, channel: entry.channel },
       });
 
-      return { status: "added", channel: entry.channel };
+      const emailId = await enqueueEmail(
+        transaction,
+        buildEntryEmail({ to: entry.email, gamertag: entry.gamertag, channel: entry.channel, schedule }),
+      );
+
+      return { status: "added", channel: entry.channel, emailId };
     });
   } catch (cause) {
     return explainInsertFailure(cause);
