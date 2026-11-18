@@ -1,6 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactElement, type RefObject } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { MapDetail } from "@features/floor-plan/components/map-detail";
 import { MapFilters, type FilterCounts } from "@features/floor-plan/components/map-filters";
 import { MapLegend } from "@features/floor-plan/components/map-legend";
@@ -23,12 +32,21 @@ import type { FloorPlanStand } from "@features/floor-plan/lib/types";
 export interface FloorPlanProps {
   stands: readonly FloorPlanStand[];
   variant?: MapVariant;
+  /** False where the page shows the selected item in its own panel instead of the card over the map. */
+  hasDetailOverlay?: boolean;
+  /** Tells the page which marker is selected, or `null` once nothing is. */
+  onSelectionChange?: (item: MapItem | null) => void;
 }
 
 /** The event map: markers, filters, detail, list and legend over the pannable drawing. */
-export function FloorPlan({ stands, variant = "embedded" }: Readonly<FloorPlanProps>): ReactElement {
+export function FloorPlan({
+  stands,
+  variant = "embedded",
+  hasDetailOverlay = true,
+  onSelectionChange,
+}: Readonly<FloorPlanProps>): ReactElement {
   const items = useMemo(() => buildMapItems(stands), [stands]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useReportedSelection(items, onSelectionChange);
   const { filter, selectFilter } = useFilterSelection(items, selectedId, setSelectedId);
   const [listOpen, setListOpen] = useState(false);
   const visibleItems = useMemo(() => filterMapItems(items, filter), [items, filter]);
@@ -36,13 +54,13 @@ export function FloorPlan({ stands, variant = "embedded" }: Readonly<FloorPlanPr
   const { focusSignal, selectItem, showItem } = useFocusSignal(items, filter, setSelectedId);
   const { mapAreaRef, showItemOnMap } = useShowOnMap(showItem);
 
-  const content = (
-    <>
+  return (
+    <MapSection variant={variant}>
       <MapHeader variant={variant} filter={filter} onSelectFilter={selectFilter} />
       <MapArea
         items={visibleItems}
         selectedId={selectedId}
-        selectedItem={selectedItem}
+        selectedItem={hasDetailOverlay ? selectedItem : null}
         variant={variant}
         focusSignal={focusSignal}
         areaRef={mapAreaRef}
@@ -58,14 +76,17 @@ export function FloorPlan({ stands, variant = "embedded" }: Readonly<FloorPlanPr
         onSelect={showItemOnMap}
       />
       <MapLegend />
-    </>
+    </MapSection>
   );
+}
 
-  if (variant === "page") return <section id={FLOOR_PLAN_SECTION_ID}>{content}</section>;
+/** The page variant fills its page; the landing one brings its own section spacing and gutters. */
+function MapSection({ variant, children }: Readonly<{ variant: MapVariant; children: ReactNode }>): ReactElement {
+  if (variant === "page") return <section id={FLOOR_PLAN_SECTION_ID}>{children}</section>;
 
   return (
     <section id={FLOOR_PLAN_SECTION_ID} className="section-block">
-      <div className="page-wrap">{content}</div>
+      <div className="page-wrap">{children}</div>
     </section>
   );
 }
@@ -163,6 +184,26 @@ function ListArea({ canHide, listOpen, items, selectedId, onToggle, onSelect }: 
       ) : null}
     </>
   );
+}
+
+type Selection = [selectedId: string | null, setSelectedId: (id: string | null) => void];
+
+/** The selected marker id; every change is also reported to the page with its item. */
+function useReportedSelection(
+  items: readonly MapItem[],
+  onSelectionChange: ((item: MapItem | null) => void) | undefined,
+): Selection {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const selectId = useCallback(
+    (id: string | null) => {
+      setSelectedId(id);
+      onSelectionChange?.(items.find((item) => item.id === id) ?? null);
+    },
+    [items, onSelectionChange],
+  );
+
+  return [selectedId, selectId];
 }
 
 function filterCounts(): FilterCounts {
