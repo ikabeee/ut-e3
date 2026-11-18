@@ -27,6 +27,9 @@ describe("isSiteNavShown", () => {
     "/stand/team",
     "/support/recovery",
     "/login",
+    "/login/verify",
+    "/forgot-password",
+    "/reset-password/reset-token",
     "/activate/invitation-token",
   ])("hides the navbar on the staff screen %s", (pathname) => {
     expect(isSiteNavShown(pathname)).toBe(false);

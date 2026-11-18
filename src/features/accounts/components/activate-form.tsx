@@ -13,11 +13,19 @@ interface ActivateFormProps {
   /** The token of the link; it goes back to the server in a hidden field, where it is checked. */
   token: string;
   action: (previous: ActivationState | null, form: FormData) => Promise<ActivationState>;
+  /** The labels and buttons; the activation of an account by default, the reset of a password otherwise. */
+  copy?: PasswordFormCopy;
 }
 
-const COPY = ACCOUNTS_COPY.activate;
+interface PasswordFormCopy {
+  passwordLabel: string;
+  confirmationLabel: string;
+  hint: (minimum: number) => string;
+  submit: string;
+  pending: string;
+}
 
-export function ActivateForm({ token, action }: Readonly<ActivateFormProps>) {
+export function ActivateForm({ token, action, copy = ACCOUNTS_COPY.activate }: Readonly<ActivateFormProps>) {
   const [state, formAction, isPending] = useActionState(action, null);
   const handleSubmit = useSubmitKeepingValues(formAction);
 
@@ -26,12 +34,12 @@ export function ActivateForm({ token, action }: Readonly<ActivateFormProps>) {
       <input type="hidden" name="token" value={token} />
       <PasswordField
         name="password"
-        label={COPY.passwordLabel}
+        label={copy.passwordLabel}
         autoComplete="new-password"
-        hint={COPY.hint(MIN_PASSWORD_LENGTH)}
+        hint={copy.hint(MIN_PASSWORD_LENGTH)}
       />
-      <PasswordField name="confirmation" label={COPY.confirmationLabel} autoComplete="new-password" />
-      <FormSubmit error={state?.error} isPending={isPending} copy={COPY} />
+      <PasswordField name="confirmation" label={copy.confirmationLabel} autoComplete="new-password" />
+      <FormSubmit error={state?.error} isPending={isPending} copy={copy} />
     </Form>
   );
 }
