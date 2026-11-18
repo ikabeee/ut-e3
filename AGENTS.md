@@ -22,7 +22,7 @@ Todo el naming (directorios, archivos y código) va en **inglés**.
 | Herramienta | Versión | Notas |
 | --- | --- | --- |
 | Node.js | `>= 22.18` | |
-| Next.js | `16.4.0` | App Router, `cacheComponents` y `partialPrefetching` activados. |
+| Next.js | `16.4.6` | App Router, `cacheComponents` y `partialPrefetching` activados. |
 | React | `19.3` | Server Components por defecto. |
 | TypeScript | `6.x` | `strict`, `module: preserve`, `moduleResolution: bundler`. |
 | Prisma | `7.10.1` + `@prisma/adapter-better-sqlite3` | Base de datos SQLite en modo WAL (`busy_timeout` de 5000 ms). Cliente generado en `generated/prisma/` (fuera de git; lo crea `postinstall`). Esquema en `prisma/schema.prisma` y configuración en `prisma7.config.ts`. |
