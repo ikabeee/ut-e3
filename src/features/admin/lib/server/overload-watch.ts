@@ -7,6 +7,7 @@ import {
   SAMPLE_INTERVAL_MS,
 } from "@features/admin/lib/overload-rule";
 import { setPublicBracketEnabled } from "@features/tournament/lib/server/public-bracket-mutations";
+import { startJob } from "@shared/lib/server/background-jobs";
 import { sendEmergencyAlert } from "@shared/lib/server/emergency-alert";
 import { clearLoadSamples, getLoadSamples, takeLoadSample, type LoadSample } from "@shared/lib/server/system-load";
 
@@ -16,18 +17,22 @@ export interface OverloadWatchDependencies {
   close: (reason: string) => Promise<boolean>;
 }
 
+export const OVERLOAD_WATCH_JOB = "overload-watch";
+
 const EMERGENCY = ADMIN_COPY.emergency;
 
 /**
- * Started once by instrumentation.ts; the timer does not keep the process alive. A sustained overload and a failure of
- * the watch itself are production emergencies (S20).
+ * Started once by instrumentation.ts as a job of the registry (so /admin/recovery can report and restart it); the timer
+ * does not keep the process alive. A sustained overload and a failure of the watch itself are production emergencies
+ * (S20).
  */
 export function startOverloadWatch(): void {
-  const timer = setInterval(() => {
-    checkOverload().then(alertOverload, alertWatchFailure);
-  }, SAMPLE_INTERVAL_MS);
-
-  timer.unref();
+  startJob({
+    name: OVERLOAD_WATCH_JOB,
+    intervalMs: SAMPLE_INTERVAL_MS,
+    run: () => checkOverload().then(alertOverload),
+    onError: alertWatchFailure,
+  });
 }
 
 /**

@@ -7,6 +7,7 @@ import {
   ADMIN_CATALOG_PATH,
   ADMIN_EMAILS_PATH,
   ADMIN_MODERATION_PATH,
+  ADMIN_RECOVERY_PATH,
   ADMIN_SERVER_PATH,
   ADMIN_SETTINGS_PATH,
   ADMIN_SQL_PATH,
@@ -25,6 +26,7 @@ const LINKS = [
   { href: ADMIN_ACCOUNTS_PATH, label: COPY.accounts },
   { href: ADMIN_EMAILS_PATH, label: COPY.emails },
   { href: ADMIN_SQL_PATH, label: COPY.sql },
+  { href: ADMIN_RECOVERY_PATH, label: COPY.recovery },
   { href: KOF_HOME_PATH, label: COPY.kof },
   { href: RAFFLE_HOME_PATH, label: COPY.raffle },
 ];

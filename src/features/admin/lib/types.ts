@@ -45,6 +45,28 @@ export type SqlConsoleState =
   | { status: "review"; message: string; statement: string; affectedRows: number }
   | { status: "done"; message: string; affectedRows: number };
 
+/** The state of one background job: whether its interval is active and how its last run ended. */
+export interface JobState {
+  isRunning: boolean;
+  lastRunAt: string | null;
+  lastError: string | null;
+}
+
+/** What /admin/recovery shows: the state of each background service and of the database files. */
+export interface RecoveryStatus {
+  mail: {
+    /** Only the host of SMTP_HOST: never the user, the password or the sender. */
+    smtpHost: string | null;
+    worker: JobState | null;
+    outbox: ServerStatus["outbox"];
+    lastSentAt: string | null;
+    lastFailure: string | null;
+  };
+  overloadWatch: JobState | null;
+  database: { databaseBytes: number; walBytes: number; shmBytes: number; freeBytes: number | null };
+  publicBracketEnabled: boolean;
+}
+
 export type EmailStatus = "sent" | "pending" | "failed";
 
 /** One email of the outbox for the sysadmin, with its full address; the body itself is read apart (and audited). */

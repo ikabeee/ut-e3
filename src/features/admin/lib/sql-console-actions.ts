@@ -12,23 +12,10 @@ import {
 } from "@features/admin/lib/server/sql-console";
 import { parseSqlStatement, type SqlStatementKind } from "@features/admin/lib/sql-statement";
 import type { SqlConsoleState } from "@features/admin/lib/types";
-import { EVENT_SETTINGS_CACHE_TAG } from "@features/event-settings/lib/server/event-settings-queries";
-import { GAMES_CACHE_TAG } from "@features/games/lib/server/games-queries";
-import { SCHEDULE_CACHE_TAG } from "@features/schedule/lib/server/schedule-queries";
-import { SPONSORS_CACHE_TAG } from "@features/sponsors/lib/server/sponsors-queries";
-import { VISITOR_PINS_CACHE_TAG } from "@features/visitors/lib/visitor-cache-tags";
+import { PUBLIC_CACHE_TAGS } from "@features/admin/lib/server/public-cache-tags";
 import { readFormText } from "@shared/lib/form-data";
 
 const COPY = ADMIN_COPY.sql;
-
-// An arbitrary write can touch any table, so every cache tag of the public pages is refreshed.
-const PUBLIC_CACHE_TAGS = [
-  EVENT_SETTINGS_CACHE_TAG,
-  GAMES_CACHE_TAG,
-  SCHEDULE_CACHE_TAG,
-  SPONSORS_CACHE_TAG,
-  VISITOR_PINS_CACHE_TAG,
-];
 
 interface SqlRequest {
   actorId: string;
