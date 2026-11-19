@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { AccountPageHeader } from "@features/accounts/components/account-page-header";
-import { AreaLink } from "@features/accounts/components/area-link";
-import { signOut } from "@features/accounts/lib/accounts-actions";
-import { getOtherAreaLink } from "@features/accounts/lib/area-links";
+import { StaffPageHeader } from "@features/accounts/components/staff-page-header";
 import { SUPPORT_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { requireRecoveryAgent } from "@features/accounts/lib/server/current-account";
 import { RecoveryDesk } from "@features/support/components/recovery-desk";
@@ -47,8 +44,12 @@ async function RecoveryPanel() {
 
   return (
     <>
-      <AccountPageHeader title={COPY.title} signedInAs={COPY.signedInAs(account.name)} signOutAction={signOut} />
-      <AreaLink link={getOtherAreaLink(account.roles, "secondary")} />
+      <StaffPageHeader
+        title={COPY.title}
+        signedInAs={COPY.signedInAs(account.name)}
+        roles={account.roles}
+        area="secondary"
+      />
       <RecoveryDesk search={searchPassportsAction} recover={recoverPassportAction} />
       <RegisterDesk register={registerVisitorAtDeskAction} canEnrollInTournament={canEnrollInTournament} />
     </>

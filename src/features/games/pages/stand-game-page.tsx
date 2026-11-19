@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { AccountPageHeader } from "@features/accounts/components/account-page-header";
-import { AreaLink } from "@features/accounts/components/area-link";
-import { signOut } from "@features/accounts/lib/accounts-actions";
-import { getOtherAreaLink } from "@features/accounts/lib/area-links";
+import { StaffPageHeader } from "@features/accounts/components/staff-page-header";
 import { requireStandAdmin } from "@features/accounts/lib/server/current-account";
 import { StandGameDelete } from "@features/games/components/stand-game-delete";
 import { StandGameForm } from "@features/games/components/stand-game-form";
@@ -50,8 +47,12 @@ async function StandGamePanel() {
 
   return (
     <>
-      <AccountPageHeader title={COPY.title} signedInAs={COPY.signedInAs(account.name)} signOutAction={signOut} />
-      <AreaLink link={getOtherAreaLink(account.roles, "primary")} />
+      <StaffPageHeader
+        title={COPY.title}
+        signedInAs={COPY.signedInAs(account.name)}
+        roles={account.roles}
+        area="primary"
+      />
       <StandAdminNav />
       <StandGameForm game={game} genres={genres} action={saveStandGameAction} />
       <StandGameImages game={gameImages} uploadAction={uploadGameImageAction} deleteAction={deleteGameImageAction} />

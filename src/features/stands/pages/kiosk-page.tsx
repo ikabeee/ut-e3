@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { AccountPageHeader } from "@features/accounts/components/account-page-header";
-import { AreaLink } from "@features/accounts/components/area-link";
-import { signOut } from "@features/accounts/lib/accounts-actions";
-import { getOtherAreaLink } from "@features/accounts/lib/area-links";
+import { StaffPageHeader } from "@features/accounts/components/staff-page-header";
 import { STAND_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { requireStandAccount } from "@features/accounts/lib/server/current-account";
 import { StandAdminNav } from "@features/stands/components/stand-admin-nav";
@@ -49,8 +46,12 @@ async function KioskPanel() {
 
   return (
     <>
-      <AccountPageHeader title={COPY.title} signedInAs={COPY.signedInAs(account.name)} signOutAction={signOut} />
-      <AreaLink link={getOtherAreaLink(account.roles, "primary")} />
+      <StaffPageHeader
+        title={COPY.title}
+        signedInAs={COPY.signedInAs(account.name)}
+        roles={account.roles}
+        area="primary"
+      />
       {account.role === "stand_admin" && <StandAdminNav />}
       {stand.gameName ? (
         <StandKiosk
