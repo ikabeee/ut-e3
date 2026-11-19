@@ -5,6 +5,7 @@ import {
   annulCheckInAction,
   excludeVisitorAction,
   moderateSelectionAction,
+  unexcludeVisitorAction,
 } from "@features/moderation/lib/moderation-actions";
 import { expectRefused, otherRoleCases, signInAs, sysadminForm } from "@shared/__tests__/lib/server/sysadmin-only";
 import { getPrisma } from "@shared/lib/server/prisma";
@@ -20,7 +21,7 @@ afterAll(async () => {
 });
 
 // RF-46: only the sysadmin annuls a visit or excludes a visitor.
-it.each(otherRoleCases({ annulCheckInAction, excludeVisitorAction, moderateSelectionAction }))(
+it.each(otherRoleCases({ annulCheckInAction, excludeVisitorAction, moderateSelectionAction, unexcludeVisitorAction }))(
   "%s calling %s is sent to the login and writes nothing",
   async (role, _name, action) => {
     await expectRefused(role, action);
@@ -33,4 +34,5 @@ it("lets the sysadmin through with the same form, so the refusals come from the 
   await expect(annulCheckInAction(null, sysadminForm())).resolves.toMatchObject({ status: "error" });
   await expect(excludeVisitorAction(null, sysadminForm())).resolves.toMatchObject({ status: "error" });
   await expect(moderateSelectionAction(null, sysadminForm())).resolves.toMatchObject({ status: "error" });
+  await expect(unexcludeVisitorAction(null, sysadminForm())).resolves.toMatchObject({ status: "error" });
 });
