@@ -8,6 +8,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- SEO: `sitemap.xml` y `robots.txt`, imágenes Open Graph generadas para la portada y cada juego, y `noindex` en el
+  pasaporte y la recuperación. Con `SITE_MODE=landing` también se publican `robots.txt`, `sitemap.xml` (solo la portada) y
+  la imagen de la portada.
 - Página pública "¿A quién acudo?" (`/help`) para los visitantes: una ilustración y una línea por problema (pasaporte
   perdido, correo que no llegó, visita sin registrar, boletos, KOF y uso sin conexión), enlazada desde la barra, el pie
   y el pasaporte, y disponible sin conexión.

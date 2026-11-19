@@ -1,7 +1,16 @@
 import { decideSiteAccess } from "@features/site/lib/site-access";
 
 describe("decideSiteAccess in landing mode", () => {
-  it.each(["/", "/privacy", "/api/health", "/manifest.webmanifest", "/icon.svg"])("serves %s", (pathname) => {
+  it.each([
+    "/",
+    "/privacy",
+    "/api/health",
+    "/manifest.webmanifest",
+    "/icon.svg",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/opengraph-image",
+  ])("serves %s", (pathname) => {
     expect(decideSiteAccess("landing", { method: "GET", pathname })).toBe("allow");
   });
 
