@@ -6,6 +6,23 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- `/admin/recovery`: pantalla "Recuperación" solo para el sysadmin. Muestra el estado del trabajador de correo (SMTP
+  configurado, servidor, última corrida y último error), de la vigilancia de carga, de la base de datos (tamaño de la
+  base, el WAL y el SHM, y espacio libre del volumen) y permite recuperarlos con un clic: probar SMTP (envía un correo
+  de prueba a tu propia dirección y muestra el error exacto), reintentar los envíos ahora, reiniciar el trabajador de
+  correo y la vigilancia de carga, revisar la integridad (`PRAGMA quick_check`), vaciar el WAL
+  (`PRAGMA wal_checkpoint(TRUNCATE)`), invalidar las cachés públicas, abrir o cerrar el bracket público y descargar un
+  respaldo consistente de la base (API de respaldo en línea de SQLite; contiene datos personales). Cada acción y cada
+  descarga quedan en la bitácora de auditoría.
+
+### Cambiado
+
+- Los intervalos del correo y de la vigilancia de carga ahora los registra `@shared/lib/server/background-jobs`, que
+  guarda su última corrida y su último error y permite reiniciarlos; el trabajador de correo arma el remitente SMTP en
+  cada corrida, así que un error de configuración se ve en el panel en vez de impedir el arranque.
+
 ## [1.3.0] - 2026-11-18
 
 ### Agregado

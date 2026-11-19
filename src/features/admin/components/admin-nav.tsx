@@ -5,6 +5,7 @@ import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import {
   ADMIN_CATALOG_PATH,
   ADMIN_MODERATION_PATH,
+  ADMIN_RECOVERY_PATH,
   ADMIN_SERVER_PATH,
   ADMIN_SETTINGS_PATH,
   ADMIN_SQL_PATH,
@@ -19,6 +20,7 @@ const LINKS = [
   { href: ADMIN_CATALOG_PATH, label: COPY.catalog },
   { href: ADMIN_SERVER_PATH, label: COPY.server },
   { href: ADMIN_SQL_PATH, label: COPY.sql },
+  { href: ADMIN_RECOVERY_PATH, label: COPY.recovery },
   { href: KOF_HOME_PATH, label: COPY.kof },
 ];
 
