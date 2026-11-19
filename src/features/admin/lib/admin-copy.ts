@@ -22,6 +22,7 @@ export const ADMIN_COPY = {
     emails: "Correos",
     sql: "Consola SQL",
     kof: "Torneo de KOF",
+    raffle: "Rifa",
   },
   pages: {
     settings: { title: "Configuración del evento", description: "Horarios y umbrales del evento." },

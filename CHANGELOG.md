@@ -8,6 +8,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- El sysadmin opera el torneo de KOF como administrador de KOF (inscribir, check-in, combates, congelar, descalificar,
+  revertir, generar y reiniciar el bracket, cerrar la vista pública) y la rifa como animador (girar, decidir, premio y
+  cerrar). Todo queda en la bitácora con su cuenta. La navegación del panel enlaza la rifa (`/admin/raffle`).
 - `/admin/accounts`: lista de todas las cuentas del staff, de cualquier rol, para el sysadmin. Muestra rol, stand, estado,
   fecha de alta y último acceso, con búsqueda por nombre o correo y filtros por rol, estado y stand. Permite desactivar y
   reactivar, enviar el restablecimiento de contraseña por correo, cerrar todas las sesiones, limpiar el 2FA pendiente,

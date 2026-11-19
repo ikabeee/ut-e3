@@ -8,7 +8,7 @@ La rifa final del evento (SRS v2, RF-49 a RF-56 y RF-25). Vive en la feature `sr
 | --- | --- | --- |
 | `/raffle/live` | Público (se proyecta en el escenario) | Tómbola de solo visualización: anuncia la hora de inicio, gira unos 3 s cuando sale un boleto y luego muestra el número, el gamertag y si está pendiente, ganó o se descartó. A la derecha, los ganadores confirmados. Se ve bajo la barra del sitio, con un enlace "Volver a los ganadores". Se actualiza sola cada 2 s (`GET /api/raffle/live`). |
 | `/raffle` | Público | Ganadores confirmados con gamertag, premio (o "Premio por entregar") y hora (RF-56). |
-| `/admin/raffle` | `raffle_admin` (entra por `/login`) | Estado, "Girar", modal "Ganador" / "Descartado", ganadores con "Registrar premio" y "Cerrar la rifa". Se actualiza cada 2 s (`GET /api/raffle`, 401 sin sesión de rifa). |
+| `/admin/raffle` | `raffle_admin` (entra por `/login`) y el sysadmin, que opera como animador (S5; enlace "Rifa" del panel) | Estado, "Girar", modal "Ganador" / "Descartado", ganadores con "Registrar premio" y "Cerrar la rifa". Se actualiza cada 2 s (`GET /api/raffle`, 401 sin sesión de rifa). |
 | `/passport` | Visitante | "Ganaste" con su número de boleto y, cuando se registra, el premio (RF-25). |
 
 ## Reglas
@@ -18,6 +18,8 @@ La rifa final del evento (SRS v2, RF-49 a RF-56 y RF-25). Vive en la feature `sr
 - El sorteo usa `crypto.randomInt` sobre los boletos `active`: cada boleto es una oportunidad, así que un visitante con dos
   boletos tiene dos. El índice que salió y el número de candidatos quedan en la bitácora.
 - Al salir un boleto, **todos** los boletos de ese visitante pasan a `drawn`, gane o no (RF-52, RN-05).
+- El sysadmin gira, decide, registra premios y cierra igual que un animador (`requireRaffleAdmin()`); el giro, el premio y la
+  bitácora llevan su cuenta, y la BD no distingue el rol del autor. Su giro pendiente bloquea a los animadores y al revés.
 - Un solo giro `pending` a la vez: lo impide un índice único parcial de la BD (RF-51). Si otro animador intenta girar,
   ve "Otro animador está girando" (RF-50) y puede tomar la decisión con "Decidir este boleto" si el primero se quedó sin
   equipo.

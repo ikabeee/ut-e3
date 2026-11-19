@@ -262,7 +262,8 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | Quién usa la mesa de recuperación (`help_desk` y `sysadmin`; el resto va a su home) | `requireRecoveryAgent()` en `current-account.ts` |
 | Home de cada rol al entrar (el de `help_desk` es `/support/recovery`) | `getHomePath()` en `src/features/accounts/lib/accounts-links.ts` |
 | Rifa: sorteo, bloqueo del segundo giro, decisión, correo al ganador, cierre y premio (RF-49 a RF-56) | `src/features/raffle/lib/server/raffle-mutations.ts`; las reglas de la BD (un solo giro `pending`, premio solo para `winner`, triggers) en la migración `*_raffle_draws` |
-| Quién usa el panel de la rifa (`raffle_admin`; entra por `/login` a `/admin/raffle`) | `requireRaffleAdmin()` en `current-account.ts` y `getHomePath()` en `accounts-links.ts` |
+| Quién usa el panel de la rifa (`raffle_admin` y, como animador, el sysadmin; entra por `/login` a `/admin/raffle`) | `requireRaffleAdmin()` en `current-account.ts` y `getHomePath()` en `accounts-links.ts` |
+| El sysadmin opera el KOF como `kof_admin` (S5): `requireKofAccount()` le da ese rol sin mesa y `requireKofViewer()` conserva el suyo para el encabezado | `current-account.ts`; las acciones y la bitácora usan su propia cuenta |
 | Segundo paso del login (código de 6 dígitos por correo, 10 min, 5 intentos, 3 envíos por 10 min) | `src/features/accounts/lib/server/login-challenge.ts` (reglas) y `login-challenge-cookie.ts`; `signIn` solo crea el reto y la sesión nace en `verifyLoginCodeAction` (`login-code-actions.ts`, `/login/verify`) |
 | "Olvidé mi contraseña" (enlace de 1 hora, un solo uso, cierra las sesiones) | `src/features/accounts/lib/server/password-reset.ts` y `password-reset-actions.ts`; páginas `/forgot-password` y `/reset-password/[token]` |
 | Bitácora de auditoría | `recordAudit()` en `src/shared/lib/server/audit-log.ts`, dentro de la transacción del cambio |

@@ -9,7 +9,6 @@ import { requireKofViewer, type KofViewer } from "@features/accounts/lib/server/
 import { listManagedAccounts } from "@features/accounts/lib/server/invitations";
 import { AdminHeader } from "@features/admin/components/admin-header";
 import { EntriesPanel } from "@features/tournament/components/entries-panel";
-import { ParticipantsMonitor } from "@features/tournament/components/participants-monitor";
 import { PublicBracketSwitch } from "@features/tournament/components/public-bracket-switch";
 import { TournamentDashboard } from "@features/tournament/components/tournament-dashboard";
 import {
@@ -65,15 +64,20 @@ async function KofPanel() {
         signOutAction={signOut}
       />
       <Entries viewer={account} hasBracket={tournament !== null} />
-      {account.role === "kof_admin" && <PublicBracketPanel />}
+      {operatesAsAdmin(account) && <PublicBracketPanel />}
       {account.role === "kof_admin" && <StaffAccounts role={account.role} />}
       <TournamentDashboard
         initial={tournament}
-        viewer={{ role: account.role, desk: account.kofDesk }}
+        viewer={{ role: operatesAsAdmin(account) ? "kof_admin" : account.role, desk: account.kofDesk }}
         action={submitTournamentCommand}
       />
     </>
   );
+}
+
+// S5: the sysadmin operates the tournament as a KOF administrator, so the screen gives it the administrator's controls.
+function operatesAsAdmin(account: KofViewer): boolean {
+  return account.role === "kof_admin" || account.role === "sysadmin";
 }
 
 function getRoleLabel(account: KofViewer): string {
@@ -82,13 +86,12 @@ function getRoleLabel(account: KofViewer): string {
   return account.role === "kof_admin" ? COPY.roles.kof_admin : COPY.roles.kof_staff(account.kofDesk);
 }
 
-// The participants are for the sysadmin and the KOF administrator only (S26); the desks see just the bracket.
+// The participants are for the sysadmin and the KOF administrator only (S26); the desks see just the bracket. Both work
+// the list (S5).
 function Entries({ viewer, hasBracket }: Readonly<{ viewer: KofViewer; hasBracket: boolean }>) {
   if (!canViewEntries(viewer.role)) return null;
 
-  if (viewer.role === "kof_admin") return <AdminEntries adminId={viewer.id} hasBracket={hasBracket} />;
-
-  return <WatchedEntries hasBracket={hasBracket} />;
+  return <AdminEntries adminId={viewer.id} hasBracket={hasBracket} />;
 }
 
 const ENTRIES_ACTIONS = {
@@ -98,7 +101,7 @@ const ENTRIES_ACTIONS = {
   reset: resetBracketAction,
 };
 
-// The administrator works the list. Loading it first closes the check-in if its hour passed, so the list never shows a
+// The administrator and the sysadmin work the list. Loading it first closes the check-in if its hour passed, so the list never shows a
 // pre-registered player as waiting after 12:45.
 async function AdminEntries({ adminId, hasBracket }: Readonly<{ adminId: string; hasBracket: boolean }>) {
   return <EntriesPanel entries={await loadEntries(adminId)} hasBracket={hasBracket} actions={ENTRIES_ACTIONS} />;
@@ -108,12 +111,6 @@ async function loadEntries(adminId: string) {
   await closeCheckInIfDue(adminId, new Date());
 
   return getEntries();
-}
-
-// The sysadmin sees the same list, read-only and refreshed on its own (S26). It only reads: the check-in closes when the
-// administrator works the list, never because the sysadmin looked at it.
-async function WatchedEntries({ hasBracket }: Readonly<{ hasBracket: boolean }>) {
-  return <ParticipantsMonitor initial={await getEntries()} hasBracket={hasBracket} />;
 }
 
 // The administrator invites, resends and disables the staff of the two desks (the roles table of the SRS).

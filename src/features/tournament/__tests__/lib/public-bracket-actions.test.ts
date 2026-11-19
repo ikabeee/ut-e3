@@ -28,6 +28,7 @@ beforeAll(async () => {
   await createAccount("admin", "kof_admin");
   await createAccount("desk1", "kof_staff", 1);
   await createAccount("sysadmin", "sysadmin");
+  await createAccount("help_desk", "help_desk");
 });
 
 afterAll(async () => {
@@ -86,8 +87,18 @@ describe("setPublicBracketAction (S5)", () => {
     expect(await getPublicBracketEnabled()).toBe(true);
   });
 
-  it("sends a sysadmin and a visitor without a session to /login", async () => {
+  it("lets the sysadmin close the public bracket as a KOF administrator", async () => {
     await signInAs("sysadmin");
+
+    expect(await setPublicBracketAction(null, createForm({ enabled: "false" }))).toEqual({
+      status: "done",
+      message: COPY.closed,
+    });
+    expect(await getPublicBracketEnabled()).toBe(false);
+  });
+
+  it("sends a help desk account and a visitor without a session to /login", async () => {
+    await signInAs("help_desk");
 
     await expect(setPublicBracketAction(null, createForm({ enabled: "false" }))).rejects.toMatchObject({
       digest: expect.stringContaining(";/login;"),
