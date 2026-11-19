@@ -36,7 +36,14 @@ const processGlobal: typeof globalThis & { backgroundJobs?: Map<string, Register
 export function startJob(definition: JobDefinition): void {
   const previous = getJobs().get(definition.name);
 
-  if (previous) stopTimer(previous);
+  // Registering again (a hot reload) keeps the same record, so a run that is still going keeps the next tick waiting.
+  if (previous) {
+    stopTimer(previous);
+    previous.definition = definition;
+    startTimer(previous);
+
+    return;
+  }
 
   const job: RegisteredJob = { definition, timer: null, isBusy: false, lastRunAt: null, lastError: null };
 

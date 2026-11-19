@@ -26,6 +26,44 @@ function buildJob(overrides: Partial<JobDefinition> = {}): JobDefinition {
 }
 
 describe("startJob", () => {
+  it("keeps a single timer when the same job is registered again, as on a hot reload", async () => {
+    const first = jest.fn(async () => undefined);
+    const second = jest.fn(async () => undefined);
+
+    startJob(buildJob({ run: first }));
+    startJob(buildJob({ run: second }));
+    await jest.advanceTimersByTimeAsync(INTERVAL_MS * 5);
+
+    expect([first.mock.calls.length, second.mock.calls.length, jest.getTimerCount()]).toEqual([0, 5, 1]);
+  });
+
+  it("does not overlap a run that is still going when the job is registered again", async () => {
+    let release = (): void => undefined;
+
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    let active = 0;
+    let highest = 0;
+
+    const run = async (): Promise<void> => {
+      active += 1;
+      highest = Math.max(highest, active);
+      await gate;
+      active -= 1;
+    };
+
+    startJob(buildJob({ run }));
+    await jest.advanceTimersByTimeAsync(INTERVAL_MS);
+    startJob(buildJob({ run }));
+    await jest.advanceTimersByTimeAsync(INTERVAL_MS * 2);
+
+    expect(highest).toBe(1);
+
+    release();
+  });
+
   it("runs on every interval and reports its last run and that it is running", async () => {
     const run = jest.fn(async () => undefined);
 
