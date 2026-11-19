@@ -45,7 +45,7 @@ export const TOURNAMENT_COPY = {
     loading: "Cargando el torneo...",
     signedInAs: (name: string, role: string) => `Sesión de ${name} · ${role}`,
     roles: {
-      sysadmin: "Sysadmin · Solo consulta",
+      sysadmin: "Sysadmin · Opera como administrador",
       kof_admin: "Administrador de KOF",
       kof_staff: (desk: number | null) => (desk === null ? "Staff de KOF" : `Staff de KOF · Mesa ${desk}`),
     },
@@ -245,6 +245,7 @@ export const TOURNAMENT_COPY = {
         alreadyEnrolled: "Ya estás inscrito en el torneo.",
         notOpen: (date: string) => `La inscripción abre el ${date}.`,
         closed: "La inscripción en línea cerró. Si aún hay lugar, inscríbete en el área de KOF del Edificio B.",
+        ended: "Las inscripciones al torneo ya cerraron.",
         full: "El torneo está lleno.",
         excluded: "Tu pasaporte está excluido y no puede inscribirse al torneo.",
         noPassport: "Necesitas tu pasaporte para inscribirte.",

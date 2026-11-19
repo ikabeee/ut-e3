@@ -82,7 +82,7 @@ export type TournamentCommandType = TournamentCommand["type"];
 export type EntryChannel = "pre" | "onsite";
 
 /** Why the passport does or does not offer the enrollment button to a visitor who is not in the tournament. */
-export type SelfEntryAvailability = "open" | "notOpen" | "closed" | "full" | "excluded";
+export type SelfEntryAvailability = "open" | "notOpen" | "closed" | "ended" | "full" | "excluded";
 
 export type EntryStatus = "registered" | "checked_in" | "no_show";
 

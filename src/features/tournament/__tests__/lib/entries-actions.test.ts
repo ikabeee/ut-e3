@@ -49,6 +49,7 @@ beforeAll(async () => {
   await createAccount("admin", "kof_admin");
   await createAccount("desk1", "kof_staff", 1);
   await createAccount("sysadmin", "sysadmin");
+  await createAccount("help_desk", "help_desk");
 });
 
 afterAll(async () => {
@@ -186,8 +187,33 @@ describe("who can use them (UT-TO-27)", () => {
     expect(refresh).not.toHaveBeenCalled();
   });
 
-  it("sends a sysadmin and a visitor without a session to /login", async () => {
+  it("lets the sysadmin work the list, generate and reset as a KOF administrator, attributed to its account", async () => {
+    await insertManyCheckedIn(40);
     await signInAs("sysadmin");
+
+    const added = await addEntryAction(null, createForm({ gamertag: "Jugador41" }));
+    const generated = await generateBracketAction();
+    const reset = await resetBracketAction(null, createForm({ confirmation: "REINICIAR" }));
+
+    expect(added).toEqual({ status: "done", message: OUTCOMES.addedPre });
+    expect(generated).toEqual({ status: "done", message: OUTCOMES.generated });
+    expect(reset).toEqual({ status: "done", message: OUTCOMES.reset });
+    expect(await getPrisma().tournamentEntry.count({ where: { registeredById: accountIds.sysadmin } })).toBe(1);
+    expect(await getPrisma().auditLog.count({ where: { actorId: accountIds.sysadmin } })).toBeGreaterThan(0);
+  });
+
+  it("lets the sysadmin check a player in with the PIN", async () => {
+    await insertEntry(0, "registered");
+    await signInAs("sysadmin");
+
+    expect(await checkInEntryAction(null, createForm({ pin: "00001" }))).toEqual({
+      status: "done",
+      message: OUTCOMES.checkedIn("Jugador1"),
+    });
+  });
+
+  it("sends a help desk account and a visitor without a session to /login", async () => {
+    await signInAs("help_desk");
 
     await expect(addEntryAction(null, createForm({ gamertag: "Jugador1" }))).rejects.toMatchObject({
       digest: expect.stringContaining(";/login;"),

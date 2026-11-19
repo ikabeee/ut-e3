@@ -93,11 +93,23 @@ describe("enrollSelfAction", () => {
     expect(await getPrisma().tournamentEntry.count()).toBe(0);
   });
 
-  it("rejects when the list is closed, with no entry or email", async () => {
-    await setWindows({ opensInHours: -48, onsiteInHours: -1 });
+  it("sends the visitor to the KOF area while the on-site sign-up lasts, with no entry or email", async () => {
+    await setWindows({ opensInHours: -48, onsiteInHours: -0.5 });
     await useDevice("token-0");
 
     expect(await enrollSelfAction()).toEqual({ status: "error", message: COPY.closed });
+    expect(await getPrisma().tournamentEntry.count()).toBe(0);
+    expect(await getPrisma().emailOutbox.count()).toBe(0);
+  });
+
+  it("says the sign-up ended, without inviting to the KOF area, once the on-site sign-up is over (A1)", async () => {
+    await setWindows({ opensInHours: -48, onsiteInHours: -2 });
+    await useDevice("token-0");
+
+    const state = await enrollSelfAction();
+
+    expect(state).toEqual({ status: "error", message: COPY.ended });
+    expect(COPY.ended).not.toMatch(/KOF|Edificio/);
     expect(await getPrisma().tournamentEntry.count()).toBe(0);
     expect(await getPrisma().emailOutbox.count()).toBe(0);
   });
@@ -140,6 +152,38 @@ describe("enrollSelfAction", () => {
     for (let attempt = 0; attempt < 10; attempt += 1) await enrollSelfAction();
 
     expect(await enrollSelfAction()).toEqual({ status: "error", message: COPY.rateLimited });
+  });
+});
+
+describe("enrollSelfAction regressions", () => {
+  it("ignores a forged visitorId in the form, even on a double submit (P6)", async () => {
+    const forged = new FormData();
+
+    forged.append("visitorId", visitors[5].id);
+    await useDevice("token-0");
+
+    // Next calls an action with what the browser sent; this one must ignore it.
+    const enroll: (...sent: unknown[]) => ReturnType<typeof enrollSelfAction> = enrollSelfAction;
+
+    await enroll(null, forged);
+    await enroll(null, forged);
+
+    const entries = await getPrisma().tournamentEntry.findMany();
+
+    expect(entries.map((entry) => entry.visitorId)).toEqual([visitors[0].id]);
+    expect(await getPrisma().emailOutbox.count()).toBe(1);
+  });
+
+  it("limits the 11th attempt in the window even for an enrolled visitor (P7)", async () => {
+    await useDevice("token-2");
+
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      expect((await enrollSelfAction()).status).toBe("done");
+    }
+
+    expect(await enrollSelfAction()).toEqual({ status: "error", message: COPY.rateLimited });
+    expect(await getPrisma().tournamentEntry.count()).toBe(1);
+    expect(await getPrisma().emailOutbox.count()).toBe(1);
   });
 });
 

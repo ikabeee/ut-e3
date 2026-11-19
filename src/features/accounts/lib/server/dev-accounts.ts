@@ -18,7 +18,7 @@ export async function createMissingDevAccounts(accounts: readonly DevAccount[], 
     if (await getPrisma().account.findUnique({ where: { email: account.email }, select: { id: true } })) continue;
 
     await getPrisma().account.create({
-      data: { ...account, status: "active", password: await hashPassword(password) },
+      data: { ...account, status: "active", password: await hashPassword(password), createdAt: new Date() },
     });
     created.push(account.email);
   }

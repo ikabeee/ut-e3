@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Prisma } from "@generated/prisma/client";
+import type { EmailOrigin } from "@shared/lib/email-kinds";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 export interface OutgoingEmail {
@@ -34,12 +35,18 @@ const MAX_RETRY_DELAY_MS = 15 * 60_000;
 // 10-minute lease gives slow SMTP deliveries enough headroom so concurrent workers do not claim in-flight sends.
 const LEASE_DURATION_MS = 10 * 60_000;
 
-export async function enqueueEmail(transaction: Prisma.TransactionClient, email: OutgoingEmail): Promise<string> {
+export async function enqueueEmail(
+  transaction: Prisma.TransactionClient,
+  email: OutgoingEmail,
+  origin?: EmailOrigin,
+): Promise<string> {
   const row = await transaction.emailOutbox.create({
     data: {
       to: email.to,
       subject: email.subject,
       text: email.text,
+      kind: origin?.kind,
+      referenceId: origin?.referenceId,
     },
   });
 

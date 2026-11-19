@@ -32,7 +32,7 @@ export async function requestEmailRecovery(email: string, now: Date): Promise<st
 
   if (!visitor) return null;
 
-  return getPrisma().$transaction((transaction) => issueEmailLink(transaction, visitor, now));
+  return getPrisma().$transaction((transaction) => issueEmailLink(transaction, visitor, { now }));
 }
 
 /** Whether the link can still be used, without using it: opening the link only reads, the visitor confirms after. */
@@ -81,11 +81,28 @@ export async function claimRecoveryToken(token: string, now: Date): Promise<stri
   });
 }
 
-async function issueEmailLink(
+/** A new recovery link for a visitor whose email was abandoned; the previous link stays valid until it expires. */
+export async function rebuildRecoveryEmail(
+  transaction: Prisma.TransactionClient,
+  visitorId: string,
+  now: Date,
+): Promise<string | null> {
+  const visitor = await transaction.visitor.findUnique({ where: { id: visitorId }, select: { id: true, email: true } });
+
+  return visitor ? issueEmailLink(transaction, visitor, { now }) : null;
+}
+
+/**
+ * Creates the one-use link and queues its email, in the transaction of the caller. `issuance.actorId` is the sysadmin who
+ * asked for it; a visitor's own request leaves it empty. The 3-per-hour limit belongs to the self-service request, not here.
+ */
+export async function issueEmailLink(
   transaction: Prisma.TransactionClient,
   visitor: { id: string; email: string },
-  now: Date,
+  issuance: { now: Date; actorId?: string | null },
 ): Promise<string> {
+  const { now, actorId = null } = issuance;
+
   const token = randomBytes(TOKEN_BYTES).toString("base64url");
 
   await transaction.recoveryToken.create({
@@ -98,16 +115,18 @@ async function issueEmailLink(
   });
 
   await recordAudit(transaction, {
-    actorId: null,
+    actorId,
     action: "passport_recovery_requested",
     entityType: "visitor",
     entityId: visitor.id,
     detail: { channel: "email" },
   });
 
-  return enqueueEmail(transaction, {
+  const email = {
     to: visitor.email,
     subject: VISITORS_COPY.recovery.email.subject,
     text: VISITORS_COPY.recovery.email.body(`${siteConfig.url}${getClaimPath(token)}`),
-  });
+  };
+
+  return enqueueEmail(transaction, email, { kind: "recovery_link", referenceId: visitor.id });
 }

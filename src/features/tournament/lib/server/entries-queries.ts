@@ -3,6 +3,7 @@ import { getEntryWindow, type EntrySchedule } from "@features/tournament/lib/ent
 import { MAX_ENTRANTS, PRE_LIST_LIMIT } from "@features/tournament/lib/tournament-rules";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import type { EntryChannel, EntryStatus, EntryView, SelfEntryAvailability } from "@features/tournament/lib/types";
+import type { Prisma } from "@generated/prisma/client";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 /**
@@ -18,7 +19,9 @@ export async function getSelfEntryAvailability(visitorId: string, now: Date): Pr
 
   if (window === "notOpen") return "notOpen";
 
-  if (window !== "pre") return "closed";
+  if (window === "closed") return "ended";
+
+  if (window === "onsite") return "closed";
 
   return (await isListFull()) ? "full" : "open";
 }
@@ -32,8 +35,10 @@ async function isListFull(): Promise<boolean> {
   return preCount >= PRE_LIST_LIMIT || places >= MAX_ENTRANTS;
 }
 
-export async function getEntrySchedule(): Promise<EntrySchedule> {
-  const settings = await getPrisma().eventSettings.findUnique({
+export async function getEntrySchedule(
+  client: Pick<Prisma.TransactionClient, "eventSettings"> = getPrisma(),
+): Promise<EntrySchedule> {
+  const settings = await client.eventSettings.findUnique({
     where: { id: 1 },
     select: {
       kofRegistrationOpensAt: true,

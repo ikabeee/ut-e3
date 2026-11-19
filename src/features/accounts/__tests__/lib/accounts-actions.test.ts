@@ -9,6 +9,7 @@ import { getPrisma } from "@shared/lib/server/prisma";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
 import { stubAfter, stubHeaders } from "@shared/__tests__/lib/server/headers-stub";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
+import { liftSysadminGuard } from "@shared/__tests__/lib/server/sysadmin-guard";
 
 const PASSWORD = "correct horse battery staple";
 
@@ -78,6 +79,7 @@ describe("signIn", () => {
   });
 
   it("rejects a disabled account with the same generic message", async () => {
+    await liftSysadminGuard(getPrisma());
     await getPrisma().account.updateMany({ data: { status: "disabled" } });
 
     expect(await signIn(null, credentials("admin@ut.mx", PASSWORD))).toEqual(INVALID_CREDENTIALS);

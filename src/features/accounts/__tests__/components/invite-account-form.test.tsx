@@ -12,6 +12,14 @@ const ADMIN_ROLES = [
 
 const STAFF_ROLES = [{ value: "kof_staff", label: "Staff de KOF" }];
 
+const EVERY_ROLE = [
+  { value: "help_desk", label: "Atención" },
+  { value: "kof_staff", label: "Staff de KOF" },
+  { value: "stand_staff", label: "Staff de stand" },
+];
+
+const STANDS = [{ value: "stand-1", label: "ZA-S1" }];
+
 describe("InviteAccountForm", () => {
   it("sends the name, the email and the first role of the list", async () => {
     const { received, action } = recordingAction({ status: "done", message: "Invitación enviada." });
@@ -40,6 +48,40 @@ describe("InviteAccountForm", () => {
     expect(screen.queryByLabelText("Rol")).not.toBeInTheDocument();
     expect(received[0].get("role")).toBe("kof_staff");
     expect(received[0].get("desk")).toBe("1");
+  });
+
+  it("asks for the stand of a stand role, and sends the one that was chosen", async () => {
+    const { received, action } = recordingAction({ status: "done", message: "Invitación enviada." });
+
+    renderWithToasts(
+      <InviteAccountForm roles={EVERY_ROLE} defaultRole="stand_staff" showDesk stands={STANDS} action={action} />,
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "Eva");
+    await userEvent.type(screen.getByLabelText("Correo"), "eva@ut.mx");
+
+    expect(screen.queryByText("Mesa")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Enviar invitación" }));
+
+    await waitFor(() => expect(received).toHaveLength(1));
+    expect(received[0].get("role")).toBe("stand_staff");
+    expect(received[0].get("standId")).toBe("stand-1");
+    expect(received[0].get("desk")).toBeNull();
+  });
+
+  it("asks for the desk only while the KOF staff is the chosen role", async () => {
+    const { received, action } = recordingAction({ status: "done", message: "Invitación enviada." });
+
+    renderWithToasts(
+      <InviteAccountForm roles={EVERY_ROLE} defaultRole="kof_staff" showDesk stands={STANDS} action={action} />,
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "Luis");
+    await userEvent.type(screen.getByLabelText("Correo"), "luis@ut.mx");
+    await userEvent.click(screen.getByRole("button", { name: "Enviar invitación" }));
+
+    await waitFor(() => expect(received).toHaveLength(1));
+    expect(received[0].get("desk")).toBe("1");
+    expect(received[0].get("standId")).toBeNull();
   });
 
   it("confirms what the server did and clears the fields", async () => {

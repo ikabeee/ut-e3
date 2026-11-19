@@ -20,6 +20,7 @@ describe("SelfEntryPanel", () => {
 
   it.each([
     ["closed", COPY.closed],
+    ["ended", COPY.ended],
     ["full", COPY.full],
     ["excluded", COPY.excluded],
   ] as const)("shows %s without a button", (availability, message) => {

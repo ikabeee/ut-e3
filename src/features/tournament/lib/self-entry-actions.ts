@@ -60,6 +60,8 @@ function describe(result: SelfEntryResult): string {
     case "preListFull":
     case "tournamentFull":
       return COPY.full;
+    case "ended":
+      return COPY.ended;
     case "excluded":
       return COPY.excluded;
     case "unknownGamertag":

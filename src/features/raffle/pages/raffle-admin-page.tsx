@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { AccountPageHeader } from "@features/accounts/components/account-page-header";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { RAFFLE_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { requireRaffleAdmin } from "@features/accounts/lib/server/current-account";
+import { AdminHeader } from "@features/admin/components/admin-header";
 import { RaffleDashboard, type RaffleDashboardActions } from "@features/raffle/components/raffle-dashboard";
 import {
   closeRaffleAction,
@@ -52,7 +52,12 @@ async function RafflePanel() {
 
   return (
     <>
-      <AccountPageHeader title={COPY.title} signedInAs={COPY.signedInAs(account.name)} signOutAction={signOut} />
+      <AdminHeader
+        title={COPY.title}
+        signedInAs={COPY.signedInAs(account.name, account.role === "sysadmin")}
+        currentPath={account.role === "sysadmin" ? RAFFLE_HOME_PATH : null}
+        signOutAction={signOut}
+      />
       <ActionLink href={RAFFLE_LIVE_PATH} variant="outline" className="justify-self-start" isExternal>
         {COPY.liveLink}
       </ActionLink>

@@ -17,6 +17,8 @@ const BEFORE_OPENING = new Date("2026-11-13T04:59:00.000Z");
 
 const REGISTRATION_OPENS = new Date("2026-11-13T05:00:00.000Z");
 
+const AT_12_45 = new Date("2026-11-20T17:45:00.000Z");
+
 const AT_12_00 = new Date("2026-11-20T17:00:00.000Z");
 
 let visitors: Awaited<ReturnType<typeof createVisitors>> = [];
@@ -81,6 +83,12 @@ describe("addSelfEntry", () => {
     expect(await getPrisma().emailOutbox.count()).toBe(0);
   });
 
+  it("answers that the sign-up ended after the on-site sign-up, with no entry or email (A1)", async () => {
+    expect(await addSelfEntry(visitors[0].id, AT_12_45)).toEqual({ status: "ended" });
+    expect(await getPrisma().tournamentEntry.count()).toBe(0);
+    expect(await getPrisma().emailOutbox.count()).toBe(0);
+  });
+
   it("rejects an excluded visitor without creating anything", async () => {
     await getPrisma().visitor.update({
       where: { id: visitors[0].id },
@@ -121,6 +129,7 @@ describe("getSelfEntryAvailability", () => {
   it.each([
     ["notOpen", BEFORE_OPENING],
     ["closed", AT_12_00],
+    ["ended", AT_12_45],
   ])("is %s by the clock", async (expected, now) => {
     expect(await getSelfEntryAvailability(visitors[0].id, now)).toBe(expected);
   });

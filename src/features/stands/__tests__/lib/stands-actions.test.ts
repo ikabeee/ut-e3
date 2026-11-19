@@ -21,6 +21,7 @@ import { createSession } from "@shared/lib/server/session";
 import { createVisitorDevice, setVisitorDeviceCookie } from "@shared/lib/server/visitor-device";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
+import { liftSysadminGuard } from "@shared/__tests__/lib/server/sysadmin-guard";
 
 const database = createTestDatabase();
 
@@ -62,6 +63,7 @@ beforeEach(async () => {
   await getPrisma().checkIn.deleteMany();
   await getPrisma().visitorDevice.deleteMany();
   await getPrisma().visitor.deleteMany();
+  await liftSysadminGuard(getPrisma());
   await getPrisma().account.deleteMany();
   await getPrisma().game.deleteMany();
   await getPrisma().stand.deleteMany();
