@@ -99,6 +99,21 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+/// Server logs (S4): written by shared/lib/server/server-log.ts and purged after 30 days. `level` and `source` are
+/// limited by CHECKs in the migration (SERVER_LOG_LEVELS and SERVER_LOG_SOURCES).
+model ServerLog {
+  id        String   @id @default(uuid())
+  level     String
+  source    String
+  message   String
+  details   Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([level, createdAt])
+  @@map("server_logs")
+}
+
 model KofTournament {
   id        Int      @id
   /// The whole bracket as JSON (features/tournament/lib/types.ts); only the server writes it.

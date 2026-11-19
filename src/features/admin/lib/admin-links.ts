@@ -20,3 +20,16 @@ export const ADMIN_RECOVERY_PATH = `${SYSADMIN_HOME_PATH}/recovery`;
 export const ADMIN_BACKUP_PATH = "/api/admin/recovery/backup";
 
 export const ADMIN_VISITORS_PATH = `${SYSADMIN_HOME_PATH}/visitors`;
+
+export const ADMIN_LOGS_PATH = `${SYSADMIN_HOME_PATH}/logs`;
+
+/** A link to the logs page: `values` are the filters of the tab; the ones that are empty stay out of the address. */
+export function buildLogsHref(tab: "audit" | "server", values: Record<string, string>, page: number = 1): string {
+  const query = new URLSearchParams({ tab });
+
+  for (const [name, value] of Object.entries(values)) if (value) query.set(name, value);
+
+  if (page > 1) query.set("page", String(page));
+
+  return `${ADMIN_LOGS_PATH}?${query.toString()}`;
+}

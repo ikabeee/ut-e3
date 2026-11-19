@@ -8,6 +8,13 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- `/admin/logs`: logs para el sysadmin, con dos pestañas. "Bitácora" lista `audit_logs` con filtros por actor, acción,
+  entidad y fechas, en páginas, y muestra el JSON como texto. "Servidor" lista los logs del servidor, que ahora se guardan
+  en la tabla `server_logs` (migración `20261120130000_server_logs`): errores de peticiones (ruta y `digest`, nunca la URL),
+  resultado de cada correo (asunto y destinatario enmascarado), avisos de emergencia, cierre automático del bracket,
+  fallas de procesos y lo que el servidor imprime con `console.error` y `console.warn`. Se filtran por nivel, origen,
+  texto y fechas, y pueden actualizarse solos. Antes de guardarse se ocultan tokens, códigos de 6 dígitos, contraseñas y
+  correos. Se purgan solos a los 30 días (cada hora) y el botón "Purgar ahora" lo hace al momento y queda en la bitácora.
 - Inscripción al torneo de KOF desde la app: el visitante con pasaporte toca "Inscribirme al torneo" en `/passport`, ya no
   depende del administrador. Entra a la lista previa con los mismos cupos y recibe el correo de confirmación. Se
   rechaza si el torneo está lleno, la inscripción cerró o su pasaporte está excluido; repetirlo no duplica nada.

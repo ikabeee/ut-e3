@@ -8,6 +8,7 @@ import { getDatabaseFreeBytes } from "@shared/lib/server/disk-space";
 import { getOutboxSummary } from "@shared/lib/server/email-outbox-status";
 import { EMAIL_WORKER_JOB } from "@shared/lib/server/email-worker";
 import { getPrisma } from "@shared/lib/server/prisma";
+import { SERVER_LOG_RETENTION_JOB } from "@shared/lib/server/server-log-retention";
 import { getDatabasePath } from "@shared/lib/server/sqlite-file";
 
 /** The state of every background service and of the database files, read on every visit of /admin/recovery. */
@@ -29,6 +30,7 @@ export async function getRecoveryStatus(): Promise<RecoveryStatus> {
       lastFailure,
     },
     overloadWatch: getJobStatus(OVERLOAD_WATCH_JOB),
+    logRetention: getJobStatus(SERVER_LOG_RETENTION_JOB),
     database,
     publicBracketEnabled,
   };
