@@ -45,7 +45,7 @@ export const TOURNAMENT_COPY = {
     loading: "Cargando el torneo...",
     signedInAs: (name: string, role: string) => `Sesión de ${name} · ${role}`,
     roles: {
-      sysadmin: "Sysadmin · Solo consulta",
+      sysadmin: "Sysadmin · Opera como administrador",
       kof_admin: "Administrador de KOF",
       kof_staff: (desk: number | null) => (desk === null ? "Staff de KOF" : `Staff de KOF · Mesa ${desk}`),
     },
@@ -144,7 +144,7 @@ export const TOURNAMENT_COPY = {
           stepsLabel: "Cómo inscribirte",
           steps: {
             passport: "Crea tu pasaporte con tu gamertag.",
-            list: "Pide al administrador de KOF que te agregue a la lista con ese gamertag.",
+            list: 'Desde tu pasaporte, toca "Inscribirme al torneo" para entrar a la lista previa.',
             checkIn: (start: string, end: string) =>
               `El día del torneo, haz tu check-in con el PIN de tu pasaporte en el área de KOF, de ${start} a ${end}.`,
           },
@@ -235,6 +235,21 @@ export const TOURNAMENT_COPY = {
           `Estás inscrito en el torneo. El ${date}, de ${start} a ${end}, haz tu check-in con tu PIN en el área de KOF del Edificio B.`,
         checkedIn: "Tu check-in está hecho: ya estás en el bracket.",
         noShow: "No hiciste tu check-in a tiempo y quedaste fuera del torneo.",
+      },
+      selfEntry: {
+        heading: "Torneo de KOF",
+        prompt: "Inscríbete al torneo con tu gamertag. Te llegará un correo de confirmación.",
+        submit: "Inscribirme al torneo",
+        sending: "Inscribiendo...",
+        enrolled: "Quedaste inscrito. Te enviamos un correo con las horas del check-in.",
+        alreadyEnrolled: "Ya estás inscrito en el torneo.",
+        notOpen: (date: string) => `La inscripción abre el ${date}.`,
+        closed: "La inscripción en línea cerró. Si aún hay lugar, inscríbete en el área de KOF del Edificio B.",
+        ended: "Las inscripciones al torneo ya cerraron.",
+        full: "El torneo está lleno.",
+        excluded: "Tu pasaporte está excluido y no puede inscribirse al torneo.",
+        noPassport: "Necesitas tu pasaporte para inscribirte.",
+        rateLimited: "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.",
       },
       errors: {
         forbidden: "Solo el administrador de KOF puede hacer esto.",

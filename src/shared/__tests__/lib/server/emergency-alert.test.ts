@@ -28,6 +28,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await getPrisma().emailOutbox.deleteMany();
+  await getPrisma().serverLog.deleteMany();
 });
 
 function createAlerter(env: Record<string, string | undefined>, clock = createClock(START)) {
@@ -78,6 +79,7 @@ describe("createEmergencyAlerter (S20)", () => {
 
     const row = await getPrisma().emailOutbox.findFirstOrThrow();
 
+    expect(row).toMatchObject({ kind: "emergency", referenceId: null });
     expect(row.to).toBe("guardia@example.com");
     expect(row.subject).toBe("[Emergencia] PIXEL & CODE: Disco casi lleno");
     expect(row.text).toContain("Quedan 10 MB en el volumen de la base.");
@@ -121,6 +123,22 @@ describe("createEmergencyAlerter (S20)", () => {
     clock.advance(60 * 60_000);
 
     await expect(alert({ ...ALERT, key: "after-the-hour" })).resolves.toBe(true);
+  });
+
+  it("records each alert that is sent in the server logs, and not the ones the limiter holds back", async () => {
+    const { alert } = createAlerter(ENV);
+
+    await alert(ALERT);
+    await alert(ALERT);
+
+    const rows = await getPrisma().serverLog.findMany({ where: { source: "emergency" } });
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      level: "warn",
+      message: "Emergency alert sent: Disco casi lleno",
+      details: { key: "disk" },
+    });
   });
 
   it("never throws: when the outbox fails it sends directly, and when that fails too it gives up quietly", async () => {

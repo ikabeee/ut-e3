@@ -157,6 +157,8 @@ async function readToken(emailId: string | null): Promise<string> {
   if (!emailId) throw new Error("Expected a reset email");
 
   const email = await getPrisma().emailOutbox.findUniqueOrThrow({ where: { id: emailId } });
+  expect(email).toMatchObject({ kind: "password_reset", referenceId: accountId });
+
   const match = /\/reset-password\/([\w-]+)/.exec(email.text);
 
   if (!match) throw new Error("The email has no reset link");

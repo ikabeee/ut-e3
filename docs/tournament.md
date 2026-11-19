@@ -22,10 +22,12 @@ El equipo opera con dos staffs para los cuatro tableros (RF-62, SRS 2.4):
 | Staff de la mesa 2 (`kof_staff`, `kofDesk = 2`) | Tableros 3 y 4 y semifinal 2 |
 | Administrador de KOF (`kof_admin`) | Cualquier combate, y además congelar, descongelar, descalificar y revertir |
 
-El staff inicia el combate, marca al perdedor y marca "No se presentó". El sysadmin no tiene comandos del torneo, pero
-sí puede abrir `/admin/kof` (el panel lo enlaza como "Torneo de KOF") para ver todos los tableros en solo consulta: sin
-botones y sin bitácora (`requireKofViewer()` y `GET /api/tournament`). Cada Server Action valida la
-sesión, el rol y la mesa del combate con `requireKofAccount()`, que sigue rechazando al sysadmin; la interfaz solo esconde botones.
+El staff inicia el combate, marca al perdedor y marca "No se presentó". El sysadmin opera el torneo completo como
+administrador de KOF (S5): abre `/admin/kof` desde "Torneo de KOF" y tiene todos los controles (combates de cualquier mesa,
+inscripciones, check-in, generar, reiniciar, congelar, descalificar, revertir y cerrar la vista pública), sin mesa propia.
+`requireKofAccount()` lo devuelve con el rol `kof_admin` y `kofDesk = null`, así que la bitácora, `registeredById` y demás
+atribuciones llevan su cuenta. `requireKofViewer()` conserva el rol `sysadmin` solo para el encabezado y la navegación. Cada
+Server Action valida la sesión, el rol y la mesa del combate con `requireKofAccount()`; la interfaz solo esconde botones.
 
 `/admin/kof` usa el mismo marco que las demás secciones del panel (`AdminHeader`): título, sesión, cerrar sesión y, para
 el sysadmin, la navegación entre secciones. Las cuentas de KOF no la ven porque no pueden abrir las otras secciones.
@@ -38,10 +40,9 @@ el sysadmin, la navegación entre secciones. Las cuentas de KOF no la ven porque
   misma consulta cada 3 segundos del bracket: la página es dinámica (`connection()`) y el navegador pide
   `GET /api/tournament` con `no-store`, así que no hay nada cacheado que invalidar.
 - La lista de participantes la ven el sysadmin y el administrador de KOF (`canViewEntries()` en
-  `lib/tournament-rules.ts`). El administrador la trabaja en el panel `Inscripciones`; el sysadmin ve el mismo panel sin
-  formularios y lo mantiene al día `GET /api/tournament/entries` cada 3 segundos (`hooks/use-entries.ts`). Esa ruta
-  responde 401 sin sesión o a una cuenta que no es de KOF ni el sysadmin, y 403 al staff de las mesas. La vista del
-  sysadmin solo lee: el cierre del check-in sigue corriendo cuando el administrador trabaja la lista.
+  `lib/tournament-rules.ts`) y ambos la trabajan en el panel `Inscripciones` (`GET /api/tournament/entries` sigue disponible para consulta). Esa ruta
+  responde 401 sin sesión o a una cuenta que no es de KOF ni el sysadmin, y 403 al staff de las mesas. El sysadmin
+  opera la lista igual que el administrador de KOF (inscribe, hace check-in y lo cierra).
 
 ## Estados del combate
 
@@ -74,9 +75,19 @@ de `event_settings`; ninguna está escrita en el código.
   reservados hasta las 12:45. La base lo exige con triggers, por si dos solicitudes llegan a la vez.
 - "Generar bracket" cierra el check-in si ya toca y usa solo a los jugadores con check-in. Se rechaza antes de las 12:55,
   una segunda vez y con menos de 32 o más de 64 jugadores.
+- El visitante se inscribe solo desde su pasaporte (`/passport`, botón "Inscribirme al torneo"; S9 de `odd/tasks/sysadmin-console.md`).
+  La sesión es la misma del pasaporte (cookie de dispositivo) y el visitante nunca viene del formulario.
+  `addSelfEntry()` (`entries-mutations.ts`) reutiliza `insertEntry()`: mismo cupo (50 de lista previa y 64), mismo
+  duplicado y mismo correo de confirmación (S8). Solo existe el canal `pre`: desde `kofOnsiteSignupStartsAt` la app
+  responde "cerró" porque la inscripción presencial es un check-in en el área de KOF. Un pasaporte excluido (RF-46) se
+  rechaza. Es idempotente (repetir responde "Ya estás inscrito" sin crear nada ni reenviar el correo), con límite de 10
+  intentos cada 10 minutos por visitante. La fila queda sin `registeredById` y la bitácora `kof_entry.add` sin actor, con
+  `detail.source = "visitor"`. No hay cancelación: no existe ninguna regla ni comando para quitar una inscripción.
+  Los estados (inscrito, lleno, cerrado, ya terminaron, aún no abre y excluido) salen de `getSelfEntryAvailability()`; los errores de la
+  acción llegan como toast.
 - El pasaporte del inscrito (`/passport`) avisa que está en el torneo y cuándo hacer el check-in; después confirma que
   ya está en el bracket.
-- Solo el administrador de KOF hace todo esto; el staff de las mesas y el sysadmin reciben un rechazo.
+- Solo el administrador de KOF y el sysadmin (que opera como administrador) hacen todo esto; el staff de las mesas recibe un rechazo.
 
 ## Bracket público
 
@@ -146,7 +157,7 @@ puede repetirse: solo agrega lo que falta.
 ## Pendiente
 
 - Registrar en el momento a un visitante que no tiene pasaporte (UT-TO-38): el registro liga un dispositivo al pasaporte,
-  así que el visitante se registra en su teléfono y el administrador lo agrega por gamertag.
+  así que el visitante se registra en su teléfono y se inscribe desde su pasaporte (o el administrador lo agrega por gamertag).
 - Una lista de espera para los lugares de "No se presentó" (UT-TO-44): quedan vacíos y son byes.
 - El cierre automático del bracket público cuando la CPU o la memoria pasan del 85% durante 2 minutos (necesita monitoreo del
   servidor), el tope de conexiones y el tiempo real por SSE: se usa consulta cada 3 segundos.

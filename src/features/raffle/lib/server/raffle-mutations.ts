@@ -1,6 +1,6 @@
 import "server-only";
 import { randomInt as cryptoRandomInt } from "node:crypto";
-import { buildWinnerEmail } from "@features/raffle/lib/raffle-email";
+import { buildWinnerEmail, type WinnerEmailInput } from "@features/raffle/lib/raffle-email";
 import type { DecisionOutcome, PrizeInput } from "@features/raffle/lib/raffle-input";
 import { getRafflePhase, pickTicketIndex, type RandomInt } from "@features/raffle/lib/raffle-rules";
 import {
@@ -189,12 +189,40 @@ export async function decideDraw(request: DecisionRequest): Promise<DecisionResu
 
     const { gamertag, email } = draw.ticket.visitor;
     const winner = { to: email, gamertag, ticketNumber: draw.ticketNumber, decidedAt: request.now };
-    const emailId = request.outcome === "winner" ? await enqueueEmail(transaction, buildWinnerEmail(winner)) : null;
+    const emailId = request.outcome === "winner" ? await enqueueWinnerEmail(transaction, request.drawId, winner) : null;
 
     await auditDecision(transaction, request, { ticketNumber: draw.ticketNumber, gamertag });
 
     return { status: "decided", outcome: request.outcome, emailId };
   });
+}
+
+/** The email of a winner whose first one was abandoned; null for a draw that is not a decided winner. */
+export async function rebuildWinnerEmail(transaction: Transaction, drawId: string): Promise<string | null> {
+  const draw = await transaction.raffleDraw.findUnique({
+    where: { id: drawId },
+    select: {
+      outcome: true,
+      decidedAt: true,
+      ticketNumber: true,
+      ticket: { select: { visitor: { select: { gamertag: true, email: true } } } },
+    },
+  });
+
+  if (draw?.outcome !== "winner" || !draw.decidedAt) return null;
+
+  const { gamertag, email } = draw.ticket.visitor;
+
+  return enqueueWinnerEmail(transaction, drawId, {
+    to: email,
+    gamertag,
+    ticketNumber: draw.ticketNumber,
+    decidedAt: draw.decidedAt,
+  });
+}
+
+function enqueueWinnerEmail(transaction: Transaction, drawId: string, winner: WinnerEmailInput): Promise<string> {
+  return enqueueEmail(transaction, buildWinnerEmail(winner), { kind: "raffle_winner", referenceId: drawId });
 }
 
 async function auditDecision(transaction: Transaction, request: DecisionRequest, detail: Prisma.InputJsonObject) {

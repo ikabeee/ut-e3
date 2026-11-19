@@ -1,4 +1,6 @@
+import type { EmailKind } from "@shared/lib/email-kinds";
 import type { OverloadMetric, OverloadSample } from "@features/admin/lib/overload-rule";
+import type { ServerLogLevel, ServerLogSource } from "@shared/lib/server-log-types";
 
 export interface UndeliveredEmailRow {
   id: string;
@@ -43,3 +45,88 @@ export type SqlConsoleState =
   | { status: "read"; message: string; result: SqlReadResult }
   | { status: "review"; message: string; statement: string; affectedRows: number }
   | { status: "done"; message: string; affectedRows: number };
+
+/** One page of a log list; `page` is already inside 1 to `pageCount`. */
+export interface LogPage<Row> {
+  rows: Row[];
+  total: number;
+  page: number;
+  pageCount: number;
+}
+
+/** The state of one background job: whether its interval is active and how its last run ended. */
+export interface JobState {
+  isRunning: boolean;
+  lastRunAt: string | null;
+  lastError: string | null;
+}
+
+/** What /admin/recovery shows: the state of each background service and of the database files. */
+export interface RecoveryStatus {
+  mail: {
+    /** Only the host of SMTP_HOST: never the user, the password or the sender. */
+    smtpHost: string | null;
+    worker: JobState | null;
+    outbox: ServerStatus["outbox"];
+    lastSentAt: string | null;
+    lastFailure: string | null;
+  };
+  overloadWatch: JobState | null;
+  /** The hourly purge of the server logs older than 30 days. */
+  logRetention: JobState | null;
+  database: { databaseBytes: number; walBytes: number; shmBytes: number; freeBytes: number | null };
+  publicBracketEnabled: boolean;
+}
+
+export type EmailStatus = "sent" | "pending" | "failed";
+
+/** One email of the outbox for the sysadmin, with its full address; the body itself is read apart (and audited). */
+export interface EmailRow {
+  id: string;
+  to: string;
+  subject: string;
+  kind: EmailKind | null;
+  status: EmailStatus;
+  attempts: number;
+  nextAttemptAt: string;
+  sentAt: string | null;
+  lastError: string | null;
+  createdAt: string;
+  hasBody: boolean;
+  /** Unsent and still with a body: it can go back to the queue. */
+  canResend: boolean;
+  /** Abandoned, body erased and of a kind that can be made again. */
+  canRebuild: boolean;
+}
+
+export interface EmailPage {
+  rows: EmailRow[];
+  total: number;
+  page: number;
+  pageCount: number;
+}
+
+export interface AuditLogRow {
+  id: string;
+  createdAt: string;
+  /** Name and email of the account; null when no staff account made the change (the automatic close, a recovery). */
+  actor: { name: string; email: string } | null;
+  action: string;
+  entityType: string;
+  entityId: string;
+  /** The JSON of the entry as indented text; null when it is empty. */
+  detail: string | null;
+}
+
+export interface ServerLogRow {
+  id: string;
+  createdAt: string;
+  level: ServerLogLevel;
+  source: ServerLogSource;
+  message: string;
+  /** The JSON of the event as indented text; null when it is empty. */
+  details: string | null;
+}
+
+/** What the view of an email answers: its text, or the reason it cannot be shown. */
+export type EmailTextState = { status: "text"; text: string } | { status: "error"; message: string };

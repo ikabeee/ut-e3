@@ -12,7 +12,8 @@ export const RAFFLE_COPY = {
     title: "Rifa",
     description: "Tómbola, decisiones y premios de la rifa final.",
     loading: "Cargando la rifa…",
-    signedInAs: (name: string) => `Sesión de ${name} · Administrador de rifa`,
+    signedInAs: (name: string, isSysadmin = false) =>
+      `Sesión de ${name} · ${isSysadmin ? "Sysadmin · Opera como animador" : "Administrador de rifa"}`,
     connectionLost: "Sin conexión. Se muestra el último estado recibido.",
     liveLink: "Abrir la tómbola en vivo",
     status: {

@@ -1,16 +1,14 @@
 import "server-only";
-import path from "node:path";
-import { DatabaseSync, type SQLOutputValue } from "node:sqlite";
+import type { DatabaseSync, SQLOutputValue } from "node:sqlite";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import type { SqlCell, SqlReadResult } from "@features/admin/lib/types";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { getPrisma } from "@shared/lib/server/prisma";
+import { withReadOnlyDatabase } from "@shared/lib/server/sqlite-file";
 
 const COPY = ADMIN_COPY.sql;
 
 export const MAX_SQL_ROWS = 500;
-
-const BUSY_TIMEOUT_MS = 5000;
 
 const MAX_ERROR_DETAIL = 300;
 
@@ -88,26 +86,6 @@ async function auditStatement(actorId: string, action: string, detail: { stateme
   await getPrisma().$transaction((transaction) =>
     recordAudit(transaction, { actorId, action, ...AUDIT_ENTITY, detail }),
   );
-}
-
-function withReadOnlyDatabase<Result>(work: (database: DatabaseSync) => Result): Result {
-  const database = new DatabaseSync(getDatabasePath(), { readOnly: true, timeout: BUSY_TIMEOUT_MS });
-
-  try {
-    return work(database);
-  } finally {
-    database.close();
-  }
-}
-
-// DATABASE_URL is "file:<path>" (prisma.ts checks it); a relative path is relative to the working directory.
-function getDatabasePath(): string {
-  const file = (process.env.DATABASE_URL ?? "")
-    .trim()
-    .replace(/^file:/, "")
-    .split("?")[0];
-
-  return path.resolve(file);
 }
 
 function readRows(database: DatabaseSync, text: string): SqlReadResult {

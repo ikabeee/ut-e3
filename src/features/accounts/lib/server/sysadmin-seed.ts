@@ -37,6 +37,13 @@ export async function seedSysadmin(prisma: PrismaClient, env: SysadminEnv): Prom
   }
 
   await prisma.account.create({
-    data: { email, name, role: SYSADMIN_ROLE, status: ACTIVE, password: await hashPassword(password) },
+    data: {
+      email,
+      name,
+      role: SYSADMIN_ROLE,
+      status: ACTIVE,
+      password: await hashPassword(password),
+      createdAt: new Date(),
+    },
   });
 }

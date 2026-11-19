@@ -25,6 +25,15 @@ export interface ManagedAccount {
   kofDesk: KofDesk | null;
 }
 
+/** An account as the list of /admin/accounts shows it: any role, with its stand, creation date and last sign-in. */
+export interface AdminAccountRow extends ManagedAccount {
+  standId: string | null;
+  /** Null for the accounts created before the column existed and for rows inserted by hand. */
+  createdAt: Date | null;
+  /** The last verified sign-in; null when the account never signed in. */
+  lastLoginAt: Date | null;
+}
+
 /** A stand account in a list of the sysadmin or of the stand administrator. */
 export interface StandAccountRow extends ManagedAccount {
   standId: string;

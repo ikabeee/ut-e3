@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
 import { TextDecoder, TextEncoder } from "node:util";
+import { setPasswordCostForTests } from "@shared/lib/server/password";
 
 if (typeof global.TextEncoder === "undefined") {
   global.TextEncoder = TextEncoder;
@@ -150,3 +151,5 @@ if (typeof window !== "undefined") {
 
   Object.defineProperty(document, "fonts", { configurable: true, value: { ready: Promise.resolve() } });
 }
+
+setPasswordCostForTests();

@@ -22,6 +22,8 @@ function aliasesFromTsconfig() {
 const config = {
   rootDir,
   testEnvironment: "jsdom",
+  globalSetup: "<rootDir>/jest.global-setup.ts",
+  globalTeardown: "<rootDir>/jest.global-teardown.ts",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   moduleNameMapper: aliasesFromTsconfig(),
   testMatch: ["<rootDir>/src/**/*.test.{ts,tsx}"],

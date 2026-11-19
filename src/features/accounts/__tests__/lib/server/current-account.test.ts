@@ -17,6 +17,7 @@ import { createSession } from "@shared/lib/server/session";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
+import { liftSysadminGuard } from "@shared/__tests__/lib/server/sysadmin-guard";
 
 const database = createTestDatabase();
 
@@ -36,6 +37,7 @@ afterAll(async () => {
 beforeEach(async () => {
   stubCookies(createCookieJar());
   await getPrisma().session.deleteMany();
+  await liftSysadminGuard(getPrisma());
   await getPrisma().account.deleteMany();
 });
 
@@ -75,12 +77,24 @@ describe("requireRaffleAdmin", () => {
     expect(await requireRaffleAdmin()).toMatchObject({ id: account.id, role: "raffle_admin" });
   });
 
-  it("sends the sysadmin and a visitor without a session to /login", async () => {
-    await expect(requireRaffleAdmin()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  it("returns the sysadmin, who operates the raffle as a raffle administrator", async () => {
+    const account = await createAccount("sysadmin");
 
-    await createSession((await createAccount("sysadmin")).id);
+    await createSession(account.id);
+
+    expect(await requireRaffleAdmin()).toMatchObject({ id: account.id, role: "sysadmin" });
+    expect(await getRaffleAdmin()).toMatchObject({ id: account.id });
+  });
+
+  it.each(["help_desk", "kof_admin", "kof_staff", "stand_staff"])("sends a %s to /login", async (role) => {
+    await createSession((await createAccount(role)).id);
 
     await expect(requireRaffleAdmin()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  });
+
+  it("sends a visitor without a session to /login", async () => {
+    await expect(requireRaffleAdmin()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+    expect(await getRaffleAdmin()).toBeNull();
   });
 
   it("answers null in a Route Handler for any other role", async () => {
@@ -94,11 +108,17 @@ describe("getKofAccount", () => {
   it("answers null instead of redirecting when there is no KOF session", async () => {
     expect(await getKofAccount()).toBeNull();
 
+    await createSession((await createAccount("help_desk")).id);
+
+    expect(await getKofAccount()).toBeNull();
+  });
+
+  it("returns the sysadmin as a KOF administrator, with no desk", async () => {
     const sysadmin = await createAccount("sysadmin");
 
     await createSession(sysadmin.id);
 
-    expect(await getKofAccount()).toBeNull();
+    expect(await getKofAccount()).toMatchObject({ id: sysadmin.id, role: "kof_admin", kofDesk: null });
   });
 
   it("returns the KOF staff member with its desk", async () => {
@@ -141,7 +161,7 @@ describe("requireKofAccount", () => {
     expect(await requireKofAccount()).toMatchObject({ role: "kof_staff", kofDesk: null });
   });
 
-  it.each(["sysadmin", "help_desk", "raffle_admin", "stand_staff"])("sends a %s to /login", async (role) => {
+  it.each(["help_desk", "raffle_admin", "stand_staff"])("sends a %s to /login", async (role) => {
     const account = await createAccount(role);
 
     await createSession(account.id);
@@ -341,9 +361,17 @@ describe("requireKofViewer (S37)", () => {
     expect(await getKofViewer()).toMatchObject({ role: "sysadmin", kofDesk: null });
   });
 
-  it("keeps requireKofAccount closed to the sysadmin: it has no tournament commands", async () => {
-    await createSession((await createAccount("sysadmin")).id);
+  it("gives the sysadmin requireKofAccount as a KOF administrator, attributed to its own account", async () => {
+    const sysadmin = await createAccount("sysadmin");
 
-    await expect(requireKofAccount()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+    await createSession(sysadmin.id);
+
+    expect(await requireKofAccount()).toEqual({
+      id: sysadmin.id,
+      email: "cuenta@ut.mx",
+      name: "Cuenta",
+      role: "kof_admin",
+      kofDesk: null,
+    });
   });
 });

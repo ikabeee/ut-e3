@@ -9,6 +9,8 @@ import {
   annulCheckIns,
   excludeVisitor,
   excludeVisitorsOfCheckIns,
+  unexcludeVisitor,
+  type UnexcludeResult,
   type BulkResult,
   type AnnulResult,
   type ModerationRequest,
@@ -54,6 +56,25 @@ export async function excludeVisitorAction(
   return { status: "done", message: OUTCOMES.excluded };
 }
 
+export async function unexcludeVisitorAction(
+  _previous: ModerationActionState | null,
+  form: FormData,
+): Promise<ModerationActionState> {
+  const actor = await requireSysadmin();
+
+  const result = await unexcludeVisitor({
+    actorId: actor.id,
+    targetId: readFormText(form, "visitorId"),
+    now: new Date(),
+  });
+
+  if (result.status !== "unexcluded") return { status: "error", message: ERRORS[result.status] };
+
+  refresh();
+
+  return { status: "done", message: describeUnexclusion(result) };
+}
+
 /**
  * The visits ticked in a list of a burst or of a stand: `intent` says whether they are annulled or their visitors
  * excluded, with one reason for all (RF-46). Each one writes its own audit entry.
@@ -80,6 +101,12 @@ export async function moderateSelectionAction(
   refresh();
 
   return { status: "done", message: describeBulk(result, isExclusion) };
+}
+
+function describeUnexclusion(result: Extract<UnexcludeResult, { status: "unexcluded" }>): string {
+  if (result.ticketsFrozen) return OUTCOMES.unexcludedFrozen;
+
+  return result.reactivatedTickets > 0 ? OUTCOMES.unexcludedTickets(result.reactivatedTickets) : OUTCOMES.unexcluded;
 }
 
 function describeBulk(result: BulkResult, isExclusion: boolean): string {

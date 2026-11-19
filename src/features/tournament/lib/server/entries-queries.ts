@@ -1,11 +1,44 @@
 import "server-only";
-import type { EntrySchedule } from "@features/tournament/lib/entries-rules";
+import { getEntryWindow, type EntrySchedule } from "@features/tournament/lib/entries-rules";
+import { MAX_ENTRANTS, PRE_LIST_LIMIT } from "@features/tournament/lib/tournament-rules";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
-import type { EntryChannel, EntryStatus, EntryView } from "@features/tournament/lib/types";
+import type { EntryChannel, EntryStatus, EntryView, SelfEntryAvailability } from "@features/tournament/lib/types";
+import type { Prisma } from "@generated/prisma/client";
 import { getPrisma } from "@shared/lib/server/prisma";
 
-export async function getEntrySchedule(): Promise<EntrySchedule> {
-  const settings = await getPrisma().eventSettings.findUnique({
+/**
+ * What the passport offers a visitor who is not in the tournament. It only reads; `addSelfEntry` decides again when
+ * the visitor presses the button, so a stale screen cannot enroll anyone out of the rules.
+ */
+export async function getSelfEntryAvailability(visitorId: string, now: Date): Promise<SelfEntryAvailability> {
+  const visitor = await getPrisma().visitor.findUnique({ where: { id: visitorId }, select: { excludedAt: true } });
+
+  if (visitor?.excludedAt) return "excluded";
+
+  const window = getEntryWindow(await getEntrySchedule(), now);
+
+  if (window === "notOpen") return "notOpen";
+
+  if (window === "closed") return "ended";
+
+  if (window === "onsite") return "closed";
+
+  return (await isListFull()) ? "full" : "open";
+}
+
+async function isListFull(): Promise<boolean> {
+  const [preCount, places] = await Promise.all([
+    getPrisma().tournamentEntry.count({ where: { channel: "pre" } }),
+    getPrisma().tournamentEntry.count({ where: { status: { not: "no_show" } } }),
+  ]);
+
+  return preCount >= PRE_LIST_LIMIT || places >= MAX_ENTRANTS;
+}
+
+export async function getEntrySchedule(
+  client: Pick<Prisma.TransactionClient, "eventSettings"> = getPrisma(),
+): Promise<EntrySchedule> {
+  const settings = await client.eventSettings.findUnique({
     where: { id: 1 },
     select: {
       kofRegistrationOpensAt: true,

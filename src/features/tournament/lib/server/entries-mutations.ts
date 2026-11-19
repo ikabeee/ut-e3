@@ -8,7 +8,7 @@ import type { EntryChannel, Player } from "@features/tournament/lib/types";
 import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { isUniqueViolation, readDatabaseMessage } from "@shared/lib/server/database-errors";
-import { enqueueEmail } from "@shared/lib/server/email-outbox";
+import { enqueueEmail, type OutgoingEmail } from "@shared/lib/server/email-outbox";
 import { hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 
@@ -24,6 +24,9 @@ export type AddEntryResult =
   | { status: "alreadyEntered" }
   | { status: "preListFull" }
   | { status: "tournamentFull" };
+
+/** A visitor enrolling on their own adds one more refusal: an excluded passport cannot play (RF-46). */
+export type SelfEntryResult = AddEntryResult | { status: "excluded" } | { status: "ended" };
 
 export type CheckInResult =
   | { status: "checkedIn"; gamertag: string }
@@ -65,6 +68,35 @@ export async function addEntry(actorId: string, gamertag: string, now: Date): Pr
   const entry = { visitorId: visitor.id, gamertag: visitor.gamertag, email: visitor.email, channel: window };
 
   return insertEntry(actorId, { entry, schedule }, now);
+}
+
+/**
+ * A visitor enrolls themselves from the app. Only the pre-registration is open to them: from noon the on-site sign-up
+ * is a check-in made in person, so the app answers "closed". The entry has no registering account and the audit log
+ * has no actor (the visitor is in `detail`); everything else is `insertEntry`, so the limits are the same.
+ */
+export async function addSelfEntry(visitorId: string, now: Date): Promise<SelfEntryResult> {
+  const schedule = await getEntrySchedule();
+  const window = getEntryWindow(schedule, now);
+
+  if (window === "notOpen") return { status: "notOpen", opensAt: schedule.registrationOpensAt };
+
+  if (window === "closed") return { status: "ended" };
+
+  if (window === "onsite") return { status: "closed" };
+
+  const visitor = await getPrisma().visitor.findUnique({
+    where: { id: visitorId },
+    select: { id: true, gamertag: true, email: true, excludedAt: true },
+  });
+
+  if (!visitor) return { status: "unknownGamertag" };
+
+  if (visitor.excludedAt) return { status: "excluded" };
+
+  const entry = { visitorId: visitor.id, gamertag: visitor.gamertag, email: visitor.email, channel: window };
+
+  return insertEntry(null, { entry, schedule }, now);
 }
 
 /** The administrator types the PIN of a pre-registered player; the player enters the bracket (RF-75). */
@@ -136,7 +168,7 @@ export async function closeCheckInIfDue(actorId: string, now: Date): Promise<num
 }
 
 async function insertEntry(
-  actorId: string,
+  actorId: string | null,
   { entry, schedule }: { entry: NewEntry; schedule: EntrySchedule },
   now: Date,
 ): Promise<AddEntryResult> {
@@ -163,19 +195,52 @@ async function insertEntry(
         action: "kof_entry.add",
         entityType: ENTITY_TYPE,
         entityId: created.id,
-        detail: { visitorId: entry.visitorId, gamertag: entry.gamertag, channel: entry.channel },
+        detail: describeEntryAudit(entry, actorId),
       });
 
-      const emailId = await enqueueEmail(
-        transaction,
-        buildEntryEmail({ to: entry.email, gamertag: entry.gamertag, channel: entry.channel, schedule }),
-      );
+      const emailId = await enqueueEntryEmail(transaction, {
+        entryId: created.id,
+        email: buildEntryEmail({ to: entry.email, gamertag: entry.gamertag, channel: entry.channel, schedule }),
+      });
 
       return { status: "added", channel: entry.channel, emailId };
     });
   } catch (cause) {
     return explainInsertFailure(cause);
   }
+}
+
+// A self-enrollment has no actor account, so the detail says who did it.
+function describeEntryAudit(entry: NewEntry, actorId: string | null) {
+  const { visitorId, gamertag, channel } = entry;
+
+  return actorId === null ? { visitorId, gamertag, channel, source: "visitor" } : { visitorId, gamertag, channel };
+}
+
+/** The confirmation of an entry whose first email was abandoned; null when the entry no longer exists. */
+export async function rebuildEntryEmail(
+  transaction: Prisma.TransactionClient,
+  entryId: string,
+): Promise<string | null> {
+  const entry = await transaction.tournamentEntry.findUnique({
+    where: { id: entryId },
+    select: { channel: true, visitor: { select: { gamertag: true, email: true } } },
+  });
+
+  if (!entry) return null;
+
+  const { gamertag, email: to } = entry.visitor;
+  const channel: EntryChannel = entry.channel === "onsite" ? "onsite" : "pre";
+  const schedule = await getEntrySchedule(transaction);
+
+  return enqueueEntryEmail(transaction, { entryId, email: buildEntryEmail({ to, gamertag, channel, schedule }) });
+}
+
+function enqueueEntryEmail(
+  transaction: Prisma.TransactionClient,
+  { entryId, email }: { entryId: string; email: OutgoingEmail },
+): Promise<string> {
+  return enqueueEmail(transaction, email, { kind: "kof_entry", referenceId: entryId });
 }
 
 async function findRefusal(transaction: Prisma.TransactionClient, entry: NewEntry): Promise<Refusal | null> {

@@ -27,6 +27,8 @@ beforeAll(async () => {
   await createAccount("desk2", "kof_staff", 2);
   await createAccount("nodesk", "kof_staff");
   await createAccount("sysadmin", "sysadmin");
+  await createAccount("help_desk", "help_desk");
+  await createAccount("raffle_admin", "raffle_admin");
 });
 
 afterAll(async () => {
@@ -146,7 +148,25 @@ describe("submitTournamentCommand", () => {
     expect(state).toEqual({ status: "error", message: ERRORS.notGenerated });
   });
 
-  it.each(["sysadmin"])("sends a %s to /login without running the command", async (key) => {
+  it.each([
+    ["start_match", "match-1"],
+    ["start_match", "match-31"],
+    ["freeze_match", "match-1"],
+  ])("lets the sysadmin run %s on %s as a KOF administrator, and records who did it", async (type, matchId) => {
+    await signInAs("sysadmin");
+
+    const state = await submitTournamentCommand(null, createForm({ type, matchId }));
+
+    const entry = await getPrisma().auditLog.findFirstOrThrow({
+      where: { action: "kof_tournament.command", actorId: accountIds.sysadmin },
+    });
+
+    expect(state).toEqual({ status: "applied" });
+    expect((await readTournament()).version).toBe(1);
+    expect(entry.entityType).toBe("kof_tournament");
+  });
+
+  it.each(["help_desk", "raffle_admin"])("sends a %s to /login without running the command", async (key) => {
     await signInAs(key);
 
     await expect(
