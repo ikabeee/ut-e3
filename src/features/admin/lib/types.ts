@@ -1,5 +1,6 @@
 import type { EmailKind } from "@shared/lib/email-kinds";
 import type { OverloadMetric, OverloadSample } from "@features/admin/lib/overload-rule";
+import type { ServerLogLevel, ServerLogSource } from "@shared/lib/server-log-types";
 
 export interface UndeliveredEmailRow {
   id: string;
@@ -45,6 +46,14 @@ export type SqlConsoleState =
   | { status: "review"; message: string; statement: string; affectedRows: number }
   | { status: "done"; message: string; affectedRows: number };
 
+/** One page of a log list; `page` is already inside 1 to `pageCount`. */
+export interface LogPage<Row> {
+  rows: Row[];
+  total: number;
+  page: number;
+  pageCount: number;
+}
+
 /** The state of one background job: whether its interval is active and how its last run ended. */
 export interface JobState {
   isRunning: boolean;
@@ -63,6 +72,8 @@ export interface RecoveryStatus {
     lastFailure: string | null;
   };
   overloadWatch: JobState | null;
+  /** The hourly purge of the server logs older than 30 days. */
+  logRetention: JobState | null;
   database: { databaseBytes: number; walBytes: number; shmBytes: number; freeBytes: number | null };
   publicBracketEnabled: boolean;
 }
@@ -93,6 +104,28 @@ export interface EmailPage {
   total: number;
   page: number;
   pageCount: number;
+}
+
+export interface AuditLogRow {
+  id: string;
+  createdAt: string;
+  /** Name and email of the account; null when no staff account made the change (the automatic close, a recovery). */
+  actor: { name: string; email: string } | null;
+  action: string;
+  entityType: string;
+  entityId: string;
+  /** The JSON of the entry as indented text; null when it is empty. */
+  detail: string | null;
+}
+
+export interface ServerLogRow {
+  id: string;
+  createdAt: string;
+  level: ServerLogLevel;
+  source: ServerLogSource;
+  message: string;
+  /** The JSON of the event as indented text; null when it is empty. */
+  details: string | null;
 }
 
 /** What the view of an email answers: its text, or the reason it cannot be shown. */

@@ -34,6 +34,7 @@ export function RecoveryPanel({ status, actions, refreshHref }: Readonly<Recover
       </Link>
       <MailSection mail={status.mail} actions={actions} />
       <OverloadSection job={status.overloadWatch} restart={actions.restartOverloadWatch} />
+      <LogRetentionSection job={status.logRetention} />
       <RecoveryDatabaseSection
         database={status.database}
         runQuickCheck={actions.runQuickCheck}
@@ -78,6 +79,23 @@ function OverloadSection({ job, restart }: Readonly<{ job: JobState | null; rest
       </h2>
       <JobLines title={copy.job} job={job} />
       <RecoveryActionForm action={restart} label={copy.restart} pendingLabel={copy.restarting} />
+    </section>
+  );
+}
+
+function LogRetentionSection({ job }: Readonly<{ job: JobState | null }>) {
+  const copy = COPY.logRetention;
+
+  return (
+    <section
+      aria-labelledby="recovery-log-retention-heading"
+      className="grid gap-3"
+      data-testid="recovery-log-retention"
+    >
+      <h2 id="recovery-log-retention-heading" className="type-section">
+        {copy.heading}
+      </h2>
+      <JobLines title={copy.job} job={job} />
     </section>
   );
 }

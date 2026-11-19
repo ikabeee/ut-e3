@@ -27,6 +27,7 @@ const STATUS: RecoveryStatus = {
     lastFailure: "421 Servicio no disponible",
   },
   overloadWatch: null,
+  logRetention: null,
   database: { databaseBytes: 3 * 1024 * 1024, walBytes: 0, shmBytes: 32768, freeBytes: null },
   publicBracketEnabled: true,
 };

@@ -30,6 +30,7 @@ describe("getRecoveryStatus", () => {
 
     expect(status.mail).toMatchObject({ smtpHost: null, worker: null });
     expect(status.overloadWatch).toBeNull();
+    expect(status.logRetention).toBeNull();
     expect(status.database.databaseBytes).toBeGreaterThan(0);
     expect(status.database.walBytes).toBeGreaterThanOrEqual(0);
     expect(status.database.freeBytes).toBeGreaterThan(0);

@@ -8,6 +8,6 @@ describe("AdminNav", () => {
     expect(screen.getByRole("link", { name: "Torneo de KOF" })).toHaveAttribute("href", "/admin/kof");
     expect(screen.getByRole("link", { name: "Rifa" })).toHaveAttribute("href", "/admin/raffle");
     expect(screen.getByRole("link", { name: "Rifa" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getAllByRole("link")).toHaveLength(12);
+    expect(screen.getAllByRole("link")).toHaveLength(13);
   });
 });

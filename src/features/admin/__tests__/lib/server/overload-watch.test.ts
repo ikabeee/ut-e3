@@ -131,3 +131,26 @@ describe("getServerStatus history", () => {
     ]);
   });
 });
+
+describe("the automatic close in the server logs (S4)", () => {
+  it("records the close as an overload warning, and nothing when the bracket was already closed", async () => {
+    await getPrisma().serverLog.deleteMany();
+
+    const sample = overloadedSampler({ cpu: 0.95, memory: 0.1 });
+
+    for (let at = 0; at <= 120_000; at += 10_000) await checkOverload(at, { sample, close: async () => false });
+
+    await expect(getPrisma().serverLog.count()).resolves.toBe(0);
+
+    clearLoadSamples();
+
+    for (let at = 0; at <= 120_000; at += 10_000) await checkOverload(at, { sample, close: async () => true });
+
+    await expect(getPrisma().serverLog.findFirstOrThrow()).resolves.toMatchObject({
+      level: "warn",
+      source: "overload",
+      message: expect.stringContaining("Public bracket closed automatically: cpu above 85.0%"),
+      details: { metric: "cpu" },
+    });
+  });
+});

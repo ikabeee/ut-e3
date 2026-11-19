@@ -3,6 +3,7 @@ import "server-only";
 import type { Prisma } from "@generated/prisma/client";
 import type { EmailOrigin } from "@shared/lib/email-kinds";
 import { getPrisma } from "@shared/lib/server/prisma";
+import { logServerEvent, maskEmail } from "@shared/lib/server/server-log";
 
 export interface OutgoingEmail {
   to: string;
@@ -15,7 +16,11 @@ export type SendEmail = (email: OutgoingEmail) => Promise<void>;
 interface PendingOutboxClaim {
   id: string;
   attempts: number;
+  to: string;
+  kind: string | null;
 }
+
+type DeliveryFailure = "failed" | "abandoned";
 
 interface SmtpRateLimitPayload {
   response: string;
@@ -99,7 +104,7 @@ async function deliverEmailWithResult(id: string, send: SendEmail, now: Date): P
   try {
     await send({ to: row.to, subject: row.subject, text: row.text });
   } catch (cause) {
-    await handleDeliveryFailure({ id, attempts: row.attempts }, cause, now);
+    await handleDeliveryFailure({ id, attempts: row.attempts, to: row.to, kind: row.kind }, cause, now);
 
     return false;
   }
@@ -112,6 +117,11 @@ async function deliverEmailWithResult(id: string, send: SendEmail, now: Date): P
         text: "",
         lastError: null,
       },
+    });
+
+    await logServerEvent("info", "email", `Email sent: ${row.kind ?? "other"}`, {
+      emailId: id,
+      to: maskEmail(row.to),
     });
 
     return true;
@@ -156,6 +166,7 @@ async function handleDeliveryFailure(claim: PendingOutboxClaim, cause: unknown, 
         text: "",
       },
     });
+    await logDeliveryFailure(claim, "abandoned", errorMessage);
 
     return;
   }
@@ -171,6 +182,7 @@ async function handleDeliveryFailure(claim: PendingOutboxClaim, cause: unknown, 
         text: "",
       },
     });
+    await logDeliveryFailure(claim, "abandoned", errorMessage);
 
     return;
   }
@@ -186,6 +198,22 @@ async function handleDeliveryFailure(claim: PendingOutboxClaim, cause: unknown, 
       nextAttemptAt,
     },
   });
+  await logDeliveryFailure(claim, "failed", errorMessage);
+}
+
+// A failed attempt will be retried (warn); an abandoned one never leaves again without a sysadmin (error).
+async function logDeliveryFailure(claim: PendingOutboxClaim, outcome: DeliveryFailure, reason: string): Promise<void> {
+  await logServerEvent(
+    outcome === "abandoned" ? "error" : "warn",
+    "email",
+    `Email ${outcome}: ${claim.kind ?? "other"}`,
+    {
+      emailId: claim.id,
+      to: maskEmail(claim.to),
+      attempts: outcome === "abandoned" ? MAX_ATTEMPTS : claim.attempts + 1,
+      reason,
+    },
+  );
 }
 
 export function getRetryDelayMs(attempts: number, random: () => number = Math.random): number {

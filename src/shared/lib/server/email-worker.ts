@@ -2,6 +2,7 @@ import "server-only";
 import { startJob } from "@shared/lib/server/background-jobs";
 import { deliverPendingEmails } from "@shared/lib/server/email-outbox";
 import { createSmtpSender } from "@shared/lib/server/mailer";
+import { logServerEvent } from "@shared/lib/server/server-log";
 
 export const EMAIL_WORKER_JOB = "email-outbox";
 
@@ -31,8 +32,8 @@ export async function deliverEmailsNow(): Promise<number> {
   return deliverPendingEmails(createSmtpSender());
 }
 
-function logDeliveryFailure(cause: unknown): void {
+async function logDeliveryFailure(cause: unknown): Promise<void> {
   const message = cause instanceof Error ? cause.message : "Unknown error";
 
-  console.error(`Email outbox delivery failed: ${message}`);
+  await logServerEvent("error", "worker", `Email outbox delivery failed: ${message}`);
 }
