@@ -8,6 +8,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Footer: el mapa del sitio incluye el correo de contacto `info@algorixinsights.com` y la línea "Desarrollado y diseñado
+  por Algorix Insights" queda centrada.
 - `npm run db:backfill:email-kinds`: da tipo a los correos viejos del pasaporte y de recuperación para poder rehacerlos.
 - `/admin/logs`: logs para el sysadmin, con dos pestañas. "Bitácora" lista `audit_logs` con filtros por actor, acción,
   entidad y fechas, en páginas, y muestra el JSON como texto. "Servidor" lista los logs del servidor, que ahora se guardan
@@ -24,6 +26,7 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 - Correo: una sola conexión SMTP, como máximo un mensaje cada 2 segundos y 10 por pasada; ante un error temporal (Gmail
   `421 4.7.0`) la pasada se detiene y los reintentos esperan de 15 min a 2 h, en lugar de gastar los 5 intentos en minutos.
+- `/tournament`: el reloj de arena y el texto "El bracket estará disponible en la pantalla del torneo." quedan centrados.
 - `/tournament`: el paso "Pide al administrador de KOF que te agregue" ahora lleva al botón del pasaporte.
 - `/admin/recovery`: pantalla "Recuperación" solo para el sysadmin. Muestra el estado del trabajador de correo (SMTP
   configurado, servidor, última corrida y último error), de la vigilancia de carga, de la base de datos (tamaño de la
