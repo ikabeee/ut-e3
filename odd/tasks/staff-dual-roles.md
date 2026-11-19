@@ -118,6 +118,9 @@ porque usa el rol secundario y las 4 mesas. Rama `feature/<issue>-staff-dual-rol
 
   Con esto se ajustaron S5, T7 y T8. El despliegue y la escritura en el VPS siguen siendo acciones que se confirman en
   el momento.
+- **L24** (confirmación del usuario, verbatim): "Listo, esa distribucion es correcta". La distribución final queda
+  aprobada: 80 cuentas en el alta, 2 a la espera de correo (Córdova como admin del 103-3 y Medina como staff del 101-5)
+  y 12 personas sin cuenta porque su área no usa la app.
 - **L23** (decisión del usuario, verbatim): "es miguel el admin de stand". Córdova Sánchez Miguel Ángel es el
   `stand_admin` del 103-3, sin rol secundario (no opera la rifa: "solo dará premios"). Falta su correo: sin él, el
   alta masiva lo omite y el sysadmin lo invita desde `/admin` cuando lo tenga.
