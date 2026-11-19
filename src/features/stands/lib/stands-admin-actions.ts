@@ -12,7 +12,7 @@ import { readFormText } from "@shared/lib/form-data";
 
 const COPY = STANDS_COPY.admin;
 
-type Refusal = "standTaken" | "limitReached" | "adminExists" | "notFound" | "emailTaken" | "hasPassport";
+type Refusal = "standTaken" | "limitReached" | "adminExists" | "notFound" | "emailTaken";
 
 // Server Actions are public endpoints: each one checks that the session is the sysadmin before reading the form
 // (RF-39). Disabling an account goes through the actions of the accounts panel, which check their own rules.

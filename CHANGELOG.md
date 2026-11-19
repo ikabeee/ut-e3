@@ -6,6 +6,17 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.5.1] - 2026-11-19
+
+### Cambiado
+
+- Un mismo correo puede ser cuenta del staff y pasaporte de visitante (antes el alta masiva y las invitaciones
+  rechazaban un correo con pasaporte, y el registro y la edición de un pasaporte rechazaban un correo de staff). La
+  lista negra de correos y la unicidad por tabla siguen igual.
+- El kiosco rechaza el PIN de un pasaporte cuyo correo es del administrador o del staff de ese stand (cuenta activa o
+  invitada): no suma visita, voto ni boletos ahí, y las visitas en cola sin conexión quedan como "No registradas" con
+  el aviso "No puedes registrar visitas en tu propio stand." en el pasaporte. En los demás stands participa normal.
+
 ## [1.5.0] - 2026-11-19
 
 ### Agregado

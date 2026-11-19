@@ -130,7 +130,6 @@ async function planBulkInvite(rows: StaffInvitationRow[], stands: readonly Stand
 
   const errors = [
     ...resolved.errors,
-    ...classified.errors,
     ...findStandCountProblem(existing.size, newStands.length),
     ...(await findLimitProblems(classified.toInvite, existing)),
   ];
@@ -168,27 +167,23 @@ function resolveStands(rows: StaffInvitationRow[], stands: readonly StandSlot[])
   return { planned, errors };
 }
 
-// An email with an account is skipped and reported (the run is idempotent); one with a passport cannot be staff (RN-02).
+// An email with an account is skipped and reported (the run is idempotent). One with a passport is invited as any other:
+// the same email can be staff and visitor (RN-02).
 interface ClassifiedEmails {
   toInvite: PlannedAccount[];
   skippedLines: number[];
-  errors: BulkInviteProblem[];
 }
 
 async function classifyEmails(planned: PlannedAccount[]): Promise<ClassifiedEmails> {
   const toInvite: PlannedAccount[] = [];
   const skippedLines: number[] = [];
-  const errors: BulkInviteProblem[] = [];
 
   for (const account of planned) {
-    const refusal = await findEmailRefusal(account.row.email);
-
-    if (refusal === null) toInvite.push(account);
-    else if (refusal.status === "emailTaken") skippedLines.push(account.row.line);
-    else errors.push({ line: account.row.line, message: "El correo ya tiene un pasaporte de visitante" });
+    if ((await findEmailRefusal(account.row.email)) === null) toInvite.push(account);
+    else skippedLines.push(account.row.line);
   }
 
-  return { toInvite, skippedLines, errors };
+  return { toInvite, skippedLines };
 }
 
 async function getExistingStands(): Promise<Map<string, string>> {

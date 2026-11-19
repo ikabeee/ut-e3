@@ -89,15 +89,15 @@ export async function getRegistrationOpensAt(): Promise<Date | null> {
   return settings?.registrationOpensAt ?? null;
 }
 
-// visitors and email_blocklist compare with COLLATE NOCASE; accounts store their email lowercased.
+// visitors and email_blocklist compare with COLLATE NOCASE. An email with a staff account can have a passport too
+// (RN-02): the kiosk is what keeps it from counting visits to its own stand.
 async function isEmailBlocked(tx: Prisma.TransactionClient, email: string): Promise<boolean> {
-  const [blocked, account, existingVisitor] = await Promise.all([
+  const [blocked, existingVisitor] = await Promise.all([
     tx.emailBlocklist.findFirst({ where: { email } }),
-    tx.account.findFirst({ where: { email: email.toLowerCase() } }),
     tx.visitor.findFirst({ where: { email } }),
   ]);
 
-  return Boolean(blocked || account || existingVisitor);
+  return Boolean(blocked || existingVisitor);
 }
 
 async function isGamertagTaken(tx: Prisma.TransactionClient, gamertag: string): Promise<boolean> {

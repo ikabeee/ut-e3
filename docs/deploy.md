@@ -468,8 +468,9 @@ mesa@ejemplo.mx,Eva Ruiz,kof_staff,,,2
 ```
 
 **Qué hace.** Primero valida toda la lista y revisa contra la base lo que esta rechazaría (un stand que no es del
-evento, un correo con pasaporte de visitante, un stand que ya tiene administrador o sus 3 staff, una mesa ocupada, más de
-18 stands). Si algo falla, escribe los errores con su línea y **no escribe nada**. Si todo está bien, en una sola
+evento, un stand que ya tiene administrador o sus 3 staff, una mesa ocupada, más de 18 stands). Un correo que ya tiene
+pasaporte de visitante sí se invita: el mismo correo puede ser staff y visitante, y el kiosco de su propio stand rechaza
+su PIN. Si algo falla, escribe los errores con su línea y **no escribe nada**. Si todo está bien, en una sola
 transacción crea los stands de `INITIAL_STANDS` que no existen (los que ya existen no se tocan) y una cuenta `invited`
 por cada correo sin cuenta, con su invitación de 72 horas y su correo en `email_outbox` (tipo `staff_invitation`). Un
 correo que ya tiene cuenta no se toca y se reporta por su línea. Lo hace "el sistema": las cuentas no tienen

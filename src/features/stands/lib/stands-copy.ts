@@ -53,12 +53,14 @@ export const STANDS_COPY = {
         unknownVisitor: "PIN no reconocido.",
         standWithoutGame: "El stand no tenía su juego registrado.",
         invalid: "Los datos de la visita llegaron incompletos.",
+        ownStand: "Este pasaporte no puede registrar visitas en este stand.",
       },
       instructions: {
         late: "No cuenta para los boletos; el pasaporte del visitante muestra el aviso.",
         unknownVisitor: "Que revise su pasaporte o vaya a Atención",
         standWithoutGame: "Registra tu juego y pide al visitante que teclee su PIN otra vez.",
         invalid: "Pide al visitante que teclee su PIN otra vez.",
+        ownStand: "No cuenta para los boletos; el pasaporte del visitante muestra el aviso.",
       },
     },
     errors: {
@@ -67,6 +69,7 @@ export const STANDS_COPY = {
       unknownPin: "PIN no reconocido, revísalo",
       alreadyVisited: "Este PIN ya registró su visita a este stand.",
       excluded: "Este pasaporte no puede registrar visitas. Pídele que pase a la mesa de atención.",
+      ownStand: "Este pasaporte no puede registrar visitas en este stand.",
       closed: "El registro de visitas ya cerró.",
       standWithoutGame: "Registra tu juego para empezar a recibir visitas",
       ratingsRequired: "Califica el juego, el stand y el arte.",
@@ -128,12 +131,12 @@ export const STANDS_COPY = {
       notFound: "No se encontró el stand.",
       adminExists: "Ese stand ya tiene un administrador. Desactívalo para invitar a otro.",
       emailTaken: "Ese correo ya tiene una cuenta.",
-      hasPassport: "Ese correo ya tiene un pasaporte de visitante; un administrador no puede tenerlo.",
     },
   },
   rejectedNotice: {
     heading: (code: string) => `Tu visita a ${code} no se registró`,
     late: "El kiosco del stand la envió después del cierre del registro de visitas, así que no cuenta para tus boletos.",
+    ownStand: "No puedes registrar visitas en tu propio stand.",
     help: "Si crees que es un error, ve a Atención.",
   },
   passportSurvey: {

@@ -97,7 +97,48 @@ describe("registerQueuedVisits", () => {
 
     expect(await send([visit], at("21:52"))).toEqual([{ id: visit.id, status: "late" }]);
     expect(await getPrisma().checkIn.count()).toBe(0);
-    expect(await getRejectedVisitNotices(visitorId)).toEqual([{ id: visit.id, standCode: "ZA-S3" }]);
+    expect(await getRejectedVisitNotices(visitorId)).toEqual([{ id: visit.id, standCode: "ZA-S3", reason: "late" }]);
+  });
+
+  it("answers ownStand to a PIN of the staff of the stand, and the passport gets the notice (RN-02, RF-24)", async () => {
+    await createStandAccount("jugador1@example.com", "stand_staff", ids.stand);
+
+    const visit = entry({ scannedAt: at("20:00") });
+
+    expect(await send([visit], at("20:05"))).toEqual([{ id: visit.id, status: "ownStand" }]);
+    expect(await getPrisma().checkIn.count()).toBe(0);
+    expect(await getPrisma().vote.count()).toBe(0);
+    expect(await getPrisma().raffleTicket.count()).toBe(0);
+    expect(await getRejectedVisitNotices(visitorId)).toEqual([
+      { id: visit.id, standCode: "ZA-S3", reason: "ownStand" },
+    ]);
+  });
+
+  it("keeps answering ownStand when the same batch is sent again, and records the notice once", async () => {
+    await createStandAccount("jugador1@example.com", "stand_admin", ids.stand);
+
+    const visit = entry({ scannedAt: at("20:00") });
+
+    await send([visit], at("20:05"));
+
+    expect(await send([visit], at("20:06"))).toEqual([{ id: visit.id, status: "ownStand" }]);
+    expect(await getPrisma().rejectedVisit.count()).toBe(1);
+  });
+
+  it("records the same passport at another stand, and spends no attempts of the kiosk on the refusal", async () => {
+    await createStandAccount("jugador1@example.com", "stand_staff", ids.stand);
+
+    const other = await createStand(4, "Otro juego");
+    const otherStaff = await createStandAccount("otro@ut.mx", "stand_staff", other.id);
+    const visit = entry({ scannedAt: at("20:00") });
+
+    await send([entry({ scannedAt: at("20:00") })], at("20:05"));
+
+    expect(
+      await registerQueuedVisits({ standId: other.id, scannedById: otherStaff.id, entries: [visit] }, at("20:06")),
+    ).toEqual([{ id: visit.id, status: "ok" }]);
+    expect(await getPrisma().checkIn.findMany({ select: { standId: true } })).toEqual([{ standId: other.id }]);
+    expect(await getPrisma().rateLimit.count()).toBe(0);
   });
 
   it("records once the same batch sent by two tabs at the same time", async () => {

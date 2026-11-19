@@ -149,15 +149,16 @@ describe("inviteAccount", () => {
     expect(await getPrisma().emailOutbox.count()).toBe(1);
   });
 
-  it("does not turn an email that has a passport into an account (RN-02)", async () => {
+  it("invites an email that has a passport and leaves the passport as it was (RN-02)", async () => {
     await getPrisma().visitor.create({
       data: { fullName: "Neo", gamertag: "Neo", email: "neo@matrix.org", pin: "x", pinLookup: "y" },
     });
 
-    expect(await inviteAccount(actors.sysadmin, invite("NEO@matrix.org", "help_desk"), NOW)).toEqual({
-      status: "hasPassport",
+    expect((await inviteAccount(actors.sysadmin, invite("NEO@matrix.org", "help_desk"), NOW)).status).toBe("invited");
+    expect(await getPrisma().account.findUnique({ where: { email: "neo@matrix.org" } })).toMatchObject({
+      status: "invited",
     });
-    expect(await getPrisma().account.findUnique({ where: { email: "neo@matrix.org" } })).toBeNull();
+    expect(await getPrisma().visitor.count({ where: { email: "neo@matrix.org" } })).toBe(1);
   });
 
   it("gives a desk to one staff member at a time and frees it when the account is disabled (UT-AC-14)", async () => {

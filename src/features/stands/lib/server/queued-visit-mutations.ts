@@ -5,6 +5,7 @@ import type { QueuedVisitResult, QueuedVisitStatus } from "@features/stands/lib/
 import { clampScannedAt, isLateVisit, type VisitWindow } from "@features/stands/lib/visit-timing";
 import { KIOSK_ATTEMPT_RULE, kioskAttemptKey } from "@features/stands/lib/server/kiosk-attempts";
 import { recordVisit } from "@features/stands/lib/server/visit-mutations";
+import { isStaffOfStand } from "@features/stands/lib/server/visit-queries";
 import { isUniqueViolation } from "@shared/lib/server/database-errors";
 import { hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
@@ -77,7 +78,7 @@ async function settleEntry(
 
   const visitor = await getPrisma().visitor.findUnique({
     where: { pinLookup: hashPinForLookup(entry.visit.pin) },
-    select: { id: true },
+    select: { id: true, email: true },
   });
 
   if (!visitor) {
@@ -86,33 +87,43 @@ async function settleEntry(
     return (await consumeAttempt(key, KIOSK_ATTEMPT_RULE, context.receivedAt)) ? "unknownVisitor" : OUT_OF_ATTEMPTS;
   }
 
-  return settleVisit(context, entry.visit, visitor.id);
+  return settleVisit(context, entry.visit, visitor);
 }
 
 // The kiosk retries a batch whose answer it never received: the first answer is the one that counts.
 async function findPreviousAnswer(id: string): Promise<QueuedVisitStatus | null> {
   if (await getPrisma().checkIn.findUnique({ where: { id }, select: { id: true } })) return "duplicate";
 
-  const rejected = await getPrisma().rejectedVisit.findUnique({ where: { id }, select: { id: true } });
+  const rejected = await getPrisma().rejectedVisit.findUnique({ where: { id }, select: { reason: true } });
 
-  return rejected ? "late" : null;
+  if (!rejected) return null;
+
+  return rejected.reason === "ownStand" ? "ownStand" : "late";
 }
 
 async function settleVisit(
   context: BatchContext,
   visit: ReceivedQueuedVisit,
-  visitorId: string,
+  visitor: { id: string; email: string },
 ): Promise<QueuedVisitStatus> {
   const { batch, window, receivedAt } = context;
+  const { id: visitorId } = visitor;
   const scannedAt = clampScannedAt(visit.scannedAt, receivedAt, window.eventStartsAt);
 
   // A visitor whose visit to the stand already counts gets no notice that it "did not register" (EC-03, RF-24).
   if (await hasVisitedStand(visitorId, batch.standId)) return "duplicate";
 
-  if (isLateVisit(scannedAt, receivedAt, window)) {
-    await recordRejection({ id: visit.id, visitorId, standId: batch.standId, scannedAt });
+  // The staff of a stand does not count visits to it (RN-02): the passport shows the notice, as with a late one.
+  const reason = await findRejectionReason({
+    visitor,
+    standId: batch.standId,
+    isLate: isLateVisit(scannedAt, receivedAt, window),
+  });
 
-    return "late";
+  if (reason) {
+    await recordRejection({ id: visit.id, visitorId, standId: batch.standId, scannedAt, reason });
+
+    return reason;
   }
 
   const result = await recordVisit({
@@ -133,14 +144,30 @@ async function settleVisit(
   return result.status === "registered" ? "ok" : "duplicate";
 }
 
+async function findRejectionReason(check: {
+  visitor: { email: string };
+  standId: string;
+  isLate: boolean;
+}): Promise<"late" | "ownStand" | null> {
+  if (await isStaffOfStand(check.standId, check.visitor.email)) return "ownStand";
+
+  return check.isLate ? "late" : null;
+}
+
 async function hasVisitedStand(visitorId: string, standId: string): Promise<boolean> {
   return (await getPrisma().checkIn.count({ where: { visitorId, standId } })) > 0;
 }
 
 // The passport shows it (RF-24); two batches that carry the same visit record it once.
-async function recordRejection(rejection: { id: string; visitorId: string; standId: string; scannedAt: Date }) {
+async function recordRejection(rejection: {
+  id: string;
+  visitorId: string;
+  standId: string;
+  scannedAt: Date;
+  reason: "late" | "ownStand";
+}) {
   try {
-    await getPrisma().rejectedVisit.create({ data: { ...rejection, reason: "late" } });
+    await getPrisma().rejectedVisit.create({ data: rejection });
   } catch (cause) {
     if (!isUniqueViolation(cause)) throw cause;
   }

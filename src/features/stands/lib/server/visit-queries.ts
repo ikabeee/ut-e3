@@ -12,7 +12,7 @@ export interface KioskStand {
 }
 
 export type VisitRefusal = {
-  status: "closed" | "standWithoutGame" | "unknownPin" | "alreadyVisited" | "excluded";
+  status: "closed" | "standWithoutGame" | "unknownPin" | "alreadyVisited" | "excluded" | "ownStand";
 };
 
 export type VisitCheck = { status: "ready"; visitorId: string } | VisitRefusal;
@@ -49,15 +49,10 @@ export async function checkVisit(standId: string, pin: string, now: Date): Promi
 
   const visitor = await getPrisma().visitor.findUnique({
     where: { pinLookup: hashPinForLookup(pin) },
-    select: { id: true, excludedAt: true, checkIns: { where: { standId }, select: { id: true } } },
+    select: { id: true, email: true, excludedAt: true, _count: { select: { checkIns: { where: { standId } } } } },
   });
 
-  if (!visitor) return { status: "unknownPin" };
-
-  // An excluded passport records nothing (RF-46, UT-CI-19). An annulled visit still holds its stand (RF-23).
-  if (visitor.excludedAt) return { status: "excluded" };
-
-  return visitor.checkIns.length > 0 ? { status: "alreadyVisited" } : { status: "ready", visitorId: visitor.id };
+  return judgeVisitor(standId, visitor);
 }
 
 /**
@@ -76,14 +71,48 @@ export async function checkVisitor(
 
   const visitor = await getPrisma().visitor.findUnique({
     where: { id: visitorId },
-    select: { excludedAt: true, _count: { select: { checkIns: { where: { standId } } } } },
+    select: { id: true, email: true, excludedAt: true, _count: { select: { checkIns: { where: { standId } } } } },
   });
 
+  return judgeVisitor(standId, visitor);
+}
+
+interface CheckedVisitor {
+  id: string;
+  email: string;
+  excludedAt: Date | null;
+  /** The visits of the passport to the stand, annulled ones included. */
+  _count: { checkIns: number };
+}
+
+async function judgeVisitor(standId: string, visitor: CheckedVisitor | null): Promise<VisitCheck> {
   if (!visitor) return { status: "unknownPin" };
 
+  // An excluded passport records nothing (RF-46, UT-CI-19). An annulled visit still holds its stand (RF-23).
   if (visitor.excludedAt) return { status: "excluded" };
 
-  return visitor._count.checkIns > 0 ? { status: "alreadyVisited" } : { status: "ready", visitorId };
+  if (await isStaffOfStand(standId, visitor.email)) return { status: "ownStand" };
+
+  return visitor._count.checkIns > 0 ? { status: "alreadyVisited" } : { status: "ready", visitorId: visitor.id };
+}
+
+/**
+ * Whether the email of a passport belongs to the administrator or staff of the stand, active or invited (RN-02): such a
+ * passport takes part everywhere except in its own stand. Accounts store their email lowercased and visitors ignore the
+ * case, so the comparison does too.
+ */
+export async function isStaffOfStand(standId: string, email: string): Promise<boolean> {
+  const account = await getPrisma().account.findFirst({
+    where: {
+      standId,
+      email: email.toLowerCase(),
+      role: { in: ["stand_admin", "stand_staff"] },
+      status: { in: ["active", "invited"] },
+    },
+    select: { id: true },
+  });
+
+  return account !== null;
 }
 
 async function findStandRefusal(standId: string, now: Date, scannedAt = now): Promise<VisitRefusal | null> {

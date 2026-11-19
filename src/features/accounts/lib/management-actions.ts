@@ -106,8 +106,6 @@ function describeInviteFailure(result: Exclude<InviteResult, { status: "invited"
       return ERRORS.deskInvalid;
     case "emailTaken":
       return ERRORS.emailTaken;
-    case "hasPassport":
-      return ERRORS.hasPassport;
     case "deskTaken":
       return ERRORS.deskTaken;
     case "standFull":
