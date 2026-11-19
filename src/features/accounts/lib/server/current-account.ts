@@ -33,7 +33,8 @@ export interface KofAccount extends SessionAccount {
   kofDesk: KofDesk | null;
 }
 
-// Every KOF Server Action calls this; the sysadmin has no tournament commands, only the KOF accounts do.
+// Every KOF Server Action calls this. The sysadmin operates the tournament as a KOF administrator (S5): it gets that role
+// and no desk, and everything it does is recorded under its own account.
 export async function requireKofAccount(): Promise<KofAccount> {
   const account = await getKofAccount();
 
@@ -46,17 +47,21 @@ export async function requireKofAccount(): Promise<KofAccount> {
 
 // For Route Handlers, which answer 401 instead of redirecting.
 export async function getKofAccount(): Promise<KofAccount | null> {
-  return toKofAccount(await getSessionAccount());
+  const account = await getSessionAccount();
+
+  if (account?.role === SYSADMIN_ROLE) return { ...account, role: "kof_admin", kofDesk: null };
+
+  return toKofAccount(account);
 }
 
-/** Who may open /admin/kof: the KOF accounts operate it and the sysadmin only watches it (it has no desk). */
+/** Who may open /admin/kof: the KOF accounts, and the sysadmin, which keeps its own role to show its header and navigation. */
 export interface KofViewer extends SessionAccount {
   role: KofAccount["role"] | "sysadmin";
   kofDesk: KofDesk | null;
 }
 
-// The pages of the KOF section that only show data (S37): the admin panel links the sysadmin to /admin/kof, so it must
-// get in. Every Server Action keeps requireKofAccount, so the sysadmin still runs no tournament command.
+// The pages and reads of the KOF section: the admin panel links the sysadmin to /admin/kof, so it must get in. Its
+// commands go through requireKofAccount, which treats it as a KOF administrator.
 export async function requireKofViewer(): Promise<KofViewer> {
   const viewer = await getKofViewer();
 
@@ -86,9 +91,10 @@ async function toKofAccount(account: SessionAccount | null): Promise<KofAccount 
   return { ...account, role, kofDesk: toKofDesk(row?.kofDesk ?? null) };
 }
 
-const RAFFLE_ROLE: AccountRole = "raffle_admin";
+const RAFFLE_ROLES: readonly string[] = ["raffle_admin", SYSADMIN_ROLE];
 
-// Every raffle page and Server Action calls this; only the raffle administrators spin, decide and register prizes.
+// Every raffle page and Server Action calls this; the raffle administrators and the sysadmin (S5) spin, decide and
+// register prizes. Draws and audit rows carry the account of whoever acted.
 export async function requireRaffleAdmin(): Promise<SessionAccount> {
   const account = await getRaffleAdmin();
 
@@ -103,7 +109,7 @@ export async function requireRaffleAdmin(): Promise<SessionAccount> {
 export async function getRaffleAdmin(): Promise<SessionAccount | null> {
   const account = await getSessionAccount();
 
-  return account?.role === RAFFLE_ROLE ? account : null;
+  return account && RAFFLE_ROLES.includes(account.role) ? account : null;
 }
 
 export interface StandAccount extends SessionAccount {

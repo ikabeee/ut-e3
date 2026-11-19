@@ -1,3 +1,4 @@
+import type { EmailKind } from "@shared/lib/email-kinds";
 import type { OverloadMetric, OverloadSample } from "@features/admin/lib/overload-rule";
 
 export interface UndeliveredEmailRow {
@@ -65,3 +66,34 @@ export interface RecoveryStatus {
   database: { databaseBytes: number; walBytes: number; shmBytes: number; freeBytes: number | null };
   publicBracketEnabled: boolean;
 }
+
+export type EmailStatus = "sent" | "pending" | "failed";
+
+/** One email of the outbox for the sysadmin, with its full address; the body itself is read apart (and audited). */
+export interface EmailRow {
+  id: string;
+  to: string;
+  subject: string;
+  kind: EmailKind | null;
+  status: EmailStatus;
+  attempts: number;
+  nextAttemptAt: string;
+  sentAt: string | null;
+  lastError: string | null;
+  createdAt: string;
+  hasBody: boolean;
+  /** Unsent and still with a body: it can go back to the queue. */
+  canResend: boolean;
+  /** Abandoned, body erased and of a kind that can be made again. */
+  canRebuild: boolean;
+}
+
+export interface EmailPage {
+  rows: EmailRow[];
+  total: number;
+  page: number;
+  pageCount: number;
+}
+
+/** What the view of an email answers: its text, or the reason it cannot be shown. */
+export type EmailTextState = { status: "text"; text: string } | { status: "error"; message: string };

@@ -246,7 +246,7 @@ async function hasNav(page) {
 
   const hasSqlConsole = (await nav.getByRole("link", { name: "Consola SQL" }).count()) === 1;
 
-  return (await nav.getByRole("link").count()) === 7 && hasSqlConsole;
+  return (await nav.getByRole("link").count()) === 12 && hasSqlConsole;
 }
 
 // RF-43: a valid change is saved with its audit entry; a cutoff after the raffle is refused and nothing changes.

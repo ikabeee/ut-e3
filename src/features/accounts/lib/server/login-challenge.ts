@@ -156,11 +156,13 @@ export async function verifyLoginCode(token: string, code: string, now: Date): P
 }
 
 function enqueueCodeEmail(transaction: Prisma.TransactionClient, account: ChallengeAccount, code: string) {
-  return enqueueEmail(transaction, {
+  const email = {
     to: account.email,
     subject: ACCOUNTS_COPY.loginCodeEmail.subject,
     text: ACCOUNTS_COPY.loginCodeEmail.body(account.name, code),
-  });
+  };
+
+  return enqueueEmail(transaction, email, { kind: "login_code", referenceId: account.id });
 }
 
 function generateCode(): string {

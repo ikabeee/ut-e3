@@ -70,8 +70,8 @@ async function signInAs(role: string): Promise<string> {
 }
 
 describe("raffle Server Actions", () => {
-  it("send anyone who is not a raffle administrator to /login", async () => {
-    await signInAs("sysadmin");
+  it("send anyone who is not a raffle administrator or the sysadmin to /login", async () => {
+    await signInAs("kof_admin");
 
     await expect(spinRaffleAction(null, formOf({ requestId: crypto.randomUUID() }))).rejects.toMatchObject({
       digest: expect.stringContaining(";/login;"),

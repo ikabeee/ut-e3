@@ -18,3 +18,6 @@ export const CLAIM_PATH = "/passport/claim";
 export function getClaimPath(token: string): string {
   return `${CLAIM_PATH}/${token}`;
 }
+
+/** The CSV of the registrations for the sysadmin; it takes the same `?q=` and `?sort=` as the list. */
+export const VISITORS_EXPORT_PATH = "/api/admin/visitors/export";

@@ -45,7 +45,7 @@ export const TOURNAMENT_COPY = {
     loading: "Cargando el torneo...",
     signedInAs: (name: string, role: string) => `Sesión de ${name} · ${role}`,
     roles: {
-      sysadmin: "Sysadmin · Solo consulta",
+      sysadmin: "Sysadmin · Opera como administrador",
       kof_admin: "Administrador de KOF",
       kof_staff: (desk: number | null) => (desk === null ? "Staff de KOF" : `Staff de KOF · Mesa ${desk}`),
     },

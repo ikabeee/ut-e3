@@ -6,6 +6,7 @@ import { registerVisitorRecord } from "@features/visitors/lib/server/visitor-reg
 import { decryptPin } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
+import { liftSysadminGuard } from "@shared/__tests__/lib/server/sysadmin-guard";
 
 const TEST_KEY = Buffer.alloc(32, 7).toString("base64");
 
@@ -27,6 +28,7 @@ beforeEach(async () => {
   await getPrisma().visitor.deleteMany();
   await getPrisma().emailBlocklist.deleteMany();
   await getPrisma().emailOutbox.deleteMany();
+  await liftSysadminGuard(getPrisma());
   await getPrisma().account.deleteMany();
 });
 
@@ -77,6 +79,7 @@ describe("registerVisitorRecord", () => {
 
     expect(email).not.toBeNull();
     expect(email?.to).toBe("neo@matrix.org");
+    expect(email).toMatchObject({ kind: "visitor_passport", referenceId: result.visitorId });
     expect(email?.text).toContain(pin);
     expect(email?.text).toContain("Neo");
     expect(email?.text).toContain("/passport");

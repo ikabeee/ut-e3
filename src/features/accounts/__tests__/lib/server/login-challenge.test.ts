@@ -210,6 +210,8 @@ async function readLatestCode(): Promise<string> {
     orderBy: { createdAt: "desc" },
   });
 
+  expect(email).toMatchObject({ kind: "login_code", referenceId: account.id });
+
   const match = /: (\d{6})\b/.exec(email.text);
 
   if (!match) throw new Error("The email has no code");
