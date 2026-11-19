@@ -20,7 +20,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { chromium } from "playwright-core";
-import { setLoginDatabase, submitLoginCode } from "./lib/e2e-harness.mjs";
+import { setLoginDatabase, submitLoginCode, waitForStaffHome } from "./lib/e2e-harness.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -577,7 +577,7 @@ async function checkStaffIsNeverStored(desk) {
   await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle" });
   await page.evaluate(async () => (await navigator.serviceWorker.ready).scope);
   await signIn(page, HELP_DESK);
-  await page.waitForURL(/\/support\/recovery$/, { timeout: UI_TIMEOUT_MS });
+  await waitForStaffHome(page, "/support/recovery");
   await page.goto(`${BASE_URL}/support/recovery`, { waitUntil: "networkidle" });
 
   const cached = await listCachedPaths(page);

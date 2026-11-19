@@ -6,7 +6,7 @@
 // visitantes"), the help desk finds the passport by email, gamertag and name and recovers it, registers a walk-in
 // visitor and the sysadmin reactivates a disabled account. The hours are moved in the temporary database only,
 // because the demo seed leaves them where the schedule of the event has them.
-import { count, runE2e, signIn, storedDate, UI_TIMEOUT_MS } from "./lib/e2e-harness.mjs";
+import { count, runE2e, signIn, storedDate, UI_TIMEOUT_MS, waitForStaffHome } from "./lib/e2e-harness.mjs";
 
 const PORT = Number(process.env.E2E_PORT ?? 3467);
 
@@ -247,7 +247,7 @@ async function signInAs(session, user, home) {
   const { context, page } = await openPage(session);
 
   await signIn(page, { baseUrl: session.baseUrl, ...user });
-  await page.waitForURL((url) => url.pathname === home, { timeout: UI_TIMEOUT_MS });
+  await waitForStaffHome(page, home);
 
   return { context, page };
 }

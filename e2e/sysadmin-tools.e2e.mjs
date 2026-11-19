@@ -19,7 +19,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { chromium } from "playwright-core";
-import { setLoginDatabase, submitLoginCode } from "./lib/e2e-harness.mjs";
+import { setLoginDatabase, submitLoginCode, waitForStaffHome } from "./lib/e2e-harness.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -222,7 +222,7 @@ async function runSteps({ pages, database, screenshots }) {
   const page = pages.sysadmin;
 
   await signIn(page, SYSADMIN);
-  await page.waitForURL(/\/admin$/, { timeout: UI_TIMEOUT_MS });
+  await waitForStaffHome(page, "/admin");
   check("the sysadmin signs in to /admin with the sections of the panel", await hasNav(page));
   await page.screenshot({ path: path.join(screenshots, "sysadmin-tools-01-panel.png"), fullPage: true });
 
@@ -402,7 +402,7 @@ async function excludeVisitor({ pages, database }) {
   check("the visitor is excluded with its reason", excluded?.reason === "Integrante de un equipo", excluded?.reason);
 
   await signIn(pages.staff, STAFF);
-  await pages.staff.waitForURL(/\/stand\/kiosk$/, { timeout: UI_TIMEOUT_MS });
+  await waitForStaffHome(pages.staff, "/stand/kiosk");
   await pages.staff.getByLabel("PIN de 5 dígitos").fill(EXCLUDED_PIN);
   await pages.staff.getByRole("button", { name: "Continuar" }).click();
   await pages.staff.getByText("Este pasaporte no puede registrar visitas").waitFor({ timeout: UI_TIMEOUT_MS });
