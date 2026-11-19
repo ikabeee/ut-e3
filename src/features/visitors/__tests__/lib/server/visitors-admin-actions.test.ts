@@ -82,6 +82,7 @@ describe("resendPassportAction", () => {
     expect(result).toEqual({ status: "done", message: VISITORS_ADMIN_COPY.outcomes.passportResent });
     expect(emails).toHaveLength(1);
     expect(emails[0]).toMatchObject({ to: "resend@ut.mx", subject: "Tu pasaporte UT Game Showcase - Resend" });
+    expect(emails[0]).toMatchObject({ kind: "visitor_passport", referenceId: visitor.id });
     expect(emails[0].text).toContain("48271");
   });
 
@@ -125,6 +126,7 @@ describe("sendRecoveryLinkAction", () => {
 
     expect(result).toEqual({ status: "done", message: VISITORS_ADMIN_COPY.outcomes.recoverySent });
     expect(email).toMatchObject({ to: "recover@ut.mx", subject: "Recupera tu pasaporte" });
+    expect(email).toMatchObject({ kind: "recovery_link", referenceId: visitor.id });
     expect(email.text).toContain("/passport/claim/");
     expect(email.text).not.toContain("48271");
     await expect(getPrisma().recoveryToken.count({ where: { visitorId: visitor.id, usedAt: null } })).resolves.toBe(1);

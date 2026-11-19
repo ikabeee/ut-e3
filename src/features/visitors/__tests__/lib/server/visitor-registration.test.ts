@@ -77,6 +77,7 @@ describe("registerVisitorRecord", () => {
 
     expect(email).not.toBeNull();
     expect(email?.to).toBe("neo@matrix.org");
+    expect(email).toMatchObject({ kind: "visitor_passport", referenceId: result.visitorId });
     expect(email?.text).toContain(pin);
     expect(email?.text).toContain("Neo");
     expect(email?.text).toContain("/passport");

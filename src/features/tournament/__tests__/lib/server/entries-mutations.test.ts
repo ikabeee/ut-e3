@@ -148,7 +148,10 @@ describe("addEntry", () => {
     const result = await addEntry(actorId, "Jugador1", REGISTRATION_OPENS);
     const email = await getPrisma().emailOutbox.findFirstOrThrow();
 
+    const entry = await getPrisma().tournamentEntry.findFirstOrThrow();
+
     expect(result).toMatchObject({ emailId: email.id });
+    expect(email).toMatchObject({ kind: "kof_entry", referenceId: entry.id });
     expect(email.to).toBe("jugador1@example.com");
     expect(email.subject).toBe("Tu inscripción al torneo de KOF");
     expect(email.text).toBe(

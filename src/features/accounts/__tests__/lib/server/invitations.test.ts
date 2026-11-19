@@ -68,6 +68,8 @@ describe("inviteAccount", () => {
     const email = await getPrisma().emailOutbox.findFirstOrThrow();
     const token = readToken(email.text);
 
+    expect(email).toMatchObject({ kind: "staff_invitation", referenceId: account.id });
+
     expect(account).toMatchObject({
       role: "kof_admin",
       status: "invited",

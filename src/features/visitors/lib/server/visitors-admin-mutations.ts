@@ -3,13 +3,12 @@ import "server-only";
 import type { ValidRegistrationInput } from "@features/visitors/lib/registration-input";
 import { issueEmailLink } from "@features/visitors/lib/server/email-recovery";
 import {
-  buildRegistrationEmail,
+  enqueuePassportEmail,
   isPrismaUniqueViolation,
   mapUniqueViolation,
 } from "@features/visitors/lib/server/visitor-registration";
 import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
-import { enqueueEmail } from "@shared/lib/server/email-outbox";
 import { decryptPin } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 
@@ -41,9 +40,11 @@ export async function resendPassportEmail(actorId: string, visitorId: string): P
 
     if (pin === null) return { status: "pinUnreadable" };
 
-    const emailId = await enqueueEmail(transaction, {
-      to: visitor.email,
-      ...buildRegistrationEmail(pin, visitor.gamertag),
+    const emailId = await enqueuePassportEmail(transaction, {
+      visitorId: visitor.id,
+      email: visitor.email,
+      gamertag: visitor.gamertag,
+      pin,
     });
 
     await recordAudit(transaction, {
