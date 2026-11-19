@@ -44,6 +44,8 @@ npm run lint:duplication   # jscpd: código copiado entre archivos de src/ (.jsc
 npm run format             # aplica el formato con Prettier (npm run format:check sólo revisa)
 npm run typecheck          # next typegen + tsc --noEmit (y tsc -p tools/oxlint para el plugin)
 npm test                   # pruebas con Jest (npm run test:coverage para cobertura)
+npm run test:changed       # solo las pruebas de los archivos con cambios sin commit (jest --onlyChanged)
+npm run test:related -- <archivos> # solo las pruebas que importan esos archivos (jest --findRelatedTests)
 npm run build              # compila para producción (exige NEXT_PUBLIC_SITE_URL y una BD migrada y con seed en DATABASE_URL)
 npm run db:generate        # genera el cliente de Prisma en generated/prisma (también corre en postinstall)
 npm run db:migrate         # crea y aplica una migración en la BD de DATABASE_URL (prisma migrate dev)

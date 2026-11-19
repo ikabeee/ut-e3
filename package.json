@@ -17,6 +17,8 @@
     "typecheck": "next typegen && tsc --noEmit && tsc -p tools/oxlint",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:changed": "jest --onlyChanged",
+    "test:related": "jest --findRelatedTests",
     "test:e2e:games": "node e2e/games.e2e.mjs",
     "test:e2e": "node e2e/passport.e2e.mjs",
     "test:e2e:sponsors": "node e2e/sponsors.e2e.mjs",

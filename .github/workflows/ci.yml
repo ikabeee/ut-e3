@@ -1,7 +1,8 @@
 name: CI
 
 # Puerta de calidad: todo PR hacia develop o main debe pasar lint (ESLint con las reglas
-# de SonarQube y Oxlint con las reglas anti-slop y readable-code), código duplicado (jscpd), formato (Prettier), typecheck, pruebas, migraciones de la base y build.
+# de SonarQube y Oxlint con las reglas anti-slop y readable-code), código duplicado (jscpd), formato (Prettier), typecheck, pruebas (repartidas en 3 shards), migraciones de la base y build.
+# Los jobs corren en paralelo; `quality` los agrupa y es el único check obligatorio (rama protegida) y el que espera deploy.yml.
 on:
   pull_request:
     branches: [develop, main]
@@ -16,27 +17,85 @@ permissions:
   contents: read
 
 jobs:
-  quality:
+  lint:
     runs-on: ubuntu-latest
-
     env:
       DO_NOT_TRACK: 1
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
       - run: npm ci
       - run: npm run lint
       - run: npm run lint:oxlint
       - run: npm run lint:duplication
       - run: npm run format:check
+
+  typecheck:
+    runs-on: ubuntu-latest
+    env:
+      DO_NOT_TRACK: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - run: npm run typecheck
-      - run: npm test -- --coverage
+
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DO_NOT_TRACK: 1
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test -- --shard=${{ matrix.shard }}/3
+
+  # La cobertura se mide solo al integrar en develop o main y no bloquea el PR ni `quality`.
+  coverage:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      DO_NOT_TRACK: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:coverage
+
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DO_NOT_TRACK: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: next-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**', 'next.config.ts') }}
+          restore-keys: |
+            next-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
       # Las consultas con "use cache" leen la base durante el build: se migra y se carga una SQLite temporal.
       - run: |
           npm run db:deploy
@@ -48,3 +107,14 @@ jobs:
           # Obligatoria en producción (src/shared/lib/env.ts); basta un valor de ejemplo.
           NEXT_PUBLIC_SITE_URL: https://example.com
           DATABASE_URL: file:${{ runner.temp }}/ci.db
+
+  # Check obligatorio: conserva el nombre `quality` del job único anterior.
+  quality:
+    if: always()
+    needs: [lint, typecheck, test, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Falla si algún job anterior no terminó bien
+        run: |
+          echo '${{ toJSON(needs) }}'
+          test "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}" = "false"
