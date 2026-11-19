@@ -70,7 +70,7 @@ export const VISITORS_ADMIN_COPY = {
     notFound: "Ese visitante ya no existe. Recarga la página.",
     pinUnreadable: "No se pudo leer el PIN de este pasaporte. Revisa PIN_ENCRYPTION_KEY.",
     unchanged: "No cambiaste ningún dato.",
-    emailBlocked: "Ese correo está en la lista negra o es de una cuenta del staff.",
+    emailBlocked: "Ese correo está en la lista negra.",
     emailTaken: "Otro pasaporte ya usa ese correo.",
     gamertagTaken: "Otro pasaporte ya usa ese gamertag.",
   },

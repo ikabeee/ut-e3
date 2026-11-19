@@ -4,6 +4,11 @@
 import { clearJobs, getJobStatus } from "@shared/lib/server/background-jobs";
 import { EMAIL_WORKER_JOB, startEmailWorker } from "@shared/lib/server/email-worker";
 
+// A local .env may set SMTP_HOST: every test starts without it and sets it only when it needs it.
+beforeEach(() => {
+  delete process.env.SMTP_HOST;
+});
+
 afterEach(() => {
   clearJobs();
   delete process.env.SMTP_HOST;

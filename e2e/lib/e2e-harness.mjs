@@ -78,6 +78,30 @@ export async function signIn(page, { baseUrl, email, password }) {
   await submitLoginCode(page, email);
 }
 
+const MY_ROLE_PATH = "/my-role";
+
+/**
+ * Waits for the page a staff account lands on after the login code. The first verified login of an account goes to
+ * /my-role (T6, S4) before its home, so this accepts both: on /my-role it checks that the page shows the role (the
+ * title and at least one role card) and then opens `home` (a pathname) by hand.
+ * Returns true when the login went through /my-role.
+ */
+export async function waitForStaffHome(page, home) {
+  const isHome = (url) => url.pathname === home;
+
+  await page.waitForURL((url) => isHome(url) || url.pathname === MY_ROLE_PATH, { timeout: UI_TIMEOUT_MS });
+
+  if (new URL(page.url()).pathname !== MY_ROLE_PATH) return false;
+
+  await page.getByRole("heading", { level: 1, name: "Mi rol en el evento" }).waitFor({ timeout: UI_TIMEOUT_MS });
+  await page.getByRole("article").first().getByRole("heading", { level: 2 }).waitFor({ timeout: UI_TIMEOUT_MS });
+
+  await page.goto(`${new URL(page.url()).origin}${home}`, { waitUntil: "networkidle" });
+  await page.waitForURL(isHome, { timeout: UI_TIMEOUT_MS });
+
+  return true;
+}
+
 let loginDatabaseFile = "";
 
 /** Tells `submitLoginCode` which database holds the emails of the app under test. */

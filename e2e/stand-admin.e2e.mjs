@@ -19,7 +19,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { chromium } from "playwright-core";
-import { setLoginDatabase, submitLoginCode } from "./lib/e2e-harness.mjs";
+import { setLoginDatabase, submitLoginCode, waitForStaffHome } from "./lib/e2e-harness.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -237,7 +237,7 @@ async function runSteps({ pages, database, screenshots }) {
 
 async function signInSysadminAndCreateStands({ page, database, screenshots }) {
   await signIn(page, SYSADMIN);
-  await page.waitForURL(/\/admin$/, { timeout: UI_TIMEOUT_MS });
+  await waitForStaffHome(page, "/admin");
   check("the sysadmin signs in to /admin", true, page.url());
 
   await createStand({ page, number: "1", admin: ADMIN_ONE });
@@ -396,7 +396,10 @@ async function checkStaffSessionEndsWhenDisabled({ pages, database }) {
   await pages.staff.waitForURL(/\/login/, { timeout: UI_TIMEOUT_MS });
   check("the open session of a disabled account no longer works", /\/login/.test(pages.staff.url()), pages.staff.url());
 
-  await signIn(pages.staff, staff);
+  // A disabled account is refused at the password step, so there is no login code to submit.
+  await pages.staff.getByLabel("Correo").fill(staff.email);
+  await pages.staff.getByLabel("Contraseña", { exact: true }).fill(staff.password);
+  await pages.staff.getByRole("button", { name: "Entrar" }).click();
   await pages.staff.getByText("Correo o contraseña incorrectos").waitFor({ timeout: UI_TIMEOUT_MS });
   check("a disabled account cannot sign in", true);
 }
@@ -439,7 +442,7 @@ async function activateAndSignIn({ page, database, account }) {
   await page.waitForURL(/\/login/, { timeout: UI_TIMEOUT_MS });
 
   await signIn(page, account);
-  await page.waitForURL(/\/stand\/kiosk$/, { timeout: UI_TIMEOUT_MS });
+  await waitForStaffHome(page, "/stand/kiosk");
   check(`${account.email} activates the account and signs in`, true, page.url());
 }
 

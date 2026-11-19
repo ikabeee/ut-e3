@@ -105,6 +105,35 @@ describe("requestVisit", () => {
   });
 });
 
+describe("requestVisit and answerPendingVisit for the staff of the stand (RN-02)", () => {
+  it("refuses the PIN of a passport whose email is staff of the stand, and leaves nothing waiting", async () => {
+    await createStandAccount("jugador1@example.com", "stand_staff", standId);
+
+    expect(await start()).toEqual({ status: "ownStand" });
+    expect(await getPrisma().pendingVisit.count()).toBe(0);
+  });
+
+  it("refuses the answer when the email became staff of the stand while the visit waited", async () => {
+    await start();
+    await createStandAccount("jugador1@example.com", "stand_admin", standId);
+
+    expect(await answerPendingVisit(visitorId, RATINGS, NOW)).toEqual({ status: "ownStand" });
+    expect(await getPrisma().checkIn.count()).toBe(0);
+    expect(await getPrisma().vote.count()).toBe(0);
+  });
+
+  it("waits for the passport at any other stand", async () => {
+    const other = await createStand(2);
+    const otherStaff = await createStandAccount("other@ut.mx", "stand_staff", other.id);
+
+    await createStandAccount("jugador1@example.com", "stand_staff", standId);
+
+    expect(await requestVisit({ standId: other.id, scannedById: otherStaff.id, pin: PIN }, NOW)).toMatchObject({
+      status: "requested",
+    });
+  });
+});
+
 describe("answerPendingVisit", () => {
   it("records the visit, the survey and who scanned it, and marks the visit as answered", async () => {
     const started = await start();

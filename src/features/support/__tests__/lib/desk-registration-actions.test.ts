@@ -123,7 +123,7 @@ describe("registerVisitorAtDeskAction", () => {
     await expect(getPrisma().visitor.count()).resolves.toBe(0);
   });
 
-  it("refuses a used email, a blocked one and the email of a staff account with the same answer", async () => {
+  it("refuses a used email and a blocked one with the same answer", async () => {
     await createSession(accountIds.help_desk);
     await getPrisma().emailBlocklist.create({ data: { email: "bloqueado@example.com" } });
     await registerVisitorAtDeskAction(null, createForm());
@@ -135,12 +135,19 @@ describe("registerVisitorAtDeskAction", () => {
       createForm({ gamertag: "Bloq_Tag", email: "bloqueado@example.com" }),
     );
 
+    expect([used, blocked]).toEqual(Array(2).fill({ status: "error", message: ERRORS.rejected }));
+    await expect(getPrisma().visitor.count()).resolves.toBe(1);
+  });
+
+  it("registers the email of a staff account as a visitor too (RN-02, 1.5.1)", async () => {
+    await createSession(accountIds.help_desk);
+
     const staff = await registerVisitorAtDeskAction(
       null,
       createForm({ gamertag: "Staff_Tag", email: `help_desk-reg-${accountCount}@ut.mx` }),
     );
 
-    expect([used, blocked, staff]).toEqual(Array(3).fill({ status: "error", message: ERRORS.rejected }));
+    expect(staff).toMatchObject({ status: "registered" });
     await expect(getPrisma().visitor.count()).resolves.toBe(1);
   });
 

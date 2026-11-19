@@ -190,6 +190,72 @@ describe("checkVisit", () => {
   });
 });
 
+describe("a passport of the staff of the stand (own-stand guard)", () => {
+  const VISITOR_EMAIL = "jugador1@example.com";
+
+  it.each([
+    ["stand_staff", "active"],
+    ["stand_staff", "invited"],
+    ["stand_admin", "active"],
+    ["stand_admin", "invited"],
+  ] as const)("records no visit, vote or ticket at the stand of its %s account (%s)", async (role, status) => {
+    const { visit } = await setUpStand(1);
+    const own = await createStandAccount(VISITOR_EMAIL, role, visit.standId);
+
+    await getPrisma().account.update({ where: { id: own.id }, data: { status } });
+
+    expect(await registerVisit(visit, ONE_MINUTE_BEFORE_CUTOFF)).toEqual({ status: "ownStand" });
+    expect(await checkVisit(visit.standId, PIN, ONE_MINUTE_BEFORE_CUTOFF)).toEqual({ status: "ownStand" });
+    expect(await getPrisma().checkIn.count()).toBe(0);
+    expect(await getPrisma().vote.count()).toBe(0);
+    expect(await getPrisma().raffleTicket.count()).toBe(0);
+  });
+
+  it("matches the email without caring about its case", async () => {
+    const { visit } = await setUpStand(1);
+
+    await getPrisma().visitor.update({ where: { id: visitorId }, data: { email: "Jugador1@EXAMPLE.com" } });
+    await createStandAccount(VISITOR_EMAIL, "stand_staff", visit.standId);
+
+    expect(await registerVisit(visit, ONE_MINUTE_BEFORE_CUTOFF)).toEqual({ status: "ownStand" });
+    expect(await getPrisma().checkIn.count()).toBe(0);
+
+    await getPrisma().visitor.update({ where: { id: visitorId }, data: { email: VISITOR_EMAIL } });
+  });
+
+  it("records the visit at any other stand, where the same passport takes part as usual", async () => {
+    const { visit: own } = await setUpStand(1);
+    const { visit: other } = await setUpStand(2);
+
+    await createStandAccount(VISITOR_EMAIL, "stand_staff", own.standId);
+
+    expect(await registerVisit(other, ONE_MINUTE_BEFORE_CUTOFF)).toEqual({ status: "registered", ticketsGranted: 0 });
+    expect(await getPrisma().checkIn.findMany({ select: { standId: true, visitorId: true } })).toEqual([
+      { standId: other.standId, visitorId },
+    ]);
+    expect(await getPrisma().vote.count()).toBe(1);
+  });
+
+  it("does not hold back the visit when the account of that email is disabled", async () => {
+    const { visit } = await setUpStand(1);
+    const own = await createStandAccount(VISITOR_EMAIL, "stand_staff", visit.standId);
+
+    await getPrisma().account.update({ where: { id: own.id }, data: { status: "disabled" } });
+
+    expect(await registerVisit(visit, ONE_MINUTE_BEFORE_CUTOFF)).toEqual({ status: "registered", ticketsGranted: 0 });
+  });
+
+  it("does not hold back the visit of an email that is staff of another stand only, nor a non-stand account", async () => {
+    const { visit } = await setUpStand(1);
+
+    await getPrisma().account.create({
+      data: { email: VISITOR_EMAIL, name: "Ayuda", role: "help_desk", status: "active", password: "hash" },
+    });
+
+    expect(await registerVisit(visit, ONE_MINUTE_BEFORE_CUTOFF)).toEqual({ status: "registered", ticketsGranted: 0 });
+  });
+});
+
 describe("getKioskStand", () => {
   it("names the stand by its code and the game it shows", async () => {
     const stand = await createStand(3, "Pixel Quest");

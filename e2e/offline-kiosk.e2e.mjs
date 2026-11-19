@@ -20,7 +20,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { chromium } from "playwright-core";
-import { setLoginDatabase, submitLoginCode } from "./lib/e2e-harness.mjs";
+import { setLoginDatabase, submitLoginCode, waitForStaffHome } from "./lib/e2e-harness.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -258,7 +258,7 @@ async function loginAsStaff(page) {
 
   await page.getByRole("button", { name: "Entrar" }).click();
   await submitLoginCode(page, STAFF_EMAIL);
-  await page.waitForURL(/\/stand\/kiosk$/, { timeout: UI_TIMEOUT_MS });
+  await waitForStaffHome(page, "/stand/kiosk");
   await page.getByRole("heading", { name: "Escribe tu PIN" }).waitFor({ timeout: UI_TIMEOUT_MS });
 
   const response = await filterDownload;

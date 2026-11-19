@@ -116,7 +116,7 @@ describe("registerVisitorRecord", () => {
     expect(result).toEqual({ status: "blocked" });
   });
 
-  it("blocks registration when email belongs to an account (case-insensitive)", async () => {
+  it("registers a visitor whose email belongs to a staff account, whatever its case (RN-02)", async () => {
     await getPrisma().account.create({
       data: {
         id: "sysadmin-1",
@@ -137,7 +137,9 @@ describe("registerVisitorRecord", () => {
       NOW,
     );
 
-    expect(result).toEqual({ status: "blocked" });
+    expect(result).toMatchObject({ status: "created" });
+    expect(await getPrisma().visitor.count({ where: { email: "admin@ut.mx" } })).toBe(1);
+    expect(await getPrisma().account.count({ where: { email: "admin@ut.mx" } })).toBe(1);
   });
 
   it("blocks registration when email is already registered by another visitor (case-insensitive)", async () => {

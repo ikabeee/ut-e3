@@ -63,6 +63,7 @@ describe("readQueuedVisitBatch", () => {
 describe("isQueuedVisitsResponse", () => {
   it("accepts the known statuses only", () => {
     expect(isQueuedVisitsResponse({ results: [{ id: ID, status: "late" }] })).toBe(true);
+    expect(isQueuedVisitsResponse({ results: [{ id: ID, status: "ownStand" }] })).toBe(true);
     expect(isQueuedVisitsResponse({ results: [{ id: ID, status: "maybe" }] })).toBe(false);
     expect(isQueuedVisitsResponse({})).toBe(false);
   });

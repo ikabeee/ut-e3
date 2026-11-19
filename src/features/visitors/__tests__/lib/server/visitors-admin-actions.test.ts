@@ -189,6 +189,25 @@ describe("updateVisitorAction", () => {
     expect(JSON.stringify(entry)).not.toContain("correo.mx");
   });
 
+  it("saves the email of a staff account, since the same email can be staff and visitor (RN-02)", async () => {
+    await signInAs("sysadmin");
+
+    const visitor = await createVisitor({ gamertag: "Edit", fullName: "Nombre Edit", email: "edit@example.com" });
+
+    await getPrisma().account.upsert({
+      where: { email: "staff@example.com" },
+      update: {},
+      create: { email: "staff@example.com", name: "Staff", role: "help_desk", status: "active", password: "x" },
+    });
+
+    await expect(
+      updateVisitorAction(null, editForm(visitor.id, { ...FIELDS, email: "Staff@Example.com" })),
+    ).resolves.toEqual({ status: "done", message: VISITORS_ADMIN_COPY.outcomes.updated });
+    await expect(getPrisma().visitor.findUniqueOrThrow({ where: { id: visitor.id } })).resolves.toMatchObject({
+      email: "staff@example.com",
+    });
+  });
+
   it("expires the unused recovery links sent to the old email when the email changes", async () => {
     await signInAs("sysadmin");
 
@@ -250,7 +269,6 @@ describe("updateVisitorAction", () => {
 
   it.each([
     ["on the blocklist", ERRORS.emailBlocked],
-    ["of a staff account", ERRORS.emailBlocked],
     ["of another passport", ERRORS.emailTaken],
   ])("rejects an email %s and leaves the visitor as it was", async (kind, message) => {
     await signInAs("sysadmin");
@@ -259,15 +277,8 @@ describe("updateVisitorAction", () => {
 
     await createVisitor({ gamertag: "Neighbour", email: "vecino@example.com" });
     await getPrisma().emailBlocklist.create({ data: { email: "bloqueado@example.com" } });
-    await getPrisma().account.upsert({
-      where: { email: "staff@example.com" },
-      update: {},
-      create: { email: "staff@example.com", name: "Staff", role: "help_desk", status: "active", password: "x" },
-    });
 
-    const email =
-      { "on the blocklist": "BLOQUEADO@example.com", "of a staff account": "staff@example.com" }[kind] ??
-      "Vecino@Example.com";
+    const email = { "on the blocklist": "BLOQUEADO@example.com" }[kind] ?? "Vecino@Example.com";
 
     await expect(updateVisitorAction(null, editForm(visitor.id, { ...FIELDS, email }))).resolves.toEqual({
       status: "error",

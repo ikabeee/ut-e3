@@ -83,7 +83,7 @@ describe("createStand (RF-39)", () => {
     expect(await getPrisma().stand.findUnique({ where: { zone_number: { zone: "A", number: 2 } } })).toBeNull();
   });
 
-  it("refuses the email of a visitor with a passport", async () => {
+  it("accepts the email of a visitor with a passport (RN-02)", async () => {
     await getPrisma().visitor.create({
       data: {
         fullName: "Visitante",
@@ -94,8 +94,12 @@ describe("createStand (RF-39)", () => {
       },
     });
 
-    expect(await createStand(request({ zone: "T", number: 3, email: "visitor" }))).toEqual({ status: "hasPassport" });
-    expect(await getPrisma().stand.findUnique({ where: { zone_number: { zone: "T", number: 3 } } })).toBeNull();
+    expect((await createStand(request({ zone: "T", number: 3, email: "visitor" }))).status).toBe("created");
+    expect(await getPrisma().account.findUnique({ where: { email: mail("visitor") } })).toMatchObject({
+      role: "stand_admin",
+      status: "invited",
+    });
+    expect(await getPrisma().visitor.count({ where: { email: mail("visitor") } })).toBe(1);
   });
 
   it("refuses the stand that would be number 19 (RN-01)", async () => {

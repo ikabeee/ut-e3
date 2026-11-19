@@ -468,8 +468,9 @@ mesa@ejemplo.mx,Eva Ruiz,kof_staff,,,2
 ```
 
 **Qué hace.** Primero valida toda la lista y revisa contra la base lo que esta rechazaría (un stand que no es del
-evento, un correo con pasaporte de visitante, un stand que ya tiene administrador o sus 3 staff, una mesa ocupada, más de
-18 stands). Si algo falla, escribe los errores con su línea y **no escribe nada**. Si todo está bien, en una sola
+evento, un stand que ya tiene administrador o sus 3 staff, una mesa ocupada, más de 18 stands). Un correo que ya tiene
+pasaporte de visitante sí se invita: el mismo correo puede ser staff y visitante, y el kiosco de su propio stand rechaza
+su PIN. Si algo falla, escribe los errores con su línea y **no escribe nada**. Si todo está bien, en una sola
 transacción crea los stands de `INITIAL_STANDS` que no existen (los que ya existen no se tocan) y una cuenta `invited`
 por cada correo sin cuenta, con su invitación de 72 horas y su correo en `email_outbox` (tipo `staff_invitation`). Un
 correo que ya tiene cuenta no se toca y se reporta por su línea. Lo hace "el sistema": las cuentas no tienen
@@ -538,6 +539,10 @@ El servidor de producción corre en Coolify y no compila (RNF-15). `.github/work
    `ghcr.io/ikabeee/ut-e3:<commit>`.
 3. Pide a Coolify que despliegue la aplicación, espera a que termine y revisa `GET /api/health` del sitio. Si algo
    falla, el job queda en rojo.
+4. Si el despliegue terminó bien, el job `release` crea la etiqueta `vX.Y.Z` (la versión de `package.json`) y su Release
+   de GitHub con las notas de la sección `## [X.Y.Z]` del `CHANGELOG.md` (`tools/release/changelog-section.mjs`). Es el
+   único job con `permissions: contents: write`; los demás solo leen. Si la etiqueta ya existe (un redespliegue o un
+   hotfix sin subir la versión), no hace nada; si falta la sección del CHANGELOG, falla con un error que lo dice.
 
 La aplicación de Coolify es del tipo "Docker Image" con la imagen `ghcr.io/ikabeee/ut-e3` y la etiqueta `main`, el
 volumen persistente en `/data` y las variables de ejecución de "Variables" (`DATABASE_URL=file:/data/app.db`,
