@@ -1,4 +1,4 @@
-import type { AccountRole } from "@features/accounts/lib/types";
+import { ACCOUNT_ROLES, type AccountRole } from "@features/accounts/lib/types";
 
 /** An invitation works for 72 hours after it is sent. */
 export const INVITATION_TTL_MS = 72 * 60 * 60 * 1000;
@@ -28,22 +28,28 @@ export interface ManageTarget {
 }
 
 /**
- * Whether the actor may resend or disable that account: the roles it manages, and the stand administrator only the staff
- * of its own stand (RF-32). The sysadmin also manages the stand administrators, whom it creates with the stand (RF-39).
+ * Whether the actor may act on that account: the sysadmin on every role, the stand administrator only on the staff of
+ * its own stand (RF-32) and the KOF administrator only on the KOF staff.
  */
 export function canManageAccount({ actor, target }: { actor: ManageActor; target: ManageTarget }): boolean {
-  if (actor.role === "sysadmin" && target.role === "stand_admin") return true;
+  if (actor.role === "sysadmin") return canManageRole(actor.role, target.role);
 
   if (!canManageRole(actor.role, target.role)) return false;
 
   return actor.role !== "stand_admin" || (Boolean(actor.standId) && actor.standId === target.standId);
 }
 
+/** Whether the actor may invite that role: the sysadmin every role, the others the roles of `getManagedRoles`. */
 export function canManageRole(actorRole: string, targetRole: string): boolean {
+  if (actorRole === "sysadmin") return ACCOUNT_ROLES.some((role) => role === targetRole);
+
   return getManagedRoles(actorRole).some((role) => role === targetRole);
 }
 
-/** The roles an account can invite, disable and re-invite: the sysadmin the administrators, the KOF and stand administrators their staff. */
+/**
+ * The roles the panel of the home of the sysadmin lists and invites (the administrators), and the staff each manager
+ * invites. The sysadmin can act on every role, but only /admin/accounts offers them all.
+ */
 export function getManagedRoles(actorRole: string): readonly AccountRole[] {
   switch (actorRole) {
     case "sysadmin":

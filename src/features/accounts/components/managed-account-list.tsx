@@ -99,7 +99,7 @@ interface RowButtonProps {
 }
 
 // A button that sends the id of one account: what the server answered shows under it, or in a toast when it failed.
-function ActionButton({ accountId, action, label, hint }: Readonly<RowButtonProps>) {
+export function ActionButton({ accountId, action, label, hint }: Readonly<RowButtonProps>) {
   const [state, formAction, isPending] = useActionState(action, null);
 
   useErrorToast(state?.status === "error" ? state.message : null, state);
@@ -121,7 +121,7 @@ function ActionButton({ accountId, action, label, hint }: Readonly<RowButtonProp
 }
 
 // Disabling closes the sessions of the person and cannot be undone from here, so the first press only asks.
-function DisableButton({
+export function DisableButton({
   accountId,
   name,
   action,

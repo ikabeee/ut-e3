@@ -110,8 +110,6 @@ describe("inviteAccount", () => {
   });
 
   it.each([
-    { label: "the sysadmin inviting a KOF staff member", actor: "sysadmin", role: "kof_staff", desk: 1 },
-    { label: "the sysadmin inviting another sysadmin", actor: "sysadmin", role: "sysadmin", desk: null },
     { label: "the KOF administrator inviting an administrator", actor: "kofAdmin", role: "kof_admin", desk: null },
     { label: "the help desk inviting anyone", actor: "helpDesk", role: "kof_staff", desk: 1 },
   ] as const)("refuses $label and creates nothing (S7)", async ({ actor, role, desk }) => {
@@ -208,7 +206,7 @@ describe("resendInvitation", () => {
     const staffId = await inviteAndGetId(actors.kofAdmin, invite(mail("luis"), "kof_staff", 1));
 
     expect(await resendInvitation(actors.kofAdmin, adminId, NOW)).toEqual({ status: "forbidden" });
-    expect(await resendInvitation(actors.sysadmin, staffId, NOW)).toEqual({ status: "forbidden" });
+    expect(await resendInvitation(actors.helpDesk, staffId, NOW)).toEqual({ status: "forbidden" });
     expect(await resendInvitation(actors.sysadmin, "missing", NOW)).toEqual({ status: "notFound" });
   });
 });

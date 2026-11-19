@@ -106,8 +106,15 @@ describe("a stand administrator inviting staff (RF-32)", () => {
     expect(result).toEqual({ status: "forbidden" });
   });
 
-  it("does not let the sysadmin invite stand staff", async () => {
-    expect(await inviteAccount(actors.sysadmin, invite("ana"), NOW)).toEqual({ status: "forbidden" });
+  it("needs the stand when the sysadmin invites stand staff, and uses the one it names", async () => {
+    expect(await inviteAccount(actors.sysadmin, invite("ana"), NOW)).toEqual({ status: "invalidStand" });
+
+    const input = { ...invite("ana"), standId: actors.otherAdmin.standId };
+
+    expect((await inviteAccount(actors.sysadmin, input, NOW)).status).toBe("invited");
+    expect((await getPrisma().account.findUniqueOrThrow({ where: { email: mail("ana") } })).standId).toBe(
+      actors.otherAdmin.standId,
+    );
   });
 });
 
@@ -133,10 +140,10 @@ describe("managing the staff of a stand", () => {
     expect((await getPrisma().account.findUniqueOrThrow({ where: { id: staffId } })).status).toBe("invited");
   });
 
-  it("lets the sysadmin disable a stand administrator but not the staff", async () => {
+  it("lets the sysadmin disable a stand administrator and the staff", async () => {
     const staffId = await inviteAndGetId(actors.standAdmin, "ana");
 
-    expect(await disableAccount(actors.sysadmin, staffId)).toEqual({ status: "forbidden" });
+    expect(await disableAccount(actors.sysadmin, staffId)).toEqual({ status: "disabled" });
 
     const adminId = await createActiveAccount({
       email: `${mail("temp-admin")}`,

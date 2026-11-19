@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import { createTestClient, createTestDatabase } from "@shared/__tests__/lib/server/test-database";
+import { liftSysadminGuard } from "@shared/__tests__/lib/server/sysadmin-guard";
 
 const STORED_HASH = "scrypt$131072$8$1$c2FsdA$aGFzaA";
 
@@ -16,6 +17,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await prisma.session.deleteMany();
+  await liftSysadminGuard(prisma);
   await prisma.account.deleteMany();
 });
 
