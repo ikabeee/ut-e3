@@ -7,6 +7,7 @@ import { createSession, deleteSession, getSessionAccount } from "@shared/lib/ser
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
+import { liftSysadminGuard } from "@shared/__tests__/lib/server/sysadmin-guard";
 
 let jar = createCookieJar();
 
@@ -25,6 +26,7 @@ beforeEach(async () => {
   jar = createCookieJar();
   stubCookies(jar);
   await getPrisma().session.deleteMany();
+  await liftSysadminGuard(getPrisma());
   await getPrisma().account.deleteMany();
 });
 

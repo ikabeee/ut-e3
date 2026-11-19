@@ -40,7 +40,25 @@ export async function requestPasswordReset(email: string, now: Date): Promise<st
 
   if (!account) return null;
 
-  return getPrisma().$transaction((transaction) => issueResetLink(transaction, account, now));
+  return queueResetLink(account, { actorId: account.id, action: "account.password_reset_requested" }, now);
+}
+
+export interface ResetLinkAudit {
+  /** Who asked for the link: the account itself, or the sysadmin that sends it on its behalf. */
+  actorId: string;
+  action: string;
+}
+
+/**
+ * Replaces the unused link of the account with a new one and queues the email, in one transaction, and returns the id
+ * of the queued email. It checks no status and counts no attempt: the caller decides who may get a link and how often.
+ */
+export async function queueResetLink(
+  account: { id: string; email: string; name: string },
+  audit: ResetLinkAudit,
+  now: Date,
+): Promise<string> {
+  return getPrisma().$transaction((transaction) => issueResetLink({ transaction, account, audit, now }));
 }
 
 /**
@@ -97,14 +115,20 @@ export async function rebuildPasswordResetEmail(
 ): Promise<string | null> {
   const account = await findAccountMailTarget(transaction, accountId);
 
-  return account?.status === ACTIVE ? issueResetLink(transaction, account, now) : null;
+  if (account?.status !== ACTIVE) return null;
+
+  const audit = { actorId: account.id, action: "account.password_reset_requested" };
+
+  return issueResetLink({ transaction, account, audit, now });
 }
 
-async function issueResetLink(
-  transaction: Prisma.TransactionClient,
-  account: { id: string; email: string; name: string },
-  now: Date,
-): Promise<string> {
+async function issueResetLink(request: {
+  transaction: Prisma.TransactionClient;
+  account: { id: string; email: string; name: string };
+  audit: ResetLinkAudit;
+  now: Date;
+}): Promise<string> {
+  const { transaction, account, audit, now } = request;
   const token = randomBytes(TOKEN_BYTES).toString("base64url");
 
   await transaction.passwordResetToken.deleteMany({ where: { accountId: account.id, usedAt: null } });
@@ -115,7 +139,7 @@ async function issueResetLink(
       expiresAt: new Date(now.getTime() + RESET_LINK_LIFETIME_MS),
     },
   });
-  await recordAudit(transaction, auditOf(account.id, "account.password_reset_requested"));
+  await recordAudit(transaction, { ...auditOf(account.id, audit.action), actorId: audit.actorId });
 
   const email = {
     to: account.email,

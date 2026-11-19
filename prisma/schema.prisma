@@ -53,6 +53,9 @@ model Account {
   standId           String?             @map("stand_id")
   stand             Stand?              @relation(fields: [standId], references: [id], onDelete: Restrict)
   kofDesk           Int?                @map("kof_desk")
+  /// Set by whoever creates the account. Null only for rows inserted by hand: the migration adds the column without a
+  /// default (SQLite cannot add a non-constant one) and fills in the accounts that already existed.
+  createdAt         DateTime?           @map("created_at")
   createdById       String?             @map("created_by_id")
   createdBy         Account?            @relation("CreatedAccounts", fields: [createdById], references: [id], onDelete: Restrict)
   created           Account[]           @relation("CreatedAccounts")

@@ -3,6 +3,7 @@ import { buttonVariants } from "@heroui/react";
 import { KOF_HOME_PATH, RAFFLE_HOME_PATH, SYSADMIN_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import {
+  ADMIN_ACCOUNTS_PATH,
   ADMIN_CATALOG_PATH,
   ADMIN_EMAILS_PATH,
   ADMIN_MODERATION_PATH,
@@ -21,6 +22,7 @@ const LINKS = [
   { href: ADMIN_VISITORS_PATH, label: COPY.visitors },
   { href: ADMIN_CATALOG_PATH, label: COPY.catalog },
   { href: ADMIN_SERVER_PATH, label: COPY.server },
+  { href: ADMIN_ACCOUNTS_PATH, label: COPY.accounts },
   { href: ADMIN_EMAILS_PATH, label: COPY.emails },
   { href: ADMIN_SQL_PATH, label: COPY.sql },
   { href: KOF_HOME_PATH, label: COPY.kof },

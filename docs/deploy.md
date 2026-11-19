@@ -386,6 +386,23 @@ El sysadmin puede consultar y modificar la base real desde el panel. Antes de us
 - Una escritura exitosa refresca las cachés de la portada (eventos, juegos, cronograma, patrocinadores y PIN de visitantes).
   No toca el bracket de KOF en memoria ni lo que ya esté guardado en el navegador.
 
+## Cuentas del staff (`/admin/accounts`)
+
+Solo el sysadmin. Lista las cuentas de todos los roles con filtros (rol, estado, stand) y búsqueda por nombre o correo.
+Cada acción queda en la bitácora de auditoría (`account.*`) y ninguna guarda el correo ni el enlace en el detalle.
+
+- **Desactivar** cierra las sesiones de la cuenta. Un sysadmin no puede desactivarse a sí mismo ni desactivar al último
+  sysadmin activo (un trigger de la base lo garantiza aunque dos lo intenten a la vez; el error es `last_sysadmin`): si perdiste el acceso de todos, el remedio es `SYSADMIN_EMAIL` en el seed o la consola SQL.
+- **Reactivar** devuelve la cuenta a `invited` con una invitación nueva de 72 horas (se borra su contraseña) y respeta
+  los límites: un administrador activo por stand, 3 staff por stand y un staff por mesa del KOF.
+- **Enviar restablecimiento de contraseña** manda el enlace de 1 hora de "Olvidé mi contraseña" a una cuenta activa. No se
+  salta el límite: cuenta 3 envíos por hora y por cuenta en un contador propio (`admin-password-reset:<id>`), que no gasta
+  ni depende del límite de quien lo pide solo.
+- **Cerrar sesiones** borra todas las sesiones de la cuenta. **Limpiar 2FA pendiente** borra sus códigos de acceso
+  pendientes; la persona vuelve a empezar desde la contraseña.
+- **Invitar** acepta cualquier rol. Las cuentas de stand llevan el stand; el staff de KOF, su mesa.
+- El último acceso sale de la bitácora (`account.login_verified`); la fecha de alta es `accounts.created_at`.
+
 ## Despliegue continuo (GitHub Actions y Coolify)
 
 El servidor de producción corre en Coolify y no compila (RNF-15). `.github/workflows/deploy.yml` hace el trabajo:

@@ -9,6 +9,7 @@ import {
   inviteAccount,
   reactivateAccount,
   resendInvitation,
+  type DisableResult,
   type InviteResult,
   type ManageFailure,
   type ReactivateResult,
@@ -60,7 +61,7 @@ export async function disableAccountAction(
 
   return result.status === "disabled"
     ? finishManagement(OUTCOMES.disabled)
-    : failManagement(describeManageFailure(result));
+    : failManagement(describeDisableFailure(result));
 }
 
 export async function reactivateAccountAction(
@@ -73,6 +74,17 @@ export async function reactivateAccountAction(
   return result.status === "reactivated"
     ? finishManagement(OUTCOMES.reactivated, result.emailId)
     : failManagement(describeReactivateFailure(result));
+}
+
+function describeDisableFailure(result: Exclude<DisableResult, { status: "disabled" }>): string {
+  switch (result.status) {
+    case "selfProtected":
+      return ERRORS.selfProtected;
+    case "lastSysadmin":
+      return ERRORS.lastSysadmin;
+    default:
+      return describeManageFailure(result);
+  }
 }
 
 function describeReactivateFailure(result: Exclude<ReactivateResult, { status: "reactivated" }>): string {
@@ -100,6 +112,10 @@ function describeInviteFailure(result: Exclude<InviteResult, { status: "invited"
       return ERRORS.deskTaken;
     case "standFull":
       return ERRORS.standFull;
+    case "invalidStand":
+      return ERRORS.standInvalid;
+    case "adminTaken":
+      return ERRORS.adminTaken;
     case "forbidden":
       return ERRORS.forbidden;
   }

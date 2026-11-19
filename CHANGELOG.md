@@ -11,6 +11,18 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 - El sysadmin opera el torneo de KOF como administrador de KOF (inscribir, check-in, combates, congelar, descalificar,
   revertir, generar y reiniciar el bracket, cerrar la vista pública) y la rifa como animador (girar, decidir, premio y
   cerrar). Todo queda en la bitácora con su cuenta. La navegación del panel enlaza la rifa (`/admin/raffle`).
+- `/admin/accounts`: lista de todas las cuentas del staff, de cualquier rol, para el sysadmin. Muestra rol, stand, estado,
+  fecha de alta y último acceso, con búsqueda por nombre o correo y filtros por rol, estado y stand. Permite desactivar y
+  reactivar, enviar el restablecimiento de contraseña por correo, cerrar todas las sesiones, limpiar el 2FA pendiente,
+  reenviar la invitación e invitar a cualquier rol (también otro sysadmin, y staff de stand o de KOF con su stand o mesa).
+  Cada acción queda en la bitácora de auditoría.
+
+### Cambiado
+
+- El sysadmin ahora puede invitar, reenviar, desactivar y reactivar cuentas de cualquier rol; las reglas del administrador
+  de KOF y del administrador de stand no cambian. Un sysadmin no puede desactivarse a sí mismo ni desactivar al último
+  sysadmin activo.
+- `accounts` guarda la fecha de alta (`created_at`, migración `20261120120000_accounts_admin`).
 - `/admin/visitors`: lista de todos los registros solo para el sysadmin, con búsqueda por gamertag, nombre o correo, orden por fecha, páginas de 50 y conteo de registros por día. Desde cada pasaporte se reenvía el correo con el PIN, se envía un enlace de recuperación (sin el límite de 3 por hora), se corrigen nombre, gamertag y correo, y se quita la exclusión. La lista se exporta a CSV (`/api/admin/visitors/export`) con las celdas que parecen fórmulas neutralizadas. Cada acción queda en la bitácora, sin el PIN.
 - La exclusión de un visitante ya se puede quitar. Antes de la rifa se reactivan los boletos que anuló la exclusión y cuyo hito el visitante aún alcanza; con la rifa iniciada los boletos no cambian.
 - `/admin/emails`: bandeja de salida completa para el sysadmin. Lista todos los correos con filtros (estado, destinatario, asunto y fecha) y páginas de 25, con intentos, próximo intento, último error y el destinatario completo; muestra el texto de un correo mientras exista (cada lectura queda en la bitácora), reenvía uno o todos los fallidos (muestra cuántos son y pide confirmar), rehace los correos abandonados cuyo texto se borró y tiene "Enviar ahora", que corre la entrega en el momento. Cada acción queda en la bitácora de auditoría.
