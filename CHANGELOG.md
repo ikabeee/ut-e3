@@ -6,6 +6,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.4.0] - 2026-11-19
+
 ### Agregado
 
 - SEO: `sitemap.xml` y `robots.txt`, imágenes Open Graph generadas para la portada y cada juego, y `noindex` en el
@@ -55,30 +57,28 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   (`PRAGMA wal_checkpoint(TRUNCATE)`), invalidar las cachés públicas, abrir o cerrar el bracket público y descargar un
   respaldo consistente de la base (API de respaldo en línea de SQLite; contiene datos personales). Cada acción y cada
   descarga quedan en la bitácora de auditoría.
+- `/admin/accounts`: lista de todas las cuentas del staff, de cualquier rol, para el sysadmin. Muestra rol, stand, estado,
+  fecha de alta y último acceso, con búsqueda por nombre o correo y filtros por rol, estado y stand. Permite desactivar y
+  reactivar, enviar el restablecimiento de contraseña por correo, cerrar todas las sesiones, limpiar el 2FA pendiente,
+  reenviar la invitación e invitar a cualquier rol (también otro sysadmin, y staff de stand o de KOF con su stand o mesa).
+  Cada acción queda en la bitácora de auditoría.
+- `/admin/visitors`: lista de todos los registros solo para el sysadmin, con búsqueda por gamertag, nombre o correo, orden por fecha, páginas de 50 y conteo de registros por día. Desde cada pasaporte se reenvía el correo con el PIN, se envía un enlace de recuperación (sin el límite de 3 por hora), se corrigen nombre, gamertag y correo, y se quita la exclusión. La lista se exporta a CSV (`/api/admin/visitors/export`) con las celdas que parecen fórmulas neutralizadas. Cada acción queda en la bitácora, sin el PIN.
+- `/admin/emails`: bandeja de salida completa para el sysadmin. Lista todos los correos con filtros (estado, destinatario, asunto y fecha) y páginas de 25, con intentos, próximo intento, último error y el destinatario completo; muestra el texto de un correo mientras exista (cada lectura queda en la bitácora), reenvía uno o todos los fallidos (muestra cuántos son y pide confirmar), rehace los correos abandonados cuyo texto se borró y tiene "Enviar ahora", que corre la entrega en el momento. Cada acción queda en la bitácora de auditoría.
 
 ### Cambiado
 
+- `/tournament`: el paso "Pide al administrador de KOF que te agregue" ahora lleva al botón del pasaporte.
 - Los intervalos del correo y de la vigilancia de carga ahora los registra `@shared/lib/server/background-jobs`, que
   guarda su última corrida y su último error y permite reiniciarlos; el trabajador de correo arma el remitente SMTP en
   cada corrida, así que un error de configuración se ve en el panel en vez de impedir el arranque.
 - El sysadmin opera el torneo de KOF como administrador de KOF (inscribir, check-in, combates, congelar, descalificar,
   revertir, generar y reiniciar el bracket, cerrar la vista pública) y la rifa como animador (girar, decidir, premio y
   cerrar). Todo queda en la bitácora con su cuenta. La navegación del panel enlaza la rifa (`/admin/raffle`).
-- `/admin/accounts`: lista de todas las cuentas del staff, de cualquier rol, para el sysadmin. Muestra rol, stand, estado,
-  fecha de alta y último acceso, con búsqueda por nombre o correo y filtros por rol, estado y stand. Permite desactivar y
-  reactivar, enviar el restablecimiento de contraseña por correo, cerrar todas las sesiones, limpiar el 2FA pendiente,
-  reenviar la invitación e invitar a cualquier rol (también otro sysadmin, y staff de stand o de KOF con su stand o mesa).
-  Cada acción queda en la bitácora de auditoría.
-
-### Cambiado
-
 - El sysadmin ahora puede invitar, reenviar, desactivar y reactivar cuentas de cualquier rol; las reglas del administrador
   de KOF y del administrador de stand no cambian. Un sysadmin no puede desactivarse a sí mismo ni desactivar al último
   sysadmin activo.
 - `accounts` guarda la fecha de alta (`created_at`, migración `20261120120000_accounts_admin`).
-- `/admin/visitors`: lista de todos los registros solo para el sysadmin, con búsqueda por gamertag, nombre o correo, orden por fecha, páginas de 50 y conteo de registros por día. Desde cada pasaporte se reenvía el correo con el PIN, se envía un enlace de recuperación (sin el límite de 3 por hora), se corrigen nombre, gamertag y correo, y se quita la exclusión. La lista se exporta a CSV (`/api/admin/visitors/export`) con las celdas que parecen fórmulas neutralizadas. Cada acción queda en la bitácora, sin el PIN.
 - La exclusión de un visitante ya se puede quitar. Antes de la rifa se reactivan los boletos que anuló la exclusión y cuyo hito el visitante aún alcanza; con la rifa iniciada los boletos no cambian.
-- `/admin/emails`: bandeja de salida completa para el sysadmin. Lista todos los correos con filtros (estado, destinatario, asunto y fecha) y páginas de 25, con intentos, próximo intento, último error y el destinatario completo; muestra el texto de un correo mientras exista (cada lectura queda en la bitácora), reenvía uno o todos los fallidos (muestra cuántos son y pide confirmar), rehace los correos abandonados cuyo texto se borró y tiene "Enviar ahora", que corre la entrega en el momento. Cada acción queda en la bitácora de auditoría.
 - Cada correo de la bandeja guarda su tipo y el registro del que sale (`kind` y `reference_id`, migración `20261120100000_outbox_kind`). Con eso se rehacen el pasaporte (con su PIN), el enlace de recuperación, la inscripción al KOF, la invitación de staff, el restablecimiento de contraseña y el aviso al ganador de la rifa. Un código de inicio de sesión, un aviso de emergencia o un correo anterior a la migración no se pueden rehacer.
 
 ## [1.3.0] - 2026-11-18
