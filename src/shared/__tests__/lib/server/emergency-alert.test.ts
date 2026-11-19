@@ -79,6 +79,7 @@ describe("createEmergencyAlerter (S20)", () => {
 
     const row = await getPrisma().emailOutbox.findFirstOrThrow();
 
+    expect(row).toMatchObject({ kind: "emergency", referenceId: null });
     expect(row.to).toBe("guardia@example.com");
     expect(row.subject).toBe("[Emergencia] PIXEL & CODE: Disco casi lleno");
     expect(row.text).toContain("Quedan 10 MB en el volumen de la base.");

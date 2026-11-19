@@ -1,45 +1,44 @@
 import "server-only";
 import type { Prisma } from "@generated/prisma/client";
+import { getJobStatus, startJob, trackRun } from "@shared/lib/server/background-jobs";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { logServerEvent } from "@shared/lib/server/server-log";
 
-/** The logs of the server (S4) live this long; the hourly interval and "Purgar ahora" delete the older rows. */
+/** The logs of the server (S4) live this long; the hourly job and "Purgar ahora" delete the older rows. */
 export const SERVER_LOG_RETENTION_DAYS = 30;
+
+/** The name of the job in the registry of background jobs, which /admin/recovery reads. */
+export const SERVER_LOG_RETENTION_JOB = "server-log-retention";
 
 const PURGE_INTERVAL_MS = 60 * 60_000;
 
 const DAY_MS = 24 * 60 * 60_000;
 
-// On globalThis, so a hot reload or a second copy of this module finds the timer the first one started.
-const TIMER_KEY = Symbol.for("ut-e3.serverLogRetention");
-
-const timers: Record<symbol, ReturnType<typeof setInterval> | undefined> = globalThis;
-
 /**
- * Started by instrumentation.ts: purges now and then every hour; the timer does not keep the process alive. Calling it
- * again, from a second `register()` or a second copy of the module, does nothing.
+ * Started by instrumentation.ts as a job of the registry: purges now and then every hour. The registry lives on
+ * globalThis, so a second `register()` or a second copy of the module (hot reload) finds the job and does nothing.
  */
 export function startServerLogRetention(): void {
-  if (timers[TIMER_KEY]) return;
+  if (getJobStatus(SERVER_LOG_RETENTION_JOB)) return;
 
-  void purgeAndReport();
+  startJob({
+    name: SERVER_LOG_RETENTION_JOB,
+    intervalMs: PURGE_INTERVAL_MS,
+    run: purgeOnce,
+    onError: reportPurgeFailure,
+  });
 
-  const timer = setInterval(() => {
-    void purgeAndReport();
-  }, PURGE_INTERVAL_MS);
-
-  timer.unref();
-  timers[TIMER_KEY] = timer;
+  trackRun(SERVER_LOG_RETENTION_JOB, purgeOnce).catch(reportPurgeFailure);
 }
 
-async function purgeAndReport(): Promise<void> {
-  try {
-    await purgeExpiredServerLogs(getPrisma());
-  } catch (cause) {
-    const message = cause instanceof Error ? cause.message : "Unknown error";
+async function purgeOnce(): Promise<void> {
+  await purgeExpiredServerLogs(getPrisma());
+}
 
-    await logServerEvent("error", "worker", `Server log retention failed: ${message}`);
-  }
+async function reportPurgeFailure(cause: unknown): Promise<void> {
+  const message = cause instanceof Error ? cause.message : "Unknown error";
+
+  await logServerEvent("error", "worker", `Server log retention failed: ${message}`);
 }
 
 /** Deletes the rows older than the retention and says how many; a row of exactly 30 days is kept. */

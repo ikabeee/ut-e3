@@ -8,6 +8,8 @@ export interface InviteInput {
   role: string;
   /** Only a KOF staff member has a desk. */
   kofDesk: KofDesk | null;
+  /** The stand of a stand account. Only the sysadmin chooses it; for the stand administrator it is its own stand. */
+  standId?: string | null;
 }
 
 export type ParsedInviteInput = { isValid: true; input: InviteInput } | { isValid: false; message: string };
@@ -37,7 +39,9 @@ export function parseInviteInput(form: FormData): ParsedInviteInput {
 
   if (desk === "invalid") return invalid(ERRORS.deskInvalid);
 
-  return { isValid: true, input: { name: person.name, email: person.email, role, kofDesk: desk } };
+  const standId = readFormText(form, "standId").trim() || null;
+
+  return { isValid: true, input: { name: person.name, email: person.email, role, kofDesk: desk, standId } };
 }
 
 /** The name and the email of a person to invite, read from the fields that carry them in the form. */

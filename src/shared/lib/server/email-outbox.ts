@@ -1,8 +1,8 @@
 import "server-only";
 
 import type { Prisma } from "@generated/prisma/client";
+import type { EmailOrigin } from "@shared/lib/email-kinds";
 import { getPrisma } from "@shared/lib/server/prisma";
-import { describeEmailKind } from "@shared/lib/server/email-kind";
 import { logServerEvent, maskEmail } from "@shared/lib/server/server-log";
 
 export interface OutgoingEmail {
@@ -17,7 +17,7 @@ interface PendingOutboxClaim {
   id: string;
   attempts: number;
   to: string;
-  subject: string;
+  kind: string | null;
 }
 
 type DeliveryFailure = "failed" | "abandoned";
@@ -40,12 +40,18 @@ const MAX_RETRY_DELAY_MS = 15 * 60_000;
 // 10-minute lease gives slow SMTP deliveries enough headroom so concurrent workers do not claim in-flight sends.
 const LEASE_DURATION_MS = 10 * 60_000;
 
-export async function enqueueEmail(transaction: Prisma.TransactionClient, email: OutgoingEmail): Promise<string> {
+export async function enqueueEmail(
+  transaction: Prisma.TransactionClient,
+  email: OutgoingEmail,
+  origin?: EmailOrigin,
+): Promise<string> {
   const row = await transaction.emailOutbox.create({
     data: {
       to: email.to,
       subject: email.subject,
       text: email.text,
+      kind: origin?.kind,
+      referenceId: origin?.referenceId,
     },
   });
 
@@ -98,7 +104,7 @@ async function deliverEmailWithResult(id: string, send: SendEmail, now: Date): P
   try {
     await send({ to: row.to, subject: row.subject, text: row.text });
   } catch (cause) {
-    await handleDeliveryFailure({ id, attempts: row.attempts, to: row.to, subject: row.subject }, cause, now);
+    await handleDeliveryFailure({ id, attempts: row.attempts, to: row.to, kind: row.kind }, cause, now);
 
     return false;
   }
@@ -113,7 +119,7 @@ async function deliverEmailWithResult(id: string, send: SendEmail, now: Date): P
       },
     });
 
-    await logServerEvent("info", "email", `Email sent: ${describeEmailKind(row.subject)}`, {
+    await logServerEvent("info", "email", `Email sent: ${row.kind ?? "other"}`, {
       emailId: id,
       to: maskEmail(row.to),
     });
@@ -200,7 +206,7 @@ async function logDeliveryFailure(claim: PendingOutboxClaim, outcome: DeliveryFa
   await logServerEvent(
     outcome === "abandoned" ? "error" : "warn",
     "email",
-    `Email ${outcome}: ${describeEmailKind(claim.subject)}`,
+    `Email ${outcome}: ${claim.kind ?? "other"}`,
     {
       emailId: claim.id,
       to: maskEmail(claim.to),

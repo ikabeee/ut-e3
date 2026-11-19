@@ -1,4 +1,5 @@
 import "server-only";
+import { findAccountMailTarget } from "@features/accounts/lib/server/account-mail-target";
 import { randomBytes } from "node:crypto";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import { RESET_PASSWORD_PATH } from "@features/accounts/lib/accounts-links";
@@ -39,7 +40,25 @@ export async function requestPasswordReset(email: string, now: Date): Promise<st
 
   if (!account) return null;
 
-  return getPrisma().$transaction((transaction) => issueResetLink(transaction, account, now));
+  return queueResetLink(account, { actorId: account.id, action: "account.password_reset_requested" }, now);
+}
+
+export interface ResetLinkAudit {
+  /** Who asked for the link: the account itself, or the sysadmin that sends it on its behalf. */
+  actorId: string;
+  action: string;
+}
+
+/**
+ * Replaces the unused link of the account with a new one and queues the email, in one transaction, and returns the id
+ * of the queued email. It checks no status and counts no attempt: the caller decides who may get a link and how often.
+ */
+export async function queueResetLink(
+  account: { id: string; email: string; name: string },
+  audit: ResetLinkAudit,
+  now: Date,
+): Promise<string> {
+  return getPrisma().$transaction((transaction) => issueResetLink({ transaction, account, audit, now }));
 }
 
 /**
@@ -88,11 +107,28 @@ export async function getResetLinkState(token: string, now: Date): Promise<Reset
   return link.expiresAt <= now ? { status: "expired" } : { status: "valid", name: link.account.name };
 }
 
-async function issueResetLink(
+/** A new reset link for an active account whose email was abandoned; the unused links are replaced. */
+export async function rebuildPasswordResetEmail(
   transaction: Prisma.TransactionClient,
-  account: { id: string; email: string; name: string },
+  accountId: string,
   now: Date,
-): Promise<string> {
+): Promise<string | null> {
+  const account = await findAccountMailTarget(transaction, accountId);
+
+  if (account?.status !== ACTIVE) return null;
+
+  const audit = { actorId: account.id, action: "account.password_reset_requested" };
+
+  return issueResetLink({ transaction, account, audit, now });
+}
+
+async function issueResetLink(request: {
+  transaction: Prisma.TransactionClient;
+  account: { id: string; email: string; name: string };
+  audit: ResetLinkAudit;
+  now: Date;
+}): Promise<string> {
+  const { transaction, account, audit, now } = request;
   const token = randomBytes(TOKEN_BYTES).toString("base64url");
 
   await transaction.passwordResetToken.deleteMany({ where: { accountId: account.id, usedAt: null } });
@@ -103,13 +139,15 @@ async function issueResetLink(
       expiresAt: new Date(now.getTime() + RESET_LINK_LIFETIME_MS),
     },
   });
-  await recordAudit(transaction, auditOf(account.id, "account.password_reset_requested"));
+  await recordAudit(transaction, { ...auditOf(account.id, audit.action), actorId: audit.actorId });
 
-  return enqueueEmail(transaction, {
+  const email = {
     to: account.email,
     subject: ACCOUNTS_COPY.passwordResetEmail.subject,
     text: ACCOUNTS_COPY.passwordResetEmail.body(account.name, `${siteConfig.url}${RESET_PASSWORD_PATH}/${token}`),
-  });
+  };
+
+  return enqueueEmail(transaction, email, { kind: "password_reset", referenceId: account.id });
 }
 
 // The audit detail never carries the email address or the token.

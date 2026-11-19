@@ -2,8 +2,14 @@
  * @jest-environment node
  */
 import type * as Retention from "@shared/lib/server/server-log-retention";
+import { clearJobs, getJobStatus } from "@shared/lib/server/background-jobs";
 import { getPrisma } from "@shared/lib/server/prisma";
-import { purgeExpiredServerLogs, SERVER_LOG_RETENTION_DAYS } from "@shared/lib/server/server-log-retention";
+import {
+  purgeExpiredServerLogs,
+  SERVER_LOG_RETENTION_DAYS,
+  SERVER_LOG_RETENTION_JOB,
+  startServerLogRetention,
+} from "@shared/lib/server/server-log-retention";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
 
 const database = createTestDatabase();
@@ -70,25 +76,29 @@ describe("the 30-day boundary", () => {
   });
 });
 
-describe("startServerLogRetention across hot reloads", () => {
-  const GUARD = Symbol.for("ut-e3.serverLogRetention");
-
+describe("startServerLogRetention as a job of the registry", () => {
   afterEach(() => {
-    const guarded: Record<symbol, ReturnType<typeof setInterval> | undefined> = globalThis;
-
-    clearInterval(guarded[GUARD]);
-    delete guarded[GUARD];
+    clearJobs();
   });
 
-  it("starts one timer, even when the module is loaded twice and register() runs twice", () => {
+  it("registers an hourly job that /admin/recovery can read, and purges once right away", async () => {
+    await createLog("ancient", 90 * DAY_MS);
+
+    startServerLogRetention();
+
+    expect(getJobStatus(SERVER_LOG_RETENTION_JOB)).toMatchObject({ intervalMs: 60 * 60_000, isRunning: true });
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    await expect(getPrisma().serverLog.count()).resolves.toBe(0);
+    expect(getJobStatus(SERVER_LOG_RETENTION_JOB)?.lastRunAt).not.toBeNull();
+  });
+
+  it("keeps a single timer when register() runs twice or the module is loaded twice (hot reload)", () => {
     const setIntervalSpy = jest.spyOn(globalThis, "setInterval");
 
     jest.isolateModules(() => {
-      const first = jest.requireActual<typeof Retention>("@shared/lib/server/server-log-retention");
-      const second = jest.requireActual<typeof Retention>("@shared/lib/server/server-log-retention");
-
-      first.startServerLogRetention();
-      second.startServerLogRetention();
+      jest.requireActual<typeof Retention>("@shared/lib/server/server-log-retention").startServerLogRetention();
+      jest.requireActual<typeof Retention>("@shared/lib/server/server-log-retention").startServerLogRetention();
     });
     jest.isolateModules(() => {
       jest.requireActual<typeof Retention>("@shared/lib/server/server-log-retention").startServerLogRetention();

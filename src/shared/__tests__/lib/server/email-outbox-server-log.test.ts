@@ -54,6 +54,18 @@ describe("email delivery in the server logs", () => {
     expect(JSON.stringify(entry)).not.toContain("123456");
   });
 
+  it("logs the kind of the row, and other when it has none", async () => {
+    const id = await queue();
+
+    await getPrisma().emailOutbox.update({ where: { id }, data: { kind: "login_code" } });
+    await deliverEmail(id, async () => undefined, NOW);
+    await deliverEmail(await queue(), async () => undefined, NOW);
+
+    const entries = await getPrisma().serverLog.findMany({ where: { source: "email" }, orderBy: { message: "asc" } });
+
+    expect(entries.map((entry) => entry.message)).toEqual(["Email sent: login_code", "Email sent: other"]);
+  });
+
   it("logs a failed attempt that will be retried as a warning", async () => {
     const error = Object.assign(new Error("Temporary failure"), { responseCode: 421 });
 

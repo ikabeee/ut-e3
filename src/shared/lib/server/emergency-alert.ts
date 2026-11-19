@@ -127,7 +127,7 @@ function createAlertLimiter() {
 }
 
 function queueInOutbox(email: OutgoingEmail): Promise<string> {
-  return enqueueEmail(getPrisma(), email);
+  return enqueueEmail(getPrisma(), email, { kind: "emergency" });
 }
 
 function buildAlertEmail(to: string, alert: EmergencyAlert, at: number): OutgoingEmail {
