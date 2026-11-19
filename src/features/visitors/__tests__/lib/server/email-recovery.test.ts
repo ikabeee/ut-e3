@@ -58,6 +58,7 @@ describe("requestEmailRecovery", () => {
 
     expect(outbox).toHaveLength(1);
     expect(outbox[0].to).toBe("neo@example.com");
+    expect(outbox[0]).toMatchObject({ kind: "recovery_link", referenceId: visitorId });
   });
 
   it("refuses the fourth request of the same email in an hour, even for an email without a passport (UT-VI-10)", async () => {

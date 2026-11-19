@@ -203,6 +203,7 @@ describe("decideDraw", () => {
 
     expect(result).toEqual({ status: "decided", outcome: "winner", emailId: email.id });
     expect(draw).toMatchObject({ outcome: "winner", decidedAt: DURING_RAFFLE });
+    expect(email).toMatchObject({ kind: "raffle_winner", referenceId: drawId });
     expect(email.to).toBe("neo@example.com");
     expect(email.text).toContain("Neo");
     expect(email.text).toContain(`#${draw.ticketNumber}`);

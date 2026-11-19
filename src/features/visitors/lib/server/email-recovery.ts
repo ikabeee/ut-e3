@@ -81,6 +81,17 @@ export async function claimRecoveryToken(token: string, now: Date): Promise<stri
   });
 }
 
+/** A new recovery link for a visitor whose email was abandoned; the previous link stays valid until it expires. */
+export async function rebuildRecoveryEmail(
+  transaction: Prisma.TransactionClient,
+  visitorId: string,
+  now: Date,
+): Promise<string | null> {
+  const visitor = await transaction.visitor.findUnique({ where: { id: visitorId }, select: { id: true, email: true } });
+
+  return visitor ? issueEmailLink(transaction, visitor, now) : null;
+}
+
 async function issueEmailLink(
   transaction: Prisma.TransactionClient,
   visitor: { id: string; email: string },
@@ -105,9 +116,11 @@ async function issueEmailLink(
     detail: { channel: "email" },
   });
 
-  return enqueueEmail(transaction, {
+  const email = {
     to: visitor.email,
     subject: VISITORS_COPY.recovery.email.subject,
     text: VISITORS_COPY.recovery.email.body(`${siteConfig.url}${getClaimPath(token)}`),
-  });
+  };
+
+  return enqueueEmail(transaction, email, { kind: "recovery_link", referenceId: visitor.id });
 }

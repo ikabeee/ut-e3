@@ -7,7 +7,7 @@ import { PASSPORT_PATH } from "@features/visitors/lib/visitors-links";
 import { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { enqueueEmail } from "@shared/lib/server/email-outbox";
-import { encryptPin, hashPinForLookup } from "@shared/lib/server/pin-cipher";
+import { decryptPin, encryptPin, hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createVisitorDevice } from "@shared/lib/server/visitor-device";
 import { siteConfig } from "@shared/lib/site-config";
@@ -192,12 +192,12 @@ async function finalizeVisitorRegistration(
 ): Promise<RegistrationResult> {
   const { visitor, input, registeredById } = created;
   const deviceToken = await createVisitorDevice(tx, visitor.id);
-  const passportUrl = `${siteConfig.url}${PASSPORT_PATH}`;
 
-  const emailId = await enqueueEmail(tx, {
-    to: input.email,
-    subject: VISITORS_COPY.email.subject(input.gamertag),
-    text: VISITORS_COPY.email.body(visitor.pin, input.gamertag, passportUrl),
+  const emailId = await enqueuePassportEmail(tx, {
+    visitorId: visitor.id,
+    email: input.email,
+    gamertag: input.gamertag,
+    pin: visitor.pin,
   });
 
   await recordVisitorAudit(tx, { visitorId: visitor.id, gamertag: input.gamertag, registeredById });
@@ -209,6 +209,36 @@ async function finalizeVisitorRegistration(
     emailId,
     pin: visitor.pin,
   };
+}
+
+/**
+ * The passport email of a visitor whose first one was abandoned: the PIN is read back from the encrypted column.
+ * Answers the id of the queued email, or null when the visitor no longer exists.
+ */
+export async function rebuildPassportEmail(tx: Prisma.TransactionClient, visitorId: string): Promise<string | null> {
+  const visitor = await tx.visitor.findUnique({
+    where: { id: visitorId },
+    select: { id: true, email: true, gamertag: true, pin: true },
+  });
+
+  if (!visitor) return null;
+
+  return enqueuePassportEmail(tx, { ...visitor, visitorId: visitor.id, pin: decryptPin(visitor.pin) });
+}
+
+function enqueuePassportEmail(
+  tx: Prisma.TransactionClient,
+  passport: { visitorId: string; email: string; gamertag: string; pin: string },
+): Promise<string> {
+  const passportUrl = `${siteConfig.url}${PASSPORT_PATH}`;
+
+  const email = {
+    to: passport.email,
+    subject: VISITORS_COPY.email.subject(passport.gamertag),
+    text: VISITORS_COPY.email.body(passport.pin, passport.gamertag, passportUrl),
+  };
+
+  return enqueueEmail(tx, email, { kind: "visitor_passport", referenceId: passport.visitorId });
 }
 
 function handleInsertError(cause: unknown): InsertAttemptOutcome {
