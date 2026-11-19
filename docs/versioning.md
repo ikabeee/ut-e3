@@ -29,8 +29,12 @@ git commit -am "chore(release): 0.2.0"
 git push -u origin release/0.2.0
 ```
 
-1. Abre un PR de `release/0.2.0` hacia **`main`**. Al hacer merge, crea la etiqueta:
-   `git tag -a v0.2.0 -m "v0.2.0" && git push origin v0.2.0` (o un Release en GitHub).
+1. Abre un PR de `release/0.2.0` hacia **`main`**. No se crea la etiqueta a mano: al hacer merge, el workflow
+   `Deploy` despliega y, si el despliegue termina bien, su job `release` crea la etiqueta `v0.2.0` y el Release de
+   GitHub con las notas de la sección `## [0.2.0]` del `CHANGELOG.md`. Si el job falla, casi siempre es porque falta esa
+   sección (o está vacía): agrégala en `main` y vuelve a lanzar el workflow desde Actions ("Re-run failed jobs" o "Run
+   workflow" sobre `main`). Si la versión ya tiene etiqueta (por ejemplo, un redespliegue sin subir la versión), el job
+   no hace nada.
 2. Integra el release de vuelta en **`develop`** (PR de `release/0.2.0` o de `main` hacia `develop`).
 
 ## Hotfix
