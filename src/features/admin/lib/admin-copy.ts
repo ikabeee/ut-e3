@@ -19,6 +19,7 @@ export const ADMIN_COPY = {
     server: "Servidor",
     sql: "Consola SQL",
     kof: "Torneo de KOF",
+    raffle: "Rifa",
   },
   pages: {
     settings: { title: "Configuración del evento", description: "Horarios y umbrales del evento." },

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { buttonVariants } from "@heroui/react";
-import { KOF_HOME_PATH, SYSADMIN_HOME_PATH } from "@features/accounts/lib/accounts-links";
+import { KOF_HOME_PATH, RAFFLE_HOME_PATH, SYSADMIN_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import {
   ADMIN_CATALOG_PATH,
@@ -20,6 +20,7 @@ const LINKS = [
   { href: ADMIN_SERVER_PATH, label: COPY.server },
   { href: ADMIN_SQL_PATH, label: COPY.sql },
   { href: KOF_HOME_PATH, label: COPY.kof },
+  { href: RAFFLE_HOME_PATH, label: COPY.raffle },
 ];
 
 /** The sections of the panel of the sysadmin (M7); the current one is marked for assistive technology. */

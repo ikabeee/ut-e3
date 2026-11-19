@@ -6,6 +6,12 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- El sysadmin opera el torneo de KOF como administrador de KOF (inscribir, check-in, combates, congelar, descalificar,
+  revertir, generar y reiniciar el bracket, cerrar la vista pública) y la rifa como animador (girar, decidir, premio y
+  cerrar). Todo queda en la bitácora con su cuenta. La navegación del panel enlaza la rifa (`/admin/raffle`).
+
 ## [1.3.0] - 2026-11-18
 
 ### Agregado
