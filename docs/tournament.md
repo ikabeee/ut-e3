@@ -41,8 +41,8 @@ el sysadmin, la navegación entre secciones. Las cuentas de KOF no la ven porque
   `GET /api/tournament` con `no-store`, así que no hay nada cacheado que invalidar.
 - La lista de participantes la ven el sysadmin y el administrador de KOF (`canViewEntries()` en
   `lib/tournament-rules.ts`) y ambos la trabajan en el panel `Inscripciones` (`GET /api/tournament/entries` sigue disponible para consulta). Esa ruta
-  responde 401 sin sesión o a una cuenta que no es de KOF ni el sysadmin, y 403 al staff de las mesas. La vista del
-  sysadmin solo lee: el cierre del check-in sigue corriendo cuando el administrador trabaja la lista.
+  responde 401 sin sesión o a una cuenta que no es de KOF ni el sysadmin, y 403 al staff de las mesas. El sysadmin
+  opera la lista igual que el administrador de KOF (inscribe, hace check-in y lo cierra).
 
 ## Estados del combate
 
