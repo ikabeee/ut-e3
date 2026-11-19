@@ -67,7 +67,8 @@ export const TOURNAMENT_COPY = {
       liveLabel: "Combates en juego y congelados",
       empty: "Ningún combate en juego ahora. Los listos esperan a que su mesa los inicie.",
       versus: (first: string, second: string) => `${first} vs ${second}`,
-      where: (area: string, desk: number) => `${area} · Mesa ${desk}`,
+      where: (area: string, desk: number | null) =>
+        desk === null ? `${area} · Administrador de KOF` : `${area} · Mesa ${desk}`,
     },
     champion: (tag: string) => `Campeón: ${tag}`,
     noChampion: "El torneo terminó sin campeón.",

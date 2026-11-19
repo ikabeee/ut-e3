@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getHomePath, LOGIN_PATH, STAND_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { getManagedRoles } from "@features/accounts/lib/invitation-rules";
 import type { ManagingActor } from "@features/accounts/lib/server/invitations";
-import type { AccountRole, KofDesk } from "@features/accounts/lib/types";
+import { KOF_DESKS, type AccountRole, type KofDesk } from "@features/accounts/lib/types";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { getSessionAccount, type SessionAccount } from "@shared/lib/server/session";
 
@@ -194,7 +194,7 @@ function toStandRole(role: string): StandAccount["role"] | null {
 }
 
 function toKofDesk(value: number | null): KofDesk | null {
-  return value === 1 || value === 2 ? value : null;
+  return KOF_DESKS.find((desk) => desk === value) ?? null;
 }
 
 // Whoever invites, resends or disables accounts: the sysadmin, the KOF administrator and the stand administrator, also

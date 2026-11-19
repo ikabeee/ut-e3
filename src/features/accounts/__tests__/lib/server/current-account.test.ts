@@ -148,7 +148,7 @@ describe("requireKofAccount", () => {
     });
   });
 
-  it.each([1, 2] as const)("returns a KOF staff member with the desk %i", async (desk) => {
+  it.each([1, 2, 3, 4] as const)("returns a KOF staff member with the desk %i", async (desk) => {
     const account = await createAccount("kof_staff", desk);
 
     await createSession(account.id);

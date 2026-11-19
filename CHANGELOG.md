@@ -8,6 +8,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- El torneo de KOF tiene cuatro mesas, una por tablero: cada staff captura su tablero, y las semifinales y la final las
+  captura solo el administrador de KOF (migración `20261121110000_kof_four_desks`).
 - Un administrador de stand puede tener un rol secundario (atención, KOF, rifa o sysadmin) en la misma cuenta; solo el
   sysadmin lo da y lo quita en `/admin/accounts`, y los encabezados enlazan de un área a la otra (migración
   `20261121100000_account_secondary_role`).

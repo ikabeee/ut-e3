@@ -10,7 +10,13 @@ import {
   MAX_STAND_STAFF,
 } from "@features/accounts/lib/invitation-rules";
 import { enqueueInvitationEmail } from "@features/accounts/lib/server/invitation-tokens";
-import type { AccountStatus, KofDesk, ManagedAccount, StandAccountRow } from "@features/accounts/lib/types";
+import {
+  KOF_DESKS,
+  type AccountStatus,
+  type KofDesk,
+  type ManagedAccount,
+  type StandAccountRow,
+} from "@features/accounts/lib/types";
 import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { isUniqueViolation, readDatabaseMessage } from "@shared/lib/server/database-errors";
@@ -297,9 +303,9 @@ async function findReactivateRefusal(account: ManagedRow): Promise<ReactivateRef
 
   if (role === "stand_admin" && standId && (await hasStandAdmin(standId))) return { status: "adminTaken" };
 
-  return role === "kof_staff" && (kofDesk === 1 || kofDesk === 2) && (await isDeskTaken(kofDesk))
-    ? { status: "deskTaken" }
-    : null;
+  const desk = toKofDesk(kofDesk);
+
+  return role === "kof_staff" && desk !== null && (await isDeskTaken(desk)) ? { status: "deskTaken" } : null;
 }
 
 async function findDisableProtection(actor: ManagingActor, account: ManagedRow): Promise<DisableRefusal | null> {
@@ -523,7 +529,7 @@ export function toStatus(value: string): AccountStatus {
 }
 
 export function toKofDesk(value: number | null): KofDesk | null {
-  return value === 1 || value === 2 ? value : null;
+  return KOF_DESKS.find((desk) => desk === value) ?? null;
 }
 
 /** A new invitation for an account that is still `invited` and whose email was abandoned; null for any other state. */

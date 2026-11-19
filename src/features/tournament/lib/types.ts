@@ -1,7 +1,7 @@
 export type BoardNumber = 1 | 2 | 3 | 4;
 
-/** Each of the two staff desks captures a pair of boards (RF-62). */
-export type Desk = 1 | 2;
+/** Each of the four staff desks captures its own board: desk n captures board n (RF-62, S3). */
+export type Desk = 1 | 2 | 3 | 4;
 
 export type MatchArea = "board_1" | "board_2" | "board_3" | "board_4" | "semifinal_1" | "semifinal_2" | "final";
 

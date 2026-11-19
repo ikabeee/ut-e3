@@ -4,6 +4,7 @@ import {
   canRunCommand,
   canViewEntries,
   getMatchDesk,
+  MATCHES_PER_BOARD,
 } from "@features/tournament/lib/tournament-rules";
 import type { TournamentCommandType } from "@features/tournament/lib/types";
 import { range } from "@features/tournament/__tests__/tournament-test-utils";
@@ -11,16 +12,21 @@ import { range } from "@features/tournament/__tests__/tournament-test-utils";
 describe("getMatchDesk", () => {
   const matches = buildBracket();
 
-  it("gives desk 1 the boards 1 and 2, the first semifinal and the final", () => {
-    const desk1 = matches.filter((match) => getMatchDesk(match) === 1).map((match) => match.number);
+  it.each([
+    [1, range(1, 15)],
+    [2, range(16, 30)],
+    [3, range(31, 45)],
+    [4, range(46, 60)],
+  ])("gives desk %i only its own board", (desk, numbers) => {
+    const matchesOfDesk = matches.filter((match) => getMatchDesk(match) === desk).map((match) => match.number);
 
-    expect(desk1).toEqual([...range(1, 30), 61, 63]);
+    expect(matchesOfDesk).toEqual(numbers);
   });
 
-  it("gives desk 2 the boards 3 and 4 and the second semifinal", () => {
-    const desk2 = matches.filter((match) => getMatchDesk(match) === 2).map((match) => match.number);
+  it("gives the semifinals and the final no desk, so only the KOF administrator captures them", () => {
+    const withoutDesk = matches.filter((match) => getMatchDesk(match) === null).map((match) => match.number);
 
-    expect(desk2).toEqual([...range(31, 60), 62]);
+    expect(withoutDesk).toEqual([61, 62, 63]);
   });
 });
 
@@ -63,23 +69,36 @@ describe("canRunCommand", () => {
     });
   });
 
-  it("lets a staff member capture only the matches of its own desk (UT-TO-14)", () => {
+  it("lets a staff member capture only the matches of its own board (UT-TO-14)", () => {
+    const desks = [1, 2, 3, 4] as const;
+    const deskOfBoard = (number: number) => desks[Math.floor((number - 1) / MATCHES_PER_BOARD)];
+
     staffCommands.forEach((type) => {
-      expect(canRunCommand({ role: "kof_staff", desk: 1 }, type, byNumber(1))).toBe(true);
-      expect(canRunCommand({ role: "kof_staff", desk: 1 }, type, byNumber(61))).toBe(true);
-      expect(canRunCommand({ role: "kof_staff", desk: 1 }, type, byNumber(63))).toBe(true);
-      expect(canRunCommand({ role: "kof_staff", desk: 1 }, type, byNumber(31))).toBe(false);
-      expect(canRunCommand({ role: "kof_staff", desk: 2 }, type, byNumber(31))).toBe(true);
-      expect(canRunCommand({ role: "kof_staff", desk: 2 }, type, byNumber(62))).toBe(true);
-      expect(canRunCommand({ role: "kof_staff", desk: 2 }, type, byNumber(1))).toBe(false);
-      expect(canRunCommand({ role: "kof_staff", desk: 2 }, type, byNumber(63))).toBe(false);
+      for (const number of range(1, 60)) {
+        for (const desk of desks) {
+          expect(canRunCommand({ role: "kof_staff", desk }, type, byNumber(number))).toBe(desk === deskOfBoard(number));
+        }
+      }
+    });
+  });
+
+  it("keeps the semifinals and the final for the KOF administrator, whatever the desk", () => {
+    staffCommands.forEach((type) => {
+      for (const number of [61, 62, 63]) {
+        for (const desk of [1, 2, 3, 4] as const) {
+          expect(canRunCommand({ role: "kof_staff", desk }, type, byNumber(number))).toBe(false);
+        }
+
+        expect(canRunCommand({ role: "kof_admin", desk: null }, type, byNumber(number))).toBe(true);
+      }
     });
   });
 
   it("never lets a staff member freeze, disqualify or revert, even on its own desk", () => {
     adminCommands.forEach((type) => {
       expect(canRunCommand({ role: "kof_staff", desk: 1 }, type, byNumber(1))).toBe(false);
-      expect(canRunCommand({ role: "kof_staff", desk: 2 }, type, byNumber(31))).toBe(false);
+      expect(canRunCommand({ role: "kof_staff", desk: 2 }, type, byNumber(16))).toBe(false);
+      expect(canRunCommand({ role: "kof_staff", desk: 4 }, type, byNumber(46))).toBe(false);
     });
   });
 

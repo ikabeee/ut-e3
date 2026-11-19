@@ -10,7 +10,9 @@ import {
   createTestTournament,
   getMatch,
   NOW,
+  playMatches,
   playUntilFinished,
+  range,
 } from "@features/tournament/__tests__/tournament-test-utils";
 import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
 
@@ -29,25 +31,20 @@ describe("TournamentDashboard", () => {
     expect(screen.getByText(/todavía no se genera/)).toBeInTheDocument();
   });
 
-  it("shows desk 1 its boards, the first semifinal and the final, and nothing else", () => {
-    renderDashboard(createTestTournament(), { role: "kof_staff", desk: 1 });
+  it.each([
+    [1, "Tablero 1"],
+    [2, "Tablero 2"],
+    [3, "Tablero 3"],
+    [4, "Tablero 4"],
+  ] as const)("shows desk %i its own board and nothing else", (desk, board) => {
+    renderDashboard(createTestTournament(), { role: "kof_staff", desk });
 
-    ["Tablero 1", "Tablero 2", "Semifinal 1", "Final"].forEach((name) => {
-      expect(screen.getByRole("heading", { name })).toBeInTheDocument();
-    });
-    ["Tablero 3", "Tablero 4", "Semifinal 2"].forEach((name) => {
-      expect(screen.queryByRole("heading", { name })).not.toBeInTheDocument();
-    });
-    expect(screen.queryByRole("heading", { name: "Bitácora" })).not.toBeInTheDocument();
-  });
-
-  it("shows desk 2 its boards and the second semifinal", () => {
-    renderDashboard(createTestTournament(), { role: "kof_staff", desk: 2 });
-
-    ["Tablero 3", "Tablero 4", "Semifinal 2"].forEach((name) => {
-      expect(screen.getByRole("heading", { name })).toBeInTheDocument();
-    });
-    expect(screen.queryByRole("heading", { name: "Tablero 1" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: board })).toBeInTheDocument();
+    ["Tablero 1", "Tablero 2", "Tablero 3", "Tablero 4", "Semifinal 1", "Semifinal 2", "Final", "Bitácora"]
+      .filter((name) => name !== board)
+      .forEach((name) => {
+        expect(screen.queryByRole("heading", { name })).not.toBeInTheDocument();
+      });
   });
 
   it("tells a staff member without a desk to ask for one", () => {
@@ -83,7 +80,7 @@ describe("TournamentDashboard", () => {
 
     const summary = screen.getByRole("list", { name: "Resumen" });
 
-    expect(within(summary).getByText("Listos").parentElement).toHaveTextContent("16");
+    expect(within(summary).getByText("Listos").parentElement).toHaveTextContent("8");
   });
 
   it("monitors the progress and says when no match is being played (S11)", () => {
@@ -108,7 +105,18 @@ describe("TournamentDashboard", () => {
     expect(within(live).getAllByRole("listitem")).toHaveLength(1);
     expect(within(live).getByText("Combate #33")).toBeInTheDocument();
     expect(within(live).getByText(`${first.tag} vs ${second.tag}`)).toBeInTheDocument();
-    expect(within(live).getByText("Tablero 3 · Mesa 2")).toBeInTheDocument();
+    expect(within(live).getByText("Tablero 3 · Mesa 3")).toBeInTheDocument();
+  });
+
+  it("says that a semifinal in play belongs to the KOF administrator, since it has no desk", () => {
+    const played = playMatches(createTestTournament(), range(1, 60));
+    const busy = applyCommand(played, { type: "start_match", matchId: getMatch(played, 61).id }, NOW);
+
+    renderDashboard(busy, { role: "kof_admin", desk: null });
+
+    const live = screen.getByRole("list", { name: "Combates en juego y congelados" });
+
+    expect(within(live).getByText("Semifinal 1 · Administrador de KOF")).toBeInTheDocument();
   });
 
   it("announces the champion when the tournament is over", () => {

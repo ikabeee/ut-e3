@@ -15,8 +15,10 @@ export const SECONDARY_ROLES = ["help_desk", "kof_admin", "raffle_admin", "sysad
 
 export type SecondaryRole = (typeof SECONDARY_ROLES)[number];
 
-/** The two staff desks of the KOF tournament; each one captures a pair of boards (RF-62). */
-export type KofDesk = 1 | 2;
+/** The four staff desks of the KOF tournament; desk n captures board n (RF-62, S3). */
+export const KOF_DESKS = [1, 2, 3, 4] as const;
+
+export type KofDesk = (typeof KOF_DESKS)[number];
 
 export type AccountStatus = "invited" | "active" | "disabled";
 

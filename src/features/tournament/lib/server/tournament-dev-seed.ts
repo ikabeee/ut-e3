@@ -25,6 +25,8 @@ export const KOF_DEV_ACCOUNTS: readonly KofDevAccount[] = [
   { email: "kof-admin@ejemplo.com", name: "Administrador de KOF (prueba)", role: "kof_admin", kofDesk: null },
   { email: "kof-mesa1@ejemplo.com", name: "Staff de KOF mesa 1 (prueba)", role: "kof_staff", kofDesk: 1 },
   { email: "kof-mesa2@ejemplo.com", name: "Staff de KOF mesa 2 (prueba)", role: "kof_staff", kofDesk: 2 },
+  { email: "kof-mesa3@ejemplo.com", name: "Staff de KOF mesa 3 (prueba)", role: "kof_staff", kofDesk: 3 },
+  { email: "kof-mesa4@ejemplo.com", name: "Staff de KOF mesa 4 (prueba)", role: "kof_staff", kofDesk: 4 },
 ];
 
 // An example value for local development only; KOF_DEV_PASSWORD replaces it.
@@ -39,7 +41,7 @@ const PRODUCTION_REFUSED =
 const MISSING_SETTINGS = "Seed de KOF: faltan los horarios del evento. Corre npm run db:seed primero.";
 
 /**
- * Prepares the tournament for a manual test (development only): the three KOF accounts, the bracket hour moved to
+ * Prepares the tournament for a manual test (development only): the five KOF accounts, the bracket hour moved to
  * `now` when it is still ahead, and a bracket of fake players. Running it again only adds what is missing.
  */
 export async function seedKofDev(
