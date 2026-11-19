@@ -11,3 +11,5 @@ export const ADMIN_SERVER_PATH = `${SYSADMIN_HOME_PATH}/server`;
 export const ADMIN_EMAILS_PATH = `${SYSADMIN_HOME_PATH}/emails`;
 
 export const ADMIN_SQL_PATH = `${SYSADMIN_HOME_PATH}/sql`;
+
+export const ADMIN_VISITORS_PATH = `${SYSADMIN_HOME_PATH}/visitors`;

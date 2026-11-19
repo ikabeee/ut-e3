@@ -9,6 +9,7 @@ import {
   ADMIN_SERVER_PATH,
   ADMIN_SETTINGS_PATH,
   ADMIN_SQL_PATH,
+  ADMIN_VISITORS_PATH,
 } from "@features/admin/lib/admin-links";
 
 const COPY = ADMIN_COPY.nav;
@@ -17,6 +18,7 @@ const LINKS = [
   { href: SYSADMIN_HOME_PATH, label: COPY.home },
   { href: ADMIN_SETTINGS_PATH, label: COPY.settings },
   { href: ADMIN_MODERATION_PATH, label: COPY.moderation },
+  { href: ADMIN_VISITORS_PATH, label: COPY.visitors },
   { href: ADMIN_CATALOG_PATH, label: COPY.catalog },
   { href: ADMIN_SERVER_PATH, label: COPY.server },
   { href: ADMIN_EMAILS_PATH, label: COPY.emails },

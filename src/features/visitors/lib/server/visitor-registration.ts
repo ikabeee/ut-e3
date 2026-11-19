@@ -226,19 +226,24 @@ export async function rebuildPassportEmail(tx: Prisma.TransactionClient, visitor
   return enqueuePassportEmail(tx, { ...visitor, visitorId: visitor.id, pin: decryptPin(visitor.pin) });
 }
 
-function enqueuePassportEmail(
+/** Queues the passport email with its PIN: the registration, the rebuild and the sysadmin's resend all go through here. */
+export function enqueuePassportEmail(
   tx: Prisma.TransactionClient,
   passport: { visitorId: string; email: string; gamertag: string; pin: string },
 ): Promise<string> {
-  const passportUrl = `${siteConfig.url}${PASSPORT_PATH}`;
-
-  const email = {
-    to: passport.email,
-    subject: VISITORS_COPY.email.subject(passport.gamertag),
-    text: VISITORS_COPY.email.body(passport.pin, passport.gamertag, passportUrl),
-  };
+  const email = { to: passport.email, ...buildRegistrationEmail(passport.pin, passport.gamertag) };
 
   return enqueueEmail(tx, email, { kind: "visitor_passport", referenceId: passport.visitorId });
+}
+
+/** The subject and text of the passport email, with the PIN in plain text. */
+export function buildRegistrationEmail(pin: string, gamertag: string) {
+  const passportUrl = `${siteConfig.url}${PASSPORT_PATH}`;
+
+  return {
+    subject: VISITORS_COPY.email.subject(gamertag),
+    text: VISITORS_COPY.email.body(pin, gamertag, passportUrl),
+  };
 }
 
 function handleInsertError(cause: unknown): InsertAttemptOutcome {
@@ -289,7 +294,7 @@ function normalizeTargets(target: UniqueViolationTarget): string[] {
   return [target.toLowerCase()];
 }
 
-function isPrismaUniqueViolation(cause: unknown): cause is PrismaUniqueError {
+export function isPrismaUniqueViolation(cause: unknown): cause is PrismaUniqueError {
   return cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === "P2002";
 }
 

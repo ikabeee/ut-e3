@@ -1,6 +1,6 @@
 import "server-only";
 import { isRaffleStarted } from "@features/moderation/lib/moderation-input";
-import { voidUnreachedTickets } from "@features/visitors/lib/server/milestone-tickets";
+import { grantMilestoneTickets, voidUnreachedTickets } from "@features/visitors/lib/server/milestone-tickets";
 import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { getPrisma } from "@shared/lib/server/prisma";
@@ -16,6 +16,9 @@ export interface ModerationRequest {
 export type AnnulResult =
   | { status: "annulled"; voidedMilestones: number[]; ticketsFrozen: boolean }
   | { status: "notFound" | "alreadyAnnulled" };
+
+export type UnexcludeResult =
+  { status: "unexcluded"; reactivatedTickets: number; ticketsFrozen: boolean } | { status: "notFound" | "notExcluded" };
 
 export type ExcludeResult = { status: "excluded"; ticketsFrozen: boolean } | { status: "notFound" | "alreadyExcluded" };
 
@@ -144,6 +147,45 @@ export async function excludeVisitor(request: ModerationRequest): Promise<Exclud
     });
 
     return { status: "excluded", ticketsFrozen };
+  });
+}
+
+/**
+ * Clears the exclusion of a visitor (the sysadmin changed their mind or excluded the wrong one). Before the raffle, the
+ * tickets the exclusion voided come back through the same rule as a new visit: a voided ticket whose milestone the
+ * visitor still reaches becomes active again, and one voided by an annulment stays voided. Once the raffle started,
+ * tickets were never voided by the exclusion, so they do not change.
+ */
+export async function unexcludeVisitor(request: Omit<ModerationRequest, "reason">): Promise<UnexcludeResult> {
+  const { actorId, targetId, now } = request;
+
+  return getPrisma().$transaction(async (transaction): Promise<UnexcludeResult> => {
+    const visitor = await transaction.visitor.findUnique({
+      where: { id: targetId },
+      select: { excludedReason: true },
+    });
+
+    if (!visitor) return { status: "notFound" };
+
+    const { count } = await transaction.visitor.updateMany({
+      where: { id: targetId, excludedAt: { not: null } },
+      data: { excludedAt: null, excludedReason: null },
+    });
+
+    if (count === 0) return { status: "notExcluded" };
+
+    const ticketsFrozen = await isFrozen(transaction, now);
+    const reactivatedTickets = ticketsFrozen ? 0 : await grantMilestoneTickets(transaction, targetId);
+
+    await recordAudit(transaction, {
+      actorId,
+      action: "visitor.unexclude",
+      entityType: "visitor",
+      entityId: targetId,
+      detail: { previousReason: visitor.excludedReason, reactivatedTickets, ticketsFrozen },
+    });
+
+    return { status: "unexcluded", reactivatedTickets, ticketsFrozen };
   });
 }
 
