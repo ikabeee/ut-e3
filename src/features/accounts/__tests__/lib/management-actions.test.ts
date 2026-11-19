@@ -91,8 +91,8 @@ describe("inviteAccountAction", () => {
   it.each([
     { label: "an invalid form", fields: { name: "", email: "x", role: "kof_admin" }, message: ERRORS.nameRequired },
     {
-      label: "a role the actor does not manage",
-      fields: { name: "Ana", email: "ana-role@ut.mx", role: "kof_staff", desk: "1" },
+      label: "a role that does not exist",
+      fields: { name: "Ana", email: "ana-role@ut.mx", role: "intruder" },
       message: ERRORS.forbidden,
     },
     {

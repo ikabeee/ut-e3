@@ -9,16 +9,16 @@ import {
 } from "@features/accounts/lib/invitation-rules";
 
 describe("canManageRole (S7)", () => {
-  it.each(["kof_admin", "raffle_admin", "help_desk"])("lets the sysadmin manage a %s", (role) => {
-    expect(canManageRole("sysadmin", role)).toBe(true);
-  });
-
-  it.each(["sysadmin", "kof_staff", "stand_admin", "stand_staff", "other"])(
-    "does not let the sysadmin manage a %s through this flow",
+  it.each(["sysadmin", "kof_admin", "raffle_admin", "help_desk", "kof_staff", "stand_admin", "stand_staff"])(
+    "lets the sysadmin manage a %s",
     (role) => {
-      expect(canManageRole("sysadmin", role)).toBe(false);
+      expect(canManageRole("sysadmin", role)).toBe(true);
     },
   );
+
+  it("does not let the sysadmin manage a role that does not exist", () => {
+    expect(canManageRole("sysadmin", "other")).toBe(false);
+  });
 
   it("lets the KOF administrator manage only the KOF staff", () => {
     expect(canManageRole("kof_admin", "kof_staff")).toBe(true);
@@ -103,11 +103,14 @@ describe("canManageAccount (RF-32)", () => {
     expect(canManageAccount({ actor: standAdmin, target: { role: "kof_staff", standId: null } })).toBe(false);
   });
 
-  it("lets the sysadmin manage the stand administrators but not the stand staff", () => {
+  it("lets the sysadmin manage the accounts of every role, with or without a stand", () => {
     const actor = { role: "sysadmin" };
 
     expect(canManageAccount({ actor, target: { role: "stand_admin", standId: OWN_STAND } })).toBe(true);
-    expect(canManageAccount({ actor, target: { role: "stand_staff", standId: OWN_STAND } })).toBe(false);
+    expect(canManageAccount({ actor, target: { role: "stand_staff", standId: OWN_STAND } })).toBe(true);
+    expect(canManageAccount({ actor, target: { role: "sysadmin", standId: null } })).toBe(true);
+    expect(canManageAccount({ actor, target: { role: "kof_staff", standId: null } })).toBe(true);
+    expect(canManageAccount({ actor, target: { role: "other", standId: null } })).toBe(false);
   });
 
   it("keeps the rules by role of the other panels", () => {

@@ -17,8 +17,14 @@ describe("parseInviteInput", () => {
 
     expect(parseInviteInput(form)).toEqual({
       isValid: true,
-      input: { name: "Ana Pérez", email: "ana@ut.mx", role: "kof_admin", kofDesk: null },
+      input: { name: "Ana Pérez", email: "ana@ut.mx", role: "kof_admin", kofDesk: null, standId: null },
     });
+  });
+
+  it("reads the stand that the sysadmin names for a stand account", () => {
+    const form = createForm({ name: "Ana", email: "ana@ut.mx", role: "stand_staff", standId: " stand-1 " });
+
+    expect(parseInviteInput(form)).toMatchObject({ isValid: true, input: { role: "stand_staff", standId: "stand-1" } });
   });
 
   it.each([

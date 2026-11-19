@@ -24,16 +24,21 @@ export interface ManagingActor {
   standId?: string | null;
 }
 
-type InviteRefusal = { status: "emailTaken" | "hasPassport" | "deskTaken" | "standFull" };
+type InviteRefusal = { status: "emailTaken" | "hasPassport" | "deskTaken" | "standFull" | "adminTaken" };
 
 export type InviteResult =
-  { status: "invited"; accountId: string; emailId: string } | { status: "forbidden" | "invalidDesk" } | InviteRefusal;
+  | { status: "invited"; accountId: string; emailId: string }
+  | { status: "forbidden" | "invalidDesk" | "invalidStand" }
+  | InviteRefusal;
 
 export type ManageFailure = { status: "forbidden" | "notFound" | "wrongState" };
 
 export type ResendResult = { status: "sent"; emailId: string } | ManageFailure;
 
-export type DisableResult = { status: "disabled" } | ManageFailure;
+/** The sysadmin cannot disable itself, nor the last active sysadmin: nobody could sign in to undo it. */
+type DisableRefusal = { status: "selfProtected" | "lastSysadmin" };
+
+export type DisableResult = { status: "disabled" } | DisableRefusal | ManageFailure;
 
 type ReactivateRefusal = { status: "standFull" | "deskTaken" | "adminTaken" };
 
@@ -43,7 +48,7 @@ export type InvitationState = { status: "valid"; name: string } | { status: "exp
 
 export type ActivationResult = { status: "activated" | "expired" | "invalid" };
 
-interface ManagedRow {
+export interface ManagedRow {
   id: string;
   role: string;
   standId: string | null;
@@ -53,7 +58,10 @@ interface ManagedRow {
   status: string;
 }
 
-type Lookup = { kind: "found"; account: ManagedRow } | { kind: "refused"; failure: ManageFailure };
+export type Lookup = { kind: "found"; account: ManagedRow } | { kind: "refused"; failure: ManageFailure };
+
+type StandChoice =
+  { kind: "chosen"; standId: string | null } | { kind: "refused"; status: "forbidden" | "invalidStand" };
 
 const ENTITY_TYPE = "account";
 
@@ -69,11 +77,11 @@ export async function inviteAccount(actor: ManagingActor, rawInput: InviteInput,
 
   if (!hasValidDesk(input)) return { status: "invalidDesk" };
 
-  // The stand of the new staff is the one of the administrator who invites, never one that the form names (RF-32).
-  const standId = input.role === "stand_staff" ? (actor.standId ?? null) : null;
+  const stand = await chooseStand(actor, input);
 
-  if (input.role === "stand_staff" && !standId) return { status: "forbidden" };
+  if (stand.kind === "refused") return { status: stand.status };
 
+  const { standId } = stand;
   const refusal = await findInviteRefusal({ input, standId });
 
   return refusal ?? createAccountWithInvitation({ actor, input, standId, now });
@@ -118,6 +126,9 @@ export async function disableAccount(actor: ManagingActor, accountId: string): P
   if (lookup.account.status === "disabled") return { status: "wrongState" };
 
   const { account } = lookup;
+  const protection = await findDisableProtection(actor, account);
+
+  if (protection) return protection;
 
   return getPrisma().$transaction(async (transaction): Promise<DisableResult> => {
     await transaction.account.update({ where: { id: account.id }, data: { status: "disabled" } });
@@ -270,6 +281,23 @@ async function findReactivateRefusal(account: ManagedRow): Promise<ReactivateRef
     : null;
 }
 
+async function findDisableProtection(actor: ManagingActor, account: ManagedRow): Promise<DisableRefusal | null> {
+  if (account.role !== "sysadmin") return null;
+
+  if (account.id === actor.id) return { status: "selfProtected" };
+
+  return account.status === "active" && !(await hasOtherActiveSysadmin(account.id)) ? { status: "lastSysadmin" } : null;
+}
+
+async function hasOtherActiveSysadmin(accountId: string): Promise<boolean> {
+  const other = await getPrisma().account.findFirst({
+    where: { role: "sysadmin", status: "active", id: { not: accountId } },
+    select: { id: true },
+  });
+
+  return other !== null;
+}
+
 async function hasStandAdmin(standId: string): Promise<boolean> {
   const admin = await getPrisma().account.findFirst({
     where: { role: "stand_admin", standId, status: { not: "disabled" } },
@@ -291,6 +319,28 @@ function explainReactivateFailure(cause: unknown): ReactivateRefusal {
   throw cause;
 }
 
+// The stand of a stand administrator's staff is its own, never one that the form names (RF-32). The sysadmin names it,
+// and only the stand roles have one.
+async function chooseStand(actor: ManagingActor, input: InviteInput): Promise<StandChoice> {
+  if (actor.role !== "sysadmin") {
+    const standId = input.role === "stand_staff" ? (actor.standId ?? null) : null;
+
+    return input.role === "stand_staff" && !standId
+      ? { kind: "refused", status: "forbidden" }
+      : { kind: "chosen", standId };
+  }
+
+  const standId = input.standId ?? null;
+  const isStandRole = input.role === "stand_admin" || input.role === "stand_staff";
+  const isValid = isStandRole === (standId !== null) && (standId === null || (await standExists(standId)));
+
+  return isValid ? { kind: "chosen", standId } : { kind: "refused", status: "invalidStand" };
+}
+
+async function standExists(standId: string): Promise<boolean> {
+  return (await getPrisma().stand.findUnique({ where: { id: standId }, select: { id: true } })) !== null;
+}
+
 // A KOF staff member needs a desk and nobody else has one.
 function hasValidDesk(input: InviteInput): boolean {
   return (input.role === "kof_staff") === (input.kofDesk !== null);
@@ -307,7 +357,11 @@ async function findInviteRefusal({
 
   if (emailRefusal) return emailRefusal;
 
-  if (standId && (await countStandStaff(standId)) >= MAX_STAND_STAFF) return { status: "standFull" };
+  if (input.role === "stand_admin" && standId && (await hasStandAdmin(standId))) return { status: "adminTaken" };
+
+  if (input.role === "stand_staff" && standId && (await countStandStaff(standId)) >= MAX_STAND_STAFF) {
+    return { status: "standFull" };
+  }
 
   return input.kofDesk !== null && (await isDeskTaken(input.kofDesk)) ? { status: "deskTaken" } : null;
 }
@@ -386,6 +440,8 @@ function explainInviteFailure(cause: unknown): InviteRefusal {
 
   if (readDatabaseMessage(cause).includes("3 cuentas de staff")) return { status: "standFull" };
 
+  if (readDatabaseMessage(cause).includes("ya tiene un administrador")) return { status: "adminTaken" };
+
   throw cause;
 }
 
@@ -403,7 +459,8 @@ async function isDeskTaken(kofDesk: KofDesk): Promise<boolean> {
   return taken !== null;
 }
 
-async function findManagedAccount(actor: ManagingActor, accountId: string): Promise<Lookup> {
+/** The account when the actor may act on it; otherwise the failure to answer. */
+export async function findManagedAccount(actor: ManagingActor, accountId: string): Promise<Lookup> {
   const account = await getPrisma().account.findUnique({
     where: { id: accountId },
     select: { id: true, role: true, name: true, email: true, status: true, standId: true, kofDesk: true },
@@ -417,16 +474,16 @@ async function findManagedAccount(actor: ManagingActor, accountId: string): Prom
 }
 
 // The audit detail never carries the email address or the token.
-function auditOf(actor: ManagingActor, action: string, accountId: string) {
+export function auditOf(actor: ManagingActor, action: string, accountId: string) {
   return { actorId: actor.id, action, entityType: ENTITY_TYPE, entityId: accountId, detail: {} };
 }
 
-function toStatus(value: string): AccountStatus {
+export function toStatus(value: string): AccountStatus {
   if (value === "active" || value === "disabled") return value;
 
   return "invited";
 }
 
-function toKofDesk(value: number | null): KofDesk | null {
+export function toKofDesk(value: number | null): KofDesk | null {
   return value === 1 || value === 2 ? value : null;
 }

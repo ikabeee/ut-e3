@@ -6,6 +6,21 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- `/admin/accounts`: lista de todas las cuentas del staff, de cualquier rol, para el sysadmin. Muestra rol, stand, estado,
+  fecha de alta y último acceso, con búsqueda por nombre o correo y filtros por rol, estado y stand. Permite desactivar y
+  reactivar, enviar el restablecimiento de contraseña por correo, cerrar todas las sesiones, limpiar el 2FA pendiente,
+  reenviar la invitación e invitar a cualquier rol (también otro sysadmin, y staff de stand o de KOF con su stand o mesa).
+  Cada acción queda en la bitácora de auditoría.
+
+### Cambiado
+
+- El sysadmin ahora puede invitar, reenviar, desactivar y reactivar cuentas de cualquier rol; las reglas del administrador
+  de KOF y del administrador de stand no cambian. Un sysadmin no puede desactivarse a sí mismo ni desactivar al último
+  sysadmin activo.
+- `accounts` guarda la fecha de alta (`created_at`, migración `20261120120000_accounts_admin`).
+
 ## [1.3.0] - 2026-11-18
 
 ### Agregado
