@@ -11,13 +11,20 @@ const SYSADMIN_ROLE = "sysadmin" satisfies AccountRole;
 
 // Every sysadmin page and Server Action calls this: proxy.ts only checks that a cookie exists.
 export async function requireSysadmin(): Promise<SessionAccount> {
-  const account = await getSessionAccount();
+  const account = await getSysadmin();
 
-  if (account?.role !== SYSADMIN_ROLE) {
+  if (!account) {
     redirect(LOGIN_PATH);
   }
 
   return account;
+}
+
+// For Route Handlers, which answer 401 instead of redirecting.
+export async function getSysadmin(): Promise<SessionAccount | null> {
+  const account = await getSessionAccount();
+
+  return account?.role === SYSADMIN_ROLE ? account : null;
 }
 
 export interface KofAccount extends SessionAccount {

@@ -386,6 +386,32 @@ El sysadmin puede consultar y modificar la base real desde el panel. Antes de us
 - Una escritura exitosa refresca las cachés de la portada (eventos, juegos, cronograma, patrocinadores y PIN de visitantes).
   No toca el bracket de KOF en memoria ni lo que ya esté guardado en el navegador.
 
+## Recuperación de servicios (`/admin/recovery`)
+
+Pantalla del sysadmin para levantar un servicio caído sin entrar al VPS. Antes de usarla en producción:
+
+- **Correo.** Muestra si hay `SMTP_HOST` (solo el servidor, nunca el usuario ni la clave), la última corrida del
+  trabajador y su último error, y los conteos de la bandeja. "Probar SMTP" envía un correo directo (sin pasar por la
+  bandeja) a la cuenta del sysadmin y muestra el error exacto del servidor. "Reintentar envíos ahora" corre la entrega
+  de la bandeja en ese momento; los correos que siguen en su espera de reintento (backoff) esperan su turno y los
+  abandonados no se rehacen. "Reiniciar el trabajador de correo" borra y vuelve a crear el intervalo de 60 s; si el
+  proceso arrancó sin `SMTP_HOST`, no hay trabajador y la acción lo dice (cambiar variables requiere reiniciar la app).
+- **Vigilancia de carga.** Mismo estado y el mismo reinicio para la lectura cada 10 s que cierra el bracket público.
+  Los intervalos viven en el registro de `@shared/lib/server/background-jobs`; un reinicio de la app los vuelve a crear.
+- **Base de datos.** Tamaño del archivo, del WAL y del SHM y espacio libre del volumen. "Revisar integridad"
+  (`PRAGMA quick_check`) y "Vaciar el WAL" (`PRAGMA wal_checkpoint(TRUNCATE)`) corren al pedirlos y bloquean el
+  servidor mientras duran: evítalos con el bracket público abierto en pleno evento. El vaciado puede decir que no
+  terminó si hay lecturas o escrituras en curso; se repite.
+- **Descargar respaldo.** Hace una copia consistente con la API de respaldo en línea de SQLite (la app sigue
+  escribiendo), en una carpeta temporal privada, la envía como descarga (`Cache-Control: no-store`) y la borra al
+  terminar o si se cancela. **El respaldo contiene todos los datos personales y los hashes de las cuentas**: guárdalo
+  en un lugar privado y bórralo cuando ya no lo necesites. Cada descarga queda en la bitácora (`admin.recovery.backup_download`)
+  con su tamaño. No sustituye al respaldo por hora de RNF-16 (ver "Respaldos"); la restauración sigue siendo la de esa sección.
+- **Cachés públicas.** "Invalidar cachés públicas" expira todas las etiquetas de `cacheTag()` de `src/`
+  (`PUBLIC_CACHE_TAGS`); una prueba falla si se agrega una etiqueta nueva y no está en esa lista.
+- **Bitácora.** Cada acción deja `admin.recovery.*` (`smtp_test`, `retry_emails`, `restart`, `quick_check`,
+  `checkpoint`, `invalidate_caches`, `backup_download`); abrir o cerrar el bracket usa su entrada de siempre.
+
 ## Cuentas del staff (`/admin/accounts`)
 
 Solo el sysadmin. Lista las cuentas de todos los roles con filtros (rol, estado, stand) y búsqueda por nombre o correo.
