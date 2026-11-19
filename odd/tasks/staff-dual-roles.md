@@ -118,6 +118,8 @@ porque usa el rol secundario y las 4 mesas. Rama `feature/<issue>-staff-dual-rol
 
   Con esto se ajustaron S5, T7 y T8. El despliegue y la escritura en el VPS siguen siendo acciones que se confirman en
   el momento.
+- **L25** (dato del usuario): el correo de Córdova Sánchez Miguel Ángel. Entra al CSV como `stand_admin` del 103-3
+  (81 filas). El correo no se copia aquí porque es un dato personal; está en el CSV fuera de git.
 - **L24** (confirmación del usuario, verbatim): "Listo, esa distribucion es correcta". La distribución final queda
   aprobada: 80 cuentas en el alta, 2 a la espera de correo (Córdova como admin del 103-3 y Medina como staff del 101-5)
   y 12 personas sin cuenta porque su área no usa la app.
