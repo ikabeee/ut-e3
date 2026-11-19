@@ -1,6 +1,6 @@
 # Patrocinadores restantes y arte de los juegos
 
-Estado: planificado, sin implementar.
+Estado: en implementación en `feature/sponsors-game-art`.
 Hay que dar de alta los patrocinadores que faltan con datos uniformes, completando por scraping lo que no venga en sus
 carpetas, y cargar las portadas y el arte de los juegos que faltan.
 
@@ -87,3 +87,43 @@ Rama `feature/<issue>-sponsors-and-game-art` desde `develop`. T2 y T3 van en un 
     - Qué archivos van en Vaporlock.
     - Si la tarjeta de One-mind es `propuesta-recorte-vertical.png`.
     - Cuáles 4 de las 7 capturas de identity-dissolution.
+- **L6** (decisiones del usuario, verbatim):
+  - Carga: "Backfill que agrega los que faltan (recomendado)".
+  - Servicios: "Una frase corta en español".
+  - Casos dudosos: "Algorix Insights sigue (no tiene carpeta)", "Nemo: buscar teléfono local (+52)", "Nuevos al final
+    del orden" y "Noxy es las dos cosas" (patrocinador y ponente).
+  - Arte: "Sí, con elecciones por defecto". La tarjeta es `*-tarjeta` (en One Mind, `propuesta-recorte-vertical.png`).
+    En Vaporlock se escalan JackVeil Vertical y Horizontal. Identity Dissolution lleva las capturas 1 a 4. Don't pet me
+    va sin logo. Se ignoran los `*-coverflow`.
+- **L7** (resultado del scraping de T1; fuentes en la investigación del 19.11.2026):
+  - **Con datos completos o casi:**
+    - Bonavida: ventas@aguabonavida.com.mx; servicios del sitio.
+    - Fresh Air: sin correo; servicios: renta de coolers evaporativos y climas portátiles.
+    - Le Jardin d'Aurore: https://lejardindaurore.com; WhatsApp +52 998 187 8194, el mismo número que OpSET.
+    - Mermelada: https://mermeladacocinaquereconforta.com; el sitio da mermeladareserva@gmail.com, mientras la carpeta
+      dice mermeladacancun@.
+    - Nemo Submarine: sin correo. El +52 998 322 8282 es de confianza baja (posible otro operador).
+    - Noxy Digital: el sitio da WhatsApp +52 564 266 3875, mientras la carpeta dice 998 172 5547.
+    - OpSET: https://opset.com.mx; el sitio da web@opset.mx, mientras la carpeta dice ceo@opset.com.mx.
+    - Algorix Insights: sin teléfono ni correo públicos.
+  - **Identificados:**
+    - Rock and Race: https://www.rockandrace.com, +52 998 289 3135, info@rockandrace.com.
+    - Target G: campo de tiro recreativo en Go Grand Outlet. Sin sitio, teléfono ni correo confirmados.
+    - PixelAndCode: https://pixelandcode.org, +52 998 894 1923, sin correo. Es un negocio aparte, no la marca del evento.
+  - **No identificados:**
+    - Dolphin: posible The Dolphin Company, confianza baja.
+    - Nannis Amigurumis: sin resultados.
+  - **No encontrado:**
+    - Directrix Studio: servicios.
+    - Fresh Air: correo.
+    - Nemo Submarine: correo.
+    - Algorix Insights: teléfono y correo.
+    - PixelAndCode: correo.
+    - Target G: contacto.
+    - Dolphin y Nannis Amigurumis: todo.
+- **L8** (decisiones del usuario, verbatim):
+  - Conflictos: "Los de la carpeta (los dio el patrocinador)".
+  - Uniformes: "Del scrapping completas los datos". Lo que no exista en ninguna fuente queda vacío, porque la app lo
+    acepta y no se inventa nada.
+  - Sin identificar: "Dolphin Discovery, deja afuera Nannis".
+  - Ponente de Noxy: "Nada por ahora".
