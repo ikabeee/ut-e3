@@ -118,6 +118,9 @@ porque usa el rol secundario y las 4 mesas. Rama `feature/<issue>-staff-dual-rol
 
   Con esto se ajustaron S5, T7 y T8. El despliegue y la escritura en el VPS siguen siendo acciones que se confirman en
   el momento.
+- **L23** (decisión del usuario, verbatim): "es miguel el admin de stand". Córdova Sánchez Miguel Ángel es el
+  `stand_admin` del 103-3, sin rol secundario (no opera la rifa: "solo dará premios"). Falta su correo: sin él, el
+  alta masiva lo omite y el sysadmin lo invita desde `/admin` cuando lo tenga.
 - **L22** (decisión del usuario, verbatim): "Mete a kristal y coronel como sysadmins". Palma Góngora Wendy Kristal
   (101-3) y Coronel Palma Christian (101-2) quedan como `stand_admin` con `sysadmin` como rol secundario. El CSV pasa a
   tener 11 roles dobles y 6 sysadmins en total.
