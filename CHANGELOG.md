@@ -6,6 +6,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- `/admin/visitors`: lista de todos los registros solo para el sysadmin, con búsqueda por gamertag, nombre o correo, orden por fecha, páginas de 50 y conteo de registros por día. Desde cada pasaporte se reenvía el correo con el PIN, se envía un enlace de recuperación (sin el límite de 3 por hora), se corrigen nombre, gamertag y correo, y se quita la exclusión. La lista se exporta a CSV (`/api/admin/visitors/export`) con las celdas que parecen fórmulas neutralizadas. Cada acción queda en la bitácora, sin el PIN.
+- La exclusión de un visitante ya se puede quitar. Antes de la rifa se reactivan los boletos que anuló la exclusión y cuyo hito el visitante aún alcanza; con la rifa iniciada los boletos no cambian.
+
 ## [1.3.0] - 2026-11-18
 
 ### Agregado

@@ -192,13 +192,8 @@ async function finalizeVisitorRegistration(
 ): Promise<RegistrationResult> {
   const { visitor, input, registeredById } = created;
   const deviceToken = await createVisitorDevice(tx, visitor.id);
-  const passportUrl = `${siteConfig.url}${PASSPORT_PATH}`;
 
-  const emailId = await enqueueEmail(tx, {
-    to: input.email,
-    subject: VISITORS_COPY.email.subject(input.gamertag),
-    text: VISITORS_COPY.email.body(visitor.pin, input.gamertag, passportUrl),
-  });
+  const emailId = await enqueueEmail(tx, { to: input.email, ...buildRegistrationEmail(visitor.pin, input.gamertag) });
 
   await recordVisitorAudit(tx, { visitorId: visitor.id, gamertag: input.gamertag, registeredById });
 
@@ -208,6 +203,16 @@ async function finalizeVisitorRegistration(
     deviceToken,
     emailId,
     pin: visitor.pin,
+  };
+}
+
+/** The email of the passport with its PIN: the registration queues it, and the sysadmin can send it again. */
+export function buildRegistrationEmail(pin: string, gamertag: string) {
+  const passportUrl = `${siteConfig.url}${PASSPORT_PATH}`;
+
+  return {
+    subject: VISITORS_COPY.email.subject(gamertag),
+    text: VISITORS_COPY.email.body(pin, gamertag, passportUrl),
   };
 }
 
@@ -259,7 +264,7 @@ function normalizeTargets(target: UniqueViolationTarget): string[] {
   return [target.toLowerCase()];
 }
 
-function isPrismaUniqueViolation(cause: unknown): cause is PrismaUniqueError {
+export function isPrismaUniqueViolation(cause: unknown): cause is PrismaUniqueError {
   return cause instanceof Prisma.PrismaClientKnownRequestError && cause.code === "P2002";
 }
 

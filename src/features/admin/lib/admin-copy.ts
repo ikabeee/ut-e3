@@ -15,6 +15,7 @@ export const ADMIN_COPY = {
     home: "Cuentas y stands",
     settings: "Configuración",
     moderation: "Moderación",
+    visitors: "Visitantes",
     catalog: "Catálogos",
     server: "Servidor",
     sql: "Consola SQL",
@@ -23,6 +24,11 @@ export const ADMIN_COPY = {
   pages: {
     settings: { title: "Configuración del evento", description: "Horarios y umbrales del evento." },
     moderation: { title: "Moderación", description: "Alertas de fraude, visitas anuladas y visitantes excluidos." },
+    visitors: {
+      title: "Visitantes",
+      description:
+        "Lista de registros, reenvío del pasaporte y enlaces de recuperación, corrección de datos y exportación.",
+    },
     catalog: { title: "Catálogos", description: "Géneros, patrocinadores y lista negra de correos." },
     server: { title: "Estado del servidor", description: "Memoria, CPU, bracket en vivo y bandeja de salida." },
     sql: { title: "Consola SQL", description: "Consultas y cambios directos a la base de datos del evento." },

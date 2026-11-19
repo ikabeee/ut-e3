@@ -84,6 +84,9 @@ export const MODERATION_COPY = {
       `Visita anulada. Boleto(s) del hito ${milestones.join(" y ")} anulado(s).`,
     annulledFrozen: "Visita anulada. La rifa ya empezó, así que los boletos no cambian.",
     excluded: "Visitante excluido. Sus boletos quedan fuera de la rifa.",
+    unexcluded: "Exclusión quitada.",
+    unexcludedTickets: (count: number) => `Exclusión quitada. Boleto(s) reactivado(s): ${count}.`,
+    unexcludedFrozen: "Exclusión quitada. La rifa ya empezó, así que los boletos no cambian.",
     bulkAnnulled: (done: number, skipped: number) =>
       skipped > 0
         ? `${done} visita(s) anulada(s). ${skipped} ya no se podían anular.`
@@ -100,5 +103,6 @@ export const MODERATION_COPY = {
     notFound: "Ya no existe. Recarga la página.",
     alreadyAnnulled: "Esa visita ya estaba anulada.",
     alreadyExcluded: "Ese visitante ya estaba excluido.",
+    notExcluded: "Ese visitante no estaba excluido.",
   },
 } as const;
