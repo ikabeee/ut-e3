@@ -15,6 +15,7 @@ import {
   type AccountStatus,
   type KofDesk,
   type ManagedAccount,
+  type SecondaryRole,
   type StandAccountRow,
 } from "@features/accounts/lib/types";
 import type { Prisma } from "@generated/prisma/client";
@@ -101,9 +102,12 @@ export interface NewInvitedAccount {
   name: string;
   email: string;
   role: string;
+  /** Set at creation only by the bulk invitation of the staff (S5); the CHECK of the table limits it to stand administrators. */
+  secondaryRole?: SecondaryRole | null;
   kofDesk: KofDesk | null;
   standId: string | null;
-  createdById: string;
+  /** Null when no staff account creates it, such as the bulk invitation that runs on deploy (T7). */
+  createdById: string | null;
   now: Date;
 }
 
@@ -325,7 +329,7 @@ export async function hasOtherActiveSysadmin(accountId: string): Promise<boolean
   return other !== null;
 }
 
-async function hasStandAdmin(standId: string): Promise<boolean> {
+export async function hasStandAdmin(standId: string): Promise<boolean> {
   const admin = await getPrisma().account.findFirst({
     where: { role: "stand_admin", standId, status: { not: "disabled" } },
     select: { id: true },
@@ -453,6 +457,7 @@ export async function createInvitedAccount(
       email: account.email,
       name: account.name,
       role: account.role,
+      secondaryRole: account.secondaryRole ?? null,
       status: "invited",
       kofDesk: account.kofDesk,
       standId: account.standId,
@@ -481,11 +486,11 @@ function explainInviteFailure(cause: unknown): InviteRefusal {
 }
 
 // Invited and active staff count against the limit; a disabled account frees its place.
-async function countStandStaff(standId: string): Promise<number> {
+export async function countStandStaff(standId: string): Promise<number> {
   return getPrisma().account.count({ where: { role: "stand_staff", standId, status: { not: "disabled" } } });
 }
 
-async function isDeskTaken(kofDesk: KofDesk): Promise<boolean> {
+export async function isDeskTaken(kofDesk: KofDesk): Promise<boolean> {
   const taken = await getPrisma().account.findFirst({
     where: { role: "kof_staff", kofDesk, status: { not: "disabled" } },
     select: { id: true },

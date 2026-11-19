@@ -8,6 +8,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Alta masiva del staff: `npm run db:invite:staff` crea los stands que faltan y las invitaciones del staff (con rol
+  secundario y mesa de KOF) desde un CSV; corre una sola vez al desplegar si existe `/data/staff-invitations.csv`, y el
+  sysadmin reenvía desde `/admin/accounts`.
 - El torneo de KOF tiene cuatro mesas, una por tablero: cada staff captura su tablero, y las semifinales y la final las
   captura solo el administrador de KOF (migración `20261121110000_kof_four_desks`).
 - Un administrador de stand puede tener un rol secundario (atención, KOF, rifa o sysadmin) en la misma cuenta; solo el
