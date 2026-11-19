@@ -24,6 +24,13 @@ describe("settleBatch", () => {
     expect(settled.rejected).toEqual([{ id: "c", reason: "late", scannedAt: "2026-11-20T21:49:00.000Z" }]);
   });
 
+  it("moves an ownStand refusal to the rejected list as sent, so the kiosk does not retry it", () => {
+    const settled = settleBatch([queuedVisit("a")], [{ id: "a", status: "ownStand" }]);
+
+    expect(settled.settledIds).toEqual(["a"]);
+    expect(settled.rejected).toEqual([expect.objectContaining({ id: "a", reason: "ownStand" })]);
+  });
+
   it("keeps in the queue a visit the answer leaves out", () => {
     const settled = settleBatch([queuedVisit("a"), queuedVisit("b")], [{ id: "a", status: "unknownVisitor" }]);
 

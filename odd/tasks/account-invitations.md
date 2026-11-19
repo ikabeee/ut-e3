@@ -18,7 +18,7 @@ Test runner: Jest (`npm test`).
   `account_invitations.token_sha256` (the property is `token`). It expires 72 hours after it is created, works once, and
   an account has at most one valid invitation: sending a new one makes the previous one useless.
 - S2 (RF-40): the sysadmin invites a `kof_admin`, a `raffle_admin` or a `help_desk` account with name and email. The email
-  is stored lowercase and must be new. RN-02: an email that already has a passport cannot become an account.
+  is stored lowercase and must be new among accounts. RN-02: an email that already has a passport can become an account too (hotfix 1.5.1); the kiosk rejects the visits of that passport to the stand of the account.
 - S3 (roles table, UT-AC-14): the KOF administrator invites a `kof_staff` with a desk, 1 or 2. A desk has at most one staff
   member that is invited or active; replacing someone is disabling the old account and inviting the new one. A
   trigger enforces it and the action explains it.

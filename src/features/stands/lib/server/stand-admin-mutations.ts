@@ -6,9 +6,7 @@ import { recordAudit } from "@shared/lib/server/audit-log";
 import { isUniqueViolation, readDatabaseMessage } from "@shared/lib/server/database-errors";
 import { getPrisma } from "@shared/lib/server/prisma";
 
-type EmailRefusal = "emailTaken" | "hasPassport";
-
-type Refusal = EmailRefusal | "standTaken" | "limitReached" | "adminExists" | "notFound";
+type Refusal = "emailTaken" | "standTaken" | "limitReached" | "adminExists" | "notFound";
 
 export type CreateStandResult = { status: "created"; standId: string; emailId: string } | { status: Refusal };
 
@@ -34,7 +32,7 @@ export async function createStand(request: {
 }): Promise<CreateStandResult> {
   const emailRefusal = await findEmailRefusal(request.admin.email);
 
-  if (emailRefusal) return { status: emailRefusal.status === "hasPassport" ? "hasPassport" : "emailTaken" };
+  if (emailRefusal) return { status: "emailTaken" };
 
   try {
     return await getPrisma().$transaction((transaction) => createInTransaction(transaction, request));
@@ -93,7 +91,7 @@ export async function inviteStandAdmin(request: {
 
   const emailRefusal = await findEmailRefusal(admin.email);
 
-  if (emailRefusal) return { status: emailRefusal.status === "hasPassport" ? "hasPassport" : "emailTaken" };
+  if (emailRefusal) return { status: "emailTaken" };
 
   try {
     return await getPrisma().$transaction(async (transaction): Promise<InviteStandAdminResult> => {

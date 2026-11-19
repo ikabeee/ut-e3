@@ -34,7 +34,7 @@ export interface ManagingActor {
   standId?: string | null;
 }
 
-type InviteRefusal = { status: "emailTaken" | "hasPassport" | "deskTaken" | "standFull" | "adminTaken" };
+type InviteRefusal = { status: "emailTaken" | "deskTaken" | "standFull" | "adminTaken" };
 
 export type InviteResult =
   | { status: "invited"; accountId: string; emailId: string }
@@ -405,15 +405,13 @@ async function findInviteRefusal({
   return input.kofDesk !== null && (await isDeskTaken(input.kofDesk)) ? { status: "deskTaken" } : null;
 }
 
-/** The checks on an email that every new account passes; `null` when it can be used. */
+/**
+ * The checks on an email that every new account passes; `null` when it can be used. An email with a visitor passport
+ * can be staff too (RN-02): the kiosk keeps it from counting visits to its own stand.
+ */
 export async function findEmailRefusal(email: string): Promise<InviteRefusal | null> {
   if (await getPrisma().account.findUnique({ where: { email }, select: { id: true } })) {
     return { status: "emailTaken" };
-  }
-
-  // RN-02: whoever has a passport cannot be staff or administrator. The column of visitors ignores the case.
-  if (await getPrisma().visitor.findFirst({ where: { email }, select: { id: true } })) {
-    return { status: "hasPassport" };
   }
 
   return null;

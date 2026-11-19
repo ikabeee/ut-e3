@@ -118,6 +118,12 @@ porque usa el rol secundario y las 4 mesas. Rama `feature/<issue>-staff-dual-rol
 
   Con esto se ajustaron S5, T7 y T8. El despliegue y la escritura en el VPS siguen siendo acciones que se confirman en
   el momento.
+- **L26** (incidente en producción y decisión del usuario, verbatim):
+  - Decisiones: "Cambia la regla para que un correo pueda ser staff y visitante" y "Permitir el correo doble y bloquear la
+    visita a su propio stand".
+  - Incidente: el alta masiva de la 1.5.0 abortó porque 4 correos del CSV ya tenían pasaporte de visitante (RN-02).
+  - Hotfix 1.5.1: RN-02 ya no impide tener pasaporte. El kiosko rechaza la visita de un pasaporte cuyo correo es del
+    staff de ese mismo stand.
 - **L25** (dato del usuario): el correo de Córdova Sánchez Miguel Ángel. Entra al CSV como `stand_admin` del 103-3
   (81 filas). El correo no se copia aquí porque es un dato personal; está en el CSV fuera de git.
 - **L24** (confirmación del usuario, verbatim): "Listo, esa distribucion es correcta". La distribución final queda

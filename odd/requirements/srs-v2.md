@@ -176,7 +176,7 @@ Tomado del orden del día oficial. Es el contenido inicial del cronograma (RF-03
 | RF-12 | El visitante se registra con nombre completo, gamertag único y correo electrónico. |
 | RF-13 | El registro se abre en la fecha configurada; la Server Action también valida la fecha. |
 | RF-14 | Al registrarse se genera su PIN de identidad: único, fijo y de 5 dígitos. Sustituye al QR. |
-| RF-15 | Un correo que esté en la lista negra (integrantes de equipos, staff y administradores) no puede crear pasaporte. El rechazo usa un mensaje genérico ("No se pudo registrar este correo"). |
+| RF-15 | Un correo que esté en la lista negra (integrantes de equipos que el sysadmin agregue) no puede crear pasaporte. Tener una cuenta del staff no mete un correo en la lista negra (RN-02). El rechazo usa un mensaje genérico ("No se pudo registrar este correo"). |
 | RF-16 | Al registrarse, el visitante recibe por correo una copia de su pasaporte: PIN, gamertag y un enlace a `/passport` (no el de recuperación). El pasaporte se activa sin esperar al correo. |
 | RF-17 | Aviso de privacidad breve en el registro con enlace al aviso completo. |
 | RF-18 | Un pasaporte tiene un solo dispositivo activo. |
@@ -288,7 +288,7 @@ Tomado del orden del día oficial. Es el contenido inicial del cronograma (RF-03
 | ID | Regla |
 | --- | --- |
 | RN-01 | El evento tiene exactamente 18 stands; los boletos se otorgan a las 9 y a las 18 visitas válidas. |
-| RN-02 | Un integrante de un equipo (o cualquier staff o administrador) no puede tener pasaporte. |
+| RN-02 | Un integrante de un equipo, un staff o un administrador puede tener pasaporte con el mismo correo de su cuenta. Sus visitas a su propio stand (el de su cuenta `stand_admin` o `stand_staff`, activa o invitada) no cuentan: el kiosco rechaza su PIN y no suma visita, voto ni boletos ahí; en los demás stands participa con normalidad. |
 | RN-03 | Un check-in cuenta solo con su voto y mientras no esté anulado. |
 | RN-04 | Un check-in cuenta si se registró antes del corte (16:50) y llega antes del inicio de la rifa (18:00). Un registro con hora anterior a la apertura del evento se ajusta a la apertura. Al empezar la rifa, los boletos se congelan. |
 | RN-05 | Un visitante con un boleto sorteado queda fuera del resto de la rifa, gane o no. |

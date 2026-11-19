@@ -22,7 +22,7 @@ export interface QueuedVisit {
 /** What the server answers for each visit of a batch. `ok` and `duplicate` leave the queue as sent. */
 export type QueuedVisitStatus = "ok" | "duplicate" | QueuedVisitRefusal;
 
-export type QueuedVisitRefusal = "late" | "unknownVisitor" | "standWithoutGame" | "invalid";
+export type QueuedVisitRefusal = "late" | "unknownVisitor" | "standWithoutGame" | "invalid" | "ownStand";
 
 export interface QueuedVisitResult {
   id: string;
@@ -51,7 +51,7 @@ export interface SettledBatch {
   rejected: RejectedQueuedVisit[];
 }
 
-const REFUSALS: readonly QueuedVisitStatus[] = ["late", "unknownVisitor", "standWithoutGame", "invalid"];
+const REFUSALS: readonly QueuedVisitStatus[] = ["late", "unknownVisitor", "standWithoutGame", "invalid", "ownStand"];
 
 /** The queue in batches of at most 50, in the order the PINs were taken. */
 export function buildBatches(pending: QueuedVisit[]): QueuedVisit[][] {

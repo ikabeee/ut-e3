@@ -16,4 +16,8 @@ export interface AdminStand extends StandFields {
 export interface RejectedVisitNotice {
   id: string;
   standCode: string;
+  reason: RejectedVisitReason;
 }
+
+/** Why the server refused a queued visit of a known visitor: it came too late, or the passport is staff of that stand. */
+export type RejectedVisitReason = "late" | "ownStand";

@@ -16,7 +16,7 @@ export function RejectedVisitNotices({ notices }: Readonly<RejectedVisitNoticesP
       {notices.map((notice) => (
         <div key={notice.id} role="alert" className="grid gap-2 border border-danger p-4">
           <p className="m-0 font-semibold text-danger">{COPY.heading(notice.standCode)}</p>
-          <p className="m-0 text-sm">{COPY.late}</p>
+          <p className="m-0 text-sm">{COPY[notice.reason]}</p>
           <p className="m-0 text-sm text-muted">{COPY.help}</p>
         </div>
       ))}

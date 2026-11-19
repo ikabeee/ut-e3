@@ -194,19 +194,18 @@ async function isGamertagUsedByAnother(
   return other !== null;
 }
 
-// email_blocklist and visitors compare without case; accounts store their email lowercased.
+// email_blocklist and visitors compare without case. A staff account can share the email (RN-02).
 async function findEmailRefusal(
   transaction: Prisma.TransactionClient,
   visitorId: string,
   email: string,
 ): Promise<"emailBlocked" | "emailTaken" | null> {
-  const [blocked, account, other] = await Promise.all([
+  const [blocked, other] = await Promise.all([
     transaction.emailBlocklist.findFirst({ where: { email }, select: { email: true } }),
-    transaction.account.findFirst({ where: { email }, select: { id: true } }),
     transaction.visitor.findFirst({ where: { email, id: { not: visitorId } }, select: { id: true } }),
   ]);
 
-  if (blocked || account) return "emailBlocked";
+  if (blocked) return "emailBlocked";
 
   return other ? "emailTaken" : null;
 }

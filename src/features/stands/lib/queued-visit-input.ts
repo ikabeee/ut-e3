@@ -44,6 +44,7 @@ const STATUSES: readonly QueuedVisitStatus[] = [
   "unknownVisitor",
   "standWithoutGame",
   "invalid",
+  "ownStand",
 ];
 
 /** Whether the body has a list of entries with an id; without ids the kiosk could not match the answers. */

@@ -109,7 +109,7 @@ describe("inviteAccountAction", () => {
     expect(refresh).not.toHaveBeenCalled();
   });
 
-  it("explains a repeated email and an email that has a passport", async () => {
+  it("explains a repeated email and invites an email that has a passport (RN-02)", async () => {
     await signInAs("sysadmin");
     await inviteAccountAction(null, createForm({ name: "Ana", email: mail("ana"), role: "kof_admin" }));
     await getPrisma().visitor.create({
@@ -126,11 +126,9 @@ describe("inviteAccountAction", () => {
       { status: "error", message: ERRORS.emailTaken },
     );
     expect(await inviteAccountAction(null, createForm({ name: "Neo", email: mail("neo"), role: "help_desk" }))).toEqual(
-      {
-        status: "error",
-        message: ERRORS.hasPassport,
-      },
+      { status: "done", message: OUTCOMES.invited },
     );
+    expect(await getPrisma().visitor.count({ where: { email: mail("neo") } })).toBe(1);
   });
 
   it("explains that a desk is taken", async () => {

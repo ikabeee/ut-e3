@@ -51,9 +51,35 @@ describe("KioskQueueStatus", () => {
   });
 });
 
+describe("KioskQueueStatus and the own-stand refusal", () => {
+  it("lists an ownStand refusal without saying whose passport it is", () => {
+    render(
+      <KioskQueueStatus
+        isOnline
+        pendingCount={0}
+        phase="allSent"
+        rejected={[{ id: "a", reason: "ownStand", scannedAt: "2026-11-20T20:15:00.000Z" }]}
+      />,
+    );
+
+    const item = screen.getByRole("listitem");
+
+    expect(item).toHaveTextContent("Este pasaporte no puede registrar visitas en este stand.");
+    expect(item).not.toHaveTextContent(/staff|equipo|\d{5}/i);
+  });
+});
+
 describe("RejectedVisitNotices", () => {
+  it("tells the visitor that a visit to their own stand does not count (RN-02, RF-24)", () => {
+    render(<RejectedVisitNotices notices={[{ id: "a", standCode: "ZA-S3", reason: "ownStand" }]} />);
+
+    expect(screen.getByRole("alert")).toHaveTextContent("Tu visita a ZA-S3 no se registró");
+    expect(screen.getByRole("alert")).toHaveTextContent("No puedes registrar visitas en tu propio stand.");
+    expect(screen.getByRole("alert")).not.toHaveTextContent("después del cierre");
+  });
+
   it("tells the visitor which visit was not recorded and why (RF-24)", () => {
-    render(<RejectedVisitNotices notices={[{ id: "a", standCode: "ZA-S3" }]} />);
+    render(<RejectedVisitNotices notices={[{ id: "a", standCode: "ZA-S3", reason: "late" }]} />);
 
     expect(screen.getByRole("alert")).toHaveTextContent("Tu visita a ZA-S3 no se registró");
     expect(screen.getByRole("alert")).toHaveTextContent("después del cierre del registro de visitas");

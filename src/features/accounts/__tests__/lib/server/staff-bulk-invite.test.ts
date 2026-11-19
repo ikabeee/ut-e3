@@ -48,7 +48,7 @@ beforeAll(async () => {
   await createAccount({ email: "old-desk@ut.mx", role: "kof_staff", kofDesk: 4 });
   await createAccount({ email: "existente@ut.mx", role: "help_desk", status: "active", password: "hash" });
   await getPrisma().visitor.create({
-    data: { fullName: "Neo", gamertag: "Neo", email: "pasaporte@ut.mx", pin: "x", pinLookup: "y" },
+    data: { fullName: "Neo", gamertag: "Neo", email: "Staff1@ut.mx", pin: "x", pinLookup: "y" },
   });
 });
 
@@ -88,11 +88,6 @@ describe("a list that is not valid writes nothing (T7)", () => {
       "a stand that is not one of the event",
       "ana@ut.mx,Ana,stand_admin,,101-9,",
       { line: 2, message: "El stand 101-9 no es uno de los stands del evento" },
-    ],
-    [
-      "an email with a visitor passport (RN-02)",
-      "pasaporte@ut.mx,Neo,help_desk,,,",
-      { line: 2, message: "El correo ya tiene un pasaporte de visitante" },
     ],
     [
       "a stand that already has an administrator",
@@ -225,6 +220,16 @@ describe("a valid list (T7, T9)", () => {
       status: "active",
     });
     expect(await getPrisma().emailOutbox.count({ where: { to: "existente@ut.mx" } })).toBe(0);
+  });
+
+  it("invites the email that already has a visitor passport and leaves the passport as it was (RN-02)", async () => {
+    expect(await getPrisma().account.findUniqueOrThrow({ where: { email: "staff1@ut.mx" } })).toMatchObject({
+      role: "stand_staff",
+      status: "invited",
+    });
+    expect(await getPrisma().visitor.findMany({ where: { email: "staff1@ut.mx" } })).toEqual([
+      expect.objectContaining({ gamertag: "Neo", email: "Staff1@ut.mx" }),
+    ]);
   });
 
   it("gives each new account its link of 72 hours and queues its email without sending it", async () => {
