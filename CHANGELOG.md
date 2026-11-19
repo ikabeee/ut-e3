@@ -8,6 +8,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Un administrador de stand puede tener un rol secundario (atención, KOF, rifa o sysadmin) en la misma cuenta; solo el
+  sysadmin lo da y lo quita en `/admin/accounts`, y los encabezados enlazan de un área a la otra (migración
+  `20261121100000_account_secondary_role`).
 - Footer: el mapa del sitio incluye el correo de contacto `info@algorixinsights.com` y la línea "Desarrollado y diseñado
   por Algorix Insights" queda centrada.
 - `npm run db:backfill:email-kinds`: da tipo a los correos viejos del pasaporte y de recuperación para poder rehacerlos.

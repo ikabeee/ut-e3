@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { AccountsPanel } from "@features/accounts/components/accounts-panel";
+import { AreaLink } from "@features/accounts/components/area-link";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { KOF_HOME_PATH } from "@features/accounts/lib/accounts-links";
+import { getOtherAreaLink } from "@features/accounts/lib/area-links";
 import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
 import { requireKofViewer, type KofViewer } from "@features/accounts/lib/server/current-account";
 import { listManagedAccounts } from "@features/accounts/lib/server/invitations";
@@ -63,6 +65,7 @@ async function KofPanel() {
         currentPath={account.role === "sysadmin" ? KOF_HOME_PATH : null}
         signOutAction={signOut}
       />
+      <AreaLink link={getOtherAreaLink(account.roles, "secondary")} />
       <Entries viewer={account} hasBracket={tournament !== null} />
       {operatesAsAdmin(account) && <PublicBracketPanel />}
       {account.role === "kof_admin" && <StaffAccounts role={account.role} />}

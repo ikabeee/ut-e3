@@ -12,6 +12,7 @@ const BASE: AdminAccountRow = {
   role: "stand_staff",
   status: "active",
   kofDesk: null,
+  secondaryRole: null,
   standId: "stand-1",
   createdAt: new Date("2026-11-10T18:30:00.000Z"),
   lastLoginAt: new Date("2026-11-19T15:00:00.000Z"),
@@ -21,9 +22,54 @@ const INVITED: AdminAccountRow = { ...BASE, id: "i", name: "Beto Invitado", stat
 
 const DISABLED: AdminAccountRow = { ...BASE, id: "d", name: "Carla Baja", status: "disabled" };
 
+const LEADER: AdminAccountRow = {
+  ...BASE,
+  id: "l",
+  name: "Lía Líder",
+  role: "stand_admin",
+  secondaryRole: "help_desk",
+};
+
+const SOLO_LEADER: AdminAccountRow = { ...BASE, id: "s", name: "Saúl Solo", role: "stand_admin" };
+
 const SELF: AdminAccountRow = { ...BASE, id: "me", name: "Yo Sysadmin", role: "sysadmin", standId: null };
 
 describe("AdminAccountList", () => {
+  describe("the secondary role (S1)", () => {
+    it("names the secondary role of a stand administrator in its summary", () => {
+      renderList([LEADER, SOLO_LEADER]);
+
+      expect(rowOf("Lía Líder")).toHaveTextContent("Administrador de stand · Rol secundario: Atención · Stand ZA-S1");
+      expect(rowOf("Saúl Solo")).not.toHaveTextContent("Rol secundario:");
+    });
+
+    it("offers the control to give or remove it only for stand administrators", () => {
+      renderList([LEADER, BASE, SELF]);
+
+      expect(within(rowOf("Lía Líder")).getByRole("button", { name: "Guardar rol secundario" })).toBeInTheDocument();
+      expect(within(rowOf("Ana Pérez")).queryByRole("button", { name: "Guardar rol secundario" })).toBeNull();
+      expect(within(rowOf("Yo Sysadmin")).queryByRole("button", { name: "Guardar rol secundario" })).toBeNull();
+    });
+
+    it("sends the account and its current secondary role, or 'none', to the action", async () => {
+      const setSecondaryRole = jest.fn<ReturnType<ManagementAction>, Parameters<ManagementAction>>(async () => ({
+        status: "done",
+        message: "Rol secundario quitado.",
+      }));
+
+      renderList([LEADER, SOLO_LEADER], { setSecondaryRole });
+      await userEvent.click(within(rowOf("Lía Líder")).getByRole("button", { name: "Guardar rol secundario" }));
+      await userEvent.click(within(rowOf("Saúl Solo")).getByRole("button", { name: "Guardar rol secundario" }));
+
+      await waitFor(() => expect(setSecondaryRole).toHaveBeenCalledTimes(2));
+      expect(Object.fromEntries(setSecondaryRole.mock.calls[0][1])).toEqual({
+        accountId: "l",
+        secondaryRole: "help_desk",
+      });
+      expect(Object.fromEntries(setSecondaryRole.mock.calls[1][1])).toEqual({ accountId: "s", secondaryRole: "none" });
+    });
+  });
+
   it("says so when no account matches", () => {
     renderList([]);
 
@@ -94,6 +140,7 @@ function renderList(accounts: AdminAccountRow[], overrides: Partial<AdminAccount
     resetPassword: idle,
     closeSessions: idle,
     clearTwoFactor: idle,
+    setSecondaryRole: idle,
     ...overrides,
   };
 

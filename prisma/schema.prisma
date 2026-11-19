@@ -45,6 +45,9 @@ model Account {
   email             String              @unique
   name              String
   role              String
+  /// Only a stand administrator has one: help_desk, kof_admin, raffle_admin or sysadmin (CHECK in the migration
+  /// `account_secondary_role`). The primary role keeps deciding the stand, the home page and the table rules.
+  secondaryRole     String?             @map("secondary_role")
   group             String?
   studio            Int?
   /// scrypt hash with its parameters and salt (shared/lib/server/password.ts); null until the account is activated.

@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { AccountsPanel } from "@features/accounts/components/accounts-panel";
+import { AreaLink } from "@features/accounts/components/area-link";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { SYSADMIN_HOME_PATH } from "@features/accounts/lib/accounts-links";
+import { getOtherAreaLink } from "@features/accounts/lib/area-links";
 import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
 import { requireSysadmin } from "@features/accounts/lib/server/current-account";
 import { listManagedAccounts } from "@features/accounts/lib/server/invitations";
@@ -66,6 +68,7 @@ async function SysadminPanel() {
         currentPath={SYSADMIN_HOME_PATH}
         signOutAction={signOut}
       />
+      <AreaLink link={getOtherAreaLink(account.roles, "secondary")} />
       <AccountsPanel
         heading={ADMIN_COPY.accountsHeading}
         actorRole={account.role}

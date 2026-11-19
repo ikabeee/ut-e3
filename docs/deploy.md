@@ -433,6 +433,9 @@ Cada acción queda en la bitácora de auditoría (`account.*`) y ninguna guarda 
 - **Cerrar sesiones** borra todas las sesiones de la cuenta. **Limpiar 2FA pendiente** borra sus códigos de acceso
   pendientes; la persona vuelve a empezar desde la contraseña.
 - **Invitar** acepta cualquier rol. Las cuentas de stand llevan el stand; el staff de KOF, su mesa.
+- **Rol secundario**: un administrador de stand puede tener además `help_desk`, `kof_admin`, `raffle_admin` o `sysadmin`
+  en la misma cuenta. Solo el sysadmin lo da o lo quita (`account.secondary_role` en la bitácora). Un sysadmin secundario
+  cuenta para la regla del último sysadmin activo, y los encabezados enlazan de un área a la otra.
 - El último acceso sale de la bitácora (`account.login_verified`); la fecha de alta es `accounts.created_at`.
 ## Logs del servidor (`/admin/logs`)
 

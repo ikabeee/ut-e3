@@ -10,6 +10,12 @@ const database = createTestDatabase();
 
 const prisma = createTestClient(database);
 
+let ownStandId = "";
+
+beforeAll(async () => {
+  ownStandId = (await prisma.stand.create({ data: { zone: "A", number: 1, studio: 1, groupCode: "101" } })).id;
+});
+
 afterAll(async () => {
   await prisma.$disconnect();
   database.remove();
@@ -77,6 +83,48 @@ describe("accounts table", () => {
   });
 });
 
+describe("the secondary role of an account (S1, S2)", () => {
+  it.each(["help_desk", "kof_admin", "raffle_admin", "sysadmin"])(
+    "accepts %s as the secondary role of a stand administrator",
+    async (secondaryRole) => {
+      await createAccount({ role: "stand_admin", status: "invited", password: null, stand: true, secondaryRole });
+
+      expect(await prisma.account.count({ where: { secondaryRole } })).toBe(1);
+    },
+  );
+
+  it("leaves the secondary role empty on every account that was already there", async () => {
+    await createAccount({ role: "stand_admin", status: "invited", password: null, stand: true });
+    await createAccount({ role: "help_desk", status: "invited", password: null, email: "help@ut.mx" });
+
+    expect(await prisma.account.count({ where: { secondaryRole: null } })).toBe(2);
+  });
+
+  it.each([
+    ["a stand staff member", { role: "stand_staff", stand: true, secondaryRole: "help_desk" }],
+    ["a sysadmin", { role: "sysadmin", secondaryRole: "help_desk" }],
+    ["a KOF administrator", { role: "kof_admin", secondaryRole: "raffle_admin" }],
+    ["a help desk account", { role: "help_desk", secondaryRole: "sysadmin" }],
+    ["a stand administrator with stand_staff", { role: "stand_admin", stand: true, secondaryRole: "stand_staff" }],
+    ["a stand administrator with kof_staff", { role: "stand_admin", stand: true, secondaryRole: "kof_staff" }],
+    ["a stand administrator with its own role", { role: "stand_admin", stand: true, secondaryRole: "stand_admin" }],
+    ["a stand administrator with an unknown role", { role: "stand_admin", stand: true, secondaryRole: "root" }],
+    ["a stand administrator with an empty role", { role: "stand_admin", stand: true, secondaryRole: "" }],
+  ])("rejects %s and keeps the table unchanged", async (_case, fields) => {
+    await expect(createAccount({ status: "invited", password: null, ...fields })).rejects.toThrow();
+    expect(await prisma.account.count()).toBe(0);
+  });
+
+  it("rejects a secondary role added later to an account that cannot have one", async () => {
+    const account = await createAccount({ role: "kof_admin", status: "invited", password: null });
+
+    await expect(
+      prisma.account.update({ where: { id: account.id }, data: { secondaryRole: "help_desk" } }),
+    ).rejects.toThrow();
+    expect((await prisma.account.findUniqueOrThrow({ where: { id: account.id } })).secondaryRole).toBeNull();
+  });
+});
+
 describe("sessions table", () => {
   it("stores the token in token_sha256 and removes the sessions of a deleted account", async () => {
     const account = await createAccount({ role: "sysadmin", status: "active", password: STORED_HASH });
@@ -100,8 +148,23 @@ interface AccountFields {
   password: string | null;
   email?: string;
   kofDesk?: number;
+  /** Gives the account the stand of the fixture. */
+  stand?: boolean;
+  secondaryRole?: string;
 }
 
-function createAccount({ role, status, password, email = "admin@ut.mx", kofDesk }: AccountFields) {
-  return prisma.account.create({ data: { email, name: "Sysadmin", role, status, password, kofDesk } });
+function createAccount({
+  role,
+  status,
+  password,
+  email = "admin@ut.mx",
+  kofDesk,
+  stand,
+  secondaryRole,
+}: AccountFields) {
+  const standId = stand ? ownStandId : undefined;
+
+  return prisma.account.create({
+    data: { email, name: "Sysadmin", role, status, password, kofDesk, standId, secondaryRole },
+  });
 }

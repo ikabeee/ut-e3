@@ -149,3 +149,50 @@ describe("what the other managers can act on", () => {
     );
   }
 });
+
+// L14: a secondary KOF administrator invites KOF staff like a primary one; the stand scope stays with the stand role.
+describe("what an account with a secondary role can act on", () => {
+  const STAND = "stand-1";
+
+  const dualKof = { role: "stand_admin", secondaryRole: "kof_admin", standId: STAND };
+
+  it("lets a stand administrator with the secondary role kof_admin manage KOF staff and its own stand's staff", () => {
+    expect(canManageRole("stand_admin", "kof_staff", "kof_admin")).toBe(true);
+    expect(canManageRole("stand_admin", "stand_staff", "kof_admin")).toBe(true);
+    expect(canManageAccount({ actor: dualKof, target: { role: "kof_staff", standId: null } })).toBe(true);
+    expect(canManageAccount({ actor: dualKof, target: { role: "stand_staff", standId: STAND } })).toBe(true);
+  });
+
+  it("keeps the stand scope: the secondary role does not open the staff of another stand", () => {
+    expect(canManageAccount({ actor: dualKof, target: { role: "stand_staff", standId: "stand-2" } })).toBe(false);
+  });
+
+  it("does not widen anything else for a secondary kof_admin", () => {
+    expect(canManageRole("stand_admin", "kof_admin", "kof_admin")).toBe(false);
+    expect(canManageRole("stand_admin", "help_desk", "kof_admin")).toBe(false);
+    expect(canManageAccount({ actor: dualKof, target: { role: "stand_admin", standId: STAND } })).toBe(false);
+    expect(canManageAccount({ actor: dualKof, target: { role: "sysadmin", standId: null } })).toBe(false);
+  });
+
+  it.each(["help_desk", "raffle_admin"])("gives a secondary %s no accounts to manage", (secondaryRole) => {
+    expect(canManageRole("stand_admin", "kof_staff", secondaryRole)).toBe(false);
+    expect(canManageRole("stand_admin", "help_desk", secondaryRole)).toBe(false);
+    expect(canManageRole("stand_admin", "stand_staff", secondaryRole)).toBe(true);
+    expect(getManagedRoles("stand_admin", secondaryRole)).toEqual(["stand_staff"]);
+  });
+
+  it("lets a stand administrator with the secondary role sysadmin manage every role", () => {
+    const actor = { role: "stand_admin", secondaryRole: "sysadmin", standId: STAND };
+
+    expect(canManageRole("stand_admin", "sysadmin", "sysadmin")).toBe(true);
+    expect(canManageAccount({ actor, target: { role: "kof_staff", standId: null } })).toBe(true);
+    expect(canManageAccount({ actor, target: { role: "stand_staff", standId: "stand-2" } })).toBe(true);
+  });
+
+  it("lists the roles of both, without repeating one", () => {
+    expect(getManagedRoles("stand_admin", "kof_admin")).toEqual(["stand_staff", "kof_staff"]);
+    expect(getManagedRoles("stand_admin", null)).toEqual(["stand_staff"]);
+    expect(getManagedRoles("stand_admin")).toEqual(["stand_staff"]);
+    expect(getManagedRoles("kof_admin", "kof_admin")).toEqual(["kof_staff"]);
+  });
+});
