@@ -376,6 +376,33 @@ El sysadmin puede consultar y modificar la base real desde el panel. Antes de us
 - Una escritura exitosa refresca las cachés de la portada (eventos, juegos, cronograma, patrocinadores y PIN de visitantes).
   No toca el bracket de KOF en memoria ni lo que ya esté guardado en el navegador.
 
+## Logs del servidor (`/admin/logs`)
+
+El sysadmin ve dos registros en el panel (`/admin/logs`):
+
+- **Bitácora:** la tabla `audit_logs`, con filtros por actor, acción, entidad y fechas, en páginas de 25. Es de solo
+  inserción.
+- **Servidor:** la tabla `server_logs`. Sobrevive a los reinicios, se filtra por nivel (`error`, `warn`, `info`), origen
+  (`request`, `email`, `overload`, `emergency`, `worker`, `console`), texto y fechas, y puede actualizarse sola cada 15 s.
+
+Qué se guarda, desde `logServerEvent(level, source, message, details)` (`src/shared/lib/server/server-log.ts`):
+
+- Los errores que Next.js atrapa en una petición: la ruta (`/activate/[token]`), el método y el `digest`; nunca la URL visitada.
+- El resultado de cada correo de la bandeja: enviado, fallido (se reintenta) o abandonado, con el asunto y el destinatario
+  enmascarado (`j***@ut.mx`); nunca el texto del correo.
+- Los avisos de emergencia que salen, el cierre automático del bracket y las fallas de la vigilancia de carga, de la
+  entrega de correos y de la propia purga.
+- Todo lo que el código del servidor imprime con `console.error` y `console.warn` (origen `console`). Se guardan como
+  máximo 30 por minuto, para que una avalancha de errores no llene la tabla; la consola del contenedor los imprime siempre.
+
+Antes de guardar se ocultan los tokens (la query de una URL y los segmentos largos de una ruta), los códigos de 6 dígitos,
+las contraseñas y las direcciones de correo (`j***@ut.mx`). Es una red de seguridad, no una garantía: no imprimas datos
+personales en el servidor. Si la base falla, el evento se imprime en la consola del contenedor y no se pierde.
+
+Retención: cada hora, y al arrancar, se borran las filas de más de 30 días. "Purgar ahora" hace lo mismo desde el panel y
+deja una entrada `admin.server_logs.purge` en la bitácora con quién lo hizo y cuántas filas borró. La tabla se puede
+consultar en `/admin/sql`, pero la purga no borra nada más reciente de 30 días.
+
 ## Despliegue continuo (GitHub Actions y Coolify)
 
 El servidor de producción corre en Coolify y no compila (RNF-15). `.github/workflows/deploy.yml` hace el trabajo:

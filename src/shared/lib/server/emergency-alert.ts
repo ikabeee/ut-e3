@@ -3,6 +3,7 @@ import { deliverQueuedEmail } from "@shared/lib/server/email-delivery";
 import { enqueueEmail, type OutgoingEmail, type SendEmail } from "@shared/lib/server/email-outbox";
 import { createSmtpSender } from "@shared/lib/server/mailer";
 import { getPrisma } from "@shared/lib/server/prisma";
+import { logServerEvent } from "@shared/lib/server/server-log";
 import { siteConfig } from "@shared/lib/site-config";
 
 export interface EmergencyAlert {
@@ -72,6 +73,8 @@ export function createEmergencyAlerter(options: EmergencyAlerterOptions = {}): S
     if (!to || !allows(alert.key, now())) return false;
 
     const email = buildAlertEmail(to, alert, now());
+
+    await logServerEvent("warn", "emergency", `Emergency alert sent: ${alert.subject}`, { key: alert.key });
 
     try {
       await deliver(await queue(email));

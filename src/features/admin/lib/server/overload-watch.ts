@@ -8,6 +8,7 @@ import {
 } from "@features/admin/lib/overload-rule";
 import { setPublicBracketEnabled } from "@features/tournament/lib/server/public-bracket-mutations";
 import { sendEmergencyAlert } from "@shared/lib/server/emergency-alert";
+import { logServerEvent } from "@shared/lib/server/server-log";
 import { clearLoadSamples, getLoadSamples, takeLoadSample, type LoadSample } from "@shared/lib/server/system-load";
 
 /** What checkOverload uses from outside: how it reads the machine and how it closes the bracket. */
@@ -50,12 +51,22 @@ export async function checkOverload(
 
   const closed = await close(`overload:${metric}`);
 
-  if (closed)
-    console.warn(
-      `Public bracket closed automatically: ${metric} above ${formatShare(PUBLIC_BRACKET_OVERLOAD_RULE.threshold)} for 2 minutes.`,
-    );
+  if (closed) await logBracketClosed(metric);
 
   return metric;
+}
+
+async function logBracketClosed(metric: string): Promise<void> {
+  const threshold = formatShare(PUBLIC_BRACKET_OVERLOAD_RULE.threshold);
+
+  await logServerEvent(
+    "warn",
+    "overload",
+    `Public bracket closed automatically: ${metric} above ${threshold} for 2 minutes.`,
+    {
+      metric,
+    },
+  );
 }
 
 async function alertOverload(metric: string | null): Promise<void> {
@@ -73,7 +84,7 @@ async function alertOverload(metric: string | null): Promise<void> {
 async function alertWatchFailure(cause: unknown): Promise<void> {
   const message = cause instanceof Error ? cause.message : "Unknown error";
 
-  console.error(`Overload watch failed: ${message}`);
+  await logServerEvent("error", "overload", `Overload watch failed: ${message}`);
   await sendEmergencyAlert({ key: "overload-watch", subject: EMERGENCY.watchFailedSubject, detail: message });
 }
 
