@@ -224,7 +224,7 @@ async function runSteps({ pages, database, screenshots }) {
   await signIn(page, SYSADMIN);
   await waitForStaffHome(page, "/admin");
   check("the sysadmin signs in to /admin with the sections of the panel", await hasNav(page));
-  await page.screenshot({ path: path.join(screenshots, "sysadmin-tools-01-panel.png"), fullPage: true });
+  await takeScreenshot(page, path.join(screenshots, "sysadmin-tools-01-panel.png"));
 
   await editEventSettings({ page, database, screenshots });
   const visitorId = await registerVisitorWithNineVisits({ page: pages.visitor, database });
@@ -237,6 +237,14 @@ async function runSteps({ pages, database, screenshots }) {
   await blockTeamEmail({ pages, database, screenshots });
   await checkServerStatus({ page, database, screenshots });
   await checkPhoneWidth(pages.visitor);
+}
+
+// Playwright hides the caret of a screenshot by writing an inline `caret-color: transparent` on every input of the
+// page. When the page is still hydrating (the dev server streams the HTML before its scripts run), React finds that
+// attribute in the server HTML and logs a hydration mismatch that has nothing to do with the app. `caret: "initial"`
+// leaves the inputs alone, so the shot never changes the DOM React is about to hydrate.
+async function takeScreenshot(page, file) {
+  await page.screenshot({ path: file, fullPage: true, caret: "initial" });
 }
 
 async function hasNav(page) {
@@ -278,7 +286,7 @@ async function editEventSettings({ page, database, screenshots }) {
     cutoff.at.startsWith("2026-11-20T21:50"),
     cutoff.at,
   );
-  await page.screenshot({ path: path.join(screenshots, "sysadmin-tools-02-settings.png"), fullPage: true });
+  await takeScreenshot(page, path.join(screenshots, "sysadmin-tools-02-settings.png"));
   await page.getByLabel("Corte de check-ins").fill("2026-11-20T16:50");
 }
 
@@ -337,7 +345,7 @@ async function checkFraudAlerts({ page, screenshots }) {
   const fewStands = await page.getByTestId("fraud-few-stands").textContent();
 
   check("the alert of visitors of a single stand lists the one-visit passports", /1 check-in/.test(fewStands));
-  await page.screenshot({ path: path.join(screenshots, "sysadmin-tools-03-alerts.png"), fullPage: true });
+  await takeScreenshot(page, path.join(screenshots, "sysadmin-tools-03-alerts.png"));
 }
 
 // E2E-14 steps 1 and 2: the annulment voids the ticket and the passport shows 8 visits and the voided ticket.
@@ -372,17 +380,14 @@ async function annulOneVisit({ pages, database, screenshots, visitorId }) {
   );
   check("its ticket became voided in the same transaction", ticket?.status === "voided", ticket?.status);
   check("the votes of the passport are all still there", count(database, "votes", `visitor_id = '${visitorId}'`) === 9);
-  await page.screenshot({ path: path.join(screenshots, "sysadmin-tools-04-annulment.png"), fullPage: true });
+  await takeScreenshot(page, path.join(screenshots, "sysadmin-tools-04-annulment.png"));
 
   await pages.visitor.reload({ waitUntil: "networkidle" });
   await pages.visitor
     .getByText(`Visitados 8 de ${database.prepare("SELECT COUNT(*) AS total FROM stands").get().total}`)
     .waitFor({ timeout: UI_TIMEOUT_MS });
   check("the passport shows 8 visits and the voided ticket", await pages.visitor.getByText(/^Anulado/).isVisible());
-  await pages.visitor.screenshot({
-    path: path.join(screenshots, "sysadmin-tools-05-passport-voided.png"),
-    fullPage: true,
-  });
+  await takeScreenshot(pages.visitor, path.join(screenshots, "sysadmin-tools-05-passport-voided.png"));
 }
 
 // E2E-14 step 3 and UT-CI-19: an excluded passport keeps its data and the kiosk refuses its PIN.
@@ -470,7 +475,7 @@ async function registerSponsor({ page, database, screenshots }) {
     sponsor?.email === "hola@pixel-coffee.example",
     sponsor?.email,
   );
-  await page.screenshot({ path: path.join(screenshots, "sysadmin-tools-06-catalog.png"), fullPage: true });
+  await takeScreenshot(page, path.join(screenshots, "sysadmin-tools-06-catalog.png"));
 
   await page.goto(`${BASE_URL}/sponsors`, { waitUntil: "networkidle" });
   check("the public page of sponsors shows it", await page.getByText("Pixel Coffee").first().isVisible());
@@ -488,7 +493,7 @@ async function blockTeamEmail({ pages, database, screenshots }) {
     "the list flags the email that already has a passport",
     await page.getByText("Ya tiene pasaporte").first().isVisible(),
   );
-  await page.screenshot({ path: path.join(screenshots, "sysadmin-tools-07-blocklist.png"), fullPage: true });
+  await takeScreenshot(page, path.join(screenshots, "sysadmin-tools-07-blocklist.png"));
 
   const context = await page
     .context()
@@ -531,7 +536,7 @@ async function checkServerStatus({ page, database, screenshots }) {
     "the outbox shows its counts",
     /Enviados: \d+\. Pendientes: \d+\. Fallidos: [1-9]/.test(await page.getByTestId("server-outbox").textContent()),
   );
-  await page.screenshot({ path: path.join(screenshots, "sysadmin-tools-08-server.png"), fullPage: true });
+  await takeScreenshot(page, path.join(screenshots, "sysadmin-tools-08-server.png"));
 
   const row = page.getByTestId("server-outbox").getByRole("listitem").filter({ hasText: "Correo de prueba" });
 
