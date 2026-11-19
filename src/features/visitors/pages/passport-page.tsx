@@ -10,8 +10,14 @@ import { RejectedVisitNotices } from "@features/stands/components/rejected-visit
 import { VisitSurveyPrompt } from "@features/stands/components/visit-survey-prompt";
 import { getRejectedVisitNotices } from "@features/stands/lib/server/rejected-visit-queries";
 import { answerVisitAction } from "@features/stands/lib/stands-actions";
+import { SelfEntryPanel } from "@features/tournament/components/self-entry-panel";
 import { TournamentNotice } from "@features/tournament/components/tournament-notice";
-import { getEntrySchedule, getVisitorEntryStatus } from "@features/tournament/lib/server/entries-queries";
+import { enrollSelfAction } from "@features/tournament/lib/self-entry-actions";
+import {
+  getEntrySchedule,
+  getSelfEntryAvailability,
+  getVisitorEntryStatus,
+} from "@features/tournament/lib/server/entries-queries";
 import { getGames } from "@features/games/lib/server/games-queries";
 import type { Game } from "@features/games/lib/types";
 import { PassportExplorer } from "@features/visitors/components/passport-explorer";
@@ -94,13 +100,21 @@ async function loadRaffleWin(visitorId: string): Promise<ReactNode> {
   return win ? <RaffleWinNotice win={win} /> : null;
 }
 
-// The page is where the visitors and tournament features meet: the notice only exists for a player that entered (RF-75).
+// The page is where the visitors and tournament features meet: the notice is for a player that entered (RF-75) and
+// whoever has not entered gets the way to enroll, or the reason they cannot.
 async function loadTournamentNotice(visitorId: string): Promise<ReactNode> {
   const status = await getVisitorEntryStatus(visitorId);
-
-  if (!status) return null;
-
   const schedule = await getEntrySchedule();
+
+  if (!status) {
+    return (
+      <SelfEntryPanel
+        availability={await getSelfEntryAvailability(visitorId, new Date())}
+        registrationOpensAt={schedule.registrationOpensAt.toISOString()}
+        action={enrollSelfAction}
+      />
+    );
+  }
 
   return (
     <TournamentNotice
