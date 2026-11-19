@@ -7,3 +7,5 @@ export const ADMIN_MODERATION_PATH = `${SYSADMIN_HOME_PATH}/moderation`;
 export const ADMIN_CATALOG_PATH = `${SYSADMIN_HOME_PATH}/catalog`;
 
 export const ADMIN_SERVER_PATH = `${SYSADMIN_HOME_PATH}/server`;
+
+export const ADMIN_SQL_PATH = `${SYSADMIN_HOME_PATH}/sql`;

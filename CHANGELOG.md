@@ -6,6 +6,23 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.3.0] - 2026-11-18
+
+### Agregado
+
+- `/admin/sql`: consola SQL solo para el sysadmin. Ejecuta una sentencia (`SELECT`, `WITH`, `EXPLAIN`, `INSERT`, `UPDATE`
+  o `DELETE`); las lecturas muestran hasta 500 filas y las escrituras se revisan primero (cuántas filas cambiarían, sin
+  aplicar nada) y se aplican al escribir CONFIRMAR. Cada sentencia, también la revisión de una escritura, queda en la bitácora de auditoría.
+
+### Corregido
+
+- Los correos se envían saludando al servidor SMTP con un dominio real (`SMTP_EHLO_NAME` o el de `NEXT_PUBLIC_SITE_URL`), no con el nombre del contenedor; el relay de Google Workspace los rechazaba con `421 4.7.0`.
+- El seed crea la cuenta sysadmin de `SYSADMIN_EMAIL` aunque ya exista otro sysadmin; antes la variable se ignoraba en silencio después del primer despliegue.
+
+### Cambiado
+
+- El contenedor ya no corre el seed al arrancar; en una base nueva se corre una vez con `docker compose exec app prisma db seed`.
+
 ## [1.2.0] - 2026-11-18
 
 ### Agregado

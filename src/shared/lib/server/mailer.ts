@@ -10,6 +10,7 @@ interface SmtpConfig {
   user: string;
   pass: string;
   from: string;
+  ehloName: string | undefined;
 }
 
 type EnvironmentSource = NodeJS.ProcessEnv | Record<string, string | undefined>;
@@ -18,7 +19,10 @@ export function createSmtpSender(env: EnvironmentSource = process.env): SendEmai
   const config = readSmtpConfig(env);
   const isDirectTls = config.port === 465;
 
+  // The relay of Google Workspace closes the connection (421 4.7.0) when the greeting is not a real domain, and the
+  // default greeting is the hostname of the container.
   const transporter = createTransport({
+    name: config.ehloName,
     host: config.host,
     port: config.port,
     secure: isDirectTls,
@@ -47,8 +51,9 @@ function readSmtpConfig(env: EnvironmentSource): SmtpConfig {
   const user = requireEnvVariable(env, "SMTP_USER");
   const pass = requireEnvVariable(env, "SMTP_PASSWORD");
   const from = parseSmtpFrom(env);
+  const ehloName = readEhloName(env);
 
-  return { host, port, user, pass, from };
+  return { host, port, user, pass, from, ehloName };
 }
 
 function parseSmtpPort(env: EnvironmentSource): number {
@@ -78,6 +83,14 @@ function parseSmtpFrom(env: EnvironmentSource): string {
   }
 
   return from;
+}
+
+function readEhloName(env: EnvironmentSource): string | undefined {
+  const name = env.SMTP_EHLO_NAME?.trim();
+
+  if (name) return name;
+
+  return URL.parse(env.NEXT_PUBLIC_SITE_URL ?? "")?.hostname || undefined;
 }
 
 function requireEnvVariable(env: EnvironmentSource, name: string): string {

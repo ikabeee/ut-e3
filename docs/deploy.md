@@ -8,7 +8,7 @@ el `Dockerfile` y el `docker-compose.yml`; el proxy (Nginx o Caddy) lo pones tú
 | Archivo | Para qué |
 | --- | --- |
 | `Dockerfile` | Imagen en tres etapas con Node 22: compila (`prisma generate` y `next build`), arma las dependencias de arranque y deja una imagen final sin compiladores. Corre como el usuario `node` (no root). |
-| `docker/entrypoint.sh` | Al arrancar aplica las migraciones pendientes (`prisma migrate deploy`), carga el contenido inicial y la cuenta del sysadmin (`prisma db seed`) y deja `node server.js` como proceso principal. |
+| `docker/entrypoint.sh` | Al arrancar aplica las migraciones pendientes (`prisma migrate deploy`), y deja `node server.js` como proceso principal. |
 | `docker-compose.yml` | Un servicio `app`, volumen `app-data` con la base SQLite, reinicio automático y `stop_grace_period: 30s`. Publica solo en `127.0.0.1`. |
 | `.env.production.example` | Plantilla de variables. Se copia a `.env` en el VPS. |
 | `GET /api/health` | Ruta ligera que usa el `HEALTHCHECK` de la imagen. No consulta la base: responde 503 (`low-disk`) si al volumen de la base le quedan menos de 64 MB, y `docker compose ps` lo muestra como `unhealthy`. No la uses como chequeo activo del proxy (ver "Caddy"). |
@@ -38,9 +38,13 @@ nano .env                # llena los valores; ver "Variables"
 
 docker compose build
 docker compose up -d
-docker compose ps        # espera el estado "healthy" (el primer arranque tarda por las migraciones y el seed)
+docker compose ps        # espera el estado "healthy" (el primer arranque tarda por las migraciones)
 curl -s http://127.0.0.1:3000/api/health
+docker compose exec app prisma db seed   # solo la primera vez: contenido inicial y cuenta del sysadmin
 ```
+
+El contenedor no corre el seed al arrancar, para no tocar una base que ya tiene sus datos. Córrelo a mano solo en
+una base nueva.
 
 Después configura el proxy inverso (ver más abajo). Entra a `https://<tu-dominio>/login` con `SYSADMIN_EMAIL` y
 `SYSADMIN_PASSWORD` (solo en un entorno con `SITE_MODE=full`; ver "Kill switch").
@@ -89,13 +93,14 @@ Todas viven en `.env` (nunca se versiona). `.env.production.example` las lista c
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Sí | URL pública sin `/` final. **Se incrusta al construir**: si cambia, `docker compose build` de nuevo. |
 | `PIN_ENCRYPTION_KEY` | Sí | 32 bytes en base64: `openssl rand -base64 32`. Guárdala fuera del VPS; sin ella no se pueden leer los PIN guardados. |
-| `SYSADMIN_EMAIL`, `SYSADMIN_NAME`, `SYSADMIN_PASSWORD` | Sí, la primera vez | Crean la cuenta del sysadmin solo si todavía no existe uno. Si ya existe, se ignoran: cambiar la contraseña aquí no la cambia. |
+| `SYSADMIN_EMAIL`, `SYSADMIN_NAME`, `SYSADMIN_PASSWORD` | Solo para el seed | Las usa `prisma db seed` (a mano, en una base nueva): crea la cuenta sysadmin de `SYSADMIN_EMAIL` si no existe una cuenta con ese correo, aunque ya haya otro sysadmin. Nunca modifican una cuenta existente: cambiar la contraseña aquí no la cambia. |
 | `NEXT_PUBLIC_MAPBOX_TOKEN` | No | Token **público** de Mapbox (`pk.`) del mapa de la sede. **Se incrusta al construir.** Sin él, o con un token secreto (`sk.`), la portada muestra el esquema de la sede en lugar del mapa. En el panel de Mapbox restríngelo a la URL del sitio. |
 | `SITE_MODE` | No | `landing` (por defecto) o `full`. **Se incrusta al construir**; ver "Kill switch". |
 | `ENV_FILE` | No | Archivo de variables del contenedor. Por defecto `.env`; ver "Dos entornos". |
 | `APP_PORT` | No | Puerto en `127.0.0.1` para el proxy. Por defecto `3000`. |
 | `APP_TAG` | No | Etiqueta de la imagen. Por defecto `latest`. |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | No | Ver "Correo". |
+| `SMTP_EHLO_NAME` | No | Nombre con el que el servidor saluda al SMTP (EHLO), por ejemplo `pixelandcode.tu-dominio.mx`. Sin él se usa el dominio de `NEXT_PUBLIC_SITE_URL`. El relay de Google Workspace (`smtp-relay.gmail.com`) cierra la conexión con `421 4.7.0` si el saludo no es un dominio real. |
 | `EMERGENCY_MAIL` | No | Dirección que recibe los avisos de emergencia de producción. Sin ella no se envía ninguno; ver "Avisos de emergencia". |
 
 El contenedor se niega a arrancar si faltan `NEXT_PUBLIC_SITE_URL` o `PIN_ENCRYPTION_KEY` y lo dice en el log.
@@ -351,6 +356,25 @@ docker compose down -v            # ¡borra también la base!
 El reinicio automático (`restart: unless-stopped`) levanta el contenedor si el proceso cae o si el VPS se reinicia
 (RNF-17). Docker no lo levanta tras una parada manual: `docker compose stop`, `docker stop` y también `docker kill`
 (aunque sea con `-s KILL`) lo dejan detenido hasta un `docker compose up -d`. Para un cambio de `.env` sin cambio de `NEXT_PUBLIC_SITE_URL`, basta `docker compose up -d`.
+
+## Consola SQL (`/admin/sql`)
+
+El sysadmin puede consultar y modificar la base real desde el panel. Antes de usarla en producción:
+
+- **Respalda antes de escribir** (ver "Respaldos"): una escritura confirmada se aplica de inmediato y no se puede deshacer.
+- **Es síncrona.** SQLite corre en el mismo hilo del servidor: una consulta lenta (un `JOIN` sin índice sobre tablas
+  grandes, un producto cartesiano) bloquea todas las solicitudes mientras dura y nada puede interrumpirla. Las
+  lecturas se cortan a 500 filas y un `WITH RECURSIVE` sin `LIMIT` se rechaza, pero eso no frena una consulta que
+  tarda antes de devolver la primera fila. Evita usarla durante el evento o con el bracket público abierto.
+- **Una sentencia por vez**, solo `SELECT`, `WITH`, `EXPLAIN`, `INSERT`, `UPDATE` y `DELETE`. Se rechazan `ATTACH`,
+  `DETACH`, `PRAGMA`, `VACUUM`, `load_extension`, `CREATE`, `DROP` y `ALTER`, y escribir en `_prisma_migrations`,
+  `audit_logs` y las tablas `sqlite_*`. Los cambios de esquema siguen siendo migraciones.
+- **Las lecturas ven todo**, incluidos datos personales y los hashes de las cuentas. Solo el sysadmin con sesión y
+  verificación en dos pasos entra, y cada sentencia queda en la bitácora (`admin.sql.read`, `admin.sql.review` y `admin.sql.write`) con su
+  texto y, en las escrituras, las filas cambiadas; nunca el resultado. No pegues contraseñas ni datos personales en la
+  sentencia: el texto se guarda tal cual.
+- Una escritura exitosa refresca las cachés de la portada (eventos, juegos, cronograma, patrocinadores y PIN de visitantes).
+  No toca el bracket de KOF en memoria ni lo que ya esté guardado en el navegador.
 
 ## Despliegue continuo (GitHub Actions y Coolify)
 
