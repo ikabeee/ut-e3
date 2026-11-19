@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Prisma } from "@generated/prisma/client";
 import { getPrisma } from "@shared/lib/server/prisma";
+import { describeEmailKind } from "@shared/lib/server/email-kind";
 import { logServerEvent, maskEmail } from "@shared/lib/server/server-log";
 
 export interface OutgoingEmail {
@@ -112,7 +113,10 @@ async function deliverEmailWithResult(id: string, send: SendEmail, now: Date): P
       },
     });
 
-    await logServerEvent("info", "email", `Email sent: ${row.subject}`, { emailId: id, to: maskEmail(row.to) });
+    await logServerEvent("info", "email", `Email sent: ${describeEmailKind(row.subject)}`, {
+      emailId: id,
+      to: maskEmail(row.to),
+    });
 
     return true;
   } catch (cause) {
@@ -193,12 +197,17 @@ async function handleDeliveryFailure(claim: PendingOutboxClaim, cause: unknown, 
 
 // A failed attempt will be retried (warn); an abandoned one never leaves again without a sysadmin (error).
 async function logDeliveryFailure(claim: PendingOutboxClaim, outcome: DeliveryFailure, reason: string): Promise<void> {
-  await logServerEvent(outcome === "abandoned" ? "error" : "warn", "email", `Email ${outcome}: ${claim.subject}`, {
-    emailId: claim.id,
-    to: maskEmail(claim.to),
-    attempts: outcome === "abandoned" ? MAX_ATTEMPTS : claim.attempts + 1,
-    reason,
-  });
+  await logServerEvent(
+    outcome === "abandoned" ? "error" : "warn",
+    "email",
+    `Email ${outcome}: ${describeEmailKind(claim.subject)}`,
+    {
+      emailId: claim.id,
+      to: maskEmail(claim.to),
+      attempts: outcome === "abandoned" ? MAX_ATTEMPTS : claim.attempts + 1,
+      reason,
+    },
+  );
 }
 
 export function getRetryDelayMs(attempts: number, random: () => number = Math.random): number {

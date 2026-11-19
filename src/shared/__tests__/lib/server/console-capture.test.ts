@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import { installConsoleCapture, MAX_CAPTURED_PER_MINUTE } from "@shared/lib/server/console-capture";
+import type * as Capture from "@shared/lib/server/console-capture";
 import type { ServerLogLevel, ServerLogSource } from "@shared/lib/server-log-types";
 
 interface Written {
@@ -86,6 +87,21 @@ describe("installConsoleCapture", () => {
     target.error("later");
 
     expect(written.at(-1)).toMatchObject({ message: "later" });
+  });
+
+  it("records a console.error once when two copies of the module are installed (hot reload)", () => {
+    const target = createFakeConsole();
+    const write = jest.fn(async () => undefined);
+
+    jest.isolateModules(() => {
+      jest.requireActual<typeof Capture>("@shared/lib/server/console-capture").installConsoleCapture({ target, write });
+    });
+    jest.isolateModules(() => {
+      jest.requireActual<typeof Capture>("@shared/lib/server/console-capture").installConsoleCapture({ target, write });
+    });
+    target.error("once");
+
+    expect(write).toHaveBeenCalledTimes(1);
   });
 
   it("puts the original functions back when uninstalled", () => {

@@ -10,8 +10,18 @@ const PURGE_INTERVAL_MS = 60 * 60_000;
 
 const DAY_MS = 24 * 60 * 60_000;
 
-/** Started once by instrumentation.ts: purges now and then every hour; the timer does not keep the process alive. */
+// On globalThis, so a hot reload or a second copy of this module finds the timer the first one started.
+const TIMER_KEY = Symbol.for("ut-e3.serverLogRetention");
+
+const timers: Record<symbol, ReturnType<typeof setInterval> | undefined> = globalThis;
+
+/**
+ * Started by instrumentation.ts: purges now and then every hour; the timer does not keep the process alive. Calling it
+ * again, from a second `register()` or a second copy of the module, does nothing.
+ */
 export function startServerLogRetention(): void {
+  if (timers[TIMER_KEY]) return;
+
   void purgeAndReport();
 
   const timer = setInterval(() => {
@@ -19,6 +29,7 @@ export function startServerLogRetention(): void {
   }, PURGE_INTERVAL_MS);
 
   timer.unref();
+  timers[TIMER_KEY] = timer;
 }
 
 async function purgeAndReport(): Promise<void> {

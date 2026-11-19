@@ -48,7 +48,7 @@ describe("email delivery in the server logs", () => {
     const [entry, ...rest] = await loggedEmailEvents();
 
     expect(rest).toEqual([]);
-    expect(entry).toMatchObject({ level: "info", message: "Email sent: Tu código de acceso" });
+    expect(entry).toMatchObject({ level: "info", message: "Email sent: other" });
     expect(entry.details).toMatchObject({ to: "v***@ut.mx" });
     expect(JSON.stringify(entry)).not.toContain("visitor@ut.mx");
     expect(JSON.stringify(entry)).not.toContain("123456");
@@ -61,7 +61,7 @@ describe("email delivery in the server logs", () => {
 
     const [entry] = await loggedEmailEvents();
 
-    expect(entry).toMatchObject({ level: "warn", message: "Email failed: Tu código de acceso" });
+    expect(entry).toMatchObject({ level: "warn", message: "Email failed: other" });
     expect(entry.details).toMatchObject({ to: "v***@ut.mx", attempts: 1, reason: "Temporary failure" });
   });
 
@@ -76,8 +76,8 @@ describe("email delivery in the server logs", () => {
 
     expect(entries.map((entry) => [entry.level, entry.message])).toEqual(
       expect.arrayContaining([
-        ["error", "Email abandoned: Tu código de acceso"],
-        ["error", "Email abandoned: Tu código de acceso"],
+        ["error", "Email abandoned: other"],
+        ["error", "Email abandoned: other"],
       ]),
     );
     expect(entries).toHaveLength(2);

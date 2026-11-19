@@ -22,7 +22,8 @@ const MINUTE_MS = 60_000;
 
 const LEVELS: Record<CapturedMethod, ServerLogLevel> = { error: "error", warn: "warn" };
 
-const WRAPPED = Symbol("serverLogCapture");
+// Symbol.for is shared by every copy of this module (hot reload), so a wrapped console is never wrapped again.
+const WRAPPED = Symbol.for("ut-e3.consoleCapture");
 
 type Wrapped = ((...args: unknown[]) => void) & { [WRAPPED]?: (...args: unknown[]) => void };
 

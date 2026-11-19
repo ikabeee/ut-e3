@@ -1,6 +1,7 @@
 /**
  * @jest-environment node
  */
+import type * as Retention from "@shared/lib/server/server-log-retention";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { purgeExpiredServerLogs, SERVER_LOG_RETENTION_DAYS } from "@shared/lib/server/server-log-retention";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
@@ -52,5 +53,49 @@ describe("purgeExpiredServerLogs", () => {
 
   it("is 30 days", () => {
     expect(SERVER_LOG_RETENTION_DAYS).toBe(30);
+  });
+});
+
+describe("the 30-day boundary", () => {
+  it("keeps exactly 30 days, deletes 30 days and 1 ms, and keeps a row dated in the future", async () => {
+    await createLog("exactly 30 days", SERVER_LOG_RETENTION_DAYS * DAY_MS);
+    await createLog("30 days and 1 ms", SERVER_LOG_RETENTION_DAYS * DAY_MS + 1);
+    await createLog("in the future", -DAY_MS);
+
+    await expect(purgeExpiredServerLogs(getPrisma(), NOW)).resolves.toBe(1);
+
+    const kept = await getPrisma().serverLog.findMany({ orderBy: { message: "asc" } });
+
+    expect(kept.map((row) => row.message)).toEqual(["exactly 30 days", "in the future"]);
+  });
+});
+
+describe("startServerLogRetention across hot reloads", () => {
+  const GUARD = Symbol.for("ut-e3.serverLogRetention");
+
+  afterEach(() => {
+    const guarded: Record<symbol, ReturnType<typeof setInterval> | undefined> = globalThis;
+
+    clearInterval(guarded[GUARD]);
+    delete guarded[GUARD];
+  });
+
+  it("starts one timer, even when the module is loaded twice and register() runs twice", () => {
+    const setIntervalSpy = jest.spyOn(globalThis, "setInterval");
+
+    jest.isolateModules(() => {
+      const first = jest.requireActual<typeof Retention>("@shared/lib/server/server-log-retention");
+      const second = jest.requireActual<typeof Retention>("@shared/lib/server/server-log-retention");
+
+      first.startServerLogRetention();
+      second.startServerLogRetention();
+    });
+    jest.isolateModules(() => {
+      jest.requireActual<typeof Retention>("@shared/lib/server/server-log-retention").startServerLogRetention();
+    });
+
+    expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+
+    setIntervalSpy.mockRestore();
   });
 });

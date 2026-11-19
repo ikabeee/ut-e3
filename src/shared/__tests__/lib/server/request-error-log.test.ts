@@ -26,7 +26,7 @@ describe("logRequestError", () => {
 
     const row = await getPrisma().serverLog.findFirstOrThrow({ where: { source: "request" } });
 
-    expect(row).toMatchObject({ level: "error", message: "Boom" });
+    expect(row).toMatchObject({ level: "error", message: "Request error: Error" });
     expect(row.details).toEqual({
       route: "/reset-password/[token]",
       routeType: "render",
@@ -34,17 +34,37 @@ describe("logRequestError", () => {
       digest: "d-123",
     });
     expect(JSON.stringify(row)).not.toContain("abcdefghijklmnopqrstuvwxyz123456");
+    expect(JSON.stringify(row)).not.toContain("Boom");
+    expect(Object.keys(row.details ?? {}).toSorted()).toEqual(["digest", "method", "route", "routeType"]);
+  });
+
+  it("never stores the free message of the error, only its class", async () => {
+    await logRequestError(
+      new TypeError("Cannot read ana@ut.mx token=abc"),
+      { method: "GET", path: "/x" },
+      { routePath: "/x", routeType: "render" },
+    );
+
+    await expect(
+      getPrisma().serverLog.findFirstOrThrow({ where: { message: { contains: "TypeError" } } }),
+    ).resolves.toMatchObject({
+      message: "Request error: TypeError",
+    });
+    await expect(getPrisma().serverLog.count({ where: { message: { contains: "ana" } } })).resolves.toBe(0);
   });
 
   it("accepts a value that is not an Error and no digest", async () => {
+    await getPrisma().serverLog.deleteMany();
+
     await logRequestError(
       "plain text",
       { method: "POST", path: "/api/x" },
-      { routePath: "/api/x", routeType: "route" },
+      { routePath: "/api/y", routeType: "route" },
     );
 
-    await expect(getPrisma().serverLog.findFirstOrThrow({ where: { message: "plain text" } })).resolves.toMatchObject({
-      details: { route: "/api/x", method: "POST" },
+    await expect(getPrisma().serverLog.findFirstOrThrow()).resolves.toMatchObject({
+      message: "Request error: NonError",
+      details: { route: "/api/y", method: "POST" },
     });
   });
 });

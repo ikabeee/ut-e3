@@ -23,7 +23,8 @@ const MASKED_EMAIL = "$1***@$2";
 const REDACTIONS: [RegExp, string][] = [
   [/(\bhttps?:\/\/[^\s"'<>?#]*)[?#][^\s"'<>]*/gi, "$1?[redacted]"],
   [/\b(password|passwd|pwd|contraseña)(\s*[:=]\s*)["']?[^\s,;&"']+/gi, `$1$2${REDACTED}`],
-  [/\b(secret|token|authorization|api[-_]?key)(\s*[:=]\s*)["']?[^\s,;&"']+/gi, `$1$2${REDACTED}`],
+  [/\b(authorization)(\s*[:=]\s*)(?:(?:Bearer|Basic)\s+)?[^\s,;&"']+/gi, `$1$2${REDACTED}`],
+  [/\b(secret|token|api[-_]?key)(\s*[:=]\s*)["']?[^\s,;&"']+/gi, `$1$2${REDACTED}`],
   [/("[^"]*(?:password|passwd|secret|token)[^"]*"\s*:\s*)"[^"]*"/gi, `$1"${REDACTED}"`],
   [/("[^"]*(?:authorization|cookie|api[-_]?key)[^"]*"\s*:\s*)"[^"]*"/gi, `$1"${REDACTED}"`],
   [/("(?:code|pin|otp)"\s*:\s*)(?:"[^"]*"|\d+)/gi, `$1"${REDACTED}"`],
