@@ -29,6 +29,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- Panel de administración: la navegación pasa a una barra lateral con íconos (en móvil, un menú plegable), también en
+  `/admin/kof` y `/admin/raffle` para el sysadmin.
 - Correo: una sola conexión SMTP, como máximo un mensaje cada 2 segundos y 10 por pasada; ante un error temporal (Gmail
   `421 4.7.0`) la pasada se detiene y los reintentos esperan de 15 min a 2 h, en lugar de gastar los 5 intentos en minutos.
 - `/tournament`: el reloj de arena y el texto "El bracket estará disponible en la pantalla del torneo." quedan centrados.

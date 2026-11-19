@@ -7,6 +7,7 @@ import { RAFFLE_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { getOtherAreaLink } from "@features/accounts/lib/area-links";
 import { requireRaffleAdmin } from "@features/accounts/lib/server/current-account";
 import { AdminHeader } from "@features/admin/components/admin-header";
+import { AdminSidebarLayout } from "@features/admin/components/admin-sidebar";
 import { RaffleDashboard, type RaffleDashboardActions } from "@features/raffle/components/raffle-dashboard";
 import {
   closeRaffleAction,
@@ -51,13 +52,14 @@ async function RafflePanel() {
   await connection();
 
   const account = await requireRaffleAdmin();
+  const currentPath = account.role === "sysadmin" ? RAFFLE_HOME_PATH : null;
 
   return (
-    <>
+    <AdminSidebarLayout currentPath={currentPath}>
       <AdminHeader
         title={COPY.title}
         signedInAs={COPY.signedInAs(account.name, account.role === "sysadmin")}
-        currentPath={account.role === "sysadmin" ? RAFFLE_HOME_PATH : null}
+        currentPath={currentPath}
         signOutAction={signOut}
       />
       <AreaLink link={getOtherAreaLink(account.roles, "secondary")} />
@@ -65,7 +67,7 @@ async function RafflePanel() {
         {COPY.liveLink}
       </ActionLink>
       <RaffleDashboard initial={await loadSnapshot()} viewerId={account.id} actions={ACTIONS} />
-    </>
+    </AdminSidebarLayout>
   );
 }
 
