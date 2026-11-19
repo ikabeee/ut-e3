@@ -1,3 +1,4 @@
+import { ACCOUNT_ROLES } from "@features/accounts/lib/types";
 import {
   canManageAccount,
   canManageRole,
@@ -119,4 +120,32 @@ describe("canManageAccount (RF-32)", () => {
       false,
     );
   });
+});
+
+// The rules of the managers that are not the sysadmin, frozen: the sysadmin's extension must not widen them.
+describe("what the other managers can act on", () => {
+  const STAND = "stand-1";
+
+  it.each(ACCOUNT_ROLES.filter((role) => role !== "sysadmin"))("freezes the matrix of the %s", (actorRole) => {
+    for (const targetRole of ACCOUNT_ROLES) {
+      const actor = { role: actorRole, standId: actorRole === "stand_admin" ? STAND : null };
+      const sameStand = canManageAccount({ actor, target: { role: targetRole, standId: STAND } });
+      const otherStand = canManageAccount({ actor, target: { role: targetRole, standId: "stand-2" } });
+      const noStand = canManageAccount({ actor, target: { role: targetRole, standId: null } });
+
+      expect({ targetRole, sameStand, otherStand, noStand }).toEqual({
+        targetRole,
+        sameStand: isAllowed(actorRole, targetRole),
+        otherStand: isAllowed(actorRole, targetRole) && actorRole !== "stand_admin",
+        noStand: isAllowed(actorRole, targetRole) && actorRole !== "stand_admin",
+      });
+    }
+  });
+
+  function isAllowed(actorRole: string, targetRole: string): boolean {
+    return (
+      (actorRole === "kof_admin" && targetRole === "kof_staff") ||
+      (actorRole === "stand_admin" && targetRole === "stand_staff")
+    );
+  }
 });

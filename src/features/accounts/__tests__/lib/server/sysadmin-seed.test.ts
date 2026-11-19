@@ -4,6 +4,7 @@
 import { seedSysadmin } from "@features/accounts/lib/server/sysadmin-seed";
 import { verifyPassword } from "@shared/lib/server/password";
 import { createTestClient, createTestDatabase } from "@shared/__tests__/lib/server/test-database";
+import { liftSysadminGuard } from "@shared/__tests__/lib/server/sysadmin-guard";
 
 const SYSADMIN_ENV = {
   SYSADMIN_EMAIL: " Admin@UT.mx ",
@@ -23,6 +24,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
+  await liftSysadminGuard(prisma);
   await prisma.account.deleteMany();
   log.mockClear();
 });

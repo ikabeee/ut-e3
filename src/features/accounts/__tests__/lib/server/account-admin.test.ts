@@ -15,7 +15,11 @@ import {
   resendInvitation,
   type ManagingActor,
 } from "@features/accounts/lib/server/invitations";
-import { getResetLinkState, PASSWORD_RESET_RULE } from "@features/accounts/lib/server/password-reset";
+import {
+  getResetLinkState,
+  PASSWORD_RESET_RULE,
+  requestPasswordReset,
+} from "@features/accounts/lib/server/password-reset";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { hashToken } from "@shared/lib/server/token-hash";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
@@ -193,6 +197,17 @@ describe("the sysadmin managing every role", () => {
     expect((await reactivateAccount(sysadmin, staff, NOW)).status).toBe("reactivated");
   });
 
+  it("refuses to reactivate a stand administrator while another one is invited", async () => {
+    const stand = await createStand(400 + testNumber);
+    const first = await createAccount({ email: mail("b1"), role: "stand_admin", standId: stand });
+
+    await disableAccount(sysadmin, first);
+    await createAccount({ email: mail("b2"), role: "stand_admin", status: "invited", standId: stand });
+
+    expect(await reactivateAccount(sysadmin, first, NOW)).toEqual({ status: "adminTaken" });
+    expect((await getPrisma().account.findUniqueOrThrow({ where: { id: first } })).status).toBe("disabled");
+  });
+
   it("refuses to reactivate over the invariants", async () => {
     const first = await createAccount({ email: mail("a1"), role: "stand_admin", standId: otherStandId });
 
@@ -276,6 +291,26 @@ describe("sendAdminPasswordReset", () => {
     expect(await sendAdminPasswordReset(sysadmin, "missing", NOW)).toEqual({ status: "notFound" });
     expect(await sendAdminPasswordReset(kofAdmin, active, NOW)).toEqual({ status: "forbidden" });
     expect(await getPrisma().emailOutbox.count()).toBe(0);
+  });
+
+  it("never spends the self-service limit of the owner, and the owner never spends the one of the sysadmin", async () => {
+    const accountId = await createAccount({ email: mail("own"), role: "help_desk" });
+
+    for (let attempt = 0; attempt < PASSWORD_RESET_RULE.limit; attempt += 1)
+      await sendAdminPasswordReset(sysadmin, accountId, NOW);
+
+    for (let attempt = 0; attempt < PASSWORD_RESET_RULE.limit; attempt += 1) {
+      expect(await requestPasswordReset(mail("own"), NOW)).not.toBeNull();
+    }
+
+    expect(await requestPasswordReset(mail("own"), NOW)).toBeNull();
+    expect(await sendAdminPasswordReset(sysadmin, accountId, NOW)).toEqual({ status: "rateLimited" });
+
+    const another = await createAccount({ email: mail("own2"), role: "help_desk" });
+
+    await requestPasswordReset(mail("own2"), NOW);
+
+    expect((await sendAdminPasswordReset(sysadmin, another, NOW)).status).toBe("sent");
   });
 
   it("has its own hourly limit, so it neither spends nor is blocked by the self-service one", async () => {
@@ -453,6 +488,7 @@ async function createAccount(account: {
       password: status === "invited" ? null : "hash",
       standId: account.standId,
       kofDesk: account.kofDesk,
+      createdAt: NOW,
     },
     select: { id: true },
   });

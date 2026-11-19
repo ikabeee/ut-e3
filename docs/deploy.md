@@ -382,7 +382,7 @@ Solo el sysadmin. Lista las cuentas de todos los roles con filtros (rol, estado,
 Cada acción queda en la bitácora de auditoría (`account.*`) y ninguna guarda el correo ni el enlace en el detalle.
 
 - **Desactivar** cierra las sesiones de la cuenta. Un sysadmin no puede desactivarse a sí mismo ni desactivar al último
-  sysadmin activo: si perdiste el acceso de todos, el remedio es `SYSADMIN_EMAIL` en el seed o la consola SQL.
+  sysadmin activo (un trigger de la base lo garantiza aunque dos lo intenten a la vez; el error es `last_sysadmin`): si perdiste el acceso de todos, el remedio es `SYSADMIN_EMAIL` en el seed o la consola SQL.
 - **Reactivar** devuelve la cuenta a `invited` con una invitación nueva de 72 horas (se borra su contraseña) y respeta
   los límites: un administrador activo por stand, 3 staff por stand y un staff por mesa del KOF.
 - **Enviar restablecimiento de contraseña** manda el enlace de 1 hora de "Olvidé mi contraseña" a una cuenta activa. No se

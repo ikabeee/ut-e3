@@ -130,13 +130,32 @@ export async function disableAccount(actor: ManagingActor, accountId: string): P
 
   if (protection) return protection;
 
-  return getPrisma().$transaction(async (transaction): Promise<DisableResult> => {
-    await transaction.account.update({ where: { id: account.id }, data: { status: "disabled" } });
-    await transaction.session.deleteMany({ where: { accountId: account.id } });
-    await recordAudit(transaction, auditOf(actor, "account.disable", account.id));
+  try {
+    return await getPrisma().$transaction((transaction) => markDisabled({ transaction, actor, account }));
+  } catch (cause) {
+    return explainDisableFailure(cause);
+  }
+}
 
-    return { status: "disabled" };
-  });
+async function markDisabled(request: {
+  transaction: Prisma.TransactionClient;
+  actor: ManagingActor;
+  account: ManagedRow;
+}): Promise<DisableResult> {
+  const { transaction, actor, account } = request;
+
+  await transaction.account.update({ where: { id: account.id }, data: { status: "disabled" } });
+  await transaction.session.deleteMany({ where: { accountId: account.id } });
+  await recordAudit(transaction, auditOf(actor, "account.disable", account.id));
+
+  return { status: "disabled" };
+}
+
+// Two sysadmins can pass the check together; the trigger of the table stops the second one and rolls its changes back.
+function explainDisableFailure(cause: unknown): DisableRefusal {
+  if (readDatabaseMessage(cause).includes("last_sysadmin")) return { status: "lastSysadmin" };
+
+  throw cause;
 }
 
 /**
@@ -422,6 +441,7 @@ export async function createInvitedAccount(
       kofDesk: account.kofDesk,
       standId: account.standId,
       createdById: account.createdById,
+      createdAt: account.now,
     },
     select: { id: true },
   });
