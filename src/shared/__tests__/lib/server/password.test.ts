@@ -70,9 +70,14 @@ describe("hashPassword and verifyPassword", () => {
   });
 
   it("is not called by any code that ships: only jest.setup.ts and the tests use it", () => {
-    const callers = readdirSync("src", { recursive: true, encoding: "utf8" })
-      .filter((file) => /\.tsx?$/.test(file) && !file.includes("__tests__") && !file.endsWith("server/password.ts"))
-      .filter((file) => readFileSync(path.join("src", file), "utf8").includes("setPasswordCostForTests"));
+    const callers = ["src", "prisma", "e2e"].flatMap((root) =>
+      readdirSync(root, { recursive: true, encoding: "utf8" })
+        .map((file) => path.join(root, file))
+        .filter(
+          (file) => /\.(tsx?|mjs)$/.test(file) && !file.includes("__tests__") && !file.endsWith("server/password.ts"),
+        )
+        .filter((file) => readFileSync(file, "utf8").includes("setPasswordCostForTests")),
+    );
 
     expect(callers).toEqual([]);
   });
