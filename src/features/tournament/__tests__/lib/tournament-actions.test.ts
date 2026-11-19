@@ -25,6 +25,8 @@ beforeAll(async () => {
   await createAccount("admin", "kof_admin");
   await createAccount("desk1", "kof_staff", 1);
   await createAccount("desk2", "kof_staff", 2);
+  await createAccount("desk3", "kof_staff", 3);
+  await createAccount("desk4", "kof_staff", 4);
   await createAccount("nodesk", "kof_staff");
   await createAccount("sysadmin", "sysadmin");
   await createAccount("help_desk", "help_desk");
@@ -57,6 +59,44 @@ describe("submitTournamentCommand", () => {
     expect(getMatch(await readTournament(), 1).status).toBe("active");
     expect(entry.entityType).toBe("kof_tournament");
   });
+
+  it.each([
+    ["desk2", 16],
+    ["desk3", 31],
+    ["desk4", 46],
+  ])("lets %s start a match of its own board", async (key, number) => {
+    await signInAs(key);
+
+    const state = await submitTournamentCommand(null, createForm({ type: "start_match", matchId: `match-${number}` }));
+
+    expect(state).toEqual({ status: "applied" });
+    expect(getMatch(await readTournament(), number).status).toBe("active");
+  });
+
+  it.each([
+    ["desk1", 16],
+    ["desk3", 1],
+    ["desk4", 31],
+  ])("rejects %s when it captures a match of another board (UT-TO-14)", async (key, number) => {
+    await signInAs(key);
+
+    const state = await submitTournamentCommand(null, createForm({ type: "start_match", matchId: `match-${number}` }));
+
+    expect(state).toEqual({ status: "error", message: ERRORS.forbidden });
+    expect((await readTournament()).version).toBe(0);
+  });
+
+  it.each(["desk1", "desk2", "desk3", "desk4"])(
+    "rejects %s on the final, which only the administrator captures",
+    async (key) => {
+      await signInAs(key);
+
+      const state = await submitTournamentCommand(null, createForm({ type: "start_match", matchId: "match-63" }));
+
+      expect(state).toEqual({ status: "error", message: ERRORS.forbidden });
+      expect((await readTournament()).version).toBe(0);
+    },
+  );
 
   it("rejects a staff member that captures a match of the other desk (UT-TO-14)", async () => {
     await signInAs("desk2");

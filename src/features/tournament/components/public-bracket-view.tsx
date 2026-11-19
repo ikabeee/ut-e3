@@ -59,9 +59,9 @@ function OpenBracket({ bracket: latest }: Readonly<{ bracket: PublicBracket }>) 
 // Closed or not generated yet, the visitor waits for the bracket: the hourglass says so before the text.
 function ClosedBracket({ state }: Readonly<{ state: "closed" | "pending" }>) {
   return (
-    <div className="grid justify-items-start gap-4">
+    <div className="grid justify-items-center gap-4">
       <WaitingHourglassIcon className="text-accent" />
-      <p role="status" className="m-0 type-mono text-muted">
+      <p role="status" className="m-0 text-center type-mono text-muted">
         {state === "closed" ? COPY.publicBracket.closed : COPY.publicBracket.pending}
       </p>
     </div>

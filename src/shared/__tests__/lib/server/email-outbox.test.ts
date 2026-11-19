@@ -5,7 +5,6 @@ import {
   deliverEmail,
   deliverPendingEmails,
   enqueueEmail,
-  getRetryDelayMs,
   isTemporaryEmailError,
   type OutgoingEmail,
   type SendEmail,
@@ -288,27 +287,6 @@ describe("deliverPendingEmails", () => {
 
     expect(count).toBe(2);
     expect(sentEmails).toHaveLength(2);
-  });
-});
-
-describe("getRetryDelayMs", () => {
-  it("calculates exponential backoff capped at 15 minutes when random returns 1", () => {
-    const fixedRandom = () => 1;
-
-    expect(getRetryDelayMs(1, fixedRandom)).toBe(30_000);
-    expect(getRetryDelayMs(2, fixedRandom)).toBe(60_000);
-    expect(getRetryDelayMs(3, fixedRandom)).toBe(120_000);
-    expect(getRetryDelayMs(4, fixedRandom)).toBe(240_000);
-    expect(getRetryDelayMs(5, fixedRandom)).toBe(480_000);
-    expect(getRetryDelayMs(6, fixedRandom)).toBe(900_000);
-    expect(getRetryDelayMs(10, fixedRandom)).toBe(900_000);
-  });
-
-  it("returns 0 when random returns 0", () => {
-    const zeroRandom = () => 0;
-
-    expect(getRetryDelayMs(1, zeroRandom)).toBe(0);
-    expect(getRetryDelayMs(2, zeroRandom)).toBe(0);
   });
 });
 

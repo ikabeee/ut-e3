@@ -17,6 +17,7 @@ export async function listAllAccounts(filter: AccountAdminFilter): Promise<Admin
       name: true,
       email: true,
       role: true,
+      secondaryRole: true,
       status: true,
       standId: true,
       kofDesk: true,

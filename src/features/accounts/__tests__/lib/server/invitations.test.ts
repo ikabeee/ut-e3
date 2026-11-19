@@ -7,6 +7,7 @@ import {
   getInvitationState,
   inviteAccount,
   listManagedAccounts,
+  reactivateAccount,
   resendInvitation,
 } from "@features/accounts/lib/server/invitations";
 import { INVITATION_TTL_MS } from "@features/accounts/lib/invitation-rules";
@@ -109,6 +110,16 @@ describe("inviteAccount", () => {
     });
   });
 
+  it.each([3, 4] as const)("lets the KOF administrator invite the staff of desk %i", async (desk) => {
+    const result = await inviteAccount(actors.kofAdmin, invite(mail("luis"), "kof_staff", desk), NOW);
+
+    expect(result.status).toBe("invited");
+    expect(await getPrisma().account.findUniqueOrThrow({ where: { email: mail("luis") } })).toMatchObject({
+      role: "kof_staff",
+      kofDesk: desk,
+    });
+  });
+
   it.each([
     { label: "the KOF administrator inviting an administrator", actor: "kofAdmin", role: "kof_admin", desk: null },
     { label: "the help desk inviting anyone", actor: "helpDesk", role: "kof_staff", desk: 1 },
@@ -162,6 +173,24 @@ describe("inviteAccount", () => {
 
     expect((await inviteAccount(actors.kofAdmin, invite(mail("new"), "kof_staff", 2), NOW)).status).toBe("invited");
   });
+
+  it.each([3, 4] as const)(
+    "gives desk %i to one staff member at a time, and reactivating a second one is refused",
+    async (desk) => {
+      await inviteAccount(actors.kofAdmin, invite(mail("old"), "kof_staff", desk), NOW);
+
+      expect(await inviteAccount(actors.kofAdmin, invite(mail("new"), "kof_staff", desk), NOW)).toEqual({
+        status: "deskTaken",
+      });
+
+      const old = await getPrisma().account.findUniqueOrThrow({ where: { email: mail("old") } });
+
+      await disableAccount(actors.kofAdmin, old.id);
+      await inviteAccount(actors.kofAdmin, invite(mail("new"), "kof_staff", desk), NOW);
+
+      expect(await reactivateAccount(actors.kofAdmin, old.id, NOW)).toEqual({ status: "deskTaken" });
+    },
+  );
 
   it("lets only one of two simultaneous invitations take a desk", async () => {
     const results = await Promise.all([
@@ -369,7 +398,7 @@ async function inviteAndGetId(actor: Actor, input: ReturnType<typeof invite>) {
   return (await getPrisma().account.findUniqueOrThrow({ where: { email: input.email } })).id;
 }
 
-function invite(email: string, role: string, kofDesk: 1 | 2 | null = null) {
+function invite(email: string, role: string, kofDesk: 1 | 2 | 3 | 4 | null = null) {
   return { name: "Ana Pérez", email, role, kofDesk };
 }
 

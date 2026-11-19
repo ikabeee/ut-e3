@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import type { AddressInfo } from "node:net";
-import { createSmtpSender } from "@shared/lib/server/mailer";
+import { buildSmtpTransportOptions, createSmtpSender } from "@shared/lib/server/mailer";
 
 const COMPLETE_ENV = {
   SMTP_HOST: "smtp.gmail.com",
@@ -54,6 +54,55 @@ describe("createSmtpSender EHLO greeting", () => {
     const greeting = await captureGreeting({ NEXT_PUBLIC_SITE_URL: "https://showcase.example.com" });
 
     expect(greeting).toBe("EHLO showcase.example.com");
+  });
+});
+
+describe("createSmtpSender connection reuse and pace", () => {
+  it("reuses one pooled connection and sends one message every 2 seconds at most", () => {
+    const options = buildSmtpTransportOptions(COMPLETE_ENV);
+
+    expect(options).toMatchObject({ pool: true, maxConnections: 1, rateDelta: 2000, rateLimit: 1 });
+  });
+
+  it("recycles the connection after 100 messages instead of keeping it open for ever", () => {
+    expect(buildSmtpTransportOptions(COMPLETE_ENV)).toMatchObject({ maxMessages: 100 });
+  });
+
+  it("answers the same sender for the same configuration, so every delivery shares the connection", () => {
+    const env = { ...COMPLETE_ENV, SMTP_HOST: "shared.example.com" };
+
+    expect(createSmtpSender(env)).toBe(createSmtpSender({ ...env }));
+  });
+
+  it("answers another sender for another configuration", () => {
+    const first = createSmtpSender({ ...COMPLETE_ENV, SMTP_HOST: "first.example.com" });
+    const second = createSmtpSender({ ...COMPLETE_ENV, SMTP_HOST: "second.example.com" });
+
+    expect(first).not.toBe(second);
+  });
+});
+
+describe("createSmtpSender EHLO name", () => {
+  it("announces the domain of the site when the environment has no site URL, never the hostname of the container", () => {
+    const options = buildSmtpTransportOptions(COMPLETE_ENV, "https://showcase.example.com");
+
+    expect(options.name).toBe("showcase.example.com");
+  });
+
+  it("does not announce localhost of a development build", () => {
+    expect(buildSmtpTransportOptions(COMPLETE_ENV, "http://localhost:3000").name).toBeUndefined();
+  });
+
+  it("prefers SMTP_EHLO_NAME, then the NEXT_PUBLIC_SITE_URL of the environment, over the site of the build", () => {
+    const fromBuild = "https://build.example.com";
+
+    expect(buildSmtpTransportOptions({ ...COMPLETE_ENV, SMTP_EHLO_NAME: "mail.example.com" }, fromBuild).name).toBe(
+      "mail.example.com",
+    );
+    expect(
+      buildSmtpTransportOptions({ ...COMPLETE_ENV, NEXT_PUBLIC_SITE_URL: "https://runtime.example.com" }, fromBuild)
+        .name,
+    ).toBe("runtime.example.com");
   });
 });
 

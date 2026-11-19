@@ -15,6 +15,7 @@ describe("isSiteNavShown", () => {
     "/register",
     "/privacy",
     "/offline",
+    "/help",
   ])("shows the navbar on the public page %s", (pathname) => {
     expect(isSiteNavShown(pathname)).toBe(true);
   });
@@ -42,7 +43,7 @@ describe("isSiteNavShown", () => {
 });
 
 describe("getSiteNavigation", () => {
-  it("lists the six sections of the app and the passport as the call to action", () => {
+  it("lists the sections of the app, the help page and the passport as the call to action", () => {
     const navigation = getSiteNavigation(false);
 
     expect(navigation.homeHref).toBe("/");
@@ -53,6 +54,7 @@ describe("getSiteNavigation", () => {
       { href: "/sponsors", label: "Patrocinadores" },
       { href: "/raffle", label: "Rifa" },
       { href: "/tournament", label: "KOF" },
+      { href: "/help", label: "Ayuda" },
     ]);
     expect(navigation.cta).toEqual({ href: "/passport", label: "Mi pasaporte" });
   });
@@ -71,7 +73,7 @@ describe("getSiteNavigation", () => {
 });
 
 describe("getCurrentNavHref", () => {
-  const hrefs = ["/", "/games", "/floor-plan", "/sponsors", "/raffle", "/tournament", "/passport"];
+  const hrefs = ["/", "/games", "/floor-plan", "/sponsors", "/raffle", "/tournament", "/help", "/passport"];
 
   it.each([
     ["/", "/"],
@@ -81,9 +83,14 @@ describe("getCurrentNavHref", () => {
     ["/sponsors", "/sponsors"],
     ["/raffle", "/raffle"],
     ["/tournament", "/tournament"],
+    ["/help", "/help"],
     ["/passport", "/passport"],
   ])("marks %s as the page of %s", (pathname, href) => {
     expect(getCurrentNavHref(pathname, hrefs)).toBe(href);
+  });
+
+  it("never shows the help page in the landing-only navigation", () => {
+    expect(getSiteNavigation(true).links.map((link) => link.href)).not.toContain("/help");
   });
 
   it("marks nothing on a page that is not in the navbar", () => {

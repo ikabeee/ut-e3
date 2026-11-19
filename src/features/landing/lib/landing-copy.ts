@@ -89,7 +89,7 @@ export const LANDING_COPY = {
     creditUrl: "https://algorixinsights.com/",
     sitemap: {
       label: "Mapa del sitio",
-      groups: { event: "Evento", pages: "Páginas" },
+      groups: { event: "Evento", pages: "Páginas", contact: "Contacto" },
       links: {
         games: "Juegos",
         activities: "Actividades",

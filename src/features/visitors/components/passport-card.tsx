@@ -1,4 +1,5 @@
 import { Card } from "@heroui/react";
+import Link from "next/link";
 import type { Passport } from "@features/visitors/lib/types";
 import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 
@@ -7,6 +8,9 @@ interface PassportCardProps {
 }
 
 const COPY = VISITORS_COPY.passport;
+
+// The help page belongs to the site feature, which depends on this one, so the link is declared here (see /help).
+const HELP_LINK = { href: "/help", label: "¿Problemas? ¿A quién acudo?" };
 
 export function PassportCard({ passport }: Readonly<PassportCardProps>) {
   return (
@@ -23,6 +27,9 @@ export function PassportCard({ passport }: Readonly<PassportCardProps>) {
 
       <Card.Footer className="flex flex-col items-center p-0 text-center">
         <p className="type-tiny text-muted">{COPY.description}</p>
+        <Link href={HELP_LINK.href} className="touch-target relative mt-4 type-tiny text-accent underline">
+          {HELP_LINK.label}
+        </Link>
       </Card.Footer>
     </Card>
   );

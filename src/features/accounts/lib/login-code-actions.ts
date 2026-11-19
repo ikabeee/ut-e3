@@ -3,12 +3,13 @@
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
-import { getHomePath, LOGIN_PATH } from "@features/accounts/lib/accounts-links";
+import { getHomePath, LOGIN_PATH, MY_ROLE_PATH } from "@features/accounts/lib/accounts-links";
 import { resendLoginCode, verifyLoginCode } from "@features/accounts/lib/server/login-challenge";
 import {
   clearLoginChallengeCookie,
   readLoginChallengeToken,
 } from "@features/accounts/lib/server/login-challenge-cookie";
+import { isFirstVerifiedLogin } from "@features/accounts/lib/server/my-role-queries";
 import { readFormText, type ServerActionForm } from "@shared/lib/form-data";
 import { deliverQueuedEmail } from "@shared/lib/server/email-delivery";
 import { createSession } from "@shared/lib/server/session";
@@ -43,7 +44,9 @@ export async function verifyLoginCodeAction(
 
   await clearLoginChallengeCookie();
   await createSession(result.accountId);
-  redirect(getHomePath(result.role));
+
+  // The first verified login of an account explains its role before the work screen (S4).
+  redirect((await isFirstVerifiedLogin(result.accountId)) ? MY_ROLE_PATH : getHomePath(result.role));
 }
 
 export async function resendLoginCodeAction(): Promise<LoginCodeState> {

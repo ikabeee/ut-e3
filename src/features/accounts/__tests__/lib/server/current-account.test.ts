@@ -5,6 +5,7 @@ import {
   getKofAccount,
   getKofViewer,
   getRaffleAdmin,
+  getSysadmin,
   requireAccountManager,
   requireStandAdmin,
   requireKofAccount,
@@ -52,6 +53,7 @@ describe("requireSysadmin", () => {
       email: "cuenta@ut.mx",
       name: "Cuenta",
       role: "sysadmin",
+      roles: ["sysadmin"],
     });
   });
 
@@ -141,11 +143,12 @@ describe("requireKofAccount", () => {
       email: "cuenta@ut.mx",
       name: "Cuenta",
       role: "kof_admin",
+      roles: ["kof_admin"],
       kofDesk: null,
     });
   });
 
-  it.each([1, 2] as const)("returns a KOF staff member with the desk %i", async (desk) => {
+  it.each([1, 2, 3, 4] as const)("returns a KOF staff member with the desk %i", async (desk) => {
     const account = await createAccount("kof_staff", desk);
 
     await createSession(account.id);
@@ -189,7 +192,13 @@ describe("requireRecoveryAgent", () => {
 
     await createSession(account.id);
 
-    expect(await requireRecoveryAgent()).toEqual({ id: account.id, email: "cuenta@ut.mx", name: "Cuenta", role });
+    expect(await requireRecoveryAgent()).toEqual({
+      id: account.id,
+      email: "cuenta@ut.mx",
+      name: "Cuenta",
+      role,
+      roles: [role],
+    });
   });
 
   it("sends a visitor without a session to /login", async () => {
@@ -231,6 +240,7 @@ describe("requireStandAdmin (RF-31, RF-32)", () => {
       email: "cuenta@ut.mx",
       name: "Cuenta",
       role: "stand_admin",
+      roles: ["stand_admin"],
       standId,
     });
   });
@@ -289,12 +299,13 @@ describe("requireAccountManager", () => {
   });
 });
 
-function createAccount(role: string, kofDesk?: number) {
+function createAccount(role: string, kofDesk?: number, secondaryRole?: string) {
   return getPrisma().account.create({
     data: {
       email: "cuenta@ut.mx",
       name: "Cuenta",
       role,
+      secondaryRole,
       status: "active",
       password: "scrypt$1$1$1$a$b",
       kofDesk,
@@ -314,6 +325,7 @@ describe("requireKofViewer (S37)", () => {
       email: "cuenta@ut.mx",
       name: "Cuenta",
       role: "sysadmin",
+      roles: ["sysadmin"],
       kofDesk: null,
     });
   });
@@ -371,7 +383,161 @@ describe("requireKofViewer (S37)", () => {
       email: "cuenta@ut.mx",
       name: "Cuenta",
       role: "kof_admin",
+      roles: ["sysadmin"],
       kofDesk: null,
     });
+  });
+});
+
+// S1, S2: a stand administrator with a secondary role works in the area of that role as an account of that role, and
+// keeps its stand everywhere else.
+describe("an account with a secondary role", () => {
+  const OTHER_SECONDARY = ["help_desk", "kof_admin", "raffle_admin", "sysadmin"];
+
+  async function signInDual(secondaryRole: string) {
+    const account = await createAccount("stand_admin", undefined, secondaryRole);
+
+    await createSession(account.id);
+
+    return account;
+  }
+
+  function expectLogin(attempt: Promise<unknown>) {
+    return expect(attempt).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
+  }
+
+  it("is a sysadmin in the sysadmin area only with the secondary role sysadmin", async () => {
+    const account = await signInDual("sysadmin");
+
+    expect(await requireSysadmin()).toEqual({
+      id: account.id,
+      email: "cuenta@ut.mx",
+      name: "Cuenta",
+      role: "sysadmin",
+      roles: ["stand_admin", "sysadmin"],
+    });
+    expect(await getSysadmin()).toMatchObject({ id: account.id, role: "sysadmin" });
+  });
+
+  it.each(["help_desk", "kof_admin", "raffle_admin"])(
+    "is not a sysadmin with the secondary role %s, and a stand administrator alone is not either",
+    async (secondaryRole) => {
+      await signInDual(secondaryRole);
+
+      await expectLogin(requireSysadmin());
+      expect(await getSysadmin()).toBeNull();
+    },
+  );
+
+  it("is a stand administrator alone nowhere but at its stand", async () => {
+    await createSession((await createAccount("stand_admin")).id);
+
+    await expectLogin(requireSysadmin());
+    await expectLogin(requireRaffleAdmin());
+    await expectLogin(requireKofAccount());
+    await expectLogin(requireKofViewer());
+    await expect(requireRecoveryAgent()).rejects.toMatchObject({ digest: expect.stringContaining(";/stand/kiosk;") });
+    expect(await requireStandAdmin()).toMatchObject({ role: "stand_admin", standId });
+  });
+
+  it.each([
+    ["raffle_admin", "raffle_admin"],
+    ["sysadmin", "sysadmin"],
+  ])("operates the raffle with the secondary role %s as that role", async (secondaryRole, role) => {
+    const account = await signInDual(secondaryRole);
+
+    expect(await requireRaffleAdmin()).toMatchObject({ id: account.id, role });
+    expect(await getRaffleAdmin()).toMatchObject({ id: account.id, role });
+  });
+
+  it.each(["help_desk", "kof_admin"])(
+    "does not operate the raffle with the secondary role %s",
+    async (secondaryRole) => {
+      await signInDual(secondaryRole);
+
+      await expectLogin(requireRaffleAdmin());
+      expect(await getRaffleAdmin()).toBeNull();
+    },
+  );
+
+  it.each(["kof_admin", "sysadmin"])(
+    "captures for the KOF as an administrator, with no desk, via %s",
+    async (secondaryRole) => {
+      const account = await signInDual(secondaryRole);
+
+      expect(await requireKofAccount()).toMatchObject({ id: account.id, role: "kof_admin", kofDesk: null });
+      expect(await getKofAccount()).toMatchObject({ id: account.id, role: "kof_admin", kofDesk: null });
+    },
+  );
+
+  it("shows the KOF section as a KOF administrator with kof_admin and as a sysadmin with sysadmin", async () => {
+    const kof = await signInDual("kof_admin");
+
+    expect(await requireKofViewer()).toMatchObject({ id: kof.id, role: "kof_admin", kofDesk: null });
+
+    await getPrisma().session.deleteMany();
+
+    const sysadmin = await getPrisma().account.update({ where: { id: kof.id }, data: { secondaryRole: "sysadmin" } });
+
+    await createSession(sysadmin.id);
+
+    expect(await getKofViewer()).toMatchObject({ id: kof.id, role: "sysadmin", kofDesk: null });
+  });
+
+  it.each(["help_desk", "raffle_admin"])("does not open the KOF with the secondary role %s", async (secondaryRole) => {
+    await signInDual(secondaryRole);
+
+    await expectLogin(requireKofAccount());
+    await expectLogin(requireKofViewer());
+    expect(await getKofAccount()).toBeNull();
+    expect(await getKofViewer()).toBeNull();
+  });
+
+  it.each(["help_desk", "sysadmin"])("works at the recovery desk with the secondary role %s", async (secondaryRole) => {
+    const account = await signInDual(secondaryRole);
+
+    expect(await requireRecoveryAgent()).toMatchObject({ id: account.id, role: secondaryRole });
+  });
+
+  it.each(["kof_admin", "raffle_admin"])(
+    "is sent from the recovery desk to its primary home with the secondary role %s",
+    async (secondaryRole) => {
+      await signInDual(secondaryRole);
+
+      await expect(requireRecoveryAgent()).rejects.toMatchObject({ digest: expect.stringContaining(";/stand/kiosk;") });
+    },
+  );
+
+  it.each(OTHER_SECONDARY)(
+    "keeps the primary role and the stand in the stand guards with %s",
+    async (secondaryRole) => {
+      const account = await signInDual(secondaryRole);
+
+      expect(await requireStandAdmin()).toMatchObject({ id: account.id, role: "stand_admin", standId });
+      expect(await requireAccountManager()).toMatchObject({ id: account.id, role: "stand_admin", standId });
+    },
+  );
+
+  it("lets the account manager carry the secondary role, so a secondary KOF administrator can invite KOF staff", async () => {
+    await signInDual("kof_admin");
+
+    expect(await requireAccountManager()).toMatchObject({ role: "stand_admin", secondaryRole: "kof_admin", standId });
+  });
+
+  it("gives a stand administrator without a secondary role no secondary role as a manager", async () => {
+    await createSession((await createAccount("stand_admin")).id);
+
+    expect(await requireAccountManager()).toMatchObject({ role: "stand_admin", secondaryRole: null });
+  });
+
+  it("answers null or the login to a disabled account with a secondary role", async () => {
+    const account = await signInDual("sysadmin");
+
+    await getPrisma().account.update({ where: { id: account.id }, data: { status: "disabled" } });
+
+    await expectLogin(requireSysadmin());
+    await expectLogin(requireRaffleAdmin());
+    await expectLogin(requireKofAccount());
+    expect(await getSysadmin()).toBeNull();
   });
 });

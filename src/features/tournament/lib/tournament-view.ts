@@ -30,7 +30,7 @@ export interface StatusCounts {
 // What the person can act on comes first; the bracket order is kept inside each group.
 const CAPTURE_PRIORITY: Record<MatchStatus, number> = { active: 0, ready: 1, frozen: 2, pending: 3, finished: 4 };
 
-/** The administrator sees every area; a staff member only the areas of its desk (RF-61). */
+/** The administrator sees every area; a staff member only the board of its desk (RF-61). */
 export function getSections(tournament: Tournament, scope: ViewScope): MatchSection[] {
   return MATCH_AREAS.filter(
     (area) => scope.isAdmin || (scope.desk !== null && getMatchDesk({ area }) === scope.desk),

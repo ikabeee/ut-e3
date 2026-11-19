@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
 import { encode } from "uqr";
 import { chromium } from "playwright-core";
-import { setLoginDatabase, submitLoginCode } from "./lib/e2e-harness.mjs";
+import { setLoginDatabase, submitLoginCode, waitForStaffHome } from "./lib/e2e-harness.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -219,7 +219,7 @@ async function runScenario(browser, databaseFile, screenshots) {
     await checkDeskNeedsLogin(pages.desk);
     const pin = await registerVisitor(pages.oldPhone);
 
-    await loginAs(pages.desk, { email: HELP_DESK_EMAIL, password: HELP_DESK_PASSWORD }, /\/support\/recovery$/);
+    await loginAs(pages.desk, { email: HELP_DESK_EMAIL, password: HELP_DESK_PASSWORD }, "/support/recovery");
     await checkWrongIdentity(pages.desk, database);
 
     const link = await recoverPassport({ page: pages.desk, database, screenshots }, pin);
@@ -262,7 +262,7 @@ async function loginAs(page, { email, password }, landing) {
   await page.getByLabel("Contraseña", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Entrar" }).click();
   await submitLoginCode(page, email);
-  await page.waitForURL(landing, { timeout: UI_TIMEOUT_MS });
+  await waitForStaffHome(page, landing);
   check(`${email} signs in and lands on ${landing}`, true, page.url());
 }
 
@@ -393,7 +393,7 @@ async function checkOldPhoneLostAccess(page) {
 }
 
 async function checkStandAccountIsRedirected(page) {
-  await loginAs(page, { email: STAFF_EMAIL, password: STAFF_PASSWORD }, /\/stand\/kiosk$/);
+  await loginAs(page, { email: STAFF_EMAIL, password: STAFF_PASSWORD }, "/stand/kiosk");
   await page.goto(`${BASE_URL}/support/recovery`, { waitUntil: "networkidle" });
   await page.waitForURL(/\/stand\/kiosk$/, { timeout: UI_TIMEOUT_MS });
   check("a stand staff account is sent back to its kiosk", page.url().endsWith("/stand/kiosk"), page.url());

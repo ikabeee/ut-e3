@@ -19,4 +19,17 @@ prisma migrate deploy
 # El seed no corre al arrancar: produccion ya tiene sus datos. En una base nueva se corre una vez a mano
 # (docs/deploy.md, "Primer despliegue").
 
+# Alta masiva del staff (docs/deploy.md): solo si existe la lista. El script corre una sola vez (deja `staff.bulk_invite`
+# en la bitacora y los arranques siguientes no hacen nada) y deja los correos en la cola; los envia el trabajador de
+# correo. Si falla (lista invalida, base ocupada) se registra y el servidor arranca igual: un sitio sin invitaciones se
+# arregla corrigiendo la lista y reiniciando, uno que no arranca deja a todos los visitantes sin el sitio. Como no
+# escribe nada cuando falla, el siguiente arranque lo intenta otra vez.
+STAFF_INVITATIONS_CSV="${STAFF_INVITATIONS_CSV:-/data/staff-invitations.csv}"
+export STAFF_INVITATIONS_CSV
+
+if [ -f "$STAFF_INVITATIONS_CSV" ]; then
+  tsx --conditions=react-server prisma/invite-staff.ts \
+    || echo "El alta masiva del staff fallo; el servidor arranca sin ella. Corrige la lista y reinicia (docs/deploy.md, Alta masiva del staff)." >&2
+fi
+
 exec node server.js

@@ -35,7 +35,7 @@ export const passportPageMetadata: Metadata = {
   title: VISITORS_COPY.passport.title,
   description: VISITORS_COPY.passport.subtitle,
   alternates: { canonical: PASSPORT_PATH },
-  robots: { index: false },
+  robots: { index: false, follow: false },
 };
 
 interface PassportViewProps {

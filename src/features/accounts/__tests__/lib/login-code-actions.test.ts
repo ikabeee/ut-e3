@@ -33,6 +33,7 @@ beforeAll(async () => {
     SYSADMIN_NAME: "Coordinación E3",
     SYSADMIN_PASSWORD: PASSWORD,
   });
+  await recordVerifiedLogin("admin@ut.mx");
 });
 
 afterAll(async () => {
@@ -88,26 +89,52 @@ describe("verifyLoginCodeAction", () => {
     expect(jar.get(CHALLENGE_COOKIE)).toMatchObject({ value: "", expires: new Date(0) });
   });
 
+  it("sends the first verified login of an account to /my-role instead of its home (S4)", async () => {
+    await createStaffAccount("kof_staff", "first@ut.mx", 2);
+    await signIn(null, credentials("first@ut.mx", PASSWORD)).catch(() => undefined);
+
+    await expect(verifyLoginCodeAction(null, codeForm(await readCodeFor("first@ut.mx")))).rejects.toMatchObject({
+      digest: expect.stringContaining(";/my-role;"),
+    });
+
+    expect(await getPrisma().session.count()).toBe(1);
+    expect(jar.get(SESSION_COOKIE)?.value).toBeTruthy();
+  });
+
+  it("sends the next login of that account to its home", async () => {
+    await createStaffAccount("kof_staff", "again@ut.mx", 3);
+
+    for (const expected of [";/my-role;", ";/admin/kof;"]) {
+      await signIn(null, credentials("again@ut.mx", PASSWORD)).catch(() => undefined);
+      await expect(verifyLoginCodeAction(null, codeForm(await readCodeFor("again@ut.mx")))).rejects.toMatchObject({
+        digest: expect.stringContaining(expected),
+      });
+    }
+  });
+
+  it("does not take a wrong code as a login: the first correct one still goes to /my-role", async () => {
+    await createStaffAccount("raffle_admin", "wrong-first@ut.mx", null);
+    await signIn(null, credentials("wrong-first@ut.mx", PASSWORD)).catch(() => undefined);
+
+    const code = await readCodeFor("wrong-first@ut.mx");
+
+    await verifyLoginCodeAction(null, codeForm(code === "000000" ? "000001" : "000000"));
+
+    await expect(verifyLoginCodeAction(null, codeForm(code))).rejects.toMatchObject({
+      digest: expect.stringContaining(";/my-role;"),
+    });
+  });
+
   it.each([
     ["kof_admin", null, ";/admin/kof;"],
     ["kof_staff", 1, ";/admin/kof;"],
     ["raffle_admin", null, ";/admin/raffle;"],
   ] as const)("sends a %s to its own home after the code", async (role, kofDesk, home) => {
-    await getPrisma().account.create({
-      data: {
-        email: `${role}@ut.mx`,
-        name: "Role",
-        role,
-        status: "active",
-        password: await hashPassword(PASSWORD),
-        kofDesk,
-      },
-    });
-
+    await createStaffAccount(role, `${role}@ut.mx`, kofDesk);
+    await recordVerifiedLogin(`${role}@ut.mx`);
     await signIn(null, credentials(`${role}@ut.mx`, PASSWORD)).catch(() => undefined);
 
-    const email = await getPrisma().emailOutbox.findFirstOrThrow({ where: { to: `${role}@ut.mx` } });
-    const code = /: (\d{6})\b/.exec(email.text)?.[1] ?? "";
+    const code = await readCodeFor(`${role}@ut.mx`);
 
     await expect(verifyLoginCodeAction(null, codeForm(code))).rejects.toMatchObject({
       digest: expect.stringContaining(home),
@@ -174,6 +201,36 @@ describe("resendLoginCodeAction", () => {
     await expect(resendLoginCodeAction()).rejects.toMatchObject({ digest: expect.stringContaining(";/login;") });
   });
 });
+
+async function createStaffAccount(role: string, email: string, kofDesk: number | null) {
+  await getPrisma().account.create({
+    data: { email, name: "Role", role, status: "active", password: await hashPassword(PASSWORD), kofDesk },
+  });
+}
+
+// The accounts that already signed in once: the audit log is what tells a first login from the next ones.
+async function recordVerifiedLogin(email: string) {
+  const account = await getPrisma().account.findUniqueOrThrow({ where: { email } });
+
+  await getPrisma().auditLog.create({
+    data: {
+      actorId: account.id,
+      action: "account.login_verified",
+      entityType: "account",
+      entityId: account.id,
+      detail: {},
+    },
+  });
+}
+
+async function readCodeFor(email: string): Promise<string> {
+  const message = await getPrisma().emailOutbox.findFirstOrThrow({
+    where: { to: email },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return /: (\d{6})\b/.exec(message.text)?.[1] ?? "";
+}
 
 async function signInAndReadCode(): Promise<string> {
   await signIn(null, credentials("admin@ut.mx", PASSWORD)).catch(() => undefined);

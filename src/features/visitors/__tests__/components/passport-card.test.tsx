@@ -13,4 +13,10 @@ describe("PassportCard", () => {
     expect(screen.getByText(VISITORS_COPY.passport.gamertagLabel)).toBeInTheDocument();
     expect(screen.getByText(VISITORS_COPY.passport.pinLabel)).toBeInTheDocument();
   });
+
+  it("links the help page under the card for a visitor with a problem", () => {
+    render(<PassportCard passport={{ gamertag: "PlayerOne", pin: "12345" }} />);
+
+    expect(screen.getByRole("link", { name: "¿Problemas? ¿A quién acudo?" })).toHaveAttribute("href", "/help");
+  });
 });

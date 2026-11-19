@@ -9,7 +9,10 @@ export interface SessionAccount {
   id: string;
   email: string;
   name: string;
+  /** The primary role: it decides the stand, the home page and the table rules. */
   role: string;
+  /** The primary role first and, when the account has one, its secondary role after it (S1). */
+  roles: readonly string[];
 }
 
 const SESSION_DURATION_MS = 12 * 60 * 60 * 1000;
@@ -43,14 +46,17 @@ export async function getSessionAccount(): Promise<SessionAccount | null> {
 
   const session = await getPrisma().session.findUnique({
     where: { token: hashToken(token) },
-    select: { expiresAt: true, account: { select: { id: true, email: true, name: true, role: true, status: true } } },
+    select: {
+      expiresAt: true,
+      account: { select: { id: true, email: true, name: true, role: true, secondaryRole: true, status: true } },
+    },
   });
 
   if (!session || session.expiresAt.getTime() <= Date.now() || session.account.status !== ACTIVE) return null;
 
-  const { id, email, name, role } = session.account;
+  const { id, email, name, role, secondaryRole } = session.account;
 
-  return { id, email, name, role };
+  return { id, email, name, role, roles: secondaryRole ? [role, secondaryRole] : [role] };
 }
 
 export async function deleteSession(): Promise<void> {

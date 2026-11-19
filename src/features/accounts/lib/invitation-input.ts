@@ -1,5 +1,5 @@
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
-import type { KofDesk } from "@features/accounts/lib/types";
+import { KOF_DESKS, type KofDesk } from "@features/accounts/lib/types";
 import { readFormText } from "@shared/lib/form-data";
 
 export interface InviteInput {
@@ -57,9 +57,7 @@ export function parsePerson(form: FormData, fields: PersonFields): ParsedPerson 
 function parseDesk(value: string): KofDesk | null | "invalid" {
   if (value === "") return null;
 
-  if (value === "1") return 1;
-
-  return value === "2" ? 2 : "invalid";
+  return KOF_DESKS.find((desk) => String(desk) === value) ?? "invalid";
 }
 
 function invalid(message: string): ParsedInviteInput {

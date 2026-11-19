@@ -6,6 +6,55 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.5.0] - 2026-11-19
+
+### Agregado
+
+- SEO: `sitemap.xml` y `robots.txt`, imágenes Open Graph generadas para la portada y cada juego, y `noindex` en el
+  pasaporte y la recuperación. Con `SITE_MODE=landing` también se publican `robots.txt`, `sitemap.xml` (solo la portada) y
+  la imagen de la portada.
+- Página pública "¿A quién acudo?" (`/help`) para los visitantes: una ilustración y una línea por problema (pasaporte
+  perdido, correo que no llegó, visita sin registrar, boletos, KOF y uso sin conexión), enlazada desde la barra, el pie
+  y el pasaporte, y disponible sin conexión.
+- Página "Mi rol" (`/my-role`): cada cuenta del staff ve lo que hace en el evento, sus pantallas, su stand, mesa o área,
+  el horario y a quién acudir. Se abre en el primer inicio de sesión, con el enlace "Mi rol" del encabezado y desde el
+  correo de invitación.
+- Alta masiva del staff: `npm run db:invite:staff` crea los stands que faltan y las invitaciones del staff (con rol
+  secundario y mesa de KOF) desde un CSV; corre una sola vez al desplegar si existe `/data/staff-invitations.csv`, y el
+  sysadmin reenvía desde `/admin/accounts`.
+- El torneo de KOF tiene cuatro mesas, una por tablero: cada staff captura su tablero, y las semifinales y la final las
+  captura solo el administrador de KOF (migración `20261121110000_kof_four_desks`).
+- Un administrador de stand puede tener un rol secundario (atención, KOF, rifa o sysadmin) en la misma cuenta; solo el
+  sysadmin lo da y lo quita en `/admin/accounts`, y los encabezados enlazan de un área a la otra (migración
+  `20261121100000_account_secondary_role`).
+- Footer: el mapa del sitio incluye el correo de contacto `info@algorixinsights.com` y la línea "Desarrollado y diseñado
+  por Algorix Insights" queda centrada.
+- `npm run db:backfill:email-kinds`: da tipo a los correos viejos del pasaporte y de recuperación para poder rehacerlos.
+
+### Cambiado
+
+- Al desplegar, el workflow crea la etiqueta y el Release de GitHub de la versión con sus notas del CHANGELOG.
+- Panel de administración: la navegación pasa a una barra lateral con íconos (en móvil, un menú plegable), también en
+  `/admin/kof` y `/admin/raffle` para el sysadmin.
+- Correo: una sola conexión SMTP, como máximo un mensaje cada 2 segundos y 10 por pasada; ante un error temporal (Gmail
+  `421 4.7.0`) la pasada se detiene y los reintentos esperan de 15 min a 2 h, en lugar de gastar los 5 intentos en minutos.
+- `/tournament`: el reloj de arena y el texto "El bracket estará disponible en la pantalla del torneo." quedan centrados.
+- `/admin/recovery`: pantalla "Recuperación" solo para el sysadmin. Muestra el estado del trabajador de correo (SMTP
+  configurado, servidor, última corrida y último error), de la vigilancia de carga, de la base de datos (tamaño de la
+  base, el WAL y el SHM, y espacio libre del volumen) y permite recuperarlos con un clic: probar SMTP (envía un correo
+  de prueba a tu propia dirección y muestra el error exacto), reintentar los envíos ahora, reiniciar el trabajador de
+  correo y la vigilancia de carga, revisar la integridad (`PRAGMA quick_check`), vaciar el WAL
+  (`PRAGMA wal_checkpoint(TRUNCATE)`), invalidar las cachés públicas, abrir o cerrar el bracket público y descargar un
+  respaldo consistente de la base (API de respaldo en línea de SQLite; contiene datos personales). Cada acción y cada
+  descarga quedan en la bitácora de auditoría.
+- `/admin/accounts`: lista de todas las cuentas del staff, de cualquier rol, para el sysadmin. Muestra rol, stand, estado,
+  fecha de alta y último acceso, con búsqueda por nombre o correo y filtros por rol, estado y stand. Permite desactivar y
+  reactivar, enviar el restablecimiento de contraseña por correo, cerrar todas las sesiones, limpiar el 2FA pendiente,
+  reenviar la invitación e invitar a cualquier rol (también otro sysadmin, y staff de stand o de KOF con su stand o mesa).
+  Cada acción queda en la bitácora de auditoría.
+- `/admin/visitors`: lista de todos los registros solo para el sysadmin, con búsqueda por gamertag, nombre o correo, orden por fecha, páginas de 50 y conteo de registros por día. Desde cada pasaporte se reenvía el correo con el PIN, se envía un enlace de recuperación (sin el límite de 3 por hora), se corrigen nombre, gamertag y correo, y se quita la exclusión. La lista se exporta a CSV (`/api/admin/visitors/export`) con las celdas que parecen fórmulas neutralizadas. Cada acción queda en la bitácora, sin el PIN.
+- `/admin/emails`: bandeja de salida completa para el sysadmin. Lista todos los correos con filtros (estado, destinatario, asunto y fecha) y páginas de 25, con intentos, próximo intento, último error y el destinatario completo; muestra el texto de un correo mientras exista (cada lectura queda en la bitácora), reenvía uno o todos los fallidos (muestra cuántos son y pide confirmar), rehace los correos abandonados cuyo texto se borró y tiene "Enviar ahora", que corre la entrega en el momento. Cada acción queda en la bitácora de auditoría.
+
 ## [1.4.0] - 2026-11-19
 
 ### Agregado

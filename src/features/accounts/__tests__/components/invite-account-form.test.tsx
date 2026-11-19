@@ -50,6 +50,28 @@ describe("InviteAccountForm", () => {
     expect(received[0].get("desk")).toBe("1");
   });
 
+  it("offers the four desks, one for each board, and sends the one that was chosen", async () => {
+    const { received, action } = recordingAction({ status: "done", message: "Invitación enviada." });
+
+    renderWithToasts(<InviteAccountForm roles={STAFF_ROLES} showDesk action={action} />);
+    await userEvent.type(screen.getByLabelText("Nombre"), "Luis");
+    await userEvent.type(screen.getByLabelText("Correo"), "luis@ut.mx");
+    await userEvent.click(screen.getByRole("button", { name: /Mesa/ }));
+
+    expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual([
+      "Mesa 1",
+      "Mesa 2",
+      "Mesa 3",
+      "Mesa 4",
+    ]);
+
+    await userEvent.click(screen.getByRole("option", { name: "Mesa 4" }));
+    await userEvent.click(screen.getByRole("button", { name: "Enviar invitación" }));
+
+    await waitFor(() => expect(received).toHaveLength(1));
+    expect(received[0].get("desk")).toBe("4");
+  });
+
   it("asks for the stand of a stand role, and sends the one that was chosen", async () => {
     const { received, action } = recordingAction({ status: "done", message: "Invitación enviada." });
 

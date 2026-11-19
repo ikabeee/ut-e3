@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { AccountPageHeader } from "@features/accounts/components/account-page-header";
 import { AccountsPanel } from "@features/accounts/components/accounts-panel";
-import { signOut } from "@features/accounts/lib/accounts-actions";
+import { StaffPageHeader } from "@features/accounts/components/staff-page-header";
 import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
 import { requireStandAdmin } from "@features/accounts/lib/server/current-account";
 import { listStandAccounts } from "@features/accounts/lib/server/invitations";
@@ -40,7 +39,12 @@ async function StandTeamPanel() {
 
   return (
     <>
-      <AccountPageHeader title={COPY.title} signedInAs={COPY.signedInAs(account.name)} signOutAction={signOut} />
+      <StaffPageHeader
+        title={COPY.title}
+        signedInAs={COPY.signedInAs(account.name)}
+        roles={account.roles}
+        area="primary"
+      />
       <StandAdminNav />
       <p className="text-sm text-muted">{COPY.hint}</p>
       <AccountsPanel heading={COPY.heading} actorRole={account.role} accounts={staff} actions={ACCOUNT_ACTIONS} />

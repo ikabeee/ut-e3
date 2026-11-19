@@ -20,7 +20,7 @@ export function SiteFooter({ sitemap }: Readonly<SiteFooterProps>) {
       <div className="page-wrap flex flex-wrap justify-between gap-4 pt-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] type-tiny">
         <span className="text-accent">{siteConfig.title}</span>
         <span className="text-muted">{siteConfig.organizationLabel}</span>
-        <p className="m-0 basis-full text-muted">
+        <p className="m-0 basis-full text-center text-muted">
           {footer.credit}{" "}
           <a
             href={footer.creditUrl}
@@ -56,7 +56,27 @@ function FooterSitemap({ groups }: Readonly<{ groups: readonly FooterLinkGroup[]
             </ul>
           </div>
         ))}
+        <ContactGroup />
       </div>
     </nav>
+  );
+}
+
+function ContactGroup() {
+  const { groups } = LANDING_COPY.footer.sitemap;
+
+  return (
+    <div className="min-w-0">
+      <p id="footer-contact" className="m-0 mb-2 type-tiny text-accent">
+        {groups.contact}
+      </p>
+      <ul aria-labelledby="footer-contact" className="m-0 flex list-none flex-col p-0 type-tiny">
+        <li>
+          <a href={`mailto:${siteConfig.contactEmail}`} className={`${LINK_CLASS} wrap-anywhere`}>
+            {siteConfig.contactEmail}
+          </a>
+        </li>
+      </ul>
+    </div>
   );
 }

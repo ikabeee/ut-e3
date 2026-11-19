@@ -14,6 +14,8 @@ export const siteConfig = {
   locale: "es_MX",
   organization,
   organizationLabel: `${organization.division} · ${organization.universityShortName}`,
+  // Public contact of the event, shown in the footer.
+  contactEmail: "info@algorixinsights.com",
   shareImage: "/media/reel.jpg",
   themeColor: "#000000",
   // --utg-black, the background of the only theme of the design system.

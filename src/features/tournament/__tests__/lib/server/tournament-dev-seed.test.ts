@@ -39,7 +39,7 @@ describe("seedKofDev", () => {
     expect(await getPrisma().account.count()).toBe(0);
   });
 
-  it("creates the three KOF accounts, moves the bracket hour and generates a bracket with byes", async () => {
+  it("creates the five KOF accounts, moves the bracket hour and generates a bracket with byes", async () => {
     await createEventSettings();
 
     const result = await seedKofDev({}, NOW);
@@ -52,6 +52,8 @@ describe("seedKofDev", () => {
       ["kof-admin@ejemplo.com", "kof_admin", null, "active"],
       ["kof-mesa1@ejemplo.com", "kof_staff", 1, "active"],
       ["kof-mesa2@ejemplo.com", "kof_staff", 2, "active"],
+      ["kof-mesa3@ejemplo.com", "kof_staff", 3, "active"],
+      ["kof-mesa4@ejemplo.com", "kof_staff", 4, "active"],
     ]);
     expect(await verifyPassword(KOF_DEV_DEFAULT_PASSWORD, accounts[0].password ?? "")).toBe(true);
     expect(settings.kofBracketGeneratesAt.getTime()).toBe(NOW.getTime());
