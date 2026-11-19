@@ -17,6 +17,7 @@ describe("buildFooterSitemap", () => {
     expect(hrefOf("Catálogo de juegos")).toBe("/games");
     expect(hrefOf("Ganadores de la rifa")).toBe("/raffle");
     expect(hrefOf("Tabla de posiciones")).toBe("/tournament");
+    expect(hrefOf("¿A quién acudo?")).toBe("/help");
     expect(links.map((link) => link.href)).not.toContain("/login");
     expect(links.map((link) => link.href)).not.toContain("/admin");
   });
@@ -33,6 +34,10 @@ describe("buildFooterSitemap", () => {
       "#floor-plan",
       "#venue",
     ]);
+  });
+
+  it("does not link the help page while only the landing is published", () => {
+    expect(getLinks(true).map((link) => link.href)).not.toContain("/help");
   });
 
   it("points every anchor to a section that the landing has", () => {

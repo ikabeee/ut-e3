@@ -8,6 +8,7 @@ import { FLOOR_PLAN_PATH, FLOOR_PLAN_SECTION_ID } from "@features/floor-plan/lib
 import { GAMES_PATH, GAMES_SECTION_ID } from "@features/games/lib/games-links";
 import { HOME_PATH, TOP_SECTION_ID } from "@features/landing/lib/landing-links";
 import { RAFFLE_WINNERS_PATH } from "@features/raffle/lib/raffle-links";
+import { HELP_PATH } from "@features/site/lib/help-topics";
 import { SITE_COPY } from "@features/site/lib/site-copy";
 import { STAFF_AREAS } from "@features/site/lib/staff-areas";
 import { SPONSORS_PATH, SPONSORS_SECTION_ID } from "@features/sponsors/lib/sponsors-links";
@@ -46,6 +47,7 @@ const FULL_NAVIGATION: SiteNavigation = {
     { href: SPONSORS_PATH, label: LABELS.sponsors },
     { href: RAFFLE_WINNERS_PATH, label: LABELS.raffle },
     { href: PUBLIC_BRACKET_PATH, label: LABELS.tournament },
+    { href: HELP_PATH, label: LABELS.help },
   ],
   cta: { href: PASSPORT_PATH, label: SITE_COPY.nav.passport },
 };
