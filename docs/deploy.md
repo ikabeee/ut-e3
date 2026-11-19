@@ -100,7 +100,7 @@ Todas viven en `.env` (nunca se versiona). `.env.production.example` las lista c
 | `APP_PORT` | No | Puerto en `127.0.0.1` para el proxy. Por defecto `3000`. |
 | `APP_TAG` | No | Etiqueta de la imagen. Por defecto `latest`. |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | No | Ver "Correo". |
-| `SMTP_EHLO_NAME` | No | Nombre con el que el servidor saluda al SMTP (EHLO), por ejemplo `pixelandcode.tu-dominio.mx`. Sin él se usa el dominio de `NEXT_PUBLIC_SITE_URL`. El relay de Google Workspace (`smtp-relay.gmail.com`) cierra la conexión con `421 4.7.0` si el saludo no es un dominio real. |
+| `SMTP_EHLO_NAME` | No | Nombre con el que el servidor saluda al SMTP (EHLO), por ejemplo `pixelandcode.tu-dominio.mx`. Sin él se usa el dominio de `NEXT_PUBLIC_SITE_URL`; sin ninguno de los dos en el entorno, el dominio con el que se construyó la imagen (localhost nunca se anuncia). El relay de Google Workspace (`smtp-relay.gmail.com`) cierra la conexión con `421 4.7.0` si el saludo no es un dominio real. |
 | `EMERGENCY_MAIL` | No | Dirección que recibe los avisos de emergencia de producción. Sin ella no se envía ninguno; ver "Avisos de emergencia". |
 
 El contenedor se niega a arrancar si faltan `NEXT_PUBLIC_SITE_URL` o `PIN_ENCRYPTION_KEY` y lo dice en el log.
@@ -115,8 +115,11 @@ de la base (RNF-03). Salen con la plantilla del sitio (fondo negro, acento azul,
 - **Con `SMTP_HOST`** (y `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` y `SMTP_FROM`, las cinco son obligatorias juntas; si falta
   alguna, el servidor no arranca y el log dice cuál. El remitente es `SMTP_FROM`, por ejemplo
   `UT Game Showcase <no-reply@tu-dominio.mx>`; debe llevar la dirección (solo el nombre no arranca) y `EMAIL_FROM` no se lee. El puerto 465 usa TLS directo y los demás, STARTTLS): cada
-  correo sale justo después de la petición y un temporizador reintenta cada minuto los que fallaron, con retroceso
-  exponencial.
+  correo sale justo después de la petición y un temporizador reintenta cada minuto los que fallaron. El envío usa una
+  sola conexión SMTP reutilizada, como máximo un mensaje cada 2 segundos y 10 correos por pasada. Si el proveedor responde
+  con un error temporal (por ejemplo Gmail `421 4.7.0 Try again later`), la pasada se detiene y el correo espera 15 min,
+  30 min, 1 h y 2 h (con una variación de hasta el 50 %) antes de cada reintento, así que sus 5 intentos abarcan entre 2
+  y casi 4 horas. Un error permanente (5xx) abandona el correo de inmediato.
 - **Panel de correos** (`/admin/emails`, solo sysadmin): lista toda la bandeja con filtros (estado, destinatario, asunto
   y fecha de cola) y muestra intentos, próximo intento, último error y el destinatario completo. Desde ahí se puede ver el
   texto de un correo mientras exista (la lectura queda en la bitácora como `admin.email.view`), reenviar uno o todos los
@@ -126,7 +129,10 @@ de la base (RNF-03). Salen con la plantilla del sitio (fondo negro, acento azul,
   staff, el restablecimiento de contraseña y el aviso al ganador de la rifa se escriben de nuevo desde el registro del que
   salían (columnas `kind` y `reference_id`); los enlaces son nuevos y el correo abandonado se reemplaza por el nuevo. Un
   código de inicio de sesión no se rehace (la persona vuelve a iniciar sesión), tampoco un aviso de emergencia ni un
-  correo puesto en cola antes de la migración `20261120100000_outbox_kind`, que no tiene tipo.
+  correo puesto en cola antes de la migración `20261120100000_outbox_kind`, que no tiene tipo. Para esos, corre una vez
+  `docker compose exec app npm run db:backfill:email-kinds`: asigna tipo y referencia a los no enviados cuyo asunto sea el
+  del pasaporte o el de recuperación y cuyo visitante se encuentre por correo (y gamertag); los demás no se tocan. Cada
+  cambio queda en la bitácora como `admin.email.backfill_kind`, y después se usa "Rehacer".
 - **Sin `SMTP_HOST`**: nada sale ni se escribe en el log. Los correos se quedan en `email_outbox` y el temporizador de
   reintentos no se inicia.
   Sirve para pruebas, y en una emergencia se puede entregar el enlace a mano:

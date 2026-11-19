@@ -58,6 +58,7 @@ npm run db:seed:raffle    # solo desarrollo: 2 animadores, 30 pasaportes con 40 
 npm run db:seed:demo      # solo desarrollo y demos: stands, KOF, soporte y rifa con una sola contraseña (DEMO_PASSWORD); no mueve horas, salvo `-- --open-raffle` (prisma/seed-demo.ts)
 npm run db:backfill:genres # en una base con juegos: da a cada juego su género confirmado si aún dice "Por anunciar"; se puede repetir (prisma/backfill-game-genres.ts)
 npm run db:backfill:images # en una base con juegos: crea las filas de imagen que faltan (portada, tarjeta y capturas) sin tocar las existentes; se puede repetir (prisma/backfill-game-images.ts)
+npm run db:backfill:email-kinds # una vez, tras desplegar: asigna tipo y referencia a los correos sin tipo del outbox (pasaporte y recuperación) para poder usar "Rehacer"; se puede repetir (prisma/backfill-email-kinds.ts)
 ```
 
 Antes de dar por terminado un cambio, corre `npm run format` y verifica que `npm run lint`,

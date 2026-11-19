@@ -33,9 +33,15 @@ interface SmtpStatusPayload {
 /** After this many attempts a row is abandoned: it counts as failed in the server status (RF-73). */
 export const MAX_ATTEMPTS = 5;
 
-const BASE_RETRY_DELAY_MS = 30_000;
+/**
+ * Gmail answers `421 4.7.0 Try again later` when the account sends too much in a short time, and it keeps answering
+ * for a while: retrying within minutes only spends the attempts. These are the waits after the 1st, 2nd, 3rd and 4th
+ * failed attempt, so the 5 attempts of an email span hours; later attempts keep the last wait.
+ */
+const RETRY_DELAYS_MS = [15 * 60_000, 30 * 60_000, 60 * 60_000, 2 * 60 * 60_000];
 
-const MAX_RETRY_DELAY_MS = 15 * 60_000;
+/** Emails sent in one pass (a pass runs every minute); the mailer also spaces them out (mailer.ts). */
+export const MAX_BATCH_SIZE = 10;
 
 // 10-minute lease gives slow SMTP deliveries enough headroom so concurrent workers do not claim in-flight sends.
 const LEASE_DURATION_MS = 10 * 60_000;
@@ -62,6 +68,11 @@ export async function deliverEmail(id: string, send: SendEmail, now: Date = new 
   await deliverEmailWithResult(id, send, now);
 }
 
+/**
+ * Sends the due emails, the oldest first, at most `MAX_BATCH_SIZE`. A temporary failure ends the pass: the provider is
+ * refusing or unreachable, and trying the other emails now would only spend their attempts too. A permanent failure of
+ * one recipient does not stop the others. Answers how many emails left.
+ */
 export async function deliverPendingEmails(send: SendEmail, now: Date = new Date()): Promise<number> {
   const pendingRows = await getPrisma().emailOutbox.findMany({
     where: {
@@ -71,26 +82,31 @@ export async function deliverPendingEmails(send: SendEmail, now: Date = new Date
     },
     select: { id: true },
     orderBy: { createdAt: "asc" },
+    take: MAX_BATCH_SIZE,
   });
 
   let sentCount = 0;
 
   for (const { id } of pendingRows) {
-    const wasDelivered = await deliverEmailWithResult(id, send, now);
+    const outcome = await deliverEmailWithResult(id, send, now);
 
-    if (wasDelivered) {
+    if (outcome === "sent") {
       sentCount++;
     }
+
+    if (outcome === "retry_later") break;
   }
 
   return sentCount;
 }
 
-async function deliverEmailWithResult(id: string, send: SendEmail, now: Date): Promise<boolean> {
+type DeliveryOutcome = "sent" | "skipped" | "retry_later" | "abandoned";
+
+async function deliverEmailWithResult(id: string, send: SendEmail, now: Date): Promise<DeliveryOutcome> {
   const isClaimed = await claimPendingRow(id, now);
 
   if (!isClaimed) {
-    return false;
+    return "skipped";
   }
 
   const row = await getPrisma().emailOutbox.findUnique({
@@ -98,15 +114,17 @@ async function deliverEmailWithResult(id: string, send: SendEmail, now: Date): P
   });
 
   if (!row) {
-    return false;
+    return "skipped";
   }
 
   try {
     await send({ to: row.to, subject: row.subject, text: row.text });
   } catch (cause) {
+    const isTemporary = isTemporaryEmailError(cause);
+
     await handleDeliveryFailure({ id, attempts: row.attempts, to: row.to, kind: row.kind }, cause, now);
 
-    return false;
+    return isTemporary ? "retry_later" : "abandoned";
   }
 
   try {
@@ -124,7 +142,7 @@ async function deliverEmailWithResult(id: string, send: SendEmail, now: Date): P
       to: maskEmail(row.to),
     });
 
-    return true;
+    return "sent";
   } catch (cause) {
     const message = formatErrorMessage(cause);
 
@@ -216,12 +234,11 @@ async function logDeliveryFailure(claim: PendingOutboxClaim, outcome: DeliveryFa
   );
 }
 
+/** The wait after `attempts` failed attempts: between half of the schedule and all of it, so the jitter never makes it short. */
 export function getRetryDelayMs(attempts: number, random: () => number = Math.random): number {
-  const exponent = Math.max(0, attempts - 1);
-  const exponentialDelay = BASE_RETRY_DELAY_MS * 2 ** exponent;
-  const cappedDelay = Math.min(exponentialDelay, MAX_RETRY_DELAY_MS);
+  const scheduleIndex = Math.min(Math.max(0, attempts - 1), RETRY_DELAYS_MS.length - 1);
 
-  return random() * cappedDelay;
+  return RETRY_DELAYS_MS[scheduleIndex] * (0.5 + 0.5 * random());
 }
 
 export function isTemporaryEmailError(cause: unknown): boolean {
