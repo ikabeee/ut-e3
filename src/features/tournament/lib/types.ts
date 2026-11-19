@@ -81,6 +81,9 @@ export type TournamentCommandType = TournamentCommand["type"];
 /** pre: the list that the KOF administrator builds; onsite: the sign-up at the KOF area on the event day. */
 export type EntryChannel = "pre" | "onsite";
 
+/** Why the passport does or does not offer the enrollment button to a visitor who is not in the tournament. */
+export type SelfEntryAvailability = "open" | "notOpen" | "closed" | "ended" | "full" | "excluded";
+
 export type EntryStatus = "registered" | "checked_in" | "no_show";
 
 export interface EntryView {

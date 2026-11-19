@@ -25,6 +25,9 @@ export type AddEntryResult =
   | { status: "preListFull" }
   | { status: "tournamentFull" };
 
+/** A visitor enrolling on their own adds one more refusal: an excluded passport cannot play (RF-46). */
+export type SelfEntryResult = AddEntryResult | { status: "excluded" } | { status: "ended" };
+
 export type CheckInResult =
   | { status: "checkedIn"; gamertag: string }
   | { status: "notOpen"; startsAt: Date }
@@ -65,6 +68,35 @@ export async function addEntry(actorId: string, gamertag: string, now: Date): Pr
   const entry = { visitorId: visitor.id, gamertag: visitor.gamertag, email: visitor.email, channel: window };
 
   return insertEntry(actorId, { entry, schedule }, now);
+}
+
+/**
+ * A visitor enrolls themselves from the app. Only the pre-registration is open to them: from noon the on-site sign-up
+ * is a check-in made in person, so the app answers "closed". The entry has no registering account and the audit log
+ * has no actor (the visitor is in `detail`); everything else is `insertEntry`, so the limits are the same.
+ */
+export async function addSelfEntry(visitorId: string, now: Date): Promise<SelfEntryResult> {
+  const schedule = await getEntrySchedule();
+  const window = getEntryWindow(schedule, now);
+
+  if (window === "notOpen") return { status: "notOpen", opensAt: schedule.registrationOpensAt };
+
+  if (window === "closed") return { status: "ended" };
+
+  if (window === "onsite") return { status: "closed" };
+
+  const visitor = await getPrisma().visitor.findUnique({
+    where: { id: visitorId },
+    select: { id: true, gamertag: true, email: true, excludedAt: true },
+  });
+
+  if (!visitor) return { status: "unknownGamertag" };
+
+  if (visitor.excludedAt) return { status: "excluded" };
+
+  const entry = { visitorId: visitor.id, gamertag: visitor.gamertag, email: visitor.email, channel: window };
+
+  return insertEntry(null, { entry, schedule }, now);
 }
 
 /** The administrator types the PIN of a pre-registered player; the player enters the bracket (RF-75). */
@@ -136,7 +168,7 @@ export async function closeCheckInIfDue(actorId: string, now: Date): Promise<num
 }
 
 async function insertEntry(
-  actorId: string,
+  actorId: string | null,
   { entry, schedule }: { entry: NewEntry; schedule: EntrySchedule },
   now: Date,
 ): Promise<AddEntryResult> {
@@ -163,7 +195,7 @@ async function insertEntry(
         action: "kof_entry.add",
         entityType: ENTITY_TYPE,
         entityId: created.id,
-        detail: { visitorId: entry.visitorId, gamertag: entry.gamertag, channel: entry.channel },
+        detail: describeEntryAudit(entry, actorId),
       });
 
       const emailId = await enqueueEntryEmail(transaction, {
@@ -176,6 +208,13 @@ async function insertEntry(
   } catch (cause) {
     return explainInsertFailure(cause);
   }
+}
+
+// A self-enrollment has no actor account, so the detail says who did it.
+function describeEntryAudit(entry: NewEntry, actorId: string | null) {
+  const { visitorId, gamertag, channel } = entry;
+
+  return actorId === null ? { visitorId, gamertag, channel, source: "visitor" } : { visitorId, gamertag, channel };
 }
 
 /** The confirmation of an entry whose first email was abandoned; null when the entry no longer exists. */

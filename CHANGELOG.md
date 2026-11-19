@@ -8,6 +8,13 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Inscripción al torneo de KOF desde la app: el visitante con pasaporte toca "Inscribirme al torneo" en `/passport`, ya no
+  depende del administrador. Entra a la lista previa con los mismos cupos y recibe el correo de confirmación. Se
+  rechaza si el torneo está lleno, la inscripción cerró o su pasaporte está excluido; repetirlo no duplica nada.
+
+### Cambiado
+
+- `/tournament`: el paso "Pide al administrador de KOF que te agregue" ahora lleva al botón del pasaporte.
 - `/admin/recovery`: pantalla "Recuperación" solo para el sysadmin. Muestra el estado del trabajador de correo (SMTP
   configurado, servidor, última corrida y último error), de la vigilancia de carga, de la base de datos (tamaño de la
   base, el WAL y el SHM, y espacio libre del volumen) y permite recuperarlos con un clic: probar SMTP (envía un correo
