@@ -2,10 +2,13 @@ import "server-only";
 import type { EntrySchedule } from "@features/tournament/lib/entries-rules";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import type { EntryChannel, EntryStatus, EntryView } from "@features/tournament/lib/types";
+import type { Prisma } from "@generated/prisma/client";
 import { getPrisma } from "@shared/lib/server/prisma";
 
-export async function getEntrySchedule(): Promise<EntrySchedule> {
-  const settings = await getPrisma().eventSettings.findUnique({
+export async function getEntrySchedule(
+  client: Pick<Prisma.TransactionClient, "eventSettings"> = getPrisma(),
+): Promise<EntrySchedule> {
+  const settings = await client.eventSettings.findUnique({
     where: { id: 1 },
     select: {
       kofRegistrationOpensAt: true,

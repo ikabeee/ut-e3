@@ -17,6 +17,7 @@ export const ADMIN_COPY = {
     moderation: "Moderación",
     catalog: "Catálogos",
     server: "Servidor",
+    emails: "Correos",
     sql: "Consola SQL",
     kof: "Torneo de KOF",
   },
@@ -25,7 +26,111 @@ export const ADMIN_COPY = {
     moderation: { title: "Moderación", description: "Alertas de fraude, visitas anuladas y visitantes excluidos." },
     catalog: { title: "Catálogos", description: "Géneros, patrocinadores y lista negra de correos." },
     server: { title: "Estado del servidor", description: "Memoria, CPU, bracket en vivo y bandeja de salida." },
+    emails: {
+      title: "Correos",
+      description: "Bandeja de salida completa: filtros, reenvío y reconstrucción de los correos abandonados.",
+    },
     sql: { title: "Consola SQL", description: "Consultas y cambios directos a la base de datos del evento." },
+  },
+  emails: {
+    heading: "Bandeja de salida",
+    summary: (sent: number, pending: number, failed: number) =>
+      `Enviados: ${sent}. Pendientes: ${pending}. Fallidos: ${failed}.`,
+    sendNow: {
+      lead: "Los pendientes salen solos cada minuto. Con este botón la entrega corre ahora.",
+      button: "Enviar ahora",
+      sending: "Enviando...",
+      done: (sent: number) => (sent === 1 ? "Se envió 1 correo." : `Se enviaron ${sent} correos.`),
+      noSmtp: "El servidor no tiene SMTP configurado (SMTP_HOST): no hay desde dónde enviar.",
+    },
+    resendFailed: {
+      lead: (count: number) =>
+        count === 1
+          ? "Hay 1 correo fallido con contenido que se puede reenviar."
+          : `Hay ${count} correos fallidos con contenido que se pueden reenviar.`,
+      none: "No hay correos fallidos con contenido para reenviar.",
+      trigger: "Reenviar todos los fallidos",
+      prompt: (count: number) =>
+        count === 1
+          ? "Se reenviará 1 correo fallido. ¿Confirmas?"
+          : `Se reenviarán ${count} correos fallidos. ¿Confirmas?`,
+      confirm: "Sí, reenviar",
+      cancel: "Cancelar",
+      done: (count: number) =>
+        count === 1
+          ? "1 correo volvió a la cola. Sale en el siguiente minuto o con Enviar ahora."
+          : `${count} correos volvieron a la cola. Salen en el siguiente minuto o con Enviar ahora.`,
+      changed: (count: number) =>
+        `La lista cambió: ahora hay ${count} correo(s) fallido(s) con contenido. No se reenvió nada; revisa el número y confirma de nuevo.`,
+    },
+    filters: {
+      label: "Filtrar correos",
+      status: "Estado",
+      statusNav: "Estado del correo",
+      all: "Todos",
+      sent: "Enviados",
+      pending: "Pendientes",
+      failed: "Fallidos",
+      recipient: "Destinatario",
+      subject: "Asunto",
+      from: "Desde (fecha de cola)",
+      to: "Hasta (fecha de cola)",
+      apply: "Filtrar",
+      clear: "Quitar filtros",
+    },
+    statusNames: { sent: "Enviado", pending: "Pendiente", failed: "Fallido" },
+    empty: "Ningún correo coincide con los filtros.",
+    total: (count: number) => (count === 1 ? "1 correo." : `${count} correos.`),
+    pagination: {
+      label: "Páginas de correos",
+      previous: "Anterior",
+      next: "Siguiente",
+      position: (page: number, pageCount: number) => `Página ${page} de ${pageCount}`,
+    },
+    row: {
+      queued: (when: string) => `En cola: ${when}.`,
+      attempts: (count: number) => `Intentos: ${count}.`,
+      nextAttempt: (when: string) => `Próximo intento: ${when}.`,
+      sentAt: (when: string) => `Enviado: ${when}.`,
+      lastError: (message: string) => `Último error: ${message}`,
+      kind: (name: string) => `Tipo: ${name}.`,
+      noBody: "Sin contenido: se borró al enviarse o abandonarse.",
+    },
+    kindNames: {
+      visitor_passport: "Pasaporte del visitante",
+      recovery_link: "Enlace de recuperación",
+      kof_entry: "Inscripción al KOF",
+      staff_invitation: "Invitación de staff",
+      login_code: "Código de inicio de sesión",
+      password_reset: "Restablecer contraseña",
+      raffle_winner: "Ganador de la rifa",
+      emergency: "Aviso de emergencia",
+    },
+    noKind: "Sin tipo (anterior a este registro)",
+    actions: {
+      resend: "Reenviar",
+      resending: "Reenviando...",
+      view: "Ver texto",
+      viewing: "Abriendo...",
+      hide: "Ocultar texto",
+      rebuild: "Rehacer",
+      rebuilding: "Rehaciendo...",
+    },
+    resent: "Correo de nuevo en la cola: sale en este momento.",
+    resendRefused: "Ese correo ya se envió o ya no tiene contenido.",
+    viewRefused: "Ese correo ya no tiene contenido que mostrar.",
+    rebuilt: "Correo rehecho y en la cola: sale en este momento.",
+    rebuildRefused: {
+      notFound: "Ese correo no existe, ya se envió o todavía tiene contenido.",
+      notRebuildable: "Ese correo no se puede rehacer.",
+      sourceGone: "Ya no existe el registro del que salía ese correo, o ya no está en el estado que lo permite.",
+    },
+    cannotRebuild: {
+      noKind: "No se puede rehacer: se puso en cola antes de que se guardara su tipo.",
+      login_code: "No se puede rehacer: pide al usuario que inicie sesión de nuevo para recibir un código nuevo.",
+      emergency: "No se puede rehacer: es un aviso de emergencia y ya pasó su momento.",
+    },
+    invalid: "Valor no válido.",
   },
   sql: {
     heading: "Consola SQL",

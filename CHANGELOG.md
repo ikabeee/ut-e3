@@ -6,6 +6,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- `/admin/emails`: bandeja de salida completa para el sysadmin. Lista todos los correos con filtros (estado, destinatario, asunto y fecha) y páginas de 25, con intentos, próximo intento, último error y el destinatario completo; muestra el texto de un correo mientras exista (cada lectura queda en la bitácora), reenvía uno o todos los fallidos (muestra cuántos son y pide confirmar), rehace los correos abandonados cuyo texto se borró y tiene "Enviar ahora", que corre la entrega en el momento. Cada acción queda en la bitácora de auditoría.
+- Cada correo de la bandeja guarda su tipo y el registro del que sale (`kind` y `reference_id`, migración `20261120100000_outbox_kind`). Con eso se rehacen el pasaporte (con su PIN), el enlace de recuperación, la inscripción al KOF, la invitación de staff, el restablecimiento de contraseña y el aviso al ganador de la rifa. Un código de inicio de sesión, un aviso de emergencia o un correo anterior a la migración no se pueden rehacer.
+
 ## [1.3.0] - 2026-11-18
 
 ### Agregado
