@@ -118,6 +118,9 @@ porque usa el rol secundario y las 4 mesas. Rama `feature/<issue>-staff-dual-rol
 
   Con esto se ajustaron S5, T7 y T8. El despliegue y la escritura en el VPS siguen siendo acciones que se confirman en
   el momento.
+- **L22** (decisión del usuario, verbatim): "Mete a kristal y coronel como sysadmins". Palma Góngora Wendy Kristal
+  (101-3) y Coronel Palma Christian (101-2) quedan como `stand_admin` con `sysadmin` como rol secundario. El CSV pasa a
+  tener 11 roles dobles y 6 sysadmins en total.
 - **L21** (evidencia de implementación):
   - Verificación independiente (gentle-ai-verify) de T1, T2, T4, T5, T7-T9, T13 y T14: PASS en los 5 puntos.
     - Las migraciones conservan los datos y el esquema salvo los cambios buscados.
