@@ -6,6 +6,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.3.0] - 2026-11-18
+
 ### Agregado
 
 - `/admin/sql`: consola SQL solo para el sysadmin. Ejecuta una sentencia (`SELECT`, `WITH`, `EXPLAIN`, `INSERT`, `UPDATE`
