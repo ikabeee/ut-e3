@@ -25,6 +25,10 @@ export const RAFFLE_HOME_PATH = "/admin/raffle";
 // The help desk signs in to the recovery desk; the page itself belongs to the support feature.
 export const SUPPORT_HOME_PATH = "/support/recovery";
 
+// The private page of the role in the event (S4): any staff account opens it. The invitation email links to it, an
+// account goes there on its first verified login and every header has a link.
+export const MY_ROLE_PATH = "/my-role";
+
 export function getHomePath(role: string): string {
   if (role === "kof_admin" || role === "kof_staff") return KOF_HOME_PATH;
 

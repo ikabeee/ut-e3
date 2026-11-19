@@ -8,6 +8,9 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- Página "Mi rol" (`/my-role`): cada cuenta del staff ve lo que hace en el evento, sus pantallas, su stand, mesa o área,
+  el horario y a quién acudir. Se abre en el primer inicio de sesión, con el enlace "Mi rol" del encabezado y desde el
+  correo de invitación.
 - Alta masiva del staff: `npm run db:invite:staff` crea los stands que faltan y las invitaciones del staff (con rol
   secundario y mesa de KOF) desde un CSV; corre una sola vez al desplegar si existe `/data/staff-invitations.csv`, y el
   sysadmin reenvía desde `/admin/accounts`.

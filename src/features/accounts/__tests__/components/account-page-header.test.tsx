@@ -10,6 +10,29 @@ describe("AccountPageHeader", () => {
     expect(screen.getByText("Sesión de Ana")).toBeInTheDocument();
   });
 
+  it("links to the page of the role of the account", () => {
+    render(<AccountPageHeader title="Mesa" signedInAs="Sesión de Ana" signOutAction={async () => {}} />);
+
+    const link = screen.getByRole("link", { name: "Mi rol" });
+
+    expect(link).toHaveAttribute("href", "/my-role");
+    expect(link).toHaveClass("min-h-11");
+  });
+
+  it("leaves the link out on the page of the role itself", () => {
+    render(
+      <AccountPageHeader
+        title="Mi rol"
+        signedInAs="Sesión de Ana"
+        signOutAction={async () => {}}
+        showRoleLink={false}
+      />,
+    );
+
+    expect(screen.queryByRole("link", { name: "Mi rol" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cerrar sesión" })).toBeInTheDocument();
+  });
+
   it("runs the sign out action from the button", async () => {
     const calls: string[] = [];
 

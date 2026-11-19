@@ -12,6 +12,20 @@ describe("AdminHeader", () => {
     expect(screen.getByRole("button", { name: "Cerrar sesión" })).toBeInTheDocument();
   });
 
+  it("links to the page of the role next to the sign out button, with or without sections", () => {
+    const { rerender } = render(
+      <AdminHeader title="Cuentas" signedInAs="Sesión de Ana" currentPath={null} signOutAction={signOutAction} />,
+    );
+
+    expect(screen.getByRole("link", { name: "Mi rol" })).toHaveAttribute("href", "/my-role");
+
+    rerender(
+      <AdminHeader title="Logs" signedInAs="Sesión de Ana" currentPath="/admin/logs" signOutAction={signOutAction} />,
+    );
+
+    expect(screen.getByRole("link", { name: "Mi rol" })).toHaveAttribute("href", "/my-role");
+  });
+
   it("collapses the sections into a menu that opens the same list as the sidebar (S10)", () => {
     render(
       <AdminHeader title="Logs" signedInAs="Sesión de Ana" currentPath="/admin/logs" signOutAction={signOutAction} />,
@@ -31,6 +45,7 @@ describe("AdminHeader", () => {
     render(<AdminHeader title="Torneo" signedInAs="Sesión de Ana" currentPath={null} signOutAction={signOutAction} />);
 
     expect(screen.queryByRole("group")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "Mi rol" })).toBeInTheDocument();
   });
 });
