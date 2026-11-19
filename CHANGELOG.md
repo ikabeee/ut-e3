@@ -6,6 +6,16 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- Inscripción al torneo de KOF desde la app: el visitante con pasaporte toca "Inscribirme al torneo" en `/passport`, ya no
+  depende del administrador. Entra a la lista previa con los mismos cupos y recibe el correo de confirmación. Se
+  rechaza si el torneo está lleno, la inscripción cerró o su pasaporte está excluido; repetirlo no duplica nada.
+
+### Cambiado
+
+- `/tournament`: el paso "Pide al administrador de KOF que te agregue" ahora lleva al botón del pasaporte.
+
 ## [1.3.0] - 2026-11-18
 
 ### Agregado

@@ -74,6 +74,16 @@ de `event_settings`; ninguna está escrita en el código.
   reservados hasta las 12:45. La base lo exige con triggers, por si dos solicitudes llegan a la vez.
 - "Generar bracket" cierra el check-in si ya toca y usa solo a los jugadores con check-in. Se rechaza antes de las 12:55,
   una segunda vez y con menos de 32 o más de 64 jugadores.
+- El visitante se inscribe solo desde su pasaporte (`/passport`, botón "Inscribirme al torneo"; S9 de `odd/tasks/sysadmin-console.md`).
+  La sesión es la misma del pasaporte (cookie de dispositivo) y el visitante nunca viene del formulario.
+  `addSelfEntry()` (`entries-mutations.ts`) reutiliza `insertEntry()`: mismo cupo (50 de lista previa y 64), mismo
+  duplicado y mismo correo de confirmación (S8). Solo existe el canal `pre`: desde `kofOnsiteSignupStartsAt` la app
+  responde "cerró" porque la inscripción presencial es un check-in en el área de KOF. Un pasaporte excluido (RF-46) se
+  rechaza. Es idempotente (repetir responde "Ya estás inscrito" sin crear nada ni reenviar el correo), con límite de 10
+  intentos cada 10 minutos por visitante. La fila queda sin `registeredById` y la bitácora `kof_entry.add` sin actor, con
+  `detail.source = "visitor"`. No hay cancelación: no existe ninguna regla ni comando para quitar una inscripción.
+  Los estados (inscrito, lleno, cerrado, aún no abre y excluido) salen de `getSelfEntryAvailability()`; los errores de la
+  acción llegan como toast.
 - El pasaporte del inscrito (`/passport`) avisa que está en el torneo y cuándo hacer el check-in; después confirma que
   ya está en el bracket.
 - Solo el administrador de KOF hace todo esto; el staff de las mesas y el sysadmin reciben un rechazo.
@@ -146,7 +156,7 @@ puede repetirse: solo agrega lo que falta.
 ## Pendiente
 
 - Registrar en el momento a un visitante que no tiene pasaporte (UT-TO-38): el registro liga un dispositivo al pasaporte,
-  así que el visitante se registra en su teléfono y el administrador lo agrega por gamertag.
+  así que el visitante se registra en su teléfono y se inscribe desde su pasaporte (o el administrador lo agrega por gamertag).
 - Una lista de espera para los lugares de "No se presentó" (UT-TO-44): quedan vacíos y son byes.
 - El cierre automático del bracket público cuando la CPU o la memoria pasan del 85% durante 2 minutos (necesita monitoreo del
   servidor), el tope de conexiones y el tiempo real por SSE: se usa consulta cada 3 segundos.
