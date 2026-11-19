@@ -14,6 +14,7 @@ export const SITE_COPY = {
       sponsors: "Patrocinadores",
       raffle: "Rifa",
       tournament: "KOF",
+      help: "Ayuda",
     },
     passport: "Mi pasaporte",
     search: {
@@ -27,6 +28,45 @@ export const SITE_COPY = {
     openMenu: "Abrir menú",
     menuTitle: "Menú",
     closeMenu: "Cerrar menú",
+  },
+  help: {
+    title: "¿A quién acudo?",
+    kicker: "Ayuda",
+    description: "Qué hacer si algo falla en tu visita al UT Game Showcase: elige tu caso y sigue el paso.",
+    lead: "Elige tu caso. Si no aparece aquí, acude a la mesa de atención del evento.",
+    topicsLabel: "Problemas frecuentes",
+    desk: "la mesa de atención",
+    passportLink: "Abrir mi pasaporte",
+    topics: {
+      lostPhone: {
+        title: "Perdí o cambié mi teléfono",
+        solution: (desk: string) => `Recupera tu pasaporte con tu correo o pídelo en ${desk}.`,
+        link: "Recuperar mi pasaporte",
+      },
+      noEmail: {
+        title: "No me llegó el correo",
+        solution: (desk: string) =>
+          `Abre tu pasaporte en el teléfono donde te registraste. Si no aparece, acude a ${desk}.`,
+      },
+      standVisit: {
+        title: "Mi visita no se registró",
+        solution: "Avisa al staff del stand y muéstrale tu PIN otra vez.",
+      },
+      tickets: {
+        title: "Dudas con mis boletos",
+        solution: (ticketsTitle: string, desk: string) =>
+          `Míralos en tu pasaporte, en «${ticketsTitle}». Si algo no cuadra, pregunta en ${desk}.`,
+      },
+      kof: {
+        title: "Quiero jugar el torneo de KOF",
+        solution: (enrollButton: string) => `Toca «${enrollButton}» en tu pasaporte o inscríbete en el área de KOF.`,
+        link: "Ver el torneo",
+      },
+      offline: {
+        title: "No tengo conexión",
+        solution: "Tu pasaporte abre desde la copia guardada en tu teléfono.",
+      },
+    },
   },
   notFound: {
     title: "Página no encontrada",

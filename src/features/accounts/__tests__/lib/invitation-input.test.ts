@@ -30,6 +30,8 @@ describe("parseInviteInput", () => {
   it.each([
     ["1", 1],
     ["2", 2],
+    ["3", 3],
+    ["4", 4],
   ] as const)("reads the desk %s of a staff member", (desk, expected) => {
     const form = createForm({ name: "Luis", email: "luis@ut.mx", role: "kof_staff", desk });
 
@@ -50,7 +52,8 @@ describe("parseInviteInput", () => {
     ["an email without an at sign", { name: "Ana", email: "ana.ut.mx", role: "kof_admin" }, ERRORS.emailInvalid],
     ["an email with spaces", { name: "Ana", email: "a na@ut.mx", role: "kof_admin" }, ERRORS.emailInvalid],
     ["a missing role", { name: "Ana", email: "a@ut.mx" }, ERRORS.roleRequired],
-    ["a desk that does not exist", { name: "Ana", email: "a@ut.mx", role: "kof_staff", desk: "3" }, ERRORS.deskInvalid],
+    ["a desk that does not exist", { name: "Ana", email: "a@ut.mx", role: "kof_staff", desk: "5" }, ERRORS.deskInvalid],
+    ["desk zero", { name: "Ana", email: "a@ut.mx", role: "kof_staff", desk: "0" }, ERRORS.deskInvalid],
     [
       "a desk that is not a number",
       { name: "Ana", email: "a@ut.mx", role: "kof_staff", desk: "uno" },

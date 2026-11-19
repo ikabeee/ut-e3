@@ -33,6 +33,23 @@ describe("PublicBracketView", () => {
     expect(hourglass.innerHTML).toContain("motion-safe:animate-pulse");
   });
 
+  it("centers the hourglass and the text together while the bracket is closed or pending (S7)", () => {
+    const { unmount } = renderWithToasts(<PublicBracketView initial={CLOSED} />);
+
+    const closed = screen.getByRole("status");
+
+    expect(closed.parentElement).toHaveClass("justify-items-center");
+    expect(closed.parentElement).not.toHaveClass("justify-items-start");
+    expect(closed).toHaveClass("text-center");
+    expect(closed.parentElement).toContainElement(screen.getByTestId("waiting-hourglass-icon"));
+
+    unmount();
+    renderWithToasts(<PublicBracketView initial={{ state: "pending", serverNow: 1 }} />);
+
+    expect(screen.getByRole("status").parentElement).toHaveClass("justify-items-center");
+    expect(screen.getByRole("status")).toHaveClass("text-center");
+  });
+
   it("says the bracket is not ready while it does not exist", () => {
     renderWithToasts(<PublicBracketView initial={{ state: "pending", serverNow: 1 }} />);
 

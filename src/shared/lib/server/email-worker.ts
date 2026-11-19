@@ -9,8 +9,8 @@ export const EMAIL_WORKER_JOB = "email-outbox";
 const DELIVER_INTERVAL_MS = 60_000;
 
 /**
- * Retries the email outbox every minute (RNF-03); the first attempt of each email runs right after its request with
- * after(). Without `SMTP_HOST` the emails wait in the outbox and the worker does not start (docs/deploy.md, "Correo").
+ * Retries the email outbox every minute (RNF-03), at most `MAX_BATCH_SIZE` emails per pass and over one pooled SMTP
+ * connection (mailer.ts); the first attempt of each email runs right after its request with after(). Without `SMTP_HOST` the emails wait in the outbox and the worker does not start (docs/deploy.md, "Correo").
  */
 export function startEmailWorker(): void {
   if (!process.env.SMTP_HOST) return;

@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import type { EventSettings } from "@features/event-settings/lib/types";
 import { makeGames } from "@features/games/__tests__/components/game-test-data";
 import { LANDING_COPY } from "@features/landing/lib/landing-copy";
-import { LandingView, landingPageMetadata } from "@features/landing/pages/landing-page";
+import { buildLandingOgCard, LandingView, landingPageMetadata } from "@features/landing/pages/landing-page";
 import type { ScheduleItem } from "@features/schedule/lib/types";
 import { getSiteNavigation } from "@features/site/lib/site-navigation";
 import { PIXEL_FORGE } from "@features/sponsors/__tests__/components/sponsor-test-data";
@@ -283,5 +283,14 @@ describe("LandingView with only the landing published", () => {
     renderLandingOnly();
 
     expect(screen.queryByRole("link", { name: /Abrir el croquis/ })).not.toBeInTheDocument();
+  });
+});
+
+describe("buildLandingOgCard", () => {
+  it("titles the image with the site and dates it with the day of the event in Cancun", () => {
+    expect(buildLandingOgCard(SETTINGS.eventStartsAt)).toMatchObject({
+      title: "PIXEL & CODE · Showcase de videojuegos",
+      details: ["20.11.2026"],
+    });
   });
 });

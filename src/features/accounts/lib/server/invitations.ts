@@ -6,10 +6,18 @@ import {
   canManageRole,
   getManagedRoles,
   isInvitationExpired,
+  isSysadminActor,
   MAX_STAND_STAFF,
 } from "@features/accounts/lib/invitation-rules";
 import { enqueueInvitationEmail } from "@features/accounts/lib/server/invitation-tokens";
-import type { AccountStatus, KofDesk, ManagedAccount, StandAccountRow } from "@features/accounts/lib/types";
+import {
+  KOF_DESKS,
+  type AccountStatus,
+  type KofDesk,
+  type ManagedAccount,
+  type SecondaryRole,
+  type StandAccountRow,
+} from "@features/accounts/lib/types";
 import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { isUniqueViolation, readDatabaseMessage } from "@shared/lib/server/database-errors";
@@ -20,6 +28,8 @@ import { hashToken } from "@shared/lib/server/token-hash";
 export interface ManagingActor {
   id: string;
   role: string;
+  /** The second role of a stand administrator (S1): what that role manages is added to what the primary one does. */
+  secondaryRole?: string | null;
   /** The stand of a stand administrator, whose staff it manages; the other roles have none. */
   standId?: string | null;
 }
@@ -52,6 +62,7 @@ export interface ManagedRow {
   id: string;
   role: string;
   standId: string | null;
+  secondaryRole: string | null;
   kofDesk: number | null;
   name: string;
   email: string;
@@ -73,7 +84,7 @@ export async function inviteAccount(actor: ManagingActor, rawInput: InviteInput,
   // The accounts table only accepts a trimmed lower-case email, so it is normalized here and not only by the parser.
   const input = { ...rawInput, email: rawInput.email.trim().toLowerCase() };
 
-  if (!canManageRole(actor.role, input.role)) return { status: "forbidden" };
+  if (!canManageRole(actor.role, input.role, actor.secondaryRole)) return { status: "forbidden" };
 
   if (!hasValidDesk(input)) return { status: "invalidDesk" };
 
@@ -91,9 +102,12 @@ export interface NewInvitedAccount {
   name: string;
   email: string;
   role: string;
+  /** Set at creation only by the bulk invitation of the staff (S5); the CHECK of the table limits it to stand administrators. */
+  secondaryRole?: SecondaryRole | null;
   kofDesk: KofDesk | null;
   standId: string | null;
-  createdById: string;
+  /** Null when no staff account creates it, such as the bulk invitation that runs on deploy (T7). */
+  createdById: string | null;
   now: Date;
 }
 
@@ -293,29 +307,29 @@ async function findReactivateRefusal(account: ManagedRow): Promise<ReactivateRef
 
   if (role === "stand_admin" && standId && (await hasStandAdmin(standId))) return { status: "adminTaken" };
 
-  return role === "kof_staff" && (kofDesk === 1 || kofDesk === 2) && (await isDeskTaken(kofDesk))
-    ? { status: "deskTaken" }
-    : null;
+  const desk = toKofDesk(kofDesk);
+
+  return role === "kof_staff" && desk !== null && (await isDeskTaken(desk)) ? { status: "deskTaken" } : null;
 }
 
 async function findDisableProtection(actor: ManagingActor, account: ManagedRow): Promise<DisableRefusal | null> {
-  if (account.role !== "sysadmin") return null;
+  if (!isSysadminActor(account)) return null;
 
   if (account.id === actor.id) return { status: "selfProtected" };
 
   return account.status === "active" && !(await hasOtherActiveSysadmin(account.id)) ? { status: "lastSysadmin" } : null;
 }
 
-async function hasOtherActiveSysadmin(accountId: string): Promise<boolean> {
+export async function hasOtherActiveSysadmin(accountId: string): Promise<boolean> {
   const other = await getPrisma().account.findFirst({
-    where: { role: "sysadmin", status: "active", id: { not: accountId } },
+    where: { OR: [{ role: "sysadmin" }, { secondaryRole: "sysadmin" }], status: "active", id: { not: accountId } },
     select: { id: true },
   });
 
   return other !== null;
 }
 
-async function hasStandAdmin(standId: string): Promise<boolean> {
+export async function hasStandAdmin(standId: string): Promise<boolean> {
   const admin = await getPrisma().account.findFirst({
     where: { role: "stand_admin", standId, status: { not: "disabled" } },
     select: { id: true },
@@ -339,7 +353,7 @@ function explainReactivateFailure(cause: unknown): ReactivateRefusal {
 // The stand of a stand administrator's staff is its own, never one that the form names (RF-32). The sysadmin names it,
 // and only the stand roles have one.
 async function chooseStand(actor: ManagingActor, input: InviteInput): Promise<StandChoice> {
-  if (actor.role !== "sysadmin") {
+  if (!namesStandAsSysadmin(actor, input)) {
     const standId = input.role === "stand_staff" ? (actor.standId ?? null) : null;
 
     return input.role === "stand_staff" && !standId
@@ -352,6 +366,14 @@ async function chooseStand(actor: ManagingActor, input: InviteInput): Promise<St
   const isValid = isStandRole === (standId !== null) && (standId === null || (await standExists(standId)));
 
   return isValid ? { kind: "chosen", standId } : { kind: "refused", status: "invalidStand" };
+}
+
+// A stand administrator with the secondary role sysadmin invites from two screens with the same action: /admin/accounts,
+// where the form names the stand, and /stand/team, where it does not and the staff goes to its own stand.
+function namesStandAsSysadmin(actor: ManagingActor, input: InviteInput): boolean {
+  if (actor.role === "sysadmin") return true;
+
+  return isSysadminActor(actor) && !(input.role === "stand_staff" && !input.standId);
 }
 
 async function standExists(standId: string): Promise<boolean> {
@@ -435,6 +457,7 @@ export async function createInvitedAccount(
       email: account.email,
       name: account.name,
       role: account.role,
+      secondaryRole: account.secondaryRole ?? null,
       status: "invited",
       kofDesk: account.kofDesk,
       standId: account.standId,
@@ -463,11 +486,11 @@ function explainInviteFailure(cause: unknown): InviteRefusal {
 }
 
 // Invited and active staff count against the limit; a disabled account frees its place.
-async function countStandStaff(standId: string): Promise<number> {
+export async function countStandStaff(standId: string): Promise<number> {
   return getPrisma().account.count({ where: { role: "stand_staff", standId, status: { not: "disabled" } } });
 }
 
-async function isDeskTaken(kofDesk: KofDesk): Promise<boolean> {
+export async function isDeskTaken(kofDesk: KofDesk): Promise<boolean> {
   const taken = await getPrisma().account.findFirst({
     where: { role: "kof_staff", kofDesk, status: { not: "disabled" } },
     select: { id: true },
@@ -480,7 +503,16 @@ async function isDeskTaken(kofDesk: KofDesk): Promise<boolean> {
 export async function findManagedAccount(actor: ManagingActor, accountId: string): Promise<Lookup> {
   const account = await getPrisma().account.findUnique({
     where: { id: accountId },
-    select: { id: true, role: true, name: true, email: true, status: true, standId: true, kofDesk: true },
+    select: {
+      id: true,
+      role: true,
+      secondaryRole: true,
+      name: true,
+      email: true,
+      status: true,
+      standId: true,
+      kofDesk: true,
+    },
   });
 
   if (!account) return { kind: "refused", failure: { status: "notFound" } };
@@ -502,7 +534,7 @@ export function toStatus(value: string): AccountStatus {
 }
 
 export function toKofDesk(value: number | null): KofDesk | null {
-  return value === 1 || value === 2 ? value : null;
+  return KOF_DESKS.find((desk) => desk === value) ?? null;
 }
 
 /** A new invitation for an account that is still `invited` and whose email was abandoned; null for any other state. */

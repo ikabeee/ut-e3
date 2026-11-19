@@ -12,6 +12,7 @@ export const ADMIN_COPY = {
   signedInAs: (name: string) => `Sesión de ${name}`,
   nav: {
     label: "Secciones del panel",
+    menu: "Menú del panel",
     home: "Cuentas y stands",
     settings: "Configuración",
     moderation: "Moderación",

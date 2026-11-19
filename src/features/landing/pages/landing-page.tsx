@@ -34,6 +34,7 @@ import { REGISTER_PATH } from "@features/visitors/lib/visitors-links";
 import { JsonLd } from "@shared/components/json-ld";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
 import { buildOpenGraph } from "@shared/lib/metadata";
+import { buildSiteOgCard, renderOgImage, type OgCard } from "@shared/lib/og-image";
 import { siteConfig } from "@shared/lib/site-config";
 import { siteMode } from "@shared/lib/site-mode";
 
@@ -41,8 +42,19 @@ export const landingPageMetadata: Metadata = {
   title: { absolute: siteConfig.title },
   description: siteConfig.description,
   alternates: { canonical: HOME_PATH },
-  openGraph: buildOpenGraph(),
+  openGraph: buildOpenGraph({ url: HOME_PATH }),
 };
+
+export async function renderLandingOgImage() {
+  const { eventStartsAt } = await getEventSettings();
+
+  return renderOgImage(buildLandingOgCard(eventStartsAt));
+}
+
+/** The card of the image of the site: its title and the day of the event, from the settings (S11). */
+export function buildLandingOgCard(eventStartsAt: string): OgCard {
+  return buildSiteOgCard([formatEventDate(eventStartsAt, "numeric")]);
+}
 
 interface LandingViewProps {
   settings: EventSettings;

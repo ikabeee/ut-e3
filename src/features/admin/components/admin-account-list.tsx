@@ -1,6 +1,7 @@
 "use client";
 
 import { ActionButton, DisableButton } from "@features/accounts/components/managed-account-list";
+import { SecondaryRoleForm } from "@features/accounts/components/secondary-role-form";
 import type { ManagementAction } from "@features/accounts/components/invite-account-form";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import {
@@ -19,6 +20,7 @@ export interface AdminAccountActions {
   resetPassword: ManagementAction;
   closeSessions: ManagementAction;
   clearTwoFactor: ManagementAction;
+  setSecondaryRole: ManagementAction;
 }
 
 interface AdminAccountListProps {
@@ -87,6 +89,9 @@ function AccountActions({
       {status !== "disabled" && !isSelf && (
         <DisableButton accountId={id} name={account.name} action={actions.disable} />
       )}
+      {account.role === "stand_admin" && (
+        <SecondaryRoleForm accountId={id} secondaryRole={account.secondaryRole} action={actions.setSecondaryRole} />
+      )}
     </div>
   );
 }
@@ -128,7 +133,13 @@ function describe(account: AdminAccountRow, standCode?: string): string {
   const stand = standCode ? ` · ${COPY.standOf(standCode)}` : "";
   const desk = account.kofDesk === null ? "" : ` · ${PANEL_COPY.deskOf(account.kofDesk)}`;
 
-  return `${role}${stand}${desk} · ${PANEL_COPY.statuses[account.status]}`;
+  return `${role}${describeSecondaryRole(account.secondaryRole)}${stand}${desk} · ${PANEL_COPY.statuses[account.status]}`;
+}
+
+function describeSecondaryRole(secondaryRole: string | null): string {
+  if (!secondaryRole) return "";
+
+  return ` · ${PANEL_COPY.secondaryRole.of(PANEL_COPY.roles[toRoleKey(secondaryRole)])}`;
 }
 
 function describeLastLogin(lastLoginAt: Date | null): string {

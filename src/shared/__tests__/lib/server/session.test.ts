@@ -59,6 +59,33 @@ describe("getSessionAccount", () => {
       email: "admin@ut.mx",
       name: "Sysadmin",
       role: "sysadmin",
+      roles: ["sysadmin"],
+    });
+  });
+
+  it("lists the primary role first and the secondary role after it", async () => {
+    const stand = await getPrisma().stand.create({ data: { zone: "A", number: 1, studio: 1, groupCode: "101" } });
+
+    const account = await getPrisma().account.create({
+      data: {
+        email: "lider@ut.mx",
+        name: "Líder",
+        role: "stand_admin",
+        secondaryRole: "help_desk",
+        status: "active",
+        password: "scrypt$1$1$1$a$b",
+        standId: stand.id,
+      },
+    });
+
+    await createSession(account.id);
+
+    expect(await getSessionAccount()).toEqual({
+      id: account.id,
+      email: "lider@ut.mx",
+      name: "Líder",
+      role: "stand_admin",
+      roles: ["stand_admin", "help_desk"],
     });
   });
 

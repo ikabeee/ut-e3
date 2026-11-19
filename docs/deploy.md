@@ -8,7 +8,7 @@ el `Dockerfile` y el `docker-compose.yml`; el proxy (Nginx o Caddy) lo pones tú
 | Archivo | Para qué |
 | --- | --- |
 | `Dockerfile` | Imagen en tres etapas con Node 22: compila (`prisma generate` y `next build`), arma las dependencias de arranque y deja una imagen final sin compiladores. Corre como el usuario `node` (no root). |
-| `docker/entrypoint.sh` | Al arrancar aplica las migraciones pendientes (`prisma migrate deploy`), y deja `node server.js` como proceso principal. |
+| `docker/entrypoint.sh` | Al arrancar aplica las migraciones pendientes (`prisma migrate deploy`), corre el alta masiva del staff si existe su lista (ver "Alta masiva del staff") y deja `node server.js` como proceso principal. |
 | `docker-compose.yml` | Un servicio `app`, volumen `app-data` con la base SQLite, reinicio automático y `stop_grace_period: 30s`. Publica solo en `127.0.0.1`. |
 | `.env.production.example` | Plantilla de variables. Se copia a `.env` en el VPS. |
 | `GET /api/health` | Ruta ligera que usa el `HEALTHCHECK` de la imagen. No consulta la base: responde 503 (`low-disk`) si al volumen de la base le quedan menos de 64 MB, y `docker compose ps` lo muestra como `unhealthy`. No la uses como chequeo activo del proxy (ver "Caddy"). |
@@ -100,7 +100,7 @@ Todas viven en `.env` (nunca se versiona). `.env.production.example` las lista c
 | `APP_PORT` | No | Puerto en `127.0.0.1` para el proxy. Por defecto `3000`. |
 | `APP_TAG` | No | Etiqueta de la imagen. Por defecto `latest`. |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | No | Ver "Correo". |
-| `SMTP_EHLO_NAME` | No | Nombre con el que el servidor saluda al SMTP (EHLO), por ejemplo `pixelandcode.tu-dominio.mx`. Sin él se usa el dominio de `NEXT_PUBLIC_SITE_URL`. El relay de Google Workspace (`smtp-relay.gmail.com`) cierra la conexión con `421 4.7.0` si el saludo no es un dominio real. |
+| `SMTP_EHLO_NAME` | No | Nombre con el que el servidor saluda al SMTP (EHLO), por ejemplo `pixelandcode.tu-dominio.mx`. Sin él se usa el dominio de `NEXT_PUBLIC_SITE_URL`; sin ninguno de los dos en el entorno, el dominio con el que se construyó la imagen (localhost nunca se anuncia). El relay de Google Workspace (`smtp-relay.gmail.com`) cierra la conexión con `421 4.7.0` si el saludo no es un dominio real. |
 | `EMERGENCY_MAIL` | No | Dirección que recibe los avisos de emergencia de producción. Sin ella no se envía ninguno; ver "Avisos de emergencia". |
 
 El contenedor se niega a arrancar si faltan `NEXT_PUBLIC_SITE_URL` o `PIN_ENCRYPTION_KEY` y lo dice en el log.
@@ -115,8 +115,11 @@ de la base (RNF-03). Salen con la plantilla del sitio (fondo negro, acento azul,
 - **Con `SMTP_HOST`** (y `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` y `SMTP_FROM`, las cinco son obligatorias juntas; si falta
   alguna, el servidor no arranca y el log dice cuál. El remitente es `SMTP_FROM`, por ejemplo
   `UT Game Showcase <no-reply@tu-dominio.mx>`; debe llevar la dirección (solo el nombre no arranca) y `EMAIL_FROM` no se lee. El puerto 465 usa TLS directo y los demás, STARTTLS): cada
-  correo sale justo después de la petición y un temporizador reintenta cada minuto los que fallaron, con retroceso
-  exponencial.
+  correo sale justo después de la petición y un temporizador reintenta cada minuto los que fallaron. El envío usa una
+  sola conexión SMTP reutilizada, como máximo un mensaje cada 2 segundos y 10 correos por pasada. Si el proveedor responde
+  con un error temporal (por ejemplo Gmail `421 4.7.0 Try again later`), la pasada se detiene y el correo espera 15 min,
+  30 min, 1 h y 2 h (con una variación de hasta el 50 %) antes de cada reintento, así que sus 5 intentos abarcan entre 2
+  y casi 4 horas. Un error permanente (5xx) abandona el correo de inmediato.
 - **Panel de correos** (`/admin/emails`, solo sysadmin): lista toda la bandeja con filtros (estado, destinatario, asunto
   y fecha de cola) y muestra intentos, próximo intento, último error y el destinatario completo. Desde ahí se puede ver el
   texto de un correo mientras exista (la lectura queda en la bitácora como `admin.email.view`), reenviar uno o todos los
@@ -126,7 +129,10 @@ de la base (RNF-03). Salen con la plantilla del sitio (fondo negro, acento azul,
   staff, el restablecimiento de contraseña y el aviso al ganador de la rifa se escriben de nuevo desde el registro del que
   salían (columnas `kind` y `reference_id`); los enlaces son nuevos y el correo abandonado se reemplaza por el nuevo. Un
   código de inicio de sesión no se rehace (la persona vuelve a iniciar sesión), tampoco un aviso de emergencia ni un
-  correo puesto en cola antes de la migración `20261120100000_outbox_kind`, que no tiene tipo.
+  correo puesto en cola antes de la migración `20261120100000_outbox_kind`, que no tiene tipo. Para esos, corre una vez
+  `docker compose exec app npm run db:backfill:email-kinds`: asigna tipo y referencia a los no enviados cuyo asunto sea el
+  del pasaporte o el de recuperación y cuyo visitante se encuentre por correo (y gamertag); los demás no se tocan. Cada
+  cambio queda en la bitácora como `admin.email.backfill_kind`, y después se usa "Rehacer".
 - **Sin `SMTP_HOST`**: nada sale ni se escribe en el log. Los correos se quedan en `email_outbox` y el temporizador de
   reintentos no se inicia.
   Sirve para pruebas, y en una emergencia se puede entregar el enlace a mano:
@@ -427,7 +433,72 @@ Cada acción queda en la bitácora de auditoría (`account.*`) y ninguna guarda 
 - **Cerrar sesiones** borra todas las sesiones de la cuenta. **Limpiar 2FA pendiente** borra sus códigos de acceso
   pendientes; la persona vuelve a empezar desde la contraseña.
 - **Invitar** acepta cualquier rol. Las cuentas de stand llevan el stand; el staff de KOF, su mesa.
+- **Rol secundario**: un administrador de stand puede tener además `help_desk`, `kof_admin`, `raffle_admin` o `sysadmin`
+  en la misma cuenta. Solo el sysadmin lo da o lo quita (`account.secondary_role` en la bitácora). Un sysadmin secundario
+  cuenta para la regla del último sysadmin activo, y los encabezados enlazan de un área a la otra.
 - El último acceso sale de la bitácora (`account.login_verified`); la fecha de alta es `accounts.created_at`.
+## Alta masiva del staff
+
+Crea de una vez las cuentas del staff como invitaciones, con su rol secundario y su mesa de KOF, y los stands que falten.
+Sirve para cargar la lista del evento en el primer despliegue; después las cuentas se invitan desde `/admin/accounts` y
+`/stand/team`. El comando es `npm run db:invite:staff [archivo.csv]` (`prisma/invite-staff.ts`).
+
+**El archivo.** Es un CSV en UTF-8 con coma, fuera de git porque lleva correos de alumnos. Va en el volumen de la app,
+por defecto en `/data/staff-invitations.csv` (otra ruta con la variable `STAFF_INVITATIONS_CSV` o como argumento del
+comando). La primera línea es el encabezado exacto:
+
+```
+email,name,role,secondary_role,stand,kof_desk
+```
+
+| Columna | Qué lleva |
+| --- | --- |
+| `email` | Correo de la persona; se guarda en minúsculas y sin espacios. Una fila sin correo se omite y se reporta (no es un error): después la invita su administrador o el sysadmin. |
+| `name` | Nombre completo. Entre comillas si lleva coma. |
+| `role` | `sysadmin`, `stand_admin`, `stand_staff`, `raffle_admin`, `kof_admin`, `kof_staff` o `help_desk`. |
+| `secondary_role` | Vacío, o `help_desk`, `kof_admin`, `raffle_admin` o `sysadmin` solo cuando `role` es `stand_admin`. |
+| `stand` | Grupo y estudio, como `101-5`, solo para `stand_admin` y `stand_staff` (obligatorio en ellos). Se busca en los 18 stands del evento (`INITIAL_STANDS`). |
+| `kof_desk` | Mesa del 1 al 4, solo para `kof_staff` (obligatoria en él). |
+
+```
+email,name,role,secondary_role,stand,kof_desk
+lider@ejemplo.mx,Ana Pérez,stand_admin,kof_admin,101-5,
+staff@ejemplo.mx,Luis Gómez,stand_staff,,101-5,
+mesa@ejemplo.mx,Eva Ruiz,kof_staff,,,2
+```
+
+**Qué hace.** Primero valida toda la lista y revisa contra la base lo que esta rechazaría (un stand que no es del
+evento, un correo con pasaporte de visitante, un stand que ya tiene administrador o sus 3 staff, una mesa ocupada, más de
+18 stands). Si algo falla, escribe los errores con su línea y **no escribe nada**. Si todo está bien, en una sola
+transacción crea los stands de `INITIAL_STANDS` que no existen (los que ya existen no se tocan) y una cuenta `invited`
+por cada correo sin cuenta, con su invitación de 72 horas y su correo en `email_outbox` (tipo `staff_invitation`). Un
+correo que ya tiene cuenta no se toca y se reporta por su línea. Lo hace "el sistema": las cuentas no tienen
+`created_by_id` y las entradas de la bitácora no tienen actor, porque ninguna cuenta del staff lo ejecutó.
+
+**Cuándo corre.** En cada arranque, `docker/entrypoint.sh` lo corre después de `prisma migrate deploy` solo si el archivo
+existe. Corre **una sola vez**: al terminar deja la entrada `staff.bulk_invite` en la bitácora (con los conteos, sin
+correos) y los arranques siguientes no hacen nada ni leen el archivo, aunque la lista cambie. Si falla, el servidor
+arranca igual (el error queda en el log del contenedor) y, como no escribió nada, el siguiente arranque lo intenta otra
+vez: se corrige la lista y se reinicia. Si todo salió bien, se puede borrar el archivo del volumen.
+
+El tamaño de la lista no la limita el correo: las invitaciones quedan en la cola y las envía el trabajador de correo a su
+ritmo (un mensaje cada 2 segundos, 10 por minuto; ver "Correo"), así que unas 70 tardan unos 7 minutos. El script no envía
+nada por sí mismo.
+
+**Revisar el resultado.**
+
+- `/admin/accounts`: las cuentas nuevas en estado "Invitada", con su rol, stand y mesa.
+- `/admin/emails`: un correo "Invitación de staff" por cuenta, y su estado (en cola, enviado o fallido).
+- `/admin/logs`: la bitácora con la entrada `staff.bulk_invite` (conteos de stands, invitaciones, omitidos y existentes),
+  `account.invite` por cuenta y `stand.create` por stand. El resumen con las líneas omitidas y existentes sale en el log
+  del contenedor (`docker compose logs app`).
+
+**Reenviar.** El alta no se repite, pero el sysadmin reenvía lo que haga falta con lo que ya existe: "Reenviar
+invitación" en `/admin/accounts` (genera un enlace nuevo de 72 horas y el anterior deja de servir) o, para un correo
+fallido, "Reenviar" y "Rehacer" en `/admin/emails`. Para una persona nueva o a quien se omitió, se invita desde
+`/admin/accounts` o la invita su administrador de stand desde `/stand/team`. Para correr la carga otra vez con otra lista
+(por ejemplo en una base de pruebas) hace falta una base sin la entrada `staff.bulk_invite`.
+
 ## Logs del servidor (`/admin/logs`)
 
 El sysadmin ve dos registros en el panel (`/admin/logs`):

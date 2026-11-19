@@ -44,13 +44,18 @@ export interface KofActor {
   desk: Desk | null;
 }
 
-/** The administrator runs any command; a staff member captures only the matches of its own desk (RF-62). */
+/**
+ * The administrator runs any command; a staff member captures only the matches of its own desk (RF-62). A match
+ * without a desk (a semifinal or the final) is only for the administrator.
+ */
 export function canRunCommand(actor: KofActor, type: TournamentCommandType, match: Pick<Match, "area">): boolean {
   if (actor.role === "kof_admin") return true;
 
   if (ADMIN_ONLY_COMMANDS.includes(type)) return false;
 
-  return actor.desk !== null && actor.desk === getMatchDesk(match);
+  const desk = getMatchDesk(match);
+
+  return desk !== null && actor.desk === desk;
 }
 
 /** Who sees the list of participants (S26): the sysadmin and the KOF administrator; the desks only see the bracket. */
@@ -60,15 +65,18 @@ export function canViewEntries(role: string): boolean {
   return ENTRIES_VIEWER_ROLES.includes(role);
 }
 
-/** Desk 1: boards 1 and 2, semifinal 1 and the final. Desk 2: boards 3 and 4 and semifinal 2 (RF-62). */
-export function getMatchDesk(match: Pick<Match, "area">): Desk {
+/** Desk n captures board n. The semifinals and the final have no desk: only the KOF administrator captures them (S3). */
+export function getMatchDesk(match: Pick<Match, "area">): Desk | null {
   switch (match.area) {
     case "board_1":
-    case "board_2":
-    case "semifinal_1":
-    case "final":
       return 1;
-    default:
+    case "board_2":
       return 2;
+    case "board_3":
+      return 3;
+    case "board_4":
+      return 4;
+    default:
+      return null;
   }
 }

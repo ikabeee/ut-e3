@@ -40,6 +40,12 @@ describe("proxySiteRequest in landing mode", () => {
     expect(response.headers.get("location")).toBe(`${SITE}/`);
   });
 
+  it("sends the page of the role back to the landing, like the other staff pages", () => {
+    const response = proxySiteRequest(request("/my-role", { headers: { cookie: "ut_session=token" } }), "landing");
+
+    expect(response.headers.get("location")).toBe(`${SITE}/`);
+  });
+
   it("answers a blocked endpoint with 404 and no body", async () => {
     const response = proxySiteRequest(request("/api/raffle"), "landing");
 
@@ -74,6 +80,23 @@ describe("proxySiteRequest in full mode", () => {
 
   it("lets a public page through without a session", () => {
     expect(proxySiteRequest(request("/passport"), "full").headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("sends the page of the role without a session to /login (S4)", () => {
+    const response = proxySiteRequest(request("/my-role"), "full");
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(`${SITE}/login`);
+  });
+
+  it("lets the page of the role through with a session cookie (the page validates it in the database)", () => {
+    const response = proxySiteRequest(request("/my-role", { headers: { cookie: "ut_session=token" } }), "full");
+
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("does not treat a path that only starts like the page of the role as private", () => {
+    expect(proxySiteRequest(request("/my-roles"), "full").headers.get("x-middleware-next")).toBe("1");
   });
 
   it("does not treat a path that only starts like a staff page as one", () => {

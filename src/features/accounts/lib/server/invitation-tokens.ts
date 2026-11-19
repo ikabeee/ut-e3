@@ -1,7 +1,7 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
-import { ACTIVATE_PATH } from "@features/accounts/lib/accounts-links";
+import { ACTIVATE_PATH, MY_ROLE_PATH } from "@features/accounts/lib/accounts-links";
 import { INVITATION_TTL_MS } from "@features/accounts/lib/invitation-rules";
 import type { Prisma } from "@generated/prisma/client";
 import { enqueueEmail, type OutgoingEmail } from "@shared/lib/server/email-outbox";
@@ -45,6 +45,6 @@ function buildInvitationEmail(to: string, name: string, token: string): Outgoing
   return {
     to,
     subject: ACCOUNTS_COPY.invitationEmail.subject,
-    text: ACCOUNTS_COPY.invitationEmail.body(name, link),
+    text: ACCOUNTS_COPY.invitationEmail.body(name, link, `${siteConfig.url}${MY_ROLE_PATH}`),
   };
 }

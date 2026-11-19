@@ -3,6 +3,7 @@ import {
   clearTwoFactorAction,
   closeSessionsAction,
   sendPasswordResetAction,
+  setSecondaryRoleAction,
 } from "@features/accounts/lib/accounts-admin-actions";
 import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
 import { requireSysadmin } from "@features/accounts/lib/server/current-account";
@@ -20,6 +21,7 @@ const ACTIONS: AccountsAdminActions = {
   resetPassword: sendPasswordResetAction,
   closeSessions: closeSessionsAction,
   clearTwoFactor: clearTwoFactorAction,
+  setSecondaryRole: setSecondaryRoleAction,
 };
 
 export const adminAccountsPageMetadata = buildAdminSectionMetadata(PAGE, ADMIN_ACCOUNTS_PATH);

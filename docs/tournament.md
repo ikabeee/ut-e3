@@ -14,13 +14,20 @@ Captura y seguimiento del torneo de *The King of Fighters* en `/admin/kof` (SRS 
 
 ## Quién captura qué
 
-El equipo opera con dos staffs para los cuatro tableros (RF-62, SRS 2.4):
+El equipo opera con cuatro mesas de staff, una por tablero (RF-62, SRS 2.4; S3 de `odd/tasks/staff-dual-roles.md`):
 
 | Cuenta | Captura |
 | --- | --- |
-| Staff de la mesa 1 (`kof_staff`, `kofDesk = 1`) | Tableros 1 y 2, semifinal 1 y final |
-| Staff de la mesa 2 (`kof_staff`, `kofDesk = 2`) | Tableros 3 y 4 y semifinal 2 |
-| Administrador de KOF (`kof_admin`) | Cualquier combate, y además congelar, descongelar, descalificar y revertir |
+| Staff de la mesa 1 (`kof_staff`, `kofDesk = 1`) | Tablero 1 |
+| Staff de la mesa 2 (`kof_staff`, `kofDesk = 2`) | Tablero 2 |
+| Staff de la mesa 3 (`kof_staff`, `kofDesk = 3`) | Tablero 3 |
+| Staff de la mesa 4 (`kof_staff`, `kofDesk = 4`) | Tablero 4 |
+| Administrador de KOF (`kof_admin`) | Cualquier combate, incluidas las semifinales y la final, y además congelar, descongelar, descalificar y revertir |
+
+Las semifinales y la final no tienen mesa: solo las captura el administrador de KOF (`getMatchDesk()` devuelve `null` y
+`canRunCommand()` se lo niega al staff). Cada mesa tiene un solo staff invitado o activo a la vez; la base lo exige con
+los triggers `accounts_kof_desk_is_unique_*` y el CHECK `accounts_kof_desk_check` limita la mesa a 1-4 (migración
+`kof_four_desks`).
 
 El staff inicia el combate, marca al perdedor y marca "No se presentó". El sysadmin opera el torneo completo como
 administrador de KOF (S5): abre `/admin/kof` desde "Torneo de KOF" y tiene todos los controles (combates de cualquier mesa,
@@ -36,7 +43,7 @@ el sysadmin, la navegación entre secciones. Las cuentas de KOF no la ven porque
 
 - El bloque "En vivo" está arriba de los tableros: combates terminados de los 63, conteo por estado (pendientes, listos,
   en juego, congelados y terminados) y los combates en juego y después los congelados, con jugadores, tablero y mesa
-  (`getLiveMatches()` en `lib/tournament-view.ts`). Cada cuenta lo ve solo de las áreas que le tocan. Se refresca con la
+  (`getLiveMatches()` en `lib/tournament-view.ts`; las semifinales y la final dicen "Administrador de KOF" en lugar de una mesa). Cada cuenta lo ve solo de las áreas que le tocan. Se refresca con la
   misma consulta cada 3 segundos del bracket: la página es dinámica (`connection()`) y el navegador pide
   `GET /api/tournament` con `no-store`, así que no hay nada cacheado que invalidar.
 - La lista de participantes la ven el sysadmin y el administrador de KOF (`canViewEntries()` en
@@ -144,11 +151,11 @@ bitácora de auditoría dentro de la misma transacción.
 ```bash
 npm run db:deploy       # aplica las migraciones, incluidas kof_desk y kof_tournament
 npm run db:seed         # contenido inicial y cuenta del sysadmin
-npm run db:seed:kof     # solo desarrollo: 3 cuentas de KOF, 40 jugadores de prueba y el bracket
+npm run db:seed:kof     # solo desarrollo: 5 cuentas de KOF, 40 jugadores de prueba y el bracket
 npm run dev             # http://localhost:3000/login
 ```
 
-`npm run db:seed:kof` crea `kof-admin@ejemplo.com`, `kof-mesa1@ejemplo.com` y `kof-mesa2@ejemplo.com`. La contraseña de
+`npm run db:seed:kof` crea `kof-admin@ejemplo.com` y las cuatro mesas, `kof-mesa1@ejemplo.com` a `kof-mesa4@ejemplo.com`. La contraseña de
 ejemplo está en `src/features/tournament/lib/server/tournament-dev-seed.ts` y se cambia con `KOF_DEV_PASSWORD`. El script
 adelanta `kofBracketGeneratesAt` a la hora actual solo en tu base local (el bracket sale ya generado, con jugadores de
 prueba; sin él, las inscripciones son las reales), se niega a correr con `NODE_ENV=production` y

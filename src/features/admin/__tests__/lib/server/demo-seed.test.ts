@@ -78,7 +78,7 @@ describe("seedDemo", () => {
     expect(roles).toEqual(
       new Set(["stand_staff", "stand_admin", "kof_admin", "kof_staff", "help_desk", "raffle_admin"]),
     );
-    expect(result.accounts).toHaveLength(2 + 1 + 3 + 1 + 2);
+    expect(result.accounts).toHaveLength(2 + 1 + 5 + 1 + 2);
     expect(result.accounts.every((account) => account.status === "active")).toBe(true);
     expect(result.raffleOpened).toBe(false);
 
@@ -113,7 +113,7 @@ describe("seedDemo", () => {
     const kof = await getPrisma().account.findUniqueOrThrow({ where: { email: "kof-admin@ejemplo.com" } });
 
     expect(await verifyPassword("demo-password-segunda", kof.password ?? "")).toBe(true);
-    expect(second.accounts).toHaveLength(9);
+    expect(second.accounts).toHaveLength(11);
     await expect(getPrisma().account.count({ where: { email: "kof-admin@ejemplo.com" } })).resolves.toBe(1);
   });
 

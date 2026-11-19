@@ -34,6 +34,24 @@ describe("SiteFooter", () => {
     expect(credit).toHaveAttribute("rel", "noopener noreferrer");
   });
 
+  it("centers the credit line on every width (S8)", () => {
+    render(<SiteFooter />);
+
+    expect(screen.getByText(/Desarrollado y diseñado por/)).toHaveClass("text-center");
+  });
+
+  it("puts the contact email as a mailto link in the site map (S8)", () => {
+    render(<SiteFooter sitemap={SITEMAP} />);
+
+    const sitemap = screen.getByRole("navigation", { name: "Mapa del sitio" });
+    const contact = within(sitemap).getByRole("list", { name: "Contacto" });
+    const email = within(contact).getByRole("link", { name: "info@algorixinsights.com" });
+
+    expect(email).toHaveAttribute("href", "mailto:info@algorixinsights.com");
+    expect(email).not.toHaveAttribute("target");
+    expect(email).toHaveClass("pointer-coarse:min-h-11");
+  });
+
   it("has no site map without links to show", () => {
     render(<SiteFooter />);
 

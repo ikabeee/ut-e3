@@ -10,7 +10,8 @@ const NO_STORE = { "Cache-Control": "no-store" };
 export async function refuseUnlessSysadmin(): Promise<Response | null> {
   const account = await getSessionAccount();
 
-  if (account?.role === "sysadmin") return null;
+  // Whoever has the sysadmin among its roles, as primary or secondary (S2), may download.
+  if (account?.roles.includes("sysadmin")) return null;
 
   return Response.json({ error: "unauthorized" }, { status: 401, headers: NO_STORE });
 }

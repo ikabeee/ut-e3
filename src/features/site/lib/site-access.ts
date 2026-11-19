@@ -1,6 +1,7 @@
 import { HOME_PATH } from "@features/landing/lib/landing-links";
 import { PRIVACY_PATH } from "@features/visitors/lib/visitors-links";
 import type { SiteMode } from "@shared/lib/site-mode";
+import { SITE_OG_IMAGE_PATH } from "@shared/lib/metadata";
 
 export type SiteAccess = "allow" | "redirectHome" | "notFound" | "methodNotAllowed";
 
@@ -19,7 +20,10 @@ const API_PREFIX = "/api/";
 const UPLOADED_GAME_IMAGES_PREFIX = "/api/media/games/";
 
 // The landing-only mode serves these pages; the Docker HEALTHCHECK needs /api/health.
-const LANDING_ONLY_PATHS = new Set([HOME_PATH, PRIVACY_PATH, HEALTH_PATH]);
+// The metadata routes the landing needs: crawlers read robots and the sitemap, and the share card is its og:image.
+const METADATA_PATHS = ["/robots.txt", "/sitemap.xml", SITE_OG_IMAGE_PATH];
+
+const LANDING_ONLY_PATHS = new Set([HOME_PATH, PRIVACY_PATH, HEALTH_PATH, ...METADATA_PATHS]);
 
 // Folders of public/ whose files the landing shows. A file name elsewhere could still reach a page or a Route Handler.
 const PUBLIC_ASSET_FOLDERS = ["/games/", "/sponsors/", "/media/", "/icons/"];

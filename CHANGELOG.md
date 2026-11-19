@@ -8,6 +8,26 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- SEO: `sitemap.xml` y `robots.txt`, imágenes Open Graph generadas para la portada y cada juego, y `noindex` en el
+  pasaporte y la recuperación. Con `SITE_MODE=landing` también se publican `robots.txt`, `sitemap.xml` (solo la portada) y
+  la imagen de la portada.
+- Página pública "¿A quién acudo?" (`/help`) para los visitantes: una ilustración y una línea por problema (pasaporte
+  perdido, correo que no llegó, visita sin registrar, boletos, KOF y uso sin conexión), enlazada desde la barra, el pie
+  y el pasaporte, y disponible sin conexión.
+- Página "Mi rol" (`/my-role`): cada cuenta del staff ve lo que hace en el evento, sus pantallas, su stand, mesa o área,
+  el horario y a quién acudir. Se abre en el primer inicio de sesión, con el enlace "Mi rol" del encabezado y desde el
+  correo de invitación.
+- Alta masiva del staff: `npm run db:invite:staff` crea los stands que faltan y las invitaciones del staff (con rol
+  secundario y mesa de KOF) desde un CSV; corre una sola vez al desplegar si existe `/data/staff-invitations.csv`, y el
+  sysadmin reenvía desde `/admin/accounts`.
+- El torneo de KOF tiene cuatro mesas, una por tablero: cada staff captura su tablero, y las semifinales y la final las
+  captura solo el administrador de KOF (migración `20261121110000_kof_four_desks`).
+- Un administrador de stand puede tener un rol secundario (atención, KOF, rifa o sysadmin) en la misma cuenta; solo el
+  sysadmin lo da y lo quita en `/admin/accounts`, y los encabezados enlazan de un área a la otra (migración
+  `20261121100000_account_secondary_role`).
+- Footer: el mapa del sitio incluye el correo de contacto `info@algorixinsights.com` y la línea "Desarrollado y diseñado
+  por Algorix Insights" queda centrada.
+- `npm run db:backfill:email-kinds`: da tipo a los correos viejos del pasaporte y de recuperación para poder rehacerlos.
 - `/admin/logs`: logs para el sysadmin, con dos pestañas. "Bitácora" lista `audit_logs` con filtros por actor, acción,
   entidad y fechas, en páginas, y muestra el JSON como texto. "Servidor" lista los logs del servidor, que ahora se guardan
   en la tabla `server_logs` (migración `20261120130000_server_logs`): errores de peticiones (ruta y `digest`, nunca la URL),
@@ -21,6 +41,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- Panel de administración: la navegación pasa a una barra lateral con íconos (en móvil, un menú plegable), también en
+  `/admin/kof` y `/admin/raffle` para el sysadmin.
+- Correo: una sola conexión SMTP, como máximo un mensaje cada 2 segundos y 10 por pasada; ante un error temporal (Gmail
+  `421 4.7.0`) la pasada se detiene y los reintentos esperan de 15 min a 2 h, en lugar de gastar los 5 intentos en minutos.
+- `/tournament`: el reloj de arena y el texto "El bracket estará disponible en la pantalla del torneo." quedan centrados.
 - `/tournament`: el paso "Pide al administrador de KOF que te agregue" ahora lleva al botón del pasaporte.
 - `/admin/recovery`: pantalla "Recuperación" solo para el sysadmin. Muestra el estado del trabajador de correo (SMTP
   configurado, servidor, última corrida y último error), de la vigilancia de carga, de la base de datos (tamaño de la

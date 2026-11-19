@@ -2,12 +2,15 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { AccountsPanel } from "@features/accounts/components/accounts-panel";
+import { AreaLink } from "@features/accounts/components/area-link";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { KOF_HOME_PATH } from "@features/accounts/lib/accounts-links";
+import { getOtherAreaLink } from "@features/accounts/lib/area-links";
 import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
 import { requireKofViewer, type KofViewer } from "@features/accounts/lib/server/current-account";
 import { listManagedAccounts } from "@features/accounts/lib/server/invitations";
 import { AdminHeader } from "@features/admin/components/admin-header";
+import { AdminSidebarLayout } from "@features/admin/components/admin-sidebar";
 import { EntriesPanel } from "@features/tournament/components/entries-panel";
 import { PublicBracketSwitch } from "@features/tournament/components/public-bracket-switch";
 import { TournamentDashboard } from "@features/tournament/components/tournament-dashboard";
@@ -54,15 +57,17 @@ async function KofPanel() {
 
   const account = await requireKofViewer();
   const tournament = await getTournament();
+  const currentPath = account.role === "sysadmin" ? KOF_HOME_PATH : null;
 
   return (
-    <>
+    <AdminSidebarLayout currentPath={currentPath}>
       <AdminHeader
         title={COPY.title}
         signedInAs={COPY.signedInAs(account.name, getRoleLabel(account))}
-        currentPath={account.role === "sysadmin" ? KOF_HOME_PATH : null}
+        currentPath={currentPath}
         signOutAction={signOut}
       />
+      <AreaLink link={getOtherAreaLink(account.roles, "secondary")} />
       <Entries viewer={account} hasBracket={tournament !== null} />
       {operatesAsAdmin(account) && <PublicBracketPanel />}
       {account.role === "kof_admin" && <StaffAccounts role={account.role} />}
@@ -71,7 +76,7 @@ async function KofPanel() {
         viewer={{ role: operatesAsAdmin(account) ? "kof_admin" : account.role, desk: account.kofDesk }}
         action={submitTournamentCommand}
       />
-    </>
+    </AdminSidebarLayout>
   );
 }
 

@@ -36,16 +36,16 @@ describe("getSections", () => {
     expect(sections.flatMap((section) => section.matches)).toHaveLength(63);
   });
 
-  it("gives desk 1 its boards, the first semifinal and the final", () => {
-    const sections = getSections(tournament, { isAdmin: false, desk: 1 });
+  it.each([
+    [1, "board_1"],
+    [2, "board_2"],
+    [3, "board_3"],
+    [4, "board_4"],
+  ] as const)("gives desk %i only its own board", (desk, area) => {
+    const sections = getSections(tournament, { isAdmin: false, desk });
 
-    expect(sections.map((section) => section.area)).toEqual(["board_1", "board_2", "semifinal_1", "final"]);
-  });
-
-  it("gives desk 2 its boards and the second semifinal", () => {
-    const sections = getSections(tournament, { isAdmin: false, desk: 2 });
-
-    expect(sections.map((section) => section.area)).toEqual(["board_3", "board_4", "semifinal_2"]);
+    expect(sections.map((section) => section.area)).toEqual([area]);
+    expect(sections[0].matches).toHaveLength(15);
   });
 
   it("gives a staff member without a desk nothing", () => {

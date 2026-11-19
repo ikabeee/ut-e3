@@ -14,6 +14,10 @@ describe("siteConfig", () => {
     expect(siteConfig.description).not.toMatch(/sorteos/i);
   });
 
+  it("owns the contact email of the event", () => {
+    expect(siteConfig.contactEmail).toBe("info@algorixinsights.com");
+  });
+
   it("publishes the new title as the Open Graph site name", () => {
     expect(buildOpenGraph().siteName).toBe("PIXEL & CODE · Showcase de videojuegos");
   });

@@ -12,20 +12,22 @@ export const recoverPageMetadata: Metadata = {
   title: COPY.title,
   description: COPY.subtitle,
   alternates: { canonical: RECOVER_PATH },
+  // A form that sends a link by email: it has nothing to show a search engine.
+  robots: { index: false, follow: false },
 };
 
 export const recoverExpiredPageMetadata: Metadata = {
   title: COPY.expiredTitle,
   description: COPY.expiredNotice,
   alternates: { canonical: RECOVERY_LINK_EXPIRED_PATH },
-  robots: { index: false },
+  robots: { index: false, follow: false },
 };
 
 export const recoverConfirmPageMetadata: Metadata = {
   title: COPY.confirmTitle,
   description: COPY.confirmNotice,
   alternates: { canonical: RECOVERY_CONFIRM_PATH },
-  robots: { index: false },
+  robots: { index: false, follow: false },
 };
 
 /** Self-service recovery by email (RF-68): the visitor types the email and gets a one-use link. */

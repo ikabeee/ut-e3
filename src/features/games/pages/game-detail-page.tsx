@@ -5,15 +5,20 @@ import { getEventSettings } from "@features/event-settings/lib/server/event-sett
 import type { EventSettings } from "@features/event-settings/lib/types";
 import { GameDetail } from "@features/games/components/game-detail";
 import { LiveItchLink } from "@features/games/components/live-itch-link";
-import { getHeroImage } from "@features/games/lib/game-cover";
 import { isGameSlug } from "@features/games/lib/game-slug";
 import { GAMES_PATH, getGamePath } from "@features/games/lib/games-links";
 import { getRelatedGames } from "@features/games/lib/related-games";
+import {
+  GAME_OG_IMAGE_ALT,
+  getGameOgImageAlt,
+  getGameOgImagePath,
+  renderGameOgImage,
+} from "@features/games/lib/server/game-og-image";
 import { getGameBySlug, getGames } from "@features/games/lib/server/games-queries";
 import type { Game, GameEventLabels } from "@features/games/lib/types";
 import { GAMES_COPY } from "@features/games/lib/games-copy";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
-import { buildOpenGraph } from "@shared/lib/metadata";
+import { buildOgImage, buildOpenGraph } from "@shared/lib/metadata";
 import { siteConfig } from "@shared/lib/site-config";
 
 type GameParams = PageProps<"/games/[slug]">["params"];
@@ -27,24 +32,30 @@ export async function generateGameDetailStaticParams() {
 
 export async function generateGameDetailPageMetadata({ params }: PageProps<"/games/[slug]">): Promise<Metadata> {
   const game = await findGame(params);
-  const cover = getHeroImage(game);
+  const path = getGamePath(game.slug);
 
   return {
     title: game.name,
     description: game.synopsis,
-    alternates: { canonical: getGamePath(game.slug) },
+    alternates: { canonical: path },
+    // The page names its image itself: Next ignores the opengraph-image file of a segment whose metadata has images.
     openGraph: buildOpenGraph({
       title: `${game.name} | ${siteConfig.title}`,
       description: game.synopsis,
-      url: getGamePath(game.slug),
-      images: cover ? [{ url: cover.path, alt: cover.alt }] : siteShareImages(),
+      url: path,
+      images: [buildOgImage(getGameOgImagePath(game.slug), getGameOgImageAlt(game))],
     }),
   };
 }
 
-// A game without artwork shares the image of the site, like any other page.
-function siteShareImages() {
-  return [{ url: siteConfig.shareImage, alt: siteConfig.title }];
+/** What src/app/games/[slug]/opengraph-image.tsx declares: the image of every game has the same alt text. */
+export const gameDetailOgImageAlt = GAME_OG_IMAGE_ALT;
+
+/** The generated image of a game (S11); a slug that is not a game gets the image of the site. */
+export async function renderGameDetailOgImage({ params }: Readonly<{ params: GameParams }>) {
+  const { slug } = await params;
+
+  return renderGameOgImage(slug);
 }
 
 // partialPrefetching shares one App Shell across every slug, so the params read waits behind Suspense. An unknown

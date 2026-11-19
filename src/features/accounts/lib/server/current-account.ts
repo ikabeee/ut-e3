@@ -3,11 +3,15 @@ import { redirect } from "next/navigation";
 import { getHomePath, LOGIN_PATH, STAND_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { getManagedRoles } from "@features/accounts/lib/invitation-rules";
 import type { ManagingActor } from "@features/accounts/lib/server/invitations";
-import type { AccountRole, KofDesk } from "@features/accounts/lib/types";
+import { KOF_DESKS, type AccountRole, type KofDesk } from "@features/accounts/lib/types";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { getSessionAccount, type SessionAccount } from "@shared/lib/server/session";
 
 const SYSADMIN_ROLE = "sysadmin" satisfies AccountRole;
+
+// The guards of an area accept an account whose primary role OR secondary role is one the area asks for (S1, S2), and
+// hand it back with that role as its `role`, so the code of the area (and its audit entries) acts as that role. The
+// stand guards are the exception: they keep the primary role and the stand of the account.
 
 // Every sysadmin page and Server Action calls this: proxy.ts only checks that a cookie exists.
 export async function requireSysadmin(): Promise<SessionAccount> {
@@ -24,7 +28,7 @@ export async function requireSysadmin(): Promise<SessionAccount> {
 export async function getSysadmin(): Promise<SessionAccount | null> {
   const account = await getSessionAccount();
 
-  return account?.role === SYSADMIN_ROLE ? account : null;
+  return account ? withRoleOf(account, [SYSADMIN_ROLE]) : null;
 }
 
 export interface KofAccount extends SessionAccount {
@@ -49,7 +53,7 @@ export async function requireKofAccount(): Promise<KofAccount> {
 export async function getKofAccount(): Promise<KofAccount | null> {
   const account = await getSessionAccount();
 
-  if (account?.role === SYSADMIN_ROLE) return { ...account, role: "kof_admin", kofDesk: null };
+  if (account?.roles.includes(SYSADMIN_ROLE)) return { ...account, role: "kof_admin", kofDesk: null };
 
   return toKofAccount(account);
 }
@@ -76,19 +80,20 @@ export async function requireKofViewer(): Promise<KofViewer> {
 export async function getKofViewer(): Promise<KofViewer | null> {
   const account = await getSessionAccount();
 
-  if (account?.role === SYSADMIN_ROLE) return { ...account, role: SYSADMIN_ROLE, kofDesk: null };
+  if (account?.roles.includes(SYSADMIN_ROLE)) return { ...account, role: SYSADMIN_ROLE, kofDesk: null };
 
   return toKofAccount(account);
 }
 
+// A KOF administrator, by its primary or its secondary role, has no desk; the staff member is always a primary role.
 async function toKofAccount(account: SessionAccount | null): Promise<KofAccount | null> {
-  const role = account ? toKofRole(account.role) : null;
+  if (account?.roles.includes("kof_admin")) return { ...account, role: "kof_admin", kofDesk: null };
 
-  if (!account || !role) return null;
+  if (account?.role !== "kof_staff") return null;
 
   const row = await getPrisma().account.findUnique({ where: { id: account.id }, select: { kofDesk: true } });
 
-  return { ...account, role, kofDesk: toKofDesk(row?.kofDesk ?? null) };
+  return { ...account, role: "kof_staff", kofDesk: toKofDesk(row?.kofDesk ?? null) };
 }
 
 const RAFFLE_ROLES: readonly string[] = ["raffle_admin", SYSADMIN_ROLE];
@@ -109,7 +114,7 @@ export async function requireRaffleAdmin(): Promise<SessionAccount> {
 export async function getRaffleAdmin(): Promise<SessionAccount | null> {
   const account = await getSessionAccount();
 
-  return account && RAFFLE_ROLES.includes(account.role) ? account : null;
+  return account ? withRoleOf(account, RAFFLE_ROLES) : null;
 }
 
 export interface StandAccount extends SessionAccount {
@@ -168,35 +173,43 @@ export async function requireRecoveryAgent(): Promise<SessionAccount> {
     redirect(LOGIN_PATH);
   }
 
-  if (!RECOVERY_ROLES.includes(account.role)) {
+  const agent = withRoleOf(account, RECOVERY_ROLES);
+
+  if (!agent) {
     redirect(getHomePath(account.role));
   }
 
-  return account;
+  return agent;
+}
+
+// The account as the first of its roles that the area accepts, or null when none of them is.
+function withRoleOf(account: SessionAccount, accepted: readonly string[]): SessionAccount | null {
+  const role = account.roles.find((candidate) => accepted.includes(candidate));
+
+  return role ? { ...account, role } : null;
 }
 
 function toStandRole(role: string): StandAccount["role"] | null {
   return role === "stand_admin" || role === "stand_staff" ? role : null;
 }
 
-function toKofRole(role: string): KofAccount["role"] | null {
-  return role === "kof_admin" || role === "kof_staff" ? role : null;
-}
-
 function toKofDesk(value: number | null): KofDesk | null {
-  return value === 1 || value === 2 ? value : null;
+  return KOF_DESKS.find((desk) => desk === value) ?? null;
 }
 
-// Whoever invites, resends or disables accounts: the sysadmin, the KOF administrator and the stand administrator. What
-// each one may manage is decided again for the target account by the functions of `invitations.ts`.
+// Whoever invites, resends or disables accounts: the sysadmin, the KOF administrator and the stand administrator, also
+// by a secondary role. The actor keeps its primary role and carries the secondary one, because the same account manages
+// its stand's staff from the stand and the KOF staff from the KOF (L14); what each one may manage is decided again for
+// the target account by the functions of `invitations.ts`.
 export async function requireAccountManager(): Promise<ManagingActor> {
   const account = await getSessionAccount();
+  const secondaryRole = account?.roles.find((role) => role !== account.role) ?? null;
 
-  if (!account || getManagedRoles(account.role).length === 0) {
+  if (!account || getManagedRoles(account.role, secondaryRole).length === 0) {
     redirect(LOGIN_PATH);
   }
 
   const row = await getPrisma().account.findUnique({ where: { id: account.id }, select: { standId: true } });
 
-  return { ...account, standId: row?.standId ?? null };
+  return { ...account, secondaryRole, standId: row?.standId ?? null };
 }

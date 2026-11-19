@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FieldError, Form, Input, Label, ListBox, Select, TextField } from "@heroui/react";
 import { ACCOUNTS_COPY } from "@features/accounts/lib/accounts-copy";
 import type { ManagementActionState } from "@features/accounts/lib/management-actions";
+import { KOF_DESKS } from "@features/accounts/lib/types";
 import { FormFeedback } from "@shared/components/form-feedback";
 import { useActionForm } from "@shared/hooks/use-action-form";
 import { PendingButton } from "@shared/components/pending-button";
@@ -31,8 +32,6 @@ interface InviteAccountFormProps {
 }
 
 const COPY = ACCOUNTS_COPY.management.panel;
-
-const DESKS = [1, 2];
 
 export function InviteAccountForm({
   roles,
@@ -96,7 +95,7 @@ function DeskField() {
     <OptionSelect
       name="desk"
       label={COPY.deskLabel}
-      options={DESKS.map((desk) => ({ value: String(desk), label: COPY.deskOption(desk) }))}
+      options={KOF_DESKS.map((desk) => ({ value: String(desk), label: COPY.deskOption(desk) }))}
     />
   );
 }
