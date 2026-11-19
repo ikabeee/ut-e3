@@ -117,6 +117,16 @@ de la base (RNF-03). Salen con la plantilla del sitio (fondo negro, acento azul,
   `UT Game Showcase <no-reply@tu-dominio.mx>`; debe llevar la dirección (solo el nombre no arranca) y `EMAIL_FROM` no se lee. El puerto 465 usa TLS directo y los demás, STARTTLS): cada
   correo sale justo después de la petición y un temporizador reintenta cada minuto los que fallaron, con retroceso
   exponencial.
+- **Panel de correos** (`/admin/emails`, solo sysadmin): lista toda la bandeja con filtros (estado, destinatario, asunto
+  y fecha de cola) y muestra intentos, próximo intento, último error y el destinatario completo. Desde ahí se puede ver el
+  texto de un correo mientras exista (la lectura queda en la bitácora como `admin.email.view`), reenviar uno o todos los
+  fallidos con contenido (`admin.email.resend`, `admin.email.resend_failed`), correr la entrega al momento con "Enviar
+  ahora" (`admin.email.send_now`, necesita `SMTP_HOST`) y **rehacer** un correo abandonado cuyo texto se borró
+  (`admin.email.rebuild`): el pasaporte (con su PIN), el enlace de recuperación, la inscripción al KOF, la invitación de
+  staff, el restablecimiento de contraseña y el aviso al ganador de la rifa se escriben de nuevo desde el registro del que
+  salían (columnas `kind` y `reference_id`); los enlaces son nuevos y el correo abandonado se reemplaza por el nuevo. Un
+  código de inicio de sesión no se rehace (la persona vuelve a iniciar sesión), tampoco un aviso de emergencia ni un
+  correo puesto en cola antes de la migración `20261120100000_outbox_kind`, que no tiene tipo.
 - **Sin `SMTP_HOST`**: nada sale ni se escribe en el log. Los correos se quedan en `email_outbox` y el temporizador de
   reintentos no se inicia.
   Sirve para pruebas, y en una emergencia se puede entregar el enlace a mano:

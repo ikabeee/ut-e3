@@ -267,6 +267,10 @@ model EmailOutbox {
   sentAt        DateTime? @map("sent_at")
   lastError     String?   @map("last_error")
   createdAt     DateTime  @default(now()) @map("created_at")
+  /// What the email is (see EMAIL_KINDS); null in the rows queued before the column existed: they cannot be rebuilt.
+  kind          String?
+  /// The id of the visitor, account, KOF entry or raffle draw the email is about, according to the kind.
+  referenceId   String?   @map("reference_id")
 
   @@map("email_outbox")
 }

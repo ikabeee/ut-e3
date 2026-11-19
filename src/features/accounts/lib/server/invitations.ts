@@ -1,4 +1,5 @@
 import "server-only";
+import { findAccountMailTarget } from "@features/accounts/lib/server/account-mail-target";
 import type { InviteInput } from "@features/accounts/lib/invitation-input";
 import {
   canManageAccount,
@@ -7,12 +8,11 @@ import {
   isInvitationExpired,
   MAX_STAND_STAFF,
 } from "@features/accounts/lib/invitation-rules";
-import { buildInvitationEmail, issueInvitation } from "@features/accounts/lib/server/invitation-tokens";
+import { enqueueInvitationEmail } from "@features/accounts/lib/server/invitation-tokens";
 import type { AccountStatus, KofDesk, ManagedAccount, StandAccountRow } from "@features/accounts/lib/types";
 import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { isUniqueViolation, readDatabaseMessage } from "@shared/lib/server/database-errors";
-import { enqueueEmail } from "@shared/lib/server/email-outbox";
 import { hashPassword } from "@shared/lib/server/password";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { hashToken } from "@shared/lib/server/token-hash";
@@ -108,8 +108,7 @@ export async function resendInvitation(actor: ManagingActor, accountId: string, 
   if (account.status !== "invited") return { status: "wrongState" };
 
   return getPrisma().$transaction(async (transaction): Promise<ResendResult> => {
-    const token = await issueInvitation(transaction, account.id, now);
-    const emailId = await enqueueEmail(transaction, buildInvitationEmail(account.email, account.name, token));
+    const emailId = await enqueueInvitationEmail(transaction, account, now);
 
     await recordAudit(transaction, auditOf(actor, "account.resend_invitation", account.id));
 
@@ -278,8 +277,7 @@ async function restoreAsInvited(request: {
 
   await transaction.account.update({ where: { id: account.id }, data: { status: "invited", password: null } });
 
-  const token = await issueInvitation(transaction, account.id, now);
-  const emailId = await enqueueEmail(transaction, buildInvitationEmail(account.email, account.name, token));
+  const emailId = await enqueueInvitationEmail(transaction, account, now);
 
   await recordAudit(transaction, auditOf(actor, "account.reactivate", account.id));
 
@@ -446,8 +444,7 @@ export async function createInvitedAccount(
     select: { id: true },
   });
 
-  const token = await issueInvitation(transaction, created.id, account.now);
-  const emailId = await enqueueEmail(transaction, buildInvitationEmail(account.email, account.name, token));
+  const emailId = await enqueueInvitationEmail(transaction, { ...account, id: created.id }, account.now);
 
   return { accountId: created.id, emailId };
 }
@@ -506,4 +503,15 @@ export function toStatus(value: string): AccountStatus {
 
 export function toKofDesk(value: number | null): KofDesk | null {
   return value === 1 || value === 2 ? value : null;
+}
+
+/** A new invitation for an account that is still `invited` and whose email was abandoned; null for any other state. */
+export async function rebuildInvitationEmail(
+  transaction: Prisma.TransactionClient,
+  accountId: string,
+  now: Date,
+): Promise<string | null> {
+  const account = await findAccountMailTarget(transaction, accountId);
+
+  return account?.status === "invited" ? enqueueInvitationEmail(transaction, account, now) : null;
 }

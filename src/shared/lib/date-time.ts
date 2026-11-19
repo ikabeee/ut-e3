@@ -9,6 +9,13 @@ const TIME_OF_DAY_FORMAT = new Intl.DateTimeFormat("es-MX", {
   timeZone: TIME_ZONE,
 });
 
+const DAY_FORMAT = new Intl.DateTimeFormat("en-CA", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  timeZone: TIME_ZONE,
+});
+
 export type YearStyle = "numeric" | "2-digit";
 
 export function formatTimeOfDay(instant: string): string {
@@ -24,6 +31,11 @@ export function formatEventDate(instant: string, yearStyle: YearStyle): string {
   }).formatToParts(new Date(instant));
 
   return DATE_PART_ORDER.map((type) => partValue(parts, type)).join(".");
+}
+
+/** The calendar day of an instant in Cancun as `YYYY-MM-DD`: what "registered on Friday" means for the event. */
+export function formatCancunDay(instant: Date): string {
+  return DAY_FORMAT.format(instant);
 }
 
 function partValue(parts: Intl.DateTimeFormatPart[], type: Intl.DateTimeFormatPartTypes): string {
