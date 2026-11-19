@@ -187,6 +187,24 @@ describe("updateVisitorAction", () => {
     expect(JSON.stringify(entry)).not.toContain("correo.mx");
   });
 
+  it("expires the unused recovery links sent to the old email when the email changes", async () => {
+    await signInAs("sysadmin");
+
+    const visitor = await createVisitor({ gamertag: "Edit", email: "viejo@example.com" });
+    const later = new Date(Date.now() + 30 * 60_000);
+
+    const token = await getPrisma().recoveryToken.create({
+      data: { visitorId: visitor.id, token: "old-link-sha", channel: "email", expiresAt: later },
+    });
+
+    await updateVisitorAction(null, editForm(visitor.id, { ...FIELDS, email: "nuevo@example.com" }));
+
+    const saved = await getPrisma().recoveryToken.findUniqueOrThrow({ where: { id: token.id } });
+
+    expect(saved.expiresAt.getTime()).toBeLessThanOrEqual(Date.now());
+    expect(saved.usedAt).toBeNull();
+  });
+
   it("says so and writes nothing when nothing changed", async () => {
     await signInAs("sysadmin");
 

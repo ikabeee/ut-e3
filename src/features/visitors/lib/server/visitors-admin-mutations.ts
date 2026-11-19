@@ -121,6 +121,15 @@ async function applyVisitorUpdate(
   if (refusal) return { status: refusal };
 
   await transaction.visitor.update({ where: { id: visitor.id }, data: input });
+
+  // A recovery link already sent to the old address must not keep working after the address was corrected.
+  if (fields.includes("email")) {
+    await transaction.recoveryToken.updateMany({
+      where: { visitorId: visitor.id, channel: "email", usedAt: null },
+      data: { expiresAt: new Date() },
+    });
+  }
+
   await recordAudit(transaction, {
     actorId,
     action: "visitor.update",
