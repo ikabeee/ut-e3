@@ -5,7 +5,6 @@ import { getEntrySchedule } from "@features/tournament/lib/server/entries-querie
 import type { ValidRegistrationInput } from "@features/visitors/lib/registration-input";
 import { getRegistrationOpensAt, registerVisitorRecord } from "@features/visitors/lib/server/visitor-registration";
 import { getClaimPath } from "@features/visitors/lib/visitors-links";
-import type { RateLimitRule } from "@shared/lib/server/rate-limit";
 
 /** What happened with the optional entry to the tournament that the agent asked for. */
 export type EnrollmentOutcome = "none" | "enrolled" | "notOnsite" | "refused";
@@ -36,9 +35,6 @@ export interface DeskRegistrationRequest {
   wantsTournament: boolean;
   now: Date;
 }
-
-// A desk serves one person at a time: the limit stops a stolen session from filling the table with passports.
-export const REGISTRATION_AGENT_RULE: RateLimitRule = { limit: 30, windowMs: 60 * 60 * 1000 };
 
 /**
  * Registers a visitor in person with the same checks as the public registration (it is the same function: blocklist,

@@ -73,7 +73,6 @@ export const STANDS_COPY = {
       closed: "El registro de visitas ya cerró.",
       standWithoutGame: "Registra tu juego para empezar a recibir visitas",
       ratingsRequired: "Califica el juego, el stand y el arte.",
-      tooManyAttempts: "Demasiados intentos. Espera unos minutos.",
       noPending: "Esta visita ya no está esperando tu calificación.",
       missingDevice: "Abre tu pasaporte en este teléfono para calificar.",
       missingSettings:

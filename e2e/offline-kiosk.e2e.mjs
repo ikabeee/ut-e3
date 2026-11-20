@@ -527,9 +527,9 @@ async function checkMobileLayout(staffPage) {
   check("no horizontal scroll at 360 px with the rejected list", overflow <= 0, `${overflow}px`);
 }
 
-// The dumbest attack: guessing PINs through the queue, 50 per batch. The batches share the 100 attempts every 5 minutes
-// of the PIN screen (RNF-10), so the staff cannot sort the real PINs out of the candidates of the filter (RNF-19).
-async function checkPinGuessing({ staffPage, database }, registeredPin) {
+// Every user of the event shares one public IP, so the queue has no time-window limit: 150 wrong PINs, 50 per batch,
+// all get an answer and a real PIN after them is still answered.
+async function checkPinGuessing({ staffPage }, registeredPin) {
   const guesses = Array.from({ length: 160 }, (_, index) => String(40000 + index)).filter(
     (pin) => pin !== registeredPin,
   );
@@ -551,17 +551,17 @@ async function checkPinGuessing({ staffPage, database }, registeredPin) {
     answered += response.body?.results?.length ?? 0;
   }
 
-  check("150 PIN guesses through the queue get at most 100 answers (RNF-10)", answered <= 100, `${answered} answers`);
+  check(
+    "150 PIN guesses through the queue all get an answer, without a limit",
+    answered === 150,
+    `${answered} answers`,
+  );
 
   const realPin = await postBatch(staffPage, { visits: [toVisit("10005", 999)] });
 
-  const recorded = database
-    .prepare("SELECT COUNT(*) AS total FROM checkins WHERE id = ?")
-    .get(toVisit("", 999).id).total;
-
   check(
-    "once the attempts run out, a real PIN gets no answer either and nothing is recorded",
-    realPin.status === 200 && realPin.body.results.length === 0 && recorded === 0,
+    "a real PIN after 150 guesses still gets an answer",
+    realPin.status === 200 && realPin.body.results.length === 1,
     JSON.stringify(realPin.body),
   );
 }

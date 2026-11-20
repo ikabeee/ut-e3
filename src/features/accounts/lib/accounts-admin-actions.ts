@@ -33,7 +33,7 @@ export async function sendPasswordResetAction(
 
   if (result.status === "sent") return finishManagement(OUTCOMES.resetSent, result.emailId);
 
-  return failManagement(result.status === "rateLimited" ? ERRORS.rateLimited : describeManageFailure(result));
+  return failManagement(describeManageFailure(result));
 }
 
 export async function closeSessionsAction(

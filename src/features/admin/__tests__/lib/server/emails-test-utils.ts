@@ -1,7 +1,8 @@
 import { MAX_ATTEMPTS } from "@shared/lib/server/email-outbox";
 import { getPrisma } from "@shared/lib/server/prisma";
 
-export const NOW = new Date("2026-11-20T18:00:00.000Z");
+// Rows are queued with the real clock, so the tests must run after it, never at a fixed date.
+export const NOW = new Date(Date.now() + 60 * 60 * 1000);
 
 let counter = 0;
 

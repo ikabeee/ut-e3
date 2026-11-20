@@ -69,13 +69,12 @@ describe("startLoginChallenge", () => {
     expect(await verifyLoginCode(second.token, second.code, NOW)).toMatchObject({ status: "verified" });
   });
 
-  it("refuses the fourth code in 10 minutes and queues no email for it", async () => {
-    expect(await startLoginChallenge(account, NOW)).toMatchObject({ status: "sent" });
-    expect(await startLoginChallenge(account, NOW)).toMatchObject({ status: "sent" });
-    expect(await startLoginChallenge(account, NOW)).toMatchObject({ status: "sent" });
+  it("sends a fourth code in 10 minutes: there is no send limit", async () => {
+    for (let sent = 0; sent < 4; sent += 1) {
+      expect(await startLoginChallenge(account, NOW)).toMatchObject({ status: "sent" });
+    }
 
-    expect(await startLoginChallenge(account, NOW)).toEqual({ status: "rateLimited" });
-    expect(await getPrisma().emailOutbox.count({ where: { to: account.email } })).toBe(3);
+    expect(await getPrisma().emailOutbox.count({ where: { to: account.email } })).toBe(4);
   });
 });
 
@@ -169,13 +168,14 @@ describe("resendLoginCode", () => {
     expect((await readAudit()).map((entry) => entry.action)).toContain("account.login_code_resent");
   });
 
-  it("counts the resends with the first code and refuses past three, queuing nothing", async () => {
+  it("resends past three codes: there is no send limit", async () => {
     const { token } = await startAndReadCode();
 
-    expect(await resendLoginCode(token, NOW)).toMatchObject({ status: "sent" });
-    expect(await resendLoginCode(token, NOW)).toMatchObject({ status: "sent" });
-    expect(await resendLoginCode(token, NOW)).toEqual({ status: "rateLimited" });
-    expect(await getPrisma().emailOutbox.count({ where: { to: account.email } })).toBe(3);
+    for (let sent = 0; sent < 3; sent += 1) {
+      expect(await resendLoginCode(token, NOW)).toMatchObject({ status: "sent" });
+    }
+
+    expect(await getPrisma().emailOutbox.count({ where: { to: account.email } })).toBe(4);
   });
 
   it("answers invalid for an unknown token, a used challenge and one older than its lifetime", async () => {

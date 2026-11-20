@@ -8,7 +8,6 @@ import { recordAudit } from "@shared/lib/server/audit-log";
 import { enqueueEmail } from "@shared/lib/server/email-outbox";
 import { hashPassword } from "@shared/lib/server/password";
 import { getPrisma } from "@shared/lib/server/prisma";
-import { consumeAttempt, type RateLimitRule } from "@shared/lib/server/rate-limit";
 import { hashToken } from "@shared/lib/server/token-hash";
 import { siteConfig } from "@shared/lib/site-config";
 
@@ -18,21 +17,16 @@ export type ResetResult = { status: "changed" | "expired" | "invalid" };
 
 export const RESET_LINK_LIFETIME_MS = 60 * 60 * 1000;
 
-// Three requests per email per hour, counted whether or not the email has an account.
-export const PASSWORD_RESET_RULE: RateLimitRule = { limit: 3, windowMs: 60 * 60 * 1000 };
-
 const TOKEN_BYTES = 32;
 
 const ACTIVE = "active";
 
 /**
  * Queues the reset email of the active account with `email` and returns the id of the queued email, or null when nothing
- * is sent (no active account, or the limit of the hour is used up). The caller runs it after answering, so neither the
+ * is sent (no active account). The caller runs it after answering, so neither the
  * answer nor its timing tells whether the email has an account. The previous unused link stops working.
  */
 export async function requestPasswordReset(email: string, now: Date): Promise<string | null> {
-  if (!(await consumeAttempt(`password-reset:${email}`, PASSWORD_RESET_RULE, now))) return null;
-
   const account = await getPrisma().account.findFirst({
     where: { email, status: ACTIVE },
     select: { id: true, email: true, name: true },
@@ -51,7 +45,7 @@ export interface ResetLinkAudit {
 
 /**
  * Replaces the unused link of the account with a new one and queues the email, in one transaction, and returns the id
- * of the queued email. It checks no status and counts no attempt: the caller decides who may get a link and how often.
+ * of the queued email. It checks no status: the caller decides who may get a link.
  */
 export async function queueResetLink(
   account: { id: string; email: string; name: string },

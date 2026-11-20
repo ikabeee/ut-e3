@@ -90,8 +90,8 @@ de `event_settings`; ninguna está escrita en el código.
   `addSelfEntry()` (`entries-mutations.ts`) reutiliza `insertEntry()`: mismo cupo (50 de lista previa y 64), mismo
   duplicado y mismo correo de confirmación (S8). Solo existe el canal `pre`: desde `kofOnsiteSignupStartsAt` la app
   responde "cerró" porque la inscripción presencial es un check-in en el área de KOF. Un pasaporte excluido (RF-46) se
-  rechaza. Es idempotente (repetir responde "Ya estás inscrito" sin crear nada ni reenviar el correo), con límite de 10
-  intentos cada 10 minutos por visitante. La fila queda sin `registeredById` y la bitácora `kof_entry.add` sin actor, con
+  rechaza. Es idempotente (repetir responde "Ya estás inscrito" sin crear nada ni reenviar el correo), sin límite de
+  intentos por tiempo. La fila queda sin `registeredById` y la bitácora `kof_entry.add` sin actor, con
   `detail.source = "visitor"`. No hay cancelación: no existe ninguna regla ni comando para quitar una inscripción.
   Los estados (inscrito, lleno, cerrado, ya terminaron, aún no abre y excluido) salen de `getSelfEntryAvailability()`; los errores de la
   acción llegan como toast.

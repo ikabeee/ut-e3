@@ -86,7 +86,7 @@ describe("registerVisitor hardening", () => {
     expect(await prisma.visitor.count()).toBe(0);
   });
 
-  it("does not spend rate-limit quota when registration is closed and allows submission when open", async () => {
+  it("refuses while registration is closed and allows submission when open", async () => {
     stubHeaders({ "x-forwarded-for": "198.51.100.77" });
 
     await prisma.eventSettings.update({

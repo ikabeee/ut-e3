@@ -6,14 +6,11 @@ import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import { addSelfEntry, type SelfEntryResult } from "@features/tournament/lib/server/entries-mutations";
 import { formatEventDate } from "@shared/lib/date-time";
 import { deliverQueuedEmail } from "@shared/lib/server/email-delivery";
-import { consumeAttempt } from "@shared/lib/server/rate-limit";
 import { getDeviceVisitorId } from "@shared/lib/server/visitor-device";
 
 export type SelfEntryState = { status: "done"; message: string } | { status: "error"; message: string };
 
 const COPY = TOURNAMENT_COPY.ui.entries.selfEntry;
-
-const SELF_ENTRY_RATE_LIMIT = { limit: 10, windowMs: 10 * 60 * 1000 };
 
 /**
  * The visitor of the passport session (the device cookie, as in `/passport`) enrolls themselves. The visitor is never
@@ -24,13 +21,7 @@ export async function enrollSelfAction(): Promise<SelfEntryState> {
 
   if (!visitorId) return failure(COPY.noPassport);
 
-  const now = new Date();
-
-  if (!(await consumeAttempt(`kof-self-entry:${visitorId}`, SELF_ENTRY_RATE_LIMIT, now))) {
-    return failure(COPY.rateLimited);
-  }
-
-  const result = await addSelfEntry(visitorId, now);
+  const result = await addSelfEntry(visitorId, new Date());
 
   if (result.status === "added") after(() => deliverQueuedEmail(result.emailId));
 

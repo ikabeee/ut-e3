@@ -58,8 +58,6 @@ export async function resendLoginCodeAction(): Promise<LoginCodeState> {
 
   if (result.status === "invalid") return { error: errors.expiredChallenge, notice: "" };
 
-  if (result.status === "rateLimited") return { error: errors.tooManyCodes, notice: "" };
-
   after(() => deliverQueuedEmail(result.emailId));
 
   return { error: "", notice: resent };

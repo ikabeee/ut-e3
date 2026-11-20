@@ -1,11 +1,6 @@
 import "server-only";
-import { headers } from "next/headers";
 
 const UNKNOWN_CLIENT = "unknown";
-
-export async function resolveClientIp(): Promise<string> {
-  return readClientIp(await headers());
-}
 
 /**
  * Address of the client as seen by our own proxy. Caddy and Nginx (docs/deploy.md) append the address they saw to

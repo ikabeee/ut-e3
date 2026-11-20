@@ -7,14 +7,13 @@ import {
   type ManageFailure,
   type ManagingActor,
 } from "@features/accounts/lib/server/invitations";
-import { queueResetLink, PASSWORD_RESET_RULE } from "@features/accounts/lib/server/password-reset";
+import { queueResetLink } from "@features/accounts/lib/server/password-reset";
 import { isSecondaryRole } from "@features/accounts/lib/secondary-role";
 import { readDatabaseMessage } from "@shared/lib/server/database-errors";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { getPrisma } from "@shared/lib/server/prisma";
-import { consumeAttempt } from "@shared/lib/server/rate-limit";
 
-export type SendResetResult = { status: "sent"; emailId: string } | { status: "rateLimited" } | ManageFailure;
+export type SendResetResult = { status: "sent"; emailId: string } | ManageFailure;
 
 export type CloseSessionsResult = { status: "closed"; count: number } | ManageFailure;
 
@@ -26,10 +25,7 @@ export type SecondaryRoleResult =
   | ManageFailure;
 
 /**
- * Sends the reset link of "Olvidé mi contraseña" to an active account on behalf of the sysadmin. The self-service limit
- * exists so that anyone can be stopped from flooding an inbox; here the caller is a signed-in sysadmin, so the limit
- * is not skipped but counted in its own bucket per account: it neither spends the attempts of the owner nor can be
- * spent by them, and a repeated click still cannot flood the inbox.
+ * Sends the reset link of "Olvidé mi contraseña" to an active account on behalf of the sysadmin.
  */
 export async function sendAdminPasswordReset(
   actor: ManagingActor,
@@ -43,10 +39,6 @@ export async function sendAdminPasswordReset(
   const { account } = lookup;
 
   if (account.status !== "active") return { status: "wrongState" };
-
-  if (!(await consumeAttempt(`admin-password-reset:${account.id}`, PASSWORD_RESET_RULE, now))) {
-    return { status: "rateLimited" };
-  }
 
   const audit = { actorId: actor.id, action: "account.admin_password_reset_sent" };
 

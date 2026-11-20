@@ -5,7 +5,6 @@ import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { enqueueEmail } from "@shared/lib/server/email-outbox";
 import { getPrisma } from "@shared/lib/server/prisma";
-import { consumeAttempt, type RateLimitRule } from "@shared/lib/server/rate-limit";
 import { hashToken } from "@shared/lib/server/token-hash";
 
 export interface ChallengeAccount {
@@ -14,9 +13,9 @@ export interface ChallengeAccount {
   name: string;
 }
 
-export type StartResult = { status: "sent"; emailId: string; token: string } | { status: "rateLimited" };
+export type StartResult = { status: "sent"; emailId: string; token: string };
 
-export type ResendResult = { status: "sent"; emailId: string } | { status: "rateLimited" } | { status: "invalid" };
+export type ResendResult = { status: "sent"; emailId: string } | { status: "invalid" };
 
 export type VerifyResult = { status: "verified"; accountId: string; role: string } | { status: "invalid" };
 
@@ -28,9 +27,6 @@ export const MAX_CODE_ATTEMPTS = 5;
 /** A challenge can ask for new codes only while it is this young, so a stolen cookie does not live on. */
 export const CHALLENGE_LIFETIME_MS = 30 * 60 * 1000;
 
-// Counts the first code and each resend, per account: whoever knows the password cannot flood the inbox.
-export const LOGIN_CODE_SEND_RULE: RateLimitRule = { limit: 3, windowMs: 10 * 60 * 1000 };
-
 const TOKEN_BYTES = 32;
 
 const CODE_DIGITS = 6;
@@ -40,8 +36,6 @@ const CODE_DIGITS = 6;
  * returns the token that goes in the challenge cookie (S2). Only the SHA-256 of the token and of the code is stored.
  */
 export async function startLoginChallenge(account: ChallengeAccount, now: Date): Promise<StartResult> {
-  if (!(await consumeAttempt(sendKey(account.id), LOGIN_CODE_SEND_RULE, now))) return { status: "rateLimited" };
-
   const token = randomBytes(TOKEN_BYTES).toString("base64url");
 
   return getPrisma().$transaction(async (transaction): Promise<StartResult> => {
@@ -84,8 +78,6 @@ export async function resendLoginCode(token: string, now: Date): Promise<ResendR
   if (!challenge) return { status: "invalid" };
 
   const { account } = challenge;
-
-  if (!(await consumeAttempt(sendKey(account.id), LOGIN_CODE_SEND_RULE, now))) return { status: "rateLimited" };
 
   return getPrisma().$transaction(async (transaction): Promise<ResendResult> => {
     const code = generateCode();
@@ -179,10 +171,6 @@ function hashCode(challengeId: string, code: string): string {
 // Both are SHA-256 hex strings of the same length; the comparison takes the same time wherever they differ.
 function isSameHash(candidate: string, stored: string): boolean {
   return timingSafeEqual(Buffer.from(candidate), Buffer.from(stored));
-}
-
-function sendKey(accountId: string): string {
-  return `login-code:${accountId}`;
 }
 
 // The audit detail never carries the code or the email address.

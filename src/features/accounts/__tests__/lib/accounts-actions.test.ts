@@ -92,61 +92,22 @@ describe("signIn", () => {
     });
   });
 
-  it("blocks the fourth attempt after three failures in an hour, even with the right password", async () => {
-    for (const attempt of [1, 2, 3]) {
+  it("signs in with the right password after more than three failures in an hour: there is no limit", async () => {
+    for (const attempt of [1, 2, 3, 4, 5]) {
       expect(await signIn(null, credentials("admin@ut.mx", `wrong-${attempt}`))).toEqual(INVALID_CREDENTIALS);
     }
 
-    expect(await signIn(null, credentials("ADMIN@ut.mx", PASSWORD))).toEqual({
-      error: "Demasiados intentos. Intenta de nuevo más tarde.",
-    });
-    expect(await getPrisma().session.count()).toBe(0);
-  });
-
-  it("does not lock the account for a client on another address", async () => {
-    stubHeaders({ "x-forwarded-for": "198.51.100.66" });
-
-    for (const attempt of [1, 2, 3, 4]) {
-      await signIn(null, credentials("admin@ut.mx", `wrong-${attempt}`));
-    }
-
-    stubHeaders({ "x-forwarded-for": "1.2.3.4, 203.0.113.20" });
-
-    await expect(signIn(null, credentials("admin@ut.mx", PASSWORD))).rejects.toMatchObject({
+    await expect(signIn(null, credentials("ADMIN@ut.mx", PASSWORD))).rejects.toMatchObject({
       digest: expect.stringContaining(";/login/verify;"),
     });
   });
 
-  it("keeps blocking the address that spent its attempts, whatever it puts in X-Forwarded-For", async () => {
-    for (const attempt of [1, 2, 3]) {
-      stubHeaders({ "x-forwarded-for": `10.0.0.${attempt}, 198.51.100.66` });
-      await signIn(null, credentials("admin@ut.mx", `wrong-${attempt}`));
-    }
-
-    stubHeaders({ "x-forwarded-for": "10.0.0.9, 198.51.100.66" });
-
-    expect(await signIn(null, credentials("admin@ut.mx", PASSWORD))).toEqual({
-      error: "Demasiados intentos. Intenta de nuevo más tarde.",
-    });
-  });
-
-  it("answers at most three of a concurrent burst of wrong passwords and blocks the rest", async () => {
+  it("answers every wrong password of a concurrent burst the same way", async () => {
     const results = await Promise.all(
       [1, 2, 3, 4, 5].map((attempt) => signIn(null, credentials("admin@ut.mx", `wrong-${attempt}`))),
     );
 
-    expect(results.filter((result) => result.error === INVALID_CREDENTIALS.error)).toHaveLength(3);
-    expect(
-      results.filter((result) => result.error === "Demasiados intentos. Intenta de nuevo más tarde."),
-    ).toHaveLength(2);
-  });
-
-  it("forgets the failed attempts after a successful sign-in", async () => {
-    await signIn(null, credentials("admin@ut.mx", "wrong-1"));
-    await signIn(null, credentials("admin@ut.mx", "wrong-2"));
-    await signIn(null, credentials("admin@ut.mx", PASSWORD)).catch(() => undefined);
-
-    expect(await getPrisma().rateLimit.count({ where: { key: { startsWith: "login:" } } })).toBe(0);
+    expect(results.filter((result) => result.error === INVALID_CREDENTIALS.error)).toHaveLength(5);
   });
 });
 

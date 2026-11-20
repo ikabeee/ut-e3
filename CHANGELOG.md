@@ -6,6 +6,15 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.7.3] - 2026-11-20
+
+### Corregido
+
+- Se quitaron todos los límites de solicitudes por tiempo (inicio de sesión del staff, envío de códigos de acceso,
+  restablecimiento y recuperación por correo, mesa de recuperación, registro en mesa, kiosco y cola de visitas, encuesta
+  del pasaporte e inscripción al KOF), porque todos los usuarios del evento salen por la misma IP pública. Se conservan
+  los 5 intentos por código de acceso y el filtro de PIN del kiosco.
+
 ## [1.7.2] - 2026-11-20
 
 ### Corregido

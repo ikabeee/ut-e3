@@ -7,13 +7,9 @@ import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { enqueueEmail } from "@shared/lib/server/email-outbox";
 import { getPrisma } from "@shared/lib/server/prisma";
-import { consumeAttempt, type RateLimitRule } from "@shared/lib/server/rate-limit";
 import { hashToken } from "@shared/lib/server/token-hash";
 import { createVisitorDevice } from "@shared/lib/server/visitor-device";
 import { siteConfig } from "@shared/lib/site-config";
-
-// RF-68: three requests per email per hour, counted whether or not the email has a passport.
-export const EMAIL_RECOVERY_RULE: RateLimitRule = { limit: 3, windowMs: 60 * 60 * 1000 };
 
 export const RECOVERY_LINK_LIFETIME_MS = 30 * 60 * 1000;
 
@@ -21,12 +17,10 @@ const TOKEN_BYTES = 32;
 
 /**
  * Queues the recovery email of the passport registered with `email` and returns the id of the queued email, or null
- * when nothing is sent (no such passport, or the limit of the hour is used up). The caller runs it after answering,
+ * when nothing is sent (no such passport). The caller runs it after answering,
  * so neither the answer nor its timing tells whether the email exists.
  */
 export async function requestEmailRecovery(email: string, now: Date): Promise<string | null> {
-  if (!(await consumeAttempt(`recovery-email:${email}`, EMAIL_RECOVERY_RULE, now))) return null;
-
   // visitors.email compares with COLLATE NOCASE.
   const visitor = await getPrisma().visitor.findFirst({ where: { email }, select: { id: true, email: true } });
 

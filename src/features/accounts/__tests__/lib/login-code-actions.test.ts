@@ -188,13 +188,13 @@ describe("verifyLoginCodeAction", () => {
 });
 
 describe("resendLoginCodeAction", () => {
-  it("queues a new code and says so; past three codes it answers the limit and queues nothing", async () => {
+  it("queues a new code and says so, also past three codes", async () => {
     await signInAndReadCode();
 
     expect(await resendLoginCodeAction()).toEqual({ error: "", notice: ACCOUNTS_COPY.verifyCode.resent });
     expect(await resendLoginCodeAction()).toEqual({ error: "", notice: ACCOUNTS_COPY.verifyCode.resent });
-    expect(await resendLoginCodeAction()).toEqual({ error: ERRORS.tooManyCodes, notice: "" });
-    expect(await getPrisma().emailOutbox.count()).toBe(3);
+    expect(await resendLoginCodeAction()).toEqual({ error: "", notice: ACCOUNTS_COPY.verifyCode.resent });
+    expect(await getPrisma().emailOutbox.count()).toBe(4);
   });
 
   it("sends the person back to /login when there is no challenge cookie", async () => {

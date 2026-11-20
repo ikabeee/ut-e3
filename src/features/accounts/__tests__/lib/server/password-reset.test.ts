@@ -76,13 +76,12 @@ describe("requestPasswordReset", () => {
     expect(await getResetLinkState(first, NOW)).toEqual({ status: "invalid" });
   });
 
-  it("allows three requests an hour per email and queues no email for the fourth", async () => {
-    expect(await requestPasswordReset(email, NOW)).not.toBeNull();
-    expect(await requestPasswordReset(email, NOW)).not.toBeNull();
-    expect(await requestPasswordReset(email, NOW)).not.toBeNull();
+  it("queues an email for a fourth request in an hour: there is no limit", async () => {
+    for (let request = 0; request < 4; request += 1) {
+      expect(await requestPasswordReset(email, NOW)).not.toBeNull();
+    }
 
-    expect(await requestPasswordReset(email, NOW)).toBeNull();
-    expect(await getPrisma().emailOutbox.count({ where: { to: email } })).toBe(3);
+    expect(await getPrisma().emailOutbox.count({ where: { to: email } })).toBe(4);
   });
 });
 
