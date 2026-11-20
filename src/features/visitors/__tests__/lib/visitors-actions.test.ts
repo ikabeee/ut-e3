@@ -101,86 +101,20 @@ describe("registerVisitor Server Action", () => {
     expect(await getPrisma().visitor.count()).toBe(0);
   });
 
-  it("blocks the fourth attempt from the same client IP within an hour", async () => {
-    stubHeaders({ "x-forwarded-for": "198.51.100.42, 10.0.0.1" });
+  it("lets every visitor behind one shared network register, without a per-address limit", async () => {
+    stubHeaders({ "x-forwarded-for": "198.51.100.42" });
 
-    for (let index = 1; index <= 3; index++) {
-      const form = createForm({
-        fullName: `User ${index}`,
-        gamertag: `Gamer${index}`,
-        email: `user${index}@ut.mx`,
-      });
-
-      await expect(registerVisitor(null, form)).rejects.toMatchObject({
-        digest: expect.stringContaining(";/passport;"),
-      });
-    }
-
-    const fourthForm = createForm({
-      fullName: "Fourth User",
-      gamertag: "Gamer4",
-      email: "user4@ut.mx",
-    });
-
-    const fourthState = await registerVisitor(null, fourthForm);
-
-    expect(fourthState.error).toBeTruthy();
-  });
-
-  it("counts the hop our proxy appended, so a made-up X-Forwarded-For does not get past the limit", async () => {
-    for (let index = 1; index <= 3; index++) {
-      stubHeaders({ "x-forwarded-for": `1.2.3.${index}, 198.51.100.43` });
-
+    for (let index = 1; index <= 10; index++) {
       await expect(
         registerVisitor(
           null,
-          createForm({ fullName: `Spoof User ${index}`, gamertag: `Spoof${index}`, email: `spoof${index}@ut.mx` }),
+          createForm({ fullName: `Venue User ${index}`, gamertag: `Venue${index}`, email: `venue${index}@ut.mx` }),
         ),
       ).rejects.toMatchObject({ digest: expect.stringContaining(";/passport;") });
     }
 
-    stubHeaders({ "x-forwarded-for": "1.2.3.99, 198.51.100.43" });
-
-    const state = await registerVisitor(
-      null,
-      createForm({ fullName: "Spoof User Four", gamertag: "Spoof4", email: "spoof4@ut.mx" }),
-    );
-
-    expect(state.error).toBe(VISITORS_COPY.rateLimited);
-  });
-
-  it("does not spend the quota on a taken gamertag", async () => {
-    await expect(
-      registerVisitor(null, createForm({ fullName: "First Visitor", gamertag: "Taken", email: "taken@ut.mx" })),
-    ).rejects.toMatchObject({ digest: expect.stringContaining(";/passport;") });
-
-    for (let index = 1; index <= 3; index++) {
-      const state = await registerVisitor(
-        null,
-        createForm({ fullName: `Retry Visitor ${index}`, gamertag: "taken", email: `retry${index}@ut.mx` }),
-      );
-
-      expect(state.fieldErrors?.gamertag).toBe(VISITORS_COPY.errors.gamertagTaken);
-    }
-
-    await expect(
-      registerVisitor(null, createForm({ fullName: "Retry Visitor", gamertag: "FreeTag", email: "retry@ut.mx" })),
-    ).rejects.toMatchObject({ digest: expect.stringContaining(";/passport;") });
-  });
-
-  it("answers a taken gamertag on the first attempt of the window instead of failing", async () => {
-    await expect(
-      registerVisitor(null, createForm({ fullName: "Owner Visitor", gamertag: "OwnedTag", email: "owner@ut.mx" })),
-    ).rejects.toMatchObject({ digest: expect.stringContaining(";/passport;") });
-    await getPrisma().rateLimit.deleteMany();
-
-    const state = await registerVisitor(
-      null,
-      createForm({ fullName: "Late Visitor", gamertag: "ownedtag", email: "late@ut.mx" }),
-    );
-
-    expect(state.fieldErrors?.gamertag).toBe(VISITORS_COPY.errors.gamertagTaken);
-    expect(await getPrisma().rateLimit.findMany()).toEqual([]);
+    expect(await getPrisma().visitor.count()).toBe(10);
+    expect(await getPrisma().rateLimit.count()).toBe(0);
   });
 
   it("returns exactly the generic rejection message when email is blocked", async () => {

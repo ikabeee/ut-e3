@@ -6,6 +6,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Corregido
+
+- El registro de pasaportes ya no se bloquea en la sede: se quitó el límite de 3 registros por hora por dirección IP,
+  que dejaba sin registro a todos los visitantes conectados al mismo Wi-Fi.
+
 ## [1.7.1] - 2026-11-20
 
 ### Corregido
