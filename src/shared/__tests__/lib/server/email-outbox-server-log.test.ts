@@ -9,7 +9,8 @@ const database = createTestDatabase();
 
 process.env.DATABASE_URL = database.url;
 
-const NOW = new Date("2026-11-20T15:00:00.000Z");
+// enqueueEmail schedules the row at the real clock, so delivery must run after it, never at a fixed date.
+const NOW = new Date(Date.now() + 60 * 60 * 1000);
 
 const EMAIL = { to: "visitor@ut.mx", subject: "Tu código de acceso", text: "Código: 123456" };
 
