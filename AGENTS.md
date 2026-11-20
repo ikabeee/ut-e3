@@ -248,12 +248,11 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | Qué cambia | Dónde |
 | --- | --- |
 | Textos del login | `src/features/accounts/lib/accounts-copy.ts` |
-| Reglas del login (límite de intentos, mensaje genérico) | `src/features/accounts/lib/accounts-actions.ts` |
+| Reglas del login (mensaje genérico; sin límite de intentos por tiempo) | `src/features/accounts/lib/accounts-actions.ts` |
 | Quién puede entrar al panel | `requireSysadmin()` en `src/features/accounts/lib/server/current-account.ts` |
 | Rutas protegidas por cookie | `matcher` de `src/proxy.ts` (sólo revisa que haya cookie; la page y cada Server Action validan la sesión en la BD) |
 | Duración y cookie de la sesión | `src/shared/lib/server/session.ts` |
 | Hash de contraseñas (scrypt) | `src/shared/lib/server/password.ts` |
-| Ventanas del límite de solicitudes | `src/shared/lib/server/rate-limit.ts` |
 | Campos y validación del cronograma | `src/features/schedule/lib/schedule-item-input.ts` |
 | Quién invita a quién (sysadmin: administradores; administrador de KOF: su staff) | `getManagedRoles()` en `src/features/accounts/lib/invitation-rules.ts` |
 | Invitar, reenviar, desactivar y activar cuentas (enlace por correo, 72 horas) | `src/features/accounts/lib/server/invitations.ts` |
@@ -266,14 +265,14 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | Filtro de PIN del kiosco (RF-78, RNF-19): rondas, factor y sal | `src/features/stands/lib/pin-filter.ts`; la sal es `event_settings.pin_filter_salt` (`INITIAL_PIN_FILTER_SALT` del seed); el registro invalida la etiqueta `visitor-pins` |
 | Aviso del pasaporte por una visita en cola rechazada (RF-24) | `rejected_visits`, `components/rejected-visit-notices.tsx` de `stands` |
 | Código QR del enlace de recuperación (RF-69) | `QrCodeImage` (`src/shared/components/qr-code.tsx`) y `buildQrCode` (`src/shared/lib/qr-code.ts`, librería `uqr`); lo muestra `recovery-result.tsx` |
-| Recuperación por correo (RF-68, RF-71): límite, vigencia del enlace y uso de un solo uso | `src/features/visitors/lib/server/email-recovery.ts`; la página es `/passport/recover` (`visitors/pages/recover-page.tsx`) |
+| Recuperación por correo (RF-68, RF-71): vigencia del enlace y uso de un solo uso | `src/features/visitors/lib/server/email-recovery.ts`; la página es `/passport/recover` (`visitors/pages/recover-page.tsx`) |
 | Quién usa la mesa de recuperación (`help_desk` y `sysadmin`; el resto va a su home) | `requireRecoveryAgent()` en `current-account.ts` |
 | Home de cada rol al entrar (el de `help_desk` es `/support/recovery`) | `getHomePath()` en `src/features/accounts/lib/accounts-links.ts` |
 | Rifa: sorteo, bloqueo del segundo giro, decisión, correo al ganador, cierre y premio (RF-49 a RF-56) | `src/features/raffle/lib/server/raffle-mutations.ts`; las reglas de la BD (un solo giro `pending`, premio solo para `winner`, triggers) en la migración `*_raffle_draws` |
 | Quién usa el panel de la rifa (`raffle_admin` y, como animador, el sysadmin; entra por `/login` a `/admin/raffle`) | `requireRaffleAdmin()` en `current-account.ts` y `getHomePath()` en `accounts-links.ts` |
 | Mesas de KOF (1 a 4, una por tablero; semifinales y final solo el `kof_admin`) | `getMatchDesk()` en `tournament/lib/tournament-rules.ts`, `KOF_DESKS` en `accounts/lib/types.ts` y el CHECK `accounts_kof_desk_check` (migración `*_kof_four_desks`) |
 | El sysadmin opera el KOF como `kof_admin` (S5): `requireKofAccount()` le da ese rol sin mesa y `requireKofViewer()` conserva el suyo para el encabezado | `current-account.ts`; las acciones y la bitácora usan su propia cuenta |
-| Segundo paso del login (código de 6 dígitos por correo, 10 min, 5 intentos, 3 envíos por 10 min) | `src/features/accounts/lib/server/login-challenge.ts` (reglas) y `login-challenge-cookie.ts`; `signIn` solo crea el reto y la sesión nace en `verifyLoginCodeAction` (`login-code-actions.ts`, `/login/verify`) |
+| Segundo paso del login (código de 6 dígitos por correo, 10 min, 5 intentos por código, sin límite de envíos) | `src/features/accounts/lib/server/login-challenge.ts` (reglas) y `login-challenge-cookie.ts`; `signIn` solo crea el reto y la sesión nace en `verifyLoginCodeAction` (`login-code-actions.ts`, `/login/verify`) |
 | "Olvidé mi contraseña" (enlace de 1 hora, un solo uso, cierra las sesiones) | `src/features/accounts/lib/server/password-reset.ts` y `password-reset-actions.ts`; páginas `/forgot-password` y `/reset-password/[token]` |
 | Bitácora de auditoría | `recordAudit()` en `src/shared/lib/server/audit-log.ts`, dentro de la transacción del cambio |
 | Visitantes del sysadmin (`/admin/visitors`): lista con búsqueda (`instr`, sin comodines), páginas de 50, conteo por día de Cancún, reenviar pasaporte con PIN, enlace de recuperación, corregir datos, quitar exclusión y CSV | `visitors/lib/server/visitors-admin-queries.ts` y `visitors-admin-mutations.ts`, acciones en `visitors-admin-actions.ts` (cada una empieza con `requireSysadmin()`), CSV en `visitors/api/visitors-admin-route.ts` (`@shared/lib/csv.ts` neutraliza fórmulas; `@shared/lib/server/csv-download.ts` da el 401 y la descarga). `unexcludeVisitor()` está en `moderation-mutations.ts` y reactiva boletos con `grantMilestoneTickets()` solo antes de la rifa. Ninguna fila ni CSV lleva el PIN, su hash ni su cifrado |

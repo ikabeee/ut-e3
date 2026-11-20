@@ -156,7 +156,7 @@ export const ADMIN_COPY = {
     neverSignedIn: "Último acceso: nunca",
     unknownDate: "sin fecha",
     resetPassword: "Enviar restablecimiento de contraseña",
-    resetPasswordHint: "Le llega un enlace de 1 hora; el anterior deja de servir. Máximo 3 por hora.",
+    resetPasswordHint: "Le llega un enlace de 1 hora; el anterior deja de servir.",
     closeSessions: "Cerrar sesiones",
     closeSessionsHint: "Cierra sesión en todos sus dispositivos.",
     clearTwoFactor: "Limpiar 2FA pendiente",

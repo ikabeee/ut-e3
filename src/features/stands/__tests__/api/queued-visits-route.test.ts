@@ -87,12 +87,12 @@ describe("queued visits route", () => {
     expect((await postQueuedVisits(post({ visits: [] }))).status).toBe(401);
   });
 
-  it("answers 429 once the batches of an account pass the limit", async () => {
+  it("keeps answering 200 past 60 batches of an account: there is no batch limit", async () => {
     await createSession(ids.staffA);
 
     for (let sent = 0; sent < 60; sent += 1) await postQueuedVisits(post({ visits: [] }));
 
-    expect((await postQueuedVisits(post({ visits: [] }))).status).toBe(429);
+    expect((await postQueuedVisits(post({ visits: [] }))).status).toBe(200);
   });
 });
 

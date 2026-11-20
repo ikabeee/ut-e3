@@ -41,8 +41,6 @@ export const SUPPORT_COPY = {
       // The same text whether the data exists or not, so the desk cannot be used to find out who registered.
       notFound:
         "No hay ningún pasaporte con ese dato. Pregunta al visitante por otro: su correo, su gamertag o su nombre.",
-      agentLimit: "Hiciste demasiadas recuperaciones seguidas. Espera unos minutos.",
-      visitorLimit: "Este pasaporte ya se recuperó 3 veces en la última hora. Intenta más tarde o avisa al sysadmin.",
     },
   },
   register: {
@@ -74,7 +72,6 @@ export const SUPPORT_COPY = {
       // The same text for a blocked, a used and a staff email, as in the public form.
       rejected: "No se pudo registrar este correo.",
       closed: "El registro todavía no abre.",
-      agentLimit: "Registraste demasiados visitantes seguidos. Espera unos minutos.",
     },
   },
 } as const;

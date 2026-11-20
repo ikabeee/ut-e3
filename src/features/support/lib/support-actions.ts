@@ -5,18 +5,16 @@ import { after } from "next/server";
 import { requireRecoveryAgent } from "@features/accounts/lib/server/current-account";
 import { parseRecoveryTarget, parseSearchInput } from "@features/support/lib/recovery-input";
 import {
-  REGISTRATION_AGENT_RULE,
   registerVisitorAtDesk,
   type DeskRegistrationResult,
   type EnrollmentOutcome,
 } from "@features/support/lib/server/desk-registration";
-import { AGENT_RULE, recoverPassport, searchPassports } from "@features/support/lib/server/passport-recovery";
+import { recoverPassport, searchPassports } from "@features/support/lib/server/passport-recovery";
 import { SUPPORT_COPY } from "@features/support/lib/support-copy";
 import { parseRegistrationInput, type ValidRegistrationInput } from "@features/visitors/lib/registration-input";
 import { VISITOR_PINS_CACHE_TAG } from "@features/visitors/lib/visitor-cache-tags";
 import { readFormText } from "@shared/lib/form-data";
 import { deliverQueuedEmail } from "@shared/lib/server/email-delivery";
-import { consumeAttempt, refundAttempt } from "@shared/lib/server/rate-limit";
 
 export type RecoveryState =
   | {
@@ -51,8 +49,6 @@ export async function searchPassportsAction(_previous: SearchState | null, form:
 
   if (!parsed.ok) return failure(parsed.message);
 
-  if (!(await consumeAttempt(`recovery-agent:${agent.id}`, AGENT_RULE))) return failure(ERRORS.agentLimit);
-
   const result = await searchPassports(agent.id, parsed.value);
 
   if (result.status === "notFound") return failure(ERRORS.notFound);
@@ -72,15 +68,13 @@ export async function recoverPassportAction(_previous: RecoveryState | null, for
 
   if (!parsed.ok) return failure(parsed.message);
 
-  if (!(await consumeAttempt(`recovery-agent:${agent.id}`, AGENT_RULE))) return failure(ERRORS.agentLimit);
-
-  const result = await recoverPassport(agent.id, parsed.value, new Date());
+  const result = await recoverPassport(agent.id, parsed.value);
 
   if (result.status === "recovered") {
     return { ...result, registeredAt: result.registeredAt.toISOString() };
   }
 
-  return failure(result.status === "visitorLimit" ? ERRORS.visitorLimit : ERRORS.notFound);
+  return failure(ERRORS.notFound);
 }
 
 function failure(message: string) {
@@ -107,7 +101,7 @@ const REGISTER_ERRORS = SUPPORT_COPY.register.errors;
 
 /**
  * Registers a visitor in person (RF-69 desk). The session is checked first; the rest is the registration of the public
- * form with the agent as the author of the audit entry, and a limit per agent per hour.
+ * form with the agent as the author of the audit entry.
  */
 export async function registerVisitorAtDeskAction(
   _previous: DeskRegistrationState | null,
@@ -118,22 +112,12 @@ export async function registerVisitorAtDeskAction(
 
   if (!parsed.ok) return { status: "error", message: REGISTER_ERRORS.invalid, fieldErrors: parsed.fieldErrors };
 
-  const key = `desk-registration:${agent.id}`;
-  const attemptedAt = new Date();
-
-  if (!(await consumeAttempt(key, REGISTRATION_AGENT_RULE, attemptedAt))) {
-    return { status: "error", message: REGISTER_ERRORS.agentLimit };
-  }
-
   const result = await registerVisitorAtDesk({
     agentId: agent.id,
     input: parsed.value,
     wantsTournament: readFormText(form, "enrollInTournament") === "on",
-    now: attemptedAt,
+    now: new Date(),
   });
-
-  // A taken gamertag is a typo of the desk, not a new passport: the attempt is given back.
-  if (result.status === "gamertagTaken") await refundAttempt(key, REGISTRATION_AGENT_RULE, attemptedAt);
 
   return describeRegistration(result, parsed.value);
 }

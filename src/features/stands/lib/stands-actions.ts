@@ -6,12 +6,10 @@ import {
   requestVisit,
   answerPendingVisit,
 } from "@features/stands/lib/server/pending-visit-mutations";
-import { KIOSK_ATTEMPT_RULE, kioskAttemptKey } from "@features/stands/lib/server/kiosk-attempts";
 import { registerVisit } from "@features/stands/lib/server/visit-mutations";
 import { STANDS_COPY } from "@features/stands/lib/stands-copy";
 import { parsePin, parseRatings } from "@features/stands/lib/survey-input";
 import { readFormText } from "@shared/lib/form-data";
-import { consumeAttempt } from "@shared/lib/server/rate-limit";
 import { getDeviceVisitorId } from "@shared/lib/server/visitor-device";
 
 export interface ActionError {
@@ -25,8 +23,6 @@ export type VisitActionState = { status: "done"; message: string } | ActionError
 
 const COPY = STANDS_COPY.kiosk;
 
-const ANSWER_RULE = { limit: 20, windowMs: 5 * 60 * 1000 };
-
 // Server Actions are public endpoints: each one checks that the session is a stand account before reading the form.
 export async function requestVisitAction(
   _previous: RequestVisitState | null,
@@ -36,9 +32,6 @@ export async function requestVisitAction(
   const pin = parsePin(readFormText(form, "pin"));
 
   if (!pin) return failure(COPY.errors.pinFormat);
-
-  if (!(await consumeAttempt(kioskAttemptKey(account.id), KIOSK_ATTEMPT_RULE)))
-    return failure(COPY.errors.tooManyAttempts);
 
   const result = await requestVisit({ standId: account.standId, scannedById: account.id, pin }, new Date());
 
@@ -63,9 +56,6 @@ export async function submitVisitAction(_previous: VisitActionState | null, form
 
   if (!ratings) return failure(COPY.errors.ratingsRequired);
 
-  if (!(await consumeAttempt(kioskAttemptKey(account.id), KIOSK_ATTEMPT_RULE)))
-    return failure(COPY.errors.tooManyAttempts);
-
   const result = await registerVisit({ standId: account.standId, scannedById: account.id, pin, ratings }, new Date());
 
   return result.status === "registered"
@@ -82,8 +72,6 @@ export async function answerVisitAction(_previous: VisitActionState | null, form
   const ratings = parseRatings(form);
 
   if (!ratings) return failure(COPY.errors.ratingsRequired);
-
-  if (!(await consumeAttempt(`survey:${visitorId}`, ANSWER_RULE))) return failure(COPY.errors.tooManyAttempts);
 
   const result = await answerPendingVisit(visitorId, ratings, new Date());
 

@@ -250,7 +250,6 @@ export const TOURNAMENT_COPY = {
         full: "El torneo está lleno.",
         excluded: "Tu pasaporte está excluido y no puede inscribirse al torneo.",
         noPassport: "Necesitas tu pasaporte para inscribirte.",
-        rateLimited: "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.",
       },
       errors: {
         forbidden: "Solo el administrador de KOF puede hacer esto.",

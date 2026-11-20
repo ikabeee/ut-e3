@@ -1,8 +1,7 @@
 import { encryptPin, hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 
-// The event hour the tests that read the real clock are set to, so the rate-limit windows hold still and the tests
-// keep passing after the event.
+// The event hour the tests that read the real clock are set to, so the tests keep passing after the event.
 const EVENT_NOW = new Date("2026-11-20T18:00:00.000Z");
 
 // Only `Date` is faked: the database and the timers of the test keep running normally.

@@ -15,11 +15,7 @@ import {
   resendInvitation,
   type ManagingActor,
 } from "@features/accounts/lib/server/invitations";
-import {
-  getResetLinkState,
-  PASSWORD_RESET_RULE,
-  requestPasswordReset,
-} from "@features/accounts/lib/server/password-reset";
+import { getResetLinkState } from "@features/accounts/lib/server/password-reset";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { hashToken } from "@shared/lib/server/token-hash";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
@@ -293,36 +289,14 @@ describe("sendAdminPasswordReset", () => {
     expect(await getPrisma().emailOutbox.count()).toBe(0);
   });
 
-  it("never spends the self-service limit of the owner, and the owner never spends the one of the sysadmin", async () => {
-    const accountId = await createAccount({ email: mail("own"), role: "help_desk" });
-
-    for (let attempt = 0; attempt < PASSWORD_RESET_RULE.limit; attempt += 1)
-      await sendAdminPasswordReset(sysadmin, accountId, NOW);
-
-    for (let attempt = 0; attempt < PASSWORD_RESET_RULE.limit; attempt += 1) {
-      expect(await requestPasswordReset(mail("own"), NOW)).not.toBeNull();
-    }
-
-    expect(await requestPasswordReset(mail("own"), NOW)).toBeNull();
-    expect(await sendAdminPasswordReset(sysadmin, accountId, NOW)).toEqual({ status: "rateLimited" });
-
-    const another = await createAccount({ email: mail("own2"), role: "help_desk" });
-
-    await requestPasswordReset(mail("own2"), NOW);
-
-    expect((await sendAdminPasswordReset(sysadmin, another, NOW)).status).toBe("sent");
-  });
-
-  it("has its own hourly limit, so it neither spends nor is blocked by the self-service one", async () => {
+  it("sends the reset link as many times as asked, with no hourly limit", async () => {
     const accountId = await createAccount({ email: mail("rl"), role: "help_desk" });
 
-    for (let attempt = 0; attempt < PASSWORD_RESET_RULE.limit; attempt += 1) {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
       expect((await sendAdminPasswordReset(sysadmin, accountId, NOW)).status).toBe("sent");
     }
 
-    expect(await sendAdminPasswordReset(sysadmin, accountId, NOW)).toEqual({ status: "rateLimited" });
-    expect(await getPrisma().emailOutbox.count()).toBe(PASSWORD_RESET_RULE.limit);
-    expect(await getPrisma().rateLimit.count({ where: { key: `password-reset:${mail("rl")}` } })).toBe(0);
+    expect(await getPrisma().emailOutbox.count()).toBe(5);
   });
 });
 

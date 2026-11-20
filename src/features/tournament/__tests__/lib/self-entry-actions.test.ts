@@ -144,15 +144,6 @@ describe("enrollSelfAction", () => {
     expect(await getPrisma().tournamentEntry.count()).toBe(50);
     expect(await getPrisma().emailOutbox.count()).toBe(0);
   });
-
-  it("limits the attempts of a visitor", async () => {
-    await setWindows({ opensInHours: -48, onsiteInHours: -1 });
-    await useDevice("token-1");
-
-    for (let attempt = 0; attempt < 10; attempt += 1) await enrollSelfAction();
-
-    expect(await enrollSelfAction()).toEqual({ status: "error", message: COPY.rateLimited });
-  });
 });
 
 describe("enrollSelfAction regressions", () => {
@@ -174,14 +165,14 @@ describe("enrollSelfAction regressions", () => {
     expect(await getPrisma().emailOutbox.count()).toBe(1);
   });
 
-  it("limits the 11th attempt in the window even for an enrolled visitor (P7)", async () => {
+  it("keeps answering past 10 attempts for an enrolled visitor, without duplicates (P7)", async () => {
     await useDevice("token-2");
 
     for (let attempt = 0; attempt < 10; attempt += 1) {
       expect((await enrollSelfAction()).status).toBe("done");
     }
 
-    expect(await enrollSelfAction()).toEqual({ status: "error", message: COPY.rateLimited });
+    expect((await enrollSelfAction()).status).toBe("done");
     expect(await getPrisma().tournamentEntry.count()).toBe(1);
     expect(await getPrisma().emailOutbox.count()).toBe(1);
   });

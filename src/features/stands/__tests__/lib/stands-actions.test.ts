@@ -16,7 +16,6 @@ import {
   createVisitor,
 } from "@features/stands/__tests__/lib/server/stands-server-utils";
 import { getPrisma } from "@shared/lib/server/prisma";
-import { consumeAttempt } from "@shared/lib/server/rate-limit";
 import { createSession } from "@shared/lib/server/session";
 import { createVisitorDevice, setVisitorDeviceCookie } from "@shared/lib/server/visitor-device";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
@@ -118,17 +117,18 @@ describe("requestVisitAction", () => {
     });
   });
 
-  it("stops after too many attempts, so the PINs cannot be guessed", async () => {
+  it("keeps answering past 100 wrong PINs: there is no attempt limit per kiosk", async () => {
     await signInAs("staff");
 
-    for (let attempt = 0; attempt < 100; attempt += 1) {
-      await consumeAttempt(`kiosk:${accountIds.staff}`, { limit: 100, windowMs: 5 * 60 * 1000 });
+    for (let attempt = 0; attempt < 101; attempt += 1) {
+      await requestVisitAction(null, createForm({ pin: "99999" }));
     }
 
-    expect(await requestVisitAction(null, createForm({ pin: PIN }))).toEqual({
+    expect(await requestVisitAction(null, createForm({ pin: "99999" }))).toEqual({
       status: "error",
-      message: ERRORS.tooManyAttempts,
+      message: ERRORS.unknownPin,
     });
+    expect(await requestVisitAction(null, createForm({ pin: PIN }))).toMatchObject({ status: "waiting" });
   });
 
   it("sends an account that is not from a stand to /login", async () => {
@@ -303,17 +303,20 @@ describe("answerVisitAction", () => {
     });
   });
 
-  it("stops after too many attempts", async () => {
-    await startVisit();
+  it("keeps answering past 20 attempts: there is no survey limit", async () => {
+    // Valid ratings without a pending visit used to spend the old 20-per-5-minutes quota.
     await signInAsVisitor();
 
     for (let attempt = 0; attempt < 20; attempt += 1) {
-      await consumeAttempt(`survey:${visitorId}`, { limit: 20, windowMs: 5 * 60 * 1000 });
+      await answerVisitAction(null, createForm(RATINGS));
     }
 
+    await startVisit();
+    await signInAsVisitor();
+
     expect(await answerVisitAction(null, createForm(RATINGS))).toEqual({
-      status: "error",
-      message: ERRORS.tooManyAttempts,
+      status: "done",
+      message: STANDS_COPY.passportSurvey.thanks,
     });
   });
 });

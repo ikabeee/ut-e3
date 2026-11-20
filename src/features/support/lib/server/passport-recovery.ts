@@ -6,7 +6,6 @@ import type { Prisma } from "@generated/prisma/client";
 import { maskEmail } from "@shared/lib/mask-email";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { getPrisma } from "@shared/lib/server/prisma";
-import { consumeAttempt, type RateLimitRule } from "@shared/lib/server/rate-limit";
 import { createVisitorDevice } from "@shared/lib/server/visitor-device";
 
 /**
@@ -27,13 +26,7 @@ export type SearchResult = { status: "found"; candidates: PassportCandidate[] } 
 
 export type RecoveryResult =
   | { status: "recovered"; fullName: string; gamertag: string; registeredAt: Date; claimPath: string }
-  | { status: "notFound" }
-  | { status: "visitorLimit" };
-
-// A desk serves one person at a time; the limit stops an agent (or a stolen session) from trying names in bulk.
-export const AGENT_RULE: RateLimitRule = { limit: 30, windowMs: 10 * 60 * 1000 };
-
-export const VISITOR_RULE: RateLimitRule = { limit: 3, windowMs: 60 * 60 * 1000 };
+  | { status: "notFound" };
 
 /** The most passports a search lists: a name shared by more people than this needs the email or the gamertag. */
 export const CANDIDATE_LIMIT = 10;
@@ -77,7 +70,7 @@ export async function searchPassports(agentId: string, query: string): Promise<S
  * Issues a new device for the chosen visitor; the previous device loses access because a visitor has a single one
  * (RF-18 and RF-70). Every outcome is audited in the transaction of the change.
  */
-export async function recoverPassport(agentId: string, visitorId: string, now: Date): Promise<RecoveryResult> {
+export async function recoverPassport(agentId: string, visitorId: string): Promise<RecoveryResult> {
   const visitor = await getPrisma().visitor.findUnique({
     where: { id: visitorId },
     select: { id: true, fullName: true, gamertag: true, createdAt: true },
@@ -87,12 +80,6 @@ export async function recoverPassport(agentId: string, visitorId: string, now: D
     await auditNotFound(agentId, visitorId);
 
     return { status: "notFound" };
-  }
-
-  if (!(await consumeAttempt(`recovery-visitor:${visitor.id}`, VISITOR_RULE, now))) {
-    await getPrisma().$transaction((transaction) => auditLimit(transaction, agentId, visitor));
-
-    return { status: "visitorLimit" };
   }
 
   return getPrisma().$transaction((transaction) => replaceDevice(transaction, agentId, visitor));
@@ -159,16 +146,6 @@ async function replaceDevice(
     registeredAt: visitor.createdAt,
     claimPath: getClaimPath(token),
   };
-}
-
-async function auditLimit(transaction: Prisma.TransactionClient, agentId: string, visitor: MatchedVisitor) {
-  await recordAudit(transaction, {
-    actorId: agentId,
-    action: "passport_recovery_limited",
-    entityType: "visitor",
-    entityId: visitor.id,
-    detail: { gamertag: visitor.gamertag },
-  });
 }
 
 // No visitor exists to point at, so the entry names what was typed, unless it is an email or a name with spaces: those

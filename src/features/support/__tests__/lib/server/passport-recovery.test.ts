@@ -1,13 +1,7 @@
 /**
  * @jest-environment node
  */
-import {
-  AGENT_RULE,
-  CANDIDATE_LIMIT,
-  VISITOR_RULE,
-  recoverPassport,
-  searchPassports,
-} from "@features/support/lib/server/passport-recovery";
+import { CANDIDATE_LIMIT, recoverPassport, searchPassports } from "@features/support/lib/server/passport-recovery";
 import { clearTables, createAccount, createVisitor } from "@features/support/__tests__/lib/server/support-server-utils";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createVisitorDevice, isActiveDeviceToken } from "@shared/lib/server/visitor-device";
@@ -131,7 +125,7 @@ describe("searchPassports", () => {
 
 describe("recoverPassport", () => {
   it("issues a link for the chosen visitor and stores only the hash of its token", async () => {
-    const result = await recoverPassport(agentId, visitorId, NOW);
+    const result = await recoverPassport(agentId, visitorId);
 
     expect(result).toMatchObject({ status: "recovered", fullName: "Ana Pérez López", gamertag: "Neo_01" });
 
@@ -148,7 +142,7 @@ describe("recoverPassport", () => {
   it("replaces the previous device, which loses access", async () => {
     const previousToken = await getPrisma().$transaction((transaction) => createVisitorDevice(transaction, visitorId));
 
-    const result = await recoverPassport(agentId, visitorId, NOW);
+    const result = await recoverPassport(agentId, visitorId);
 
     expect(result.status).toBe("recovered");
     expect(await isActiveDeviceToken(previousToken)).toBe(false);
@@ -156,7 +150,7 @@ describe("recoverPassport", () => {
   });
 
   it("audits the recovery with the agent and the visitor", async () => {
-    await recoverPassport(agentId, visitorId, NOW);
+    await recoverPassport(agentId, visitorId);
 
     const entries = await getPrisma().auditLog.findMany({ where: { actorId: agentId } });
 
@@ -171,7 +165,7 @@ describe("recoverPassport", () => {
   });
 
   it("answers not found for an id that does not exist, issues nothing and audits it", async () => {
-    expect(await recoverPassport(agentId, "no-existe", NOW)).toEqual({ status: "notFound" });
+    expect(await recoverPassport(agentId, "no-existe")).toEqual({ status: "notFound" });
     expect(await getPrisma().visitorDevice.count()).toBe(0);
     expect(
       await getPrisma().auditLog.findMany({
@@ -181,30 +175,9 @@ describe("recoverPassport", () => {
     ).toEqual([{ action: "passport_recovery_failed", actorId: agentId, entityType: "visitor_lookup" }]);
   });
 
-  it("allows 3 recoveries of the same visitor per hour and refuses the 4th, auditing it", async () => {
-    for (let attempt = 0; attempt < VISITOR_RULE.limit; attempt += 1) {
-      expect((await recoverPassport(agentId, visitorId, NOW)).status).toBe("recovered");
+  it("recovers the same visitor more than 3 times in an hour: there is no limit per visitor", async () => {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      expect((await recoverPassport(agentId, visitorId)).status).toBe("recovered");
     }
-
-    expect(await recoverPassport(agentId, visitorId, NOW)).toEqual({ status: "visitorLimit" });
-    expect(await getPrisma().auditLog.count({ where: { actorId: agentId, action: "passport_recovery_limited" } })).toBe(
-      1,
-    );
-  });
-
-  it("counts the visitors apart and starts again in the next hour", async () => {
-    const other = await createVisitor("Trin_02", "Luis Gómez", "54321");
-
-    for (let attempt = 0; attempt < VISITOR_RULE.limit; attempt += 1) await recoverPassport(agentId, visitorId, NOW);
-
-    const otherResult = await recoverPassport(agentId, other.id, NOW);
-    const nextHour = await recoverPassport(agentId, visitorId, new Date(NOW.getTime() + VISITOR_RULE.windowMs));
-
-    expect(otherResult.status).toBe("recovered");
-    expect(nextHour.status).toBe("recovered");
-  });
-
-  it("keeps the agent rule at 30 searches or recoveries every 10 minutes", () => {
-    expect(AGENT_RULE).toEqual({ limit: 30, windowMs: 10 * 60 * 1000 });
   });
 });

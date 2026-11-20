@@ -4,7 +4,6 @@
 import type * as NextCache from "next/cache";
 import type * as NextServer from "next/server";
 import { registerVisitorAtDeskAction } from "@features/support/lib/support-actions";
-import { REGISTRATION_AGENT_RULE } from "@features/support/lib/server/desk-registration";
 import { SUPPORT_COPY } from "@features/support/lib/support-copy";
 import {
   clearTables,
@@ -14,7 +13,6 @@ import {
 } from "@features/support/__tests__/lib/server/support-server-utils";
 import { hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
-import { consumeAttempt } from "@shared/lib/server/rate-limit";
 import { createSession } from "@shared/lib/server/session";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
@@ -151,33 +149,28 @@ describe("registerVisitorAtDeskAction", () => {
     await expect(getPrisma().visitor.count()).resolves.toBe(1);
   });
 
-  it("names a taken gamertag and gives the attempt back", async () => {
+  it("names a taken gamertag", async () => {
     await createSession(accountIds.help_desk);
     await registerVisitorAtDeskAction(null, createForm());
 
     const state = await registerVisitorAtDeskAction(null, createForm({ email: "otro@example.com" }));
 
     expect(state).toMatchObject({ status: "error", fieldErrors: { gamertag: ERRORS.gamertagTaken } });
-
-    const row = await getPrisma().rateLimit.findFirstOrThrow({
-      where: { key: `desk-registration:${accountIds.help_desk}` },
-    });
-
-    expect(row.count).toBe(1);
   });
 
-  it("stops an agent after the hourly limit", async () => {
+  it("registers past 30 passports in an hour: there is no limit per agent", async () => {
     await createSession(accountIds.help_desk);
 
-    for (let attempt = 0; attempt < REGISTRATION_AGENT_RULE.limit; attempt += 1) {
-      await consumeAttempt(`desk-registration:${accountIds.help_desk}`, REGISTRATION_AGENT_RULE);
+    for (let index = 0; index < 31; index += 1) {
+      const state = await registerVisitorAtDeskAction(
+        null,
+        createForm({ gamertag: `Desk_${index}`, email: `desk${index}@example.com` }),
+      );
+
+      expect(state.status).toBe("registered");
     }
 
-    await expect(registerVisitorAtDeskAction(null, createForm())).resolves.toEqual({
-      status: "error",
-      message: ERRORS.agentLimit,
-    });
-    await expect(getPrisma().visitor.count()).resolves.toBe(0);
+    await expect(getPrisma().visitor.count()).resolves.toBe(31);
   });
 
   it("does not register before the registration opens", async () => {

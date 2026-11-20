@@ -333,11 +333,10 @@ El proxy termina TLS y pasa todo a `127.0.0.1:3000` (o tu `APP_PORT`). Cuatro co
 - **Compresión en el proxy.** La app no comprime sus respuestas (`compress: false` en `next.config.ts`) para que Node
   no gaste CPU en eso durante la llegada del público; los dos bloques de abajo comprimen (`gzip` en Nginx y `encode` en
   Caddy). Sin eso, cada visitante baja el JS y el CSS sin comprimir (unas 4 veces más).
-- **`X-Forwarded-For` con la dirección que vio el proxy al final.** El límite de inicio de sesión (RNF-10, por correo
-  y dirección) toma la **última** dirección del encabezado, porque las anteriores las escribe el cliente. Los dos
-  bloques de abajo ya lo hacen (Nginx con `$proxy_add_x_forwarded_for` y Caddy por defecto). Si pones otro proxy o una
-  CDN delante de este, esa última dirección sería la del proxy y todos compartirían el límite. El registro de
-  pasaportes no tiene límite por dirección: en la sede todos los teléfonos salen por la misma IP del Wi-Fi.
+- **`X-Forwarded-For` con la dirección que vio el proxy al final.** La app ya no limita solicitudes por dirección ni
+  por tiempo (inicio de sesión, registro, recuperación, kiosco): en la sede todos los teléfonos salen por la misma IP
+  del Wi-Fi. Los dos bloques de abajo escriben la dirección correcta (Nginx con `$proxy_add_x_forwarded_for` y Caddy
+  por defecto) para la bitácora.
 
 ### Nginx
 
@@ -489,9 +488,8 @@ Cada acción queda en la bitácora de auditoría (`account.*`) y ninguna guarda 
   sysadmin activo (un trigger de la base lo garantiza aunque dos lo intenten a la vez; el error es `last_sysadmin`): si perdiste el acceso de todos, el remedio es `SYSADMIN_EMAIL` en el seed o la consola SQL.
 - **Reactivar** devuelve la cuenta a `invited` con una invitación nueva de 72 horas (se borra su contraseña) y respeta
   los límites: un administrador activo por stand, 3 staff por stand y un staff por mesa del KOF.
-- **Enviar restablecimiento de contraseña** manda el enlace de 1 hora de "Olvidé mi contraseña" a una cuenta activa. No se
-  salta el límite: cuenta 3 envíos por hora y por cuenta en un contador propio (`admin-password-reset:<id>`), que no gasta
-  ni depende del límite de quien lo pide solo.
+- **Enviar restablecimiento de contraseña** manda el enlace de 1 hora de "Olvidé mi contraseña" a una cuenta activa. Sin
+  límite de envíos.
 - **Cerrar sesiones** borra todas las sesiones de la cuenta. **Limpiar 2FA pendiente** borra sus códigos de acceso
   pendientes; la persona vuelve a empezar desde la contraseña.
 - **Invitar** acepta cualquier rol. Las cuentas de stand llevan el stand; el staff de KOF, su mesa.

@@ -3,7 +3,6 @@
  */
 import { recoverPassportAction, searchPassportsAction } from "@features/support/lib/support-actions";
 import { SUPPORT_COPY } from "@features/support/lib/support-copy";
-import { AGENT_RULE } from "@features/support/lib/server/passport-recovery";
 import {
   clearTables,
   createAccount,
@@ -12,7 +11,6 @@ import {
   setClockToTheEvent,
 } from "@features/support/__tests__/lib/server/support-server-utils";
 import { getPrisma } from "@shared/lib/server/prisma";
-import { consumeAttempt } from "@shared/lib/server/rate-limit";
 import { createSession } from "@shared/lib/server/session";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
@@ -98,7 +96,6 @@ describe("searchPassportsAction", () => {
     await expect(searchPassportsAction(null, createForm({ query: "Neo_01" }))).rejects.toMatchObject({
       digest: expect.stringContaining(`;${home};`),
     });
-    expect(await getPrisma().rateLimit.count()).toBe(0);
   });
 
   it("asks for something to search before touching the database", async () => {
@@ -123,17 +120,14 @@ describe("searchPassportsAction", () => {
     expect(states).toEqual(Array(3).fill({ status: "error", message: ERRORS.notFound }));
   });
 
-  it("stops an agent after 30 attempts in 10 minutes", async () => {
+  it("keeps searching past 30 attempts in 10 minutes: there is no limit per agent", async () => {
     await createSession(accountIds.help_desk);
 
-    for (let attempt = 0; attempt < AGENT_RULE.limit; attempt += 1) {
-      await consumeAttempt(`recovery-agent:${accountIds.help_desk}`, AGENT_RULE);
+    for (let attempt = 0; attempt < 31; attempt += 1) {
+      await searchPassportsAction(null, createForm({ query: "Nadie_9" }));
     }
 
-    expect(await searchPassportsAction(null, createForm({ query: "Neo_01" }))).toEqual({
-      status: "error",
-      message: ERRORS.agentLimit,
-    });
+    expect(await searchPassportsAction(null, createForm({ query: "Neo_01" }))).toMatchObject({ status: "found" });
   });
 });
 
@@ -187,17 +181,14 @@ describe("recoverPassportAction", () => {
     expect(await getPrisma().visitorDevice.count()).toBe(0);
   });
 
-  it("stops the 4th recovery of the same visitor in an hour with a clear message", async () => {
+  it("recovers the same visitor a 4th time in an hour: there is no limit per visitor", async () => {
     await createSession(accountIds.help_desk);
 
     for (let attempt = 0; attempt < 3; attempt += 1) {
       await recoverPassportAction(null, createForm({ visitorId }));
     }
 
-    expect(await recoverPassportAction(null, createForm({ visitorId }))).toEqual({
-      status: "error",
-      message: ERRORS.visitorLimit,
-    });
+    expect(await recoverPassportAction(null, createForm({ visitorId }))).toMatchObject({ status: "recovered" });
   });
 });
 

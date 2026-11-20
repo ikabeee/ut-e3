@@ -14,7 +14,6 @@ import {
   inviteAccountAction,
   type ManagementActionState,
 } from "@features/accounts/lib/management-actions";
-import { PASSWORD_RESET_RULE } from "@features/accounts/lib/server/password-reset";
 import { createCookieJar, stubCookies } from "@shared/__tests__/lib/server/cookie-jar";
 import { stubAfter } from "@shared/__tests__/lib/server/headers-stub";
 import { expectRefused, otherRoleCases, signInAs } from "@shared/__tests__/lib/server/sysadmin-only";
@@ -77,7 +76,7 @@ describe("sendPasswordResetAction", () => {
     expect(refresh).toHaveBeenCalledTimes(1);
   });
 
-  it("explains an invited account, a missing account and the hourly limit", async () => {
+  it("explains an invited account and a missing account; the reset can be sent past the old hourly limit", async () => {
     const invited = await signInAsSysadminAndCreate("help_desk", "invited");
 
     expect(await sendPasswordResetAction(null, form(invited))).toEqual(failure(ERRORS.wrongState));
@@ -86,11 +85,9 @@ describe("sendPasswordResetAction", () => {
 
     const active = await createAccount("raffle_admin");
 
-    for (let attempt = 0; attempt < PASSWORD_RESET_RULE.limit; attempt += 1) {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
       expect((await sendPasswordResetAction(null, form(active))).status).toBe("done");
     }
-
-    expect(await sendPasswordResetAction(null, form(active))).toEqual(failure(ERRORS.rateLimited));
   });
 });
 

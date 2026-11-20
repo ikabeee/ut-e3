@@ -8,21 +8,15 @@ import { findSignInAccount } from "@features/accounts/lib/server/account-queries
 import { startLoginChallenge, type ChallengeAccount } from "@features/accounts/lib/server/login-challenge";
 import { setLoginChallengeCookie } from "@features/accounts/lib/server/login-challenge-cookie";
 import { readFormText, type ServerActionForm } from "@shared/lib/form-data";
-import { resolveClientIp } from "@shared/lib/server/client-ip";
 import { deliverQueuedEmail } from "@shared/lib/server/email-delivery";
 import { hashPassword, verifyPassword } from "@shared/lib/server/password";
-import { clearAttempts, consumeAttempt } from "@shared/lib/server/rate-limit";
 import { deleteSession } from "@shared/lib/server/session";
 
 export interface SignInState {
   error: string;
 }
 
-const SIGN_IN_LIMIT = { limit: 3, windowMs: 60 * 60 * 1000 };
-
 const { errors } = ACCOUNTS_COPY.signIn;
-
-const CODE_ERRORS = ACCOUNTS_COPY.verifyCode.errors;
 
 // The password alone opens no session: it starts the second step, the 6-digit code that is sent by email (S2).
 // Server Actions are public endpoints: the form fields are untrusted until checked here.
@@ -32,20 +26,11 @@ export async function signIn(_previous: SignInState | null, form: ServerActionFo
 
   if (!email || !password) return { error: errors.missingFields };
 
-  // Per address too: a prankster typing wrong passwords locks only their own device, not the staff member (RNF-10).
-  const attemptKey = `login:${email}:${await resolveClientIp()}`;
-
-  if (!(await consumeAttempt(attemptKey, SIGN_IN_LIMIT))) return { error: errors.tooManyAttempts };
-
   const account = await authenticate(email, password);
 
   if (!account) return { error: errors.invalidCredentials };
 
-  await clearAttempts(attemptKey);
-
   const challenge = await startLoginChallenge(account, new Date());
-
-  if (challenge.status === "rateLimited") return { error: CODE_ERRORS.tooManyCodes };
 
   await setLoginChallengeCookie(challenge.token);
   after(() => deliverQueuedEmail(challenge.emailId));

@@ -61,21 +61,13 @@ describe("requestEmailRecovery", () => {
     expect(outbox[0]).toMatchObject({ kind: "recovery_link", referenceId: visitorId });
   });
 
-  it("refuses the fourth request of the same email in an hour, even for an email without a passport (UT-VI-10)", async () => {
-    for (let request = 0; request < 3; request++) {
+  it("queues a fourth request of the same email in an hour: there is no limit (UT-VI-10)", async () => {
+    for (let request = 0; request < 4; request++) {
       expect(await requestEmailRecovery("neo@example.com", NOW)).not.toBeNull();
     }
 
-    expect(await requestEmailRecovery("neo@example.com", NOW)).toBeNull();
-    expect(await getPrisma().emailOutbox.count()).toBe(3);
-    expect(await getPrisma().rateLimit.findFirst({ where: { key: "recovery-email:neo@example.com" } })).toMatchObject({
-      count: 4,
-    });
-
-    await requestEmailRecovery("nadie@example.com", NOW);
-    expect(await getPrisma().rateLimit.findFirst({ where: { key: "recovery-email:nadie@example.com" } })).toMatchObject(
-      { count: 1 },
-    );
+    expect(await getPrisma().emailOutbox.count()).toBe(4);
+    expect(await requestEmailRecovery("nadie@example.com", NOW)).toBeNull();
   });
 
   it("sends only the one-use link, never the PIN, gamertag or name (UT-VI-15, RF-71)", async () => {

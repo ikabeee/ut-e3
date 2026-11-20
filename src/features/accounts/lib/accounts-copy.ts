@@ -10,7 +10,6 @@ export const ACCOUNTS_COPY = {
     errors: {
       missingFields: "Escribe tu correo y tu contraseña.",
       invalidCredentials: "Correo o contraseña incorrectos",
-      tooManyAttempts: "Demasiados intentos. Intenta de nuevo más tarde.",
     },
   },
   verifyCode: {
@@ -26,7 +25,6 @@ export const ACCOUNTS_COPY = {
     errors: {
       invalidFormat: "Escribe los 6 dígitos del código.",
       invalidCode: "El código es incorrecto o venció. Pide uno nuevo.",
-      tooManyCodes: "Pediste demasiados códigos. Intenta de nuevo más tarde.",
       expiredChallenge: "Este intento de inicio de sesión venció. Vuelve a iniciar sesión.",
     },
   },
@@ -299,7 +297,6 @@ Si no esperabas este correo, ignóralo.`,
       secondaryRoleInvalid: "Elige un rol secundario de la lista.",
       notStandAdmin: "Solo un administrador de stand puede tener un rol secundario.",
       secondaryRoleUnchanged: "La cuenta ya tiene ese rol secundario.",
-      rateLimited: "Ya se enviaron 3 enlaces en la última hora a esta cuenta. Intenta más tarde.",
       notFound: "No se encontró la cuenta.",
       wrongState: "La cuenta no está en un estado que permita esto.",
     },
