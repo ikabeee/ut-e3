@@ -6,6 +6,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Corregido
+
+- El bracket de KOF ya se genera con menos de 32 jugadores (desde 8): los combates de primera ronda sin jugadores se
+  resuelven solos y los jugadores avanzan por byes hasta el campeón.
+
 ## [1.7.0] - 2026-11-20
 
 ### Agregado

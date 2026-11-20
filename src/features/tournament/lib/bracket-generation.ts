@@ -85,26 +85,47 @@ function getFirstRound(matches: readonly Match[], board: BoardNumber): Match[] {
 }
 
 function fillBoard(firstRound: readonly Match[], boardPlayers: readonly Player[]) {
-  const byeMatches = getByeMatchIndexes(firstRound.length, PLAYERS_PER_BOARD - boardPlayers.length);
+  const sizes = getMatchSizes(firstRound.length, boardPlayers.length);
   let next = 0;
 
   firstRound.forEach((match, index) => {
-    const count = byeMatches.has(index) ? 1 : 2;
+    const count = sizes[index];
 
     assignPlayers(match, boardPlayers.slice(next, next + count), index % 2 === 0 ? 0 : 1);
     next += count;
   });
 }
 
-// Spaced out over the round: a bye never shares a match with another bye (RF-60).
-function getByeMatchIndexes(matchCount: number, byes: number): Set<number> {
-  return new Set(Array.from({ length: byes }, (_, index) => Math.floor((index * matchCount) / byes)));
+// How many players each first round match gets (0, 1 or 2). With 8 or more players on the board no match is empty and a
+// bye never shares a match with another bye (RF-60); with fewer, the matches that get a player are spaced over the
+// round and the rest start empty, which the engine settles on its own.
+function getMatchSizes(matchCount: number, players: number): number[] {
+  if (players >= matchCount) {
+    const byeMatches = getSpacedIndexes(matchCount, matchCount * 2 - players);
+
+    return Array.from({ length: matchCount }, (_, index) => (byeMatches.has(index) ? 1 : 2));
+  }
+
+  const playerMatches = getSpacedIndexes(matchCount, players);
+
+  return Array.from({ length: matchCount }, (_, index) => (playerMatches.has(index) ? 1 : 0));
+}
+
+function getSpacedIndexes(matchCount: number, count: number): Set<number> {
+  return new Set(Array.from({ length: count }, (_, index) => Math.floor((index * matchCount) / count)));
 }
 
 function assignPlayers(match: Match, group: readonly Player[], byeSlot: SlotIndex) {
   if (group.length === 2) {
     setSlotPlayer(match, 0, group[0].id);
     setSlotPlayer(match, 1, group[1].id);
+
+    return;
+  }
+
+  if (group.length === 0) {
+    setSlotPlayer(match, 0, null);
+    setSlotPlayer(match, 1, null);
 
     return;
   }

@@ -26,8 +26,11 @@ export const MAX_ENTRANTS = BOARD_NUMBERS.length * PLAYERS_PER_BOARD;
 /** The pre-registration list leaves at least 14 of the 64 places for the event day (RF-58). */
 export const PRE_LIST_LIMIT = 50;
 
-/** Below this a first round match would be a bye against a bye, which RF-60 forbids. */
-export const MIN_ENTRANTS = MAX_ENTRANTS / 2;
+/**
+ * Fewer than 8 would leave a board without players. From 32 down some first round matches have nobody in them: they
+ * settle as "empty" and the next round gets a bye, so a player only ever waits for the next real opponent.
+ */
+export const MIN_ENTRANTS = 8;
 
 /** Freezing, disqualifying and reverting belong to the KOF administrator (RF-63, RF-64). */
 export const ADMIN_ONLY_COMMANDS: readonly TournamentCommandType[] = [

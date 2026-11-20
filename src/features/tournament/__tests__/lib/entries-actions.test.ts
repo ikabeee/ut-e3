@@ -139,12 +139,12 @@ describe("generateBracketAction", () => {
   });
 
   it("explains that it needs enough players and stores nothing", async () => {
-    await insertManyCheckedIn(31);
+    await insertManyCheckedIn(7);
     await signInAs("admin");
 
     expect(await generateBracketAction()).toEqual({
       status: "error",
-      message: TOURNAMENT_COPY.errors.invalidEntrantCount(32, 64),
+      message: TOURNAMENT_COPY.errors.invalidEntrantCount(8, 64),
     });
     expect(await getPrisma().kofTournament.count()).toBe(0);
   });

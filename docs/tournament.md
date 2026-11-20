@@ -9,8 +9,10 @@ Captura y seguimiento del torneo de *The King of Fighters* en `/admin/kof` (SRS 
 - El bracket se genera una sola vez, a la hora configurada en `event_settings.kofBracketGeneratesAt` (12:55 del día del
   evento), con los jugadores que hicieron check-in. El barajeo usa Fisher-Yates con `crypto.randomInt` y su resultado
   queda en la bitácora (RF-59).
-- Con menos de 64 jugadores los lugares vacíos son byes, repartidos parejo entre los tableros, y un bye nunca se
-  enfrenta a otro (RF-60). Por eso el bracket pide entre 32 y 64 jugadores.
+- Con menos de 64 jugadores los lugares vacíos son byes, repartidos parejo entre los tableros. Con 32 o más un bye nunca
+  se enfrenta a otro (RF-60). Con menos de 32 algunos combates de primera ronda quedan sin jugadores: se cierran solos
+  como `empty` y el siguiente combate recibe un bye, así que ningún jugador espera a un rival que no existe. El bracket
+  pide entre 8 y 64 jugadores.
 
 ## Quién captura qué
 
@@ -82,7 +84,7 @@ de `event_settings`; ninguna está escrita en el código.
 - El cupo es de 64 inscripciones que no sean "No se presentó". Los lugares de la lista previa sin check-in siguen
   reservados hasta las 12:45. La base lo exige con triggers, por si dos solicitudes llegan a la vez.
 - "Generar bracket" cierra el check-in si ya toca y usa solo a los jugadores con check-in. Se rechaza antes de las 12:55,
-  una segunda vez y con menos de 32 o más de 64 jugadores.
+  una segunda vez y con menos de 8 o más de 64 jugadores.
 - El visitante se inscribe solo desde su pasaporte (`/passport`, botón "Inscribirme al torneo"; S9 de `odd/tasks/sysadmin-console.md`).
   La sesión es la misma del pasaporte (cookie de dispositivo) y el visitante nunca viene del formulario.
   `addSelfEntry()` (`entries-mutations.ts`) reutiliza `insertEntry()`: mismo cupo (50 de lista previa y 64), mismo
