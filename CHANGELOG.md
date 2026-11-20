@@ -6,6 +6,10 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Cambiado
+
+- Todos los inscritos al torneo de KOF conservan su boleto de rifa, también los que no hicieron check-in; los boletos que se habían anulado por no presentarse vuelven a la rifa.
+
 ## [1.7.5] - 2026-11-20
 
 ### Agregado

@@ -79,7 +79,7 @@ describe("unexcludeVisitor", () => {
     expect(await ticketsOf(visitor.id)).toEqual([expect.objectContaining({ milestone: 0, status: "active" })]);
   });
 
-  it("keeps voided the KOF ticket of a visitor that did not show up", async () => {
+  it("brings back the KOF ticket of a visitor that did not show up", async () => {
     const visitor = await newVisitor("KofNoShow");
 
     await getPrisma().tournamentEntry.create({ data: { visitorId: visitor.id, channel: "pre", status: "no_show" } });
@@ -90,8 +90,8 @@ describe("unexcludeVisitor", () => {
 
     const result = await unexcludeVisitor({ actorId: sysadminId, targetId: visitor.id, now: BEFORE_RAFFLE });
 
-    expect(result).toEqual({ status: "unexcluded", reactivatedTickets: 0, ticketsFrozen: false });
-    expect(await ticketsOf(visitor.id)).toEqual([expect.objectContaining({ milestone: 0, status: "voided" })]);
+    expect(result).toEqual({ status: "unexcluded", reactivatedTickets: 1, ticketsFrozen: false });
+    expect(await ticketsOf(visitor.id)).toEqual([expect.objectContaining({ milestone: 0, status: "active" })]);
   });
 
   it("clears the exclusion and brings back the tickets it voided, before the raffle", async () => {

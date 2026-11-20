@@ -305,7 +305,7 @@ describe("closeCheckInIfDue", () => {
     expect(audit).toBeGreaterThan(0);
   });
 
-  it("voids the KOF ticket of the players that did not show up and keeps the rest active", async () => {
+  it("keeps the KOF ticket active for the players that did not show up", async () => {
     await addEntry(actorId, "Jugador1", REGISTRATION_OPENS);
     await addEntry(actorId, "Jugador2", REGISTRATION_OPENS);
     await checkInEntry(actorId, "00002", AT_12_00);
@@ -318,7 +318,7 @@ describe("closeCheckInIfDue", () => {
     });
 
     expect(tickets).toEqual([
-      { visitorId: visitors[0].id, status: "voided" },
+      { visitorId: visitors[0].id, status: "active" },
       { visitorId: visitors[1].id, status: "active" },
     ]);
   });

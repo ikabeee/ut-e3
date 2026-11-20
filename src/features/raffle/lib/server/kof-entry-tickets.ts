@@ -20,25 +20,17 @@ export async function grantKofEntryTicket(transaction: Prisma.TransactionClient,
   });
 }
 
-/** Runs in the transaction that turns entries into "No se presentó": their KOF ticket leaves the raffle. */
-export async function voidKofEntryTickets(transaction: Prisma.TransactionClient, visitorIds: string[]): Promise<void> {
-  await transaction.raffleTicket.updateMany({
-    where: { visitorId: { in: visitorIds }, milestone: KOF_ENTRY_MILESTONE, status: "active" },
-    data: { status: "voided" },
-  });
-}
-
 /**
- * After an exclusion is lifted: the KOF ticket comes back while the visitor is still entered and did show up (or the
- * check-in has not closed). Returns how many tickets it reactivated (0 or 1).
+ * After an exclusion is lifted: the KOF ticket comes back while the visitor is still entered, whether or not they
+ * checked in. Returns how many tickets it reactivated (0 or 1).
  */
 export async function reactivateKofEntryTicket(
   transaction: Prisma.TransactionClient,
   visitorId: string,
 ): Promise<number> {
-  const entry = await transaction.tournamentEntry.findUnique({ where: { visitorId }, select: { status: true } });
+  const entry = await transaction.tournamentEntry.findUnique({ where: { visitorId }, select: { id: true } });
 
-  if (!entry || entry.status === "no_show") return 0;
+  if (!entry) return 0;
 
   const { count } = await transaction.raffleTicket.updateMany({
     where: { visitorId, milestone: KOF_ENTRY_MILESTONE, status: "voided" },

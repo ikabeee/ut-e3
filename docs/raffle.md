@@ -20,8 +20,10 @@ La rifa final del evento (SRS v2, RF-49 a RF-56 y RF-25). Vive en la feature `sr
 - Al salir un boleto, **todos** los boletos de ese visitante pasan a `drawn`, gane o no (RF-52, RN-05).
 - Inscribirse al torneo de KOF da un boleto ("Boleto del torneo KOF"), guardado con `milestone = 0`
   (`KOF_ENTRY_MILESTONE` en `raffle/lib/kof-entry-ticket.ts`). Lo crea la misma transacción de la inscripción, sea
-  pre-inscripción o en sitio; se anula cuando la inscripción queda como "No se presentó" y vuelve al quitar una exclusión
-  solo si sigue inscrito. La migración `*_kof_entry_tickets` se lo dio a los que ya estaban inscritos.
+  pre-inscripción o en sitio. Todos los inscritos lo conservan, también los que quedan como "No se presentó"; solo una
+  exclusión lo anula, y vuelve al quitarla si el visitante sigue inscrito. La migración `*_kof_entry_tickets` se lo dio
+  a los que ya estaban inscritos y `*_kof_no_show_tickets` reactivó los que se habían anulado por no presentarse (salvo
+  excluidos y visitantes ya sorteados).
 - El sysadmin gira, decide, registra premios y cierra igual que un animador (`requireRaffleAdmin()`); el giro, el premio y la
   bitácora llevan su cuenta, y la BD no distingue el rol del autor. Su giro pendiente bloquea a los animadores y al revés.
 - Un solo giro `pending` a la vez: lo impide un índice único parcial de la BD (RF-51). Si otro animador intenta girar,
