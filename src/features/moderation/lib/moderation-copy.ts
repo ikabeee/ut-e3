@@ -1,3 +1,5 @@
+import { KOF_ENTRY_MILESTONE } from "@features/raffle/lib/kof-entry-ticket";
+
 export const MODERATION_COPY = {
   alerts: {
     heading: "Alertas de posible fraude",
@@ -59,7 +61,8 @@ export const MODERATION_COPY = {
     noCheckIns: "Sin visitas.",
     ticketsHeading: "Boletos",
     noTickets: "Sin boletos.",
-    ticket: (number: number, milestone: number) => `Boleto #${number} (hito ${milestone})`,
+    ticket: (number: number, milestone: number) =>
+      milestone === KOF_ENTRY_MILESTONE ? `Boleto #${number} del torneo KOF` : `Boleto #${number} (hito ${milestone})`,
     ticketStatus: (status: string) => {
       if (status === "active") return "activo";
 

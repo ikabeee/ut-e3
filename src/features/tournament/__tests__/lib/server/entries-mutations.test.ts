@@ -8,6 +8,7 @@ import {
   explainInsertFailure,
   generateFromEntries,
 } from "@features/tournament/lib/server/entries-mutations";
+import { KOF_ENTRY_MILESTONE } from "@features/raffle/lib/kof-entry-ticket";
 import { getTournament } from "@features/tournament/lib/server/tournament-queries";
 import { TournamentRuleError } from "@features/tournament/lib/tournament-rule-error";
 import { createEventSettings, createVisitors } from "@features/tournament/__tests__/lib/server/tournament-server-utils";
@@ -71,6 +72,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await getPrisma().kofTournament.deleteMany();
   await getPrisma().tournamentEntry.deleteMany();
+  await getPrisma().raffleTicket.deleteMany();
   await getPrisma().emailOutbox.deleteMany();
 });
 
@@ -168,6 +170,35 @@ describe("addEntry", () => {
     expect(email.text).toBe(
       "¡Hola, Jugador1!\n\nQuedaste inscrito en el torneo de KOF y tu check-in ya está hecho: entras al bracket.\n\nQuédate cerca del área de KOF del Edificio B para cuando llamen tu combate.",
     );
+  });
+
+  it("gives the pre-registered player an active raffle ticket of the KOF", async () => {
+    await addEntry(actorId, "Jugador1", REGISTRATION_OPENS);
+
+    const tickets = await getPrisma().raffleTicket.findMany({
+      select: { visitorId: true, milestone: true, status: true },
+    });
+
+    expect(tickets).toEqual([{ visitorId: visitors[0].id, milestone: KOF_ENTRY_MILESTONE, status: "active" }]);
+  });
+
+  it("gives the player that signs up on site an active raffle ticket of the KOF", async () => {
+    await addEntry(actorId, "Jugador1", AT_12_00);
+
+    const tickets = await getPrisma().raffleTicket.findMany({
+      select: { visitorId: true, milestone: true, status: true },
+    });
+
+    expect(tickets).toEqual([{ visitorId: visitors[0].id, milestone: KOF_ENTRY_MILESTONE, status: "active" }]);
+  });
+
+  it("gives no second ticket and no ticket when the entry is refused", async () => {
+    await addEntry(actorId, "Jugador1", REGISTRATION_OPENS);
+    await addEntry(actorId, "Jugador1", AT_11_59);
+    await addEntry(actorId, "NoExiste", AT_11_59);
+    await addEntry(actorId, "Jugador2", AT_12_46);
+
+    expect(await getPrisma().raffleTicket.count()).toBe(1);
   });
 
   it("queues no email when the entry is refused (S8)", async () => {
@@ -272,6 +303,24 @@ describe("closeCheckInIfDue", () => {
       ["no_show", 5],
     ]);
     expect(audit).toBeGreaterThan(0);
+  });
+
+  it("voids the KOF ticket of the players that did not show up and keeps the rest active", async () => {
+    await addEntry(actorId, "Jugador1", REGISTRATION_OPENS);
+    await addEntry(actorId, "Jugador2", REGISTRATION_OPENS);
+    await checkInEntry(actorId, "00002", AT_12_00);
+
+    await closeCheckInIfDue(actorId, AT_12_45);
+
+    const tickets = await getPrisma().raffleTicket.findMany({
+      orderBy: { number: "asc" },
+      select: { visitorId: true, status: true },
+    });
+
+    expect(tickets).toEqual([
+      { visitorId: visitors[0].id, status: "voided" },
+      { visitorId: visitors[1].id, status: "active" },
+    ]);
   });
 
   it("does nothing the second time and writes no second audit entry", async () => {

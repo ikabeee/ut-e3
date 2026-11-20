@@ -15,9 +15,9 @@ const FEATURE_DEPENDENCIES = {
   sponsors: ["accounts", "games"],
   stands: ["accounts", "games", "pwa", "visitors"],
   support: ["accounts", "tournament", "visitors"],
-  tournament: ["accounts"],
-  visitors: ["accounts", "floor-plan", "games"],
-  moderation: ["accounts", "games", "visitors"],
+  tournament: ["accounts", "raffle"],
+  visitors: ["accounts", "floor-plan", "games", "raffle"],
+  moderation: ["accounts", "games", "raffle", "visitors"],
   admin: [
     "accounts",
     "event-settings",

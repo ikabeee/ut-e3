@@ -1,4 +1,5 @@
 import "server-only";
+import { grantKofEntryTicket, voidKofEntryTickets } from "@features/raffle/lib/server/kof-entry-tickets";
 import { buildEntryEmail } from "@features/tournament/lib/entry-email";
 import { getEntryWindow, type EntrySchedule } from "@features/tournament/lib/entries-rules";
 import { findEntryByPin, getEntrySchedule } from "@features/tournament/lib/server/entries-queries";
@@ -151,6 +152,10 @@ export async function closeCheckInIfDue(actorId: string, now: Date): Promise<num
     });
 
     if (count > 0) {
+      await voidKofEntryTickets(
+        transaction,
+        pending.map((entry) => entry.visitorId),
+      );
       await recordAudit(transaction, {
         actorId,
         action: "kof_entry.close_check_in",
@@ -186,6 +191,8 @@ async function insertEntry(
           registeredById: actorId,
         },
       });
+
+      await grantKofEntryTicket(transaction, entry.visitorId);
 
       await recordAudit(transaction, {
         actorId,

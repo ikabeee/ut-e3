@@ -15,6 +15,7 @@ import {
   ticketsOf,
   visitStands,
 } from "@features/moderation/__tests__/lib/server/moderation-server-utils";
+import { KOF_ENTRY_MILESTONE } from "@features/raffle/lib/kof-entry-ticket";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { signInAs } from "@shared/__tests__/lib/server/sysadmin-only";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
@@ -65,6 +66,34 @@ async function unexcludeAudits(visitorId: string) {
 }
 
 describe("unexcludeVisitor", () => {
+  it("brings back the KOF ticket of a visitor still entered in the tournament, before the raffle", async () => {
+    const visitor = await newVisitor("KofBack");
+
+    await getPrisma().tournamentEntry.create({ data: { visitorId: visitor.id, channel: "pre", status: "registered" } });
+    await getPrisma().raffleTicket.create({ data: { visitorId: visitor.id, milestone: KOF_ENTRY_MILESTONE } });
+    await excludeVisitor({ actorId: sysadminId, targetId: visitor.id, reason: "Sin motivo real", now: BEFORE_RAFFLE });
+
+    const result = await unexcludeVisitor({ actorId: sysadminId, targetId: visitor.id, now: BEFORE_RAFFLE });
+
+    expect(result).toEqual({ status: "unexcluded", reactivatedTickets: 1, ticketsFrozen: false });
+    expect(await ticketsOf(visitor.id)).toEqual([expect.objectContaining({ milestone: 0, status: "active" })]);
+  });
+
+  it("keeps voided the KOF ticket of a visitor that did not show up", async () => {
+    const visitor = await newVisitor("KofNoShow");
+
+    await getPrisma().tournamentEntry.create({ data: { visitorId: visitor.id, channel: "pre", status: "no_show" } });
+    await getPrisma().raffleTicket.create({
+      data: { visitorId: visitor.id, milestone: KOF_ENTRY_MILESTONE, status: "voided" },
+    });
+    await excludeVisitor({ actorId: sysadminId, targetId: visitor.id, reason: "Sin motivo real", now: BEFORE_RAFFLE });
+
+    const result = await unexcludeVisitor({ actorId: sysadminId, targetId: visitor.id, now: BEFORE_RAFFLE });
+
+    expect(result).toEqual({ status: "unexcluded", reactivatedTickets: 0, ticketsFrozen: false });
+    expect(await ticketsOf(visitor.id)).toEqual([expect.objectContaining({ milestone: 0, status: "voided" })]);
+  });
+
   it("clears the exclusion and brings back the tickets it voided, before the raffle", async () => {
     const visitor = await visitorWithNineVisits("Back");
 
