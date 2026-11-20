@@ -242,7 +242,7 @@ export function getRetryDelayMs(attempts: number, random: () => number = Math.ra
 }
 
 export function isTemporaryEmailError(cause: unknown): boolean {
-  if (hasRateLimitResponse(cause)) {
+  if (hasRateLimitResponse(cause) || hasQuotaAnswer(cause)) {
     return true;
   }
 
@@ -257,6 +257,25 @@ export function isTemporaryEmailError(cause: unknown): boolean {
   return true;
 }
 
+/**
+ * Some providers refuse over a quota with a 5xx, for example Google Workspace's `550 5.7.1 Daily SMTP relay limit
+ * exceeded`. The limit lifts by itself, so the email must wait instead of being abandoned. A full recipient mailbox
+ * (enhanced status 5.2.x) is not a provider quota and stays permanent.
+ */
+const QUOTA_ANSWER_PATTERN = /limit exceeded|rate limit|quota|try again later/i;
+
+const RECIPIENT_MAILBOX_STATUS_PATTERN = /\b5\.2\.\d/;
+
+function hasQuotaAnswer(cause: unknown): boolean {
+  if (!hasSmtpResponseCode(cause) || cause.responseCode < 500 || cause.responseCode >= 600) {
+    return false;
+  }
+
+  const answer = [hasResponseText(cause) ? cause.response : "", formatErrorMessage(cause)].join("\n");
+
+  return QUOTA_ANSWER_PATTERN.test(answer) && !RECIPIENT_MAILBOX_STATUS_PATTERN.test(answer);
+}
+
 function isSmtpAuthFailure(responseCode: number): boolean {
   return responseCode === 530 || responseCode === 535;
 }
@@ -269,6 +288,10 @@ function hasRateLimitResponse(cause: unknown): cause is SmtpRateLimitPayload {
     typeof cause.response === "string" &&
     cause.response.includes("4.7.28")
   );
+}
+
+function hasResponseText(cause: SmtpStatusPayload): cause is SmtpStatusPayload & SmtpRateLimitPayload {
+  return "response" in cause && typeof cause.response === "string";
 }
 
 function hasSmtpResponseCode(cause: unknown): cause is SmtpStatusPayload {

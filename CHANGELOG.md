@@ -6,6 +6,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.6.0] - 2026-11-19
+
 ### Agregado
 
 - `npm run db:rebuild-abandoned`: rehace de una vez los correos abandonados del staff (invitaciones y restablecimientos
@@ -21,6 +23,15 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   página.
 - Arte de los juegos: tarjetas, portadas y capturas nuevas para los 16 juegos con material. One Mind y Vaporlock vuelven
   a mostrarse y Identity Dissolution tiene 4 capturas (`npm run db:backfill:images` agrega las filas que faltan).
+
+## [1.5.2] - 2026-11-19
+
+### Corregido
+
+- El correo ya no se abandona cuando el proveedor responde con un límite o cuota como error permanente (por ejemplo el
+  `550 5.7.1 Daily SMTP relay limit exceeded` del relay de Google Workspace): se trata como temporal, la pasada se
+  detiene y el correo se reintenta con la espera de 15 min a 2 h, con su texto intacto. Los demás errores 5xx
+  (usuario inexistente, política) siguen siendo permanentes.
 
 ## [1.5.1] - 2026-11-19
 
