@@ -96,9 +96,16 @@ describe("generateTournament", () => {
     expect(await getPrisma().kofTournament.count()).toBe(1);
   });
 
-  it("rejects fewer than 32 players and stores nothing", async () => {
-    await expect(generateTournament(actorId, createPlayers(31), GENERATES_AT)).rejects.toThrow(TournamentRuleError);
+  it("rejects fewer than 8 players and stores nothing", async () => {
+    await expect(generateTournament(actorId, createPlayers(7), GENERATES_AT)).rejects.toThrow(TournamentRuleError);
     expect(await getPrisma().kofTournament.count()).toBe(0);
+  });
+
+  it("generates the bracket with 31 players, below the old minimum of 32", async () => {
+    const result = await generateTournament(actorId, createPlayers(31), GENERATES_AT);
+
+    expect(result.status).toBe("created");
+    expect(await getPrisma().kofTournament.count()).toBe(1);
   });
 });
 

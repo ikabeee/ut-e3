@@ -7,6 +7,7 @@ import {
   createSeededRandomInt,
   createTestTournament,
   NOW,
+  playUntilFinished,
   range,
 } from "@features/tournament/__tests__/tournament-test-utils";
 
@@ -107,12 +108,87 @@ describe("generateBracket", () => {
     expect(second).toEqual(first);
   });
 
-  it("rejects fewer than 32 or more than 64 players", () => {
-    const message = TOURNAMENT_COPY.errors.invalidEntrantCount(32, 64);
+  it("rejects fewer than 8 or more than 64 players", () => {
+    const message = TOURNAMENT_COPY.errors.invalidEntrantCount(8, 64);
 
-    expect(() => createTestTournament(31)).toThrow(message);
+    expect(() => createTestTournament(7)).toThrow(message);
     expect(() => createTestTournament(65)).toThrow(message);
-    expect(() => createTestTournament(31)).toThrow(TournamentRuleError);
+    expect(() => createTestTournament(7)).toThrow(TournamentRuleError);
+  });
+});
+
+describe("generateBracket with fewer than 32 players", () => {
+  const SIZES = [8, 9, 12, 16, 20, 24, 28, 31];
+
+  it("places every player once in the first round, with at most one player per slot", () => {
+    SIZES.forEach((count) => {
+      const firstRound = createTestTournament(count, count).matches.filter((match) => match.round === 1);
+      const placed = firstRound.flatMap((match) => match.slots.map((slot) => slot.playerId)).filter(Boolean);
+
+      expect(placed).toHaveLength(count);
+      expect(new Set(placed).size).toBe(count);
+    });
+  });
+
+  it("settles the matches without two players on its own, and leaves ready only the ones with two", () => {
+    SIZES.forEach((count) => {
+      const firstRound = createTestTournament(count, count).matches.filter((match) => match.round === 1);
+
+      firstRound.forEach((match) => {
+        const players = match.slots.filter((slot) => slot.playerId !== null).length;
+
+        if (players === 2) expect(match.status).toBe("ready");
+        else expect(match.status).toBe("finished");
+
+        if (players === 1) expect(match.outcome).toBe("bye");
+
+        if (players === 0) expect(match.outcome).toBe("empty");
+      });
+    });
+  });
+
+  it("spreads the players evenly over the four boards", () => {
+    SIZES.forEach((count) => {
+      const matches = createTestTournament(count, count).matches;
+
+      const perBoard = [1, 2, 3, 4].map((board) =>
+        matches
+          .filter((match) => match.area === `board_${board}` && match.round === 1)
+          .flatMap((match) => match.slots)
+          .filter((slot) => slot.playerId !== null),
+      );
+
+      const sizes = perBoard.map((slots) => slots.length);
+
+      expect(Math.max(...sizes) - Math.min(...sizes)).toBeLessThanOrEqual(1);
+    });
+  });
+
+  it("plays the whole tournament to a champion for every size from 8 to 64", () => {
+    range(8, 64).forEach((count) => {
+      const finished = playUntilFinished(createTestTournament(count, count));
+
+      expect(finished.phase).toBe("finished");
+      expect(finished.championId).not.toBeNull();
+      expect(finished.matches.every((match) => match.status === "finished")).toBe(true);
+    });
+  });
+
+  it("never plays a match against an empty slot", () => {
+    range(8, 31).forEach((count) => {
+      const finished = playUntilFinished(createTestTournament(count, count));
+      const played = finished.matches.filter((match) => match.outcome === "played");
+
+      expect(played.every((match) => match.slots.every((slot) => slot.playerId !== null))).toBe(true);
+    });
+  });
+
+  it("plays exactly one match less than the number of players", () => {
+    range(8, 64).forEach((count) => {
+      const finished = playUntilFinished(createTestTournament(count, count));
+
+      expect(finished.matches.filter((match) => match.outcome === "played")).toHaveLength(count - 1);
+    });
   });
 });
 

@@ -325,8 +325,8 @@ describe("generateFromEntries", () => {
     expect(await getPrisma().tournamentEntry.count({ where: { status: "no_show" } })).toBe(5);
   });
 
-  it("refuses to start with fewer than 32 players", async () => {
-    await insertEntries({ preCheckedIn: 31 });
+  it("refuses to start with fewer than 8 players", async () => {
+    await insertEntries({ preCheckedIn: 7 });
 
     await expect(generateFromEntries(actorId, AT_12_55)).rejects.toThrow(TournamentRuleError);
     expect(await getPrisma().kofTournament.count()).toBe(0);

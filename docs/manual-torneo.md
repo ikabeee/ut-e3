@@ -74,8 +74,9 @@ fuera por no presentarse.
 
 1. A partir de las 12:55, en "Generar el bracket", pulsa "Generar bracket".
 2. Se generan 63 combates con los jugadores que hicieron check-in. El barajeo es aleatorio y queda registrado.
-3. Se necesitan entre 32 y 64 jugadores con check-in. Con menos de 64, los lugares vacíos son byes, repartidos parejo entre
-   los tableros; un bye nunca enfrenta a otro bye.
+3. Se necesitan entre 8 y 64 jugadores con check-in. Con menos de 64, los lugares vacíos son byes, repartidos parejo entre
+   los tableros. Con 32 o más, un bye nunca enfrenta a otro bye; con menos de 32 algunos combates de primera ronda quedan
+   vacíos y se resuelven solos: el jugador que espera pasa a la siguiente ronda y se enfrenta al próximo rival real.
 4. Se genera una sola vez. Un segundo intento sale "El bracket ya se generó."; antes de la hora, "El bracket se genera a
    las ...".
 
@@ -188,7 +189,7 @@ aparece en el panel de Inscripciones solo cuando el bracket ya existe.
    confirmar."
 3. Pulsa "Reiniciar torneo". Sale "Torneo reiniciado. Ya puedes generar el bracket otra vez."
 4. Revisa los conteos de inscripciones y pulsa "Generar bracket". La generación sigue las reglas de siempre: desde las 12:55 y con
-   entre 32 y 64 jugadores con check-in.
+   entre 8 y 64 jugadores con check-in.
 
 Si otra mesa guarda un resultado justo mientras reinicias, puede salir "No hay un bracket que reiniciar." Recarga y repite.
 
