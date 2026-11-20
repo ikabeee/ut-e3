@@ -6,6 +6,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.6.0] - 2026-11-19
+
 ### Agregado
 
 - `npm run db:rebuild-abandoned`: rehace de una vez los correos abandonados del staff (invitaciones y restablecimientos
@@ -21,6 +23,7 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
   página.
 - Arte de los juegos: tarjetas, portadas y capturas nuevas para los 16 juegos con material. One Mind y Vaporlock vuelven
   a mostrarse y Identity Dissolution tiene 4 capturas (`npm run db:backfill:images` agrega las filas que faltan).
+
 ## [1.5.2] - 2026-11-19
 
 ### Corregido
