@@ -1,5 +1,6 @@
 import "server-only";
 import { isRaffleStarted } from "@features/moderation/lib/moderation-input";
+import { reactivateKofEntryTicket } from "@features/raffle/lib/server/kof-entry-tickets";
 import { grantMilestoneTickets, voidUnreachedTickets } from "@features/visitors/lib/server/milestone-tickets";
 import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
@@ -175,7 +176,7 @@ export async function unexcludeVisitor(request: Omit<ModerationRequest, "reason"
     if (count === 0) return { status: "notExcluded" };
 
     const ticketsFrozen = await isFrozen(transaction, now);
-    const reactivatedTickets = ticketsFrozen ? 0 : await grantMilestoneTickets(transaction, targetId);
+    const reactivatedTickets = ticketsFrozen ? 0 : await reactivateTickets(transaction, targetId);
 
     await recordAudit(transaction, {
       actorId,
@@ -187,6 +188,13 @@ export async function unexcludeVisitor(request: Omit<ModerationRequest, "reason"
 
     return { status: "unexcluded", reactivatedTickets, ticketsFrozen };
   });
+}
+
+// The milestone tickets the visits still reach, plus the ticket of the KOF entry.
+async function reactivateTickets(transaction: Prisma.TransactionClient, visitorId: string): Promise<number> {
+  return (
+    (await grantMilestoneTickets(transaction, visitorId)) + (await reactivateKofEntryTicket(transaction, visitorId))
+  );
 }
 
 // Read from the table, not from the cache: the sysadmin can move the hour of the raffle.

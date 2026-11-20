@@ -29,7 +29,7 @@ export function PassportTickets({ tickets }: Readonly<PassportTicketsProps>) {
                 {COPY.ticket(ticket.number)}
               </span>
               <span className="type-tiny text-muted">
-                {ticket.voided ? COPY.voided : COPY.milestone(ticket.milestone)}
+                {ticket.voided ? COPY.voided(ticket.milestone) : COPY.milestone(ticket.milestone)}
               </span>
             </li>
           ))}

@@ -20,6 +20,20 @@ describe("PassportTickets", () => {
     expect(screen.getByText(COPY.milestone(9))).toBeInTheDocument();
   });
 
+  it("names the ticket of the KOF entry, active or voided", () => {
+    render(
+      <PassportTickets
+        tickets={[
+          { number: 5, milestone: 0 },
+          { number: 6, milestone: 0, voided: true },
+        ]}
+      />,
+    );
+
+    expect(screen.getAllByText("Boleto del torneo KOF")).toHaveLength(1);
+    expect(screen.getByText("Anulado: no te presentaste al check-in del torneo KOF")).toBeInTheDocument();
+  });
+
   it("explains when tickets are granted while the visitor has none", () => {
     render(<PassportTickets tickets={[]} />);
 

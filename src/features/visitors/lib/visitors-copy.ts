@@ -1,3 +1,5 @@
+import { KOF_ENTRY_MILESTONE } from "@features/raffle/lib/kof-entry-ticket";
+
 export const VISITORS_COPY = {
   genericRejection: "No se pudo registrar este correo",
   closed: (date: string) => `El registro se abre el ${date}.`,
@@ -90,10 +92,14 @@ export const VISITORS_COPY = {
     },
     tickets: {
       title: "Boletos",
-      empty: "Aún no tienes boletos. Se otorgan al llegar a 9 y a 18 visitas.",
+      empty: "Aún no tienes boletos. Se otorgan al llegar a 9 y a 18 visitas y al inscribirte al torneo KOF.",
       ticket: (number: number) => `Boleto #${number}`,
-      milestone: (milestone: number) => `Al llegar a ${milestone} visitas`,
-      voided: "Anulado: vuelve a llegar al hito para reactivarlo",
+      milestone: (milestone: number) =>
+        milestone === KOF_ENTRY_MILESTONE ? "Boleto del torneo KOF" : `Al llegar a ${milestone} visitas`,
+      voided: (milestone: number) =>
+        milestone === KOF_ENTRY_MILESTONE
+          ? "Anulado: no te presentaste al check-in del torneo KOF"
+          : "Anulado: vuelve a llegar al hito para reactivarlo",
     },
     explorer: {
       passportLabel: "Tu pasaporte",

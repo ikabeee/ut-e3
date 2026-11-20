@@ -401,6 +401,7 @@ model RaffleTicket {
   number    Int         @id @default(autoincrement())
   visitorId String      @map("visitor_id")
   visitor   Visitor     @relation(fields: [visitorId], references: [id], onDelete: Restrict)
+  /// 9 or 18 visits, or 0 for the ticket of the KOF entry (raffle/lib/kof-entry-ticket.ts).
   milestone Int
   /// active: enters the raffle; drawn: its visitor was drawn, so none of the visitor's tickets enter again (RF-52,
   /// RN-05); voided: annulled with its check-in (RF-46).

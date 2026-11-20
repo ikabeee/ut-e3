@@ -86,6 +86,14 @@ describe("raffle_tickets", () => {
     );
   });
 
+  it("accepts the ticket of the KOF entry as milestone 0", async () => {
+    const visitor = await createVisitor("tank");
+
+    const ticket = await getPrisma().raffleTicket.create({ data: { visitorId: visitor.id, milestone: 0 } });
+
+    expect(ticket).toMatchObject({ milestone: 0, status: "active" });
+  });
+
   it("starts every ticket as active", async () => {
     const visitor = await createVisitor("niobe");
 
