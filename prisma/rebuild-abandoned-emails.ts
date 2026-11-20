@@ -3,22 +3,31 @@ import {
   rebuildAbandonedEmails,
   type AbandonedRebuildResult,
   type KindCounts,
+  type PlannedRebuild,
 } from "@features/admin/lib/server/abandoned-email-rebuild";
 import { getPrisma } from "@shared/lib/server/prisma";
 
-// Runs with `npx tsx --conditions=react-server prisma/rebuild-abandoned-emails.ts`, when the sysadmin cannot reach
-// "Rehacer" in /admin/emails (S9 of odd/tasks/staff-dual-roles.md). It makes again every abandoned email of a kind that
-// can be rebuilt, with new links and PINs, and leaves them queued for the throttled mail worker: nothing is sent here.
-// Safe to run again: a rebuilt row is no longer abandoned. The exit code is 1 when any row failed.
+// Runs with `npx tsx --conditions=react-server prisma/rebuild-abandoned-emails.ts [--dry-run]`, when the sysadmin cannot
+// reach "Rehacer" in /admin/emails (S9 of odd/tasks/staff-dual-roles.md). It only handles STAFF emails (staff_invitation
+// and password_reset): it makes them again with new links and leaves them queued for the throttled mail worker, and
+// nothing is sent here. Visitor emails (passport, recovery, KOF, raffle) are never read, deleted or queued again.
+// `--dry-run` lists what it would do and writes nothing; run it first. Safe to run again: a rebuilt row is no longer
+// abandoned. The exit code is 1 when any row failed.
 loadEnvConfig(process.cwd());
 
 rebuildAndReport().catch(reportFailure);
 
 async function rebuildAndReport(): Promise<void> {
-  try {
-    const result = await rebuildAbandonedEmails(getPrisma(), new Date());
+  const dryRun = process.argv.includes("--dry-run");
 
-    printResult(result);
+  try {
+    const result = await rebuildAbandonedEmails(getPrisma(), new Date(), { dryRun });
+
+    if (dryRun) {
+      printPlan(result);
+    } else {
+      printResult(result);
+    }
 
     if (result.failed.length > 0) process.exitCode = 1;
   } finally {
@@ -26,10 +35,26 @@ async function rebuildAndReport(): Promise<void> {
   }
 }
 
+function printPlan(result: AbandonedRebuildResult): void {
+  console.log("Prueba (--dry-run): no se escribió nada. Con la corrida real se intentaría rehacer:");
+
+  for (const planned of result.planned) console.log(describePlanned(planned));
+
+  console.log(`Total: ${result.planned.length}.`);
+  console.log(`Se omitirían (sin referencia): ${describe(result.skipped)}.`);
+  console.log(
+    "Una corrida real puede encontrar que la cuenta ya no existe o cambió; entonces el correo sigue abandonado.",
+  );
+}
+
+function describePlanned(planned: PlannedRebuild): string {
+  return `- ${planned.emailId} ${planned.kind} creado ${planned.createdAt.toISOString()}`;
+}
+
 function printResult(result: AbandonedRebuildResult): void {
   console.log(`Correos rehechos y en cola: ${describe(result.rebuilt)}.`);
-  console.log(`Omitidos (no se pueden rehacer): ${describe(result.skipped)}.`);
-  console.log(`Sin su registro de origen (siguen abandonados): ${describe(result.sourceGone)}.`);
+  console.log(`Omitidos (sin referencia): ${describe(result.skipped)}.`);
+  console.log(`Sin su cuenta de origen (siguen abandonados): ${describe(result.sourceGone)}.`);
 
   for (const failure of result.failed) {
     console.error(`Falló ${failure.kind} ${failure.emailId}: ${failure.message}`);

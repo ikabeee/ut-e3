@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { rebuildAbandonedEmails, UNTYPED } from "@features/admin/lib/server/abandoned-email-rebuild";
+import { rebuildAbandonedEmails } from "@features/admin/lib/server/abandoned-email-rebuild";
 import {
   createAbandoned,
   createEmail,
@@ -9,7 +9,6 @@ import {
   NOW,
 } from "@features/admin/__tests__/lib/server/emails-test-utils";
 import { createEventSettings } from "@features/raffle/__tests__/lib/server/raffle-server-utils";
-import { CLAIM_PATH } from "@features/visitors/lib/visitors-links";
 import { encryptPin, hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 import { createTestDatabase } from "@shared/__tests__/lib/server/test-database";
@@ -21,6 +20,8 @@ process.env.DATABASE_URL = database.url;
 process.env.PIN_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString("base64");
 
 const REBUILD_ACTION = "admin.email.rebuild";
+
+let counter = 0;
 
 beforeAll(async () => {
   await createEventSettings();
@@ -38,39 +39,43 @@ beforeEach(async () => {
 });
 
 describe("rebuildAbandonedEmails", () => {
-  it("replaces the abandoned passport, KOF and recovery emails with fresh queued rows, and audits each one", async () => {
-    const visitor = await createVisitor("Neo", "12345");
-    const entry = await createEntry(visitor.id);
-    const passport = await createAbandoned({ kind: "visitor_passport", referenceId: visitor.id });
-    const kof = await createAbandoned({ kind: "kof_entry", referenceId: entry.id });
-    const recovery = await createAbandoned({ kind: "recovery_link", referenceId: visitor.id });
+  it("rebuilds an abandoned staff invitation and password reset with fresh queued rows, and audits each one", async () => {
+    const invited = await createAccount({ status: "invited", password: null });
+    const active = await createAccount({ status: "active", password: "hash" });
+    const invitation = await createAbandoned({ kind: "staff_invitation", referenceId: invited.id });
+    const reset = await createAbandoned({ kind: "password_reset", referenceId: active.id });
 
     const result = await rebuildAbandonedEmails(getPrisma(), NOW);
 
     expect(result).toEqual({
-      rebuilt: { visitor_passport: 1, kof_entry: 1, recovery_link: 1 },
+      rebuilt: { staff_invitation: 1, password_reset: 1 },
       skipped: {},
       sourceGone: {},
       failed: [],
+      planned: [],
     });
 
     const rows = await getPrisma().emailOutbox.findMany();
 
-    expect(rows.map((row) => row.kind).sort()).toEqual(["kof_entry", "recovery_link", "visitor_passport"]);
+    expect(rows.map((row) => row.kind).sort()).toEqual(["password_reset", "staff_invitation"]);
 
     for (const row of rows) {
       expect(row).toMatchObject({ attempts: 0, sentAt: null });
       expect(row.text).not.toBe("");
-      expect([passport.id, kof.id, recovery.id]).not.toContain(row.id);
+      expect([invitation.id, reset.id]).not.toContain(row.id);
+      expect(row.nextAttemptAt.getTime()).toBeLessThanOrEqual(NOW.getTime());
     }
 
-    expect(rows.find((row) => row.kind === "visitor_passport")?.text).toContain("12345");
-    expect(rows.find((row) => row.kind === "recovery_link")?.text).toContain(CLAIM_PATH);
-    await expect(getPrisma().recoveryToken.count({ where: { visitorId: visitor.id, usedAt: null } })).resolves.toBe(1);
+    await expect(getPrisma().accountInvitation.count({ where: { accountId: invited.id, usedAt: null } })).resolves.toBe(
+      1,
+    );
+    await expect(getPrisma().passwordResetToken.count({ where: { accountId: active.id, usedAt: null } })).resolves.toBe(
+      1,
+    );
 
     const entries = await getPrisma().auditLog.findMany({ where: { action: REBUILD_ACTION } });
 
-    expect(entries.map((entry) => entry.entityId).sort()).toEqual([passport.id, kof.id, recovery.id].sort());
+    expect(entries.map((entry) => entry.entityId).sort()).toEqual([invitation.id, reset.id].sort());
 
     for (const audit of entries) {
       expect(audit).toMatchObject({ actorId: null, entityType: "email_outbox" });
@@ -78,120 +83,172 @@ describe("rebuildAbandonedEmails", () => {
     }
   });
 
-  it("does not send anything: the new rows are due in the queue for the mail worker", async () => {
-    const visitor = await createVisitor("Trinity", "54321");
+  it("never touches an abandoned visitor email: it stays byte-identical, with no audit, token or count", async () => {
+    const visitor = await createVisitor("Neo", "12345");
+    const entry = await createEntry(visitor.id);
 
     await createAbandoned({ kind: "visitor_passport", referenceId: visitor.id });
-    await rebuildAbandonedEmails(getPrisma(), NOW);
+    await createAbandoned({ kind: "recovery_link", referenceId: visitor.id });
+    await createAbandoned({ kind: "kof_entry", referenceId: entry.id });
+    await createAbandoned({ kind: "raffle_winner", referenceId: "sorteo-1" });
+    await createAbandoned({ kind: "visitor_passport" });
 
-    const row = await getPrisma().emailOutbox.findFirstOrThrow();
-
-    expect(row.sentAt).toBeNull();
-    expect(row.attempts).toBe(0);
-    expect(row.nextAttemptAt.getTime()).toBeLessThanOrEqual(NOW.getTime());
-  });
-
-  it("skips login codes, emergency alerts and rows without kind or reference, and counts them per kind", async () => {
-    const loginCode = await createAbandoned({ kind: "login_code", referenceId: "cuenta-1" });
-    const emergency = await createAbandoned({ kind: "emergency_alert", referenceId: "aviso-1" });
-    const untyped = await createAbandoned();
-    const noReference = await createAbandoned({ kind: "visitor_passport" });
-    const entriesBefore = await auditCount();
+    const before = await getPrisma().emailOutbox.findMany({ orderBy: { id: "asc" } });
+    const auditBefore = await auditCount();
 
     const result = await rebuildAbandonedEmails(getPrisma(), NOW);
 
-    expect(result).toEqual({
-      rebuilt: {},
-      skipped: { login_code: 1, emergency_alert: 1, [UNTYPED]: 1, visitor_passport: 1 },
-      sourceGone: {},
-      failed: [],
-    });
-
-    const ids = [loginCode.id, emergency.id, untyped.id, noReference.id];
-
-    await expect(getPrisma().emailOutbox.count({ where: { id: { in: ids }, text: "", attempts: 5 } })).resolves.toBe(4);
-    await expect(getPrisma().emailOutbox.count()).resolves.toBe(4);
-    await expect(auditCount()).resolves.toBe(entriesBefore);
+    expect(result).toEqual({ rebuilt: {}, skipped: {}, sourceGone: {}, failed: [], planned: [] });
+    await expect(getPrisma().emailOutbox.findMany({ orderBy: { id: "asc" } })).resolves.toEqual(before);
+    await expect(auditCount()).resolves.toBe(auditBefore);
+    await expect(getPrisma().recoveryToken.count()).resolves.toBe(0);
   });
 
-  it("leaves alone the emails that are not abandoned: sent, pending and failed with a body", async () => {
-    const visitor = await createVisitor("Morfeo", "11111");
+  it("leaves alone, and does not count, login codes, emergency alerts and rows without a kind", async () => {
+    const ids = [
+      (await createAbandoned({ kind: "login_code", referenceId: "cuenta-1" })).id,
+      (await createAbandoned({ kind: "emergency", referenceId: "aviso-1" })).id,
+      (await createAbandoned()).id,
+    ];
 
-    await createEmail({ kind: "visitor_passport", referenceId: visitor.id, sentAt: new Date(), text: "" });
-    await createEmail({ kind: "visitor_passport", referenceId: visitor.id });
-    await createFailed({ kind: "visitor_passport", referenceId: visitor.id, text: "Aún con contenido" });
+    const auditBefore = await auditCount();
 
     const result = await rebuildAbandonedEmails(getPrisma(), NOW);
 
-    expect(result).toEqual({ rebuilt: {}, skipped: {}, sourceGone: {}, failed: [] });
+    expect(result).toEqual({ rebuilt: {}, skipped: {}, sourceGone: {}, failed: [], planned: [] });
+    await expect(getPrisma().emailOutbox.count({ where: { id: { in: ids }, text: "", attempts: 5 } })).resolves.toBe(3);
+    await expect(auditCount()).resolves.toBe(auditBefore);
+  });
+
+  it("does not send anything and leaves alone the staff emails that are not abandoned", async () => {
+    const invited = await createAccount({ status: "invited", password: null });
+
+    await createEmail({ kind: "staff_invitation", referenceId: invited.id, sentAt: new Date(), text: "" });
+    await createEmail({ kind: "staff_invitation", referenceId: invited.id });
+    await createFailed({ kind: "password_reset", referenceId: invited.id, text: "Aún con contenido" });
+
+    const result = await rebuildAbandonedEmails(getPrisma(), NOW);
+
+    expect(result).toEqual({ rebuilt: {}, skipped: {}, sourceGone: {}, failed: [], planned: [] });
     await expect(getPrisma().emailOutbox.count()).resolves.toBe(3);
   });
 
-  it("reports an abandoned row whose visitor is gone as sourceGone and keeps it", async () => {
-    const abandoned = await createAbandoned({ kind: "recovery_link", referenceId: "visitante-borrado" });
+  it("skips an abandoned staff email without a reference and reports one whose account changed as sourceGone", async () => {
+    const activated = await createAccount({ status: "active", password: "hash" });
+    const noReference = await createAbandoned({ kind: "staff_invitation" });
+    const gone = await createAbandoned({ kind: "staff_invitation", referenceId: activated.id });
+    const missing = await createAbandoned({ kind: "password_reset", referenceId: "cuenta-borrada" });
+    const auditBefore = await auditCount();
 
     const result = await rebuildAbandonedEmails(getPrisma(), NOW);
 
-    expect(result.sourceGone).toEqual({ recovery_link: 1 });
+    expect(result.skipped).toEqual({ staff_invitation: 1 });
+    expect(result.sourceGone).toEqual({ staff_invitation: 1, password_reset: 1 });
     expect(result.rebuilt).toEqual({});
-    await expect(getPrisma().emailOutbox.findUnique({ where: { id: abandoned.id } })).resolves.not.toBeNull();
+
+    for (const row of [noReference, gone, missing]) {
+      await expect(getPrisma().emailOutbox.findUnique({ where: { id: row.id } })).resolves.toEqual(row);
+    }
+
+    await expect(auditCount()).resolves.toBe(auditBefore);
+  });
+
+  it("dry run lists the staff emails it would rebuild, without recipient or tokens, and writes nothing", async () => {
+    const invited = await createAccount({ status: "invited", password: null });
+    const visitor = await createVisitor("Trinity", "54321");
+
+    const invitation = await createAbandoned({
+      kind: "staff_invitation",
+      referenceId: invited.id,
+      createdAt: new Date("2026-11-01T00:00:00Z"),
+    });
+
+    await createAbandoned({ kind: "visitor_passport", referenceId: visitor.id });
+    await createAbandoned({ kind: "staff_invitation" });
+
+    const before = await getPrisma().emailOutbox.findMany({ orderBy: { id: "asc" } });
+    const auditBefore = await auditCount();
+
+    const result = await rebuildAbandonedEmails(getPrisma(), NOW, { dryRun: true });
+
+    expect(result).toEqual({
+      rebuilt: {},
+      skipped: { staff_invitation: 1 },
+      sourceGone: {},
+      failed: [],
+      planned: [{ emailId: invitation.id, kind: "staff_invitation", createdAt: new Date("2026-11-01T00:00:00Z") }],
+    });
+    expect(JSON.stringify(result)).not.toContain(invited.email);
+    await expect(getPrisma().emailOutbox.findMany({ orderBy: { id: "asc" } })).resolves.toEqual(before);
+    await expect(auditCount()).resolves.toBe(auditBefore);
+    await expect(getPrisma().accountInvitation.count({ where: { accountId: invited.id } })).resolves.toBe(0);
   });
 
   it("is idempotent: a second run finds nothing to rebuild and writes nothing", async () => {
-    const visitor = await createVisitor("Cypher", "22222");
+    const invited = await createAccount({ status: "invited", password: null });
 
-    await createAbandoned({ kind: "visitor_passport", referenceId: visitor.id });
+    await createAbandoned({ kind: "staff_invitation", referenceId: invited.id });
     await createAbandoned({ kind: "login_code", referenceId: "cuenta-1" });
     await rebuildAbandonedEmails(getPrisma(), NOW);
 
-    const entriesBefore = await auditCount();
+    const auditBefore = await auditCount();
     const rowsBefore = await getPrisma().emailOutbox.findMany({ orderBy: { id: "asc" } });
 
     const second = await rebuildAbandonedEmails(getPrisma(), NOW);
 
-    expect(second.rebuilt).toEqual({});
-    expect(second.failed).toEqual([]);
-    await expect(auditCount()).resolves.toBe(entriesBefore);
+    expect(second).toEqual({ rebuilt: {}, skipped: {}, sourceGone: {}, failed: [], planned: [] });
+    await expect(auditCount()).resolves.toBe(auditBefore);
     await expect(getPrisma().emailOutbox.findMany({ orderBy: { id: "asc" } })).resolves.toEqual(rowsBefore);
   });
 
   it("does not stop at a row that fails: it reports it, rolls it back and rebuilds the others", async () => {
-    const broken = await createVisitor("Broken", "33333", "no-es-un-pin-cifrado");
-    const healthy = await createVisitor("Healthy", "44444");
+    const healthy = await createAccount({ status: "invited", password: null });
+    const broken = await createAccount({ status: "invited", password: null });
 
     const failing = await createAbandoned({
-      kind: "visitor_passport",
+      kind: "staff_invitation",
       referenceId: broken.id,
       createdAt: new Date("2026-11-01T00:00:00Z"),
     });
 
     await createAbandoned({
-      kind: "visitor_passport",
+      kind: "staff_invitation",
       referenceId: healthy.id,
       createdAt: new Date("2026-11-02T00:00:00Z"),
     });
+    await getPrisma().$executeRawUnsafe(
+      `CREATE TRIGGER fail_for_test BEFORE INSERT ON email_outbox WHEN NEW.reference_id = '${broken.id}' BEGIN SELECT RAISE(ABORT, 'boom'); END`,
+    );
 
     const result = await rebuildAbandonedEmails(getPrisma(), NOW);
 
-    expect(result.rebuilt).toEqual({ visitor_passport: 1 });
+    await getPrisma().$executeRawUnsafe("DROP TRIGGER fail_for_test");
+
+    expect(result.rebuilt).toEqual({ staff_invitation: 1 });
     expect(result.failed).toHaveLength(1);
-    expect(result.failed[0]).toMatchObject({ emailId: failing.id, kind: "visitor_passport" });
+    expect(result.failed[0]).toMatchObject({ emailId: failing.id, kind: "staff_invitation" });
+    await expect(getPrisma().accountInvitation.count({ where: { accountId: broken.id } })).resolves.toBe(0);
     await expect(getPrisma().emailOutbox.findUnique({ where: { id: failing.id } })).resolves.toMatchObject({
       text: "",
     });
-    await expect(
-      getPrisma().emailOutbox.count({ where: { referenceId: healthy.id, text: { not: "" } } }),
-    ).resolves.toBe(1);
   });
 });
 
-async function createVisitor(gamertag: string, pin: string, storedPin = encryptPin(pin)) {
+async function createAccount(data: { status: string; password: string | null }) {
+  counter += 1;
+
+  return getPrisma().account.create({
+    data: { email: `cuenta${counter}@ut.mx`, name: `Cuenta ${counter}`, role: "help_desk", ...data },
+  });
+}
+
+async function createVisitor(gamertag: string, pin: string) {
   return getPrisma().visitor.create({
     data: {
       fullName: `Nombre ${gamertag}`,
       gamertag,
       email: `${gamertag.toLowerCase()}@example.com`,
-      pin: storedPin,
+      pin: encryptPin(pin),
       pinLookup: hashPinForLookup(`${pin}-${gamertag}`),
     },
   });
