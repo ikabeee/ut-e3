@@ -119,7 +119,9 @@ de la base (RNF-03). Salen con la plantilla del sitio (fondo negro, acento azul,
   sola conexión SMTP reutilizada, como máximo un mensaje cada 2 segundos y 10 correos por pasada. Si el proveedor responde
   con un error temporal (por ejemplo Gmail `421 4.7.0 Try again later`), la pasada se detiene y el correo espera 15 min,
   30 min, 1 h y 2 h (con una variación de hasta el 50 %) antes de cada reintento, así que sus 5 intentos abarcan entre 2
-  y casi 4 horas. Un error permanente (5xx) abandona el correo de inmediato.
+  y casi 4 horas. Un error de cuota o límite del proveedor se trata igual aunque llegue como 5xx (por ejemplo el
+  `550 5.7.1 Daily SMTP relay limit exceeded` del relay de Google Workspace): se reintenta en lugar de abandonar el
+  correo. Cualquier otro error permanente (5xx) abandona el correo de inmediato.
 - **Panel de correos** (`/admin/emails`, solo sysadmin): lista toda la bandeja con filtros (estado, destinatario, asunto
   y fecha de cola) y muestra intentos, próximo intento, último error y el destinatario completo. Desde ahí se puede ver el
   texto de un correo mientras exista (la lectura queda en la bitácora como `admin.email.view`), reenviar uno o todos los
