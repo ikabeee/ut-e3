@@ -90,6 +90,8 @@ export interface EntryView {
   id: string;
   visitorId: string;
   gamertag: string;
+  /** The name on the passport, so the staff can find a player who forgot the gamertag. */
+  fullName: string;
   channel: EntryChannel;
   status: EntryStatus;
   /** ISO instant, only when the status is `checked_in`. */

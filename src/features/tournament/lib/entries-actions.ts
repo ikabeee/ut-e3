@@ -12,6 +12,7 @@ import {
   type AddEntryResult,
   type CheckInResult,
 } from "@features/tournament/lib/server/entries-mutations";
+import { findEntryByPin } from "@features/tournament/lib/server/entries-queries";
 import { resetTournament, type GenerateResult } from "@features/tournament/lib/server/tournament-mutations";
 import { RESET_CONFIRMATION } from "@features/tournament/lib/tournament-rules";
 import { formatEventDate, formatTimeOfDay } from "@shared/lib/date-time";
@@ -91,6 +92,21 @@ export async function resetBracketAction(
   const result = await resetTournament(actor.id);
 
   return finish(result.status === "reset" ? done(COPY.outcomes.reset) : refused(COPY.outcomes.nothingToReset));
+}
+
+/**
+ * The search of the list by PIN: answers only the id of the entry, never the PIN, and only to whoever works the list.
+ * It does not change anything, so it does not refresh the screen.
+ */
+export async function findEntryIdByPinAction(pin: string): Promise<string | null> {
+  const actor = await requireKofAccount();
+
+  if (actor.role !== "kof_admin") return null;
+
+  // A Server Action is a public endpoint: whatever arrives is read as text before it is checked as a PIN.
+  const entry = await findEntryByPin(String(pin).trim());
+
+  return entry?.id ?? null;
 }
 
 function describeAdd(result: AddEntryResult): Outcome {

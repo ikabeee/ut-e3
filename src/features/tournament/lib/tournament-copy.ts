@@ -194,6 +194,22 @@ export const TOURNAMENT_COPY = {
       statuses: { registered: "Inscrito", checked_in: "Con check-in", no_show: "No se presentó" },
       channels: { pre: "Lista previa", onsite: "Presencial" },
       empty: "Todavía no hay inscritos.",
+      search: {
+        label: "Buscar jugador",
+        placeholder: (withPin: boolean) => (withPin ? "Gamertag, nombre o PIN" : "Gamertag o nombre"),
+        noResults: "Ningún jugador coincide con la búsqueda.",
+        shown: (shown: number, total: number) => `${shown} de ${total} jugadores`,
+      },
+      filters: {
+        label: "Filtrar por estado",
+        options: {
+          all: "Todos",
+          registered: "Pendientes de check-in",
+          checked_in: "Con check-in",
+          no_show: "No se presentaron",
+        },
+        option: (label: string, count: number) => `${label} (${count})`,
+      },
       add: { label: "Gamertag del jugador", submit: "Agregar al torneo", sending: "Agregando..." },
       checkIn: { label: "PIN del jugador", submit: "Hacer check-in", sending: "Verificando..." },
       generate: {

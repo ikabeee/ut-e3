@@ -15,6 +15,7 @@ import { TournamentDashboard } from "@features/tournament/components/tournament-
 import {
   addEntryAction,
   checkInEntryAction,
+  findEntryIdByPinAction,
   generateBracketAction,
   resetBracketAction,
 } from "@features/tournament/lib/entries-actions";
@@ -100,6 +101,7 @@ const ENTRIES_ACTIONS = {
   checkIn: checkInEntryAction,
   generate: generateBracketAction,
   reset: resetBracketAction,
+  findByPin: findEntryIdByPinAction,
 };
 
 // The administrator and the sysadmin work the list. Loading it first closes the check-in if its hour passed, so the list never shows a

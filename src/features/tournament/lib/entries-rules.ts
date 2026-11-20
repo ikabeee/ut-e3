@@ -21,3 +21,8 @@ export function getEntryWindow(schedule: EntrySchedule, now: Date): EntryWindow 
 
   return now >= schedule.onsiteStartsAt ? "onsite" : "pre";
 }
+
+/** A passport PIN is five digits; anything else is never looked up. */
+export function isPinFormat(text: string): boolean {
+  return /^\d{5}$/.test(text);
+}

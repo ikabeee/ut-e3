@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EntriesPanel, type EntriesAction } from "@features/tournament/components/entries-panel";
+import type { PinLookup } from "@features/tournament/hooks/use-pin-match";
 import type { EntriesActionState } from "@features/tournament/lib/entries-actions";
 import type { EntryView } from "@features/tournament/lib/types";
 import { renderWithToasts } from "@shared/__tests__/components/toast-test-utils";
@@ -30,6 +31,7 @@ describe("EntriesPanel", () => {
 
     const row = screen.getByText("Jugador3").closest("li");
 
+    expect(row).toHaveTextContent("Nombre Jugador3");
     expect(row).toHaveTextContent("Presencial");
     expect(row).toHaveTextContent("Con check-in");
     expect(screen.getByText("Jugador4").closest("li")).toHaveTextContent("No se presentó");
@@ -40,8 +42,64 @@ describe("EntriesPanel", () => {
 
     expect(screen.getByRole("list", { name: "Conteo de inscripciones" })).toBeInTheDocument();
     expect(screen.getByText("Jugador1")).toBeInTheDocument();
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+
+    for (const name of ["Agregar al torneo", "Hacer check-in", "Generar bracket", "Reiniciar torneo"]) {
+      expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
+    }
+  });
+
+  it("searches by gamertag or name and says so when nobody matches", async () => {
+    renderWithToasts(<EntriesPanel entries={ENTRIES} hasBracket={false} />);
+
+    const search = screen.getByRole("searchbox", { name: "Buscar jugador" });
+
+    await userEvent.type(search, "nombre jugador3");
+
+    expect(screen.getByText("Jugador3")).toBeInTheDocument();
+    expect(screen.queryByText("Jugador1")).not.toBeInTheDocument();
+    expect(screen.getByText("1 de 4 jugadores")).toBeInTheDocument();
+
+    await userEvent.clear(search);
+    await userEvent.type(search, "zzz");
+
+    expect(screen.getByText("Ningún jugador coincide con la búsqueda.")).toBeInTheDocument();
+  });
+
+  it("finds a player by PIN through the server, which only answers the entry", async () => {
+    const pins: string[] = [];
+
+    const { actions } = recordingActions({ status: "done", message: "ok" }, async (pin) => {
+      pins.push(pin);
+
+      return pin === "00004" ? "entry-4" : null;
+    });
+
+    renderPanel({ entries: ENTRIES, hasBracket: false, actions });
+    await userEvent.type(screen.getByRole("searchbox", { name: "Buscar jugador" }), "00004");
+
+    expect(await screen.findByText("Jugador4")).toBeInTheDocument();
+    expect(screen.queryByText("Jugador1")).not.toBeInTheDocument();
+    expect(pins).toEqual(["00004"]);
+  });
+
+  it("filters by status, with the count on each filter", async () => {
+    renderPanel({ entries: ENTRIES, hasBracket: false });
+
+    const filters = screen.getByRole("radiogroup", { name: "Filtrar por estado" });
+
+    expect(within(filters).getByRole("radio", { name: "Todos (4)" })).toBeChecked();
+
+    await userEvent.click(within(filters).getByRole("radio", { name: "Pendientes de check-in (1)" }));
+
+    expect(screen.getByText("Jugador1")).toBeInTheDocument();
+    expect(screen.queryByText("Jugador2")).not.toBeInTheDocument();
+
+    await userEvent.click(within(filters).getByRole("radio", { name: "Con check-in (2)" }));
+
+    expect(screen.getByText("Jugador2")).toBeInTheDocument();
+    expect(screen.getByText("Jugador3")).toBeInTheDocument();
+    expect(screen.queryByText("Jugador1")).not.toBeInTheDocument();
   });
 
   it("says so when nobody has signed up", () => {
@@ -163,7 +221,7 @@ function renderPanel({
   renderWithToasts(<EntriesPanel entries={entries} hasBracket={hasBracket} actions={actions} />);
 }
 
-function recordingActions(result: EntriesActionState) {
+function recordingActions(result: EntriesActionState, findByPin: PinLookup = async () => null) {
   const calls: Record<"add" | "checkIn" | "generate" | "reset", FormData[]> = {
     add: [],
     checkIn: [],
@@ -181,7 +239,13 @@ function recordingActions(result: EntriesActionState) {
 
   return {
     calls,
-    actions: { add: record("add"), checkIn: record("checkIn"), generate: record("generate"), reset: record("reset") },
+    actions: {
+      add: record("add"),
+      checkIn: record("checkIn"),
+      generate: record("generate"),
+      reset: record("reset"),
+      findByPin,
+    },
   };
 }
 
@@ -190,6 +254,7 @@ function entry(index: number, channel: EntryView["channel"], status: EntryView["
     id: `entry-${index}`,
     visitorId: `visitor-${index}`,
     gamertag: `Jugador${index}`,
+    fullName: `Nombre Jugador${index}`,
     channel,
     status,
     checkedInAt: status === "checked_in" ? "2026-11-20T17:20:00.000Z" : null,

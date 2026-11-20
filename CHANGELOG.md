@@ -6,6 +6,14 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.7.4] - 2026-11-20
+
+### Agregado
+
+- KOF: la lista de inscripciones muestra el nombre de cada jugador, se busca por gamertag, nombre o PIN (el PIN se
+  resuelve en el servidor y nunca llega al navegador) y se filtra por estado: pendientes de check-in, con check-in y
+  no se presentaron, con el conteo en cada filtro.
+
 ## [1.7.3] - 2026-11-20
 
 ### Corregido
