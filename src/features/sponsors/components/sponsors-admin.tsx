@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { Description, FieldError, Form, Input, Label, TextArea, TextField } from "@heroui/react";
 import { EMAIL_MAX_LENGTH, NAME_MAX_LENGTH, SERVICES_MAX_LENGTH } from "@features/sponsors/lib/sponsor-input";
 import type { SponsorActionState } from "@features/sponsors/lib/sponsors-admin-actions";
@@ -21,7 +22,7 @@ const COPY = SPONSORS_COPY.admin;
 
 const TEXT_FIELDS = [
   { name: "name", maxLength: NAME_MAX_LENGTH, type: "text", hint: null, isRequired: true },
-  { name: "logoPath", maxLength: 200, type: "text", hint: COPY.hints.logoPath, isRequired: true },
+  { name: "logoPath", maxLength: 200, type: "text", hint: COPY.hints.logoPath, isRequired: false },
   { name: "websiteUrl", maxLength: 300, type: "url", hint: null, isRequired: false },
   { name: "phone", maxLength: 20, type: "tel", hint: COPY.hints.phone, isRequired: false },
   { name: "email", maxLength: EMAIL_MAX_LENGTH, type: "email", hint: COPY.hints.email, isRequired: false },
@@ -80,6 +81,7 @@ function SponsorForm({
     >
       {sponsor ? <input type="hidden" name="id" value={sponsor.id} /> : null}
       <SponsorTextFields sponsor={sponsor} />
+      <SponsorLogoFile />
       <SponsorExtraFields sponsor={sponsor} nextPosition={nextPosition} />
       <div className="grid gap-3 min-[561px]:col-span-2">
         <ActionFormFooter
@@ -108,6 +110,26 @@ function SponsorTextFields({ sponsor }: Readonly<{ sponsor?: Sponsor }>) {
       <FieldError />
     </TextField>
   ));
+}
+
+// The file input is native: its value is a File that the Server Action reads, and its label and hint are tied by id.
+function SponsorLogoFile() {
+  const inputId = useId();
+
+  return (
+    <div className="grid content-start gap-1">
+      <Label htmlFor={inputId}>{COPY.fields.logoFile}</Label>
+      <input
+        id={inputId}
+        name="logoFile"
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        aria-describedby={`${inputId}-hint`}
+        className="min-h-11 border border-border p-2 text-base"
+      />
+      <Description id={`${inputId}-hint`}>{COPY.hints.logoFile}</Description>
+    </div>
+  );
 }
 
 function SponsorExtraFields({ sponsor, nextPosition }: Readonly<{ sponsor?: Sponsor; nextPosition: number }>) {

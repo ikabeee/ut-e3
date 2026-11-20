@@ -11,6 +11,7 @@ carpetas, y cargar las portadas y el arte de los juegos que faltan.
   UNIFORMES (LOS NEGOCIOS SON DE CANCUN". Fuente: `/Users/carlglzm/Downloads/GENERAL - PATROCINADORES`.
 - **S2. Portadas y arte que faltan.** Pedido: "/Users/carlglzm/Downloads/portadas tambien las portadas o arte que
   falta dentro de esta carpeta".
+- **S3. Subir logos desde el panel.** Pedido: "necesito que los usarios puedan subir los logos desde el panel (sysadmin)".
 
 ## Tasks
 
@@ -20,6 +21,7 @@ carpetas, y cargar las portadas y el arte de los juegos que faltan.
 | T2 | S1 | Logos en `public/sponsors/<slug>.svg`, o `.png` con fondo transparente, recortados al contenido (`balanced-logo-size.ts` iguala el área). Son 6 nuevos (Dolphin, Fresh Air, Nannis Amigurumis, PixelAndCode, Rock and Race y Target G) y se revisan los existentes. | Inline | ninguno | hecho (3e174b2, 7d66d1a) |
 | T3 | S1 | Datos de los 14 patrocinadores en `INITIAL_SPONSORS` (`sponsors-seed.ts`), con el mismo formato: los mismos campos llenos y el mismo estilo de `services`. Como `seedSponsors` solo llena una tabla vacía, producción necesita una vía de carga (ver L5). Pruebas del seed y `CHANGELOG.md`. | Inline | item 1 si se escribe un backfill sobre datos guardados | hecho (3e174b2, 7d66d1a) |
 | T4 | S2 | Arte de los juegos en `public/games/`: la tarjeta 810x1080 como `<slug>.jpg`, la portada 1920x1080 como `<slug>-portada.jpg` y las capturas 1920x1080 como `<slug>-captura-NN.jpg`, todo en JPG RGB y de máximo 5 MB. Incluye las conversiones de L4 y la actualización de `games-seed.ts` si cambian las capturas. | Inline | ninguno | hecho (ea12abb) |
+| T6 | S3 | El sysadmin sube el logo de un patrocinador desde `/admin`, sin deploy. Formatos PNG, JPG o WebP validados por su firma (sin SVG, por el riesgo de XSS) y de máximo 2 MB. Se guardan en `UPLOADS_DIR` y se sirven por `GET /api/media/sponsors/<archivo>`, como las imágenes de los juegos. El servidor asigna el nombre con un hash del contenido, valida antes de escribir, escribe el archivo y luego la fila (si la BD falla, borra el archivo) y lo audita. Los logos actuales de `public/sponsors/` siguen funcionando. Pruebas y documentación. | Writer | item 2 (subida de archivos) | hecho (sin commit) |
 | T5 | S2 | Arte que no viene en la carpeta: sombra-del-mictlan (no tiene ninguna imagen), make-em-fall (no tiene carpeta) y las capturas de 16 juegos. Se reporta a los equipos. | Reporte | ninguno | sin commit |
 
 Rama `feature/<issue>-sponsors-and-game-art` desde `develop`. T2 y T3 van en un commit y T4 en otro. Sin push ni PR.
@@ -127,3 +129,5 @@ Rama `feature/<issue>-sponsors-and-game-art` desde `develop`. T2 y T3 van en un 
     acepta y no se inventa nada.
   - Sin identificar: "Dolphin Discovery, deja afuera Nannis".
   - Ponente de Noxy: "Nada por ahora".
+- **L9** (pedido del usuario, verbatim): "necesito que los usarios puedan subir los logos desde el panel (sysadmin)".
+  Se agregaron S3 y T6.

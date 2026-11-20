@@ -6,6 +6,11 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- Patrocinadores: el sysadmin sube el logo desde `/admin` (PNG, JPG o WebP de máximo 2 MB, validado por su firma; sin
+  SVG) y se guarda en `UPLOADS_DIR/sponsors/` sin esperar un despliegue. Los logos de `public/sponsors/` siguen igual.
+
 ## [1.6.0] - 2026-11-19
 
 ### Agregado
