@@ -1,5 +1,5 @@
 import "server-only";
-import { grantKofEntryTicket, voidKofEntryTickets } from "@features/raffle/lib/server/kof-entry-tickets";
+import { grantKofEntryTicket } from "@features/raffle/lib/server/kof-entry-tickets";
 import { buildEntryEmail } from "@features/tournament/lib/entry-email";
 import { getEntryWindow, type EntrySchedule } from "@features/tournament/lib/entries-rules";
 import { findEntryByPin, getEntrySchedule } from "@features/tournament/lib/server/entries-queries";
@@ -146,16 +146,13 @@ export async function closeCheckInIfDue(actorId: string, now: Date): Promise<num
       select: { id: true, visitorId: true },
     });
 
+    // The KOF raffle ticket stays active: every entered player keeps it, also the ones that did not show up.
     const { count } = await transaction.tournamentEntry.updateMany({
       where: { id: { in: pending.map((entry) => entry.id) }, status: "registered" },
       data: { status: "no_show" },
     });
 
     if (count > 0) {
-      await voidKofEntryTickets(
-        transaction,
-        pending.map((entry) => entry.visitorId),
-      );
       await recordAudit(transaction, {
         actorId,
         action: "kof_entry.close_check_in",

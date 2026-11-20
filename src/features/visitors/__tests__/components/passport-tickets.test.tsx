@@ -31,7 +31,7 @@ describe("PassportTickets", () => {
     );
 
     expect(screen.getAllByText("Boleto del torneo KOF")).toHaveLength(1);
-    expect(screen.getByText("Anulado: no te presentaste al check-in del torneo KOF")).toBeInTheDocument();
+    expect(screen.getByText("Anulado")).toBeInTheDocument();
   });
 
   it("explains when tickets are granted while the visitor has none", () => {

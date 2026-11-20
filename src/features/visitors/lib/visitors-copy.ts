@@ -97,9 +97,7 @@ export const VISITORS_COPY = {
       milestone: (milestone: number) =>
         milestone === KOF_ENTRY_MILESTONE ? "Boleto del torneo KOF" : `Al llegar a ${milestone} visitas`,
       voided: (milestone: number) =>
-        milestone === KOF_ENTRY_MILESTONE
-          ? "Anulado: no te presentaste al check-in del torneo KOF"
-          : "Anulado: vuelve a llegar al hito para reactivarlo",
+        milestone === KOF_ENTRY_MILESTONE ? "Anulado" : "Anulado: vuelve a llegar al hito para reactivarlo",
     },
     explorer: {
       passportLabel: "Tu pasaporte",
