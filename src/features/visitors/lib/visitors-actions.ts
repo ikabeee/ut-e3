@@ -12,8 +12,6 @@ import { VISITORS_COPY } from "@features/visitors/lib/visitors-copy";
 import { PASSPORT_PATH, RECOVERY_LINK_EXPIRED_PATH } from "@features/visitors/lib/visitors-links";
 import { readFormText } from "@shared/lib/form-data";
 import { deliverQueuedEmail } from "@shared/lib/server/email-delivery";
-import { resolveClientIp } from "@shared/lib/server/client-ip";
-import { consumeAttempt, refundAttempt } from "@shared/lib/server/rate-limit";
 import { setVisitorDeviceCookie } from "@shared/lib/server/visitor-device";
 
 export interface RegistrationState {
@@ -27,8 +25,6 @@ export interface RegistrationState {
 }
 
 export type RecoveryRequestState = { status: "sent" } | { status: "invalid"; email: string; error: string };
-
-const REGISTRATION_RATE_LIMIT = { limit: 3, windowMs: 60 * 60 * 1000 };
 
 export async function registerVisitor(_previous: RegistrationState | null, form: FormData): Promise<RegistrationState> {
   const parsed = parseRegistrationInput(form);
@@ -50,19 +46,8 @@ export async function registerVisitor(_previous: RegistrationState | null, form:
     return { values: parsed.value, error: closedError };
   }
 
-  const attemptKey = `register:${await resolveClientIp()}`;
-  const attemptedAt = new Date();
-
-  if (!(await consumeAttempt(attemptKey, REGISTRATION_RATE_LIMIT, attemptedAt))) {
-    return { values: parsed.value, error: VISITORS_COPY.rateLimited };
-  }
-
-  const state = await executeRegistration(parsed.value);
-
-  // A taken gamertag is a typo, not a new passport: the visitor retries and the attempt is given back.
-  if (state.fieldErrors?.gamertag) await refundAttempt(attemptKey, REGISTRATION_RATE_LIMIT, attemptedAt);
-
-  return state;
+  // No per-address limit: every phone at the venue leaves through the same university Wi-Fi address.
+  return executeRegistration(parsed.value);
 }
 
 async function checkRegistrationClosed(): Promise<string | null> {

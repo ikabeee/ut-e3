@@ -1,7 +1,6 @@
 export const VISITORS_COPY = {
   genericRejection: "No se pudo registrar este correo",
   closed: (date: string) => `El registro se abre el ${date}.`,
-  rateLimited: "Demasiados intentos. Intenta de nuevo más tarde.",
   errors: {
     fullNameRequired: "El nombre completo es obligatorio.",
     fullNameLength: "El nombre debe tener entre 3 y 80 caracteres.",

@@ -333,10 +333,11 @@ El proxy termina TLS y pasa todo a `127.0.0.1:3000` (o tu `APP_PORT`). Cuatro co
 - **Compresión en el proxy.** La app no comprime sus respuestas (`compress: false` en `next.config.ts`) para que Node
   no gaste CPU en eso durante la llegada del público; los dos bloques de abajo comprimen (`gzip` en Nginx y `encode` en
   Caddy). Sin eso, cada visitante baja el JS y el CSS sin comprimir (unas 4 veces más).
-- **`X-Forwarded-For` con la dirección que vio el proxy al final.** Los límites de registro y de inicio de sesión
-  (RNF-10) toman la **última** dirección del encabezado, porque las anteriores las escribe el cliente. Los dos bloques
-  de abajo ya lo hacen (Nginx con `$proxy_add_x_forwarded_for` y Caddy por defecto). Si pones otro proxy o una CDN
-  delante de este, esa última dirección sería la del proxy y todos los visitantes compartirían el límite.
+- **`X-Forwarded-For` con la dirección que vio el proxy al final.** El límite de inicio de sesión (RNF-10, por correo
+  y dirección) toma la **última** dirección del encabezado, porque las anteriores las escribe el cliente. Los dos
+  bloques de abajo ya lo hacen (Nginx con `$proxy_add_x_forwarded_for` y Caddy por defecto). Si pones otro proxy o una
+  CDN delante de este, esa última dirección sería la del proxy y todos compartirían el límite. El registro de
+  pasaportes no tiene límite por dirección: en la sede todos los teléfonos salen por la misma IP del Wi-Fi.
 
 ### Nginx
 
