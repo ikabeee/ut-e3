@@ -1,9 +1,10 @@
 import "server-only";
-import { getEntryWindow, type EntrySchedule } from "@features/tournament/lib/entries-rules";
+import { getEntryWindow, isPinFormat, type EntrySchedule } from "@features/tournament/lib/entries-rules";
 import { MAX_ENTRANTS, PRE_LIST_LIMIT } from "@features/tournament/lib/tournament-rules";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
 import type { EntryChannel, EntryStatus, EntryView, SelfEntryAvailability } from "@features/tournament/lib/types";
 import type { Prisma } from "@generated/prisma/client";
+import { hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 /**
@@ -72,7 +73,7 @@ export async function getEntries(): Promise<EntryView[]> {
       channel: true,
       status: true,
       checkedInAt: true,
-      visitor: { select: { gamertag: true } },
+      visitor: { select: { gamertag: true, fullName: true } },
     },
   });
 
@@ -80,10 +81,21 @@ export async function getEntries(): Promise<EntryView[]> {
     id: row.id,
     visitorId: row.visitorId,
     gamertag: row.visitor.gamertag,
+    fullName: row.visitor.fullName,
     channel: toChannel(row.channel),
     status: toStatus(row.status),
     checkedInAt: row.checkedInAt?.toISOString() ?? null,
   }));
+}
+
+/** The entry of the visitor with that PIN, or `null`. The PIN is compared by its HMAC: it never leaves the database. */
+export async function findEntryByPin(pin: string) {
+  if (!isPinFormat(pin)) return null;
+
+  return getPrisma().tournamentEntry.findFirst({
+    where: { visitor: { pinLookup: hashPinForLookup(pin) } },
+    select: { id: true, status: true, visitor: { select: { gamertag: true } } },
+  });
 }
 
 /** The status of the entry of a visitor, or `null` when they are not in the tournament (RF-75). */

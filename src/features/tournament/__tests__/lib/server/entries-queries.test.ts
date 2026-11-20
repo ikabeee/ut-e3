@@ -47,7 +47,7 @@ describe("getEntrySchedule", () => {
 });
 
 describe("getEntries", () => {
-  it("lists the entries in the order they were added, with the gamertag", async () => {
+  it("lists the entries in the order they were added, with the gamertag and the name", async () => {
     await getPrisma().tournamentEntry.create({
       data: { visitorId: visitors[1].id, channel: "pre", status: "registered" },
     });
@@ -62,9 +62,11 @@ describe("getEntries", () => {
 
     const entries = await getEntries();
 
-    expect(entries.map((entry) => [entry.gamertag, entry.channel, entry.status, entry.checkedInAt])).toEqual([
-      ["Jugador2", "pre", "registered", null],
-      ["Jugador1", "onsite", "checked_in", "2026-11-20T17:20:00.000Z"],
+    expect(
+      entries.map((entry) => [entry.gamertag, entry.fullName, entry.channel, entry.status, entry.checkedInAt]),
+    ).toEqual([
+      ["Jugador2", "Nombre Jugador2", "pre", "registered", null],
+      ["Jugador1", "Nombre Jugador1", "onsite", "checked_in", "2026-11-20T17:20:00.000Z"],
     ]);
   });
 });

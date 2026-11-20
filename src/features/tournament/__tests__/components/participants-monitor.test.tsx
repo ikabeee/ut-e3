@@ -8,6 +8,7 @@ const FIRST: EntryView = {
   id: "entry-1",
   visitorId: "visitor-1",
   gamertag: "Jugador1",
+  fullName: "Nombre Jugador1",
   channel: "pre",
   status: "registered",
   checkedInAt: null,
@@ -19,7 +20,8 @@ describe("ParticipantsMonitor", () => {
     render(<ParticipantsMonitor initial={[FIRST]} hasBracket={false} load={async () => [FIRST]} />);
 
     expect(screen.getByText("Jugador1")).toBeInTheDocument();
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Agregar al torneo" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Hacer check-in" })).not.toBeInTheDocument();
   });
 
   it("brings in the participants added since, on the next poll", async () => {

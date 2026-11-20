@@ -1,7 +1,7 @@
 import "server-only";
 import { buildEntryEmail } from "@features/tournament/lib/entry-email";
 import { getEntryWindow, type EntrySchedule } from "@features/tournament/lib/entries-rules";
-import { getEntrySchedule } from "@features/tournament/lib/server/entries-queries";
+import { findEntryByPin, getEntrySchedule } from "@features/tournament/lib/server/entries-queries";
 import { generateTournament, type GenerateResult } from "@features/tournament/lib/server/tournament-mutations";
 import { MAX_ENTRANTS, PRE_LIST_LIMIT } from "@features/tournament/lib/tournament-rules";
 import type { EntryChannel, Player } from "@features/tournament/lib/types";
@@ -9,12 +9,9 @@ import type { Prisma } from "@generated/prisma/client";
 import { recordAudit } from "@shared/lib/server/audit-log";
 import { isUniqueViolation, readDatabaseMessage } from "@shared/lib/server/database-errors";
 import { enqueueEmail, type OutgoingEmail } from "@shared/lib/server/email-outbox";
-import { hashPinForLookup } from "@shared/lib/server/pin-cipher";
 import { getPrisma } from "@shared/lib/server/prisma";
 
 const ENTITY_TYPE = "tournament_entry";
-
-const PIN_FORMAT = /^\d{5}$/;
 
 export type AddEntryResult =
   | { status: "added"; channel: EntryChannel; emailId: string }
@@ -271,15 +268,6 @@ export function explainInsertFailure(cause: unknown): Refusal {
   if (isUniqueViolation(cause)) return { status: "alreadyEntered" };
 
   throw cause;
-}
-
-async function findEntryByPin(pin: string) {
-  if (!PIN_FORMAT.test(pin)) return null;
-
-  return getPrisma().tournamentEntry.findFirst({
-    where: { visitor: { pinLookup: hashPinForLookup(pin) } },
-    select: { id: true, status: true, visitor: { select: { gamertag: true } } },
-  });
 }
 
 async function markCheckedIn(

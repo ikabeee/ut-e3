@@ -2,6 +2,8 @@
 
 import { FieldError, Form, Input, Label, TextField } from "@heroui/react";
 import { useActionState } from "react";
+import { EntryList } from "@features/tournament/components/entry-list";
+import type { PinLookup } from "@features/tournament/hooks/use-pin-match";
 import type { EntriesActionState } from "@features/tournament/lib/entries-actions";
 import { getEntryCounts, type EntryCounts } from "@features/tournament/lib/entries-view";
 import { TOURNAMENT_COPY } from "@features/tournament/lib/tournament-copy";
@@ -18,6 +20,8 @@ export interface EntriesActions {
   checkIn: EntriesAction;
   generate: EntriesAction;
   reset: EntriesAction;
+  /** The search of the list by PIN, answered by the server. */
+  findByPin: PinLookup;
 }
 
 interface EntriesPanelProps {
@@ -51,7 +55,7 @@ export function EntriesPanel({ entries, hasBracket, actions }: Readonly<EntriesP
       </h2>
       <EntryCountList counts={getEntryCounts(entries)} />
       {actions && <EntryActions actions={actions} hasBracket={hasBracket} />}
-      <EntryList entries={entries} />
+      <EntryList entries={entries} findByPin={actions?.findByPin} />
     </section>
   );
 }
@@ -151,22 +155,5 @@ function ResetForm({ action }: Readonly<{ action: EntriesAction }>) {
         {isPending ? COPY.reset.sending : COPY.reset.submit}
       </PendingButton>
     </Form>
-  );
-}
-
-function EntryList({ entries }: Readonly<{ entries: readonly EntryView[] }>) {
-  if (entries.length === 0) return <p className="type-mono text-muted">{COPY.empty}</p>;
-
-  return (
-    <ul className="m-0 grid list-none gap-2 p-0 md:grid-cols-2">
-      {entries.map((entry) => (
-        <li key={entry.id} className="flex items-center justify-between gap-3 border border-border p-3">
-          <span className="font-bold">{entry.gamertag}</span>
-          <span className="type-tiny text-muted">
-            {COPY.channels[entry.channel]} · {COPY.statuses[entry.status]}
-          </span>
-        </li>
-      ))}
-    </ul>
   );
 }

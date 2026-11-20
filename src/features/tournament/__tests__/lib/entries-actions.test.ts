@@ -6,6 +6,7 @@ import type * as NextServer from "next/server";
 import {
   addEntryAction,
   checkInEntryAction,
+  findEntryIdByPinAction,
   generateBracketAction,
   resetBracketAction,
 } from "@features/tournament/lib/entries-actions";
@@ -121,6 +122,27 @@ describe("checkInEntryAction", () => {
 
     expect(await checkInEntryAction(null, createForm(fields))).toEqual({ status: "error", message });
     expect((await getPrisma().tournamentEntry.findFirstOrThrow()).status).toBe("registered");
+  });
+});
+
+describe("findEntryIdByPinAction", () => {
+  it("answers the id of the entry with that PIN, and nothing for a PIN that is not in the list", async () => {
+    await insertEntry(0, "registered");
+    await signInAs("admin");
+
+    const entry = await getPrisma().tournamentEntry.findFirstOrThrow();
+
+    expect(await findEntryIdByPinAction(" 00001 ")).toBe(entry.id);
+    expect(await findEntryIdByPinAction("00002")).toBeNull();
+    expect(await findEntryIdByPinAction("Jugador1")).toBeNull();
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("answers nothing to a desk", async () => {
+    await insertEntry(0, "registered");
+    await signInAs("desk1");
+
+    expect(await findEntryIdByPinAction("00001")).toBeNull();
   });
 });
 
