@@ -139,7 +139,9 @@ describe("generateBracket with fewer than 32 players", () => {
 
         if (players === 2) expect(match.status).toBe("ready");
         else expect(match.status).toBe("finished");
+
         if (players === 1) expect(match.outcome).toBe("bye");
+
         if (players === 0) expect(match.outcome).toBe("empty");
       });
     });
