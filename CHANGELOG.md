@@ -6,6 +6,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.7.0] - 2026-11-20
+
 ### Agregado
 
 - Patrocinadores: el sysadmin sube el logo desde `/admin` (PNG, JPG o WebP de máximo 2 MB, validado por su firma; sin
