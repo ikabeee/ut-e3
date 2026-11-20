@@ -45,6 +45,8 @@ const SERVER_READY_TIMEOUT_MS = 180_000;
 
 const UI_TIMEOUT_MS = 20_000;
 
+const HOUR_MS = 3600_000;
+
 const results = [];
 
 main().then(
@@ -416,6 +418,8 @@ function deskForm(page, heading) {
 async function checkAssistedRegistration({ desk, walkIn, database, screenshots }) {
   const agent = database.prepare("SELECT id FROM accounts WHERE email = ?").get(HELP_DESK_EMAIL);
 
+  // The seeded window is a fixed date: it is moved to the past so the check does not depend on when CI runs.
+  moveOnsiteSignupWindow(database, { opensIn: -4 * HOUR_MS, startsIn: -3 * HOUR_MS, endsIn: -2 * HOUR_MS });
   await desk.goto(`${BASE_URL}/support/recovery`, { waitUntil: "networkidle" });
   check(
     "the KOF option is hidden outside the on-site sign-up",
@@ -466,21 +470,7 @@ async function checkAssistedRegistrationRefusals(page) {
 }
 
 async function checkAssistedRegistrationInTournament({ desk, database }) {
-  const now = Date.now();
-
-  const { current } = database
-    .prepare("SELECT kof_onsite_signup_starts_at AS current FROM event_settings WHERE id = 1")
-    .get();
-
-  const stored = (milliseconds) =>
-    /^\d+$/.test(String(current)) ? milliseconds : new Date(milliseconds).toISOString();
-
-  database
-    .prepare(
-      "UPDATE event_settings SET kof_registration_opens_at = ?, kof_onsite_signup_starts_at = ?, kof_onsite_signup_ends_at = ? WHERE id = 1",
-    )
-    .run(stored(now - 2 * 3600_000), stored(now - 3600_000), stored(now + 3600_000));
-
+  moveOnsiteSignupWindow(database, { opensIn: -2 * HOUR_MS, startsIn: -HOUR_MS, endsIn: HOUR_MS });
   await desk.goto(`${BASE_URL}/support/recovery`, { waitUntil: "networkidle" });
   await desk.getByText("Inscribir también en el torneo de KOF").click();
 
@@ -515,6 +505,23 @@ async function fillRegistration(form, { gamertag, email }) {
   await form.getByLabel("Gamertag").fill(gamertag);
   await form.getByLabel("Correo").fill(email);
   await form.getByRole("button", { name: "Registrar visitante" }).click();
+}
+
+// Offsets are relative to now; the column keeps the format the seed used (epoch milliseconds or ISO text).
+function moveOnsiteSignupWindow(database, { opensIn, startsIn, endsIn }) {
+  const now = Date.now();
+
+  const { current } = database
+    .prepare("SELECT kof_onsite_signup_starts_at AS current FROM event_settings WHERE id = 1")
+    .get();
+
+  const stored = (offset) => (/^\d+$/.test(String(current)) ? now + offset : new Date(now + offset).toISOString());
+
+  database
+    .prepare(
+      "UPDATE event_settings SET kof_registration_opens_at = ?, kof_onsite_signup_starts_at = ?, kof_onsite_signup_ends_at = ? WHERE id = 1",
+    )
+    .run(stored(opensIn), stored(startsIn), stored(endsIn));
 }
 
 function count(database, table, where = "1 = 1") {
