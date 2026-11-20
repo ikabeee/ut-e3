@@ -60,6 +60,7 @@ function validateEntry(entry: Sponsor): SponsorInput {
 
   if (!parsed.isValid)
     throw new Error(`Patrocinador inválido (${entry.name}): ${Object.keys(parsed.errors).join(", ")}`);
+
   if (!existsSync(join(process.cwd(), "public", parsed.sponsor.logoPath)))
     throw new Error(`Patrocinador inválido (${entry.name}): no existe public${parsed.sponsor.logoPath}`);
 

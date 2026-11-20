@@ -6,6 +6,17 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- Patrocinadores: se agregan Dolphin Discovery, Fresh Air, Pixel & Code, Rock and Race y Target G, y se completan los datos
+  de contacto y los servicios de los demás con una frase corta en español. `npm run db:backfill:sponsors` los carga en una
+  base que ya tiene patrocinadores sin pisar lo editado.
+
+### Cambiado
+
+- Arte de los juegos: tarjetas, portadas y capturas nuevas para los 16 juegos con material. One Mind y Vaporlock vuelven
+  a mostrarse y Identity Dissolution tiene 4 capturas (`npm run db:backfill:images` agrega las filas que faltan).
+
 ## [1.5.1] - 2026-11-19
 
 ### Cambiado

@@ -21,7 +21,69 @@ beforeEach(async () => {
 });
 
 const BONAVIDA = INITIAL_SPONSORS[1];
+
 const NEW_SPONSOR_NAMES = INITIAL_SPONSORS.slice(8).map(({ name }) => name);
+
+// The rows production has today (the list before the new sponsors), with the values the sponsors gave.
+const PREVIOUS_SPONSORS = [
+  {
+    name: "Algorix Insights",
+    logoPath: "/sponsors/algorix-insights.svg",
+    websiteUrl: "https://algorixinsights.com",
+    phone: "",
+    email: null,
+    services: "Desarrollo web, agentes de IA y software a medida.",
+  },
+  {
+    name: "Bonavida",
+    logoPath: "/sponsors/bonavida.svg",
+    websiteUrl: "https://aguabonavida.com.mx/",
+    phone: "+529983048120",
+    email: null,
+    services: "",
+  },
+  { name: "Mermelada", logoPath: "/sponsors/mermelada.svg", websiteUrl: "", phone: "", email: null, services: "" },
+  {
+    name: "Nemo Submarine",
+    logoPath: "/sponsors/nemo-submarine.svg",
+    websiteUrl: "https://www.nemoisla.com/",
+    phone: "+19038019083",
+    email: null,
+    services: "",
+  },
+  {
+    name: "OpSET",
+    logoPath: "/sponsors/opset.svg",
+    websiteUrl: "",
+    phone: "+529981878194",
+    email: "ceo@opset.com.mx",
+    services: "",
+  },
+  {
+    name: "Le Jardin d'Aurore",
+    logoPath: "/sponsors/le-jardin-d-aurore.svg",
+    websiteUrl: "https://www.lejardindaurore.com/",
+    phone: "+529981878194",
+    email: "contacto@lejardindaurore.com",
+    services: "",
+  },
+  {
+    name: "Noxy Digital",
+    logoPath: "/sponsors/noxy-digital.png",
+    websiteUrl: "https://www.noxy.digital/",
+    phone: "+529981725547",
+    email: "info@noxy.digital",
+    services: "",
+  },
+  {
+    name: "Directrix Studio",
+    logoPath: "/sponsors/directrix-studio.png",
+    websiteUrl: "https://www.facebook.com/GrupoDirectrixAgenciaCreativa/",
+    phone: "+529981268631",
+    email: "directrixstudio@gmail.com",
+    services: "",
+  },
+].map((sponsor, index) => ({ ...sponsor, position: index + 1 }));
 
 describe("backfillSponsors", () => {
   it("inserts every initial sponsor into an empty table, in order", async () => {
@@ -30,7 +92,7 @@ describe("backfillSponsors", () => {
     expect(result.added).toEqual(INITIAL_SPONSORS.map(({ name }) => name));
     expect(result.filled).toEqual([]);
     expect(await readSponsors()).toEqual(
-      INITIAL_SPONSORS.map(({ id: _id, ...sponsor }) => expect.objectContaining(sponsor)),
+      INITIAL_SPONSORS.map((sponsor) => expect.objectContaining({ ...sponsor, id: expect.any(String) })),
     );
   });
 
@@ -112,6 +174,31 @@ describe("backfillSponsors", () => {
       services: BONAVIDA.services,
       position: 77,
     });
+  });
+
+  it("brings the eight sponsors of the previous list up to date without moving them or touching what they have", async () => {
+    await getPrisma().sponsor.createMany({ data: PREVIOUS_SPONSORS });
+
+    const result = await backfillSponsors(getPrisma());
+
+    expect(result).toEqual({
+      added: NEW_SPONSOR_NAMES,
+      filled: [
+        "Bonavida (email, services)",
+        "Mermelada (websiteUrl, phone, email, services)",
+        "Nemo Submarine (services)",
+        "OpSET (websiteUrl, services)",
+        "Le Jardin d'Aurore (services)",
+        "Noxy Digital (services)",
+      ],
+    });
+    const rows = await readSponsors();
+    expect(rows.map(({ name, position }) => ({ name, position }))).toEqual(
+      INITIAL_SPONSORS.map(({ name, position }) => ({ name, position })),
+    );
+    expect(rows[1]).toMatchObject({ websiteUrl: "https://aguabonavida.com.mx/", email: "ventas@aguabonavida.com.mx" });
+    expect(rows[5]).toMatchObject({ websiteUrl: "https://www.lejardindaurore.com/" });
+    expect(rows[7]).toMatchObject({ name: "Directrix Studio", services: "" });
   });
 
   it("does not fill a field that the initial data leaves empty", async () => {
