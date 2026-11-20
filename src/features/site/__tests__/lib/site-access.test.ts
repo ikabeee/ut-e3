@@ -28,6 +28,16 @@ describe("decideSiteAccess in landing mode", () => {
     );
   });
 
+  it("serves the logos that the sysadmin uploads, only to reads", () => {
+    const pathname = "/api/media/sponsors/sponsor-nodo-caribe-0123456789ab.png";
+
+    expect(decideSiteAccess("landing", { method: "GET", pathname })).toBe("allow");
+    expect(decideSiteAccess("landing", { method: "HEAD", pathname })).toBe("allow");
+    expect(decideSiteAccess("landing", { method: "POST", pathname })).toBe("methodNotAllowed");
+    expect(decideSiteAccess("landing", { method: "GET", pathname: "/api/media/sponsorsx/a.png" })).toBe("notFound");
+    expect(decideSiteAccess("full", { method: "GET", pathname })).toBe("allow");
+  });
+
   it.each(["/games/abby-s-tower.jpg", "/sponsors/bonavida.svg", "/media/hero-loop.mp4", "/icons/icon-192.png"])(
     "serves the public file %s",
     (pathname) => {

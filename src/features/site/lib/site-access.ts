@@ -16,8 +16,9 @@ const HEALTH_PATH = "/api/health";
 
 const API_PREFIX = "/api/";
 
-// The images that stand administrators upload live in the volume, not in public/, and the landing shows them.
-const UPLOADED_GAME_IMAGES_PREFIX = "/api/media/games/";
+// The images that stand administrators upload and the logos that the sysadmin uploads live in the volume, not in
+// public/, and the landing shows them.
+const UPLOADED_MEDIA_PREFIXES = ["/api/media/games/", "/api/media/sponsors/"];
 
 // The landing-only mode serves these pages; the Docker HEALTHCHECK needs /api/health.
 // The metadata routes the landing needs: crawlers read robots and the sitemap, and the share card is its og:image.
@@ -46,7 +47,11 @@ export function decideSiteAccess(mode: SiteMode, request: SiteRequest): SiteAcce
 }
 
 function isLandingOnlyPath(pathname: string): boolean {
-  return LANDING_ONLY_PATHS.has(pathname) || isPublicFile(pathname) || pathname.startsWith(UPLOADED_GAME_IMAGES_PREFIX);
+  return (
+    LANDING_ONLY_PATHS.has(pathname) ||
+    isPublicFile(pathname) ||
+    UPLOADED_MEDIA_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  );
 }
 
 function isPublicFile(pathname: string): boolean {

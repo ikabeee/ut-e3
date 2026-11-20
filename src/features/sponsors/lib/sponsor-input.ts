@@ -1,3 +1,4 @@
+import { isSponsorLogoFileName, SPONSOR_MEDIA_PATH } from "@features/sponsors/lib/sponsor-logo";
 import { SPONSORS_COPY } from "@features/sponsors/lib/sponsors-copy";
 import { readFormText } from "@shared/lib/form-data";
 
@@ -20,7 +21,7 @@ export const SERVICES_MAX_LENGTH = 200;
 export const EMAIL_MAX_LENGTH = 254;
 
 // A file served from public/ (next/image only loads local logos), without `..` segments.
-const LOGO_PATH = /^\/(?:[\w-]+\/)*[\w.-]+\.(?:svg|png|jpe?g|webp)$/i;
+const PUBLIC_LOGO_PATH = /^\/(?:[\w-]+\/)*[\w.-]+\.(?:svg|png|jpe?g|webp)$/i;
 
 // E.164, as the CHECK of the table asks (`phone GLOB '+[0-9]*'`).
 const PHONE = /^\+\d{8,15}$/;
@@ -53,7 +54,7 @@ export function parseSponsorInput(form: FormData): ParsedSponsor {
 function findErrors(sponsor: SponsorInput): SponsorErrors {
   const checks: [SponsorField, boolean][] = [
     ["name", sponsor.name.length > 0 && sponsor.name.length <= NAME_MAX_LENGTH],
-    ["logoPath", LOGO_PATH.test(sponsor.logoPath) && !sponsor.logoPath.includes("..")],
+    ["logoPath", isLogoPath(sponsor.logoPath)],
     ["websiteUrl", sponsor.websiteUrl === "" || isHttpsUrl(sponsor.websiteUrl)],
     ["phone", sponsor.phone === "" || PHONE.test(sponsor.phone)],
     ["email", sponsor.email === null || (sponsor.email.length <= EMAIL_MAX_LENGTH && EMAIL.test(sponsor.email))],
@@ -62,6 +63,15 @@ function findErrors(sponsor: SponsorInput): SponsorErrors {
   ];
 
   return Object.fromEntries(checks.flatMap(([field, isValid]) => (isValid ? [] : [[field, ERRORS[field]]])));
+}
+
+// A logo is a file of public/ or one of the files that the sysadmin uploads, which the app names itself.
+function isLogoPath(logoPath: string): boolean {
+  const mediaPrefix = `${SPONSOR_MEDIA_PATH}/`;
+
+  if (logoPath.startsWith(mediaPrefix)) return isSponsorLogoFileName(logoPath.slice(mediaPrefix.length));
+
+  return PUBLIC_LOGO_PATH.test(logoPath) && !logoPath.includes("..") && !logoPath.startsWith("/api/");
 }
 
 function isHttpsUrl(text: string): boolean {

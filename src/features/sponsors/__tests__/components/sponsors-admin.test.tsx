@@ -31,3 +31,26 @@ describe("SponsorsAdmin email field", () => {
     expect(within(rows[1]).getByLabelText("Correo")).toHaveValue("");
   });
 });
+
+describe("SponsorsAdmin logo upload (S3)", () => {
+  it("offers an optional Logo (archivo) field for PNG, JPG or WebP in the create form and in each edit form", () => {
+    render(<SponsorsAdmin sponsors={[PIXEL_FORGE]} saveAction={noopAction} deleteAction={noopAction} />);
+
+    const fields = screen.getAllByLabelText("Subir logo (archivo)");
+
+    expect(fields).toHaveLength(2);
+
+    for (const field of fields) {
+      expect(field).toHaveAttribute("type", "file");
+      expect(field).toHaveAttribute("name", "logoFile");
+      expect(field).toHaveAttribute("accept", "image/png,image/jpeg,image/webp");
+      expect(field).not.toBeRequired();
+    }
+  });
+
+  it("no longer requires the path of the logo, since the file can take its place", () => {
+    render(<SponsorsAdmin sponsors={[]} saveAction={noopAction} deleteAction={noopAction} />);
+
+    expect(screen.getByLabelText("Ruta del logo")).not.toBeRequired();
+  });
+});

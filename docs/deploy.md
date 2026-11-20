@@ -21,7 +21,12 @@ imagen es `/data/uploads` (el mismo volumen `app-data`; en desarrollo, `data/upl
 `GET /api/media/games/<archivo>.jpg`, con caché inmutable porque el nombre lleva un hash del contenido. Solo se aceptan
 JPG reales, de máximo 5 MB, con el tamaño exacto del grid de portadas (tarjeta 810x1080; portada y hasta cuatro capturas
 1920x1080). El respaldo de la base (abajo) no incluye las imágenes: copia también `/data/uploads`
-(`docker compose cp app:/data/uploads ./uploads-<fecha>`). El límite de cuerpo de las Server Actions es de 6 MB
+(`docker compose cp app:/data/uploads ./uploads-<fecha>`).
+Los logos de los patrocinadores que el sysadmin sube desde `/admin` (campo "Subir logo (archivo)") se guardan en
+`UPLOADS_DIR/sponsors/` (`/data/uploads/sponsors`), así que también viajan en ese respaldo del volumen y no necesitan
+un despliegue. Solo se aceptan PNG, JPG y WebP reales (se revisan por su firma, no por el nombre), de máximo 2 MB y
+4000 px por lado; el SVG se rechaza porque puede llevar scripts. Se sirven por `GET /api/media/sponsors/<archivo>` con
+caché inmutable, también con el kill switch en `landing`. Los logos de `public/sponsors/` siguen funcionando. El límite de cuerpo de las Server Actions es de 6 MB
 (`experimental.serverActions.bodySizeLimit` en `next.config.ts`); si pones un proxy con límite menor
 (`client_max_body_size` en Nginx), súbelo a 6 MB o la carga falla antes de llegar a la app.
 
@@ -165,6 +170,37 @@ Cada inicio de sesión del staff pide un código de 6 dígitos que se envía por
 `SMTP_HOST` nadie del staff puede entrar: ese código y los enlaces de "Olvidé mi contraseña" (vencen en 1 hora) también se
 quedan en `email_outbox`. Para leer el código en una emergencia usa `SELECT to_address, text FROM email_outbox` en el
 comando de arriba y busca el último correo "Tu código para entrar al panel del evento".
+
+#### Proveedor recomendado: Resend
+
+El relay de Google Workspace (`smtp-relay.gmail.com`) tiene un cupo diario reducido mientras la cuenta no haya pagado una
+factura generada por Google. Cuando lo alcanza responde `550-5.7.1 Daily SMTP relay limit exceeded` y no sale ningún
+correo, tampoco los códigos 2FA. Gmail SMTP (`smtp.gmail.com`) se queda en 500 correos al día hasta que el dominio acumula
+100 USD pagados. Para el evento se usa Resend: el plan Pro no tiene límite diario (50 000 correos al mes). El plan gratis
+permite solo 100 al día, así que no alcanza.
+
+1. Crea la cuenta en resend.com y contrata el plan Pro.
+2. En **Domains**, agrega un subdominio de envío, por ejemplo `eventos.algorixinsights.com`. Resend recomienda un
+   subdominio para no mezclar su reputación con la del dominio principal.
+3. Copia en el DNS del dominio los registros que muestra Resend: DKIM (TXT) y SPF (MX y TXT del subdominio de retorno).
+   Espera a que el dominio diga **Verified**.
+4. En **API Keys**, crea una clave con permiso **Sending access**, limitada a ese dominio.
+5. En Coolify, cambia las variables de la app y reinicia:
+
+   | Variable | Valor |
+   | --- | --- |
+   | `SMTP_HOST` | `smtp.resend.com` |
+   | `SMTP_PORT` | `465` (TLS directo) |
+   | `SMTP_USER` | `resend` |
+   | `SMTP_PASSWORD` | la API key de Resend |
+   | `SMTP_FROM` | `UT Game Showcase <no-reply@eventos.algorixinsights.com>` (la dirección debe ser del dominio verificado) |
+   | `SMTP_EHLO_NAME` | el dominio del sitio, sin cambios |
+
+6. Prueba el envío en `/admin/recovery` ("Probar SMTP"). Después, si quedaron correos abandonados del staff, corre
+   `npm run db:rebuild-abandoned -- --dry-run` y luego sin `--dry-run`.
+
+La app ya limita el ritmo (un mensaje cada 2 segundos y 10 por pasada) y reintenta los errores temporales, así que no hace
+falta cambiar código. Para volver a Google basta con restaurar las cinco variables.
 
 ### Avisos de emergencia
 
