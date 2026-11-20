@@ -164,6 +164,37 @@ Cada inicio de sesión del staff pide un código de 6 dígitos que se envía por
 quedan en `email_outbox`. Para leer el código en una emergencia usa `SELECT to_address, text FROM email_outbox` en el
 comando de arriba y busca el último correo "Tu código para entrar al panel del evento".
 
+#### Proveedor recomendado: Resend
+
+El relay de Google Workspace (`smtp-relay.gmail.com`) tiene un cupo diario reducido mientras la cuenta no haya pagado una
+factura generada por Google. Cuando lo alcanza responde `550-5.7.1 Daily SMTP relay limit exceeded` y no sale ningún
+correo, tampoco los códigos 2FA. Gmail SMTP (`smtp.gmail.com`) se queda en 500 correos al día hasta que el dominio acumula
+100 USD pagados. Para el evento se usa Resend: el plan Pro no tiene límite diario (50 000 correos al mes). El plan gratis
+permite solo 100 al día, así que no alcanza.
+
+1. Crea la cuenta en resend.com y contrata el plan Pro.
+2. En **Domains**, agrega un subdominio de envío, por ejemplo `eventos.algorixinsights.com`. Resend recomienda un
+   subdominio para no mezclar su reputación con la del dominio principal.
+3. Copia en el DNS del dominio los registros que muestra Resend: DKIM (TXT) y SPF (MX y TXT del subdominio de retorno).
+   Espera a que el dominio diga **Verified**.
+4. En **API Keys**, crea una clave con permiso **Sending access**, limitada a ese dominio.
+5. En Coolify, cambia las variables de la app y reinicia:
+
+   | Variable | Valor |
+   | --- | --- |
+   | `SMTP_HOST` | `smtp.resend.com` |
+   | `SMTP_PORT` | `465` (TLS directo) |
+   | `SMTP_USER` | `resend` |
+   | `SMTP_PASSWORD` | la API key de Resend |
+   | `SMTP_FROM` | `UT Game Showcase <no-reply@eventos.algorixinsights.com>` (la dirección debe ser del dominio verificado) |
+   | `SMTP_EHLO_NAME` | el dominio del sitio, sin cambios |
+
+6. Prueba el envío en `/admin/recovery` ("Probar SMTP"). Después, si quedaron correos abandonados del staff, corre
+   `npm run db:rebuild-abandoned -- --dry-run` y luego sin `--dry-run`.
+
+La app ya limita el ritmo (un mensaje cada 2 segundos y 10 por pasada) y reintenta los errores temporales, así que no hace
+falta cambiar código. Para volver a Google basta con restaurar las cinco variables.
+
 ### Avisos de emergencia
 
 Con `EMERGENCY_MAIL=guardia@tu-dominio.mx` en `.env`, el servidor manda un correo a esa dirección cuando:
