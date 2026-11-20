@@ -24,18 +24,25 @@ beforeEach(async () => {
 
 const E164 = /^\+\d{8,15}$/;
 
+const NAMES = [
+  "Algorix Insights",
+  "Bonavida",
+  "Mermelada",
+  "Nemo Submarine",
+  "OpSET",
+  "Le Jardin d'Aurore",
+  "Noxy Digital",
+  "Directrix Studio",
+  "Dolphin Discovery",
+  "Fresh Air",
+  "Pixel & Code",
+  "Rock and Race",
+  "Target G",
+];
+
 describe("INITIAL_SPONSORS", () => {
-  it("lists the eight sponsors with a logo, in the order of the carousel", () => {
-    expect(INITIAL_SPONSORS.map((sponsor) => sponsor.name)).toEqual([
-      "Algorix Insights",
-      "Bonavida",
-      "Mermelada",
-      "Nemo Submarine",
-      "OpSET",
-      "Le Jardin d'Aurore",
-      "Noxy Digital",
-      "Directrix Studio",
-    ]);
+  it("lists the thirteen sponsors, the eight first ones in their order and the new ones after, alphabetically", () => {
+    expect(INITIAL_SPONSORS.map((sponsor) => sponsor.name)).toEqual(NAMES);
   });
 
   it("gives every sponsor a logo that exists in public/", () => {
@@ -44,67 +51,97 @@ describe("INITIAL_SPONSORS", () => {
     }
   });
 
-  it("keeps the website and the phone only where the sources give them", () => {
+  it("keeps the website and the phone where the sources give them, and empty where no source does", () => {
     expect(INITIAL_SPONSORS.map(({ name, websiteUrl, phone }) => ({ name, websiteUrl, phone }))).toEqual([
       { name: "Algorix Insights", websiteUrl: "https://algorixinsights.com", phone: "" },
-      { name: "Bonavida", websiteUrl: "https://aguabonavida.com.mx/", phone: "+529983048120" },
-      { name: "Mermelada", websiteUrl: "", phone: "" },
+      { name: "Bonavida", websiteUrl: "https://aguabonavida.com.mx", phone: "+529983048120" },
+      { name: "Mermelada", websiteUrl: "https://mermeladacocinaquereconforta.com", phone: "+529981819937" },
       { name: "Nemo Submarine", websiteUrl: "https://www.nemoisla.com/", phone: "+19038019083" },
-      { name: "OpSET", websiteUrl: "", phone: "+529981878194" },
-      { name: "Le Jardin d'Aurore", websiteUrl: "https://www.lejardindaurore.com/", phone: "+529981878194" },
+      { name: "OpSET", websiteUrl: "https://opset.com.mx", phone: "+529981878194" },
+      { name: "Le Jardin d'Aurore", websiteUrl: "https://lejardindaurore.com", phone: "+529981878194" },
       { name: "Noxy Digital", websiteUrl: "https://www.noxy.digital/", phone: "+529981725547" },
       {
         name: "Directrix Studio",
         websiteUrl: "https://www.facebook.com/GrupoDirectrixAgenciaCreativa/",
         phone: "+529981268631",
       },
+      { name: "Dolphin Discovery", websiteUrl: "https://www.dolphindiscovery.com.mx/", phone: "+529981933360" },
+      { name: "Fresh Air", websiteUrl: "https://freshair.com.mx/", phone: "+529981802252" },
+      { name: "Pixel & Code", websiteUrl: "https://pixelandcode.org", phone: "+529988941923" },
+      { name: "Rock and Race", websiteUrl: "https://www.rockandrace.com", phone: "+529982893135" },
+      { name: "Target G", websiteUrl: "", phone: "" },
     ]);
   });
 
-  it("gives an email only to OpSET, Le Jardin d'Aurore, Noxy Digital and Directrix Studio, and stores the others as null", () => {
+  it("gives an email to the sponsors that have one and stores the others as null", () => {
     expect(INITIAL_SPONSORS.map(({ name, email }) => ({ name, email }))).toEqual([
       { name: "Algorix Insights", email: null },
-      { name: "Bonavida", email: null },
-      { name: "Mermelada", email: null },
+      { name: "Bonavida", email: "ventas@aguabonavida.com.mx" },
+      { name: "Mermelada", email: "mermeladacancun@gmail.com" },
       { name: "Nemo Submarine", email: null },
       { name: "OpSET", email: "ceo@opset.com.mx" },
       { name: "Le Jardin d'Aurore", email: "contacto@lejardindaurore.com" },
       { name: "Noxy Digital", email: "info@noxy.digital" },
       { name: "Directrix Studio", email: "directrixstudio@gmail.com" },
+      { name: "Dolphin Discovery", email: "customercare@dolphindiscovery.com" },
+      { name: "Fresh Air", email: null },
+      { name: "Pixel & Code", email: null },
+      { name: "Rock and Race", email: "info@rockandrace.com" },
+      { name: "Target G", email: null },
     ]);
   });
 
-  it("keeps the website and the services of OpSET, and the services of Le Jardin d'Aurore, empty", () => {
-    const [opset, jardin] = INITIAL_SPONSORS.slice(4);
-
-    expect([opset.websiteUrl, opset.services, jardin.services]).toEqual(["", "", ""]);
-  });
-
-  it.each([
-    ["Le Jardin d'Aurore", "https://www.lejardindaurore.com/", "+529981878194"],
-    ["Noxy Digital", "https://www.noxy.digital/", "+529981725547"],
-    ["Directrix Studio", "https://www.facebook.com/GrupoDirectrixAgenciaCreativa/", "+529981268631"],
-  ])("gives %s data that the admin validation accepts (https, E.164, email)", (name, websiteUrl, phone) => {
-    const sponsor = INITIAL_SPONSORS.find((candidate) => candidate.name === name);
-    const form = new FormData();
-
-    for (const [field, value] of Object.entries({ ...sponsor, position: String(sponsor?.position) }))
-      form.set(field, value === null ? "" : String(value));
-
-    expect(parseSponsorInput(form)).toMatchObject({ isValid: true, sponsor: { websiteUrl, phone } });
-  });
-
-  it("describes only Algorix Insights, the only sponsor with a services text", () => {
-    expect(INITIAL_SPONSORS.map((sponsor) => sponsor.services)).toEqual([
-      "Desarrollo web, agentes de IA y software a medida.",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
+  it("describes every sponsor but Directrix Studio with one short Spanish sentence", () => {
+    expect(INITIAL_SPONSORS.map(({ name, services }) => ({ name, services }))).toEqual([
+      {
+        name: "Algorix Insights",
+        services: "Desarrollo de software a la medida, sitios web y agentes de IA para automatizar negocios.",
+      },
+      { name: "Bonavida", services: "Agua purificada a domicilio en Cancún." },
+      {
+        name: "Mermelada",
+        services: "Restaurante de desayunos y comida con recetas inspiradas en sabores regionales en Cancún.",
+      },
+      { name: "Nemo Submarine", services: "Paseos en submarino para ver arrecifes y vida marina en Isla Mujeres." },
+      {
+        name: "OpSET",
+        services: "Desarrollo de sitios web, tiendas en línea, plataformas a la medida y branding en Cancún.",
+      },
+      {
+        name: "Le Jardin d'Aurore",
+        services: "Boutique floral que crea pequeños jardines botánicos y arreglos de plantas para el hogar.",
+      },
+      {
+        name: "Noxy Digital",
+        services: "Estudio de diseño y desarrollo de sitios web, tiendas en línea y plataformas.",
+      },
+      { name: "Directrix Studio", services: "" },
+      {
+        name: "Dolphin Discovery",
+        services: "Programas de nado e interacción con delfines en Cancún, Isla Mujeres y la Riviera Maya.",
+      },
+      {
+        name: "Fresh Air",
+        services: "Renta de coolers evaporativos y climas portátiles para eventos en Cancún y la Riviera Maya.",
+      },
+      { name: "Pixel & Code", services: "Portales inmobiliarios y sitios web para captar clientes en Cancún." },
+      { name: "Rock and Race", services: "Pista de arrancones en autos clásicos en Go Grand Outlet Cancún." },
+      {
+        name: "Target G",
+        services: "Campo de tiro recreativo con lanzadores no letales en Go Grand Outlet Cancún.",
+      },
     ]);
+  });
+
+  it("gives every sponsor data that the admin validation accepts", () => {
+    for (const sponsor of INITIAL_SPONSORS) {
+      const form = new FormData();
+
+      for (const [field, value] of Object.entries({ ...sponsor, position: String(sponsor.position) }))
+        form.set(field, value === null ? "" : String(value));
+
+      expect(parseSponsorInput(form)).toMatchObject({ isValid: true });
+    }
   });
 
   it("writes every phone that exists in E.164", () => {
@@ -133,16 +170,7 @@ describe("seedSponsors", () => {
       select: { name: true, email: true, phone: true },
     });
 
-    expect(rows.map(({ email }) => email)).toEqual([
-      null,
-      null,
-      null,
-      null,
-      "ceo@opset.com.mx",
-      "contacto@lejardindaurore.com",
-      "info@noxy.digital",
-      "directrixstudio@gmail.com",
-    ]);
+    expect(rows.map(({ email }) => email)).toEqual(INITIAL_SPONSORS.map(({ email }) => email));
     expect(rows[4]?.phone).toBe("+529981878194");
   });
 

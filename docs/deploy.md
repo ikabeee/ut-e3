@@ -175,6 +175,18 @@ evento, cronograma, los 18 stands con sus juegos de muestra, patrocinadores y el
 toca, así que reiniciar o actualizar el contenedor no pisa lo que ya editaste. El sysadmin reemplaza los datos de
 muestra desde `/admin` (stands, cronograma y cuentas).
 
+Para que una base que ya tiene patrocinadores reciba los nuevos de la lista inicial (`INITIAL_SPONSORS`), se corre una
+vez tras desplegar (los logos nuevos viajan en `public/sponsors/` con la imagen):
+
+```bash
+docker compose exec app npm run db:backfill:sponsors
+```
+
+Agrega los patrocinadores que faltan (se comparan por nombre, sin importar mayúsculas) después de la última posición y,
+en los que ya existen, llena solo los campos vacíos (sitio, teléfono, correo y servicios): nunca pisa lo que el sysadmin
+editó. Se puede repetir sin efecto. Valida cada entrada como el formulario del panel y falla, sin escribir nada, si falta
+un logo en `public/`. Después hay que reiniciar la app, porque la portada y `/sponsors` están en caché.
+
 ### Datos de demostración (solo en una instancia de pruebas)
 
 `db:seed:stands` crea cuentas de staff con una contraseña de ejemplo y 24 pasaportes falsos. **No se corre en
