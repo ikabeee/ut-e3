@@ -118,6 +118,19 @@ porque usa el rol secundario y las 4 mesas. Rama `feature/<issue>-staff-dual-rol
 
   Con esto se ajustaron S5, T7 y T8. El despliegue y la escritura en el VPS siguen siendo acciones que se confirman en
   el momento.
+- **L27** (cambio de decisión del usuario, verbatim): "Cambio de decisión sobre el script db:rebuild-abandoned (todavía sin
+  commit en feature/sponsors-game-art): solo puede tocar correos del staff; la información de visitantes no se puede
+  tocar."
+  1. "Que el script solo procese staff_invitation y password_reset. Que nunca lea, borre ni vuelva a encolar filas de
+     visitor_passport, recovery_link, kof_entry ni raffle_winner, y que tampoco las cuente como "omitidas". La consulta
+     tiene que filtrar por esos dos tipos desde el inicio."
+  2. "Agregar --dry-run, que solo liste qué haría, y correrlo primero así en producción."
+  3. "Pruebas: una fila de visitante abandonada no cambia (sigue igual y sin auditoría), y una invitación abandonada se
+     rehace."
+  4. "No correr el script de rehacer sobre los 13 abandonados de visitantes. Quedan como están."
+  5. "Registrar la decisión en el log de odd/tasks/staff-dual-roles.md."
+
+  Nota: el script ya estaba en el commit 5da37b7. El cambio va en un commit nuevo encima.
 - **L26** (incidente en producción y decisión del usuario, verbatim):
   - Decisiones: "Cambia la regla para que un correo pueda ser staff y visitante" y "Permitir el correo doble y bloquear la
     visita a su propio stand".

@@ -6,6 +6,22 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+### Agregado
+
+- `npm run db:rebuild-abandoned`: rehace de una vez los correos abandonados del staff (invitaciones y restablecimientos
+  de contraseña) con enlaces nuevos y los deja en cola, para cuando el sysadmin no puede usar "Rehacer". No toca los
+  correos de los visitantes. `-- --dry-run` solo lista lo que haría; córrelo primero.
+- Patrocinadores: se agregan Dolphin Discovery, Fresh Air, Pixel & Code, Rock and Race y Target G, y se completan los datos
+  de contacto y los servicios de los demás con una frase corta en español. `npm run db:backfill:sponsors` los carga en una
+  base que ya tiene patrocinadores sin pisar lo editado.
+
+### Cambiado
+
+- La barra lateral del panel de administración se queda fija al cambiar de sección: solo se recarga el contenido de la
+  página.
+- Arte de los juegos: tarjetas, portadas y capturas nuevas para los 16 juegos con material. One Mind y Vaporlock vuelven
+  a mostrarse y Identity Dissolution tiene 4 capturas (`npm run db:backfill:images` agrega las filas que faltan).
+
 ## [1.5.1] - 2026-11-19
 
 ### Cambiado

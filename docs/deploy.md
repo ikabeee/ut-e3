@@ -133,6 +133,17 @@ de la base (RNF-03). Salen con la plantilla del sitio (fondo negro, acento azul,
   `docker compose exec app npm run db:backfill:email-kinds`: asigna tipo y referencia a los no enviados cuyo asunto sea el
   del pasaporte o el de recuperación y cuyo visitante se encuentre por correo (y gamertag); los demás no se tocan. Cada
   cambio queda en la bitácora como `admin.email.backfill_kind`, y después se usa "Rehacer".
+  Si el sysadmin no puede entrar al panel (por ejemplo, porque los códigos de inicio de sesión no llegan mientras dura el
+  límite de Gmail), `docker compose exec app npm run db:rebuild-abandoned` rehace de una vez los correos **del staff**
+  abandonados (invitaciones, `staff_invitation`, y restablecimientos de contraseña, `password_reset`), con enlaces nuevos,
+  y los deja en cola para el trabajador de correo (no envía nada). Solo toca esos dos tipos: la consulta filtra por ellos
+  desde el inicio, así que nunca lee, borra ni vuelve a encolar el pasaporte, la recuperación, la inscripción al KOF ni el
+  aviso del ganador de la rifa (la información de los visitantes no se toca), y tampoco los cuenta como omitidos; los
+  códigos de inicio de sesión y los avisos de emergencia quedan igual. **Corre primero la prueba** con
+  `docker compose exec app npm run db:rebuild-abandoned -- --dry-run`: lista (id, tipo y fecha de creación, sin
+  destinatario ni enlaces) lo que haría y no escribe nada. Después corre la real. Cada rehecho queda en la bitácora como
+  `admin.email.rebuild` sin actor, y una segunda corrida no encuentra nada que rehacer. El comando termina con código 1
+  si alguno falló (el resto se rehace igual).
 - **Sin `SMTP_HOST`**: nada sale ni se escribe en el log. Los correos se quedan en `email_outbox` y el temporizador de
   reintentos no se inicia.
   Sirve para pruebas, y en una emergencia se puede entregar el enlace a mano:
@@ -174,6 +185,18 @@ El primer arranque ejecuta el seed del repositorio (`prisma/seed.ts`), que **sol
 evento, cronograma, los 18 stands con sus juegos de muestra, patrocinadores y el sysadmin. Una base con datos no se
 toca, así que reiniciar o actualizar el contenedor no pisa lo que ya editaste. El sysadmin reemplaza los datos de
 muestra desde `/admin` (stands, cronograma y cuentas).
+
+Para que una base que ya tiene patrocinadores reciba los nuevos de la lista inicial (`INITIAL_SPONSORS`), se corre una
+vez tras desplegar (los logos nuevos viajan en `public/sponsors/` con la imagen):
+
+```bash
+docker compose exec app npm run db:backfill:sponsors
+```
+
+Agrega los patrocinadores que faltan (se comparan por nombre, sin importar mayúsculas) después de la última posición y,
+en los que ya existen, llena solo los campos vacíos (sitio, teléfono, correo y servicios): nunca pisa lo que el sysadmin
+editó. Se puede repetir sin efecto. Valida cada entrada como el formulario del panel y falla, sin escribir nada, si falta
+un logo en `public/`. Después hay que reiniciar la app, porque la portada y `/sponsors` están en caché.
 
 ### Datos de demostración (solo en una instancia de pruebas)
 

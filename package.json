@@ -48,6 +48,8 @@
     "db:backfill:genres": "tsx --conditions=react-server prisma/backfill-game-genres.ts",
     "db:backfill:images": "tsx --conditions=react-server prisma/backfill-game-images.ts",
     "db:backfill:email-kinds": "tsx --conditions=react-server prisma/backfill-email-kinds.ts",
+    "db:backfill:sponsors": "tsx --conditions=react-server prisma/backfill-sponsors.ts",
+    "db:rebuild-abandoned": "tsx --conditions=react-server prisma/rebuild-abandoned-emails.ts",
     "db:invite:staff": "tsx --conditions=react-server prisma/invite-staff.ts",
     "test:load": "node tools/load/landing-load.mjs"
   },

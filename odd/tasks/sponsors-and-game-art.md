@@ -1,6 +1,6 @@
 # Patrocinadores restantes y arte de los juegos
 
-Estado: planificado, sin implementar.
+Estado: en implementación en `feature/sponsors-game-art`.
 Hay que dar de alta los patrocinadores que faltan con datos uniformes, completando por scraping lo que no venga en sus
 carpetas, y cargar las portadas y el arte de los juegos que faltan.
 
@@ -16,10 +16,10 @@ carpetas, y cargar las portadas y el arte de los juegos que faltan.
 
 | ID | Specs | Qué | Ruta | Riesgo | Commit |
 |---|---|---|---|---|---|
-| T1 | S1 | Scraping de los negocios de Cancún (sitio, redes, Google Maps) para llenar lo que falta de cada patrocinador: `websiteUrl` (https), `phone` (`+52…`), `email` y `services` (máximo 200 caracteres). Cada dato lleva su fuente en el Log; si un dato no se encuentra, se reporta y no se inventa. | Investigación web (solo lectura) | ninguno | sin commit |
-| T2 | S1 | Logos en `public/sponsors/<slug>.svg`, o `.png` con fondo transparente, recortados al contenido (`balanced-logo-size.ts` iguala el área). Son 6 nuevos (Dolphin, Fresh Air, Nannis Amigurumis, PixelAndCode, Rock and Race y Target G) y se revisan los existentes. | Inline | ninguno | pendiente |
-| T3 | S1 | Datos de los 14 patrocinadores en `INITIAL_SPONSORS` (`sponsors-seed.ts`), con el mismo formato: los mismos campos llenos y el mismo estilo de `services`. Como `seedSponsors` solo llena una tabla vacía, producción necesita una vía de carga (ver L5). Pruebas del seed y `CHANGELOG.md`. | Inline | item 1 si se escribe un backfill sobre datos guardados | pendiente |
-| T4 | S2 | Arte de los juegos en `public/games/`: la tarjeta 810x1080 como `<slug>.jpg`, la portada 1920x1080 como `<slug>-portada.jpg` y las capturas 1920x1080 como `<slug>-captura-NN.jpg`, todo en JPG RGB y de máximo 5 MB. Incluye las conversiones de L4 y la actualización de `games-seed.ts` si cambian las capturas. | Inline | ninguno | pendiente |
+| T1 | S1 | Scraping de los negocios de Cancún (sitio, redes, Google Maps) para llenar lo que falta de cada patrocinador: `websiteUrl` (https), `phone` (`+52…`), `email` y `services` (máximo 200 caracteres). Cada dato lleva su fuente en el Log; si un dato no se encuentra, se reporta y no se inventa. | Investigación web (solo lectura) | ninguno | hecho (sin commit, ver L7) |
+| T2 | S1 | Logos en `public/sponsors/<slug>.svg`, o `.png` con fondo transparente, recortados al contenido (`balanced-logo-size.ts` iguala el área). Son 6 nuevos (Dolphin, Fresh Air, Nannis Amigurumis, PixelAndCode, Rock and Race y Target G) y se revisan los existentes. | Inline | ninguno | hecho (3e174b2, 7d66d1a) |
+| T3 | S1 | Datos de los 14 patrocinadores en `INITIAL_SPONSORS` (`sponsors-seed.ts`), con el mismo formato: los mismos campos llenos y el mismo estilo de `services`. Como `seedSponsors` solo llena una tabla vacía, producción necesita una vía de carga (ver L5). Pruebas del seed y `CHANGELOG.md`. | Inline | item 1 si se escribe un backfill sobre datos guardados | hecho (3e174b2, 7d66d1a) |
+| T4 | S2 | Arte de los juegos en `public/games/`: la tarjeta 810x1080 como `<slug>.jpg`, la portada 1920x1080 como `<slug>-portada.jpg` y las capturas 1920x1080 como `<slug>-captura-NN.jpg`, todo en JPG RGB y de máximo 5 MB. Incluye las conversiones de L4 y la actualización de `games-seed.ts` si cambian las capturas. | Inline | ninguno | hecho (ea12abb) |
 | T5 | S2 | Arte que no viene en la carpeta: sombra-del-mictlan (no tiene ninguna imagen), make-em-fall (no tiene carpeta) y las capturas de 16 juegos. Se reporta a los equipos. | Reporte | ninguno | sin commit |
 
 Rama `feature/<issue>-sponsors-and-game-art` desde `develop`. T2 y T3 van en un commit y T4 en otro. Sin push ni PR.
@@ -87,3 +87,43 @@ Rama `feature/<issue>-sponsors-and-game-art` desde `develop`. T2 y T3 van en un 
     - Qué archivos van en Vaporlock.
     - Si la tarjeta de One-mind es `propuesta-recorte-vertical.png`.
     - Cuáles 4 de las 7 capturas de identity-dissolution.
+- **L6** (decisiones del usuario, verbatim):
+  - Carga: "Backfill que agrega los que faltan (recomendado)".
+  - Servicios: "Una frase corta en español".
+  - Casos dudosos: "Algorix Insights sigue (no tiene carpeta)", "Nemo: buscar teléfono local (+52)", "Nuevos al final
+    del orden" y "Noxy es las dos cosas" (patrocinador y ponente).
+  - Arte: "Sí, con elecciones por defecto". La tarjeta es `*-tarjeta` (en One Mind, `propuesta-recorte-vertical.png`).
+    En Vaporlock se escalan JackVeil Vertical y Horizontal. Identity Dissolution lleva las capturas 1 a 4. Don't pet me
+    va sin logo. Se ignoran los `*-coverflow`.
+- **L7** (resultado del scraping de T1; fuentes en la investigación del 19.11.2026):
+  - **Con datos completos o casi:**
+    - Bonavida: ventas@aguabonavida.com.mx; servicios del sitio.
+    - Fresh Air: sin correo; servicios: renta de coolers evaporativos y climas portátiles.
+    - Le Jardin d'Aurore: https://lejardindaurore.com; WhatsApp +52 998 187 8194, el mismo número que OpSET.
+    - Mermelada: https://mermeladacocinaquereconforta.com; el sitio da mermeladareserva@gmail.com, mientras la carpeta
+      dice mermeladacancun@.
+    - Nemo Submarine: sin correo. El +52 998 322 8282 es de confianza baja (posible otro operador).
+    - Noxy Digital: el sitio da WhatsApp +52 564 266 3875, mientras la carpeta dice 998 172 5547.
+    - OpSET: https://opset.com.mx; el sitio da web@opset.mx, mientras la carpeta dice ceo@opset.com.mx.
+    - Algorix Insights: sin teléfono ni correo públicos.
+  - **Identificados:**
+    - Rock and Race: https://www.rockandrace.com, +52 998 289 3135, info@rockandrace.com.
+    - Target G: campo de tiro recreativo en Go Grand Outlet. Sin sitio, teléfono ni correo confirmados.
+    - PixelAndCode: https://pixelandcode.org, +52 998 894 1923, sin correo. Es un negocio aparte, no la marca del evento.
+  - **No identificados:**
+    - Dolphin: posible The Dolphin Company, confianza baja.
+    - Nannis Amigurumis: sin resultados.
+  - **No encontrado:**
+    - Directrix Studio: servicios.
+    - Fresh Air: correo.
+    - Nemo Submarine: correo.
+    - Algorix Insights: teléfono y correo.
+    - PixelAndCode: correo.
+    - Target G: contacto.
+    - Dolphin y Nannis Amigurumis: todo.
+- **L8** (decisiones del usuario, verbatim):
+  - Conflictos: "Los de la carpeta (los dio el patrocinador)".
+  - Uniformes: "Del scrapping completas los datos". Lo que no exista en ninguna fuente queda vacío, porque la app lo
+    acepta y no se inventa nada.
+  - Sin identificar: "Dolphin Discovery, deja afuera Nannis".
+  - Ponente de Noxy: "Nada por ahora".

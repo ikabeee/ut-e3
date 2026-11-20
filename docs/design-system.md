@@ -63,6 +63,11 @@ márgenes), `section-block` (espacio entre secciones) y `scrollbar-none`.
 - **En los paneles** (`/admin` y sus secciones, `/admin/kof`, `/admin/raffle`, `/stand/game`, `/stand/team`,
   `/support/recovery`) la carga son barras con la forma del contenido (`PanelSkeleton`); los botones que envían
   conservan su spinner.
+- **Barra lateral del panel** (`/admin` y todo lo que cuelga de ahí): la dibuja una sola vez el layout de `/admin`
+  (`AdminLayout`, `admin/pages/admin-layout.tsx`) y solo para el sysadmin. Al cambiar de sección se queda montada y
+  solo cambia el contenido de la derecha, que muestra su propio `PanelSkeleton`; la sección actual sale de la URL
+  (`usePathname`). En móvil es un menú plegable arriba de la página, que se cierra al navegar. Una page del panel
+  nunca pinta la barra.
 - **Errores**: todos salen en un toast. `SiteToasts` (`site/components/site-toasts.tsx`) monta la única región de
   toasts en el layout raíz (y en `global-error`); se anuncian como `alert`. Un componente no pinta el error: llama
   `useErrorToast(mensaje, estado)`. El toast se repite cuando una respuesta nueva trae el mismo mensaje y se va cuando

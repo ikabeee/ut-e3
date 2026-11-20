@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { AccountsPanel } from "@features/accounts/components/accounts-panel";
-import { AreaLink } from "@features/accounts/components/area-link";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { SYSADMIN_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { getOtherAreaLink } from "@features/accounts/lib/area-links";
@@ -10,7 +9,6 @@ import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
 import { requireSysadmin } from "@features/accounts/lib/server/current-account";
 import { listManagedAccounts } from "@features/accounts/lib/server/invitations";
 import { AdminHeader } from "@features/admin/components/admin-header";
-import { AdminSidebarLayout } from "@features/admin/components/admin-sidebar";
 import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 import { getZoneLink } from "@features/floor-plan/lib/floor-plan-links";
 import { ZONE_IDS } from "@features/floor-plan/lib/types";
@@ -46,7 +44,7 @@ const STAND_ACTIONS: StandsAdminActions = {
 
 export function AdminPage() {
   return (
-    <main className="page-wrap grid gap-10 py-12">
+    <main className="grid min-w-0 content-start gap-10">
       <Suspense fallback={<PanelSkeleton label={ADMIN_COPY.loading} />}>
         <SysadminPanel />
       </Suspense>
@@ -62,14 +60,13 @@ async function SysadminPanel() {
   const items = await getScheduleItems();
 
   return (
-    <AdminSidebarLayout currentPath={SYSADMIN_HOME_PATH}>
+    <>
       <AdminHeader
         title={ADMIN_COPY.title}
         signedInAs={ADMIN_COPY.signedInAs(account.name)}
-        currentPath={SYSADMIN_HOME_PATH}
+        areaLink={getOtherAreaLink(account.roles, "secondary")}
         signOutAction={signOut}
       />
-      <AreaLink link={getOtherAreaLink(account.roles, "secondary")} />
       <AccountsPanel
         heading={ADMIN_COPY.accountsHeading}
         actorRole={account.role}
@@ -83,6 +80,6 @@ async function SysadminPanel() {
         saveAction={saveScheduleItem}
         deleteAction={deleteScheduleItem}
       />
-    </AdminSidebarLayout>
+    </>
   );
 }

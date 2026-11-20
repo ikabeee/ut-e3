@@ -30,7 +30,7 @@ export function AdminAccountsPage({ searchParams }: Readonly<PageProps<"/admin/a
   return (
     <AdminSectionShell
       title={PAGE.title}
-      path={ADMIN_ACCOUNTS_PATH}
+
       renderContent={() => renderAccounts(searchParams)}
     />
   );

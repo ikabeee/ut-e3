@@ -51,7 +51,7 @@ interface SeedGame {
   groupCode: string;
   /** False for the games that have no artwork yet: they show a generic cover with their name. */
   hasCover?: boolean;
-  /** Screenshots of the game (`<slug>-captura-NN.jpg`), at most 3 because `game_images.position` is limited to 1..5, after the cover and the landscape image. */
+  /** Screenshots of the game (`<slug>-captura-NN.jpg`), at most 4 (`MAX_SCREENSHOTS`) because `game_images.position` is limited to 1..6, after the cover and the landscape image. */
   screenshots?: number;
   /** Overrides GENRE_BY_SLUG; without either, the placeholder genre. */
   genre?: Genre;
@@ -114,7 +114,7 @@ const SEED_GAMES: SeedGame[] = [
     stand: { zone: "T", number: 6 },
     studio: 2,
     groupCode: "101",
-    screenshots: 3,
+    screenshots: 4,
   },
 ];
 
