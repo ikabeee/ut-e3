@@ -60,6 +60,7 @@ npm run db:backfill:genres # en una base con juegos: da a cada juego su género 
 npm run db:backfill:images # en una base con juegos: crea las filas de imagen que faltan (portada, tarjeta y capturas) sin tocar las existentes; se puede repetir (prisma/backfill-game-images.ts)
 npm run db:backfill:sponsors # en una base con patrocinadores: agrega los de la lista inicial que faltan (por nombre) y llena solo los campos vacíos de los existentes, sin pisar lo editado; se puede repetir (prisma/backfill-sponsors.ts)
 npm run db:backfill:email-kinds # una vez, tras desplegar: asigna tipo y referencia a los correos sin tipo del outbox (pasaporte y recuperación) para poder usar "Rehacer"; se puede repetir (prisma/backfill-email-kinds.ts)
+npm run db:rebuild-abandoned # sin entrar al panel: rehace de una vez los correos abandonados que se pueden rehacer (pasaporte, KOF, recuperación, etc.) con enlaces y PIN nuevos, en cola y sin enviar; omite códigos de login y avisos de emergencia; se puede repetir (prisma/rebuild-abandoned-emails.ts)
 npm run db:invite:staff   # alta masiva del staff desde un CSV (email,name,role,secondary_role,stand,kof_desk): crea los stands que faltan y las invitaciones; corre una sola vez (marca staff.bulk_invite) y el entrypoint la lanza si existe /data/staff-invitations.csv (prisma/invite-staff.ts)
 ```
 

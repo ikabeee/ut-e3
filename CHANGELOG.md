@@ -8,6 +8,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Agregado
 
+- `npm run db:rebuild-abandoned`: rehace de una vez los correos abandonados (pasaporte, KOF, recuperación) con enlaces y
+  PIN nuevos y los deja en cola, para cuando el sysadmin no puede usar "Rehacer".
 - Patrocinadores: se agregan Dolphin Discovery, Fresh Air, Pixel & Code, Rock and Race y Target G, y se completan los datos
   de contacto y los servicios de los demás con una frase corta en español. `npm run db:backfill:sponsors` los carga en una
   base que ya tiene patrocinadores sin pisar lo editado.

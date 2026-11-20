@@ -133,6 +133,12 @@ de la base (RNF-03). Salen con la plantilla del sitio (fondo negro, acento azul,
   `docker compose exec app npm run db:backfill:email-kinds`: asigna tipo y referencia a los no enviados cuyo asunto sea el
   del pasaporte o el de recuperación y cuyo visitante se encuentre por correo (y gamertag); los demás no se tocan. Cada
   cambio queda en la bitácora como `admin.email.backfill_kind`, y después se usa "Rehacer".
+  Si el sysadmin no puede entrar al panel (por ejemplo, porque los códigos de inicio de sesión no llegan mientras dura el
+  límite de Gmail), `docker compose exec app npm run db:rebuild-abandoned` rehace de una vez todos los abandonados que
+  se pueden rehacer, con enlaces y PIN nuevos, y los deja en cola para el trabajador de correo (no envía nada). Omite los
+  códigos de inicio de sesión, los avisos de emergencia y los que no tienen tipo o referencia; cada rehecho queda en la
+  bitácora como `admin.email.rebuild` sin actor, y una segunda corrida no encuentra nada que rehacer. El comando termina
+  con código 1 si alguno falló (el resto se rehace igual).
 - **Sin `SMTP_HOST`**: nada sale ni se escribe en el log. Los correos se quedan en `email_outbox` y el temporizador de
   reintentos no se inicia.
   Sirve para pruebas, y en una emergencia se puede entregar el enlace a mano:
