@@ -18,11 +18,12 @@ export const SPONSORS_COPY = {
   },
   admin: {
     heading: "Patrocinadores",
-    lead: "Las tarjetas de /sponsors y la banda de la portada. Los logos se suben a public/ y aquí va su ruta.",
+    lead: "Las tarjetas de /sponsors y la banda de la portada. El logo se sube como archivo, sin esperar un despliegue.",
     newSponsor: "Nuevo patrocinador",
     fields: {
       name: "Nombre",
       logoPath: "Ruta del logo",
+      logoFile: "Subir logo (archivo)",
       websiteUrl: "Sitio web",
       phone: "Teléfono de contacto",
       email: "Correo",
@@ -30,7 +31,9 @@ export const SPONSORS_COPY = {
       position: "Orden",
     },
     hints: {
-      logoPath: "Archivo dentro de public/, por ejemplo /sponsors/mi-logo.svg (svg, png, jpg o webp).",
+      logoPath:
+        "Se llena sola al subir un archivo. También puede ser un archivo de public/, por ejemplo /sponsors/mi-logo.svg.",
+      logoFile: "PNG, JPG o WebP de máximo 2 MB y 4000 px por lado (sin SVG). Si eliges uno, reemplaza la ruta.",
       phone: "Con lada internacional, por ejemplo +529981234567.",
       email: "Opcional. Se muestra como enlace de correo en la tarjeta.",
       position: "Las tarjetas se ordenan de menor a mayor.",
@@ -50,7 +53,11 @@ export const SPONSORS_COPY = {
     },
     errors: {
       name: "Escribe el nombre (máximo 80 caracteres).",
-      logoPath: "La ruta empieza con / y termina en .svg, .png, .jpg o .webp.",
+      logoPath: "Sube un archivo o escribe una ruta que empiece con / y termine en .svg, .png, .jpg o .webp.",
+      logoFormat: "El archivo no es un PNG, JPG o WebP válido. El SVG no se acepta.",
+      logoTooLarge: "El logo pesa más de 2 MB. Reduce su tamaño y vuelve a subirlo.",
+      logoDimensions: "El logo mide más de 4000 px por lado. Reduce su tamaño y vuelve a subirlo.",
+      unexpected: "No se pudo guardar el logo. Intenta de nuevo.",
       websiteUrl: "El sitio debe ser una dirección https.",
       phone: "Escribe el teléfono con + y de 8 a 15 dígitos.",
       email: "Escribe un correo válido, por ejemplo contacto@empresa.com (máximo 254 caracteres).",
@@ -58,7 +65,7 @@ export const SPONSORS_COPY = {
       position: "El orden es un número entero de 1 a 999.",
       notFound: "Ese patrocinador ya no existe. Recarga la página.",
       rejected: "La base de datos rechazó los datos. Revisa el teléfono.",
-      missingLogo: "No existe ese archivo en public/. Sube el logo con el build y escribe su ruta.",
+      missingLogo: "No existe ese archivo. Sube el logo como archivo o escribe la ruta de uno que exista.",
     },
   },
 } as const;

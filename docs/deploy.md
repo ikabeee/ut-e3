@@ -21,7 +21,12 @@ imagen es `/data/uploads` (el mismo volumen `app-data`; en desarrollo, `data/upl
 `GET /api/media/games/<archivo>.jpg`, con caché inmutable porque el nombre lleva un hash del contenido. Solo se aceptan
 JPG reales, de máximo 5 MB, con el tamaño exacto del grid de portadas (tarjeta 810x1080; portada y hasta cuatro capturas
 1920x1080). El respaldo de la base (abajo) no incluye las imágenes: copia también `/data/uploads`
-(`docker compose cp app:/data/uploads ./uploads-<fecha>`). El límite de cuerpo de las Server Actions es de 6 MB
+(`docker compose cp app:/data/uploads ./uploads-<fecha>`).
+Los logos de los patrocinadores que el sysadmin sube desde `/admin` (campo "Subir logo (archivo)") se guardan en
+`UPLOADS_DIR/sponsors/` (`/data/uploads/sponsors`), así que también viajan en ese respaldo del volumen y no necesitan
+un despliegue. Solo se aceptan PNG, JPG y WebP reales (se revisan por su firma, no por el nombre), de máximo 2 MB y
+4000 px por lado; el SVG se rechaza porque puede llevar scripts. Se sirven por `GET /api/media/sponsors/<archivo>` con
+caché inmutable, también con el kill switch en `landing`. Los logos de `public/sponsors/` siguen funcionando. El límite de cuerpo de las Server Actions es de 6 MB
 (`experimental.serverActions.bodySizeLimit` en `next.config.ts`); si pones un proxy con límite menor
 (`client_max_body_size` en Nginx), súbelo a 6 MB o la carga falla antes de llegar a la app.
 

@@ -12,7 +12,7 @@ const FEATURE_DEPENDENCIES = {
   games: ["accounts", "event-settings"],
   "event-settings": ["accounts"],
   schedule: ["accounts", "floor-plan"],
-  sponsors: ["accounts"],
+  sponsors: ["accounts", "games"],
   stands: ["accounts", "games", "pwa", "visitors"],
   support: ["accounts", "tournament", "visitors"],
   tournament: ["accounts"],

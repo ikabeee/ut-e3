@@ -167,3 +167,25 @@ describe("saveSponsor and deleteSponsor (RF-41)", () => {
     });
   });
 });
+
+describe("logoPath of the uploaded logos (S3)", () => {
+  const UPLOADED = "/api/media/sponsors/sponsor-nodo-caribe-0123456789ab.png";
+
+  it("accepts the path of a logo the app stores", () => {
+    expect(parseSponsorInput(sponsorForm({ logoPath: UPLOADED }))).toMatchObject({
+      isValid: true,
+      sponsor: { logoPath: UPLOADED },
+    });
+  });
+
+  it.each([
+    "/api/media/sponsors/sponsor-a-0123456789ab.svg",
+    "/api/media/sponsors/logo.png",
+    "/api/media/sponsors/../secret.png",
+    "/api/media/games/sponsor-a-0123456789ab.png",
+    "/api/other/logo.png",
+    "/api/media/sponsors/sponsor-a-0123456789ab.PNG",
+  ])("refuses %s", (logoPath) => {
+    expect(parseSponsorInput(sponsorForm({ logoPath })).isValid).toBe(false);
+  });
+});
