@@ -16,7 +16,7 @@ const PAGE = ADMIN_COPY.pages.catalog;
 export const adminCatalogPageMetadata = buildAdminSectionMetadata(PAGE, ADMIN_CATALOG_PATH);
 
 export function AdminCatalogPage() {
-  return <AdminSectionShell title={PAGE.title} path={ADMIN_CATALOG_PATH} renderContent={renderCatalog} />;
+  return <AdminSectionShell title={PAGE.title} renderContent={renderCatalog} />;
 }
 
 // Genres (RF-72), sponsors (RF-41) and the blocklist of team emails (RF-44).

@@ -30,7 +30,7 @@ const ACTIONS = {
 export const adminRecoveryPageMetadata = buildAdminSectionMetadata(PAGE, ADMIN_RECOVERY_PATH);
 
 export function AdminRecoveryPage() {
-  return <AdminSectionShell title={PAGE.title} path={ADMIN_RECOVERY_PATH} renderContent={renderRecovery} />;
+  return <AdminSectionShell title={PAGE.title} renderContent={renderRecovery} />;
 }
 
 // The state of the services is read on every visit; the shell has already checked that the session is the sysadmin's.

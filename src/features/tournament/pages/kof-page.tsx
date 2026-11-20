@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { AccountsPanel } from "@features/accounts/components/accounts-panel";
-import { AreaLink } from "@features/accounts/components/area-link";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { KOF_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { getOtherAreaLink } from "@features/accounts/lib/area-links";
@@ -10,7 +9,6 @@ import { ACCOUNT_ACTIONS } from "@features/accounts/lib/management-action-set";
 import { requireKofViewer, type KofViewer } from "@features/accounts/lib/server/current-account";
 import { listManagedAccounts } from "@features/accounts/lib/server/invitations";
 import { AdminHeader } from "@features/admin/components/admin-header";
-import { AdminSidebarLayout } from "@features/admin/components/admin-sidebar";
 import { EntriesPanel } from "@features/tournament/components/entries-panel";
 import { PublicBracketSwitch } from "@features/tournament/components/public-bracket-switch";
 import { TournamentDashboard } from "@features/tournament/components/tournament-dashboard";
@@ -39,10 +37,10 @@ export const kofPageMetadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// The same frame as the other sections of the panel (S11): the sysadmin also gets the navigation between sections.
+// The same frame as the other sections of the panel (S11): the layout of /admin gives the sysadmin the sidebar.
 export function KofPage() {
   return (
-    <main className="page-wrap grid gap-12 py-12">
+    <main className="grid min-w-0 content-start gap-12">
       <Suspense fallback={<PanelSkeleton label={COPY.loading} />}>
         <KofPanel />
       </Suspense>
@@ -57,17 +55,15 @@ async function KofPanel() {
 
   const account = await requireKofViewer();
   const tournament = await getTournament();
-  const currentPath = account.role === "sysadmin" ? KOF_HOME_PATH : null;
 
   return (
-    <AdminSidebarLayout currentPath={currentPath}>
+    <>
       <AdminHeader
         title={COPY.title}
         signedInAs={COPY.signedInAs(account.name, getRoleLabel(account))}
-        currentPath={currentPath}
+        areaLink={getOtherAreaLink(account.roles, "secondary")}
         signOutAction={signOut}
       />
-      <AreaLink link={getOtherAreaLink(account.roles, "secondary")} />
       <Entries viewer={account} hasBracket={tournament !== null} />
       {operatesAsAdmin(account) && <PublicBracketPanel />}
       {account.role === "kof_admin" && <StaffAccounts role={account.role} />}
@@ -76,7 +72,7 @@ async function KofPanel() {
         viewer={{ role: operatesAsAdmin(account) ? "kof_admin" : account.role, desk: account.kofDesk }}
         action={submitTournamentCommand}
       />
-    </AdminSidebarLayout>
+    </>
   );
 }
 

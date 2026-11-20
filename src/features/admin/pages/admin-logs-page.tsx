@@ -18,7 +18,7 @@ const PAGE = ADMIN_COPY.pages.logs;
 export const adminLogsPageMetadata = buildAdminSectionMetadata(PAGE, ADMIN_LOGS_PATH);
 
 export function AdminLogsPage({ searchParams }: Readonly<PageProps<"/admin/logs">>) {
-  return <AdminSectionShell title={PAGE.title} path={ADMIN_LOGS_PATH} renderContent={() => renderLogs(searchParams)} />;
+  return <AdminSectionShell title={PAGE.title} renderContent={() => renderLogs(searchParams)} />;
 }
 
 // `?tab=` picks the log and the rest of the address holds its filters; both are read on every visit.

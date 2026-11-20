@@ -1,50 +1,40 @@
-import type { ReactNode } from "react";
-import { AreaLink } from "@features/accounts/components/area-link";
-import type { AreaLink as AreaLinkData } from "@features/accounts/lib/area-links";
-import { AdminHeader } from "@features/admin/components/admin-header";
+"use client";
+
+import { usePathname } from "next/navigation";
 import { AdminNav } from "@features/admin/components/admin-nav";
+import { AdminNavIcon } from "@features/admin/components/admin-nav-icons";
+import { ADMIN_COPY } from "@features/admin/lib/admin-copy";
 
-interface AdminSectionViewProps {
-  title: string;
-  signedInAs: string;
-  path: string;
-  /** The way back to the stand for an account with a second role (S1); null for an account with one role. */
-  areaLink: AreaLinkData | null;
-  signOutAction: () => Promise<void>;
-  children: ReactNode;
-}
+/**
+ * The sections of the panel (S10), drawn once by the layout of /admin, which stays mounted while the pages change: it
+ * reads the current path to mark its section. From 1024 px a fixed-width sidebar; below that a menu that folds above
+ * the page.
+ */
+export function AdminSidebar() {
+  const pathname = usePathname();
 
-/** What a section looks like once the session is known (S10): the sidebar of the panel beside the header and the content. */
-export function AdminSectionView({ areaLink, children, path, ...header }: Readonly<AdminSectionViewProps>) {
   return (
-    <AdminSidebarLayout currentPath={path}>
-      <AdminHeader {...header} currentPath={path} />
-      <AreaLink link={areaLink} />
-      {children}
-    </AdminSidebarLayout>
+    <aside className="grid content-start lg:sticky lg:top-[calc(var(--spacing-nav)+1.5rem)] lg:max-h-[calc(100dvh-var(--spacing-nav)-3rem)] lg:overflow-y-auto lg:border lg:border-border lg:bg-background lg:p-2">
+      <AdminMobileMenu key={pathname} currentPath={pathname} />
+      <div className="hidden lg:block">
+        <AdminNav currentPath={pathname} />
+      </div>
+    </aside>
   );
 }
 
-interface AdminSidebarLayoutProps {
-  /** The section on screen, marked in the sidebar; `null` for an account that only has this one screen. */
-  currentPath: string | null;
-  children: ReactNode;
-}
-
-/**
- * The frame of every page of the panel (S10): from 1024 px a fixed-width sidebar with the sections beside the content;
- * below that the sections are the menu of `AdminHeader`, so the sidebar is not drawn. An account without sections (the
- * KOF desks) gets the content alone.
- */
-export function AdminSidebarLayout({ currentPath, children }: Readonly<AdminSidebarLayoutProps>) {
-  if (currentPath === null) return <div className="grid gap-12">{children}</div>;
-
+// A native disclosure: it opens with a tap or the keyboard and needs no state. The sidebar keys it by the path, so a
+// navigation mounts it again, closed.
+function AdminMobileMenu({ currentPath }: Readonly<{ currentPath: string }>) {
   return (
-    <div className="grid gap-12 lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start lg:gap-10">
-      <aside className="sticky top-[calc(var(--spacing-nav)+1.5rem)] hidden max-h-[calc(100dvh-var(--spacing-nav)-3rem)] overflow-y-auto border border-border bg-background p-2 lg:block">
+    <details className="border border-border lg:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 px-3 type-mono [&::-webkit-details-marker]:hidden">
+        <AdminNavIcon name="menu" />
+        {ADMIN_COPY.nav.menu}
+      </summary>
+      <div className="border-t border-border p-2">
         <AdminNav currentPath={currentPath} />
-      </aside>
-      <div className="grid min-w-0 content-start gap-12">{children}</div>
-    </div>
+      </div>
+    </details>
   );
 }

@@ -16,6 +16,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ### Cambiado
 
+- La barra lateral del panel de administración se queda fija al cambiar de sección: solo se recarga el contenido de la
+  página.
 - Arte de los juegos: tarjetas, portadas y capturas nuevas para los 16 juegos con material. One Mind y Vaporlock vuelven
   a mostrarse y Identity Dissolution tiene 4 capturas (`npm run db:backfill:images` agrega las filas que faltan).
 

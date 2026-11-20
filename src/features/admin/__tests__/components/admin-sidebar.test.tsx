@@ -1,74 +1,60 @@
-import { render, screen } from "@testing-library/react";
-import { AdminSectionView, AdminSidebarLayout } from "@features/admin/components/admin-sidebar";
+import { render, screen, within } from "@testing-library/react";
+import { PathnameContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
+import type { ReactNode } from "react";
+import { AdminSidebar } from "@features/admin/components/admin-sidebar";
 
-const signOutAction = async () => {};
+// The App Router hands the current path through this context; jest.mock is not allowed in this repository.
+function atPath(pathname: string, children: ReactNode) {
+  return <PathnameContext.Provider value={pathname}>{children}</PathnameContext.Provider>;
+}
 
-describe("AdminSidebarLayout", () => {
-  it("puts the sections in a sidebar beside the content, with the current one marked (S10)", () => {
-    render(
-      <AdminSidebarLayout currentPath="/admin/emails">
-        <p>Contenido de la sección</p>
-      </AdminSidebarLayout>,
-    );
+describe("AdminSidebar", () => {
+  it("puts the sections in a sidebar, marking the section of the current path (S10)", () => {
+    render(atPath("/admin/emails", <AdminSidebar />));
 
     const sidebar = screen.getByRole("complementary");
+    const [, desktop] = within(sidebar).getAllByRole("navigation", { name: "Secciones del panel" });
 
-    expect(sidebar).toContainElement(screen.getByRole("navigation", { name: "Secciones del panel" }));
-    expect(screen.getAllByRole("link")).toHaveLength(13);
-    expect(screen.getByRole("link", { name: "Correos" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByText("Contenido de la sección")).toBeInTheDocument();
-    expect(sidebar).not.toContainElement(screen.getByText("Contenido de la sección"));
+    expect(within(desktop).getAllByRole("link")).toHaveLength(13);
+    expect(within(desktop).getByRole("link", { name: "Correos" })).toHaveAttribute("aria-current", "page");
   });
 
-  it("shows only the content for an account without sections, like the KOF desks", () => {
-    render(
-      <AdminSidebarLayout currentPath={null}>
-        <p>Contenido de la sección</p>
-      </AdminSidebarLayout>,
-    );
+  it("follows the path when the page changes, since the layout stays mounted", () => {
+    const { rerender } = render(atPath("/admin/emails", <AdminSidebar />));
 
-    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
-    expect(screen.getByText("Contenido de la sección")).toBeInTheDocument();
-  });
-});
+    rerender(atPath("/admin/kof", <AdminSidebar />));
 
-describe("AdminSectionView", () => {
-  it("renders the sidebar, the header and the content of the section (S10)", () => {
-    render(
-      <AdminSectionView
-        title="Logs"
-        signedInAs="Sesión de Ana"
-        path="/admin/logs"
-        areaLink={null}
-        signOutAction={signOutAction}
-      >
-        <p>Contenido de la sección</p>
-      </AdminSectionView>,
-    );
+    for (const nav of screen.getAllByRole("navigation", { name: "Secciones del panel" })) {
+      const current = within(nav)
+        .getAllByRole("link")
+        .filter((link) => link.getAttribute("aria-current") === "page");
 
-    expect(screen.getByRole("complementary")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Logs" })).toBeInTheDocument();
-    expect(screen.getByText("Contenido de la sección")).toBeInTheDocument();
-    expect(screen.queryByRole("navigation", { name: "Cambiar de área" })).not.toBeInTheDocument();
+      expect(current).toHaveLength(1);
+      expect(current[0]).toHaveAccessibleName("Torneo de KOF");
+    }
   });
 
-  it("renders the link back to the stand for an account with a second role (S1)", () => {
-    render(
-      <AdminSectionView
-        title="Logs"
-        signedInAs="Sesión de Ana"
-        path="/admin/logs"
-        areaLink={{ href: "/stand/kiosk", label: "Ir a mi stand" }}
-        signOutAction={signOutAction}
-      >
-        <p>Contenido de la sección</p>
-      </AdminSectionView>,
+  it("collapses the sections into a closed menu on a phone (S10)", () => {
+    render(atPath("/admin/logs", <AdminSidebar />));
+
+    const menu = screen.getByRole("group");
+
+    expect(within(menu).getByText("Menú del panel").tagName).toBe("SUMMARY");
+    expect(menu).not.toHaveAttribute("open");
+    expect(within(menu).getAllByRole("link")).toHaveLength(13);
+    expect(within(menu).getByRole("link", { name: "Logs" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("closes the menu after a navigation", () => {
+    const { rerender } = render(atPath("/admin/logs", <AdminSidebar />));
+
+    screen.getByRole("group").setAttribute("open", "");
+    rerender(atPath("/admin/sql", <AdminSidebar />));
+
+    expect(screen.getByRole("group")).not.toHaveAttribute("open");
+    expect(within(screen.getByRole("group")).getByRole("link", { name: "Consola SQL" })).toHaveAttribute(
+      "aria-current",
+      "page",
     );
-
-    const nav = screen.getByRole("navigation", { name: "Cambiar de área" });
-
-    expect(nav).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Ir a mi stand" })).toHaveAttribute("href", "/stand/kiosk");
   });
 });

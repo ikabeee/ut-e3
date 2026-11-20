@@ -27,7 +27,7 @@ export function AdminModerationPage({ searchParams }: Readonly<PageProps<"/admin
   return (
     <AdminSectionShell
       title={PAGE.title}
-      path={ADMIN_MODERATION_PATH}
+
       renderContent={() => renderModeration(searchParams)}
     />
   );
