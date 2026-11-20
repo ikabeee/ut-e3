@@ -41,6 +41,7 @@ describe("GET /api/media/sponsors/[file] (S3)", () => {
     expect(response.headers.get("Content-Type")).toBe(contentType);
     expect(response.headers.get("Cache-Control")).toBe("public, max-age=31536000, immutable");
     expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+    expect(response.headers.get("Content-Security-Policy")).toBe("default-src 'none'; sandbox");
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(BYTES);
   });
 

@@ -19,6 +19,8 @@ export async function GET(_request: Request, context: RouteContext<"/api/media/s
       "Content-Type": LOGO_CONTENT_TYPES[readLogoExtension(file)],
       "Cache-Control": IMMUTABLE,
       "X-Content-Type-Options": "nosniff",
+      // An uploaded file is only ever an image: even a polyglot opened directly can run nothing.
+      "Content-Security-Policy": "default-src 'none'; sandbox",
     },
   });
 }
