@@ -6,6 +6,8 @@ y [versionado semántico](https://semver.org/lang/es/). El proceso de release es
 
 ## [Sin publicar]
 
+## [1.7.5] - 2026-11-20
+
 ### Agregado
 
 - Inscribirse al torneo de KOF da un boleto de rifa ("Boleto del torneo KOF"), también a los que ya estaban inscritos.
