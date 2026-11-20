@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { AreaLink } from "@features/accounts/components/area-link";
 import { signOut } from "@features/accounts/lib/accounts-actions";
 import { RAFFLE_HOME_PATH } from "@features/accounts/lib/accounts-links";
 import { getOtherAreaLink } from "@features/accounts/lib/area-links";
 import { requireRaffleAdmin } from "@features/accounts/lib/server/current-account";
 import { AdminHeader } from "@features/admin/components/admin-header";
-import { AdminSidebarLayout } from "@features/admin/components/admin-sidebar";
 import { RaffleDashboard, type RaffleDashboardActions } from "@features/raffle/components/raffle-dashboard";
 import {
   closeRaffleAction,
@@ -39,7 +37,7 @@ const ACTIONS: RaffleDashboardActions = {
 
 export function RaffleAdminPage() {
   return (
-    <main className="page-wrap grid gap-10 py-12">
+    <main className="grid min-w-0 content-start gap-10">
       <Suspense fallback={<PanelSkeleton label={COPY.loading} />}>
         <RafflePanel />
       </Suspense>
@@ -52,22 +50,20 @@ async function RafflePanel() {
   await connection();
 
   const account = await requireRaffleAdmin();
-  const currentPath = account.role === "sysadmin" ? RAFFLE_HOME_PATH : null;
 
   return (
-    <AdminSidebarLayout currentPath={currentPath}>
+    <>
       <AdminHeader
         title={COPY.title}
         signedInAs={COPY.signedInAs(account.name, account.role === "sysadmin")}
-        currentPath={currentPath}
+        areaLink={getOtherAreaLink(account.roles, "secondary")}
         signOutAction={signOut}
       />
-      <AreaLink link={getOtherAreaLink(account.roles, "secondary")} />
       <ActionLink href={RAFFLE_LIVE_PATH} variant="outline" className="justify-self-start" isExternal>
         {COPY.liveLink}
       </ActionLink>
       <RaffleDashboard initial={await loadSnapshot()} viewerId={account.id} actions={ACTIONS} />
-    </AdminSidebarLayout>
+    </>
   );
 }
 

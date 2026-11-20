@@ -9,7 +9,7 @@ const PAGE = ADMIN_COPY.pages.sql;
 export const adminSqlPageMetadata = buildAdminSectionMetadata(PAGE, ADMIN_SQL_PATH);
 
 export function AdminSqlPage() {
-  return <AdminSectionShell title={PAGE.title} path={ADMIN_SQL_PATH} renderContent={renderSqlConsole} />;
+  return <AdminSectionShell title={PAGE.title} renderContent={renderSqlConsole} />;
 }
 
 // The console reads nothing at render time: the shell has already checked that the session is the sysadmin's.

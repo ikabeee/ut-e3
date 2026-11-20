@@ -27,7 +27,7 @@ export function AdminVisitorsPage({ searchParams }: Readonly<PageProps<"/admin/v
   return (
     <AdminSectionShell
       title={PAGE.title}
-      path={ADMIN_VISITORS_PATH}
+
       renderContent={() => renderVisitors(searchParams)}
     />
   );

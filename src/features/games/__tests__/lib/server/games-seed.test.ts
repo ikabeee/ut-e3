@@ -38,7 +38,7 @@ const GAMES_WITHOUT_COVER = ["sombra-del-mictlan"];
 // Games with screenshots (`<slug>-captura-NN.jpg`) after the cover and the landscape image.
 const SCREENSHOTS = new Map([
   ["one-mind", 3],
-  ["identity-dissolution", 3],
+  ["identity-dissolution", 4],
 ]);
 
 // The genre of every game, as the organizers confirmed it.
@@ -342,5 +342,18 @@ describe("backfillGameImages", () => {
 
     expect(images.map((image) => image.position)).toEqual([1, 2, 3, 4, 5]);
     expect(images[0].alt).toBe("Editada");
+  });
+
+  it("adds the fourth screenshot of identity-dissolution at position 6 to a game that has three", async () => {
+    await seedGames(getPrisma());
+    const game = await getPrisma().game.findUniqueOrThrow({ where: { slug: "identity-dissolution" } });
+
+    await getPrisma().gameImage.deleteMany({ where: { gameId: game.id, position: 6 } });
+
+    expect(await backfillGameImages(getPrisma())).toEqual(["/games/identity-dissolution-captura-04.jpg"]);
+
+    const images = await getPrisma().gameImage.findMany({ where: { gameId: game.id }, orderBy: { position: "asc" } });
+
+    expect(images.map((image) => image.position)).toEqual([1, 2, 3, 4, 5, 6]);
   });
 });

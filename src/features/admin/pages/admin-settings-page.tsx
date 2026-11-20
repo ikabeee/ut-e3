@@ -13,7 +13,7 @@ const COPY = EVENT_SETTINGS_COPY.admin;
 export const adminSettingsPageMetadata = buildAdminSectionMetadata(PAGE, ADMIN_SETTINGS_PATH);
 
 export function AdminSettingsPage() {
-  return <AdminSectionShell title={PAGE.title} path={ADMIN_SETTINGS_PATH} renderContent={renderSettings} />;
+  return <AdminSectionShell title={PAGE.title} renderContent={renderSettings} />;
 }
 
 // The row as it is right now, so the form shows what the last save left (RF-43).

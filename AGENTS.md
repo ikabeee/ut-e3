@@ -58,7 +58,9 @@ npm run db:seed:raffle    # solo desarrollo: 2 animadores, 30 pasaportes con 40 
 npm run db:seed:demo      # solo desarrollo y demos: stands, KOF, soporte y rifa con una sola contraseña (DEMO_PASSWORD); no mueve horas, salvo `-- --open-raffle` (prisma/seed-demo.ts)
 npm run db:backfill:genres # en una base con juegos: da a cada juego su género confirmado si aún dice "Por anunciar"; se puede repetir (prisma/backfill-game-genres.ts)
 npm run db:backfill:images # en una base con juegos: crea las filas de imagen que faltan (portada, tarjeta y capturas) sin tocar las existentes; se puede repetir (prisma/backfill-game-images.ts)
+npm run db:backfill:sponsors # en una base con patrocinadores: agrega los de la lista inicial que faltan (por nombre) y llena solo los campos vacíos de los existentes, sin pisar lo editado; se puede repetir (prisma/backfill-sponsors.ts)
 npm run db:backfill:email-kinds # una vez, tras desplegar: asigna tipo y referencia a los correos sin tipo del outbox (pasaporte y recuperación) para poder usar "Rehacer"; se puede repetir (prisma/backfill-email-kinds.ts)
+npm run db:rebuild-abandoned # sin entrar al panel: rehace de una vez solo los correos abandonados del STAFF (invitación y restablecimiento de contraseña) con enlaces nuevos, en cola y sin enviar; nunca toca correos de visitantes; corre primero con `-- --dry-run` (solo lista, no escribe); se puede repetir (prisma/rebuild-abandoned-emails.ts)
 npm run db:invite:staff   # alta masiva del staff desde un CSV (email,name,role,secondary_role,stand,kof_desk): crea los stands que faltan y las invitaciones; corre una sola vez (marca staff.bulk_invite) y el entrypoint la lanza si existe /data/staff-invitations.csv (prisma/invite-staff.ts)
 ```
 
@@ -167,7 +169,9 @@ Si una consulta no se cachea (usa `await connection()`), envuelve la parte que e
 ### Reglas de dependencias
 
 1. `src/app/` sólo importa pages: `@features/<feature>/pages/<name>-page`. Tampoco importa
-   `@shared/components/*`. `layout.tsx` sólo importa de `@shared/lib/` (fuentes, metadata y siteConfig).
+   `@shared/components/*`. `layout.tsx` sólo importa de `@shared/lib/` (fuentes, metadata y siteConfig). Un layout
+   anidado re-exporta su contenedor de `pages/` igual que una ruta (`src/app/admin/layout.tsx` ->
+   `@features/admin/pages/admin-layout`).
 2. Sólo `lib/server/`, `@shared/lib/server/` y los Route Handlers
    (`api/*-route.ts`) importan `server-only`, y nada que pueda llegar al navegador (`lib/`, `hooks/`,
    `components/`, `api/*-api-client.ts`) importa esas carpetas ni los Route Handlers. El cliente de Prisma
@@ -175,7 +179,7 @@ Si una consulta no se cachea (usa `await connection()`), envuelve la parte que e
    `@shared/lib/server/` (la consulta pasa por `getPrisma()` de `@shared/lib/server/prisma`).
 3. Dentro de una feature, las capas siguen la tabla de arriba: `lib/` no importa `hooks/`,
    `components/` ni `pages/`; `hooks/` no importa `components/` ni `pages/`; `pages/` no importa `hooks/`.
-4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx`, `globals.css`, archivos de ruta que delegan
+4. `src/app/` no contiene UI ni lógica: sólo `layout.tsx` (y layouts anidados que re-exportan una page), `globals.css`, archivos de ruta que delegan
    en `pages/` y Route Handlers (`route.ts`) que re-exportan `@features/<feature>/api/<feature>-route`.
 5. `shared/` nunca importa de `features/`, y no conoce rutas, secciones ni textos del evento. Criterio:
    **si sabe el nombre de una página, una ruta o un texto del evento, no es `shared/`**. Cada
@@ -273,7 +277,7 @@ Dónde cambiar cada pieza del acceso del staff (RF-37, RF-42 y RNF-09 a RNF-11 d
 | "Olvidé mi contraseña" (enlace de 1 hora, un solo uso, cierra las sesiones) | `src/features/accounts/lib/server/password-reset.ts` y `password-reset-actions.ts`; páginas `/forgot-password` y `/reset-password/[token]` |
 | Bitácora de auditoría | `recordAudit()` en `src/shared/lib/server/audit-log.ts`, dentro de la transacción del cambio |
 | Visitantes del sysadmin (`/admin/visitors`): lista con búsqueda (`instr`, sin comodines), páginas de 50, conteo por día de Cancún, reenviar pasaporte con PIN, enlace de recuperación, corregir datos, quitar exclusión y CSV | `visitors/lib/server/visitors-admin-queries.ts` y `visitors-admin-mutations.ts`, acciones en `visitors-admin-actions.ts` (cada una empieza con `requireSysadmin()`), CSV en `visitors/api/visitors-admin-route.ts` (`@shared/lib/csv.ts` neutraliza fórmulas; `@shared/lib/server/csv-download.ts` da el 401 y la descarga). `unexcludeVisitor()` está en `moderation-mutations.ts` y reactiva boletos con `grantMilestoneTickets()` solo antes de la rifa. Ninguna fila ni CSV lleva el PIN, su hash ni su cifrado |
-| Secciones del panel (`/admin/settings`, `/moderation`, `/visitors`, `/catalog`, `/server`) y su navegación (barra lateral con íconos; en móvil, menú plegable) | `src/features/admin/pages/` (marco común en `admin-section-shell.tsx`), `admin/components/admin-sidebar.tsx` (`AdminSidebarLayout`, también en `/admin/kof` y `/admin/raffle` para el sysadmin), `admin/components/admin-nav.tsx` y la lista única de secciones en `admin/lib/admin-nav-items.ts` |
+| Secciones del panel (`/admin/settings`, `/moderation`, `/visitors`, `/catalog`, `/server`) y su navegación (barra lateral con íconos; en móvil, menú plegable) | La barra vive en el layout anidado `src/app/admin/layout.tsx`, que re-exporta `AdminLayout` (`admin/pages/admin-layout.tsx`): se queda montada entre las páginas de `/admin/*` y al navegar solo cambia el contenido; lee la sesión en su propio `Suspense` (sin bloquear la página) y solo el sysadmin, también como rol secundario, ve la barra (`/admin/kof` y `/admin/raffle` quedan sin barra para las cuentas de KOF y de la rifa). `admin/components/admin-sidebar.tsx` (`AdminSidebar`, cliente: marca la sección con `usePathname` y el menú móvil se cierra al navegar), `admin/components/admin-nav.tsx` y la lista única de secciones en `admin/lib/admin-nav-items.ts`. El contenido de cada sección usa `admin-section-shell.tsx` y el encabezado `AdminHeader`; ninguna page pinta la barra |
 | Valores de `event_settings` y umbrales de fraude (RF-43) | `event-settings/lib/event-settings-input.ts` (validación) y `lib/server/event-settings-mutations.ts` |
 | Alertas de fraude (RF-45) | `moderation/lib/fraud-alerts.ts` (reglas puras) y `lib/server/moderation-queries.ts` |
 | Anular visitas y excluir visitantes (RF-46); boletos que se anulan y se reactivan | `moderation/lib/server/moderation-mutations.ts` y `visitors/lib/server/milestone-tickets.ts` (`VALID_CHECK_IN_WHERE`, `RAFFLE_ELIGIBLE_TICKET_WHERE`) |

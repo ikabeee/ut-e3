@@ -36,8 +36,9 @@ inscripciones, check-in, generar, reiniciar, congelar, descalificar, revertir y 
 atribuciones llevan su cuenta. `requireKofViewer()` conserva el rol `sysadmin` solo para el encabezado y la navegación. Cada
 Server Action valida la sesión, el rol y la mesa del combate con `requireKofAccount()`; la interfaz solo esconde botones.
 
-`/admin/kof` usa el mismo marco que las demás secciones del panel (`AdminHeader`): título, sesión, cerrar sesión y, para
-el sysadmin, la navegación entre secciones. Las cuentas de KOF no la ven porque no pueden abrir las otras secciones.
+`/admin/kof` usa el mismo encabezado que las demás secciones del panel (`AdminHeader`): título, sesión y cerrar sesión.
+El layout de `/admin` añade la barra lateral solo para el sysadmin; las cuentas de KOF no la ven porque no pueden abrir
+las otras secciones.
 
 ## Monitor en vivo y participantes
 

@@ -11,7 +11,7 @@ const PAGE = ADMIN_COPY.pages.server;
 export const adminServerPageMetadata = buildAdminSectionMetadata(PAGE, ADMIN_SERVER_PATH);
 
 export function AdminServerPage() {
-  return <AdminSectionShell title={PAGE.title} path={ADMIN_SERVER_PATH} renderContent={renderServer} />;
+  return <AdminSectionShell title={PAGE.title} renderContent={renderServer} />;
 }
 
 // Memory, CPU, the audience of the live bracket and the outbox, read on every visit (RF-73), and the switch of RF-74.

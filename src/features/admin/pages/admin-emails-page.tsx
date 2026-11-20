@@ -26,9 +26,7 @@ const ACTIONS = {
 export const adminEmailsPageMetadata = buildAdminSectionMetadata(PAGE, ADMIN_EMAILS_PATH);
 
 export function AdminEmailsPage({ searchParams }: Readonly<PageProps<"/admin/emails">>) {
-  return (
-    <AdminSectionShell title={PAGE.title} path={ADMIN_EMAILS_PATH} renderContent={() => renderEmails(searchParams)} />
-  );
+  return <AdminSectionShell title={PAGE.title} renderContent={() => renderEmails(searchParams)} />;
 }
 
 // The outbox changes with every email, so it is read on every visit; the filters come from the URL.
